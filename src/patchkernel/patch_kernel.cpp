@@ -5350,12 +5350,17 @@ void PatchKernel::pruneStaleAdjacencies()
 */
 void PatchKernel::_updateAdjacencies()
 {
-	// The adjacencies are found looking for matching half-faces.
+	int dimension = getDimension();
+
+	// Check if multiple adjacencies are allowed
 	//
 	// On a three-dimensional patch each internal face is shared between two,
 	// and only two, half-faces. On lower dimension patches one internal face
-	// may be shared among multiple half-faces (this happend with non-manifold
+	// may be shared among multiple half-faces (this happens with non-manifold
 	// patches).
+	bool multipleMatchesAllowed = (dimension < 3);
+
+	// Define matching windings
 	//
 	// If faces can be shared only between two half-faces, there is a one-to-one
 	// correspondence between the half-faces. Give one half-faces, its matching
@@ -5368,17 +5373,6 @@ void PatchKernel::_updateAdjacencies()
 	// In this case, when looking for half-face correspondence, it is necessary
 	// to look for half-faces with reverse vertex winding order and also for
 	// half-faces with the same vertex winding order.
-	//
-	// If we are updating the adjacencies of only part of the cells, we need
-	// to populate the half-face list with the faces of the cells that will
-	// not be updated (among those faces may find matches for the faces of
-	// the updated cells). If faces can be shared only between two half-faces
-	// we need to insert only the border faces of the non-updated cells,
-	// otherwise we need to add all the faces of the non-updated cells.
-
-	// Define matching windings
-	bool multipleMatchesAllowed = (getDimension() < 3);
-
 	std::vector<CellHalfFace::Winding> matchingWindings;
 	matchingWindings.push_back(CellHalfFace::WINDING_REVERSE);
 	if (multipleMatchesAllowed) {
@@ -5396,88 +5390,200 @@ void PatchKernel::_updateAdjacencies()
 		++nDirtyAdjacenciesCells;
 	}
 
-	// Initialize half-faces list
-	std::unordered_multiset<CellHalfFace, CellHalfFace::Hasher> halfFaces;
-	if (multipleMatchesAllowed) {
-		halfFaces.reserve(4 * getCellCount());
-	} else {
-		halfFaces.reserve(2 * nDirtyAdjacenciesCells);
-	}
-
-	// Populate list with faces of non-updated cells
-	if ((long) nDirtyAdjacenciesCells != getCellCount()) {
-		for (Cell &cell : m_cells) {
-			if (testCellAlterationFlags(cell.getId(), FLAG_ADJACENCIES_DIRTY)) {
+	// Get the vertices of cells with dirty adjacencies
+	//
+	// The list is only needed if multiple matches are allowed and there are
+	// cells whose adjacencies don't need to be updated.
+	std::unique_ptr<PiercedStorage<bool, long>> dirtyAdjacenciesVertices;
+	if (multipleMatchesAllowed && (nDirtyAdjacenciesCells != getCellCount())) {
+		dirtyAdjacenciesVertices = std::unique_ptr<PiercedStorage<bool, long>>(new PiercedStorage<bool, long>(1, &m_vertices));
+		dirtyAdjacenciesVertices->fill(false);
+		for (const auto &entry : m_alteredCells) {
+			AlterationFlags cellAlterationFlags = entry.second;
+			if (!testAlterationFlags(cellAlterationFlags, FLAG_ADJACENCIES_DIRTY)) {
 				continue;
 			}
 
-			int nCellFaces = cell.getFaceCount();
-			for (int face = 0; face < nCellFaces; face++) {
-				if (multipleMatchesAllowed || cell.isFaceBorder(face)) {
-					halfFaces.emplace(cell, face, CellHalfFace::WINDING_NATURAL);
-				}
+			long cellId = entry.first;
+			const Cell &cell = m_cells.at(cellId);
+			ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
+			for (long vertexId : cellVertexIds) {
+				dirtyAdjacenciesVertices->at(vertexId) = true;
 			}
 		}
 	}
 
-	// Update the adjacencies
-	for (const auto &entry : m_alteredCells) {
-		AlterationFlags cellAlterationFlags = entry.second;
-		if (!testAlterationFlags(cellAlterationFlags, FLAG_ADJACENCIES_DIRTY)) {
+	// List the cells that needs to be processed
+	//
+	// The list should contain the cells whose adjacencies need to be updated
+	// and their neighbours candidates.
+	//
+	// Cells whose adjacencies needs to be updated are cells having the dirty
+	// adjaceny flag set.
+	//
+	// Neighbours candidates are all border cells and, if multiple matches are
+	// allowed, cells that share vertices with a cell with dirty adjacencies.
+	std::vector<Cell *> processList;
+	processList.reserve(nDirtyAdjacenciesCells);
+
+	std::size_t nMaxHalfFaces = 0;
+	for (Cell &cell : m_cells) {
+		// Get cell information
+		long cellId = cell.getId();
+		int nCellFaces = cell.getFaceCount();
+
+		// Add cells with dirty adjacencies
+		if (testCellAlterationFlags(cellId, FLAG_ADJACENCIES_DIRTY)) {
+			nMaxHalfFaces += nCellFaces;
+			processList.push_back(&cell);
 			continue;
 		}
 
-		long cellId = entry.first;
-		Cell &cell = m_cells.at(cellId);
+		// Add border cells
+		bool isBorderCell = false;
+		for (int face = 0; face < nCellFaces; face++) {
+			if (cell.isFaceBorder(face)) {
+				isBorderCell = true;
+				continue;
+			}
+		}
 
-		const int nCellFaces = cell.getFaceCount();
+		if (isBorderCell) {
+			nMaxHalfFaces += nCellFaces;
+			processList.push_back(&cell);
+			continue;
+		}
+
+		// Add cell that share vertices with a cell with dirty adjacencies
+		//
+		// For performace reasons, the check is a bit rough. All cells that
+		// share a number of vertices at least equal to the dimension af the
+		// patch will be added to the process list. This will add also cells
+		// that are not neighbour candidates, but it's faster to add some false
+		// positives, rather trying to filter them out.
+		if (multipleMatchesAllowed) {
+			ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
+
+			int nCelldirtyAdjacenciesVertices = 0;
+			bool futureNeighbourCandidate = false;
+			for (long vertexId : cellVertexIds) {
+				if (dirtyAdjacenciesVertices->at(vertexId)) {
+					++nCelldirtyAdjacenciesVertices;
+					if (nCelldirtyAdjacenciesVertices >= dimension) {
+						futureNeighbourCandidate = true;
+						break;
+					}
+				}
+			}
+
+			if (futureNeighbourCandidate) {
+				nMaxHalfFaces += nCellFaces;
+				processList.push_back(&cell);
+			}
+		}
+	}
+
+	// Create the adjacencies
+	std::unordered_set<CellHalfFace, CellHalfFace::Hasher> halfFaces;
+	halfFaces.reserve(0.5 * nMaxHalfFaces);
+
+	std::vector<std::pair<Cell *, int>> matchingAdjacencies;
+	for (Cell *cell : processList) {
+		long cellId = cell->getId();
+		const int nCellFaces = cell->getFaceCount();
+		bool areCellAdjacenciesDirty = testCellAlterationFlags(cellId, FLAG_ADJACENCIES_DIRTY);
 		for (int face = 0; face < nCellFaces; face++) {
 			// Generate the half-face
-			CellHalfFace halfFace(cell, face);
+			CellHalfFace halfFace(*cell, face);
 
-			// Find matching half-faces
-			int nAdjacencies = 0;
+			// Find matching half-face
+			auto matchingHalfFaceItr = halfFaces.end();
 			for (CellHalfFace::Winding winding : matchingWindings) {
 				// Set winding order
 				halfFace.setWinding(winding);
 
-				// Search for matching half-faces
-				//
-				// Each match is adjacent to the current half-face.
-				auto matchRange = halfFaces.equal_range(halfFace);
-				for (auto matchItr = matchRange.first; matchItr != matchRange.second; ++matchItr) {
-					const CellHalfFace &neighHalfFace = *matchItr;
-
-					// Generate the adjacency
-					//
-					// The function that adds the adjacencies to a cell takes
-					// care of checking if the adjacency already exists.
-					Cell &neigh    = neighHalfFace.getCell();
-					long neighId   = neigh.getId();
-					long neighFace = neighHalfFace.getFace();
-
-					cell.pushAdjacency(face, neighId);
-					neigh.pushAdjacency(neighFace, cellId);
-
-					++nAdjacencies;
-				}
-
-				// Remove the matching half-faces from the list
-				//
-				// It is not possible to remove the matching half-faces
-				// if multiple matches are allowed.
-				if (!multipleMatchesAllowed) {
-					halfFaces.erase(matchRange.first, matchRange.second);
+				// Search for matching half-face
+				matchingHalfFaceItr = halfFaces.find(halfFace);
+				if (matchingHalfFaceItr != halfFaces.end()) {
+					break;
 				}
 			}
 
-			// Add the current half-face to the list.
+			// Early return if no matching half-face has been found
 			//
-			// If no multiple matches are allowed, we need to add the current
-			// half-face to the list only if no matchings were found.
-			if (multipleMatchesAllowed || nAdjacencies == 0) {
+			// If no matching half-face has been found, we need to add the
+			// current half-face to the list because it may match the face
+			// of a cell that will be processed later.
+			if (matchingHalfFaceItr == halfFaces.end()) {
 				halfFace.setWinding(CellHalfFace::WINDING_NATURAL);
 				halfFaces.insert(std::move(halfFace));
+				continue;
+			}
+
+			// Get matching half-face information
+			const CellHalfFace &matchingHalfFace = *matchingHalfFaceItr;
+			Cell &matchingCell  = matchingHalfFace.getCell();
+			long matchingCellId = matchingCell.getId();
+			long matchingFace   = matchingHalfFace.getFace();
+
+			// Only process cells with dirty adjacencies
+			//
+			// In order to limit the half faces that need to be stored, we are
+			// processing at the same time cells with dirty adjacencies and
+			// their neighbour candidates. This means we will also find matches
+			// between faces of cell whose adjacensies are already up-to-date.
+			bool areMatchingCellAdjacenciesDirty = testCellAlterationFlags(matchingCellId, FLAG_ADJACENCIES_DIRTY);
+			if (!areCellAdjacenciesDirty && !areMatchingCellAdjacenciesDirty) {
+				continue;
+			}
+
+			// Identifty matching adjacencies
+			//
+			// If multiple matches are allowed, in addition to the entry
+			// related to the matching half face, we also need to add the
+			// entries associated to the adjacencies already identified
+			// for the half face.
+			matchingAdjacencies.clear();
+			matchingAdjacencies.emplace_back(std::make_pair<Cell *, int>(&matchingCell, matchingFace));
+			if (multipleMatchesAllowed) {
+				const int nMachingFaceNeighs = matchingCell.getAdjacencyCount(matchingFace);
+				const long *machingFaceNeighs = matchingCell.getAdjacencies(matchingFace);
+				for (int k = 0; k < nMachingFaceNeighs; ++k) {
+					long neighId = machingFaceNeighs[k];
+					if (neighId == cellId) {
+						continue;
+					}
+
+					Cell &neigh = m_cells.at(neighId);
+					int neighFace = findAdjoinNeighFace(matchingCellId, matchingFace, neighId);
+					matchingAdjacencies.emplace_back(std::make_pair<Cell *, int>(&neigh, std::move(neighFace)));
+				}
+			} else {
+				// When cell adjacencies are makred dirty this means that some
+				// adjacencies are dirty not that all adjacencies are dirty.
+				// The matchin cell may have no adjaceny associated to the
+				// matching face or a signle adjacency that should match
+				// the current cell.
+				assert(matchingCell.getAdjacencyCount(matchingFace) == 0 || (matchingCell.getAdjacencyCount(matchingFace) == 1 && (*(matchingCell.getAdjacencies(matchingFace)) == cellId)));
+			}
+
+			// Create adjacencies
+			for (const std::pair<Cell *, int> &matchingAdjacency : matchingAdjacencies) {
+				Cell *adjacentCell = matchingAdjacency.first;
+				long adjacentCellId = adjacentCell->getId();
+				int adjacentFace = matchingAdjacency.second;
+
+				cell->pushAdjacency(face, adjacentCellId);
+				adjacentCell->pushAdjacency(adjacentFace, cellId);
+			}
+
+			// Remove the matching half-face from the list
+			//
+			// If multiple matches are allowed, we need to keep the half
+			// face, because that entry may match the face of a cell that
+			// will be processed later.
+			if (!multipleMatchesAllowed) {
+				halfFaces.erase(matchingHalfFaceItr);
 			}
 		}
 	}
