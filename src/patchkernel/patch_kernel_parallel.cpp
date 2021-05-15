@@ -31,7 +31,6 @@
 #include <unordered_set>
 
 #include "bitpit_communications.hpp"
-#include "bitpit_SA.hpp"
 
 #include "patch_kernel.hpp"
 
@@ -2786,7 +2785,17 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
     std::vector<long> neighIds;
 
     std::unordered_set<long> duplicateCellsCandidates;
-    KdTree<3, Vertex, long> duplicateVerticesCandidatesTree;
+
+    std::array<double, 3> *candidateVertexCoords;
+    Vertex::Less vertexLess(10 * std::numeric_limits<double>::epsilon());
+    auto vertexCoordsLess = [this, &vertexLess, &candidateVertexCoords](const long &id_1, const long &id_2)
+    {
+        const std::array<double, 3> &coords_1 = (id_1 >= 0) ? this->getVertex(id_1).getCoords() : *candidateVertexCoords;
+        const std::array<double, 3> &coords_2 = (id_2 >= 0) ? this->getVertex(id_2).getCoords() : *candidateVertexCoords;
+
+        return vertexLess(coords_1, coords_2);
+    };
+    std::set<long, decltype(vertexCoordsLess)> duplicateVerticesCandidates(vertexCoordsLess);
 
     std::unordered_map<long, long> verticesMap;
 
@@ -2833,21 +2842,13 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
         // properly identify duplicate vertices. Since we have delete all ghost
         // information, all the vertices of border faces need to be added to the
         // duplicate vertex candidates.
-        //
-        // Duplicate vertex candidates are stored in a kd-tree. The kd-tree stores
-        // a pointer to the vertices. If we try to store in the kd-tree a pointers
-        // to the vertices of the patch, the first resize of the vertex container
-        // would invalidate the pointer. Create a copy of the vertices and store
-        // the pointer to that copy.
-        std::unordered_map<long, Vertex> duplicateVerticesCandidates;
+        duplicateVerticesCandidates.clear();
         if (!m_partitioningSerialization) {
             for (long cellId : duplicateCellsCandidates) {
                 const Cell &cell = m_cells.at(cellId);
                 ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
-                int nCellVertices = cellVertexIds.size();
-                for (int k = 0; k < nCellVertices; ++k) {
-                    long vertexId = cellVertexIds[k];
-                    duplicateVerticesCandidates.insert({vertexId, m_vertices.at(vertexId)});
+                for (long vertexId : cellVertexIds) {
+                    duplicateVerticesCandidates.insert(vertexId);
                 }
             }
         } else {
@@ -2861,18 +2862,10 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
                     int nFaceVertices = cell.getFaceVertexCount(face);
                     for (int k = 0; k < nFaceVertices; ++k) {
                         long vertexId = cell.getFaceVertexId(face, k);
-                        duplicateVerticesCandidates.insert({vertexId, m_vertices.at(vertexId)});
+                        duplicateVerticesCandidates.insert(vertexId);
                     }
                 }
             }
-        }
-
-        duplicateVerticesCandidatesTree.clear();
-        for (auto &entry : duplicateVerticesCandidates) {
-            long vertexId = entry.first;
-            Vertex &vertex = entry.second;
-
-            duplicateVerticesCandidatesTree.insert(&vertex, vertexId);
         }
 
         //
@@ -2965,13 +2958,25 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
             //
             // Only frame and halo vertices may be a duplicate.
             //
-            // If the vertex is a duplicate the function that check its existance
-            // will return the current id of the vertex.
+            //
+            // If the vertex is a duplicate, it will be possible to obtain the
+            // id of the id of the coincident vertex already in the patch.
             long vertexId;
 
             bool isDuplicate = (isFrame || isHalo);
             if (isDuplicate) {
-                isDuplicate = (duplicateVerticesCandidatesTree.exist(&vertex, vertexId) >= 0);
+                // The container that stores the list of possible duplicate
+                // vertices uses a customized comparator that allows to
+                // compare the coordinates of the stored vertices with the
+                // coordinates of an external vertex. To check if the external
+                // vertex is among the vertex in the container, the search
+                // should be performed using the NULL_ID as the key.
+                candidateVertexCoords = &(vertex.getCoords());
+                auto candidateVertexItr = duplicateVerticesCandidates.find(Cell::NULL_ID);
+                isDuplicate = (candidateVertexItr != duplicateVerticesCandidates.end());
+                if (isDuplicate) {
+                    vertexId = *candidateVertexItr;
+                }
             }
 
             // Add the vertex
@@ -2999,7 +3004,6 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
 
         // Cleanup
         verticesBuffers[sendRankIndex].reset();
-        std::unordered_map<long, Vertex>().swap(duplicateVerticesCandidates);
 
         //
         // Process cells
