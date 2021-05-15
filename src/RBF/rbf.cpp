@@ -29,7 +29,6 @@
 
 #include "bitpit_operators.hpp"
 #include "bitpit_IO.hpp"
-#include "bitpit_SA.hpp"
 
 #include "rbf.hpp"
 
