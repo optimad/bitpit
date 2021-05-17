@@ -8,7 +8,7 @@ section: modules
 <h1>A quick look at bitpit</h1>
 
 <p>
-During the develpment of scientific applications it is always necessary to spend time developing basic
+During the development of scientific applications it is always necessary to spend time developing basic
 functionalities which are common to many scientific programs. For example, applications that deals with
 finite volume or finite element methods always uses some kind of spatial discretization of the physical
 domain and thus require code to handle computational meshes. Although essential to the application, the
@@ -18,9 +18,9 @@ of the main functionalities of the application.
 
 <p>
 Each module of the <strong>bitpit</strong> library is developed to address a specific aspect of real-life
-application development. Modules can be used as building blocks to quickly develop a high-perfomance
+application development. Modules can be used as building blocks to quickly develop a high-performance
 scientific application. The library consist of several modules ranging from low level functionalities like
-algebrical operators to high level functionalities like the evaluation of distance functions on
+algebraic operators to high level functionalities like the evaluation of distance functions on
 computational meshes.
 </p>
 
@@ -34,9 +34,9 @@ Engineering Srl</a> and licensed under the <a href="https://www.gnu.org/licenses
 <h3>Operators</h3>
 
 <ul>
-    <li>basic algebrical operators (sum, difference, multiplication, division) for the std::vector
+    <li>basic algebraic operators (sum, difference, multiplication, division) for the std::vector
     and std::array containers</li>
-    <li>basic mathematic functions like dot product, cross product, norm, absolute value, ... for the std::vector
+    <li>basic mathematical functions like dot product, cross product, norm, absolute value, ... for the std::vector
     and std::array containers</li>
     <li>stream operators and display functions for the std::vector and std::array containers</li>
 </ul>
@@ -54,7 +54,7 @@ Engineering Srl</a> and licensed under the <a href="https://www.gnu.org/licenses
 
 <h3>Communications</h3>
 
-<p>The communications module provides high levle methods for handling MPI parallel communications.</p>
+<p>The communications module provides high level methods for handling MPI parallel communications.</p>
 
 <h2>IO - Input Output</h2>
 
@@ -80,9 +80,9 @@ parameterization even with a large set of nodes.</p>
 
 <h2>SA - Sort algorithms</h2>
 
-    bitpit::LIFOStack manage insertion and extraction uding the Last-In-First-Out pragma
+    bitpit::LIFOStack manage insertion and extraction using the Last-In-First-Out pragma
     bitpit::KdTree sorts vertices in a d-dimensional Euclidean space in a Kd-tree structure
-    bitpit::MinPQueue & bitpit::MaxPQueue manage a binary tree which ensures that the root element has the smalles/largest value in the tree
+    bitpit::MinPQueue & bitpit::MaxPQueue manage a binary tree which ensures that the root element has the smallest/largest value in the tree
 
 <h2>Computational Geometry (CG)</h2>
 
@@ -93,7 +93,7 @@ parameterization even with a large set of nodes.</p>
 <h3>PABLO - PArallel Balanced Linear Octree</h3>
 
 <p>
-PABLO is a stand-alone module which provides a parallel linear octree/quadtree. bitpit::ParaTree provides connectivity/adjecency information only, whereas bitpit::PabloUniform provides aditionally all geometrical information for an Octree within and rectangular domain. Message passing paradigm is transparent to the user since PABLO has embedded MPI calls. By this way, the user can easily perform data communications and dynamic load-balance by calling straightforward high level methods.
+PABLO is a stand-alone module which provides a parallel linear octree/quadtree. bitpit::ParaTree provides connectivity/adjecency information only, whereas bitpit::PabloUniform provides additionally all geometrical information for an Octree within and rectangular domain. Message passing paradigm is transparent to the user since PABLO has embedded MPI calls. By this way, the user can easily perform data communications and dynamic load-balance by calling straightforward high level methods.
 <br/>
 PABLO allows adaptive mesh refinement by generating non-conforming grid with hanging nodes. Additional features available in PABLO are: 2:1 balancing between octants and a easy way to generate and store intersections between octants.
 </p>
