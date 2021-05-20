@@ -2029,7 +2029,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
     std::unordered_set<long> frontierNeighs;
     std::unordered_set<long> frontierVertices;
     std::unordered_set<long> frontierFaceVertices;
-    std::unordered_set<CellHalfEdge, CellHalfEdge::Hasher> frontierEdges;
+    std::unordered_set<ConstCellHalfEdge, ConstCellHalfEdge::Hasher> frontierEdges;
 
     std::unordered_set<long> outgoingCells;
     std::unordered_set<long> frameCells;
@@ -2123,13 +2123,13 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
                         // Select the cell with only one adjacency
                         long frontierCellId;
                         long frontierFace;
-                        Cell *frontierCell;
+                        const Cell *frontierCell;
                         if (nFaceAdjacencies == 1) {
                             frontierCellId = cellId;
                             frontierFace = face;
                             frontierCell = &cell;
                         } else {
-                            Cell &neigh = getCell(neighId);
+                            const Cell &neigh = getCell(neighId);
 
                             frontierCellId = neighId;
                             frontierFace = findAdjoinNeighFace(cell, face, neigh);
@@ -2224,7 +2224,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
                                 // Edge information
                                 int nEdgeVertices = frontierCell->getEdgeVertexCount(edge);
 
-                                CellHalfEdge frontierEdge = CellHalfEdge(*frontierCell, edge, CellHalfEdge::WINDING_NATURAL);
+                                ConstCellHalfEdge frontierEdge = ConstCellHalfEdge(*frontierCell, edge, ConstCellHalfEdge::WINDING_NATURAL);
 
                                 // Discard edges that do not belong to the
                                 // current frontier face
@@ -2244,12 +2244,12 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
                                 }
 
                                 // Avoid adding duplicate edges
-                                frontierEdge.setWinding(CellHalfEdge::WINDING_REVERSE);
+                                frontierEdge.setWinding(ConstCellHalfEdge::WINDING_REVERSE);
                                 auto frontierEdgeItr = frontierEdges.find(frontierEdge);
                                 if (frontierEdgeItr != frontierEdges.end()) {
                                     continue;
                                 } else {
-                                    frontierEdge.setWinding(CellHalfEdge::WINDING_NATURAL);
+                                    frontierEdge.setWinding(ConstCellHalfEdge::WINDING_NATURAL);
                                     frontierEdgeItr = frontierEdges.find(frontierEdge);
                                     if (frontierEdgeItr != frontierEdges.end()) {
                                         continue;
