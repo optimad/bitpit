@@ -2129,9 +2129,11 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
                             frontierFace = face;
                             frontierCell = &cell;
                         } else {
+                            Cell &neigh = getCell(neighId);
+
                             frontierCellId = neighId;
-                            frontierFace = findAdjoinNeighFace(cellId, face, neighId);
-                            frontierCell = &(m_cells.at(neighId));
+                            frontierFace = findAdjoinNeighFace(cell, face, neigh);
+                            frontierCell = &neigh;
 
                             assert(frontierFace >= 0);
                         }

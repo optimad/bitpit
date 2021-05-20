@@ -5574,7 +5574,7 @@ void PatchKernel::_updateAdjacencies()
 					}
 
 					Cell &neigh = m_cells.at(neighId);
-					int neighFace = findAdjoinNeighFace(matchingCellId, matchingFace, neighId);
+					int neighFace = findAdjoinNeighFace(matchingCell, matchingFace, neigh);
 					matchingAdjacencies.emplace_back(std::make_pair<Cell *, int>(&neigh, std::move(neighFace)));
 				}
 			} else {
@@ -5889,7 +5889,7 @@ void PatchKernel::_updateInterfaces()
 					long neighId = faceAdjacencies[k];
 					Cell *neigh  = &m_cells[neighId];
 
-					int neighFace = findAdjoinNeighFace(cellId, face, neighId);
+					int neighFace = findAdjoinNeighFace(cell, face, *neigh);
 
 					buildCellInterface(&cell, face, neigh, neighFace);
 				}
@@ -6060,14 +6060,17 @@ PatchKernel::InterfaceIterator PatchKernel::buildCellInterface(Cell *cell_1, int
 /*!
 	Finds the face of the supposed neighbour that adjoins the target face.
 
-	\param cellId is the id of the cell
+	\param cell is the cell
 	\param cellFace is the target face of the cell
-	\param neighId is the id of a supposed neighbour of the cell
+	\param neigh is the supposed neighbour of the cell
 	\result The face of the neighbour which adjoins the target face. If the
 	two cells are not neighbours, a negative number is returned.
  */
-int PatchKernel::findAdjoinNeighFace(long cellId, int cellFace, long neighId) const
+int PatchKernel::findAdjoinNeighFace(const Cell &cell, int cellFace, const Cell &neigh) const
 {
+	long cellId  = cell.getId();
+	long neighId = neigh.getId();
+
 	// Evaluate list of candidate faces
 	//
 	// The cells may be neighbours through multiple faces. Identify which face
@@ -6076,7 +6079,6 @@ int PatchKernel::findAdjoinNeighFace(long cellId, int cellFace, long neighId) co
 	// is not needed at all. Therefore, first we identify all the faces through
 	// which the two cells are neighbours and then, if and only if there are
 	// multiple candidates, we identify the face that matches the target one.
-	const Cell &neigh = getCell(neighId);
 	const int nNeighFaces = neigh.getFaceCount();
 
 	int nCandidates = 0;
