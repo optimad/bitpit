@@ -2744,4 +2744,35 @@ void VolOctree::findOctantCodimensionNeighs(const OctantInfo &octantInfo, int in
 	}
 }
 
+/*!
+ * Check whether the face "face_A" on cell "cell_A" is the same as the face
+ * "face_B" on cell "cell_B".
+ *
+ * \param[in] cell_A is the first cell
+ * \param[in] face_A is the face on the first cell
+ * \param[in] cell_B is the the second cell
+ * \param[in] face_B is the face on the second cell
+ * \result Returns true if the two faces are the same.
+*/
+bool VolOctree::isSameFace(const Cell &cell_A, int face_A, const Cell &cell_B, int face_B) const
+{
+	// Check if the face matches
+	if (m_tree->getOppface()[face_A] != face_B) {
+		return false;
+	}
+
+	// Check if the two cells are neighbours
+	long cellId_A = cell_A.getId();
+
+	int nNeighFaceAdjacencies_B = cell_B.getAdjacencyCount(face_B);
+	const long *neighFaceAdjacencies_B = cell_B.getAdjacencies(face_B);
+	for (int k = 0; k < nNeighFaceAdjacencies_B; ++k) {
+		if (neighFaceAdjacencies_B[k] == cellId_A) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 }
