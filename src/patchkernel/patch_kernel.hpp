@@ -587,8 +587,6 @@ public:
 	long locatePoint(double x, double y, double z) const;
 	virtual long locatePoint(const std::array<double, 3> &point) const = 0;
 
-	bool isSameFace(long cellId_A, int face_A, long cellId_B, int face_B) const;
-
 	AdjacenciesBuildStrategy getAdjacenciesBuildStrategy() const;
 	bool areAdjacenciesDirty(bool global = false) const;
 	BITPIT_DEPRECATED(void buildAdjacencies());
@@ -875,6 +873,7 @@ protected:
 	void mappedItemRenumbering(PiercedVector<item_t, id_t> &container, const std::unordered_map<id_t, id_t> &renumberMap);
 
 	int findAdjoinNeighFace(long cellId, int cellFace, long neighId) const;
+	bool isSameFace(long cellId_A, int face_A, long cellId_B, int face_B) const;
 
 private:
 	std::unique_ptr<IndexGenerator<long>> m_vertexIdGenerator;
