@@ -898,7 +898,7 @@ protected:
 	void mappedItemRenumbering(PiercedVector<item_t, id_t> &container, const std::unordered_map<id_t, id_t> &renumberMap);
 
 	int findAdjoinNeighFace(const Cell &cell, int cellFace, const Cell &neigh) const;
-	bool isSameFace(long cellId_A, int face_A, long cellId_B, int face_B) const;
+	bool isSameFace(const Cell &cell_A, int face_A, const Cell &cell_B, int face_B) const;
 
 private:
 	std::unique_ptr<IndexGenerator<long>> m_vertexIdGenerator;
