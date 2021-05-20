@@ -5109,16 +5109,14 @@ long PatchKernel::locatePoint(double x, double y, double z) const
  * Check whether the face "face_A" on cell "cell_A" is the same as the face
  * "face_B" on cell "cell_B".
  * 
- * \param[in] cellId_A is the index of the first cell
+ * \param[in] cell_A is the first cell
  * \param[in] face_A is the face on the first cell
- * \param[in] cellId_B is the index of the second cell
+ * \param[in] cell_B is the the second cell
  * \param[in] face_B is the face on the second cell
  * \result Returns true if the two faces are the same.
 */
-bool PatchKernel::isSameFace(long cellId_A, int face_A, long cellId_B, int face_B) const
+bool PatchKernel::isSameFace(const Cell &cell_A, int face_A, const Cell &cell_B, int face_B) const
 {
-	const Cell &cell_A = m_cells[cellId_A];
-	const Cell &cell_B = m_cells[cellId_B];
 	if (cell_A.getFaceType(face_A) != cell_B.getFaceType(face_B)) {
 		return false;
 	}
@@ -6068,9 +6066,6 @@ PatchKernel::InterfaceIterator PatchKernel::buildCellInterface(Cell *cell_1, int
  */
 int PatchKernel::findAdjoinNeighFace(const Cell &cell, int cellFace, const Cell &neigh) const
 {
-	long cellId  = cell.getId();
-	long neighId = neigh.getId();
-
 	// Evaluate list of candidate faces
 	//
 	// The cells may be neighbours through multiple faces. Identify which face
@@ -6079,6 +6074,7 @@ int PatchKernel::findAdjoinNeighFace(const Cell &cell, int cellFace, const Cell 
 	// is not needed at all. Therefore, first we identify all the faces through
 	// which the two cells are neighbours and then, if and only if there are
 	// multiple candidates, we identify the face that matches the target one.
+	long cellId = cell.getId();
 	const int nNeighFaces = neigh.getFaceCount();
 
 	int nCandidates = 0;
@@ -6102,7 +6098,7 @@ int PatchKernel::findAdjoinNeighFace(const Cell &cell, int cellFace, const Cell 
 	} else {
 		for (int i = 0; i < nCandidates; ++i) {
 			int candidateFace = (*candidates)[i];
-			if (isSameFace(cellId, cellFace, neighId, candidateFace)) {
+			if (isSameFace(cell, cellFace, neigh, candidateFace)) {
 				return candidateFace;
 			}
 		}
