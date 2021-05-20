@@ -169,6 +169,7 @@ protected:
 	std::vector<long> _findGhostCellExchangeSources(int rank) override;
 #endif
 
+	int findAdjoinNeighFace(const Cell &cell, int cellFace, const Cell &neigh) const override;
 	bool isSameFace(const Cell &cell_A, int face_A, const Cell &cell_B, int face_B) const override;
 
 private:
