@@ -897,7 +897,7 @@ protected:
 	template<typename item_t, typename id_t = long>
 	void mappedItemRenumbering(PiercedVector<item_t, id_t> &container, const std::unordered_map<id_t, id_t> &renumberMap);
 
-	int findAdjoinNeighFace(const Cell &cell, int cellFace, const Cell &neigh) const;
+	virtual int findAdjoinNeighFace(const Cell &cell, int cellFace, const Cell &neigh) const;
 	virtual bool isSameFace(const Cell &cell_A, int face_A, const Cell &cell_B, int face_B) const;
 
 private:

@@ -2745,6 +2745,34 @@ void VolOctree::findOctantCodimensionNeighs(const OctantInfo &octantInfo, int in
 }
 
 /*!
+	Finds the face of the supposed neighbour that adjoins the target face.
+
+	\param cellId is the id of the cell
+	\param cellFace is the target face of the cell
+	\param neighId is the id of a supposed neighbour of the cell
+	\result The face of the neighbour which adjoins the target face. If the
+	two cells are not neighbours, a negative number is returned.
+ */
+int VolOctree::findAdjoinNeighFace(const Cell &cell, int cellFace, const Cell &neigh) const
+{
+	long cellId = cell.getId();
+
+	// Get the neighbour face
+	int neighFace = m_tree->getOppface()[cellFace];
+
+	// Check if the two cells are neighbours
+	int nNeighFaceAdjacencies = neigh.getAdjacencyCount(neighFace);
+	const long *neighFaceAdjacencies = neigh.getAdjacencies(neighFace);
+	for (int k = 0; k < nNeighFaceAdjacencies; ++k) {
+		if (neighFaceAdjacencies[k] == cellId) {
+			return neighFace;
+		}
+	}
+
+	return -1;
+}
+
+/*!
  * Check whether the face "face_A" on cell "cell_A" is the same as the face
  * "face_B" on cell "cell_B".
  *
