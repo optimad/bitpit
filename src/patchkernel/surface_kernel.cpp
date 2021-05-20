@@ -999,16 +999,16 @@ bool SurfaceKernel::adjustCellOrientation(long seed, bool invert)
                 const long *faceAdjacencies = cell.getAdjacencies(face);
                 for (int i = 0; i < nFaceAdjacencies; ++i) {
                     long neighId = faceAdjacencies[i];
+                    const Cell &neigh = getCell(neighId);
 #if BITPIT_ENABLE_MPI==1
                     if (ghostExchangeNeeded) {
-                        const auto &neigh = getCell(neighId);
                         if (!neigh.isInterior()) {
                             continue;
                         }
                     }
 #endif
 
-                    int neighFace = findAdjoinNeighFace(cellId, face, neighId);
+                    int neighFace = findAdjoinNeighFace(cell, face, neigh);
 
                     bool isNeighOriented = haveSameOrientation(cellId, face, neighId, neighFace);
                     if (visited.count(neighId) == 0) {

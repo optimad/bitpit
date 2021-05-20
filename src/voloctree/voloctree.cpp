@@ -1719,7 +1719,7 @@ VolOctree::StitchInfo VolOctree::deleteCells(const std::vector<DeleteInfo> &dele
 				}
 
 				const Cell &neigh = m_cells[neighId];
-				int neighFace = findAdjoinNeighFace(cellId, face, neighId);
+				int neighFace = findAdjoinNeighFace(cell, face, neigh);
 				const int *localNeighFaceConnect = m_cellTypeInfo->faceConnectStorage[neighFace].data();
 				ConstProxyVector<long> faceVertexIds = neigh.getFaceVertexIds(neighFace);
 				std::size_t nFaceVertexIds = faceVertexIds.size();
