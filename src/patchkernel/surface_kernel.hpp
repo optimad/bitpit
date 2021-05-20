@@ -76,7 +76,7 @@ private:
         bool compareSelectedTypes(unsigned short, ElementType) const;
         void displayHistogram(long, const std::vector<double>&, const std::vector<double>&, const std::string&, std::ostream&, unsigned int padding = 0) const;
 
-        bool haveSameOrientation(long cellId_A, int face_A, long cellId_B, int face_B) const;
+        bool haveSameOrientation(const Cell &cell_A, int face_A, const Cell &cell_B, int face_B) const;
 
 protected:
         int                     m_spaceDim;
