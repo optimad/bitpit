@@ -1010,7 +1010,7 @@ bool SurfaceKernel::adjustCellOrientation(long seed, bool invert)
 
                     int neighFace = findAdjoinNeighFace(cell, face, neigh);
 
-                    bool isNeighOriented = haveSameOrientation(cellId, face, neighId, neighFace);
+                    bool isNeighOriented = haveSameOrientation(cell, face, neigh, neighFace);
                     if (visited.count(neighId) == 0) {
                         if (!isNeighOriented) {
                             flipCellOrientation(neighId);
@@ -1114,23 +1114,23 @@ bool SurfaceKernel::adjustCellOrientation(long seed, bool invert)
  * relative orientation only checking the order of the vertices, otherwise
  * is is necessary to evaluate the normals.
  *
- * \param[in] cellId_A is the index of the first cell
- * \param[in] cellFace_A is the face on the first cell
- * \param[in] cellId_B is the index of the second cell
- * \param[in] cellFace_B is the face on the second cell
+ * \param[in] cell_A is the first cell
+ * \param[in] face_A is the face on the first cell
+ * \param[in] cell_B is the second cell
+ * \param[in] face_B is the face on the second cell
  * \result Returns true if the two facets have the same orientation, false
  * otherwise.
 */
-bool SurfaceKernel::haveSameOrientation(long cellId_A, int cellFace_A, long cellId_B, int cellFace_B) const
+bool SurfaceKernel::haveSameOrientation(const Cell &cell_A, int face_A, const Cell &cell_B, int face_B) const
 {
     //
     // Cell information
     //
-    const Cell &cell_A = getCell(cellId_A);
+    long cellId_A = cell_A.getId();
     ConstProxyVector<long> cellVertexIds_A = cell_A.getVertexIds();
     std::size_t nCellVertices_A = cellVertexIds_A.size();
 
-    const Cell &cell_B = getCell(cellId_B);
+    long cellId_B = cell_B.getId();
     ConstProxyVector<long> cellVertexIds_B = cell_B.getVertexIds();
     std::size_t nCellVertices_B = cellVertexIds_B.size();
 
@@ -1199,8 +1199,8 @@ bool SurfaceKernel::haveSameOrientation(long cellId_A, int cellFace_A, long cell
     std::size_t nMaxCellVertices = std::max(nCellVertices_A, nCellVertices_B);
     BITPIT_CREATE_WORKSPACE(vertexCoordinates, std::array<double BITPIT_COMMA 3>, nMaxCellVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
 
-    ConstProxyVector<int> faceLocalVertexIds_A = cell_A.getFaceLocalVertexIds(cellFace_A);
-    ConstProxyVector<int> faceLocalVertexIds_B = cell_B.getFaceLocalVertexIds(cellFace_B);
+    ConstProxyVector<int> faceLocalVertexIds_A = cell_A.getFaceLocalVertexIds(face_A);
+    ConstProxyVector<int> faceLocalVertexIds_B = cell_B.getFaceLocalVertexIds(face_B);
 
     std::array<double, 3> pseudoNormal_A;
     std::array<double, 3> pseudoNormal_B;
