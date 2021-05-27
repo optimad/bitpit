@@ -523,6 +523,16 @@ uint8_t ReconstructionPolynomial::getDimensions() const
 }
 
 /*!
+ * Get the origin of the reconstruction.
+ *
+ * \return The origin of the reconstruction.
+ */
+const std::array<double, 3> & ReconstructionPolynomial::getOrigin() const
+{
+    return m_origin;
+}
+
+/*!
  * Get the number of coefficients of the reconstruction polynomial.
  *
  * \return The number of coefficients of the reconstruction polynomial.
