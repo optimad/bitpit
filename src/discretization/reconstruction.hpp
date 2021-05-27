@@ -55,6 +55,7 @@ public:
 
     uint8_t getDegree() const;
     uint8_t getDimensions() const;
+    const std::array<double, 3> & getOrigin() const;
 
     uint16_t getCoefficientCount() const;
 
