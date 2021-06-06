@@ -25,6 +25,16 @@
 #ifndef __BITPIT_PROXY_VECTOR_HPP__
 #define __BITPIT_PROXY_VECTOR_HPP__
 
+#define  __PXI_POINTER_TYPE__ \
+    typename std::conditional<std::is_const<value_t>::value, \
+        typename std::vector<value_no_cv_t>::const_pointer, \
+        typename std::vector<value_no_cv_t>::pointer>::type
+
+#define  __PXI_REFERENCE_TYPE__ \
+    typename std::conditional<std::is_const<value_t>::value, \
+        typename std::vector<value_no_cv_t>::const_reference, \
+        typename std::vector<value_no_cv_t>::reference>::type
+
 #define  __PXI_REFERENCE__ typename ProxyVectorIterator<value_t, value_no_cv_t>::reference
 #define  __PXI_POINTER__   typename ProxyVectorIterator<value_t, value_no_cv_t>::pointer
 
@@ -48,23 +58,50 @@ class ProxyVector;
     @brief Iterator for the class ProxyVector
 
     @tparam value_t is the type of the objects handled by the ProxyVector
+    @tparam pointer_t defines a pointer to the type iterated over
+    @tparam reference_t defines a reference to the type iterated over
 */
 template<typename value_t, typename value_no_cv_t = typename std::remove_cv<value_t>::type>
 class ProxyVectorIterator
-    : public std::iterator<std::random_access_iterator_tag, value_no_cv_t, std::ptrdiff_t, value_t*, value_t&>
+    : public std::iterator<std::random_access_iterator_tag, value_t, std::ptrdiff_t, __PXI_POINTER_TYPE__, __PXI_REFERENCE_TYPE__>
 {
 
 template<typename PXV_value_t>
 friend class ProxyVector;
 
+friend class ProxyVectorIterator<typename std::add_const<value_t>::type, value_no_cv_t>;
+
 public:
     /*!
-        Type of data stored in the container
+        Iterator category
+    */
+    typedef std::bidirectional_iterator_tag iterator_category;
+
+    /*!
+        Value type
     */
     typedef value_t value_type;
 
+    /*!
+        Difference type
+    */
+    typedef std::ptrdiff_t difference_type;
+
+    /*!
+        Pointer type
+    */
+    typedef __PXI_POINTER_TYPE__ pointer;
+
+    /*!
+        Reference type
+    */
+    typedef __PXI_REFERENCE_TYPE__ reference;
+
     // Constructors
     ProxyVectorIterator();
+
+    template<typename other_value_t, typename std::enable_if<std::is_const<value_t>::value && !std::is_const<other_value_t>::value && std::is_same<other_value_t, typename std::remove_cv<value_t>::type>::value, int>::type = 0>
+    ProxyVectorIterator(const ProxyVectorIterator<other_value_t> &other);
 
     // General methods
     void swap(ProxyVectorIterator& other) noexcept;
@@ -83,14 +120,13 @@ public:
     __PXI_REFERENCE__ operator*() const;
     __PXI_POINTER__ operator->() const;
 
-    template<typename other_value_t = value_t, typename std::enable_if<!std::is_const<other_value_t>::value, int>::type = 0>
-    operator ProxyVectorIterator<const other_value_t>() const;
+    template<typename other_value_t, typename std::enable_if<std::is_const<value_t>::value && !std::is_const<other_value_t>::value && std::is_same<other_value_t, typename std::remove_cv<value_t>::type>::value, int>::type = 0>
+    ProxyVectorIterator & operator=(const ProxyVectorIterator<other_value_t> &other);
 
     /*!
         Two-way comparison.
     */
-    template<typename other_value_t = value_t, typename other_value_no_cv_t = typename std::remove_cv<other_value_t>::type>
-    bool operator==(const ProxyVectorIterator<other_value_t, other_value_no_cv_t>& other) const
+    bool operator==(const ProxyVectorIterator &other) const
     {
         return (m_position == other.m_position);
     }
@@ -98,8 +134,7 @@ public:
     /*!
         Two-way comparison.
     */
-    template<typename other_value_t = value_t, typename other_value_no_cv_t = typename std::remove_cv<other_value_t>::type>
-    bool operator!=(const ProxyVectorIterator<other_value_t, other_value_no_cv_t>& other) const
+    bool operator!=(const ProxyVectorIterator &other) const
     {
         return (m_position != other.m_position);
     }
@@ -108,10 +143,10 @@ private:
     /*!
         Position inside the container.
     */
-    value_t *m_position;
+    __PXI_POINTER__ m_position;
 
     // Constructors
-    explicit ProxyVectorIterator(value_t *position);
+    explicit ProxyVectorIterator(__PXI_POINTER__ position);
 
 };
 
@@ -144,14 +179,14 @@ public:
     typedef value_t value_type;
 
     /*!
-        Iterator for the pierced array raw container.
+        Iterator for the container
     */
-    typedef ProxyVectorIterator<value_t> iterator;
+    typedef ProxyVectorIterator<value_t, value_no_cv_t> iterator;
 
     /*!
-        Constant iterator for the pierced array raw container.
+        Constant iterator for the container
     */
-    typedef ProxyVectorIterator<const value_no_cv_t> const_iterator;
+    typedef ProxyVectorIterator<typename std::add_const<value_no_cv_t>::type, value_no_cv_t> const_iterator;
 
     /*!
         Reference type

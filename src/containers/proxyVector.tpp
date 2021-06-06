@@ -37,10 +37,25 @@ ProxyVectorIterator<value_t, value_no_cv_t>::ProxyVectorIterator()
 }
 
 /*!
+    Constructor
+
+    This constructor allows to generate a constant iterator from a non
+    constnat iterator.
+
+    \param other is the iterator that will be copied
+*/
+template<typename value_t, typename value_no_cv_t>
+template<typename other_value_t, typename std::enable_if<std::is_const<value_t>::value && !std::is_const<other_value_t>::value && std::is_same<other_value_t, typename std::remove_cv<value_t>::type>::value, int>::type>
+ProxyVectorIterator<value_t, value_no_cv_t>::ProxyVectorIterator(const ProxyVectorIterator<other_value_t> &other)
+    : m_position(other.m_position)
+{
+}
+
+/*!
     Exchanges the values of the current iterator and
     the iterator recevied as argument.
 
-    \param other the iterator to exchange values with
+    \param other is the iterator to exchange values with
 */
 template<typename value_t, typename value_no_cv_t>
 void ProxyVectorIterator<value_t, value_no_cv_t>::swap(ProxyVectorIterator& other) noexcept
@@ -132,13 +147,18 @@ __PXI_POINTER__ ProxyVectorIterator<value_t, value_no_cv_t>::operator->() const
 }
 
 /*!
-    Converts the iterator to a const_iterator.
+* Copy assignment operator to create a constant iterator from a non-constant
+* one.
+*
+* \param other is the iterator that will be copied
 */
 template<typename value_t, typename value_no_cv_t>
-template<typename other_value_t, typename std::enable_if<!std::is_const<other_value_t>::value, int>::type>
-ProxyVectorIterator<value_t, value_no_cv_t>::operator ProxyVectorIterator<const other_value_t>() const
+template<typename other_value_t, typename std::enable_if<std::is_const<value_t>::value && !std::is_const<other_value_t>::value && std::is_same<other_value_t, typename std::remove_cv<value_t>::type>::value, int>::type>
+ProxyVectorIterator<value_t, value_no_cv_t> & ProxyVectorIterator<value_t, value_no_cv_t>::operator=(const ProxyVectorIterator<other_value_t> &other)
 {
-    return ProxyVectorIterator<const other_value_t>(m_position);
+    m_position = other.m_position;
+
+    return *this;
 }
 
 /*!
@@ -146,7 +166,7 @@ ProxyVectorIterator<value_t, value_no_cv_t>::operator ProxyVectorIterator<const 
     the const base iterator recevied in input.
 */
 template<typename value_t, typename value_no_cv_t>
-ProxyVectorIterator<value_t, value_no_cv_t>::ProxyVectorIterator(value_t *position)
+ProxyVectorIterator<value_t, value_no_cv_t>::ProxyVectorIterator(__PXI_POINTER__ position)
     : m_position(position)
 {
 }
