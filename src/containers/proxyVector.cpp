@@ -31,4 +31,8 @@ template class ProxyVector<int>;
 template class ProxyVector<long>;
 template class ProxyVector<double>;
 
+template class ProxyVector<const int>;
+template class ProxyVector<const long>;
+template class ProxyVector<const double>;
+
 }
