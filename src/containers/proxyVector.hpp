@@ -248,25 +248,32 @@ public:
 
     bool operator==(const ProxyVector &other) const;
 
-    __PXV_CONST_POINTER__ data() const noexcept;
+    template<typename U = value_t, typename std::enable_if<!std::is_const<U>::value, int>::type = 0>
     __PXV_POINTER__ data() noexcept;
+    __PXV_CONST_POINTER__ data() const noexcept;
 
-    __PXV_CONST_REFERENCE__ operator[](std::size_t n) const;
+    template<typename U = value_t, typename std::enable_if<!std::is_const<U>::value, int>::type = 0>
     __PXV_REFERENCE__ operator[](std::size_t n);
+    __PXV_CONST_REFERENCE__ operator[](std::size_t n) const;
 
-    __PXV_CONST_REFERENCE__ at(std::size_t n) const;
+    template<typename U = value_t, typename std::enable_if<!std::is_const<U>::value, int>::type = 0>
     __PXV_REFERENCE__ at(std::size_t n);
+    __PXV_CONST_REFERENCE__ at(std::size_t n) const;
 
-    __PXV_CONST_REFERENCE__ front() const;
+    template<typename U = value_t, typename std::enable_if<!std::is_const<U>::value, int>::type = 0>
     __PXV_REFERENCE__ front();
+    __PXV_CONST_REFERENCE__ front() const;
 
-    __PXV_CONST_REFERENCE__ back() const;
+    template<typename U = value_t, typename std::enable_if<!std::is_const<U>::value, int>::type = 0>
     __PXV_REFERENCE__ back();
+    __PXV_CONST_REFERENCE__ back() const;
 
+    template<typename U = value_t, typename std::enable_if<!std::is_const<U>::value, int>::type = 0>
     __PXV_ITERATOR__ begin();
-    __PXV_ITERATOR__ end();
-
     __PXV_CONST_ITERATOR__ begin() const;
+
+    template<typename U = value_t, typename std::enable_if<!std::is_const<U>::value, int>::type = 0>
+    __PXV_ITERATOR__ end();
     __PXV_CONST_ITERATOR__ end() const;
 
     __PXV_CONST_ITERATOR__ cbegin();

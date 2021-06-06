@@ -370,6 +370,18 @@ std::size_t ProxyVector<value_t>::size() const
 }
 
 /*!
+    Returns a direct pointer to the memory where the elments are stored.
+
+    \result A direct pointer to the memory where the elments are stored.
+*/
+template<typename value_t>
+template<typename other_value_t, typename std::enable_if<!std::is_const<other_value_t>::value, int>::type>
+__PXV_POINTER__ ProxyVector<value_t>::data() noexcept
+{
+    return m_data;
+}
+
+/*!
     Returns a direct constant pointer to the memory where the elments are
     stored.
 
@@ -383,14 +395,16 @@ __PXV_CONST_POINTER__ ProxyVector<value_t>::data() const noexcept
 }
 
 /*!
-    Returns a direct pointer to the memory where the elments are stored.
+    Returns a reference to the specified element.
 
-    \result A direct pointer to the memory where the elments are stored.
+    \param n is the position of the requested element
+    \result A reference to the specified element.
 */
 template<typename value_t>
-__PXV_POINTER__ ProxyVector<value_t>::data() noexcept
+template<typename other_value_t, typename std::enable_if<!std::is_const<other_value_t>::value, int>::type>
+__PXV_REFERENCE__ ProxyVector<value_t>::operator[](std::size_t n)
 {
-    return m_data;
+    return m_data[n];
 }
 
 /*!
@@ -412,7 +426,8 @@ __PXV_CONST_REFERENCE__ ProxyVector<value_t>::operator[](std::size_t n) const
     \result A reference to the specified element.
 */
 template<typename value_t>
-__PXV_REFERENCE__ ProxyVector<value_t>::operator[](std::size_t n)
+template<typename other_value_t, typename std::enable_if<!std::is_const<other_value_t>::value, int>::type>
+__PXV_REFERENCE__ ProxyVector<value_t>::at(std::size_t n)
 {
     return m_data[n];
 }
@@ -430,15 +445,15 @@ __PXV_CONST_REFERENCE__ ProxyVector<value_t>::at(std::size_t n) const
 }
 
 /*!
-    Returns a reference to the specified element.
+    Gets a reference to the first element in the container.
 
-    \param n is the position of the requested element
-    \result A reference to the specified element.
+    \result A reference to the first element in the container.
 */
 template<typename value_t>
-__PXV_REFERENCE__ ProxyVector<value_t>::at(std::size_t n)
+template<typename other_value_t, typename std::enable_if<!std::is_const<other_value_t>::value, int>::type>
+__PXV_REFERENCE__ ProxyVector<value_t>::front()
 {
-    return m_data[n];
+    return m_data[0];
 }
 
 /*!
@@ -453,14 +468,15 @@ __PXV_CONST_REFERENCE__ ProxyVector<value_t>::front() const
 }
 
 /*!
-    Gets a reference to the first element in the container.
+    Gets a reference to the last element in the container.
 
-    \result A reference to the first element in the container.
+    \result A reference to the last element in the container.
 */
 template<typename value_t>
-__PXV_REFERENCE__ ProxyVector<value_t>::front()
+template<typename other_value_t, typename std::enable_if<!std::is_const<other_value_t>::value, int>::type>
+__PXV_REFERENCE__ ProxyVector<value_t>::back()
 {
-    return m_data[0];
+    return m_data[m_size - 1];
 }
 
 /*!
@@ -475,36 +491,15 @@ __PXV_CONST_REFERENCE__ ProxyVector<value_t>::back() const
 }
 
 /*!
-    Gets a reference to the last element in the container.
-
-    \result A reference to the last element in the container.
-*/
-template<typename value_t>
-__PXV_REFERENCE__ ProxyVector<value_t>::back()
-{
-    return m_data[m_size - 1];
-}
-
-/*!
     Returns an iterator pointing to the first element in the container.
 
     \result An iterator pointing to the first element in the container.
 */
 template<typename value_t>
+template<typename other_value_t, typename std::enable_if<!std::is_const<other_value_t>::value, int>::type>
 __PXV_ITERATOR__ ProxyVector<value_t>::begin()
 {
     return iterator(m_data);
-}
-
-/*!
-    Returns an iterator referring to the past-the-end element in the container.
-
-    \result An iterator referring to the past-the-end element in the container.
-*/
-template<typename value_t>
-__PXV_ITERATOR__ ProxyVector<value_t>::end()
-{
-    return iterator(m_data + m_size);
 }
 
 /*!
@@ -516,6 +511,18 @@ template<typename value_t>
 __PXV_CONST_ITERATOR__ ProxyVector<value_t>::begin() const
 {
     return const_iterator(m_data);
+}
+
+/*!
+    Returns an iterator referring to the past-the-end element in the container.
+
+    \result An iterator referring to the past-the-end element in the container.
+*/
+template<typename value_t>
+template<typename other_value_t, typename std::enable_if<!std::is_const<other_value_t>::value, int>::type>
+__PXV_ITERATOR__ ProxyVector<value_t>::end()
+{
+    return iterator(m_data + m_size);
 }
 
 /*!
