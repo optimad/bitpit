@@ -25,43 +25,43 @@
 #ifndef __BITPIT_PROXY_VECTOR_HPP__
 #define __BITPIT_PROXY_VECTOR_HPP__
 
-#define  __PXI_REFERENCE__ typename ProxyVectorIterator<T, T_no_cv>::reference
-#define  __PXI_POINTER__   typename ProxyVectorIterator<T, T_no_cv>::pointer
+#define  __PXI_REFERENCE__ typename ProxyVectorIterator<value_t, value_no_cv_t>::reference
+#define  __PXI_POINTER__   typename ProxyVectorIterator<value_t, value_no_cv_t>::pointer
 
-#define __PXV_REFERENCE__       typename ProxyVector<T>::reference
-#define __PXV_CONST_REFERENCE__ typename ProxyVector<T>::const_reference
-#define __PXV_POINTER__         typename ProxyVector<T>::pointer
-#define __PXV_CONST_POINTER__   typename ProxyVector<T>::const_pointer
-#define __PXV_ITERATOR__        typename ProxyVector<T>::iterator
-#define __PXV_CONST_ITERATOR__  typename ProxyVector<T>::const_iterator
+#define __PXV_REFERENCE__       typename ProxyVector<value_t>::reference
+#define __PXV_CONST_REFERENCE__ typename ProxyVector<value_t>::const_reference
+#define __PXV_POINTER__         typename ProxyVector<value_t>::pointer
+#define __PXV_CONST_POINTER__   typename ProxyVector<value_t>::const_pointer
+#define __PXV_ITERATOR__        typename ProxyVector<value_t>::iterator
+#define __PXV_CONST_ITERATOR__  typename ProxyVector<value_t>::const_iterator
 
 #include <memory>
 #include <vector>
 
 namespace bitpit{
 
-template<typename PXV_T>
+template<typename PXV_value_t>
 class ProxyVector;
 
 /*!
     @ingroup containers
     @brief Iterator for the class ProxyVector
 
-    @tparam T is the type of the objects handled by the ProxyVector
+    @tparam value_t is the type of the objects handled by the ProxyVector
 */
-template<typename T, typename T_no_cv = typename std::remove_cv<T>::type>
+template<typename value_t, typename value_no_cv_t = typename std::remove_cv<value_t>::type>
 class ProxyVectorIterator
-    : public std::iterator<std::random_access_iterator_tag, T_no_cv, std::ptrdiff_t, T*, T&>
+    : public std::iterator<std::random_access_iterator_tag, value_no_cv_t, std::ptrdiff_t, value_t*, value_t&>
 {
 
-template<typename PXV_T>
+template<typename PXV_value_t>
 friend class ProxyVector;
 
 public:
     /*!
         Type of data stored in the container
     */
-    typedef T value_type;
+    typedef value_t value_type;
 
     // Constructors
     ProxyVectorIterator();
@@ -83,35 +83,35 @@ public:
     __PXI_REFERENCE__ operator*() const;
     __PXI_POINTER__ operator->() const;
 
-    template<typename U = T, typename std::enable_if<!std::is_const<U>::value, int>::type = 0>
-    operator ProxyVectorIterator<const U>() const;
+    template<typename other_value_t = value_t, typename std::enable_if<!std::is_const<other_value_t>::value, int>::type = 0>
+    operator ProxyVectorIterator<const other_value_t>() const;
 
     /*!
         Two-way comparison.
     */
-    template<typename U = T, typename U_no_cv = typename std::remove_cv<U>::type>
-    bool operator==(const ProxyVectorIterator<U, U_no_cv>& rhs) const
+    template<typename other_value_t = value_t, typename other_value_no_cv_t = typename std::remove_cv<other_value_t>::type>
+    bool operator==(const ProxyVectorIterator<other_value_t, other_value_no_cv_t>& other) const
     {
-        return (m_position == rhs.m_position);
+        return (m_position == other.m_position);
     }
 
     /*!
         Two-way comparison.
     */
-    template<typename U = T, typename U_no_cv = typename std::remove_cv<U>::type>
-    bool operator!=(const ProxyVectorIterator<U, U_no_cv>& rhs) const
+    template<typename other_value_t = value_t, typename other_value_no_cv_t = typename std::remove_cv<other_value_t>::type>
+    bool operator!=(const ProxyVectorIterator<other_value_t, other_value_no_cv_t>& other) const
     {
-        return (m_position != rhs.m_position);
+        return (m_position != other.m_position);
     }
 
 private:
     /*!
         Position inside the container.
     */
-    T *m_position;
+    value_t *m_position;
 
     // Constructors
-    explicit ProxyVectorIterator(T *position);
+    explicit ProxyVectorIterator(value_t *position);
 
 };
 
@@ -122,69 +122,69 @@ private:
     the container itself.
 
     @details
-    Usage: Use <tt>ProxyVector<Type></tt> to declare a list of elements that
+    Usage: Use <tt>ProxyVector<value_t></tt> to declare a list of elements that
     can be either stored in an external vectror or, if the elements are
     constant, inside the container itself. When the ProxyVector is destroyed,
     the elements of the list will be destroyed only if owned by the ProxyVector o
     bject itself.
 
-    @tparam T is the type of the objects handled by the ProxyVector
+    @tparam value_t is the type of the objects handled by the ProxyVector
 */
-template<typename T>
+template<typename value_t>
 class ProxyVector
 {
 
 private:
-    typedef typename std::remove_cv<T>::type T_no_cv;
+    typedef typename std::remove_cv<value_t>::type value_no_cv_t;
 
 public:
     /*!
         Type of data stored in the container
     */
-    typedef T value_type;
+    typedef value_t value_type;
 
     /*!
         Iterator for the pierced array raw container.
     */
-    typedef ProxyVectorIterator<T> iterator;
+    typedef ProxyVectorIterator<value_t> iterator;
 
     /*!
         Constant iterator for the pierced array raw container.
     */
-    typedef ProxyVectorIterator<const T_no_cv> const_iterator;
+    typedef ProxyVectorIterator<const value_no_cv_t> const_iterator;
 
     /*!
         Reference
     */
     typedef
-        typename std::conditional<std::is_const<T>::value,
-            typename std::vector<T_no_cv>::const_reference,
-            typename std::vector<T_no_cv>::reference>::type
+        typename std::conditional<std::is_const<value_t>::value,
+            typename std::vector<value_no_cv_t>::const_reference,
+            typename std::vector<value_no_cv_t>::reference>::type
         reference;
 
     /*!
         Constant reference
     */
-    typedef typename std::vector<T_no_cv>::const_reference const_reference;
+    typedef typename std::vector<value_no_cv_t>::const_reference const_reference;
 
     /*!
         Pointer
     */
     typedef
-        typename std::conditional<std::is_const<T>::value,
-            typename std::vector<T_no_cv>::const_pointer,
-            typename std::vector<T_no_cv>::pointer>::type
+        typename std::conditional<std::is_const<value_t>::value,
+            typename std::vector<value_no_cv_t>::const_pointer,
+            typename std::vector<value_no_cv_t>::pointer>::type
         pointer;
 
     /*!
         Constant pointer
     */
-    typedef typename std::vector<T_no_cv>::const_pointer const_pointer;
+    typedef typename std::vector<value_no_cv_t>::const_pointer const_pointer;
 
     ProxyVector();
-    ProxyVector(T *data, std::size_t size);
-    template<typename U = T, typename std::enable_if<std::is_const<U>::value, int>::type = 0>
-    ProxyVector(std::vector<T_no_cv> &&data);
+    ProxyVector(value_t *data, std::size_t size);
+    template<typename other_value_t = value_t, typename std::enable_if<std::is_const<other_value_t>::value, int>::type = 0>
+    ProxyVector(std::vector<value_no_cv_t> &&data);
 
     ProxyVector(const ProxyVector &other);
     ProxyVector(ProxyVector &&other) = default;
@@ -199,18 +199,18 @@ public:
 
     ProxyVector & operator=(const ProxyVector &other);
 
-    void set(T *data, std::size_t size);
-    template<typename U = T, typename std::enable_if<std::is_const<U>::value, int>::type = 0>
-    T_no_cv * set(std::vector<T_no_cv> &&storage);
-    template<typename U = T, typename std::enable_if<std::is_const<U>::value, int>::type = 0>
-    T_no_cv * set(std::size_t size);
+    void set(value_t *data, std::size_t size);
+    template<typename other_value_t = value_t, typename std::enable_if<std::is_const<other_value_t>::value, int>::type = 0>
+    value_no_cv_t * set(std::vector<value_no_cv_t> &&storage);
+    template<typename other_value_t = value_t, typename std::enable_if<std::is_const<other_value_t>::value, int>::type = 0>
+    value_no_cv_t * set(std::size_t size);
 
     void clear();
     void swap(ProxyVector &other);
 
     bool empty() const;
     std::size_t size() const;
-    bool operator==(const ProxyVector& rhs) const;
+    bool operator==(const ProxyVector& other) const;
 
     __PXV_CONST_POINTER__ data() const noexcept;
     __PXV_POINTER__ data() noexcept;
@@ -237,16 +237,16 @@ public:
     __PXV_CONST_ITERATOR__ cend();
 
 private:
-    std::unique_ptr<std::vector<T_no_cv>> m_storage;
+    std::unique_ptr<std::vector<value_no_cv_t>> m_storage;
 
-    T *m_data;
+    value_t *m_data;
     std::size_t m_size;
 
 };
 
 // Constant proxy vector
-template<typename T>
-using ConstProxyVector = ProxyVector<const T>;
+template<typename value_t>
+using ConstProxyVector = ProxyVector<const value_t>;
 
 }
 
