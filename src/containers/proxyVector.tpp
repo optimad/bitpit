@@ -28,7 +28,7 @@
 namespace bitpit {
 
 /*!
-    Creates a new uninitialized iterator
+    Constructor
 */
 template<typename value_t, typename value_no_cv_t>
 ProxyVectorIterator<value_t, value_no_cv_t>::ProxyVectorIterator()
@@ -112,8 +112,7 @@ ProxyVectorIterator<value_t, value_no_cv_t>& ProxyVectorIterator<value_t, value_
 /*!
     Deference operator.
 
-    \result A reference to the element currently pointed to by the
-            iterator.
+    \result A reference to the element currently pointed to by the iterator.
 */
 template<typename value_t, typename value_no_cv_t>
 __PXI_REFERENCE__ ProxyVectorIterator<value_t, value_no_cv_t>::operator*() const
@@ -124,8 +123,7 @@ __PXI_REFERENCE__ ProxyVectorIterator<value_t, value_no_cv_t>::operator*() const
 /*!
     Deference operator.
 
-    \result A reference to the element currently pointed to by the
-            iterator.
+    \result A reference to the element currently pointed to by the iterator.
 */
 template<typename value_t, typename value_no_cv_t>
 __PXI_POINTER__ ProxyVectorIterator<value_t, value_no_cv_t>::operator->() const
@@ -305,7 +303,7 @@ void ProxyVector<value_t>::clear()
 }
 
 /*!
-    Swaps the contents.
+    Swaps the content.
 
     \param other is another container of the same type
 */

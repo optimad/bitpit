@@ -154,7 +154,7 @@ public:
     typedef ProxyVectorIterator<const value_no_cv_t> const_iterator;
 
     /*!
-        Reference
+        Reference type
     */
     typedef
         typename std::conditional<std::is_const<value_t>::value,
@@ -168,7 +168,7 @@ public:
     typedef typename std::vector<value_no_cv_t>::const_reference const_reference;
 
     /*!
-        Pointer
+        Pointer type
     */
     typedef
         typename std::conditional<std::is_const<value_t>::value,
