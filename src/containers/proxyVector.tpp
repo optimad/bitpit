@@ -25,7 +25,7 @@
 #ifndef __BITPIT_PROXY_VECTOR_TPP__
 #define __BITPIT_PROXY_VECTOR_TPP__
 
-namespace bitpit{
+namespace bitpit {
 
 /*!
     Creates a new uninitialized iterator
