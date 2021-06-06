@@ -261,7 +261,10 @@ extern template class ProxyVector<int>;
 extern template class ProxyVector<long>;
 extern template class ProxyVector<double>;
 
-}
+extern template class ProxyVector<const int>;
+extern template class ProxyVector<const long>;
+extern template class ProxyVector<const double>;
 
+}
 
 #endif
