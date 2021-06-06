@@ -38,7 +38,7 @@
 #include <memory>
 #include <vector>
 
-namespace bitpit{
+namespace bitpit {
 
 template<typename PXV_value_t>
 class ProxyVector;
@@ -210,7 +210,8 @@ public:
 
     bool empty() const;
     std::size_t size() const;
-    bool operator==(const ProxyVector& other) const;
+
+    bool operator==(const ProxyVector &other) const;
 
     __PXV_CONST_POINTER__ data() const noexcept;
     __PXV_POINTER__ data() noexcept;
@@ -253,9 +254,9 @@ using ConstProxyVector = ProxyVector<const value_t>;
 // Include the implementation
 #include "proxyVector.tpp"
 
-// Some commonly used ProxyVectors are instantiated explicitly
 namespace bitpit{
 
+// Some commonly used ProxyVectors are instantiated explicitly
 extern template class ProxyVector<int>;
 extern template class ProxyVector<long>;
 extern template class ProxyVector<double>;
