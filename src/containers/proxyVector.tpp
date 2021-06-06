@@ -30,8 +30,8 @@ namespace bitpit{
 /*!
     Creates a new uninitialized iterator
 */
-template<typename T, typename T_no_cv>
-ProxyVectorIterator<T, T_no_cv>::ProxyVectorIterator()
+template<typename value_t, typename value_no_cv_t>
+ProxyVectorIterator<value_t, value_no_cv_t>::ProxyVectorIterator()
     : m_position(nullptr)
 {
 }
@@ -42,8 +42,8 @@ ProxyVectorIterator<T, T_no_cv>::ProxyVectorIterator()
 
     \param other the iterator to exchange values with
 */
-template<typename T, typename T_no_cv>
-void ProxyVectorIterator<T, T_no_cv>::swap(ProxyVectorIterator& other) noexcept
+template<typename value_t, typename value_no_cv_t>
+void ProxyVectorIterator<value_t, value_no_cv_t>::swap(ProxyVectorIterator& other) noexcept
 {
     std::swap(m_position, other.m_position);
 }
@@ -51,8 +51,8 @@ void ProxyVectorIterator<T, T_no_cv>::swap(ProxyVectorIterator& other) noexcept
 /*!
     Pre-increment operator.
 */
-template<typename T, typename T_no_cv>
-ProxyVectorIterator<T, T_no_cv> & ProxyVectorIterator<T, T_no_cv>::operator++()
+template<typename value_t, typename value_no_cv_t>
+ProxyVectorIterator<value_t, value_no_cv_t> & ProxyVectorIterator<value_t, value_no_cv_t>::operator++()
 {
     m_position++;
 
@@ -62,8 +62,8 @@ ProxyVectorIterator<T, T_no_cv> & ProxyVectorIterator<T, T_no_cv>::operator++()
 /*!
     Post-increment operator.
 */
-template<typename T, typename T_no_cv>
-ProxyVectorIterator<T, T_no_cv> ProxyVectorIterator<T, T_no_cv>::operator++(int)
+template<typename value_t, typename value_no_cv_t>
+ProxyVectorIterator<value_t, value_no_cv_t> ProxyVectorIterator<value_t, value_no_cv_t>::operator++(int)
 {
     ProxyVectorIterator tmp(m_position);
 
@@ -75,8 +75,8 @@ ProxyVectorIterator<T, T_no_cv> ProxyVectorIterator<T, T_no_cv>::operator++(int)
 /*!
     Pre-decrement operator.
 */
-template<typename T, typename T_no_cv>
-ProxyVectorIterator<T, T_no_cv> & ProxyVectorIterator<T, T_no_cv>::operator--()
+template<typename value_t, typename value_no_cv_t>
+ProxyVectorIterator<value_t, value_no_cv_t> & ProxyVectorIterator<value_t, value_no_cv_t>::operator--()
 {
     m_position--;
 
@@ -86,8 +86,8 @@ ProxyVectorIterator<T, T_no_cv> & ProxyVectorIterator<T, T_no_cv>::operator--()
 /*!
     Post-decrement operator.
 */
-template<typename T, typename T_no_cv>
-ProxyVectorIterator<T, T_no_cv> ProxyVectorIterator<T, T_no_cv>::operator--(int)
+template<typename value_t, typename value_no_cv_t>
+ProxyVectorIterator<value_t, value_no_cv_t> ProxyVectorIterator<value_t, value_no_cv_t>::operator--(int)
 {
     ProxyVectorIterator tmp(m_position);
 
@@ -101,8 +101,8 @@ ProxyVectorIterator<T, T_no_cv> ProxyVectorIterator<T, T_no_cv>::operator--(int)
 
     \param increment is the increment
 */
-template<typename T, typename T_no_cv>
-ProxyVectorIterator<T, T_no_cv>& ProxyVectorIterator<T, T_no_cv>::operator+=(int increment)
+template<typename value_t, typename value_no_cv_t>
+ProxyVectorIterator<value_t, value_no_cv_t>& ProxyVectorIterator<value_t, value_no_cv_t>::operator+=(int increment)
 {
     m_position += increment;
 
@@ -115,8 +115,8 @@ ProxyVectorIterator<T, T_no_cv>& ProxyVectorIterator<T, T_no_cv>::operator+=(int
     \result A reference to the element currently pointed to by the
             iterator.
 */
-template<typename T, typename T_no_cv>
-__PXI_REFERENCE__ ProxyVectorIterator<T, T_no_cv>::operator*() const
+template<typename value_t, typename value_no_cv_t>
+__PXI_REFERENCE__ ProxyVectorIterator<value_t, value_no_cv_t>::operator*() const
 {
     return *m_position;
 }
@@ -127,8 +127,8 @@ __PXI_REFERENCE__ ProxyVectorIterator<T, T_no_cv>::operator*() const
     \result A reference to the element currently pointed to by the
             iterator.
 */
-template<typename T, typename T_no_cv>
-__PXI_POINTER__ ProxyVectorIterator<T, T_no_cv>::operator->() const
+template<typename value_t, typename value_no_cv_t>
+__PXI_POINTER__ ProxyVectorIterator<value_t, value_no_cv_t>::operator->() const
 {
     return m_position;
 }
@@ -136,19 +136,19 @@ __PXI_POINTER__ ProxyVectorIterator<T, T_no_cv>::operator->() const
 /*!
     Converts the iterator to a const_iterator.
 */
-template<typename T, typename T_no_cv>
-template<typename U, typename std::enable_if<!std::is_const<U>::value, int>::type>
-ProxyVectorIterator<T, T_no_cv>::operator ProxyVectorIterator<const U>() const
+template<typename value_t, typename value_no_cv_t>
+template<typename other_value_t, typename std::enable_if<!std::is_const<other_value_t>::value, int>::type>
+ProxyVectorIterator<value_t, value_no_cv_t>::operator ProxyVectorIterator<const other_value_t>() const
 {
-    return ProxyVectorIterator<const U>(m_position);
+    return ProxyVectorIterator<const other_value_t>(m_position);
 }
 
 /*!
     Creates a new iterator and initializes it with the position of
     the const base iterator recevied in input.
 */
-template<typename T, typename T_no_cv>
-ProxyVectorIterator<T, T_no_cv>::ProxyVectorIterator(T *position)
+template<typename value_t, typename value_no_cv_t>
+ProxyVectorIterator<value_t, value_no_cv_t>::ProxyVectorIterator(value_t *position)
     : m_position(position)
 {
 }
@@ -159,8 +159,8 @@ ProxyVectorIterator<T, T_no_cv>::ProxyVectorIterator(T *position)
     \param other is the iterator from which the distance will be evaluated
     \result The distance between the specified iterator.
 */
-template<typename T, typename T_no_cv>
-std::size_t ProxyVectorIterator<T, T_no_cv>::operator-(const ProxyVectorIterator &other)
+template<typename value_t, typename value_no_cv_t>
+std::size_t ProxyVectorIterator<value_t, value_no_cv_t>::operator-(const ProxyVectorIterator &other)
 {
     return (m_position - other.m_position);
 }
@@ -168,8 +168,8 @@ std::size_t ProxyVectorIterator<T, T_no_cv>::operator-(const ProxyVectorIterator
 /*!
     Constructor
 */
-template<typename T>
-ProxyVector<T>::ProxyVector()
+template<typename value_t>
+ProxyVector<value_t>::ProxyVector()
     : m_data(nullptr), m_size(0)
 {
 }
@@ -180,8 +180,8 @@ ProxyVector<T>::ProxyVector()
     \param size is the number elements contained in the data
     \param data a pointer to the data
 */
-template<typename T>
-ProxyVector<T>::ProxyVector(T *data, std::size_t size)
+template<typename value_t>
+ProxyVector<value_t>::ProxyVector(value_t *data, std::size_t size)
     : m_data(data), m_size(size)
 {
 }
@@ -191,10 +191,10 @@ ProxyVector<T>::ProxyVector(T *data, std::size_t size)
 
     \param storage is the storage that contains the data
 */
-template<typename T>
-template<typename U, typename std::enable_if<std::is_const<U>::value, int>::type>
-ProxyVector<T>::ProxyVector(std::vector<T_no_cv> &&storage)
-    : m_storage(std::unique_ptr<std::vector<T_no_cv>>(new std::vector<T_no_cv>(std::move(storage)))),
+template<typename value_t>
+template<typename other_value_t, typename std::enable_if<std::is_const<other_value_t>::value, int>::type>
+ProxyVector<value_t>::ProxyVector(std::vector<value_no_cv_t> &&storage)
+    : m_storage(std::unique_ptr<std::vector<value_no_cv_t>>(new std::vector<value_no_cv_t>(std::move(storage)))),
       m_data(m_storage->data()), m_size(m_storage->size())
 {
 }
@@ -202,15 +202,15 @@ ProxyVector<T>::ProxyVector(std::vector<T_no_cv> &&storage)
 /*!
     Copy constructor.
 */
-template<typename T>
-ProxyVector<T>::ProxyVector(const ProxyVector &other)
+template<typename value_t>
+ProxyVector<value_t>::ProxyVector(const ProxyVector &other)
     : m_size(other.m_size)
 {
     if (other.m_storage) {
         if (m_storage) {
             m_storage->assign(other.m_storage->begin(), other.m_storage->end());
         } else {
-            m_storage = std::unique_ptr<std::vector<T_no_cv>>(new std::vector<T_no_cv>(*(other.m_storage)));
+            m_storage = std::unique_ptr<std::vector<value_no_cv_t>>(new std::vector<value_no_cv_t>(*(other.m_storage)));
         }
 
         if (other.m_data == other.m_storage->data()) {
@@ -231,8 +231,8 @@ ProxyVector<T>::ProxyVector(const ProxyVector &other)
     Assigns new contents to the container, replacing its current contents,
     and modifying its size accordingly.
 */
-template<typename T>
-ProxyVector<T> & ProxyVector<T>::operator=(const ProxyVector &other)
+template<typename value_t>
+ProxyVector<value_t> & ProxyVector<value_t>::operator=(const ProxyVector &other)
 {
     if (this != &other) {
         ProxyVector temporary(other);
@@ -248,8 +248,8 @@ ProxyVector<T> & ProxyVector<T>::operator=(const ProxyVector &other)
     \param data a pointer to the data
     \param size is the number elements contained in the data
 */
-template<typename T>
-void ProxyVector<T>::set(T *data, std::size_t size)
+template<typename value_t>
+void ProxyVector<value_t>::set(value_t *data, std::size_t size)
 {
     m_data = data;
     m_size = size;
@@ -260,11 +260,11 @@ void ProxyVector<T>::set(T *data, std::size_t size)
 
     \param storage is the storage that contains the data
 */
-template<typename T>
-template<typename U, typename std::enable_if<std::is_const<U>::value, int>::type>
-typename ProxyVector<T>::T_no_cv * ProxyVector<T>::set(std::vector<T_no_cv> &&storage)
+template<typename value_t>
+template<typename other_value_t, typename std::enable_if<std::is_const<other_value_t>::value, int>::type>
+typename ProxyVector<value_t>::value_no_cv_t * ProxyVector<value_t>::set(std::vector<value_no_cv_t> &&storage)
 {
-    m_storage = std::unique_ptr<std::vector<T_no_cv>>(new std::vector<T_no_cv>(std::move(storage)));
+    m_storage = std::unique_ptr<std::vector<value_no_cv_t>>(new std::vector<value_no_cv_t>(std::move(storage)));
     m_data    = m_storage->data();
     m_size    = m_storage->size();
 
@@ -277,12 +277,12 @@ typename ProxyVector<T>::T_no_cv * ProxyVector<T>::set(std::vector<T_no_cv> &&st
     \param size is the number of elements the storage should be able to
     contain
 */
-template<typename T>
-template<typename U, typename std::enable_if<std::is_const<U>::value, int>::type>
-typename ProxyVector<T>::T_no_cv * ProxyVector<T>::set(std::size_t size)
+template<typename value_t>
+template<typename other_value_t, typename std::enable_if<std::is_const<other_value_t>::value, int>::type>
+typename ProxyVector<value_t>::value_no_cv_t * ProxyVector<value_t>::set(std::size_t size)
 {
     if (!m_storage) {
-        m_storage = std::unique_ptr<std::vector<T_no_cv>>(new std::vector<T_no_cv>(size));
+        m_storage = std::unique_ptr<std::vector<value_no_cv_t>>(new std::vector<value_no_cv_t>(size));
     } else {
         m_storage->resize(size);
     }
@@ -295,8 +295,8 @@ typename ProxyVector<T>::T_no_cv * ProxyVector<T>::set(std::size_t size)
 /*!
     Clear content.
 */
-template<typename T>
-void ProxyVector<T>::clear()
+template<typename value_t>
+void ProxyVector<value_t>::clear()
 {
     m_data = nullptr;
     m_size = 0;
@@ -309,8 +309,8 @@ void ProxyVector<T>::clear()
 
     \param other is another container of the same type
 */
-template<typename T>
-void ProxyVector<T>::swap(ProxyVector &other)
+template<typename value_t>
+void ProxyVector<value_t>::swap(ProxyVector &other)
 {
     std::swap(m_data, other.m_data);
     std::swap(m_size, other.m_size);
@@ -323,10 +323,10 @@ void ProxyVector<T>::swap(ProxyVector &other)
 
     \result true if the containers are equal, false otherwise.
 */
-template<typename T>
-bool ProxyVector<T>::operator==(const ProxyVector& rhs) const
+template<typename value_t>
+bool ProxyVector<value_t>::operator==(const ProxyVector& other) const
 {
-    return m_size == rhs.m_size && m_data == rhs.m_data && m_storage == rhs.m_storage;
+    return m_size == other.m_size && m_data == other.m_data && m_storage == other.m_storage;
 }
 
 /*!
@@ -334,8 +334,8 @@ bool ProxyVector<T>::operator==(const ProxyVector& rhs) const
 
     \result true if the container size is 0, false otherwise.
 */
-template<typename T>
-bool ProxyVector<T>::empty() const
+template<typename value_t>
+bool ProxyVector<value_t>::empty() const
 {
     return size() == 0;
 }
@@ -345,8 +345,8 @@ bool ProxyVector<T>::empty() const
 
     \result The number of elements in the container.
 */
-template<typename T>
-std::size_t ProxyVector<T>::size() const
+template<typename value_t>
+std::size_t ProxyVector<value_t>::size() const
 {
     return m_size;
 }
@@ -358,8 +358,8 @@ std::size_t ProxyVector<T>::size() const
     \result A direct constant pointer to the memory where the elments are
     stored.
 */
-template<typename T>
-__PXV_CONST_POINTER__ ProxyVector<T>::data() const noexcept
+template<typename value_t>
+__PXV_CONST_POINTER__ ProxyVector<value_t>::data() const noexcept
 {
     return m_data;
 }
@@ -369,8 +369,8 @@ __PXV_CONST_POINTER__ ProxyVector<T>::data() const noexcept
 
     \result A direct pointer to the memory where the elments are stored.
 */
-template<typename T>
-__PXV_POINTER__ ProxyVector<T>::data() noexcept
+template<typename value_t>
+__PXV_POINTER__ ProxyVector<value_t>::data() noexcept
 {
     return m_data;
 }
@@ -381,8 +381,8 @@ __PXV_POINTER__ ProxyVector<T>::data() noexcept
     \param n is the position of the requested element
     \result A constant reference to the specified element.
 */
-template<typename T>
-__PXV_CONST_REFERENCE__ ProxyVector<T>::operator[](std::size_t n) const
+template<typename value_t>
+__PXV_CONST_REFERENCE__ ProxyVector<value_t>::operator[](std::size_t n) const
 {
     return m_data[n];
 }
@@ -393,8 +393,8 @@ __PXV_CONST_REFERENCE__ ProxyVector<T>::operator[](std::size_t n) const
     \param n is the position of the requested element
     \result A reference to the specified element.
 */
-template<typename T>
-__PXV_REFERENCE__ ProxyVector<T>::operator[](std::size_t n)
+template<typename value_t>
+__PXV_REFERENCE__ ProxyVector<value_t>::operator[](std::size_t n)
 {
     return m_data[n];
 }
@@ -405,8 +405,8 @@ __PXV_REFERENCE__ ProxyVector<T>::operator[](std::size_t n)
     \param n is the position of the requested element
     \result A constant reference to the specified element.
 */
-template<typename T>
-__PXV_CONST_REFERENCE__ ProxyVector<T>::at(std::size_t n) const
+template<typename value_t>
+__PXV_CONST_REFERENCE__ ProxyVector<value_t>::at(std::size_t n) const
 {
     return m_data[n];
 }
@@ -417,8 +417,8 @@ __PXV_CONST_REFERENCE__ ProxyVector<T>::at(std::size_t n) const
     \param n is the position of the requested element
     \result A reference to the specified element.
 */
-template<typename T>
-__PXV_REFERENCE__ ProxyVector<T>::at(std::size_t n)
+template<typename value_t>
+__PXV_REFERENCE__ ProxyVector<value_t>::at(std::size_t n)
 {
     return m_data[n];
 }
@@ -428,8 +428,8 @@ __PXV_REFERENCE__ ProxyVector<T>::at(std::size_t n)
 
     \result A constant reference to the first element in the container.
 */
-template<typename T>
-__PXV_CONST_REFERENCE__ ProxyVector<T>::front() const
+template<typename value_t>
+__PXV_CONST_REFERENCE__ ProxyVector<value_t>::front() const
 {
     return m_data[0];
 }
@@ -439,8 +439,8 @@ __PXV_CONST_REFERENCE__ ProxyVector<T>::front() const
 
     \result A reference to the first element in the container.
 */
-template<typename T>
-__PXV_REFERENCE__ ProxyVector<T>::front()
+template<typename value_t>
+__PXV_REFERENCE__ ProxyVector<value_t>::front()
 {
     return m_data[0];
 }
@@ -450,8 +450,8 @@ __PXV_REFERENCE__ ProxyVector<T>::front()
 
     \result A constant reference to the last element in the container.
 */
-template<typename T>
-__PXV_CONST_REFERENCE__ ProxyVector<T>::back() const
+template<typename value_t>
+__PXV_CONST_REFERENCE__ ProxyVector<value_t>::back() const
 {
     return m_data[m_size - 1];
 }
@@ -461,8 +461,8 @@ __PXV_CONST_REFERENCE__ ProxyVector<T>::back() const
 
     \result A reference to the last element in the container.
 */
-template<typename T>
-__PXV_REFERENCE__ ProxyVector<T>::back()
+template<typename value_t>
+__PXV_REFERENCE__ ProxyVector<value_t>::back()
 {
     return m_data[m_size - 1];
 }
@@ -472,8 +472,8 @@ __PXV_REFERENCE__ ProxyVector<T>::back()
 
     \result An iterator pointing to the first element in the container.
 */
-template<typename T>
-__PXV_ITERATOR__ ProxyVector<T>::begin()
+template<typename value_t>
+__PXV_ITERATOR__ ProxyVector<value_t>::begin()
 {
     return iterator(m_data);
 }
@@ -483,8 +483,8 @@ __PXV_ITERATOR__ ProxyVector<T>::begin()
 
     \result An iterator referring to the past-the-end element in the container.
 */
-template<typename T>
-__PXV_ITERATOR__ ProxyVector<T>::end()
+template<typename value_t>
+__PXV_ITERATOR__ ProxyVector<value_t>::end()
 {
     return iterator(m_data + m_size);
 }
@@ -494,8 +494,8 @@ __PXV_ITERATOR__ ProxyVector<T>::end()
 
     \result A constant iterator pointing to the first element in the container.
 */
-template<typename T>
-__PXV_CONST_ITERATOR__ ProxyVector<T>::begin() const
+template<typename value_t>
+__PXV_CONST_ITERATOR__ ProxyVector<value_t>::begin() const
 {
     return const_iterator(m_data);
 }
@@ -507,8 +507,8 @@ __PXV_CONST_ITERATOR__ ProxyVector<T>::begin() const
     \result A constant iterator referring to the past-the-end element in the
     container.
 */
-template<typename T>
-__PXV_CONST_ITERATOR__ ProxyVector<T>::end() const
+template<typename value_t>
+__PXV_CONST_ITERATOR__ ProxyVector<value_t>::end() const
 {
     return const_iterator(m_data + m_size);
 }
@@ -518,8 +518,8 @@ __PXV_CONST_ITERATOR__ ProxyVector<T>::end() const
 
     \result A constant iterator pointing to the first element in the container.
 */
-template<typename T>
-__PXV_CONST_ITERATOR__ ProxyVector<T>::cbegin()
+template<typename value_t>
+__PXV_CONST_ITERATOR__ ProxyVector<value_t>::cbegin()
 {
     return const_iterator(m_data);
 }
@@ -531,8 +531,8 @@ __PXV_CONST_ITERATOR__ ProxyVector<T>::cbegin()
     \result A constant iterator referring to the past-the-end element in the
     container.
 */
-template<typename T>
-__PXV_CONST_ITERATOR__ ProxyVector<T>::cend()
+template<typename value_t>
+__PXV_CONST_ITERATOR__ ProxyVector<value_t>::cend()
 {
     return const_iterator(m_data + m_size);
 }
