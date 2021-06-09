@@ -387,12 +387,15 @@ std::array<double,3> SegmentationKernel::computeSegmentNormal( const SurfUnstruc
  */
 std::array<double,3> SegmentationKernel::computeSegmentEdgeNormal( const SurfUnstructured::CellConstIterator &segmentIterator, int edge ) const {
 
-    long neighId = segmentIterator->getAdjacency(edge);
-    SurfUnstructured::CellConstIterator neighIterator = m_surface->getCellConstIterator(neighId);
-
     std::array<double,3> normal = computeSegmentNormal(segmentIterator);
-    normal += computeSegmentNormal(neighIterator);
-    normal /= norm2(normal);
+
+    if (segmentIterator->getAdjacencyCount(edge) > 0) {
+        long neighId = segmentIterator->getAdjacency(edge);
+        SurfUnstructured::CellConstIterator neighIterator = m_surface->getCellConstIterator(neighId);
+
+        normal += computeSegmentNormal(neighIterator);
+        normal /= norm2(normal);
+    }
 
     return normal;
 }
