@@ -3215,11 +3215,6 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
                     }
                 }
             }
-
-            // Cell adjacencies are up-to-date
-            if (duplicateCellsReceivedAdjacencies.count(cellId)) {
-                unsetCellAlterationFlags(cellId, FLAG_ADJACENCIES_DIRTY);
-            }
         }
 
         // Link received cells with the initial cells
