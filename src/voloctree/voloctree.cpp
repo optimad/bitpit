@@ -588,7 +588,8 @@ void VolOctree::setBoundingBox()
 #if BITPIT_ENABLE_MPI==1
 	// The tree is only evaluating the bounding box of the internal octants,
 	// we need to consider also ghosts cells.
-	for (auto ghostCellItr = ghostCellBegin(); ghostCellItr != ghostCellEnd(); ++ghostCellItr) {
+	CellConstIterator endItr = ghostCellConstEnd();
+	for (CellConstIterator ghostCellItr = ghostCellConstBegin(); ghostCellItr != endItr; ++ghostCellItr) {
 		ConstProxyVector<long> ghostVertexIds = ghostCellItr->getVertexIds();
 		int nGhostCellVertices = ghostVertexIds.size();
 		for (int i = 0; i < nGhostCellVertices; ++i) {
@@ -1021,10 +1022,13 @@ std::vector<adaption::Info> VolOctree::_adaptionPrepare(bool trackAdaption)
 #if BITPIT_ENABLE_MPI==1
 		// Ghost cells will be removed
 		if (isPartitioned() && getGhostCellCount() > 0) {
+			CellConstIterator beginItr = ghostCellConstBegin();
+			CellConstIterator endItr   = ghostCellConstEnd();
+
 			std::size_t adaptionInfoId = adaptionData.create(adaption::TYPE_DELETION, adaption::ENTITY_CELL, currentRank);
 			adaption::Info &adaptionInfo = adaptionData[adaptionInfoId];
 			adaptionInfo.previous.reserve(getGhostCellCount());
-			for (auto itr = ghostCellBegin(); itr != ghostCellEnd(); ++itr) {
+			for (CellConstIterator itr = beginItr; itr != endItr; ++itr) {
 				adaptionInfo.previous.emplace_back();
 				long &deletedGhostCellId = adaptionInfo.previous.back();
 				deletedGhostCellId = itr.getId();

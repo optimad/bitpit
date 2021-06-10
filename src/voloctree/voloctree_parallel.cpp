@@ -259,9 +259,12 @@ void VolOctree::computePartitioningOctantWeights(const std::unordered_map<long, 
 		return;
 	}
 
+	CellConstIterator beginItr = internalCellConstBegin();
+	CellConstIterator endItr   = internalCellConstEnd();
+
 	std::size_t nOctants = m_tree->getNumOctants();
 	m_partitioningOctantWeights = std::unique_ptr<std::vector<double>>(new std::vector<double>(nOctants, defaultWeight));
-	for (auto cellItr = internalCellConstBegin(); cellItr != internalCellConstEnd(); ++cellItr) {
+	for (CellConstIterator cellItr = beginItr; cellItr != endItr; ++cellItr) {
 		long cellId = cellItr.getId();
 		auto weightItr = cellWeights.find(cellId);
 		if (weightItr != cellWeights.end()) {
