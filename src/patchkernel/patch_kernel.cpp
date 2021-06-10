@@ -6103,7 +6103,7 @@ void PatchKernel::resetInterfaceAlterationFlags(long id, AlterationFlags flags)
 */
 void PatchKernel::setInterfaceAlterationFlags(AlterationFlags flags)
 {
-	for (CellIterator itr = cellBegin(); itr != cellEnd(); ++itr) {
+	for (InterfaceIterator itr = interfaceBegin(); itr != interfaceEnd(); ++itr) {
 		setInterfaceAlterationFlags(itr.getId(), flags);
 	}
 }
