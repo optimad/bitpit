@@ -54,7 +54,7 @@ class PiercedStorageIterator
     : protected PiercedKernelIterator<id_t>
 {
 
-friend class PiercedStorageIterator<value_no_cv_t, id_t, value_no_cv_t>;
+friend class PiercedStorageIterator<typename std::add_const<value_t>::type, id_t, value_no_cv_t>;
 
 template<typename PS_value_t, typename PS_id_t>
 friend class PiercedStorage;
@@ -131,6 +131,9 @@ public:
     // Constructors
     PiercedStorageIterator();
 
+    template<typename other_value_t, typename std::enable_if<std::is_const<value_t>::value && !std::is_const<other_value_t>::value && std::is_same<other_value_t, typename std::remove_cv<value_t>::type>::value, int>::type = 0>
+    PiercedStorageIterator(const PiercedStorageIterator<other_value_t, id_t, value_no_cv_t> &other);
+
     // General methods
     void swap(PiercedStorageIterator& other) noexcept;
 
@@ -154,8 +157,8 @@ public:
     __PSI_REFERENCE__ operator*() const;
     __PSI_POINTER__ operator->() const;
 
-    template<typename U = value_t, typename std::enable_if<!std::is_const<U>::value, int>::type = 0>
-    operator PiercedStorageIterator<const U, id_t>() const;
+    template<typename other_value_t, typename std::enable_if<std::is_const<value_t>::value && !std::is_const<other_value_t>::value && std::is_same<other_value_t, typename std::remove_cv<value_t>::type>::value, int>::type = 0>
+    PiercedStorageIterator & operator=(const PiercedStorageIterator<other_value_t, id_t, value_no_cv_t> &other);
 
     /**
     * Two-way comparison.
