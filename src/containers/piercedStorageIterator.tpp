@@ -36,6 +36,19 @@ PiercedStorageIterator<value_t, id_t, value_no_cv_t>::PiercedStorageIterator()
 {
 }
 
+/*!
+    Creates a new constant iterator pointing to the same position of the
+    specified iterator.
+
+    \param other is the iterator that will be copied
+*/
+template<typename value_t, typename id_t, typename value_no_cv_t>
+template<typename other_value_t, typename std::enable_if<std::is_const<value_t>::value && !std::is_const<other_value_t>::value && std::is_same<other_value_t, typename std::remove_cv<value_t>::type>::value, int>::type>
+PiercedStorageIterator<value_t, id_t, value_no_cv_t>::PiercedStorageIterator(const PiercedStorageIterator<other_value_t, id_t, value_no_cv_t> &other)
+    : PiercedStorageIterator(other.m_storage, other.getRawIndex())
+{
+}
+
 /**
 * Creates a new iterator and initializes it with the position of the const
 * base iterator recevied in input.
@@ -203,16 +216,20 @@ __PSI_POINTER__ PiercedStorageIterator<value_t, id_t, value_no_cv_t>::operator->
     return m_storage->rawData(rawIndex);
 }
 
-/**
-* Converts the iterator to a const_iterator.
+/*!
+* Copy assignment operator to create a constant iterator from a non-constant
+* one.
+*
+* \param other is the iterator that will be copied
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
-template<typename U, typename std::enable_if<!std::is_const<U>::value, int>::type>
-PiercedStorageIterator<value_t, id_t, value_no_cv_t>::operator PiercedStorageIterator<const U, id_t>() const
+template<typename other_value_t, typename std::enable_if<std::is_const<value_t>::value && !std::is_const<other_value_t>::value && std::is_same<other_value_t, typename std::remove_cv<value_t>::type>::value, int>::type>
+PiercedStorageIterator<value_t, id_t, value_no_cv_t> & PiercedStorageIterator<value_t, id_t, value_no_cv_t>::operator=(const PiercedStorageIterator<other_value_t, id_t, value_no_cv_t> &other)
 {
-    std::size_t rawIndex = getRawIndex();
+    PiercedKernelIterator<id_t>::operator=(other);
+    m_storage = other.m_storage;
 
-    return PiercedStorageIterator<const U, id_t>(m_storage, rawIndex);
+    return *this;
 }
 
 }
