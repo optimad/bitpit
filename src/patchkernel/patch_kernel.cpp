@@ -1079,7 +1079,8 @@ void PatchKernel::write(VTKWriteMode mode)
 	int vtkVertexCount = 0;
 	m_vtkVertexMap.unsetKernel(true);
 	m_vtkVertexMap.setStaticKernel(&m_vertices);
-	for (VertexConstIterator itr = vertexConstBegin(); itr != vertexConstEnd(); ++itr) {
+	VertexConstIterator endItr = vertexConstEnd();
+	for (VertexConstIterator itr = vertexConstBegin(); itr != endItr; ++itr) {
 		std::size_t vertexRawId = itr.getRawIndex();
 		if (vertexWriteFlag.rawAt(vertexRawId)) {
 			m_vtkVertexMap.rawAt(vertexRawId) = vtkVertexCount++;
@@ -1352,8 +1353,11 @@ void PatchKernel::setVertexAutoIndexing(bool enabled)
 	}
 
 	if (enabled) {
+		VertexConstIterator beginItr = m_vertices.cbegin();
+		VertexConstIterator endItr   = m_vertices.cend();
+
 		m_vertexIdGenerator = std::unique_ptr<IndexGenerator<long>>(new IndexGenerator<long>());
-		for (auto itr = m_vertices.begin(); itr != m_vertices.end(); ++itr) {
+		for (VertexConstIterator itr = beginItr; itr != endItr; ++itr) {
 			m_vertexIdGenerator->setAssigned(itr.getId());
 		}
 	} else {
@@ -1860,6 +1864,9 @@ long PatchKernel::countOrphanVertices() const
 */
 std::vector<long> PatchKernel::findOrphanVertices()
 {
+	VertexConstIterator beginItr = m_vertices.cbegin();
+	VertexConstIterator endItr   = m_vertices.cend();
+
 	// Detect used vertices
 	PiercedStorage<bool, long> vertexUsedFlag(1, &m_vertices);
 	vertexUsedFlag.fill(false);
@@ -1874,7 +1881,7 @@ std::vector<long> PatchKernel::findOrphanVertices()
 
 	// Count the orphan vertices
 	std::size_t nOrhpanVertices = 0;
-	for (auto itr = m_vertices.begin(); itr != m_vertices.end(); ++itr) {
+	for (VertexConstIterator itr = beginItr; itr != endItr; ++itr) {
 		std::size_t vertexRawIndex = itr.getRawIndex();
 		if (!vertexUsedFlag.rawAt(vertexRawIndex)) {
 			++nOrhpanVertices;
@@ -1885,7 +1892,7 @@ std::vector<long> PatchKernel::findOrphanVertices()
 	std::vector<long> orhpanVertices(nOrhpanVertices);
 
 	std::size_t orphanVertexIndex = 0;
-	for (auto itr = m_vertices.begin(); itr != m_vertices.end(); ++itr) {
+	for (VertexConstIterator itr = beginItr; itr != endItr; ++itr) {
 		std::size_t vertexRawIndex = itr.getRawIndex();
 		if (!vertexUsedFlag.rawAt(vertexRawIndex)) {
 			orhpanVertices[orphanVertexIndex] = itr.getId();
@@ -2099,8 +2106,11 @@ void PatchKernel::setCellAutoIndexing(bool enabled)
 	}
 
 	if (enabled) {
+		CellConstIterator beginItr = m_cells.cbegin();
+		CellConstIterator endItr   = m_cells.cend();
+
 		m_cellIdGenerator = std::unique_ptr<IndexGenerator<long>>(new IndexGenerator<long>());
-		for (auto itr = m_cells.begin(); itr != m_cells.end(); ++itr) {
+		for (CellConstIterator itr = beginItr; itr != endItr; ++itr) {
 			m_cellIdGenerator->setAssigned(itr.getId());
 		}
 	} else {
@@ -3689,8 +3699,11 @@ void PatchKernel::setInterfaceAutoIndexing(bool enabled)
 	}
 
 	if (enabled) {
+		InterfaceConstIterator beginItr = m_interfaces.cbegin();
+		InterfaceConstIterator endItr   = m_interfaces.cend();
+
 		m_interfaceIdGenerator = std::unique_ptr<IndexGenerator<long>>(new IndexGenerator<long>());
-		for (auto itr = m_interfaces.begin(); itr != m_interfaces.end(); ++itr) {
+		for (InterfaceConstIterator itr = beginItr; itr != endItr; ++itr) {
 			m_interfaceIdGenerator->setAssigned(itr.getId());
 		}
 	} else {
@@ -4148,7 +4161,8 @@ long PatchKernel::countFreeInterfaces() const
 long PatchKernel::countOrphanInterfaces() const
 {
 	long nOrphanInterfaces = 0;
-	for (InterfaceConstIterator itr = interfaceConstBegin(); itr != interfaceConstEnd(); ++itr) {
+	InterfaceConstIterator endItr = interfaceConstEnd();
+	for (InterfaceConstIterator itr = interfaceConstBegin(); itr != endItr; ++itr) {
 		const long interfaceId = itr.getId();
 		if (isInterfaceOrphan(interfaceId)) {
 			++nOrphanInterfaces;
@@ -4169,7 +4183,8 @@ long PatchKernel::countOrphanInterfaces() const
 std::vector<long> PatchKernel::findOrphanInterfaces() const
 {
 	std::vector<long> orphanInterfaces;
-	for (InterfaceConstIterator itr = interfaceConstBegin(); itr != interfaceConstEnd(); ++itr) {
+	InterfaceConstIterator endItr = interfaceConstEnd();
+	for (InterfaceConstIterator itr = interfaceConstBegin(); itr != endItr; ++itr) {
 		const long interfaceId = itr.getId();
 		if (isInterfaceOrphan(interfaceId)) {
 			orphanInterfaces.push_back(interfaceId);
@@ -6131,7 +6146,8 @@ void PatchKernel::resetCellAlterationFlags(long id, AlterationFlags flags)
 */
 void PatchKernel::setCellAlterationFlags(AlterationFlags flags)
 {
-	for (CellIterator itr = cellBegin(); itr != cellEnd(); ++itr) {
+	CellConstIterator endItr = cellConstEnd();
+	for (CellConstIterator itr = cellConstBegin(); itr != endItr; ++itr) {
 		setCellAlterationFlags(itr.getId(), flags);
 	}
 }
@@ -6209,7 +6225,8 @@ void PatchKernel::resetInterfaceAlterationFlags(long id, AlterationFlags flags)
 */
 void PatchKernel::setInterfaceAlterationFlags(AlterationFlags flags)
 {
-	for (InterfaceIterator itr = interfaceBegin(); itr != interfaceEnd(); ++itr) {
+	InterfaceConstIterator endItr = interfaceConstEnd();
+	for (InterfaceConstIterator itr = interfaceConstBegin(); itr != endItr; ++itr) {
 		setInterfaceAlterationFlags(itr.getId(), flags);
 	}
 }
@@ -7096,7 +7113,8 @@ void PatchKernel::flushData(std::fstream &stream, const std::string &name, VTKFo
 	BITPIT_UNUSED(format);
 
 	if (name == "Points") {
-		for (VertexConstIterator itr = vertexConstBegin(); itr != vertexConstEnd(); ++itr) {
+		VertexConstIterator endItr = vertexConstEnd();
+		for (VertexConstIterator itr = vertexConstBegin(); itr != endItr; ++itr) {
 			std::size_t vertexRawId = itr.getRawIndex();
 			long vertexVTKId = m_vtkVertexMap.rawAt(vertexRawId);
 			if (vertexVTKId != Vertex::NULL_ID) {
@@ -7214,7 +7232,8 @@ void PatchKernel::flushData(std::fstream &stream, const std::string &name, VTKFo
 			genericIO::flushBINARY(stream, cell.getPID());
 		}
 	} else if (name == "vertexIndex") {
-		for (VertexConstIterator itr = vertexConstBegin(); itr != vertexConstEnd(); ++itr) {
+		VertexConstIterator endItr = vertexConstEnd();
+		for (VertexConstIterator itr = vertexConstBegin(); itr != endItr; ++itr) {
 			std::size_t vertexRawId = itr.getRawIndex();
 			long vertexVTKId = m_vtkVertexMap.rawAt(vertexRawId);
 			if (vertexVTKId != Vertex::NULL_ID) {
@@ -7233,7 +7252,8 @@ void PatchKernel::flushData(std::fstream &stream, const std::string &name, VTKFo
 			genericIO::flushBINARY(stream, getCellRank(cell.getId()));
 		}
 	} else if (name == "vertexRank") {
-		for (VertexConstIterator itr = vertexConstBegin(); itr != vertexConstEnd(); ++itr) {
+		VertexConstIterator endItr = vertexConstEnd();
+		for (VertexConstIterator itr = vertexConstBegin(); itr != endItr; ++itr) {
 			std::size_t vertexRawId = itr.getRawIndex();
 			long vertexVTKId = m_vtkVertexMap.rawAt(vertexRawId);
 			if (vertexVTKId != Vertex::NULL_ID) {
