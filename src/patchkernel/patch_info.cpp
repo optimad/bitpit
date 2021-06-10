@@ -214,9 +214,12 @@ void PatchNumberingInfo::_extract()
 
 	// Evalaute the consecutive id of the internal cells
 	if (m_patch->getInternalCellCount() > 0) {
+		PatchKernel::CellConstIterator beginItr = m_patch->internalCellConstBegin();
+		PatchKernel::CellConstIterator endItr   = m_patch->internalCellConstEnd();
+
 		std::size_t index = 0;
 		std::vector<std::pair<long, long>> nativeIds(m_patch->getInternalCellCount());
-		for (auto itr = m_patch->internalCellConstBegin(); itr != m_patch->internalCellConstEnd(); ++itr) {
+		for (PatchKernel::CellConstIterator itr = beginItr; itr != endItr; ++itr) {
 			long id = itr.getId();
 			long nativeId = m_patch->_getCellNativeIndex(id);
 

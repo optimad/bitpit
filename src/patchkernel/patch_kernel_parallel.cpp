@@ -1673,8 +1673,11 @@ double PatchKernel::evalPartitioningUnbalance(const std::unordered_map<long, dou
 	// Evaluate partition weight
 	double partitionWeight;
 	if (!cellWeights.empty()) {
+		CellConstIterator beginItr = internalCellConstBegin();
+		CellConstIterator endItr   = internalCellConstEnd();
+
 		partitionWeight = 0.;
-		for (auto cellItr = internalCellConstBegin(); cellItr != internalCellConstEnd(); ++cellItr) {
+		for (CellConstIterator cellItr = beginItr; cellItr != endItr; ++cellItr) {
 			long cellId = cellItr.getId();
 
 			double cellWeight;
@@ -2759,7 +2762,8 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
     // We may received cells that connect to the existing mesh through one
     // of the faces that are now borders. Marking those border interfaces as
     // dangling allows to delete them and create new internal interfaces.
-    for (auto itr = ghostCellConstBegin(); itr != ghostCellConstEnd(); ++itr) {
+    CellConstIterator endItr = ghostCellConstEnd();
+    for (CellConstIterator itr = ghostCellConstBegin(); itr != endItr; ++itr) {
         const Cell &cell = *itr;
         const long *interfaces = cell.getInterfaces();
         const int nCellInterfaces = cell.getInterfaceCount();
@@ -3846,9 +3850,12 @@ void PatchKernel::updateGhostVertexExchangeInfo()
 	// List of vertices that are no more ghosts.
 	//
 	// Previous ghost vertices will be converted to internal vertices.
+	VertexConstIterator previousBeginItr = ghostVertexConstBegin();
+	VertexConstIterator previousEndItr   = ghostVertexConstEnd();
+
 	std::vector<long> previousGhosts;
 	previousGhosts.reserve(getGhostVertexCount());
-	for (VertexConstIterator vertexItr = ghostVertexBegin(); vertexItr != ghostVertexEnd(); ++vertexItr) {
+	for (VertexConstIterator vertexItr = previousBeginItr; vertexItr != previousEndItr; ++vertexItr) {
 		long vertexId = vertexItr.getId();
 		if (exchangeVertexOwners.count(vertexId) != 0) {
 			continue;
@@ -3886,7 +3893,10 @@ void PatchKernel::updateGhostVertexExchangeInfo()
 	}
 
 	// Set the owner of the existing ghosts
-	for (VertexConstIterator vertexItr = ghostVertexBegin(); vertexItr != ghostVertexEnd(); ++vertexItr) {
+	VertexConstIterator beginItr = ghostVertexConstEnd();
+	VertexConstIterator endItr   = ghostVertexConstEnd();
+
+	for (VertexConstIterator vertexItr = beginItr; vertexItr != endItr; ++vertexItr) {
 		long vertexId = vertexItr->getId();
 		int vertexOwner = exchangeVertexOwners.at(vertexId);
 		setGhostVertexOwner(vertexId, vertexOwner);
