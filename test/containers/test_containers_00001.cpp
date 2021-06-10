@@ -431,6 +431,100 @@ int subtest_001()
 }
 
 /*!
+* Subtest 002
+*
+* Testing basic PiercedVectorIterator features.
+*/
+int subtest_002()
+{
+	// Creating an emtpy PiercedVector
+	std::cout << std::endl << "::: Creating an empty PiercedVector :::" << std::endl;
+	std::cout << std::endl;
+
+	std::cout << "  Pierced vector created" << std::endl;
+
+	PiercedVector<double> container;
+
+	// Filling the PiercedVector
+	std::cout << std::endl << "::: Filling the vector :::" << std::endl;
+
+	int nElements = 10;
+	fillContainer(nElements, container);
+
+	printElements(container);
+
+	// Testing iterator
+	std::cout << std::endl << "::: Testing iterator :::" << std::endl;
+
+	PiercedVector<double>::iterator piercedItr1 = container.begin();
+	if (*piercedItr1 != container.front()) {
+		return 1;
+	}
+	piercedItr1 = container.end();
+
+	PiercedVector<double>::iterator piercedItr2;
+	piercedItr2 = container.begin();
+	if (*piercedItr2 != container.front()) {
+		return 1;
+	}
+	piercedItr2 = container.end();
+
+	// Testing constant iterator
+	std::cout << std::endl << "::: Testing constant iterator :::" << std::endl;
+
+	PiercedVector<double>::const_iterator piercedConstItr1 = container.cbegin();
+	if (*piercedConstItr1 != container.front()) {
+		return 1;
+	}
+	piercedConstItr1++;
+	++piercedConstItr1;
+	if (*piercedConstItr1 != container[2]) {
+		return 1;
+	}
+	piercedConstItr1 = container.cend();
+
+	PiercedVector<double>::const_iterator piercedConstItr2 = container.begin();
+	if (*piercedConstItr2 != container.front()) {
+		return 1;
+	}
+	piercedConstItr2++;
+	++piercedConstItr2;
+	if (*piercedConstItr2 != container[2]) {
+		return 1;
+	}
+	piercedConstItr2 = container.end();
+
+	PiercedVector<double>::const_iterator piercedConstItr3;
+	piercedConstItr3 = container.begin();
+	if (*piercedConstItr3 != container.front()) {
+		return 1;
+	}
+	piercedConstItr3++;
+	++piercedConstItr3;
+	if (*piercedConstItr3 != container[2]) {
+		return 1;
+	}
+	piercedConstItr3 = container.end();
+
+	PiercedVector<double>::const_iterator piercedConstItr4;
+	piercedConstItr4 = container.cbegin();
+	if (*piercedConstItr4 != container.front()) {
+		return 1;
+	}
+	piercedConstItr4++;
+	++piercedConstItr4;
+	if (*piercedConstItr4 != container[2]) {
+		return 1;
+	}
+	piercedConstItr4 = container.cend();
+
+	// Done
+	std::cout << std::endl << "::: Done :::" << std::endl;
+	std::cout << std::endl;
+
+	return 0;
+}
+/*!
 * Main program.
 */
 int main(int argc, char *argv[])
@@ -451,6 +545,11 @@ int main(int argc, char *argv[])
 	int status;
 	try {
 		status = subtest_001();
+		if (status != 0) {
+			return status;
+		}
+
+		status = subtest_002();
 		if (status != 0) {
 			return status;
 		}
