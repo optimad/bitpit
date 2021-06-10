@@ -115,7 +115,8 @@ void SegmentationKernel::setSurface( const SurfUnstructured *surface, double fea
     m_featureAngle = featureAngle;
 
     // Check if segment is supported
-    for( SurfUnstructured::CellConstIterator segmentItr = m_surface->cellConstBegin(); segmentItr != m_surface->cellConstEnd(); ++segmentItr ){
+    SurfUnstructured::CellConstIterator endItr = m_surface->cellConstEnd();
+    for( SurfUnstructured::CellConstIterator segmentItr = m_surface->cellConstBegin(); segmentItr != endItr; ++segmentItr ){
         switch (segmentItr->getType()) {
 
         case ElementType::VERTEX :
