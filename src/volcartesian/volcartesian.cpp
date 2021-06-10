@@ -272,8 +272,11 @@ void VolCartesian::resetInterfaces()
 void VolCartesian::_updateAdjacencies()
 {
 	// Partial updates are not supported
+	CellConstIterator beginItr = cellConstBegin();
+	CellConstIterator endItr   = cellConstEnd();
+
 	bool partialUpdate = false;
-	for (auto cellIterator = cellBegin(); cellIterator != cellEnd(); ++cellIterator) {
+	for (CellConstIterator cellIterator = beginItr; cellIterator != endItr; ++cellIterator) {
 		long cellId = cellIterator.getId();
 		if (!testCellAlterationFlags(cellId, FLAG_ADJACENCIES_DIRTY)) {
 			partialUpdate = true;
@@ -318,8 +321,11 @@ void VolCartesian::_updateAdjacencies()
 void VolCartesian::_updateInterfaces()
 {
 	// Partial updates are not supported
+	CellConstIterator beginItr = cellConstBegin();
+	CellConstIterator endItr   = cellConstEnd();
+
 	bool partialUpdate = false;
-	for (auto cellIterator = cellBegin(); cellIterator != cellEnd(); ++cellIterator) {
+	for (CellConstIterator cellIterator = beginItr; cellIterator != endItr; ++cellIterator) {
 		long cellId = cellIterator.getId();
 		if (!testCellAlterationFlags(cellId, FLAG_INTERFACES_DIRTY)) {
 			partialUpdate = true;
