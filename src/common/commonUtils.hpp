@@ -32,6 +32,7 @@
 #include <cfloat>
 #include <cmath>
 #include <functional>
+#include <limits>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
