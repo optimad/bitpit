@@ -1963,6 +1963,8 @@ void VolOctree::_updateAdjacencies()
 	FaceInfoSet processedFaces;
 	processedFaces.reserve(nDirtyAdjacenciesCells * getDimension());
 
+	std::vector<uint32_t> neighTreeIds;
+	std::vector<bool> neighGhostFlags;
 	for (int level = 0; level <= maxLevel; ++level) {
 		for (long cellId : hierarchicalCellIds[level]) {
 			Cell &cell = m_cells[cellId];
@@ -1974,8 +1976,8 @@ void VolOctree::_updateAdjacencies()
 				}
 
 				// Find cell neighbours
-				std::vector<uint32_t> neighTreeIds;
-				std::vector<bool> neighGhostFlags;
+				neighTreeIds.clear();
+				neighGhostFlags.clear();
 				if (octantInfo.internal) {
 					m_tree->findNeighbours(octantInfo.id, face, 1, neighTreeIds, neighGhostFlags);
 				} else {
