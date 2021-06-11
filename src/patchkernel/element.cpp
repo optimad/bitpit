@@ -764,12 +764,14 @@ ConstProxyVector<int> Element::getFaceLocalConnect(int face) const
 		int nVertices = getVertexCount();
 
 		int faceConnectSize = getFaceVertexCount(face);
-		std::vector<int> localFaceConnect(faceConnectSize);
+
+		ConstProxyVector<int> localFaceConnect(ConstProxyVector<int>::INTERNAL_STORAGE, faceConnectSize);
+		ConstProxyVector<int>::storage_pointer localFaceConnectStorage = localFaceConnect.storedData();
 		for (int i = 0; i < faceConnectSize; ++i) {
-			localFaceConnect[i] = (face + i) % nVertices;
+			localFaceConnectStorage[i] = (face + i) % nVertices;
 		}
 
-		return ConstProxyVector<int>(std::move(localFaceConnect));
+		return localFaceConnect;
 	}
 
 	case (ElementType::POLYHEDRON):
@@ -786,9 +788,10 @@ ConstProxyVector<int> Element::getFaceLocalConnect(int face) const
 			++localVertexOffset;
 		}
 
-		std::vector<int> localFaceConnect(faceConnectSize);
+		ConstProxyVector<int> localFaceConnect(ConstProxyVector<int>::INTERNAL_STORAGE, faceConnectSize);
+		ConstProxyVector<int>::storage_pointer localFaceConnectStorage = localFaceConnect.storedData();
 		if (!faceHasReferenceInfo) {
-			localFaceConnect[0] = nFaceVertices;
+			localFaceConnectStorage[0] = nFaceVertices;
 		}
 
 		// The list of the vertices in sorted, therfore we can search the
@@ -798,10 +801,10 @@ ConstProxyVector<int> Element::getFaceLocalConnect(int face) const
 			int vertexId = faceVertexIds[k];
 			auto localVertexIdItr = std::lower_bound(vertexIds.begin(), vertexIds.end(), vertexId);
 			assert(localVertexIdItr != vertexIds.end() && *localVertexIdItr == vertexId);
-			localFaceConnect[localVertexOffset + k] = std::distance(vertexIds.begin(), localVertexIdItr);
+			localFaceConnectStorage[localVertexOffset + k] = std::distance(vertexIds.begin(), localVertexIdItr);
 		}
 
-		return ConstProxyVector<int>(std::move(localFaceConnect));
+		return localFaceConnect;
 	}
 
 	default:
@@ -838,17 +841,18 @@ ConstProxyVector<long> Element::getFaceConnect(int face) const
 		if (facePos + faceConnectSize <= connectSize) {
 			return ConstProxyVector<long>(connectivity + facePos, faceConnectSize);
 		} else {
-			std::vector<long> faceConnect(faceConnectSize);
+			ConstProxyVector<long> faceConnect(ConstProxyVector<long>::INTERNAL_STORAGE, faceConnectSize);
+			ConstProxyVector<long>::storage_pointer faceConnectStorage = faceConnect.storedData();
 			for (int i = 0; i < faceConnectSize; ++i) {
 				int position = facePos + i;
 				if (position >= connectSize) {
 					position = position % connectSize + 1;
 				}
 
-				faceConnect[i] = connectivity[position];
+				faceConnectStorage[i] = connectivity[position];
 			}
 
-			return ConstProxyVector<long>(std::move(faceConnect));
+			return faceConnect;
 		}
 	}
 
@@ -877,14 +881,15 @@ ConstProxyVector<long> Element::getFaceConnect(int face) const
 		int faceConnectSize = getFaceVertexCount(face);
 		const int *localFaceConnect = getInfo().faceConnectStorage[face].data();
 
-		std::vector<long> faceConnect(faceConnectSize);
+		ConstProxyVector<long> faceConnect(ConstProxyVector<long>::INTERNAL_STORAGE, faceConnectSize);
+		ConstProxyVector<long>::storage_pointer faceConnectStorage = faceConnect.storedData();
 		for (int k = 0; k < faceConnectSize; ++k) {
 			int localVertexId = localFaceConnect[k];
 			long vertexId = connectivity[localVertexId];
-			faceConnect[k] = vertexId;
+			faceConnectStorage[k] = vertexId;
 		}
 
-		return ConstProxyVector<long>(std::move(faceConnect));
+		return faceConnect;
 	}
 
 	}
@@ -975,12 +980,13 @@ ConstProxyVector<int> Element::getEdgeLocalConnect(int edge) const
 	{
 		int nEdgeVertices = ReferenceElementInfo::getInfo(ElementType::VERTEX).nVertices;
 
-		std::vector<int> localEdgeConnect(nEdgeVertices);
+		ConstProxyVector<int> localEdgeConnect(ConstProxyVector<int>::INTERNAL_STORAGE, nEdgeVertices);
+		ConstProxyVector<int>::storage_pointer localEdgeConnectStorage = localEdgeConnect.storedData();
 		for (int k = 0; k < nEdgeVertices; ++k) {
-			localEdgeConnect[k] = k;
+			localEdgeConnectStorage[k] = k;
 		}
 
-		return ConstProxyVector<int>(std::move(localEdgeConnect));
+		return localEdgeConnect;
 	}
 
 	case (ElementType::POLYHEDRON):
@@ -992,15 +998,16 @@ ConstProxyVector<int> Element::getEdgeLocalConnect(int edge) const
 		// vertices using a binary search.
 		ConstProxyVector<long> vertexIds = getVertexIds();
 
-		std::vector<int> localEdgeConnect(nEdgeVertices);
+		ConstProxyVector<int> localEdgeConnect(ConstProxyVector<int>::INTERNAL_STORAGE, nEdgeVertices);
+		ConstProxyVector<int>::storage_pointer localEdgeConnectStorage = localEdgeConnect.storedData();
 		for (int k = 0; k < nEdgeVertices; ++k) {
 			int vertexId = edgeVertexIds[k];
 			auto localVertexIdItr = std::lower_bound(vertexIds.begin(), vertexIds.end(), vertexId);
 			assert(localVertexIdItr != vertexIds.end() && *localVertexIdItr == vertexId);
-			localEdgeConnect[k] = std::distance(vertexIds.begin(), localVertexIdItr);
+			localEdgeConnectStorage[k] = std::distance(vertexIds.begin(), localVertexIdItr);
 		}
 
-		return ConstProxyVector<int>(std::move(localEdgeConnect));
+		return localEdgeConnect;
 	}
 
 	default:
@@ -1047,13 +1054,14 @@ ConstProxyVector<long> Element::getEdgeConnect(int edge) const
 		ConstProxyVector<int> localEdgeConnect = getEdgeLocalConnect(edge);
 		int nEdgeVertices = localEdgeConnect.size();
 
-		std::vector<long> edgeConnect(nEdgeVertices);
+		ConstProxyVector<long> edgeConnect(ConstProxyVector<long>::INTERNAL_STORAGE, nEdgeVertices);
+		ConstProxyVector<long>::storage_pointer edgeConnectStorage = edgeConnect.storedData();
 		for (int k = 0; k < nEdgeVertices; ++k) {
 			int localVertexId = localEdgeConnect[k];
-			edgeConnect[k] = connectivity[localVertexId];
+			edgeConnectStorage[k] = connectivity[localVertexId];
 		}
 
-		return ConstProxyVector<long>(std::move(edgeConnect));
+		return edgeConnect;
 	}
 
 	}
@@ -1177,16 +1185,22 @@ ConstProxyVector<long> Element::getVertexIds(ElementType type, const long *conne
 
 		// The list of the vertices has to be sorted, this will make it easy
 		// to extract the connectivity of the face.
-		std::set<long> vertexIds;
+		std::set<long> uniqueVertexIds;
 		for (int i = 0; i < nFaces - 1; ++i) {
 			int facePos = getFaceStreamPosition(connectivity, i);
 
 			int beginVertexPos = facePos + 1;
 			int endVertexPos   = facePos + 1 + connectivity[facePos];
-			vertexIds.insert(connectivity + beginVertexPos, connectivity + endVertexPos);
+			uniqueVertexIds.insert(connectivity + beginVertexPos, connectivity + endVertexPos);
 		}
 
-		return ConstProxyVector<long>(std::vector<long>(vertexIds.begin(), vertexIds.end()));
+		std::size_t nVertices = uniqueVertexIds.size();
+
+		ConstProxyVector<long> vertexIds(ConstProxyVector<long>::INTERNAL_STORAGE, nVertices);
+		ConstProxyVector<long>::storage_pointer vertexIdsStorage = vertexIds.storedData();
+		std::copy_n(uniqueVertexIds.begin(), nVertices, vertexIdsStorage);
+
+		return vertexIds;
 	}
 
 	default:
@@ -1266,6 +1280,7 @@ ConstProxyVector<long> Element::getFaceVertexIds(int face) const
 	if  (m_type == ElementType::POLYHEDRON) {
 		ElementType faceType = getFaceType(face);
 		if (faceType == ElementType::POLYGON) {
+			assert(!vertexIds.storedData());
 			vertexIds.set(vertexIds.data() + 1, vertexIds.size() - 1);
 		}
 	}
@@ -1326,12 +1341,13 @@ ConstProxyVector<int> Element::getFaceLocalVertexIds(int face) const
 		std::size_t faceLocalConnectSize = faceLocalConnect.size();
 
 		std::size_t nFaceVertices = faceLocalConnectSize - 1;
-		std::vector<int> faceLocalVertexIds(nFaceVertices);
+		ConstProxyVector<int> faceLocalVertexIds(ConstProxyVector<int>::INTERNAL_STORAGE, nFaceVertices);
+		ConstProxyVector<int>::storage_pointer faceLocalVertexIdsStorage = faceLocalVertexIds.storedData();
 		for (std::size_t i = 0; i < nFaceVertices; ++i) {
-			faceLocalVertexIds[i] = faceLocalConnect[i + 1];
+			faceLocalVertexIdsStorage[i] = faceLocalConnect[i + 1];
 		}
 
-		return ConstProxyVector<int>(std::move(faceLocalVertexIds));
+		return faceLocalVertexIds;
 	}
 
 	default:
@@ -1967,7 +1983,7 @@ std::vector<ConstProxyVector<long>> Element::evalEdgeConnects(int nRequestedEdge
 	assert(nRequestedEdges <= getEdgeCount());
 
 	std::set<std::pair<long, long>> edgeSet;
-	std::vector<ConstProxyVector<long>> edgeConnectStorage(nRequestedEdges);
+	std::vector<ConstProxyVector<long>> edgeConnectStorage(nRequestedEdges, ConstProxyVector<long>(ConstProxyVector<long>::INTERNAL_STORAGE, 2));
 
 	int nFaces = getFaceCount();
 	for (int i = 0; i < nFaces; ++i) {
@@ -1983,9 +1999,9 @@ std::vector<ConstProxyVector<long>> Element::evalEdgeConnects(int nRequestedEdge
 			std::pair<long, long> edgePair = std::pair<long, long>(vertex_A, vertex_B);
 			std::pair<std::set<std::pair<long, long>>::iterator, bool> insertResult = edgeSet.insert(edgePair);
 			if (insertResult.second) {
-				std::vector<long> edgeConnect(2, edgePair.first);
-				edgeConnect[1] = edgePair.second;
-				edgeConnectStorage[edgeSet.size() - 1] = ConstProxyVector<long>(std::move(edgeConnect));
+				ConstProxyVector<long>::storage_pointer connectStorage = edgeConnectStorage[edgeSet.size() - 1].storedData();
+				connectStorage[0] = edgePair.first;
+				connectStorage[1] = edgePair.second;
 
 				if (edgeSet.size() == (std::size_t) nRequestedEdges) {
 					return edgeConnectStorage;
