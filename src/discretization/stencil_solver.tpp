@@ -229,7 +229,8 @@ void DiscretizationStencilSolverAssembler<stencil_t>::getRowPattern(long rowInde
         pattern->set(patternData, stencilSize);
     } else {
         std::size_t expandedPatternSize = m_blockSize * stencilSize;
-        long *expandedPatternStorage = pattern->set(expandedPatternSize);
+        pattern->set(ConstProxyVector<long>::INTERNAL_STORAGE, expandedPatternSize);
+        ConstProxyVector<long>::storage_pointer expandedPatternStorage = pattern->storedData();
 
         std::size_t expandedPatternIdx = 0;
         for (std::size_t k = 0; k < stencilSize; ++k) {
@@ -288,7 +289,8 @@ void DiscretizationStencilSolverAssembler<stencil_t>::_getRowValues(long rowInde
     const typename stencil_t::weight_type *weightData = stencil.weightData();
 
     std::size_t expandedValuesSize = m_blockSize * stencilSize;
-    double *expandedValuesStorage = values->set(expandedValuesSize);
+    values->set(ConstProxyVector<double>::INTERNAL_STORAGE, expandedValuesSize);
+    ConstProxyVector<double>::storage_pointer expandedValuesStorage = values->storedData();
 
     std::size_t expandedValuesIdx = 0;
     for (std::size_t k = 0; k < stencilSize; ++k) {

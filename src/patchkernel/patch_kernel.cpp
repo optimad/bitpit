@@ -4924,13 +4924,10 @@ ConstProxyVector<std::array<double, 3>> PatchKernel::getCellVertexCoordinates(lo
 	ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
 	const int nCellVertices = cellVertexIds.size();
 
-	// Store coordinates in storage
-	std::vector<std::array<double, 3>> storage(nCellVertices);
-	getVertexCoords(cellVertexIds.size(), cellVertexIds.data(), storage.data());
-
 	// Build the proxy vector with the coordinates
-	ConstProxyVector<std::array<double, 3>> vertexCoordinates;
-	vertexCoordinates.set(std::move(storage));
+	ConstProxyVector<std::array<double, 3>> vertexCoordinates(ConstProxyVector<std::array<double, 3>>::INTERNAL_STORAGE, nCellVertices);
+	ConstProxyVector<std::array<double, 3>>::storage_pointer storage = vertexCoordinates.storedData();
+	getVertexCoords(cellVertexIds.size(), cellVertexIds.data(), storage);
 
 	return vertexCoordinates;
 }
@@ -5003,13 +5000,10 @@ ConstProxyVector<std::array<double, 3>> PatchKernel::getInterfaceVertexCoordinat
 	ConstProxyVector<long> interfaceVertexIds = interface.getVertexIds();
 	const int nInterfaceVertices = interfaceVertexIds.size();
 
-	// Store coordinates in storage
-	std::vector<std::array<double, 3>> storage(nInterfaceVertices);
-	getVertexCoords(interfaceVertexIds.size(), interfaceVertexIds.data(), storage.data());
-
 	// Build the proxy vector with the coordinates
-	ConstProxyVector<std::array<double, 3>> vertexCoordinates;
-	vertexCoordinates.set(std::move(storage));
+	ConstProxyVector<std::array<double, 3>> vertexCoordinates(ConstProxyVector<std::array<double, 3>>::INTERNAL_STORAGE, nInterfaceVertices);
+	ConstProxyVector<std::array<double, 3>>::storage_pointer storage = vertexCoordinates.storedData();
+	getVertexCoords(interfaceVertexIds.size(), interfaceVertexIds.data(), storage);
 
 	return vertexCoordinates;
 }
@@ -6641,13 +6635,10 @@ ConstProxyVector<std::array<double, 3>> PatchKernel::getElementVertexCoordinates
 	ConstProxyVector<long> elementVertexIds = element.getVertexIds();
 	const int nElementVertices = elementVertexIds.size();
 
-	// Store coordinates in storage
-	std::vector<std::array<double, 3>> storage(nElementVertices);
-	getVertexCoords(elementVertexIds.size(), elementVertexIds.data(), storage.data());
-
 	// Build the proxy vector with the coordinates
-	ConstProxyVector<std::array<double, 3>> vertexCoordinates;
-	vertexCoordinates.set(std::move(storage));
+	ConstProxyVector<std::array<double, 3>> vertexCoordinates(ConstProxyVector<std::array<double, 3>>::INTERNAL_STORAGE, nElementVertices);
+	ConstProxyVector<std::array<double, 3>>::storage_pointer storage = vertexCoordinates.storedData();
+	getVertexCoords(elementVertexIds.size(), elementVertexIds.data(), storage);
 
 	return vertexCoordinates;
 }

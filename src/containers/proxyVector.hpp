@@ -38,15 +38,20 @@
 #define  __PXI_REFERENCE__ typename ProxyVectorIterator<value_t, value_no_cv_t>::reference
 #define  __PXI_POINTER__   typename ProxyVectorIterator<value_t, value_no_cv_t>::pointer
 
-#define __PXV_REFERENCE__       typename ProxyVector<value_t>::reference
-#define __PXV_CONST_REFERENCE__ typename ProxyVector<value_t>::const_reference
-#define __PXV_POINTER__         typename ProxyVector<value_t>::pointer
-#define __PXV_CONST_POINTER__   typename ProxyVector<value_t>::const_pointer
-#define __PXV_ITERATOR__        typename ProxyVector<value_t>::iterator
-#define __PXV_CONST_ITERATOR__  typename ProxyVector<value_t>::const_iterator
+#define __PXV_REFERENCE__             typename ProxyVector<value_t>::reference
+#define __PXV_CONST_REFERENCE__       typename ProxyVector<value_t>::const_reference
+#define __PXV_POINTER__               typename ProxyVector<value_t>::pointer
+#define __PXV_CONST_POINTER__         typename ProxyVector<value_t>::const_pointer
+#define __PXV_STORAGE_POINTER__       typename ProxyVector<value_t>::storage_pointer
+#define __PXV_STORAGE_CONST_POINTER__ typename ProxyVector<value_t>::storage_const_pointer
+#define __PXV_ITERATOR__              typename ProxyVector<value_t>::iterator
+#define __PXV_CONST_ITERATOR__        typename ProxyVector<value_t>::const_iterator
 
+#include <cassert>
 #include <memory>
 #include <vector>
+
+#include "bitpit_common.hpp"
 
 namespace bitpit {
 
@@ -152,6 +157,114 @@ private:
 
 /*!
     @ingroup containers
+    @brief Interface for ProxyVector storages.
+
+    @tparam pointer_t defines a pointer to the data stored
+    @tparam const_pointer_t defines a constant pointer to the data stored
+*/
+template<typename pointer_t, typename const_pointer_t>
+class ProxyVectorStorageInterface
+{
+
+public:
+    virtual ~ProxyVectorStorageInterface() = default;
+
+    virtual bool empty() const = 0;
+    virtual std::size_t size() const = 0;
+
+    virtual pointer_t data() = 0;
+    virtual const_pointer_t data() const = 0;
+
+    virtual void resize(std::size_t size) = 0;
+
+};
+
+/*!
+    @ingroup containers
+    @brief Metafunction for generating ProxyVector dummy storages.
+
+    @tparam value_t is the type of the objects handled by the dummy storage
+    @tparam pointer_t defines a pointer to the data stored
+    @tparam const_pointer_t defines a constant pointer to the data stored
+*/
+template<typename value_t, typename pointer_t = value_t *, typename const_pointer_t = const value_t *>
+class ProxyVectorDummyStorage : public ProxyVectorStorageInterface<pointer_t, const_pointer_t>
+{
+
+template<typename PXV_value_t>
+friend class ProxyVector;
+
+public:
+    typedef pointer_t pointer;
+    typedef const_pointer_t const_pointer;
+
+    void swap(ProxyVectorDummyStorage &other) noexcept;
+
+    pointer data() override;
+    const_pointer data() const override;
+
+    bool empty() const override;
+    std::size_t size() const override;
+
+    void resize(std::size_t size) override;
+
+protected:
+    ProxyVectorDummyStorage(std::size_t size = 0);
+
+};
+
+/*!
+    @ingroup containers
+    @brief Metafunction for generating ProxyVector storages.
+
+    @tparam value_t is the type of the objects handled by the storage
+    @tparam pointer_t defines a pointer to the data stored
+    @tparam const_pointer_t defines a constant pointer to the data stored
+*/
+template<typename value_t, typename pointer_t = typename std::vector<value_t>::pointer, typename const_pointer_t = typename std::vector<value_t>::const_pointer>
+class ProxyVectorStorage : public ProxyVectorStorageInterface<pointer_t, const_pointer_t>
+{
+
+template<typename PXV_value_t>
+friend class ProxyVector;
+
+public:
+    typedef pointer_t pointer;
+    typedef const_pointer_t const_pointer;
+
+    ~ProxyVectorStorage();
+
+    void swap(ProxyVectorStorage &other) noexcept;
+
+    pointer data() override;
+    const_pointer data() const override;
+
+    bool empty() const override;
+    std::size_t size() const override;
+
+    void resize(std::size_t size) override;
+
+protected:
+    ProxyVectorStorage(std::size_t size = 0);
+    ProxyVectorStorage(const ProxyVectorStorage &other);
+    ProxyVectorStorage(ProxyVectorStorage &&other) = default;
+
+private:
+    static const int MEMORY_POOL_VECTOR_COUNT = 10;
+    static const int MEMORY_POOL_MAX_CAPACITY = 128;
+
+    static std::vector<std::unique_ptr<std::vector<value_t>>> m_storagePool;
+
+    std::unique_ptr<std::vector<value_t>> createStorage(std::size_t size);
+    std::unique_ptr<std::vector<value_t>> createStorage(const std::unique_ptr<std::vector<value_t>> &source);
+    void destroyStorage(std::unique_ptr<std::vector<value_t>> *storage);
+
+    std::unique_ptr<std::vector<value_t>> m_storage;
+
+};
+
+/*!
+    @ingroup containers
     @brief Metafunction for generating a list of elements that can be either
     stored in an external vectror or, if the elements are constant, inside
     the container itself.
@@ -203,6 +316,16 @@ public:
     typedef typename std::vector<value_no_cv_t>::const_pointer const_pointer;
 
     /*!
+        Storage pointer type
+    */
+    typedef typename std::vector<value_no_cv_t>::pointer storage_pointer;
+
+    /*!
+        Constant storage pointer
+    */
+    typedef typename std::vector<value_no_cv_t>::const_pointer storage_const_pointer;
+
+    /*!
         Reference type
     */
     typedef
@@ -216,37 +339,45 @@ public:
     */
     typedef typename std::vector<value_no_cv_t>::const_reference const_reference;
 
+    /*!
+        Flag to use the internal storage
+    */
+    static constexpr __PXV_POINTER__ INTERNAL_STORAGE = nullptr;
+
     ProxyVector();
-    ProxyVector(value_t *data, std::size_t size);
-    template<typename other_value_t = value_t, typename std::enable_if<std::is_const<other_value_t>::value, int>::type = 0>
-    ProxyVector(std::vector<value_no_cv_t> &&data);
+    template<typename U = value_t, typename std::enable_if<std::is_const<U>::value, int>::type = 0>
+    ProxyVector(std::size_t size);
+    template<typename U = value_t, typename std::enable_if<std::is_const<U>::value, int>::type = 0>
+    ProxyVector(__PXV_POINTER__ data, std::size_t size);
+    template<typename U = value_t, typename std::enable_if<std::is_const<U>::value, int>::type = 0>
+    ProxyVector(std::size_t size, std::size_t capacity);
+    template<typename U = value_t, typename std::enable_if<std::is_const<U>::value, int>::type = 0>
+    ProxyVector(__PXV_POINTER__ data, std::size_t size, std::size_t capacity);
+    template<typename U = value_t, typename std::enable_if<!std::is_const<U>::value, int>::type = 0>
+    ProxyVector(__PXV_POINTER__ data, std::size_t size);
 
     ProxyVector(const ProxyVector &other);
     ProxyVector(ProxyVector &&other) = default;
 
-    /*!
-        Move assignment operator.
-
-        The move assignment operator "steals" the resources held by the
-        argument.
-    */
     ProxyVector & operator=(ProxyVector &&other) = default;
-
     ProxyVector & operator=(const ProxyVector &other);
 
-    void set(value_t *data, std::size_t size);
-    template<typename other_value_t = value_t, typename std::enable_if<std::is_const<other_value_t>::value, int>::type = 0>
-    value_no_cv_t * set(std::vector<value_no_cv_t> &&storage);
-    template<typename other_value_t = value_t, typename std::enable_if<std::is_const<other_value_t>::value, int>::type = 0>
-    value_no_cv_t * set(std::size_t size);
-
-    void clear();
     void swap(ProxyVector &other);
 
     bool empty() const;
     std::size_t size() const;
 
     bool operator==(const ProxyVector &other) const;
+
+    template<typename U = value_t, typename std::enable_if<std::is_const<U>::value, int>::type = 0>
+    void set(__PXV_POINTER__ data, std::size_t size);
+    template<typename U = value_t, typename std::enable_if<std::is_const<U>::value, int>::type = 0>
+    void set(__PXV_POINTER__ data, std::size_t size, std::size_t capacity);
+    template<typename U = value_t, typename std::enable_if<!std::is_const<U>::value, int>::type = 0>
+    void set(__PXV_POINTER__ data, std::size_t size);
+
+    __PXV_STORAGE_POINTER__ storedData() noexcept;
+    __PXV_STORAGE_CONST_POINTER__ storedData() const noexcept;
 
     template<typename U = value_t, typename std::enable_if<!std::is_const<U>::value, int>::type = 0>
     __PXV_POINTER__ data() noexcept;
@@ -280,10 +411,19 @@ public:
     __PXV_CONST_ITERATOR__ cend();
 
 private:
-    std::unique_ptr<std::vector<value_no_cv_t>> m_storage;
+    /*!
+        Storage type
+    */
+    typedef
+        typename std::conditional<std::is_const<value_t>::value,
+            ProxyVectorStorage<value_no_cv_t>,
+            ProxyVectorDummyStorage<value_no_cv_t>>::type
+        storage_t;
 
-    value_t *m_data;
+    storage_t m_storage;
+
     std::size_t m_size;
+    __PXV_POINTER__ m_data;
 
 };
 

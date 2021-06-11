@@ -184,37 +184,392 @@ std::size_t ProxyVectorIterator<value_t, value_no_cv_t>::operator-(const ProxyVe
 }
 
 /*!
+    Constructor.
+
+    \param size is the size of the storage expressed in number of elements.
+*/
+template<typename value_t, typename pointer_t, typename const_pointer_t>
+ProxyVectorDummyStorage<value_t, pointer_t, const_pointer_t>::ProxyVectorDummyStorage(std::size_t size)
+{
+    BITPIT_UNUSED(size);
+}
+
+/*!
+    Swaps the contents.
+
+    \param other is another storage of the same type
+*/
+template<typename value_t, typename pointer_t, typename const_pointer_t>
+void ProxyVectorDummyStorage<value_t, pointer_t, const_pointer_t>::swap(ProxyVectorDummyStorage &other) noexcept
+{
+    BITPIT_UNUSED(other);
+}
+
+/*!
+    Return a pointer to the data.
+
+    \result A pointer to the data.
+*/
+template<typename value_t, typename pointer_t, typename const_pointer_t>
+typename ProxyVectorDummyStorage<value_t, pointer_t, const_pointer_t>::pointer ProxyVectorDummyStorage<value_t, pointer_t, const_pointer_t>::data()
+{
+    return nullptr;
+}
+
+/*!
+    Return a constant pointer to the data.
+
+    \result A constant pointer to the data.
+*/
+template<typename value_t, typename pointer_t, typename const_pointer_t>
+typename ProxyVectorDummyStorage<value_t, pointer_t, const_pointer_t>::const_pointer ProxyVectorDummyStorage<value_t, pointer_t, const_pointer_t>::data() const
+{
+    return nullptr;
+}
+/*!
+    Check if the storage is empty.
+
+    \result Returns true if the storage is empty, false otherwise.
+*/
+template<typename value_t, typename pointer_t, typename const_pointer_t>
+bool ProxyVectorDummyStorage<value_t, pointer_t, const_pointer_t>::empty() const
+{
+    return true;
+}
+
+/*!
+    Get the size of the storage expressed in number of elements.
+
+    \result The size of the storage, expressed in number of elements.
+*/
+template<typename value_t, typename pointer_t, typename const_pointer_t>
+std::size_t ProxyVectorDummyStorage<value_t, pointer_t, const_pointer_t>::size() const
+{
+    return 0;
+}
+
+/*!
+    Resize the storage.
+
+    \result The size of the storage expressed in number of elements.
+*/
+template<typename value_t, typename pointer_t, typename const_pointer_t>
+void ProxyVectorDummyStorage<value_t, pointer_t, const_pointer_t>::resize(std::size_t size)
+{
+    BITPIT_UNUSED(size);
+}
+
+/*!
+    Memory pool
+*/
+template<typename value_t, typename pointer_t, typename const_pointer_t>
+std::vector<std::unique_ptr<std::vector<value_t>>> ProxyVectorStorage<value_t, pointer_t, const_pointer_t>::m_storagePool = std::vector<std::unique_ptr<std::vector<value_t>>>();
+
+/*!
+    Create a storage.
+
+    \param size is the size of the storage, expressed in number of elements.
+*/
+template<typename value_t, typename pointer_t, typename const_pointer_t>
+std::unique_ptr<std::vector<value_t>> ProxyVectorStorage<value_t, pointer_t, const_pointer_t>::createStorage(std::size_t size)
+{
+    if (size == 0) {
+        return std::unique_ptr<std::vector<value_t>>(nullptr);
+    }
+
+    if (!m_storagePool.empty()) {
+        std::unique_ptr<std::vector<value_t>> storage = std::move(m_storagePool.back());
+        if (storage->size() < size) {
+            storage->resize(size);
+        }
+
+        m_storagePool.resize(m_storagePool.size() - 1);
+
+        return storage;
+    } else {
+        return std::unique_ptr<std::vector<value_t>>(new std::vector<value_t>(size));
+    }
+}
+
+/*!
+    Create a storage.
+
+    \param source is the storage whose content will be copied in newly created
+    storage
+*/
+template<typename value_t, typename pointer_t, typename const_pointer_t>
+std::unique_ptr<std::vector<value_t>> ProxyVectorStorage<value_t, pointer_t, const_pointer_t>::createStorage(const std::unique_ptr<std::vector<value_t>> &source)
+{
+    if (!source || source->empty()) {
+        return std::unique_ptr<std::vector<value_t>>(nullptr);
+    }
+
+    if (!m_storagePool.empty()) {
+        std::unique_ptr<std::vector<value_t>> storage = createStorage(source->size());
+        std::copy_n(source->data(), source->size(), storage->data());
+
+        return storage;
+    } else {
+        return std::unique_ptr<std::vector<value_t>>(new std::vector<value_t>(*source));
+    }
+}
+
+/*!
+    Delete a storage.
+*/
+template<typename value_t, typename pointer_t, typename const_pointer_t>
+void ProxyVectorStorage<value_t, pointer_t, const_pointer_t>::destroyStorage(std::unique_ptr<std::vector<value_t>> *storage)
+{
+    if (!(*storage)) {
+        return;
+    }
+
+    if (m_storagePool.size() < MEMORY_POOL_VECTOR_COUNT) {
+        if ((*storage)->size() > MEMORY_POOL_MAX_CAPACITY) {
+            (*storage)->resize(MEMORY_POOL_MAX_CAPACITY);
+        }
+
+        m_storagePool.emplace_back(std::move(*storage));
+        storage->reset();
+    }
+}
+
+/*!
+    Constructor.
+
+    \param size is the size of the storage expressed in number of elements.
+*/
+template<typename value_t, typename pointer_t, typename const_pointer_t>
+ProxyVectorStorage<value_t, pointer_t, const_pointer_t>::ProxyVectorStorage(std::size_t size)
+    : m_storage(createStorage(size))
+{
+}
+
+/*!
+    Copy constructor.
+
+    \param x is another storage of the same type (i.e., instantiated with
+    the same template parameters) whose content is copied in this container.
+*/
+template<typename value_t, typename pointer_t, typename const_pointer_t>
+ProxyVectorStorage<value_t, pointer_t, const_pointer_t>::ProxyVectorStorage(const ProxyVectorStorage<value_t, pointer_t, const_pointer_t> &other)
+    : m_storage(createStorage(other.m_storage))
+{
+}
+
+/*!
+    Destructor.
+*/
+template<typename value_t, typename pointer_t, typename const_pointer_t>
+ProxyVectorStorage<value_t, pointer_t, const_pointer_t>::~ProxyVectorStorage()
+{
+    destroyStorage(&m_storage);
+}
+
+/*!
+    Swaps the contents.
+
+    \param other is another storage of the same type
+*/
+template<typename value_t, typename pointer_t, typename const_pointer_t>
+void ProxyVectorStorage<value_t, pointer_t, const_pointer_t>::swap(ProxyVectorStorage &other) noexcept
+{
+    m_storage.swap(other.m_storage);
+}
+
+/*!
+    Return a pointer to the data.
+
+    \result A pointer to the data.
+*/
+template<typename value_t, typename pointer_t, typename const_pointer_t>
+typename ProxyVectorStorage<value_t, pointer_t, const_pointer_t>::pointer ProxyVectorStorage<value_t, pointer_t, const_pointer_t>::data()
+{
+    if (empty()) {
+        return nullptr;
+    }
+
+    return m_storage->data();
+}
+
+/*!
+    Return a constant pointer to the data.
+
+    \result A constant pointer to the data.
+*/
+template<typename value_t, typename pointer_t, typename const_pointer_t>
+typename ProxyVectorStorage<value_t, pointer_t, const_pointer_t>::const_pointer ProxyVectorStorage<value_t, pointer_t, const_pointer_t>::data() const
+{
+    if (empty()) {
+        return nullptr;
+    }
+
+    return m_storage->data();
+}
+
+/*!
+    Check if the storage is empty.
+
+    \result Returns true if the storage is empty, false otherwise.
+*/
+template<typename value_t, typename pointer_t, typename const_pointer_t>
+bool ProxyVectorStorage<value_t, pointer_t, const_pointer_t>::empty() const
+{
+    if (!m_storage) {
+        return true;
+    }
+
+    return m_storage->empty();
+}
+
+/*!
+    Get the size of the storage expressed in number of elements.
+
+    \result The size of the storage, expressed in number of elements.
+*/
+template<typename value_t, typename pointer_t, typename const_pointer_t>
+std::size_t ProxyVectorStorage<value_t, pointer_t, const_pointer_t>::size() const
+{
+    if (!m_storage) {
+        return 0;
+    }
+
+    return m_storage->size();
+}
+
+/*!
+    Resize the storage.
+
+    \result The size of the storage expressed in number of elements.
+*/
+template<typename value_t, typename pointer_t, typename const_pointer_t>
+void ProxyVectorStorage<value_t, pointer_t, const_pointer_t>::resize(std::size_t size)
+{
+    if (size == 0) {
+        destroyStorage(&m_storage);
+        return;
+
+    }
+
+    if (m_storage) {
+        m_storage->resize(size);
+    } else {
+        m_storage = createStorage(size);
+    }
+}
+
+/*!
     Constructor
 */
 template<typename value_t>
 ProxyVector<value_t>::ProxyVector()
-    : m_data(nullptr), m_size(0)
+    : m_size(0), m_data(nullptr)
 {
 }
 
 /*!
     Constructor
+
+    The container will create an internal storage that later can be filled
+    with data. This is allowed because the container points to constant data,
+    i.e., the container is not allowed to change the data it points to. Having
+    the data stored internallt or pointing to external data doesn't change the
+    behaviour of the container: in both cases it acts as a proxy to some
+    constant data.
 
     \param size is the number elements contained in the data
-    \param data a pointer to the data
-*/
-template<typename value_t>
-ProxyVector<value_t>::ProxyVector(value_t *data, std::size_t size)
-    : m_data(data), m_size(size)
-{
-}
-
-/*!
-    Constructor
-
-    \param storage is the storage that contains the data
 */
 template<typename value_t>
 template<typename other_value_t, typename std::enable_if<std::is_const<other_value_t>::value, int>::type>
-ProxyVector<value_t>::ProxyVector(std::vector<value_no_cv_t> &&storage)
-    : m_storage(std::unique_ptr<std::vector<value_no_cv_t>>(new std::vector<value_no_cv_t>(std::move(storage)))),
-      m_data(m_storage->data()), m_size(m_storage->size())
+ProxyVector<value_t>::ProxyVector(std::size_t size)
+    : ProxyVector<value_t>(INTERNAL_STORAGE, size, size)
 {
+}
+
+/*!
+    Constructor
+
+    The container will create an internal storage that later can be filled
+    with data. This is allowed because the container points to constant data,
+    i.e., the container is not allowed to change the data it points to. Having
+    the data stored internallt or pointing to external data doesn't change the
+    behaviour of the container: in both cases it acts as a proxy to some
+    constant data.
+
+    \param size is the number elements contained in the data
+    \param capacity is the size of the internal storage space expressed in
+    number of elements, the capacity of the container cannot be smaller than
+    the size of the data, if a smaller capacity is specified the storage will
+    be resized using data size
+*/
+template<typename value_t>
+template<typename other_value_t, typename std::enable_if<std::is_const<other_value_t>::value, int>::type>
+ProxyVector<value_t>::ProxyVector(std::size_t size, std::size_t capacity)
+    : ProxyVector<value_t>::ProxyVector(INTERNAL_STORAGE, size, capacity)
+{
+}
+
+/*!
+    Constructor
+
+    The container will create an internal storage that later can be filled
+    with data. This is allowed because the container points to constant data,
+    i.e., the container is not allowed to change the data it points to. Having
+    the data stored internallt or pointing to external data doesn't change the
+    behaviour of the container: in both cases it acts as a proxy to some
+    constant data.
+
+    \param data a pointer to the data
+    \param size is the number elements contained in the data
+*/
+template<typename value_t>
+template<typename other_value_t, typename std::enable_if<std::is_const<other_value_t>::value, int>::type>
+ProxyVector<value_t>::ProxyVector(__PXV_POINTER__ data, std::size_t size)
+    : ProxyVector<value_t>::ProxyVector(data, size, (data != INTERNAL_STORAGE) ? 0 : size)
+{
+}
+
+/*!
+    Constructor
+
+    If data is set to INTERNAL_STORAGE, the container will create an internal
+    storage that later can be filled with data. This is allowed because the
+    container points to constant data, i.e., the container is not allowed to
+    change the data it points to. Having the data stored internallt or pointing
+    to external data doesn't change the behaviour of the container: in both
+    cases it acts as a proxy to some constant data.
+
+    \param data a pointer to the data
+    \param size is the number elements contained in the data
+    \param capacity is the size of the internal storage space expressed in
+    number of elements, the capacity of the container cannot be smaller than
+    the size of the data, if a smaller capacity is specified the storage will
+    be resized using data size
+*/
+template<typename value_t>
+template<typename other_value_t, typename std::enable_if<std::is_const<other_value_t>::value, int>::type>
+ProxyVector<value_t>::ProxyVector(__PXV_POINTER__ data, std::size_t size, std::size_t capacity)
+    : m_storage(capacity), m_size(size), m_data((data != INTERNAL_STORAGE) ? data : m_storage.data())
+{
+}
+
+/*!
+    Constructor
+
+    Containers that point to non-constant data cannot use the internal storage.
+    This guarantees that all the pointers returned by the container are always
+    pointing to the original data (i.e., the container acts as a proxy to the
+    original data).
+
+    \param data a pointer to the data
+    \param size is the number elements contained in the data
+*/
+template<typename value_t>
+template<typename other_value_t, typename std::enable_if<!std::is_const<other_value_t>::value, int>::type>
+ProxyVector<value_t>::ProxyVector(__PXV_POINTER__ data, std::size_t size)
+    : m_storage(0), m_size(size), m_data(data)
+{
+    assert(data != INTERNAL_STORAGE);
 }
 
 /*!
@@ -222,25 +577,8 @@ ProxyVector<value_t>::ProxyVector(std::vector<value_no_cv_t> &&storage)
 */
 template<typename value_t>
 ProxyVector<value_t>::ProxyVector(const ProxyVector &other)
-    : m_size(other.m_size)
+    : m_storage(other.m_storage), m_size(other.m_size), m_data(other.storedData() ? m_storage.data() : other.m_data)
 {
-    if (other.m_storage) {
-        if (m_storage) {
-            m_storage->assign(other.m_storage->begin(), other.m_storage->end());
-        } else {
-            m_storage = std::unique_ptr<std::vector<value_no_cv_t>>(new std::vector<value_no_cv_t>(*(other.m_storage)));
-        }
-
-        if (other.m_data == other.m_storage->data()) {
-            m_data = m_storage->data();
-        } else {
-            m_data = other.m_data;
-        }
-    } else {
-        m_storage.reset();
-
-        m_data = other.m_data;
-    }
 }
 
 /*!
@@ -263,63 +601,133 @@ ProxyVector<value_t> & ProxyVector<value_t>::operator=(const ProxyVector &other)
 /*!
     Sets the content of the container.
 
-    \param data a pointer to the data
+    If data is set to INTERNAL_STORAGE, the container will create an internal
+    storage that later can be filled with data. This is allowed because the
+    container points to constant data, i.e., the container is not allowed to
+    change the data it points to. Having the data stored internallt or pointing
+    to external data doesn't change the behaviour of the container: in both
+    cases it acts as a proxy to some constant data.
+
+    \param data a pointer to the data, if the value INTERNAL_STORAGE is
+    specified, the proxy will point to the data contained in the internal
+    storage
     \param size is the number elements contained in the data
 */
 template<typename value_t>
-void ProxyVector<value_t>::set(value_t *data, std::size_t size)
-{
-    m_data = data;
-    m_size = size;
-}
-
-/*!
-    Sets the content of the container.
-
-    \param storage is the storage that contains the data
-*/
-template<typename value_t>
 template<typename other_value_t, typename std::enable_if<std::is_const<other_value_t>::value, int>::type>
-typename ProxyVector<value_t>::value_no_cv_t * ProxyVector<value_t>::set(std::vector<value_no_cv_t> &&storage)
+void ProxyVector<value_t>::set(__PXV_POINTER__ data, std::size_t size)
 {
-    m_storage = std::unique_ptr<std::vector<value_no_cv_t>>(new std::vector<value_no_cv_t>(std::move(storage)));
-    m_data    = m_storage->data();
-    m_size    = m_storage->size();
-
-    return m_storage->data();
-}
-
-/*!
-    Sets the content of the container.
-
-    \param size is the number of elements the storage should be able to
-    contain
-*/
-template<typename value_t>
-template<typename other_value_t, typename std::enable_if<std::is_const<other_value_t>::value, int>::type>
-typename ProxyVector<value_t>::value_no_cv_t * ProxyVector<value_t>::set(std::size_t size)
-{
-    if (!m_storage) {
-        m_storage = std::unique_ptr<std::vector<value_no_cv_t>>(new std::vector<value_no_cv_t>(size));
+    std::size_t capacity;
+    if (data != INTERNAL_STORAGE) {
+        capacity = 0;
     } else {
-        m_storage->resize(size);
+        capacity = size;
     }
-    m_data = m_storage->data();
-    m_size = m_storage->size();
-
-    return m_storage->data();
+    set(data, size, capacity);
 }
 
 /*!
-    Clear content.
+    Sets the content of the container.
+
+    If data is set to INTERNAL_STORAGE, the container will create an internal
+    storage that later can be filled with data. This is allowed because the
+    container points to constant data, i.e., the container is not allowed to
+    change the data it points to. Having the data stored internallt or pointing
+    to external data doesn't change the behaviour of the container: in both
+    cases it acts as a proxy to some constant data.
+
+    \param data a pointer to the data, if the value INTERNAL_STORAGE is
+    specified, the proxy will point to the data contained in the internal
+    storage
+    \param size is the number elements contained in the data
+    \param capacity is the number elements the internal contained should be
+    able to contain, the capacity of the container cannot be smaller thatn
+    the size of the data, if a smaller capacity is specified the storage
+    will be resize using data size
 */
 template<typename value_t>
-void ProxyVector<value_t>::clear()
+template<typename other_value_t, typename std::enable_if<std::is_const<other_value_t>::value, int>::type>
+void ProxyVector<value_t>::set(__PXV_POINTER__ data, std::size_t size, std::size_t capacity)
 {
-    m_data = nullptr;
-    m_size = 0;
+    m_storage.resize(std::max(size, capacity));
 
-    m_storage.reset();
+    m_size = size;
+    if (data == INTERNAL_STORAGE) {
+        if (m_size == 0) {
+            m_data = nullptr;
+        } else {
+            m_data = m_storage.data();
+        }
+    } else {
+        m_data = data;
+    }
+}
+
+/*!
+    Sets the content of the container.
+
+    Containers that point to non-constant data cannot use the internal storage.
+    This guarantees that all the pointers returned by the container are always
+    pointing to the original data (i.e., the container acts as a proxy to the
+    original data).
+
+    \param data a pointer to the data, containers that point to non-constant
+    data cannot use the internal storage, hence the value INTERNAL_STORAGE in
+    not allowed
+    \param size is the number elements contained in the data
+*/
+template<typename value_t>
+template<typename other_value_t, typename std::enable_if<!std::is_const<other_value_t>::value, int>::type>
+void ProxyVector<value_t>::set(__PXV_POINTER__ data, std::size_t size)
+{
+    assert(data != INTERNAL_STORAGE);
+
+    m_storage.resize(0);
+
+    m_size = size;
+    m_data = data;
+}
+
+/*!
+    Returns a direct pointer to the memory of the internal storage.
+
+    If the container is not using the internal storage, a null pointer is
+    returned.
+
+    \result A a direct pointer to the memory of the internal storage.
+*/
+template<typename value_t>
+__PXV_STORAGE_POINTER__ ProxyVector<value_t>::storedData() noexcept
+{
+    __PXV_STORAGE_POINTER__ internalData = m_storage.data();
+    if (!internalData) {
+        return nullptr;
+    } else if (internalData != m_data) {
+        return nullptr;
+    }
+
+    return internalData;
+}
+
+/*!
+    Returns a constant direct pointer to the memory of the internal storage.
+
+    If the container is not using the internal storage, a null pointer is
+    returned.
+
+    \result A a direct pointer to the memory of the internal storage.
+*/
+template<typename value_t>
+__PXV_STORAGE_CONST_POINTER__ ProxyVector<value_t>::storedData() const noexcept
+{
+    __PXV_STORAGE_CONST_POINTER__ internalData = m_storage.data();
+    if (!internalData) {
+        return nullptr;
+    } else if (internalData != m_data) {
+        return nullptr;
+    }
+
+    return internalData;
 }
 
 /*!
@@ -330,8 +738,8 @@ void ProxyVector<value_t>::clear()
 template<typename value_t>
 void ProxyVector<value_t>::swap(ProxyVector &other)
 {
-    std::swap(m_data, other.m_data);
     std::swap(m_size, other.m_size);
+    std::swap(m_data, other.m_data);
 
     m_storage.swap(other.m_storage);
 }
@@ -344,7 +752,23 @@ void ProxyVector<value_t>::swap(ProxyVector &other)
 template<typename value_t>
 bool ProxyVector<value_t>::operator==(const ProxyVector& other) const
 {
-    return m_size == other.m_size && m_data == other.m_data && m_storage == other.m_storage;
+    if (m_size != other.m_size) {
+        return false;
+    }
+
+    if (!storedData() && !other.storedData()) {
+        if (m_data != other.m_data) {
+            return false;
+        }
+    }
+
+    for (std::size_t i = 0; i < m_size; ++i) {
+        if (m_data[i] != other.m_data[i]) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 /*!
