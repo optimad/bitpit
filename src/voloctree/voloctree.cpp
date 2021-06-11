@@ -1933,6 +1933,9 @@ std::vector<long> VolOctree::importCells(const std::vector<OctantInfo> &octantIn
 */
 void VolOctree::_updateAdjacencies()
 {
+	// Tree information
+	int maxLevel = m_tree->getMaxDepth();
+
 	// Face information
 	int nCellFaces = m_cellTypeInfo->nFaces;
 	uint8_t oppositeFace[nCellFaces];
@@ -1940,21 +1943,24 @@ void VolOctree::_updateAdjacencies()
 
 	// Count cells with dirty adjacencies
 	long nDirtyAdjacenciesCells = 0;
+	std::vector<std::size_t> nDirtyAdjacenciesCellsByLevel(maxLevel + 1, 0);
 	for (const auto &entry : m_alteredCells) {
 		AlterationFlags cellAlterationFlags = entry.second;
 		if (!testAlterationFlags(cellAlterationFlags, FLAG_ADJACENCIES_DIRTY)) {
 			continue;
 		}
 
+		long cellId = entry.first;
+		int cellLevel = getCellLevel(cellId);
+
 		++nDirtyAdjacenciesCells;
+		++nDirtyAdjacenciesCellsByLevel[cellLevel];
 	}
 
-	// Sort the cells beased on their tree level
-	int maxLevel = m_tree->getMaxDepth();
-	size_t averageSize = nDirtyAdjacenciesCells / (maxLevel + 1);
+	// Group altered cells by their tree level
 	std::vector<std::vector<long>> hierarchicalCellIds(maxLevel + 1);
 	for (int level = 0; level <= maxLevel; ++level) {
-		hierarchicalCellIds[level].reserve(averageSize);
+		hierarchicalCellIds[level].reserve(nDirtyAdjacenciesCellsByLevel[level]);
 	}
 
 	for (const auto &entry : m_alteredCells) {
