@@ -87,7 +87,7 @@ private:
         static constexpr bool has_restore()
         {
             return std::is_same<decltype(test_restore<class_t>(nullptr)), std::true_type>();
-        };
+        }
 
     public:
         static const bool value = has_restore<T>();
@@ -112,7 +112,7 @@ private:
         static constexpr bool has_dump()
         {
             return std::is_same<decltype(test_dump<class_t>(nullptr)), std::true_type>();
-        };
+        }
 
     public:
         static const bool value = has_dump<T>();
@@ -251,7 +251,7 @@ public:
     static constexpr bool has_initialize()
     {
         return check_initialize<value_t, void, Args...>::value;
-    };
+    }
 
     // Constructors and initialization
     PiercedStorage();
