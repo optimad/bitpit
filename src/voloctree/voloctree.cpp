@@ -1975,37 +1975,80 @@ void VolOctree::_updateAdjacencies()
 	}
 
 	// Update the adjacencies
-	FaceInfoSet processedFaces;
-	processedFaces.reserve(nDirtyAdjacenciesCells * getDimension());
-
 	std::vector<uint32_t> neighTreeIds;
 	std::vector<bool> neighGhostFlags;
 	for (int level = 0; level <= maxLevel; ++level) {
 		for (long cellId : hierarchicalCellIds[level]) {
 			Cell &cell = m_cells[cellId];
 			OctantInfo octantInfo = getCellOctant(cellId);
+			Octant *octant = getOctantPointer(octantInfo);
 			for (int face = 0; face < nCellFaces; ++face) {
-				FaceInfo currentFaceInfo(cellId, face);
-				if (processedFaces.count(currentFaceInfo) > 0) {
-					continue;
+				// Check if the face needs to be processed
+				//
+				// If the face has no adjacencies, we need to process it to
+				// figure out if it is a border or it has some neighbours.
+				//
+				// If the face has only one adjacency and the neighbour's level
+				// is smaller or equal than the one of the current cell, all
+				// face adjacencies have already been found.
+				//
+				// If the face has only one adjacency and the neighbour's level
+				// is greater than the one of the current cell, there are still
+				// adjacencies to be found. The adjacency associated with the
+				// face is an adjacency that was not created during this update
+				// (cells are processed in level increasing order, only cells
+				// with a level smaller or equal to the one of the current cell
+				// may already have been processed during this update). Since
+				// the cell is bigger that its neighbour it cannot have only
+				// one adjacency, there are other adjacencies to be found in
+				// the cell marked as dirty.
+				//
+				// If the face has multiple adjacencies, we need to figure out
+				// if all the adjacencies have already been found. Current
+				// adjacencies were not created during this update (since there
+				// are multiple adjacencies, those adjacencies are cells smaller
+				// than the current one, however since cells are processed in
+				// level increasing order, only cells with a level smaller or
+				// equal to the one of the current cell may already have been
+				// processed during this update). To check if all adjacencies
+				// have been found, we check if the area coverd by the current
+				// adjacencies is equal to the face area.
+				int nFaceAdjacencies = cell.getAdjacencyCount(face);
+				if (nFaceAdjacencies > 0) {
+					if (nFaceAdjacencies == 1) {
+						long cellLevel = octant->getLevel();
+						long neighId = cell.getAdjacency(face, 0);
+						long neighLevel = getCellLevel(neighId);
+						if (neighLevel <= cellLevel) {
+							continue;
+						}
+					} else {
+						uint64_t neighsArea = 0;
+						const long *faceAdjacencies = cell.getAdjacencies(face);
+						for (int k = 0; k < nFaceAdjacencies; ++k) {
+							long neighId = faceAdjacencies[k];
+							OctantInfo neighOctantInfo = getCellOctant(neighId);
+							Octant *neighOctant = getOctantPointer(neighOctantInfo);
+							neighsArea += neighOctant->getLogicalArea();
+						}
+
+						uint64_t faceArea = octant->getLogicalArea();
+						if (faceArea == neighsArea) {
+							continue;
+						}
+					}
 				}
 
 				// Find cell neighbours
 				neighTreeIds.clear();
 				neighGhostFlags.clear();
-				if (octantInfo.internal) {
-					m_tree->findNeighbours(octantInfo.id, face, 1, neighTreeIds, neighGhostFlags);
-				} else {
-					m_tree->findGhostNeighbours(octantInfo.id, face, 1, neighTreeIds, neighGhostFlags);
-				}
+				m_tree->findNeighbours(octant, face, 1, neighTreeIds, neighGhostFlags);
 
 				// Set the adjacencies
 				//
-				// Adjacencies will processed twice, once while processing the
-				// current cell, and once while processing the neighbour cell.
-				// However they will be set only once, because the function that
-				// insert the adjacency in the cell will insert only unique
-				// adjacencies.
+				// Some of the neighbours may already be among the adjacencies
+				// of the cell, this is not a problem because the function that
+				// pushs the adjacency will insert only unique adjacencies.
 				int nNeighs = neighTreeIds.size();
 				for (int k = 0; k < nNeighs; ++k) {
 					OctantInfo neighOctantInfo(neighTreeIds[k], !neighGhostFlags[k]);
@@ -2018,9 +2061,6 @@ void VolOctree::_updateAdjacencies()
 					int neighFace = oppositeFace[face];
 					Cell &neigh = m_cells[neighId];
 					neigh.pushAdjacency(neighFace, cellId);
-
-					FaceInfo neighFaceInfo(neighId, neighFace);
-					processedFaces.insert(neighFaceInfo);
 				}
 			}
 		}
