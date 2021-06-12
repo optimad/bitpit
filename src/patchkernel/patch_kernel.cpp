@@ -5183,7 +5183,7 @@ void PatchKernel::pruneStaleAdjacencies()
 		return;
 	}
 
-	// Update cell adjacencies
+	// Remove stale adjacencies
 	for (const auto &entry : m_alteredCells) {
 		AlterationFlags cellAlterationFlags = entry.second;
 		if (!testAlterationFlags(cellAlterationFlags, FLAG_ADJACENCIES_DIRTY)) {
@@ -5539,7 +5539,7 @@ void PatchKernel::pruneStaleInterfaces()
 		return;
 	}
 
-	// Update cell interfaces
+	// Remove dangling interfaces from cells
 	for (const auto &entry : m_alteredCells) {
 		AlterationFlags cellAlterationFlags = entry.second;
 		if (!testAlterationFlags(cellAlterationFlags, FLAG_INTERFACES_DIRTY)) {
