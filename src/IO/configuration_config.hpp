@@ -91,8 +91,10 @@ public:
     template<typename T>
     void set(const std::string &key, const T &value);
 
-private:
+protected:
     bool m_multiSections;
+
+private:
     std::unique_ptr<Options> m_options;
     std::unique_ptr<Sections> m_sections;
 

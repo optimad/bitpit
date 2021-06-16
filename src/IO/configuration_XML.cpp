@@ -157,6 +157,132 @@ xmlChar * encodeString(const std::string &in, const std::string &encoding)
     return out;
 }
 
+/*!
+    Read the specified configuration file.
+
+    \param filename is the filename of the configuration file
+    \param rootname name of the root. If this name does not match xml doc root
+        name return an error
+    \param checkVersion boolean to enable the control of XML version
+    \param version number of version to check. If checkVersion is true and
+           version does not match the xml one, return an error
+    \param rootConfig pointer to Config tree to store data parsed from document.
+*/
+void readConfiguration(const std::string &filename, const std::string &rootname, bool checkVersion,
+                       int version, Config *rootConfig)
+{
+    if (!rootConfig) {
+        throw std::runtime_error("XML::readConfiguration Null Config tree structure passed");
+    }
+
+    // Macro to check API for match with the DLL we are using
+    LIBXML_TEST_VERSION
+
+    // Read the XML file
+    xmlDoc *doc = xmlReadFile(filename.c_str(), NULL, 0);
+    if (doc == nullptr) {
+        throw std::runtime_error("Could not parse XML configuration file \"" + filename + "\"");
+    }
+
+    // Get the root element
+    xmlNode * rootElement = xmlDocGetRootElement(doc);
+
+    // check if the root name is the requeste one
+    std::string rootXMLName(reinterpret_cast<const char*>(rootElement->name));
+    if (rootXMLName != rootname) {
+        throw std::runtime_error("The name of the root XML element is not \"" + rootname + "\"");
+    }
+
+    // Check if the version is supported
+    const xmlChar *versionAttributeName =
+        reinterpret_cast<const xmlChar *>("version");
+    if (checkVersion && xmlHasProp(rootElement, versionAttributeName)) {
+        xmlChar *versionValue = xmlGetProp(rootElement, versionAttributeName);
+        std::string versionString((char *) versionValue);
+        xmlFree(versionValue);
+
+        int versionXML;
+        std::istringstream(versionString) >> versionXML;
+
+        if (versionXML != version) {
+            throw std::runtime_error("The version of the XML file is not not \"" + std::to_string(version) + "\"");
+        }
+    }
+
+    readNode(rootElement->children, rootConfig);
+
+    // Clean-up
+    xmlFreeDoc(doc);
+    xmlCleanupParser();
+}
+
+/*!
+    Write the configuration to the specified file.
+
+    \param filename is the filename where the configuration will be written to
+    \param rootname name of the root to assign to the XML file.
+    \param version number of version to assing to the XML file.
+    \param rootConfig pointer to the Config tree to be written on file.
+*/
+void writeConfiguration(const std::string &filename, const std::string &rootname, int version,
+                        const Config *rootConfig)
+{
+    if (!rootConfig) {
+        throw std::runtime_error("XML::writeConfiguration Null Config tree structure passed");
+    }
+
+    int status;
+
+    // Create a new XmlWriter for DOM tree, with no compression
+    xmlTextWriterPtr writer = xmlNewTextWriterFilename(filename.c_str(), 0);
+    if (writer == NULL) {
+        throw std::runtime_error("Error creating the xml writer");
+    }
+
+    xmlTextWriterSetIndent(writer, 1);
+
+    // Start the document
+    status = xmlTextWriterStartDocument(writer, NULL, DEFAULT_ENCODING.c_str(), NULL);
+    if (status < 0) {
+        throw std::runtime_error("Error at xmlTextWriterStartDocument");
+    }
+
+    // Start the root element
+    xmlChar *elementName = encodeString(rootname, DEFAULT_ENCODING);
+    status = xmlTextWriterStartElement(writer, BAD_CAST elementName);
+    if (status < 0) {
+        throw std::runtime_error("Error at xmlTextWriterStartElement");
+    }
+
+    // Add an attribute with version
+    std::ostringstream versionStream;
+    versionStream << version;
+
+    xmlChar *versionAttr = encodeString(versionStream.str(), DEFAULT_ENCODING);
+    status = xmlTextWriterWriteAttribute(writer, BAD_CAST "version", BAD_CAST versionAttr);
+    if (status < 0) {
+        throw std::runtime_error("Error at xmlTextWriterWriteAttribute");
+    }
+
+    // Write the configuration
+    writeNode(writer, rootConfig, DEFAULT_ENCODING);
+
+    // End section
+    status = xmlTextWriterEndElement(writer);
+    if (status < 0) {
+        throw std::runtime_error("Error at xmlTextWriterEndElement");
+    }
+
+    // Close the document
+    status = xmlTextWriterEndDocument(writer);
+    if (status < 0) {
+        throw std::runtime_error("Error at xmlTextWriterEndDocument");
+    }
+
+    // Write the XML
+    xmlFreeTextWriter(writer);
+}
+
 }
 
 }

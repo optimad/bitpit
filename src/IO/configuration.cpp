@@ -22,12 +22,11 @@
 *
 \*---------------------------------------------------------------------------*/
 
-#include <stdexcept>
-#include <libxml/encoding.h>
-#include <libxml/parser.h>
 
 #include "configuration.hpp"
 #include "configuration_XML.hpp"
+
+#include <stringUtils.hpp>
 
 namespace bitpit {
 
@@ -96,7 +95,8 @@ ConfigParser::ConfigParser(const std::string &root, int version, bool multiSecti
 }
 
 /*!
-    Resets the configuration parser
+    Resets the configuration parser. MultiSection property set in construction
+    is not affected.
 
     \param root is the name of the root element
 */
@@ -110,7 +110,8 @@ void ConfigParser::reset(const std::string &root)
 }
 
 /*!
-    Resets the configuration parser
+    Resets the configuration parser. MultiSections property set in construction
+    is not affected.
 
     \param root is the name of the root element
     \param version is the version
@@ -125,6 +126,26 @@ void ConfigParser::reset(const std::string &root, int version)
 }
 
 /*!
+    Resets the configuration parser. MultiSections property set in construction
+    is forced to the new value given by the parameter multiSection
+
+    \param root is the name of the root element
+    \param version is the version
+    \param multiSections bool to force multiSection property set in construction
+    to the new value.
+*/
+void ConfigParser::reset(const std::string &root, int version, bool multiSections)
+{
+    m_root         = root;
+    m_checkVersion = true;
+    m_version      = version;
+
+    m_multiSections = true;
+
+    clear();
+}
+
+/*!
     Read the specified configuration file.
 
     \param filename is the filename of the configuration file
@@ -134,48 +155,23 @@ void ConfigParser::reset(const std::string &root, int version)
 */
 void ConfigParser::read(const std::string &filename, bool append)
 {
-    // Macro to check API for match with the DLL we are using
-    LIBXML_TEST_VERSION
-
-    // Read the XML file
-    xmlDoc *doc = xmlReadFile(filename.c_str(), NULL, 0);
-    if (doc == nullptr) {
-        throw std::runtime_error("Could not parse configuration file \"" + filename + "\"");
-    }
-
-    // Get the root element
-    xmlNode * rootElement = xmlDocGetRootElement(doc);
-
-    // check if the root name is the requeste one
-    std::string rootName(reinterpret_cast<const char*>(rootElement->name));
-    if (rootName != m_root) {
-        throw std::runtime_error("The name of the root element is not \"" + m_root + "\"");
-    }
-
-    // Check if the version is supported
-    const xmlChar *versionAttributeName = reinterpret_cast<const xmlChar *>("version");
-    if (m_checkVersion && xmlHasProp(rootElement, versionAttributeName)) {
-        xmlChar *versionValue = xmlGetProp(rootElement, versionAttributeName);
-        std::string versionString((char *) versionValue);
-        xmlFree(versionValue);
-
-        int version;
-        std::istringstream(versionString) >> version;
-
-        if (version != m_version) {
-            throw std::runtime_error("The version ofthe file is not not \"" + std::to_string(m_version) + "\"");
-        }
-    }
-
-    // Load the options in the configuration file
+    // Processing not-append requests
     if (!append) {
         clear();
     }
-    config::XML::readNode(rootElement->children, this);
 
-    // Clean-up
-    xmlFreeDoc(doc);
-    xmlCleanupParser();
+    std::string extension = "";
+    std::size_t dotPosition = filename.find_last_of(".");
+    if (dotPosition != std::string::npos) {
+        extension = filename.substr(dotPosition + 1);
+        extension = utils::string::trim(extension);
+    }
+
+    if (extension == "xml" || extension == "XML") {
+        config::XML::readConfiguration(filename, m_root, m_checkVersion, m_version, this);
+    } else {
+        throw std::runtime_error("ConfigParser::read - Unsupported file format");
+    }
 }
 
 /*!
@@ -185,56 +181,18 @@ void ConfigParser::read(const std::string &filename, bool append)
 */
 void ConfigParser::write(const std::string &filename) const
 {
-    int status;
-
-    // Create a new XmlWriter for DOM tree, with no compression
-    xmlTextWriterPtr writer = xmlNewTextWriterFilename(filename.c_str(), 0);
-    if (writer == NULL) {
-        throw std::runtime_error("Error creating the xml writer");
+    std::string extension = "";
+    std::size_t dotPosition = filename.find_last_of(".");
+    if (dotPosition != std::string::npos) {
+        extension = filename.substr(dotPosition + 1);
+        extension = utils::string::trim(extension);
     }
 
-    xmlTextWriterSetIndent(writer, 1);
-
-    // Start the document
-    status = xmlTextWriterStartDocument(writer, NULL, config::XML::DEFAULT_ENCODING.c_str(), NULL);
-    if (status < 0) {
-        throw std::runtime_error("Error at xmlTextWriterStartDocument");
+    if (extension == "xml" || extension == "XML") {
+        config::XML::writeConfiguration(filename, m_root, m_version, this);
+    } else {
+        throw std::runtime_error("ConfigParser::write - Unsupported file format");
     }
-
-    // Start the root element
-    xmlChar *elementName = config::XML::encodeString(m_root, config::XML::DEFAULT_ENCODING);
-    status = xmlTextWriterStartElement(writer, BAD_CAST elementName);
-    if (status < 0) {
-        throw std::runtime_error("Error at xmlTextWriterStartElement");
-    }
-
-    // Add an attribute with version
-    std::ostringstream versionStream;
-    versionStream << m_version;
-
-    xmlChar *versionAttr = config::XML::encodeString(versionStream.str(), config::XML::DEFAULT_ENCODING);
-    status = xmlTextWriterWriteAttribute(writer, BAD_CAST "version", BAD_CAST versionAttr);
-    if (status < 0) {
-        throw std::runtime_error("Error at xmlTextWriterWriteAttribute");
-    }
-
-    // Write the configuration
-    config::XML::writeNode(writer, this, config::XML::DEFAULT_ENCODING);
-
-    // End section
-    status = xmlTextWriterEndElement(writer);
-    if (status < 0) {
-        throw std::runtime_error("Error at xmlTextWriterEndElement");
-    }
-
-    // Close the document
-    status = xmlTextWriterEndDocument(writer);
-    if (status < 0) {
-        throw std::runtime_error("Error at xmlTextWriterEndDocument");
-    }
-
-    // Write the XML
-    xmlFreeTextWriter(writer);
 }
 
 /*!
@@ -277,8 +235,23 @@ GlobalConfigParser::GlobalConfigParser(const std::string &name, int version)
 }
 
 /*!
-    Returns the global configuration.
+    Constructor a new parser.
+*/
+GlobalConfigParser::GlobalConfigParser(const std::string &name, bool multiSections)
+    : ConfigParser(name, DEFAULT_VERSION, multiSections)
+{
+}
 
+/*!
+    Constructor a new parser.
+*/
+GlobalConfigParser::GlobalConfigParser(const std::string &name, int version, bool multiSections)
+    : ConfigParser(name, version, multiSections)
+{
+}
+
+/*!
+    Returns a global configuration with default options.
     \result The global instance of the configuration file parser.
 */
 GlobalConfigParser & GlobalConfigParser::parser()
@@ -299,7 +272,8 @@ namespace config {
     GlobalConfigParser &root = GlobalConfigParser::parser();
 
     /*!
-        Resets the root element name.
+        Resets to custom root element name, all other options are forcefully
+        reset to default. MultiSection property remains unaffected by the reset
 
         \param name is the name of the root element
     */
@@ -309,7 +283,9 @@ namespace config {
     }
 
     /*!
-        Resets the root element name and version.
+        Resets to custom root element name and version. , all other options are
+        forcefully reset to default. MultiSection property remains unaffected by
+        the reset.
 
         \param name is the name of the root element
         \param version is the version
@@ -317,6 +293,18 @@ namespace config {
     void reset(const std::string &name, int version)
     {
         root.reset(name, version);
+    }
+
+    /*!
+        Resets to custom root element name, version and multiSections property
+
+        \param name is the name of the root element
+        \param version is the version
+        \param multiSections boolean to control multiSections property of Config tree
+    */
+    void reset(const std::string &name, int version, bool multiSections)
+    {
+        root.reset(name, version, multiSections);
     }
 
     /*!
