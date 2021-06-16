@@ -43,6 +43,7 @@ public:
 
     void reset(const std::string &root);
     void reset(const std::string &root, int version);
+    void reset(const std::string &root, int version, bool multiSections);
 
     void read(const std::string &filename, bool append = true);
     void write(const std::string &filename) const;
@@ -72,6 +73,9 @@ private:
 
     GlobalConfigParser();
     GlobalConfigParser(const std::string &name, int version);
+    GlobalConfigParser(const std::string &name, bool multiSections);
+    GlobalConfigParser(const std::string &name, int version, bool multiSections);
+
 
     GlobalConfigParser(GlobalConfigParser const&) = delete;
     GlobalConfigParser& operator=(GlobalConfigParser const&) = delete;
@@ -91,6 +95,7 @@ namespace config {
     void reset();
     void reset(const std::string &name);
     void reset(const std::string &name, int version);
+    void reset(const std::string &name, int version, bool multiSections);
 
     void read(const std::string &filename, bool append = true);
     void write(const std::string &filename);
