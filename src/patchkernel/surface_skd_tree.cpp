@@ -369,8 +369,9 @@ long SurfaceSkdTree::findPointClosestCell(const std::array<double, 3> &point, do
 
     // Get a list of candidates nodes
     //
-    // Some temporary data structures are member of the class to avoid
-    // their reallocation every time the function is called.
+    // If threads safe lookups are not needed, some temporary data structures
+    // are declared as member of the class to avoid their reallocation every
+    // time the function is called.
     //
     // First, we gather all the candidates and then we evaluate the distance
     // of each candidate. Since distance estimate is constantly updated when
@@ -378,15 +379,36 @@ long SurfaceSkdTree::findPointClosestCell(const std::array<double, 3> &point, do
     // minimum distance of some candidates. Processing the candidates after
     // scanning all the tree, allows to discard some of them without the need
     // of evaluating the exact distance.
-    m_nodeStack.clear();
-    m_candidateIds.clear();
-    m_candidateMinDistances.clear();
+    std::unique_ptr<std::vector<std::size_t>> privateNodeStack;
+    std::unique_ptr<std::vector<std::size_t>> privateCandidateIds;
+    std::unique_ptr<std::vector<double>> privateCandidateMinDistances;
 
-    m_nodeStack.push_back(rootId);
-    while (!m_nodeStack.empty()) {
-        std::size_t nodeId = m_nodeStack.back();
+    std::vector<std::size_t> *nodeStack;
+    std::vector<std::size_t> *candidateIds;
+    std::vector<double> *candidateMinDistances;
+    if (areLookupsThreadSafe()) {
+        privateNodeStack = std::unique_ptr<std::vector<std::size_t>>(new std::vector<std::size_t>());
+        privateCandidateIds = std::unique_ptr<std::vector<std::size_t>>(new std::vector<std::size_t>());
+        privateCandidateMinDistances = std::unique_ptr<std::vector<double>>(new std::vector<double>());
+
+        nodeStack = privateNodeStack.get();
+        candidateIds = privateCandidateIds.get();
+        candidateMinDistances = privateCandidateMinDistances.get();
+    } else {
+        m_nodeStack.clear();
+        m_candidateIds.clear();
+        m_candidateMinDistances.clear();
+
+        nodeStack = &m_nodeStack;
+        candidateIds = &m_candidateIds;
+        candidateMinDistances = &m_candidateMinDistances;
+    }
+
+    nodeStack->push_back(rootId);
+    while (!nodeStack->empty()) {
+        std::size_t nodeId = nodeStack->back();
         const SkdNode &node = m_nodes[nodeId];
-        m_nodeStack.pop_back();
+        nodeStack->pop_back();
 
         // Do not consider nodes with a minimum distance greater than
         // the distance estimate
@@ -409,13 +431,13 @@ long SurfaceSkdTree::findPointClosestCell(const std::array<double, 3> &point, do
             std::size_t childId = node.getChildId(childLocation);
             if (childId != SkdNode::NULL_ID) {
                 isLeaf = false;
-                m_nodeStack.push_back(childId);
+                nodeStack->push_back(childId);
             }
         }
 
         if (isLeaf) {
-            m_candidateIds.push_back(nodeId);
-            m_candidateMinDistances.push_back(std::sqrt(nodeMinSquareDistance));
+            candidateIds->push_back(nodeId);
+            candidateMinDistances->push_back(std::sqrt(nodeMinSquareDistance));
         }
     }
 
@@ -423,15 +445,15 @@ long SurfaceSkdTree::findPointClosestCell(const std::array<double, 3> &point, do
     long nDistanceEvaluations = 0;
 
     *distance = std::sqrt(squareDistanceEstimate);
-    for (std::size_t k = 0; k < m_candidateIds.size(); ++k) {
+    for (std::size_t k = 0; k < candidateIds->size(); ++k) {
         // Do not consider nodes with a minimum distance greater than the
         // distance estimate
-        if (utils::DoubleFloatingGreater()(m_candidateMinDistances[k], *distance, tolerance, tolerance)) {
+        if (utils::DoubleFloatingGreater()(candidateMinDistances->at(k), *distance, tolerance, tolerance)) {
             continue;
         }
 
         // Evaluate the distance
-        std::size_t nodeId = m_candidateIds[k];
+        std::size_t nodeId = candidateIds->at(k);
         const SkdNode &node = m_nodes[nodeId];
 
         node.updatePointClosestCell(point, interiorCellsOnly, id, distance);

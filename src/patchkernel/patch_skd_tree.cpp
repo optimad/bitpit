@@ -927,7 +927,8 @@ PatchSkdTree::PatchSkdTree(const PatchKernel *patch, bool interiorCellsOnly)
     : m_patchInfo(patch, &m_cellRawIds),
       m_cellRawIds(interiorCellsOnly ? patch->getInternalCellCount() : patch->getCellCount()),
       m_nLeafs(0), m_nMinLeafCells(0), m_nMaxLeafCells(0),
-      m_interiorCellsOnly(interiorCellsOnly)
+      m_interiorCellsOnly(interiorCellsOnly),
+      m_threadSafeLookups(false)
 #if BITPIT_ENABLE_MPI
     , m_rank(0), m_nProcessors(1), m_communicator(MPI_COMM_NULL)
 #endif
@@ -1292,6 +1293,26 @@ void PatchSkdTree::createLeaf(std::size_t nodeId)
     ++m_nLeafs;
     m_nMinLeafCells = std::min(nodeCellCount, m_nMinLeafCells);
     m_nMaxLeafCells = std::max(nodeCellCount, m_nMaxLeafCells);
+}
+
+/*!
+* Set if the tree lookups should be thread safe.
+*
+* \param enable if set to true the lookups will be thread safe.
+*/
+void PatchSkdTree::enableThreadSafeLookups(bool enable)
+{
+    m_threadSafeLookups = enable;
+}
+
+/*!
+* Check if tree lookups are thread safe.
+*
+* \result Returns true if tree lookups are thread safe, false otherwise.
+*/
+bool PatchSkdTree::areLookupsThreadSafe() const
+{
+    return m_threadSafeLookups;
 }
 
 #if BITPIT_ENABLE_MPI

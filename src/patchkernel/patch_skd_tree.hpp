@@ -199,6 +199,9 @@ public:
 
     std::size_t evalMaxDepth(std::size_t rootId = 0) const;
 
+    void enableThreadSafeLookups(bool enable);
+    bool areLookupsThreadSafe() const;
+
 #if BITPIT_ENABLE_MPI
     const SkdBox & getPartitionBox(int rank) const;
 #endif
@@ -214,6 +217,8 @@ protected:
     std::vector<SkdNode, SkdNode::Allocator> m_nodes;
 
     bool m_interiorCellsOnly;
+
+    bool m_threadSafeLookups;                                       /*! Controls if the tree lookups should be thread safe */
 
 #if BITPIT_ENABLE_MPI
     int m_rank;
