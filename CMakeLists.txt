@@ -446,7 +446,7 @@ if (BITPIT_ENABLE_MPI)
 endif()
 set(OPERATORS_EXTERNAL_DEPS "")
 set(CONTAINERS_EXTERNAL_DEPS "")
-set(IO_EXTERNAL_DEPS "LibXml2")
+set(IO_EXTERNAL_DEPS "LibXml2;RapidJSON")
 set(COMMUNICATIONS_EXTERNAL_DEPS "MPI")
 set(LA_EXTERNAL_DEPS "PETSc")
 set(SA_EXTERNAL_DEPS "")
@@ -689,6 +689,27 @@ if (${_LibXml2_index} GREATER -1)
     list (INSERT BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS 0 "LIBXML2_INCLUDE_DIR")
 endif()
 unset(_LibXml2_index)
+
+list(FIND EXTERNAL_DEPS "RapidJSON" _RapidJSON_index)
+if (${_RapidJSON_index} GREATER -1)
+    find_package(RapidJSON 1.1.0 QUIET)
+    mark_as_advanced(RapidJSON_DIR)
+
+    if (RapidJSON_FOUND)
+        # RapidJSON library has been found
+        addPrivateDefinitions("HAS_RAPIDJSON_LIB=1")
+        list (INSERT BITPIT_EXTERNAL_DEPENDENCIES 0 "RapidJSON")
+        list (INSERT BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS 0 "RAPIDJSON_INCLUDE_DIRS")
+
+        # Activate std::string RapidJSON compliancy
+        addPrivateDefinitions("RAPIDJSON_HAS_STDSTRING=1")
+    else()
+        # RapidJSON library has not been found
+        addPrivateDefinitions("HAS_RAPIDJSON_LIB=0")
+        message(STATUS "RapidJSON library not found, JSON support will be disabled.")
+    endif()
+endif()
+unset(_RapidJSON_index)
 
 list(FIND EXTERNAL_DEPS "PETSc" _PETSc_index)
 if (${_PETSc_index} GREATER -1)

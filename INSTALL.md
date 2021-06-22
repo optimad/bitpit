@@ -12,9 +12,14 @@ Some additional dependencies are required for building specific modules
 * libxml2 and its development headers are needed when compiling the 'IO'
   module (please note that the 'IO' module is a dependecies for many other
   bitpit modules, the only modules that do not depend on 'IO' are the low
-  level modules like 'operators', 'containers', 'LA', and 'SA');
+  level modules like 'operators', 'containers', 'LA', and 'SA'). Moreover,
+  json support is automatically enabled if RapidJSON (version 1.1.0) libraries  
+  are installed on the system (https://github.com/Tencent/rapidjson): this is
+  a completely optional requirement, IO module will compile and work fine
+  with the only xml support too;   
 * blas, lapack, and lapacke are needed when compiling 'CG', 'RBF', and 'POD'
   modules.
+    
 
 When compiling bitpit, both shared library files and header library files are
 required. Therefore, in addition to the library packages, also the corresponding
@@ -43,7 +48,7 @@ The `BITPIT_ENABLE_MPI` variable can be used to compile the parallel implementat
 
 The `BITPIT_BUILD_EXAMPLES` can be used to compile examples sources in `bitpit/examples`. Note that the tests sources in `bitpit/test`are necessarily compiled and successively available at `bitpit/build/test/` as well as the compiled examples are available at `bitpit/build/examples/`.
 
-The module variables (available in the advanced mode) can be used to compile each module singularly by setting the related varible `ON/OFF` (BITPIT_MODULE_CONTAINERS, BITPIT_MODULE_IO, BITPIT_MODULE_LA, BITPIT_MODULE_SA...). Possible dependencies between bitpit modules are automatically resolved. 
+The module variables (available in the advanced mode) can be used to compile each module singularly by setting the related varible `ON/OFF` (BITPIT_MODULE_CONTAINERS, BITPIT_MODULE_IO, BITPIT_MODULE_LA, BITPIT_MODULE_SA...). Possible dependencies between bitpit modules are automatically resolved.
 
 Finally, you can choose the installation folder setting the cmake variable `CMAKE_INSTALL_PREFIX`. The default installation folder is `/usr/local/`.
 
@@ -69,12 +74,12 @@ In order to build properly the documentation Doxygen (>=1.8.6) and Graphviz (>=2
 
 In the ccmake interface the variable `BITPIT_ENABLE_DOC` can be set to `ON` in order to build the documentation during the library compilation.
 If turned on the new variable `BITPIT_DOC_EXTRACT_PRIVATE` can be used to include all the private class members in the documentation.
-  
-After the `make` or `make install` the doxygen documentation will be built. You can chose to compile only the documentation with command 
+
+After the `make` or `make install` the doxygen documentation will be built. You can chose to compile only the documentation with command
 ```bash
     bitpit/build$ make doc   
 ```
 You can now browse the html documentation with your favorite browser by opening 'html/index.html'.
 
 ## Help
-For any problem, please contact <a href="http://www.optimad.it">Optimad engineering srl</a> at info@optimad.it. 
+For any problem, please contact <a href="http://www.optimad.it">Optimad engineering srl</a> at info@optimad.it.
