@@ -1,0 +1,34 @@
+{
+    "first" : {
+        "color"   : "blue",
+        "distance": 11543 ,
+        "exists"  : true,
+        "data" : {
+            "x" : 64.12345679
+        },
+        "dummy" : null
+    },
+
+    "second" : {
+        "color"   : "redButnotreallyREDsomething similar + to red",
+        "distance": -22876587866878888,
+        "exists"  : false,
+        "data" : {
+            "y" : -32.6789E-21
+        }
+    },
+
+    "ObjArray"    : [
+        {
+            "Address" : "Sunset Boulevard 1923",
+            "Nation"  : "California - USA",
+            "ZIPCode" : 42345
+        },
+
+        {
+            "Address" : "Via dei Pini 24",
+            "Nation"  : "Italy",
+            "ZIPCode" : 10129
+        }
+    ]
+}

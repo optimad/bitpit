@@ -26,6 +26,10 @@
 #include "configuration.hpp"
 #include "configuration_XML.hpp"
 
+#if HAS_RAPIDJSON_LIB
+#include "configuration_JSON.hpp"
+#endif
+
 #include <stringUtils.hpp>
 
 namespace bitpit {
@@ -148,6 +152,9 @@ void ConfigParser::reset(const std::string &root, int version, bool multiSection
 /*!
     Read the specified configuration file.
 
+    Configuration file can be either XML or JSON files (if JSON support was
+    found at compile time).
+
     \param filename is the filename of the configuration file
     \param append controls if the configuration file will be appended to the
     current configuration or if the current configuration will be overwritten
@@ -160,6 +167,7 @@ void ConfigParser::read(const std::string &filename, bool append)
         clear();
     }
 
+    // Read the configuration
     std::string extension = "";
     std::size_t dotPosition = filename.find_last_of(".");
     if (dotPosition != std::string::npos) {
@@ -169,6 +177,10 @@ void ConfigParser::read(const std::string &filename, bool append)
 
     if (extension == "xml" || extension == "XML") {
         config::XML::readConfiguration(filename, m_root, m_checkVersion, m_version, this);
+#if HAS_RAPIDJSON_LIB
+    } else if (extension == "json" || extension == "JSON") {
+        config::JSON::readConfiguration(filename, this);
+#endif
     } else {
         throw std::runtime_error("ConfigParser::read - Unsupported file format");
     }
@@ -177,10 +189,15 @@ void ConfigParser::read(const std::string &filename, bool append)
 /*!
     Write the configuration to the specified file.
 
+    Configuration file can be either XML or JSON files (if JSON support was
+    found at compile time).
+
+
     \param filename is the filename where the configuration will be written to
 */
 void ConfigParser::write(const std::string &filename) const
 {
+    // Write the configuration
     std::string extension = "";
     std::size_t dotPosition = filename.find_last_of(".");
     if (dotPosition != std::string::npos) {
@@ -190,6 +207,11 @@ void ConfigParser::write(const std::string &filename) const
 
     if (extension == "xml" || extension == "XML") {
         config::XML::writeConfiguration(filename, m_root, m_version, this);
+#if HAS_RAPIDJSON_LIB
+    } else if (extension == "json" || extension == "JSON") {
+        bool prettify = true;
+        config::JSON::writeConfiguration(filename, this, prettify);
+#endif
     } else {
         throw std::runtime_error("ConfigParser::write - Unsupported file format");
     }
@@ -310,6 +332,9 @@ namespace config {
     /*!
         Read the specified configuration file.
 
+        Configuration file can be either XML or JSON files (if JSON support was
+        found at compile time).
+
         \param filename is the filename of the configuration file
         \param append controls if the configuration file will be appended to the
         current configuration or if the current configuration will be overwritten
@@ -322,6 +347,9 @@ namespace config {
 
     /*!
         Write the configuration to the specified file.
+
+        Configuration file can be either XML or JSON files (if JSON support was
+        found at compile time).
 
         \param filename is the filename where the configuration will be written to
     */

@@ -24,7 +24,7 @@ This is a short guide to set a bitpit compliant 64bit Windows environment using 
   - mingw-w64-x86_64-qt5 (optional, but needed to run cmake-gui. Consider 1.22 GB to install it.)
   - mingw-w64-x86_64-doxygen (to generate Doxygen documentation)
   - mingw-w64-x86_64-graphviz (to generate Doxygen documentation)
-
+  - mingw-w64-x86_64-rapidjson (to enable JSON I/O support on IO module)
 
 - <B>Microsoft MPI</B>: MSMpiSetup.exe or msmpisdk.msi (downloadable for free from https://www.microsoft.com/ searching for "MicrosoftMPI v x.x.x". Here the exact version x.x.x must be compliant with the version of MinGW64 package mingw-w64-x86_64-msmpi. See MSMPI section in procedure chapter for details)
 
@@ -202,6 +202,14 @@ Install *libxml2* with:
 ```bash
 user@machine MINGW64 ~
 > pacman -S mingw-w64-x86_64-libxml2
+```
+
+**__RAPIDJSON__**
+
+If JSON support on IO module is required, install *rapidjson* with:
+```bash
+user@machine MINGW64 ~
+> pacman -S mingw-w64-x86_64-rapidjson
 ```
 
 **__PETSc__**
