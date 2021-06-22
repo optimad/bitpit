@@ -85,8 +85,8 @@ void writeNode(xmlTextWriterPtr writer, const Config *config, const std::string 
 {
     // Write the options
     for (auto &entry : config->getOptions()) {
-        std::string key   = entry.first;
-        std::string value = entry.second;
+        const std::string &key   = entry.first;
+        const std::string &value = entry.second;
 
         xmlChar *elementName = encodeString(key, encoding);
         xmlChar *elementText = encodeString(value, encoding);
@@ -98,7 +98,7 @@ void writeNode(xmlTextWriterPtr writer, const Config *config, const std::string 
 
     // Write the sections
     for (auto &entry : config->getSections()) {
-        std::string key = entry.first;
+        const std::string &key = entry.first;
         const Config::Section *section = entry.second.get();
 
         // Start the section
