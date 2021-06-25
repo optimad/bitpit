@@ -909,7 +909,7 @@ int VolOctree::getCellLevel(long id) const
 	} else {
 		octant = m_tree->getGhostOctant(octantInfo.id);
 	}
-	return m_tree->getLevel(octant);
+	return octant->getLevel();
 }
 
 /*!
@@ -2550,14 +2550,14 @@ void VolOctree::_findCellEdgeNeighs(long id, int edge, const std::vector<long> &
 	//
 	std::vector<long> faceNeighs;
 	const Octant *octant = getOctantPointer(octantInfo);
-	int octantLevel = m_tree->getLevel(octant);
+	int octantLevel = octant->getLevel();
 	for (int face : m_octantLocalFacesOnEdge[edge]) {
 		faceNeighs.clear();
 		_findCellFaceNeighs(id, face, blackList, &faceNeighs);
 		for (long neighId : faceNeighs) {
 			const OctantInfo neighOctantInfo = getCellOctant(neighId);
 			const Octant *neighOctant = getOctantPointer(neighOctantInfo);
-			int neighOctantLevel = m_tree->getLevel(neighOctant);
+			int neighOctantLevel = neighOctant->getLevel();
 			if (neighOctantLevel <= octantLevel) {
 				utils::addToOrderedVector<long>(neighId, *neighs);
 			} else if (m_tree->isEdgeOnOctant(octant, edge, neighOctant)) {
@@ -2604,7 +2604,7 @@ void VolOctree::_findCellVertexNeighs(long id, int vertex, const std::vector<lon
 	// NOTE: in three dimension the function "_findCellEdgeNeighs" will return
 	// both edge and face neighbours.
 	const Octant *octant = getOctantPointer(octantInfo);
-	int octantLevel = m_tree->getLevel(octant);
+	int octantLevel = octant->getLevel();
 	if (isThreeDimensional()) {
 		std::vector<long> edgeNeighs;
 		for (int edge : m_octantLocalEdgesOnVertex[vertex]) {
@@ -2613,7 +2613,7 @@ void VolOctree::_findCellVertexNeighs(long id, int vertex, const std::vector<lon
 			for (long neighId : edgeNeighs) {
 				const OctantInfo neighOctantInfo = getCellOctant(neighId);
 				const Octant *neighOctant = getOctantPointer(neighOctantInfo);
-				int neighOctantLevel = m_tree->getLevel(neighOctant);
+				int neighOctantLevel = neighOctant->getLevel();
 				if (neighOctantLevel <= octantLevel) {
 					utils::addToOrderedVector<long>(neighId, *neighs);
 				} else if (m_tree->isNodeOnOctant(octant, vertex, neighOctant)) {
@@ -2629,7 +2629,7 @@ void VolOctree::_findCellVertexNeighs(long id, int vertex, const std::vector<lon
 			for (long neighId : faceNeighs) {
 				const OctantInfo neighOctantInfo = getCellOctant(neighId);
 				const Octant *neighOctant = getOctantPointer(neighOctantInfo);
-				int neighOctantLevel = m_tree->getLevel(neighOctant);
+				int neighOctantLevel = neighOctant->getLevel();
 				if (neighOctantLevel <= octantLevel) {
 					utils::addToOrderedVector<long>(neighId, *neighs);
 				} else if (m_tree->isNodeOnOctant(octant, vertex, neighOctant)) {
