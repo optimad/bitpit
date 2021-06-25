@@ -1925,7 +1925,7 @@ std::vector<long> VolOctree::importCells(const std::vector<OctantInfo> &octantIn
 void VolOctree::_updateAdjacencies()
 {
 	// Face information
-	int nCellFaces = 2 * getDimension();
+	int nCellFaces = m_cellTypeInfo->nFaces;
 	uint8_t oppositeFace[nCellFaces];
 	m_tree->getOppface(oppositeFace);
 
