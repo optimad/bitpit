@@ -2279,7 +2279,7 @@ namespace bitpit {
     bool
     LocalTree::localBalance(bool doNew, bool doInterior){
 
-        uint32_t			sizeneigh, modsize;
+        uint32_t			sizeneigh;
         u32vector		 	neigh;
         u32vector		 	modified, newmodified;
         uint32_t 			i, idx;
@@ -2496,9 +2496,9 @@ namespace bitpit {
             }
 
             // While loop for iterative balancing
-            u32vector().swap(newmodified);
-            modsize = modified.size();
-            while(modsize!=0){
+            while(!modified.empty()){
+                newmodified.clear();
+
                 ibegin = modified.begin();
                 iend = modified.end();
                 for (iit=ibegin; iit!=iend; ++iit){
@@ -2590,10 +2590,7 @@ namespace bitpit {
                     }
                 }
                 preBalance21(newmodified);
-                u32vector().swap(modified);
-                swap(modified,newmodified);
-                modsize = modified.size();
-                u32vector().swap(newmodified);
+                modified.swap(newmodified);
             }// end while
 
         }
@@ -2675,9 +2672,9 @@ namespace bitpit {
             }
 
             // While loop for iterative balancing
-            u32vector().swap(newmodified);
-            modsize = modified.size();
-            while(modsize!=0){
+            while(!modified.empty()){
+                newmodified.clear();
+
                 ibegin = modified.begin();
                 iend = modified.end();
                 for (iit=ibegin; iit!=iend; ++iit){
@@ -2769,10 +2766,7 @@ namespace bitpit {
                     }
                 }
                 preBalance21(newmodified);
-                u32vector().swap(modified);
-                swap(modified,newmodified);
-                modsize = modified.size();
-                u32vector().swap(newmodified);
+                modified.swap(newmodified);
             }// end while
             obegin = oend = m_octants.end();
             ibegin = iend = modified.end();
