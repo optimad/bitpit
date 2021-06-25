@@ -3733,7 +3733,8 @@ namespace bitpit {
         }
 
         // Initialize mapping
-        u32vector(nocts0).swap(m_mapIdx);
+        m_mapIdx.resize(nocts0);
+        m_mapIdx.shrink_to_fit();
         for (uint32_t i=0; i<nocts0; i++){
             m_mapIdx[i] = i;
         }
@@ -3815,16 +3816,15 @@ namespace bitpit {
             iter->m_info[Octant::INFO_AUX] = false;
         }
 
-        m_mapIdx.clear();
         if (mapper_flag){
-            // m_mapIdx init
             m_mapIdx.resize(nocts0);
-            u32vector(m_mapIdx).swap(m_mapIdx);
-
             for (uint32_t i=0; i<nocts0; i++){
                 m_mapIdx[i] = i;
             }
+        } else {
+            m_mapIdx.clear();
         }
+        m_mapIdx.shrink_to_fit();
 
         bool globalDone = false;
 #if BITPIT_ENABLE_MPI==1
@@ -4543,13 +4543,15 @@ namespace bitpit {
         }
 
         // m_mapIdx init
-        u32vector().swap(m_mapIdx);
         if (mapflag) {
             m_mapIdx.resize(nocts0);
             for (uint32_t i=0; i<nocts0; i++){
                 m_mapIdx[i] = i;
             }
+        } else {
+            m_mapIdx.clear();
         }
+        m_mapIdx.shrink_to_fit();
 
         bool globalDone = false;
 #if BITPIT_ENABLE_MPI==1
