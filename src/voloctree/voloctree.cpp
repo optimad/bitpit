@@ -1596,9 +1596,7 @@ VolOctree::StitchInfo VolOctree::deleteCells(const std::vector<DeleteInfo> &dele
 {
 	// Info of the cells
 	int nCellVertices = m_cellTypeInfo->nVertices;
-
-	// Info on the faces
-	int nInterfaceVertices = m_interfaceTypeInfo->nVertices;
+	int nCellFaces    = m_cellTypeInfo->nFaces;
 
 	// Delete the cells
 	std::unordered_set<long> deadVertices;
@@ -1655,12 +1653,22 @@ VolOctree::StitchInfo VolOctree::deleteCells(const std::vector<DeleteInfo> &dele
 
 	// All the vertices belonging to the dangling cells has to be kept
 	//
-	// The vertices of the dangling faces need to be kept because there are
-	// still cells using them. However it's not enough to consider only the
-	// vertices on the dangling faces, we have to consider the vertices of
-	// the whole cell. That's because we may need to keep vertices on the
-	// edges of the cell, and those vertices may not be on interfaces of the
-	// dangling faces.
+	// We need to keep all the vertices that lie on a dangling face and belong
+	// to cells that were not deleted. These are the vertices of the dangling
+	// faces, plus all the vertices that lie on the borders of the dangling
+	// faces. Latter vertices arise from three-dimensional configurations where
+	// a small cell has been deleted and, among its non-deleted neighburs, there
+	// areboth larger cells and cells of the same size. In this case, a vertex
+	// of the deleted small cell can lie on one of the edges of a bigger cell
+	// and belong also to a smaller cell. If only the bigger cell is dangling,
+	// that vertex will lie on a dangling face (it's on the edge of the cell,
+	// hence on the border of the face), but it's not one of the vertices of
+	// the dangling cells.
+	//
+	// To identify all vertices that need to be kept, we consider the vertices
+	// of the dangling faces and the vertices of the smaller neighbouring faces
+	// (i.e., the faces of the smaller neigbours of the dangling cells that lie
+	// on the faces of the dangling cells).
 	//
 	// Morover we need to build a map between the patch numbering and the
 	// octree numbering of the vertices of the dangling cells. This map will
@@ -1668,6 +1676,7 @@ VolOctree::StitchInfo VolOctree::deleteCells(const std::vector<DeleteInfo> &dele
 	// the existing cells.
 	StitchInfo stitchVertices;
 	for (const auto &entry: m_alteredCells) {
+		// Consider only dangling faces
 		if (!testAlterationFlags(entry.second, FLAG_DANGLING)) {
 			continue;
 		}
@@ -1687,35 +1696,35 @@ VolOctree::StitchInfo VolOctree::deleteCells(const std::vector<DeleteInfo> &dele
 			deadVertices.erase(vertexId);
 		}
 
-		// Vertices of all other interfaces left of the cell
-		int nCellInterfaces = cell.getInterfaceCount();
-		const long *interfaces = cell.getInterfaces();
-		for (int i = 0; i < nCellInterfaces; ++i) {
-			long interfaceId = interfaces[i];
-			if (interfaceId < 0) {
-				continue;
-			}
+		// Vertices of neighbours
+		//
+		// We need to select the neighbours smaller than the current cell and
+		// keep the vertices of the faces that are shared with the current cell.
+		int cellLevel = octant->getLevel();
 
-			const Interface &interface = m_interfaces[interfaceId];
-			if (interface.isBorder()) {
-				continue;
-			}
+		for (int face = 0; face < nCellFaces; ++face) {
+			int nFaceAdjacencies = cell.getAdjacencyCount(face);
+			const long *faceAdjacencies = cell.getAdjacencies(face);
+			for (int i = 0; i < nFaceAdjacencies; ++i) {
+				int neighId = faceAdjacencies[i];
+				OctantInfo neighOctantInfo = getCellOctant(neighId);
+				Octant *neighOctant = getOctantPointer(neighOctantInfo);
+				int neighLevel = neighOctant->getLevel();
+				if (neighLevel <= cellLevel) {
+					continue;
+				}
 
-			long ownerId  = interface.getOwner();
-			int ownerFace = interface.getOwnerFace();
-
-			const Cell &ownerCell = m_cells[ownerId];
-			ConstProxyVector<long> ownerCellVertexIds = ownerCell.getVertexIds();
-
-			OctantInfo ownerOctantInfo = getCellOctant(ownerId);
-			Octant *ownerOctant = getOctantPointer(ownerOctantInfo);
-
-			const int *localFaceConnect = m_cellTypeInfo->faceConnectStorage[ownerFace].data();
-			for (int k = 0; k < nInterfaceVertices; ++k) {
-				long vertexId = ownerCellVertexIds[localFaceConnect[k]];
-				uint64_t vertexTreeKey = m_tree->computeNodePersistentKey(ownerOctant, localFaceConnect[k]);
-				stitchVertices.insert({vertexTreeKey, vertexId});
-				deadVertices.erase(vertexId);
+				const Cell &neigh = m_cells[neighId];
+				int neighFace = findAdjoinNeighFace(cellId, face, neighId);
+				const int *localNeighFaceConnect = m_cellTypeInfo->faceConnectStorage[neighFace].data();
+				ConstProxyVector<long> faceVertexIds = neigh.getFaceVertexIds(neighFace);
+				std::size_t nFaceVertexIds = faceVertexIds.size();
+				for (std::size_t k = 0; k < nFaceVertexIds; ++k) {
+					long vertexId = faceVertexIds[k];
+					uint64_t vertexTreeKey = m_tree->computeNodePersistentKey(neighOctant, localNeighFaceConnect[k]);
+					stitchVertices.insert({vertexTreeKey, vertexId});
+					deadVertices.erase(vertexId);
+				}
 			}
 		}
 	}
