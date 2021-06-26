@@ -22,7 +22,7 @@
 # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 #
 
-cmake_policy(VERSION 2.8)
+cmake_policy(VERSION 3.10)
 
 set(PETSC_VALID_COMPONENTS
   C

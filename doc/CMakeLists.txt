@@ -23,7 +23,7 @@
 #---------------------------------------------------------------------------*/
 
 # Specify the version being used as well as the language
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.10)
 
 # Add a target to generate API documentation with Doxygen
 option(BITPIT_ENABLE_DOC "Create and install the HTML based API documentation (requires Doxygen)" OFF)
