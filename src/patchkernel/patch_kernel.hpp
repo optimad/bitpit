@@ -1047,6 +1047,13 @@ private:
 #if BITPIT_ENABLE_MPI==1
 	void _deleteGhostCell(long id);
 #endif
+
+	InterfaceIterator _addInterface(ElementType type, std::unique_ptr<long[]> &&connectStorage, long id);
+
+	void _restoreInterface(const InterfaceIterator &iterator, ElementType type, std::unique_ptr<long[]> &&connectStorage);
+
+	void _deleteInterface(long id);
+
 };
 
 }
