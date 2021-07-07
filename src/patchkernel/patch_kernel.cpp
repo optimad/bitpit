@@ -2438,18 +2438,22 @@ PatchKernel::CellIterator PatchKernel::addCell(Cell &&source, long id)
 		id = source.getId();
 	}
 
-	int connectSize = source.getConnectSize();
-	std::unique_ptr<long[]> connectStorage = std::unique_ptr<long[]>(new long[connectSize]);
-	if (!source.hasInfo()){
-		std::copy(source.getConnect(), source.getConnect() + connectSize, connectStorage.get());
-	}
+	// Add a dummy cell
+	//
+	// It is not possible to directly add the source into the storage. First a
+	// dummy cell is created and then that cell is replaced with the source.
+	std::unique_ptr<long[]> dummyConnectStorage = std::unique_ptr<long[]>(nullptr);
 
-	CellIterator iterator = addCell(source.getType(), std::move(connectStorage), id);
+	CellIterator iterator = _addInternalCell(ElementType::UNDEFINED, std::move(dummyConnectStorage), id);
+
+	// Replace the newly created cell with the source
+	//
+	// Before replacing the newly created cell we need to set the id of the
+	// source to the id that has been assigned to the newly created cell.
+	source.setId(iterator->getId());
 
 	Cell &cell = (*iterator);
-	id = cell.getId();
 	cell = std::move(source);
-	cell.setId(id);
 
 	return iterator;
 }
@@ -2532,16 +2536,6 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementType type, std::unique_ptr
 		return cellEnd();
 	}
 
-	if (m_cellIdGenerator) {
-		if (id < 0) {
-			id = m_cellIdGenerator->generate();
-		} else {
-			m_cellIdGenerator->setAssigned(id);
-		}
-	} else if (id < 0) {
-		throw std::runtime_error("No valid id has been provided for the cell.");
-	}
-
 	if (Cell::getDimension(type) > getDimension()) {
 		return cellEnd();
 	}
@@ -2570,6 +2564,17 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementType type, std::unique_ptr
 PatchKernel::CellIterator PatchKernel::_addInternalCell(ElementType type, std::unique_ptr<long[]> &&connectStorage,
 													long id)
 {
+	// Get the id of the cell
+	if (m_cellIdGenerator) {
+		if (id < 0) {
+			id = m_cellIdGenerator->generate();
+		} else {
+			m_cellIdGenerator->setAssigned(id);
+		}
+	} else if (id < 0) {
+		throw std::runtime_error("No valid id has been provided for the cell.");
+	}
+
 	// Get the id of the cell before which the new cell should be inserted
 #if BITPIT_ENABLE_MPI==1
 	//
@@ -2714,9 +2719,6 @@ bool PatchKernel::deleteCell(long id)
 	_deleteInternalCell(id);
 #endif
 
-	// Cell id is no longer used
-	m_cellIdGenerator->trash(id);
-
 	return true;
 }
 
@@ -2787,6 +2789,11 @@ void PatchKernel::_deleteInternalCell(long id)
 	m_nInternalCells--;
 	if (id == m_lastInternalCellId) {
 		updateLastInternalCellId();
+	}
+
+	// Cell id is no longer used
+	if (m_cellIdGenerator) {
+		m_cellIdGenerator->trash(id);
 	}
 }
 
