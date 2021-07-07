@@ -1560,13 +1560,26 @@ PatchKernel::VertexIterator PatchKernel::addVertex(Vertex &&source, long id)
 		id = source.getId();
 	}
 
-	VertexIterator iterator = addVertex(source.getCoords(), id);
+	// Add a dummy vertex
+	//
+	// It is not possible to directly add the source into the storage. First a
+	// dummy vertex is created and then that vertex is replaced with the source.
+	//
+	// The corrdinates of the dummy vertex shuold match the coordinates of the
+	// source, because the bounding box of the patch is updated every time a
+	// new vertex is added.
+	VertexIterator iterator = _addInternalVertex(source.getCoords(), id);
+
+	// Replace the newly created vertex with the source
+	//
+	// Before replacing the newly created vertex we need to set the id
+	// of the source to the id that has been assigned to the newly created
+	// vertex, we also need to mark the vertex as internal.
+	source.setId(iterator->getId());
+	source.setInterior(true);
 
 	Vertex &vertex = (*iterator);
-	id = vertex.getId();
 	vertex = std::move(source);
-	vertex.setId(id);
-	vertex.setInterior(true);
 
 	return iterator;
 }
@@ -1595,16 +1608,6 @@ PatchKernel::VertexIterator PatchKernel::addVertex(const std::array<double, 3> &
 		return vertexEnd();
 	}
 
-	if (m_vertexIdGenerator) {
-		if (id < 0) {
-			id = m_vertexIdGenerator->generate();
-		} else {
-			m_vertexIdGenerator->setAssigned(id);
-		}
-	} else if (id < 0) {
-		throw std::runtime_error("No valid id has been provided for the vertex.");
-	}
-
 	// Add the vertex
 	VertexIterator iterator = _addInternalVertex(coords, id);
 
@@ -1627,6 +1630,17 @@ PatchKernel::VertexIterator PatchKernel::addVertex(const std::array<double, 3> &
 */
 PatchKernel::VertexIterator PatchKernel::_addInternalVertex(const std::array<double, 3> &coords, long id)
 {
+	// Get id
+	if (m_vertexIdGenerator) {
+		if (id < 0) {
+			id = m_vertexIdGenerator->generate();
+		} else {
+			m_vertexIdGenerator->setAssigned(id);
+		}
+	} else if (id < 0) {
+		throw std::runtime_error("No valid id has been provided for the vertex.");
+	}
+
 	// Get the id of the vertex before which the new vertex should be inserted
 #if BITPIT_ENABLE_MPI==1
 	//
@@ -1737,11 +1751,6 @@ bool PatchKernel::deleteVertex(long id)
 	_deleteInternalVertex(id);
 #endif
 
-	// Vertex id is no longer used
-	if (m_vertexIdGenerator) {
-		m_vertexIdGenerator->trash(id);
-	}
-
 	return true;
 }
 
@@ -1813,6 +1822,11 @@ void PatchKernel::_deleteInternalVertex(long id)
 	m_nInternalVertices--;
 	if (id == m_lastInternalVertexId) {
 		updateLastInternalVertexId();
+	}
+
+	// Vertex id is no longer used
+	if (m_vertexIdGenerator) {
+		m_vertexIdGenerator->trash(id);
 	}
 }
 
