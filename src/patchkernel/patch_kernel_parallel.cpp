@@ -840,17 +840,6 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementType type, std::unique_ptr
 		return cellEnd();
 	}
 
-	if (m_cellIdGenerator) {
-		if (id < 0) {
-			id = m_cellIdGenerator->generate();
-		} else {
-			m_cellIdGenerator->setAssigned(id);
-		}
-	} else if (id < 0) {
-		throw std::runtime_error("No valid id has been provided for the cell.");
-	}
-
-
 	if (Cell::getDimension(type) > getDimension()) {
 		return cellEnd();
 	}
@@ -885,6 +874,17 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementType type, std::unique_ptr
 PatchKernel::CellIterator PatchKernel::_addGhostCell(ElementType type, std::unique_ptr<long[]> &&connectStorage,
 												 int rank, long id)
 {
+	// Get the id of the cell
+	if (m_cellIdGenerator) {
+		if (id < 0) {
+			id = m_cellIdGenerator->generate();
+		} else {
+			m_cellIdGenerator->setAssigned(id);
+		}
+	} else if (id < 0) {
+		throw std::runtime_error("No valid id has been provided for the cell.");
+	}
+
 	// Create the cell
 	//
 	// If there are internal cells, the ghost cell should be inserted
@@ -999,6 +999,11 @@ void PatchKernel::_deleteGhostCell(long id)
 	m_nGhostCells--;
 	if (id == m_firstGhostCellId) {
 		updateFirstGhostCellId();
+	}
+
+	// Cell id is no longer used
+	if (m_cellIdGenerator) {
+		m_cellIdGenerator->trash(id);
 	}
 }
 
