@@ -3913,15 +3913,24 @@ PatchKernel::InterfaceIterator PatchKernel::addInterface(Interface &&source, lon
 		id = source.getId();
 	}
 
-	int connectSize = source.getConnectSize();
-	std::unique_ptr<long[]> connectStorage = std::unique_ptr<long[]>(new long[connectSize]);
+	// Add a dummy interface
+	//
+	// It is not possible to directly add the source into the storage. First
+	// a dummy interface is created and then that interface is replaced with
+	// the source.
+	std::unique_ptr<long[]> dummyConnectStorage = std::unique_ptr<long[]>(nullptr);
 
-	InterfaceIterator iterator = addInterface(source.getType(), std::move(connectStorage), id);
+	InterfaceIterator iterator = _addInterface(ElementType::UNDEFINED, std::move(dummyConnectStorage), id);
+
+	// Replace the newly created interface with the source
+	//
+	// Before replacing the newly created interface we need to set the id
+	// of the source to the id that has been assigned to the newly created
+	// interface.
+	source.setId(iterator->getId());
 
 	Interface &interface = (*iterator);
-	id = interface.getId();
 	interface = std::move(source);
-	interface.setId(id);
 
 	return iterator;
 }
@@ -3999,6 +4008,36 @@ PatchKernel::InterfaceIterator PatchKernel::addInterface(ElementType type,
 		return interfaceEnd();
 	}
 
+	if (Interface::getDimension(type) > (getDimension() - 1)) {
+		return interfaceEnd();
+	}
+
+	InterfaceIterator iterator = _addInterface(type, std::move(connectStorage), id);
+
+	return iterator;
+}
+
+/*!
+	Internal function to add a new interface with the specified id.
+
+	If valid, the specified id will we assigned to the newly created interface,
+	otherwise a new unique id will be generated for the interface. However, it
+	is not possible to create a new interface with an id already assigned to an
+	existing interface of the patch. If this happens, an exception is thrown.
+	Ids are considered valid if they are greater or equal than zero.
+
+	\param type is the type of the interface
+	\param connectStorage is the storage the contains or will contain
+	the connectivity of the element
+	\param id is the id of the new cell. If a negative id value is
+	specified, ad new unique id will be generated
+	\return An iterator pointing to the added interface.
+*/
+PatchKernel::InterfaceIterator PatchKernel::_addInterface(ElementType type,
+														  std::unique_ptr<long[]> &&connectStorage,
+														  long id)
+{
+	// Get id
 	if (m_interfaceIdGenerator) {
 		if (id < 0) {
 			id = m_interfaceIdGenerator->generate();
@@ -4009,10 +4048,7 @@ PatchKernel::InterfaceIterator PatchKernel::addInterface(ElementType type,
 		throw std::runtime_error("No valid id has been provided for the interface.");
 	}
 
-	if (Interface::getDimension(type) > (getDimension() - 1)) {
-		return interfaceEnd();
-	}
-
+	// Create the interface
 	PiercedVector<Interface>::iterator iterator = m_interfaces.emreclaim(id, id, type, std::move(connectStorage));
 
 	// Set the alteration flags
@@ -4063,15 +4099,35 @@ PatchKernel::InterfaceIterator PatchKernel::restoreInterface(ElementType type,
 		throw std::runtime_error("Unable to restore the specified interface: the kernel doesn't contain an entry for that interface.");
 	}
 
-	// There is not need to set the id of the interfaces as assigned, because
-	// also the index generator will be restored.
-	Interface &interface = *iterator;
-	interface.initialize(id, type, std::move(connectStorage));
-
-	// Set the alteration flags
-	setRestoredInterfaceAlterationFlags(id);
+	_restoreInterface(iterator, type, std::move(connectStorage));
 
 	return iterator;
+}
+
+/*!
+	Internal function to restore the interface with the specified id.
+
+	The kernel should already contain the interface, only the contents of the
+	interface will be updated.
+
+	\param type is the type of the interface
+	\param connectStorage is the storage the contains or will contain
+	the connectivity of the element
+	\return An iterator pointing to the restored interface.
+*/
+void PatchKernel::_restoreInterface(const InterfaceIterator &iterator, ElementType type,
+									std::unique_ptr<long[]> &&connectStorage)
+{
+	// Restore the interface
+	//
+	// There is no need to set the id of the interfaces as assigned, because
+	// also the index generator will be restored.
+	long interfaceId = iterator.getId();
+	Interface &interface = *iterator;
+	interface.initialize(interfaceId, type, std::move(connectStorage));
+
+	// Set the alteration flags
+	setRestoredInterfaceAlterationFlags(interfaceId);
 }
 
 /*!
@@ -4095,16 +4151,28 @@ bool PatchKernel::deleteInterface(long id)
 		return false;
 	}
 
+	_deleteInterface(id);
+
+	return true;
+}
+
+/*!
+	Internal function to delete an interface.
+
+	\param id is the id of the interface
+*/
+void PatchKernel::_deleteInterface(long id)
+{
 	// Set the alteration flags
 	setDeletedInterfaceAlterationFlags(id);
 
 	// Delete interface
 	m_interfaces.erase(id, true);
+
+	// Interface id is no longer used
 	if (m_interfaceIdGenerator) {
 		m_interfaceIdGenerator->trash(id);
 	}
-
-	return true;
 }
 
 /*!
