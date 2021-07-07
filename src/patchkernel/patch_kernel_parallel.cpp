@@ -482,6 +482,11 @@ void PatchKernel::_deleteGhostVertex(long id)
 	if (id == m_firstGhostVertexId) {
 		updateFirstGhostVertexId();
 	}
+
+    // Vertex id is no longer used
+    if (m_vertexIdGenerator) {
+        m_vertexIdGenerator->trash(id);
+    }
 }
 
 /*!
