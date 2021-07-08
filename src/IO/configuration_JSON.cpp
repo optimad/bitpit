@@ -103,7 +103,7 @@ void readConfiguration(const std::string &filename, Config *rootConfig)
     }
 
     // Root should be an object, bitpit doens't support root arrays.
-    assert(jsonRoot.isObject() && "JSON:readDoc parsed document root is not an object");
+    assert(jsonRoot.IsObject() && "JSON:readDoc parsed document root is not an object");
 
     // Fill the configuration
     readNode("", jsonRoot, rootConfig);
