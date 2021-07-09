@@ -56,12 +56,6 @@ const int LevelSetCachedObject::PROPAGATION_SIGN_UNDEFINED = -3;
 */
 
 /*!
- * Destructor
- */
-LevelSetCachedObject::~LevelSetCachedObject( ){
-}
-
-/*!
  * Constructor
  * @param[in] id id assigned to object
  */

@@ -41,13 +41,6 @@ namespace bitpit {
 LevelSetMetaObject::LevelSetMetaObject(int id) : LevelSetObject(id){
 }
 
-
-/*!
- * Destructor
- */
-LevelSetMetaObject::~LevelSetMetaObject(){
-}
-
 /*!
  * If the object is primary 
  * @return true

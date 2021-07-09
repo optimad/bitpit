@@ -43,13 +43,6 @@ namespace bitpit {
 */
 
 /*!
- * Destructor
- */
-LevelSetBoolean::~LevelSetBoolean(){
-    m_objPtr.clear();
-}
-
-/*!
  * Constructor taking two objects.
  * @param[in] id identifier of object
  * @param[in] op type of boolean operation

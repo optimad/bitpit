@@ -91,7 +91,6 @@ class LevelSetCachedObject : public LevelSetObject{
 # endif 
 
     public:
-    virtual ~LevelSetCachedObject();
     LevelSetCachedObject(int);
 
     LevelSetInfo                                getLevelSetInfo(long ) const override ;

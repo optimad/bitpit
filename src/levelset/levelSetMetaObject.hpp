@@ -32,7 +32,6 @@ class LevelSetObject;
 class LevelSetMetaObject : public LevelSetObject{
     public:
     LevelSetMetaObject(int);
-    virtual ~LevelSetMetaObject();
 
     bool            isPrimary() const override;
     virtual int     getPrimaryObjectId( long ) const =0;

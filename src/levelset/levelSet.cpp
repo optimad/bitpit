@@ -78,13 +78,6 @@ LevelSet::LevelSet() {
 }
 
 /*!
- * Destructor of LevelSet
-*/
-LevelSet::~LevelSet(){
-    clear() ;
-}
-
-/*!
  * Sets the grid on which the levelset function should be computed.
  * Only cartesian and octree patches are supported at this moment.
  * @param[in] mesh computational grid
