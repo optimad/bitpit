@@ -502,12 +502,6 @@ LevelSetSegmentation::SurfaceInfo::SurfaceInfo( long index, const std::array<dou
 */
 
 /*!
- * Destructor
- */
-LevelSetSegmentation::~LevelSetSegmentation() {
-}
-
-/*!
  * Constructor
  * @param[in] id identifier of object
  */

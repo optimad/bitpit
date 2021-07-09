@@ -146,7 +146,6 @@ class LevelSetSegmentation : public LevelSetCachedObject {
     void                                        updateLSInNarrowBand(LevelSetOctree *, const std::vector<adaption::Info> &, bool);
 
     public:
-    virtual ~LevelSetSegmentation();
     LevelSetSegmentation(int);
     LevelSetSegmentation(int, std::unique_ptr<const SurfUnstructured> &&, double featureAngle = 2. * BITPIT_PI);
     LevelSetSegmentation(int, const SurfUnstructured*, double featureAngle = 2. * BITPIT_PI);

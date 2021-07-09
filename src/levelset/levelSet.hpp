@@ -64,7 +64,6 @@ class LevelSet{
     bool                    removeProcessingOrder(int) ;
 
     public:
-    ~LevelSet() ;
     LevelSet() ;
 
     LevelSet(LevelSet&& other) = default;

@@ -44,7 +44,6 @@ class LevelSetMask : public LevelSetSegmentation {
 
 
     public:
-    ~LevelSetMask();
     LevelSetMask(int, const std::unordered_set<long> &, const VolumeKernel &);
     LevelSetMask(int, const std::vector<long> &, long, bool, const VolumeKernel &);
 };
