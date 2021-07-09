@@ -4142,44 +4142,60 @@ std::unordered_map<long, int> PatchKernel::evaluateExchangeVertexOwners() const
 	}
 
 	// Send local vertex owners to the neighbouring partitions
+	//
+	// The list of sent and received vertices are ordered using a geometrical
+	// criterion (the same criterion is used on all the partitions), in this
+	// way the n-th source vertex on a partition will correspond to the n-th
+	// target vertex on the other partition.
+	std::set<long, VertexPositionLess> exchangeSourcesVertexIds(VertexPositionLess(*this));
 	for (const auto &entry : m_ghostCellExchangeSources) {
 		int rank = entry.first;
-		const std::vector<long> &cellIds = entry.second;
+		const std::vector<long> &exchangeSourcesCellIds = entry.second;
 
-		std::size_t bufferSize = 0;
-		for (long cellId : cellIds) {
+		exchangeSourcesVertexIds.clear();
+		for (long cellId : exchangeSourcesCellIds) {
 			const Cell &cell = getCell(cellId);
-			bufferSize += sizeof(int) * cell.getVertexCount();
+			ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
+			exchangeSourcesVertexIds.insert(cellVertexIds.begin(), cellVertexIds.end());
 		}
+
+		std::size_t bufferSize = sizeof(int) * exchangeSourcesVertexIds.size();
 		vertexOwnerCommunicator.setSend(rank, bufferSize);
 
 		SendBuffer &buffer = vertexOwnerCommunicator.getSendBuffer(rank);
-		for (long cellId : cellIds) {
-			const Cell &cell = getCell(cellId);
-			for (long vertexId : cell.getVertexIds()) {
-				buffer << exchangeVertexOwners.at(vertexId);
-			}
+		for (long vertexId : exchangeSourcesVertexIds) {
+			buffer << exchangeVertexOwners.at(vertexId);
 		}
 		vertexOwnerCommunicator.startSend(rank);
 	}
 
 	// Receive vertex owners from the neighbouring partitions
+	//
+	// The list of sent and received vertices are ordered using a geometrical
+	// criterion (the same criterion is used on all the partitions), in this
+	// way the n-th source vertex on a partition will correspond to the n-th
+	// target vertex on the other partition.
 	int nCompletedRecvs = 0;
+	std::set<long, VertexPositionLess> exchangeTargetsVertexIds(VertexPositionLess(*this));
 	while (nCompletedRecvs < vertexOwnerCommunicator.getRecvCount()) {
 		int rank = vertexOwnerCommunicator.waitAnyRecv();
-		const std::vector<long> &cellIds = m_ghostCellExchangeTargets.at(rank);
+		const std::vector<long> &exchangeTargetsCellIds = m_ghostCellExchangeTargets.at(rank);
 		RecvBuffer &buffer = vertexOwnerCommunicator.getRecvBuffer(rank);
 
-		for (long cellId : cellIds) {
+		exchangeTargetsVertexIds.clear();
+		for (long cellId : exchangeTargetsCellIds) {
 			const Cell &cell = getCell(cellId);
-			for (long vertexId : cell.getVertexIds()) {
-				int remoteVertexOwner;
-				buffer >> remoteVertexOwner;
+			ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
+			exchangeTargetsVertexIds.insert(cellVertexIds.begin(), cellVertexIds.end());
+		}
 
-				int &currentVertexOwner = exchangeVertexOwners.at(vertexId);
-				if (remoteVertexOwner < currentVertexOwner) {
-					currentVertexOwner = remoteVertexOwner;
-				}
+		for (long vertexId : exchangeTargetsVertexIds) {
+			int remoteVertexOwner;
+			buffer >> remoteVertexOwner;
+
+			int &currentVertexOwner = exchangeVertexOwners.at(vertexId);
+			if (remoteVertexOwner < currentVertexOwner) {
+				currentVertexOwner = remoteVertexOwner;
 			}
 		}
 
