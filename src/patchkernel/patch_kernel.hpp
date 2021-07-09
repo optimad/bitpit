@@ -99,6 +99,10 @@ public:
 
 		bool operator()(long id_1, long id_2) const
 		{
+			if (id_1 == id_2) {
+				return false;
+			}
+
 			const std::array<double, 3> &coords_1 = m_patch.getVertexCoords(id_1);
 			const std::array<double, 3> &coords_2 = m_patch.getVertexCoords(id_2);
 			for (int k = 0; k < 3; ++k) {
@@ -154,6 +158,10 @@ public:
 
 		bool operator()(long id_1, long id_2) const
 		{
+			if (id_1 == id_2) {
+				return false;
+			}
+
 			std::array<double, 3> centroid_1;
 			std::array<double, 3> centroid_2;
 			if (m_native) {
@@ -221,6 +229,10 @@ public:
 
 		bool operator()(long id_1, long id_2) const
 		{
+			if (id_1 == id_2) {
+				return false;
+			}
+
 			// Select the first vertex of the first cell
 			ConstProxyVector<long> cellVertexIds_1 = m_patch.getCell(id_1).getVertexIds();
 
