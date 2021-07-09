@@ -40,12 +40,6 @@ namespace bitpit {
 */
 
 /*!
- * Destructor
- */
-LevelSetObject::~LevelSetObject( ){
-}
-
-/*!
  * Constructor
  * @param[in] id id assigned to object
  */

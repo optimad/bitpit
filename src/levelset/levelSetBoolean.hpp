@@ -56,7 +56,6 @@ class LevelSetBoolean: public LevelSetMetaObject {
     void                                        _restore( std::istream &) override;
 
     public:
-    ~LevelSetBoolean();
     LevelSetBoolean(int, LevelSetBooleanOperation, LevelSetObject*, LevelSetObject*);
     LevelSetBoolean(int, LevelSetBooleanOperation, const std::vector<LevelSetObject*> &);
     LevelSetBoolean(const LevelSetBoolean &);

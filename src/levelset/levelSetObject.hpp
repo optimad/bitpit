@@ -100,7 +100,7 @@ class LevelSetObject : public VTKBaseStreamer{
 # endif 
 
     public:
-    virtual ~LevelSetObject();
+    virtual ~LevelSetObject() = default;
 
     const LevelSetKernel *                      getKernel() const;
 

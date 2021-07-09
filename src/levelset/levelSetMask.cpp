@@ -47,12 +47,6 @@ namespace bitpit {
 */
 
 /*!
- * Destructor
- */
-LevelSetMask::~LevelSetMask() {
-}
-
-/*!
  * Constructor
  * @param[in] id identifier of object
  * @param[in] mask the list of inner cells
