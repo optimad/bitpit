@@ -695,7 +695,7 @@ double LevelSetSegmentation::getMaxSurfaceFeatureSize( ) const {
 }
 
 /*!
- * Computes axis aligned bounding box of object
+ * Computes axis aligned global bounding box of object
  * @param[out] minP minimum point
  * @param[out] maxP maximum point
  */
@@ -703,6 +703,29 @@ void LevelSetSegmentation::getBoundingBox( std::array<double,3> &minP, std::arra
     const SurfUnstructured &m_surface = m_segmentation->getSurface();
     m_surface.getBoundingBox(minP,maxP) ;
 }
+
+#if BITPIT_ENABLE_MPI
+/*!
+ * Computes axis aligned bounding box of object
+ *
+ * The current process may only have the portion of the object needed for
+ * evaluating the levelset on the interior cells, this function allows to
+ * evaluate the overall bounding box across all process.
+ *
+ * @param[out] minP minimum point
+ * @param[out] maxP maximum point
+ */
+void LevelSetSegmentation::getGlobalBoundingBox( std::array<double,3> &minP, std::array<double,3> &maxP ) const {
+    getBoundingBox(minP, maxP);
+
+    if (m_kernelPtr->getMesh()->isPartitioned()) {
+        MPI_Comm communicator = m_kernelPtr->getCommunicator();
+
+        MPI_Allreduce(MPI_IN_PLACE, minP.data(), 3, MPI_DOUBLE, MPI_MIN, communicator);
+        MPI_Allreduce(MPI_IN_PLACE, maxP.data(), 3, MPI_DOUBLE, MPI_MAX, communicator);
+    }
+}
+#endif
 
 /*!
  * Clear the segmentation and the specified kernel.

@@ -70,6 +70,9 @@ class LevelSetCachedObject : public LevelSetObject{
     protected:
     PiercedVector<LevelSetInfo>                 m_ls ;          /**< Levelset information for each cell */
     virtual void                                getBoundingBox( std::array<double,3> &, std::array<double,3> & )const =0  ;
+# if BITPIT_ENABLE_MPI
+    virtual void                                getGlobalBoundingBox( std::array<double,3> &, std::array<double,3> & )const =0  ;
+#endif
 
     void                                        _clear( ) override ;
     virtual void                                __clear() ;

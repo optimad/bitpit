@@ -176,9 +176,17 @@ void LevelSetCachedObject::propagateSign() {
     seeds.reserve(mesh.getCellCount());
 
     // Evaluate the bounding box of the object
+    //
+    // The current process may only have the portion of the object needed for
+    // evaluating the levelset on the cells of its mesh, therefore we need to
+    // evaluate the overall bounding box across all process.
     std::array<double,3> boxMin;
     std::array<double,3> boxMax;
+#if BITPIT_ENABLE_MPI
+    getGlobalBoundingBox(boxMin, boxMax);
+#else
     getBoundingBox(boxMin, boxMax);
+#endif
 
     // Set the initial propagation status of the cells
     //
