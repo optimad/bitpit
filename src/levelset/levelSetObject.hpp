@@ -55,6 +55,8 @@ class LevelSetObject : public VTKBaseStreamer{
     private:
     int                                         m_id;           /**< identifier of object */
 
+    void                                        setId(int id);
+
     protected:
     LevelSetObject(int);
     LevelSetObject(const LevelSetObject &other) = default;

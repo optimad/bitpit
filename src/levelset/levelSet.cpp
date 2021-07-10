@@ -156,10 +156,6 @@ void LevelSet::setMesh( VolOctree* octree ) {
  */
 int LevelSet::addObject( std::unique_ptr<SurfUnstructured> &&segmentation, double angle, int id ) {
 
-    if (id == levelSetDefaults::OBJECT) {
-        id = m_objects.size();
-    }
-
     LevelSetSegmentation* lsSeg = new LevelSetSegmentation(id, std::move(segmentation), angle ) ;
     LevelSetObject *object = static_cast<LevelSetObject *>(lsSeg);
 
@@ -175,10 +171,6 @@ int LevelSet::addObject( std::unique_ptr<SurfUnstructured> &&segmentation, doubl
  */
 int LevelSet::addObject( SurfUnstructured *segmentation, double angle, int id ) {
 
-    if (id == levelSetDefaults::OBJECT) {
-        id = m_objects.size();
-    }
-
     LevelSetSegmentation* lsSeg = new LevelSetSegmentation(id, segmentation, angle) ;
     LevelSetObject *object = static_cast<LevelSetObject *>(lsSeg);
 
@@ -193,10 +185,6 @@ int LevelSet::addObject( SurfUnstructured *segmentation, double angle, int id ) 
  * order will be used as identifier
  */
 int LevelSet::addObject( std::unique_ptr<SurfaceKernel> &&segmentation, double angle, int id ) {
-
-    if (id == levelSetDefaults::OBJECT) {
-        id = m_objects.size();
-    }
 
     SurfUnstructured *surfUnstructured = dynamic_cast<SurfUnstructured *>(segmentation.get());
     if (!surfUnstructured) {
@@ -220,10 +208,6 @@ int LevelSet::addObject( std::unique_ptr<SurfaceKernel> &&segmentation, double a
  */
 int LevelSet::addObject( SurfaceKernel *segmentation, double angle, int id ) {
 
-    if (id == levelSetDefaults::OBJECT) {
-        id = m_objects.size();
-    }
-
     SurfUnstructured *surfUnstructured = dynamic_cast<SurfUnstructured *>(segmentation);
     if (!surfUnstructured) {
         throw std::runtime_error ("Segmentation type not supported");
@@ -245,10 +229,6 @@ int LevelSet::addObject( SurfaceKernel *segmentation, double angle, int id ) {
  */
 int LevelSet::addObject( LevelSetBooleanOperation operation, int id1, int id2, int id ) {
 
-    if (id == levelSetDefaults::OBJECT) {
-        id = m_objects.size();
-    }
-
     LevelSetObject *ptr1 = m_objects.at(id1).get() ;
     LevelSetObject *ptr2 = m_objects.at(id2).get() ;
 
@@ -263,10 +243,6 @@ int LevelSet::addObject( LevelSetBooleanOperation operation, int id1, int id2, i
  * @return identifier of new object
  */
 int LevelSet::addObject( LevelSetBooleanOperation operation, const std::vector<int> &ids, int id ) {
-
-    if (id == levelSetDefaults::OBJECT) {
-        id = m_objects.size();
-    }
 
     std::vector<LevelSetObject*> ptr;
     for( int id : ids){
@@ -284,10 +260,6 @@ int LevelSet::addObject( LevelSetBooleanOperation operation, const std::vector<i
  */
 int LevelSet::addObject( const std::unordered_set<long> &list, int id ) {
 
-    if (id == levelSetDefaults::OBJECT) {
-        id = m_objects.size();
-    }
-
     assert(m_kernel && " levelset: setMesh must be called befor adding a LevelSetMask object ");
 
     return registerObject( std::unique_ptr<LevelSetObject>( new LevelSetMask(id, list, *m_kernel->getMesh()) ) );
@@ -303,10 +275,6 @@ int LevelSet::addObject( const std::unordered_set<long> &list, int id ) {
  * @return identifier of new object
  */
 int LevelSet::addObject( const std::vector<long> &list, long refInterface, bool invert, int id ) {
-
-    if (id == levelSetDefaults::OBJECT) {
-        id = m_objects.size();
-    }
 
     assert(m_kernel && " levelset: setMesh must be called befor adding a LevelSetMask object ");
 
@@ -330,6 +298,14 @@ int LevelSet::addObject( std::unique_ptr<LevelSetObject> &&object ) {
  */
 int LevelSet::registerObject( std::unique_ptr<LevelSetObject> &&object ) {
 
+    int objectId = object->getId();
+    if (objectId == levelSetDefaults::OBJECT) {
+        objectId = m_objectIdentifierGenerator.generate();
+        object->setId(objectId);
+    } else {
+        m_objectIdentifierGenerator.setAssigned(objectId);
+    }
+
     if( m_kernel){
         object->setKernel(m_kernel.get());
     }
@@ -337,8 +313,6 @@ int LevelSet::registerObject( std::unique_ptr<LevelSetObject> &&object ) {
     if (m_narrowBandSize > 0.) {
         object->setSizeNarrowBand(m_narrowBandSize);
     }
-
-    int objectId = object->getId();
 
     m_objects[objectId] = std::move(object) ;
 
@@ -351,6 +325,7 @@ int LevelSet::registerObject( std::unique_ptr<LevelSetObject> &&object ) {
  * Remove all levelset objects
  */
 void LevelSet::removeObjects() {
+    m_objectIdentifierGenerator.reset();
     m_objects.clear();
     m_order.clear();
 }
@@ -362,6 +337,7 @@ void LevelSet::removeObjects() {
  */
 bool LevelSet::removeObject(int id) {
     if( m_objects.count(id) != 0){
+        m_objectIdentifierGenerator.trash(id);
         m_objects.erase(id);
         bool found = removeProcessingOrder(id);
         BITPIT_UNUSED(found);
@@ -680,6 +656,8 @@ void LevelSet::partition( const std::vector<adaption::Info> &mapper ){
  */
 void LevelSet::dump( std::ostream &stream ){
 
+    m_objectIdentifierGenerator.dump(stream);
+
     utils::binary::write(stream, m_order);
     utils::binary::write(stream, m_narrowBandSize);
     utils::binary::write(stream, m_signedDF);
@@ -695,6 +673,8 @@ void LevelSet::dump( std::ostream &stream ){
  * @param[in] stream output stream
  */
 void LevelSet::restore( std::istream &stream ){
+
+    m_objectIdentifierGenerator.restore(stream);
 
     utils::binary::read(stream, m_order);
     utils::binary::read(stream, m_narrowBandSize);

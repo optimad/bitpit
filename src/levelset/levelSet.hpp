@@ -51,6 +51,8 @@ class LevelSetObject;
 class LevelSet{
 
     private:
+    IndexGenerator<long> m_objectIdentifierGenerator; /**< Object identifier generator */
+
     std::unique_ptr<LevelSetKernel>                             m_kernel ;              /**< LevelSet computational kernel */
     std::unordered_map<int,std::unique_ptr<LevelSetObject>>     m_objects ;              /**< Objects defining the boundaries */
 
