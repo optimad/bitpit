@@ -140,6 +140,9 @@ class LevelSetSegmentation : public LevelSetCachedObject {
 # endif
 
     void                                        getBoundingBox( std::array<double,3> &, std::array<double,3> &) const override;
+# if BITPIT_ENABLE_MPI
+    void                                        getGlobalBoundingBox( std::array<double,3> &, std::array<double,3> &) const override;
+#endif
 
     void                                        computeLSInNarrowBand( LevelSetCartesian *, bool);
     void                                        computeLSInNarrowBand( LevelSetOctree *, bool);
