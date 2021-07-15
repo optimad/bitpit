@@ -22,27 +22,11 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#include "version.hpp"
+/*! \file */
 
-#include "version_verbose.hpp"
+#ifndef __BITPIT_VERBOSE_VERSION_HPP__
+#define __BITPIT_VERBOSE_VERSION_HPP__
 
-namespace bitpit {
+#define BITPIT_VERBOSE_VERSION "@BITPIT_VERBOSE_VERSION@"
 
-/*!
- * Get the bitpit version.
- *
- * \param verbose if set to true, verbose version will be returned.
- */
-const std::string & getVersion(bool verbose)
-{
-    const static std::string VERSION_STRING         = BITPIT_VERSION;
-    const static std::string VERBOSE_VERSION_STRING = BITPIT_VERBOSE_VERSION;
-
-    if (verbose) {
-        return VERBOSE_VERSION_STRING;
-    } else {
-        return VERSION_STRING;
-    }
-}
-
-}
+#endif
