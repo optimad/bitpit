@@ -33,7 +33,7 @@
 
 namespace bitpit {
 
-const std::string & getVersion();
+const std::string & getVersion(bool verbose = false);
 
 }
 
