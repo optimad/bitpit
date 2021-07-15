@@ -135,8 +135,8 @@ void ConfigParser::reset(const std::string &root, int version)
 
     \param root is the name of the root element
     \param version is the version
-    \param multiSections bool to force multiSection property set in construction
-    to the new value.
+    \param multiSections if set to true the configuration parser will allow
+    multiple sections with the same name
 */
 void ConfigParser::reset(const std::string &root, int version, bool multiSections)
 {
@@ -144,7 +144,7 @@ void ConfigParser::reset(const std::string &root, int version, bool multiSection
     m_checkVersion = true;
     m_version      = version;
 
-    m_multiSections = true;
+    m_multiSections = multiSections;
 
     clear();
 }
