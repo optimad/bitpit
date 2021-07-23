@@ -450,7 +450,10 @@ PatchKernel::VertexIterator PatchKernel::restoreVertex(const std::array<double, 
 */
 void PatchKernel::_restoreGhostVertex(const VertexIterator &iterator, const std::array<double, 3> &coords, int rank)
 {
-	// Restore vertex
+	// Restore the vertex
+	//
+	// There is no need to set the id of the vertex as assigned, because
+	// also the index generator will be restored.
 	Vertex &vertex = *iterator;
 	vertex.initialize(iterator.getId(), coords, false);
 	m_nGhostVertices++;
@@ -968,7 +971,10 @@ PatchKernel::CellIterator PatchKernel::restoreCell(ElementType type, std::unique
 void PatchKernel::_restoreGhostCell(const CellIterator &iterator, ElementType type,
 								std::unique_ptr<long[]> &&connectStorage, int rank)
 {
-	// Restore cell
+	// Restore the cell
+	//
+	// There is no need to set the id of the cell as assigned, because
+	// also the index generator will be restored.
 	long cellId = iterator.getId();
 	Cell &cell = *iterator;
 	cell.initialize(iterator.getId(), type, std::move(connectStorage), false, true);

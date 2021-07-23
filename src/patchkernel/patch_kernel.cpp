@@ -1546,6 +1546,7 @@ PatchKernel::VertexIterator PatchKernel::addVertex(const Vertex &source, long id
 */
 PatchKernel::VertexIterator PatchKernel::addVertex(Vertex &&source, long id)
 {
+	// Get the id
 	if (id < 0) {
 		id = source.getId();
 	}
@@ -1620,7 +1621,7 @@ PatchKernel::VertexIterator PatchKernel::addVertex(const std::array<double, 3> &
 */
 PatchKernel::VertexIterator PatchKernel::_addInternalVertex(const std::array<double, 3> &coords, long id)
 {
-	// Get id
+	// Get the id
 	if (m_vertexIdGenerator) {
 		if (id < 0) {
 			id = m_vertexIdGenerator->generate();
@@ -1707,7 +1708,9 @@ PatchKernel::VertexIterator PatchKernel::restoreVertex(const std::array<double, 
 */
 void PatchKernel::_restoreInternalVertex(const VertexIterator &iterator, const std::array<double, 3> &coords)
 {
-	// There is not need to set the id of the vertex as assigned, because
+	// Restore the vertex
+	//
+	// There is no need to set the id of the vertex as assigned, because
 	// also the index generator will be restored.
 	Vertex &vertex = *iterator;
 	vertex.initialize(iterator.getId(), coords, true);
@@ -2424,6 +2427,7 @@ PatchKernel::CellIterator PatchKernel::addCell(const Cell &source, long id)
 */
 PatchKernel::CellIterator PatchKernel::addCell(Cell &&source, long id)
 {
+	// Get the id
 	if (id < 0) {
 		id = source.getId();
 	}
@@ -2664,7 +2668,9 @@ PatchKernel::CellIterator PatchKernel::restoreCell(ElementType type, std::unique
 void PatchKernel::_restoreInternalCell(const CellIterator &iterator, ElementType type,
 								   std::unique_ptr<long[]> &&connectStorage)
 {
-	// There is not need to set the id of the cell as assigned, because
+	// Restore the cell
+	//
+	// There is no need to set the id of the cell as assigned, because
 	// also the index generator will be restored.
 	long cellId = iterator.getId();
 	Cell &cell = *iterator;
@@ -3899,6 +3905,7 @@ PatchKernel::InterfaceIterator PatchKernel::addInterface(const Interface &source
 */
 PatchKernel::InterfaceIterator PatchKernel::addInterface(Interface &&source, long id)
 {
+	// Get the id
 	if (id < 0) {
 		id = source.getId();
 	}
@@ -4027,7 +4034,7 @@ PatchKernel::InterfaceIterator PatchKernel::_addInterface(ElementType type,
 														  std::unique_ptr<long[]> &&connectStorage,
 														  long id)
 {
-	// Get id
+	// Get the id
 	if (m_interfaceIdGenerator) {
 		if (id < 0) {
 			id = m_interfaceIdGenerator->generate();
