@@ -1043,9 +1043,6 @@ private:
 	void setDeletedInterfaceAlterationFlags(long id);
 
 	VertexIterator _addInternalVertex(const std::array<double, 3> &coords, long id);
-#if BITPIT_ENABLE_MPI==1
-	VertexIterator _addGhostVertex(const std::array<double, 3> &coords, int rank, long id);
-#endif
 
 	void _restoreInternalVertex(const VertexIterator &iterator, const std::array<double, 3> &coords);
 #if BITPIT_ENABLE_MPI==1
