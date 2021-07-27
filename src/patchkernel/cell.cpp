@@ -260,19 +260,6 @@ void Cell::_initialize(bool interior, bool initializeNeighbourhood, bool storeNe
 
 	// Neighbourhood
 	if (initializeNeighbourhood) {
-		// To reduce memory fragmentation, destroy both interfaces/adjacencies
-		// before resetting the interfaces/adjacencies
-		int reallocateInterfaces = (static_cast<int>(m_interfaces.getItemCount()) != getFaceCount());
-		if (reallocateInterfaces) {
-			m_interfaces.destroy();
-		}
-
-		int reallocateAdjacencies = (static_cast<int>(m_adjacencies.getItemCount()) != getFaceCount());
-		if (reallocateAdjacencies) {
-			m_adjacencies.destroy();
-		}
-
-		// Reset the interfaces/adjacencies
 		resetInterfaces(storeNeighbourhood);
 		resetAdjacencies(storeNeighbourhood);
 	}
@@ -325,7 +312,22 @@ void Cell::deleteInterfaces()
 */
 void Cell::resetInterfaces(bool storeInterfaces)
 {
-	m_interfaces = createNeighbourhoodStorage(storeInterfaces);
+	// Early return if no interfaces should be stored
+	ElementType type = getType();
+	if (!storeInterfaces || type == ElementType::UNDEFINED) {
+		m_interfaces.destroy();
+		return;
+	}
+
+	// Early return if not element defines no faces
+	int nFaces = getFaceCount();
+	if (nFaces <= 0) {
+		m_interfaces.destroy();
+		return;
+	}
+
+	// Initialize the interface storage
+	m_interfaces.initialize(nFaces, 0);
 }
 
 /*!
@@ -580,7 +582,22 @@ void Cell::deleteAdjacencies()
 */
 void Cell::resetAdjacencies(bool storeAdjacencies)
 {
-	m_adjacencies = createNeighbourhoodStorage(storeAdjacencies);
+	// Early return if no adjacencies should be stored
+	ElementType type = getType();
+	if (!storeAdjacencies || type == ElementType::UNDEFINED) {
+		m_adjacencies.destroy();
+		return;
+	}
+
+	// Early return if not element defines no faces
+	int nFaces = getFaceCount();
+	if (nFaces <= 0) {
+		m_adjacencies.destroy();
+		return;
+	}
+
+	// Initialize the interface storage
+	m_adjacencies.initialize(nFaces, 0);
 }
 
 /*!
