@@ -1315,6 +1315,16 @@ long PatchKernel::getVertexCount() const
 }
 
 /*!
+	Gets the number of internal vertices in the patch.
+
+	\return The number of internal vertices in the patch.
+*/
+long PatchKernel::getInternalVertexCount() const
+{
+	return m_nInternalVertices;
+}
+
+/*!
 	Gets the nodes owned by the patch.
 
 	\return The nodes owned by the patch.
