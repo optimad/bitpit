@@ -3283,7 +3283,7 @@ void ReconstructionAssembler::computePseudoInverse(int m, int n, double zeroThre
     // To check if a signular value is non zero, we only need to check if it's
     // greater than the defined threshold.
     for (int i = 0; i < k; ++i) {
-        double sigma_plus = (m_sigma[i] > zeroThreshold) ? (1. / m_sigma[i]) : m_sigma[i];
+        double sigma_plus = (m_sigma[i] > zeroThreshold) ? (1. / m_sigma[i]) : 0.;
         cblas_dscal(m, sigma_plus, &m_U[i*m], 1);
     }
 
