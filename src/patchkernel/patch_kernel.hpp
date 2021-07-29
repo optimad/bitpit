@@ -410,7 +410,7 @@ public:
 	virtual void setDimension(int dimension);
 	bool isThreeDimensional() const;
 
-	bool empty() const;
+	bool empty(bool global = true) const;
 
 	bool isVertexAutoIndexingEnabled() const;
 	void setVertexAutoIndexing(bool enabled);
