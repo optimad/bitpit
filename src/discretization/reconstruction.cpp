@@ -2818,7 +2818,7 @@ void ReconstructionKernel::display(std::ostream &out, double tolerance) const
  */
 
 /*!
- * Is the threshold for which a singuler value is considered zero.
+ * Is the threshold below which a singular value is considered zero.
  */
 const double ReconstructionAssembler::SVD_ZERO_THRESHOLD = 1e-9;
 
@@ -3288,6 +3288,10 @@ void ReconstructionAssembler::computePseudoInverse(int m, int n, double zeroThre
     //
     // u = sigma^ + *U
     // and is stored in U
+    //
+    // Sigma are singular values, hence they are non-negative by definition.
+    // To check if a signular value is non zero, we only need to check if it's
+    // greater than the defined threshold.
     for (int i = 0; i < k; ++i) {
        double sigma_plus = (m_sigma[i] > zeroThreshold) ? (1. / m_sigma[i]) : m_sigma[i];
        cblas_dscal(m, sigma_plus, &m_U[i*m], 1);
