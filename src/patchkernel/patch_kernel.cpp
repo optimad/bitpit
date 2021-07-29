@@ -2050,13 +2050,15 @@ void PatchKernel::getVertexCoords(std::size_t nVertices, const long *ids, std::a
 /*!
 	Return true if the patch is empty.
 
+	\param global if set to true, the empty status will be evaluated globally
+	across all the partitions
 	\return Return true if the patch is empty.
 */
-bool PatchKernel::empty() const
+bool PatchKernel::empty(bool global) const
 {
 	bool isEmpty = (getCellCount() == 0);
 #if BITPIT_ENABLE_MPI==1
-	if (isPartitioned()) {
+	if (global && isPartitioned()) {
 		MPI_Allreduce(MPI_IN_PLACE, &isEmpty, 1, MPI_C_BOOL, MPI_LAND, getCommunicator());
 	}
 #endif
