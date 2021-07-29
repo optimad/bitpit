@@ -2820,7 +2820,7 @@ void ReconstructionKernel::display(std::ostream &out, double tolerance) const
 /*!
  * Is the threshold below which a singular value is considered zero.
  */
-const double ReconstructionAssembler::SVD_ZERO_THRESHOLD = 1e-9;
+const double ReconstructionAssembler::SVD_ZERO_THRESHOLD = 1e-14;
 
 
 /*!
