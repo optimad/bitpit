@@ -406,8 +406,8 @@ void LevelSetCachedObject::propagateSign() {
  *
  * \param cellId is the index of the cell
  * \param cellSign is the sign of the cell
- * \param boxMin is the lower-left corenr of the object bounding box
- * \param boxMax is the upper-right corenr of the object bounding box
+ * \param objectBoxMin is the lower-left corenr of the object bounding box
+ * \param objectBoxMax is the upper-right corenr of the object bounding box
  * \param[out] cellStatus on output will contain the propagation status
  * associated to the cell
  * \param[in,out] seeds are the seeds to be used for sign propagation
@@ -418,26 +418,26 @@ void LevelSetCachedObject::propagateSign() {
  * \param[in,out] externalSign is the sign of the external region
  */
 void LevelSetCachedObject::initializeCellSignPropagation(long cellId, int cellSign,
-                                                         const std::array<double, 3> &boxMin,
-                                                         const std::array<double, 3> &boxMax,
+                                                         const std::array<double, 3> &objectBoxMin,
+                                                         const std::array<double, 3> &objectBoxMax,
                                                          int *cellStatus, std::vector<long> *seeds,
                                                          long *nWaiting, long *nExternal,
                                                          int *externalSign) {
 
     // Detect if the cell is external
     //
-    // A cell is external if is outside the object bounding box.
+    // A cell is external if it is completely outside the object bounding box.
+    // If the cell may be intersected by the object (i.e., the bounding box of
+    // the cell intersects the bounding box of the object), the cell cannot be
+    // flagged as external.
     const VolumeKernel &mesh = *(m_kernelPtr->getMesh());
-    double geometricTolerance = mesh.getTol();
-    std::array<double, 3> centroid = mesh.evalCellCentroid(cellId);
+    double distanceTolerance = mesh.getTol();
 
-    bool isExternal = false;
-    for (int i = 0; i < 3; ++i) {
-        if (centroid[i] < boxMin[i] - geometricTolerance || centroid[i] > boxMax[i] + geometricTolerance) {
-            isExternal = true;
-            break;
-        }
-    }
+    std::array<double,3> cellBoxMin;
+    std::array<double,3> cellBoxMax;
+    mesh.evalCellBoundingBox(cellId, &cellBoxMin, &cellBoxMax);
+
+    bool isExternal = !CGElem::intersectBoxBox(cellBoxMin, cellBoxMax, objectBoxMin, objectBoxMax, 3, distanceTolerance);
 
     // Detect the status of the cell
     //
