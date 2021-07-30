@@ -106,19 +106,12 @@ public:
 			const std::array<double, 3> &coords_1 = m_patch.getVertexCoords(id_1);
 			const std::array<double, 3> &coords_2 = m_patch.getVertexCoords(id_2);
 			for (int k = 0; k < 3; ++k) {
-				if (utils::DoubleFloatingEqual()(coords_1[k], coords_2[k], m_patch.getTol())) {
-					continue;
+				if (coords_1[k] < coords_2[k]) {
+					return true;
 				}
-
-				return coords_1[k] < coords_2[k];
 			}
 
-			// If we are here the two vertex coordinates coincide. It's not
-			// possible to define an order for the two vertices.
-			std::ostringstream stream;
-			stream << "It was not possible to define an order for vertices " << id_1 << " and " << id_2 << ". ";
-			stream << "The two vertices have the same coordinates.";
-			throw std::runtime_error (stream.str());
+			return false;
 		}
 
 		const PatchKernel &m_patch;
