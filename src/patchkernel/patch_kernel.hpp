@@ -166,19 +166,12 @@ public:
 			}
 
 			for (int k = 0; k < 3; ++k) {
-				if (utils::DoubleFloatingEqual()(centroid_1[k], centroid_2[k], m_patch.getTol())) {
-					continue;
+				if (centroid_1[k] < centroid_2[k]) {
+					return true;
 				}
-
-				return centroid_1[k] < centroid_2[k];
 			}
 
-			// If we are here the two cell centroids coincide. It's not
-			// possible to define an order for the two cells.
-			std::ostringstream stream;
-			stream << "It was not possible to define an order for cells " << id_1 << " and " << id_2 << ". ";
-			stream << "The two cells have the same centroid.";
-			throw std::runtime_error (stream.str());
+			return false;
 		}
 
 		const PatchKernel &m_patch;
@@ -253,19 +246,13 @@ public:
 				const std::array<double, 3> &vertexCoords_1 = m_patch.getVertex(vertexId_1).getCoords();
 				const std::array<double, 3> &vertexCoords_2 = m_patch.getVertex(vertexId_2).getCoords();
 				for (int k = 0; k < 3; ++k) {
-					if (utils::DoubleFloatingEqual()(vertexCoords_1[k], vertexCoords_2[k], m_patch.getTol())) {
-						continue;
+					if (vertexCoords_1[k] < vertexCoords_2[k]) {
+						return true;
 					}
-
-					return vertexCoords_1[k] < vertexCoords_2[k];
 				}
 			}
 
-			// If we are here it was not possible to find a vertex on the
-			// second cell for the comparison.
-			std::ostringstream stream;
-			stream << "Unable to fuzzy order cells " << id_1 << " and " << id_2 << ". ";
-			throw std::runtime_error (stream.str());
+			return false;
 		}
 
 		PatchKernel &m_patch;
