@@ -84,14 +84,70 @@ public:
 	};
 
 	/*!
+		Functional for comparing the position of two points.
+
+		To identify the order of the two points, their coordinates will be
+		compared. Before comparing the coordinates, it is necessary check
+		if the two points are coincident within the specified tolerance.
+	*/
+	struct PointPositionLess
+	{
+		PointPositionLess(double tolerance)
+			: m_tolerance(tolerance)
+		{
+		}
+
+		virtual ~PointPositionLess() = default;
+
+		bool operator()(std::array<double, 3> point_1, std::array<double, 3> point_2) const
+		{
+			// Check if the points are coincident
+			//
+			// To check if two points are coincident, the specified tolerance
+			// will be used.
+			bool coincident = true;
+			for (int k = 0; k < 3; ++k) {
+				if (!utils::DoubleFloatingEqual()(point_1[k], point_2[k], m_tolerance)) {
+					coincident = false;
+					break;
+				}
+			}
+
+			if (coincident) {
+				return false;
+			}
+
+			// Compare the position of the points
+			//
+			// If the points are not coincident, we loop over the coordinates
+			// and we compare the first non-coincident coordinate.
+			//
+			// In order to guarantee a consistent ordering, the test to check
+			// if two coordinates are coincident should be performed with no
+			// tolerance.
+			for (int k = 0; k < 3; ++k) {
+				if (point_1[k] == point_2[k]) {
+					continue;
+				}
+
+				return (point_1[k] < point_2[k]);
+			}
+
+			return false;
+		}
+
+		const double m_tolerance;
+	};
+
+	/*!
 		Functional for comparing the position of two vertices.
 
 		The comparison is made with respect to the vertex coordinates.
 	*/
-	struct VertexPositionLess
+	struct VertexPositionLess : private PointPositionLess
 	{
 		VertexPositionLess(const PatchKernel &patch)
-			: m_patch(patch)
+			: PointPositionLess(patch.getTol()), m_patch(patch)
 		{
 		}
 
@@ -105,20 +161,8 @@ public:
 
 			const std::array<double, 3> &coords_1 = m_patch.getVertexCoords(id_1);
 			const std::array<double, 3> &coords_2 = m_patch.getVertexCoords(id_2);
-			for (int k = 0; k < 3; ++k) {
-				if (utils::DoubleFloatingEqual()(coords_1[k], coords_2[k], m_patch.getTol())) {
-					continue;
-				}
 
-				return coords_1[k] < coords_2[k];
-			}
-
-			// If we are here the two vertex coordinates coincide. It's not
-			// possible to define an order for the two vertices.
-			std::ostringstream stream;
-			stream << "It was not possible to define an order for vertices " << id_1 << " and " << id_2 << ". ";
-			stream << "The two vertices have the same coordinates.";
-			throw std::runtime_error (stream.str());
+			return PointPositionLess::operator()(coords_1, coords_2);
 		}
 
 		const PatchKernel &m_patch;
@@ -147,10 +191,10 @@ public:
 
 		The comparison is made with respect to the cell centroid.
 	*/
-	struct CellPositionLess
+	struct CellPositionLess : private PointPositionLess
 	{
 		CellPositionLess(const PatchKernel &patch, bool native = true)
-			: m_patch(patch), m_native(native)
+			: PointPositionLess(patch.getTol()), m_patch(patch), m_native(native)
 		{
 		}
 
@@ -172,20 +216,7 @@ public:
 				centroid_2 = m_patch.PatchKernel::evalCellCentroid(id_2);
 			}
 
-			for (int k = 0; k < 3; ++k) {
-				if (utils::DoubleFloatingEqual()(centroid_1[k], centroid_2[k], m_patch.getTol())) {
-					continue;
-				}
-
-				return centroid_1[k] < centroid_2[k];
-			}
-
-			// If we are here the two cell centroids coincide. It's not
-			// possible to define an order for the two cells.
-			std::ostringstream stream;
-			stream << "It was not possible to define an order for cells " << id_1 << " and " << id_2 << ". ";
-			stream << "The two cells have the same centroid.";
-			throw std::runtime_error (stream.str());
+			return PointPositionLess::operator()(centroid_1, centroid_2);
 		}
 
 		const PatchKernel &m_patch;
@@ -218,10 +249,10 @@ public:
 
 		The comparison is made with respect to the position of cell vertices.
 	*/
-	struct CellFuzzyPositionLess
+	struct CellFuzzyPositionLess : private PointPositionLess
 	{
 		CellFuzzyPositionLess(PatchKernel &patch)
-			: m_patch(patch)
+			: PointPositionLess(patch.getTol()), m_patch(patch)
 		{
 		}
 
@@ -252,23 +283,10 @@ public:
 			}
 
 			// Compare the two vertices
-			if (vertexId_2 != Vertex::NULL_ID) {
-				const std::array<double, 3> &vertexCoords_1 = m_patch.getVertex(vertexId_1).getCoords();
-				const std::array<double, 3> &vertexCoords_2 = m_patch.getVertex(vertexId_2).getCoords();
-				for (int k = 0; k < 3; ++k) {
-					if (utils::DoubleFloatingEqual()(vertexCoords_1[k], vertexCoords_2[k], m_patch.getTol())) {
-						continue;
-					}
+			const std::array<double, 3> &vertexCoords_1 = m_patch.getVertex(vertexId_1).getCoords();
+			const std::array<double, 3> &vertexCoords_2 = m_patch.getVertex(vertexId_2).getCoords();
 
-					return vertexCoords_1[k] < vertexCoords_2[k];
-				}
-			}
-
-			// If we are here it was not possible to find a vertex on the
-			// second cell for the comparison.
-			std::ostringstream stream;
-			stream << "Unable to fuzzy order cells " << id_1 << " and " << id_2 << ". ";
-			throw std::runtime_error (stream.str());
+			return PointPositionLess::operator()(vertexCoords_1, vertexCoords_2);
 		}
 
 		PatchKernel &m_patch;
