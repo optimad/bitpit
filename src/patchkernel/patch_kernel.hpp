@@ -220,8 +220,8 @@ public:
 	*/
 	struct CellFuzzyPositionLess
 	{
-		CellFuzzyPositionLess(PatchKernel &patch, bool native = true)
-			: m_patch(patch), m_native(native)
+		CellFuzzyPositionLess(PatchKernel &patch)
+			: m_patch(patch)
 		{
 		}
 
@@ -234,25 +234,21 @@ public:
 			}
 
 			// Select the first vertex of the first cell
-			ConstProxyVector<long> cellVertexIds_1 = m_patch.getCell(id_1).getVertexIds();
-
 			std::size_t vertexLocalId_1 = 0;
-			long vertexId_1 = cellVertexIds_1[vertexLocalId_1];
+			long vertexId_1 = m_patch.getCell(id_1).getVertexId(vertexLocalId_1);
 
 			// The vertex of the second cell is choosen as the first vertex on
 			// that cell not equal to the selected vertex of the first cell.
-			ConstProxyVector<long> cellVertexIds_2 = m_patch.getCell(id_2).getVertexIds();
-			std::size_t nCellVertices_2 = cellVertexIds_2.size();
-
-			std::size_t vertexLocalId_2 = 0;
 			long vertexId_2 = Vertex::NULL_ID;
-			while (vertexLocalId_2 <= nCellVertices_2) {
-				vertexId_2 = cellVertexIds_2[vertexLocalId_2];
-				if (vertexId_1 != vertexId_2) {
+			for (long candidateVertexId_2 : m_patch.getCell(id_2).getVertexIds()) {
+				if (vertexId_1 != candidateVertexId_2) {
+					vertexId_2 = candidateVertexId_2;
 					break;
 				}
+			}
 
-				++vertexLocalId_2;
+			if (vertexId_2 == Vertex::NULL_ID) {
+				return false;
 			}
 
 			// Compare the two vertices
@@ -276,7 +272,6 @@ public:
 		}
 
 		PatchKernel &m_patch;
-		bool m_native;
 	};
 
 	/*!
@@ -289,8 +284,8 @@ public:
 	*/
 	struct CellFuzzyPositionGreater : private CellFuzzyPositionLess
 	{
-		CellFuzzyPositionGreater(PatchKernel &patch, bool native = true)
-			: CellFuzzyPositionLess(patch, native)
+		CellFuzzyPositionGreater(PatchKernel &patch)
+			: CellFuzzyPositionLess(patch)
 		{
 		}
 
