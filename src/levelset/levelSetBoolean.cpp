@@ -79,29 +79,29 @@ LevelSetBoolean::LevelSetBoolean( const LevelSetBoolean &other) :LevelSetMetaObj
 
 /*!
  * Returns LevelSetInfo 
- * @param[in] i cell index
+ * @param[in] id cell id
  * @return LevelSetInfo
 */
-LevelSetInfo LevelSetBoolean::getLevelSetInfo( long i)const{
-    return booleanOperation(i) ;
+LevelSetInfo LevelSetBoolean::getLevelSetInfo( long id)const{
+    return booleanOperation(id) ;
 } 
 
 /*!
  * Get the levelset value
- * @param[in] i cell index
+ * @param[in] id cell id
  * @return levelset value in cell
  */
-double LevelSetBoolean::getLS( long i)const {
-    return booleanOperation(i).value ;
+double LevelSetBoolean::getLS( long id)const {
+    return booleanOperation(id).value ;
 }
 
 /*!
  * Get the levelset gradient
- * @param[in] i cell index
+ * @param[in] id cell id
  * @return levelset gradient in cell 
  */
-std::array<double,3> LevelSetBoolean::getGradient(long i) const {
-    return booleanOperation(i).gradient ;
+std::array<double,3> LevelSetBoolean::getGradient(long id) const {
+    return booleanOperation(id).gradient ;
 }
 
 /*!

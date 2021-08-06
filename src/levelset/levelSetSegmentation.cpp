@@ -617,12 +617,12 @@ long LevelSetSegmentation::getSupport( long id ) const{
 
 /*!
  * Get size of support triangle
- * @param[in] i cell index
+ * @param[in] id cell id
  * @return charcteristic size of support triangle
  */
-double LevelSetSegmentation::getSurfaceFeatureSize( long i ) const {
+double LevelSetSegmentation::getSurfaceFeatureSize( long id ) const {
 
-    long support = getSupport(i);
+    long support = getSupport(id);
     if (support == levelSetDefaults::SUPPORT) {
         return (- levelSetDefaults::SIZE);
     }
