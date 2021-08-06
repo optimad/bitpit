@@ -154,10 +154,10 @@ std::array<double,3> LevelSetObject::getNormal(long i) const {
 
 /*!
  * Get the sign of the levelset function
- * @param[in] i cell index
+ * @param[in] id cell id
  * @return sign of levelset
  */
-short LevelSetObject::getSign(long i)const{
+short LevelSetObject::getSign(long id)const{
     return ( static_cast<short>(sign(getLS(i) )) );
 }
 
