@@ -131,7 +131,8 @@ class LevelSetObject : public VTKBaseStreamer{
     virtual double                              getMinSurfaceFeatureSize() const;
     virtual double                              getMaxSurfaceFeatureSize() const;
 
-    void                                        enableVTKOutput(LevelSetWriteField field, bool enable=true);
+    void                                        enableVTKOutput(LevelSetWriteField writeField, bool enable=true);
+    void                                        enableVTKOutput(LevelSetWriteField writeField, const std::string &objectName, bool enable=true);
     void                                        flushData(std::fstream &, const std::string &, VTKFormat) override;
 
 
