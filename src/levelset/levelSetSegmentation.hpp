@@ -62,7 +62,7 @@ public:
 
     const SurfaceSkdTree & getSearchTree() const ;
 
-    int getSegmentInfo( const std::array<double,3> &p, long i, bool signd, double &d, std::array<double,3> &x, std::array<double,3> &n ) const;
+    int getSegmentInfo( const std::array<double,3> &pointCoords, long segmentId, bool signd, double &distance, std::array<double,3> &gradient, std::array<double,3> &normal ) const;
 
 private:
     typedef std::pair<long, int> SegmentVertexKey;
@@ -161,7 +161,7 @@ class LevelSetSegmentation : public LevelSetCachedObject {
 
     virtual int                                 getPart(long ) const override;
     virtual std::array<double,3>                getNormal(long ) const override;
-    long                                        getSupport(long i) const;
+    long                                        getSupport(long id) const;
 
     double                                      getSurfaceFeatureSize(long ) const override;
     double                                      getMinSurfaceFeatureSize() const override;
