@@ -406,38 +406,50 @@ void LevelSetObject::restore( std::istream &stream ){
 
 /*!
  * Enables or disables the VTK output
- * @param[in] writeField describes the field(s) that should be written
+ * @param[in] fieldset describes the field(s) that should be written
  * @param[in] enable true for enabling, false for diabling
  */
-void LevelSetObject::enableVTKOutput( LevelSetWriteField writeField, bool enable) {
+void LevelSetObject::enableVTKOutput( LevelSetWriteField fieldset, bool enable) {
+
+    std::stringstream objectNameStream;
+    objectNameStream << getId();
+
+    enableVTKOutput(fieldset, objectNameStream.str(), enable);
+
+}
+
+/*!
+ * Enables or disables the VTK output
+ * @param[in] fieldset describes the field(s) that should be written
+ * @param[in] objectName is the name that will be associated with the object
+ * @param[in] enable true for enabling, false for diabling
+ */
+void LevelSetObject::enableVTKOutput( LevelSetWriteField fieldset, const std::string &objectName, bool enable) {
 
     std::vector<LevelSetWriteField> fields;
 
-    if( writeField==LevelSetWriteField::ALL){
+    if( fieldset==LevelSetWriteField::ALL){
         fields.push_back(LevelSetWriteField::VALUE);
         fields.push_back(LevelSetWriteField::GRADIENT);
         fields.push_back(LevelSetWriteField::NORMAL);
         fields.push_back(LevelSetWriteField::PART);
 
-    } else if ( writeField==LevelSetWriteField::DEFAULT){
+    } else if ( fieldset==LevelSetWriteField::DEFAULT){
         fields.push_back(LevelSetWriteField::VALUE);
         fields.push_back(LevelSetWriteField::GRADIENT);
 
     } else {
-        fields.push_back(writeField);
+        fields.push_back(fieldset);
     }
 
     for( LevelSetWriteField &field : fields){
 
         std::stringstream name;
-        name << "ls_";
-        name << getId();
-        name << "_";
-
+        name << "levelset";
 
         switch(field){
             case LevelSetWriteField::VALUE:
-                name << "value";
+                name << "Value_" << objectName;
                 if(enable){
                     m_kernelPtr->getMesh()->getVTK().addData<double>( name.str(), VTKFieldType::SCALAR, VTKLocation::CELL, this);
                 } else {
@@ -446,7 +458,7 @@ void LevelSetObject::enableVTKOutput( LevelSetWriteField writeField, bool enable
                 break;
 
             case LevelSetWriteField::GRADIENT:
-                name << "gradient";
+                name << "Gradient_" << objectName;
                 if(enable){
                     m_kernelPtr->getMesh()->getVTK().addData<double>( name.str(), VTKFieldType::VECTOR, VTKLocation::CELL, this);
                 } else {
@@ -455,7 +467,7 @@ void LevelSetObject::enableVTKOutput( LevelSetWriteField writeField, bool enable
                 break;
 
             case LevelSetWriteField::NORMAL:
-                name << "normal";
+                name << "Normal_" << objectName;
                 if(enable){
                     m_kernelPtr->getMesh()->getVTK().addData<double>( name.str(), VTKFieldType::VECTOR, VTKLocation::CELL, this);
                 } else {
@@ -464,7 +476,7 @@ void LevelSetObject::enableVTKOutput( LevelSetWriteField writeField, bool enable
                 break;
 
             case LevelSetWriteField::PART:
-                name << "partId";
+                name << "PartId_" << objectName;
                 if(enable){
                     m_kernelPtr->getMesh()->getVTK().addData<int>( name.str(), VTKFieldType::SCALAR, VTKLocation::CELL, this);
                 } else {
@@ -493,7 +505,7 @@ void LevelSetObject::enableVTKOutput( LevelSetWriteField writeField, bool enable
 void LevelSetObject::flushData( std::fstream &stream, const std::string &name, VTKFormat format){
 
 
-    if(utils::string::keywordInString(name,"value")){
+    if(utils::string::keywordInString(name,"levelsetValue")){
 
         void (*writeFunctionPtr)(std::fstream &, const double &) = nullptr;
 
@@ -511,7 +523,7 @@ void LevelSetObject::flushData( std::fstream &stream, const std::string &name, V
             (*writeFunctionPtr)(stream,value);
         }
 
-    } else if( utils::string::keywordInString(name,"gradient")){
+    } else if( utils::string::keywordInString(name,"levelsetGradient")){
 
         void (*writeFunctionPtr)(std::fstream &, const std::array<double,3> &) = nullptr;
 
@@ -529,7 +541,7 @@ void LevelSetObject::flushData( std::fstream &stream, const std::string &name, V
             (*writeFunctionPtr)(stream,value);
         }
 
-    } else if( utils::string::keywordInString(name,"normal")){
+    } else if( utils::string::keywordInString(name,"levelsetNormal")){
 
         void (*writeFunctionPtr)(std::fstream &, const std::array<double,3> &) = nullptr;
 
@@ -547,7 +559,7 @@ void LevelSetObject::flushData( std::fstream &stream, const std::string &name, V
             (*writeFunctionPtr)(stream,value);
         }
 
-    } else if( utils::string::keywordInString(name,"part")){
+    } else if( utils::string::keywordInString(name,"levelsetPart")){
 
         void (*writeFunctionPtr)(std::fstream &, const int &) = nullptr;
 
