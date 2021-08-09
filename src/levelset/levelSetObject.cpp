@@ -158,7 +158,16 @@ std::array<double,3> LevelSetObject::getNormal(long id) const {
  * @return sign of levelset
  */
 short LevelSetObject::getSign(long id)const{
-    return ( static_cast<short>(sign(getValue(id) )) );
+    return evalValueSign(getValue(id));
+}
+
+/*!
+ * Eval the sign of the specified levelset value
+ * @param[in] value is the levelset value
+ * @return sign of levelset
+ */
+short LevelSetObject::evalValueSign(double value)const{
+    return static_cast<short>(sign(value));
 }
 
 /*!
