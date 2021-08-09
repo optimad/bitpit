@@ -96,22 +96,6 @@ private:
 class LevelSetSegmentation : public LevelSetCachedObject {
 
     private:
-    struct DistanceComparator
-    {
-        const std::vector<double> & m_vector;
-
-        DistanceComparator(const std::vector<double> & vector)
-            : m_vector(vector)
-        {
-
-        }
-
-        bool operator()(double i1, double i2)
-        {
-            return m_vector[i1] < m_vector[i2];
-        }
-    };
-
     struct SurfaceInfo
     {
         long support;
