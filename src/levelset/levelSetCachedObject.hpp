@@ -98,6 +98,7 @@ class LevelSetCachedObject : public LevelSetObject{
 
     LevelSetInfo                                getLevelSetInfo(long ) const override ;
     double                                      getLS(long ) const override ;
+    double                                      getValue(long ) const override ;
     std::array<double,3>                        getGradient(long ) const override ;
 
     void                                        propagateSign() override ;

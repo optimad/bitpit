@@ -199,18 +199,18 @@ int subtest_001()
 
         for( auto & cell : mesh.getCells() ){
             long cellId = cell.getId() ;
-            if( std::abs(object0.getLS(cellId)) < mesh.evalCellSize(cellId)  ){
+            if( std::abs(object0.getValue(cellId)) < mesh.evalCellSize(cellId)  ){
                 mesh.markCellForRefinement(cellId) ;
             }
 
             if( i<3) {
-                if( std::abs(object1.getLS(cellId)) < mesh.evalCellSize(cellId)  ){
+                if( std::abs(object1.getValue(cellId)) < mesh.evalCellSize(cellId)  ){
                     mesh.markCellForRefinement(cellId) ;
                 }
             }
 
             if( i<6) {
-                if( std::abs(object2.getLS(cellId)) < mesh.evalCellSize(cellId)  ){
+                if( std::abs(object2.getValue(cellId)) < mesh.evalCellSize(cellId)  ){
                     mesh.markCellForRefinement(cellId) ;
                 }
             }

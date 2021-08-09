@@ -64,6 +64,7 @@ class LevelSetBoolean: public LevelSetMetaObject {
 
     LevelSetInfo                                getLevelSetInfo(long ) const override;
     double                                      getLS(long ) const override;
+    double                                      getValue(long ) const override;
     std::array<double,3>                        getGradient(long ) const override;
 
     std::array<double,3>                        getNormal(long ) const override;

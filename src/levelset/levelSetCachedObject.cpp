@@ -85,6 +85,17 @@ LevelSetInfo LevelSetCachedObject::getLevelSetInfo( long i)const{
  */
 double LevelSetCachedObject::getLS( long id)const {
 
+    return getValue(id);
+
+}
+
+/*!
+ * Get the levelset value of cell
+ * @param[in] id cell id
+ * @return levelset value in cell
+ */
+double LevelSetCachedObject::getValue( long id)const {
+
     auto itr = m_ls.find(id);
     if ( itr == m_ls.end() ){
         return levelSetDefaults::VALUE;
