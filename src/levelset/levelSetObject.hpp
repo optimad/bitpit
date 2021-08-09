@@ -71,6 +71,8 @@ class LevelSetObject : public VTKBaseStreamer{
     virtual void                                updateLSInNarrowBand(const std::vector<adaption::Info> &, bool);
     void                                        clearAfterMeshAdaption(const std::vector<adaption::Info>&);
 
+    short                                       evalValueSign(double) const ;
+
     virtual void                                propagateSign() ;
 
     void                                        dump(std::ostream &);
