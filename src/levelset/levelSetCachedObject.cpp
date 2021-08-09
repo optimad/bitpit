@@ -80,12 +80,12 @@ LevelSetInfo LevelSetCachedObject::getLevelSetInfo( long i)const{
 
 /*!
  * Get the levelset value of cell
- * @param[in] i cell index
+ * @param[in] id cell id
  * @return levelset value in cell
  */
-double LevelSetCachedObject::getLS( long i)const {
+double LevelSetCachedObject::getLS( long id)const {
 
-    auto itr = m_ls.find(i);
+    auto itr = m_ls.find(id);
     if ( itr == m_ls.end() ){
         return levelSetDefaults::VALUE;
     }
@@ -96,12 +96,12 @@ double LevelSetCachedObject::getLS( long i)const {
 
 /*!
  * Get the levelset gradient of cell
- * @param[in] i cell index
+ * @param[in] id cell id
  * @return levelset gradient in cell 
  */
-std::array<double,3> LevelSetCachedObject::getGradient(long i) const {
+std::array<double,3> LevelSetCachedObject::getGradient(long id) const {
 
-    auto itr = m_ls.find(i);
+    auto itr = m_ls.find(id);
     if ( itr == m_ls.end() ){
         return levelSetDefaults::GRADIENT;
     }

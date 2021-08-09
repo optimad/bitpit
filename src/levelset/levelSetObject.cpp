@@ -98,16 +98,16 @@ bool LevelSetObject::isPrimary( ) const {
 /*!
  * Computes the projection point of the cell center, i.e. the closest
  * point to the cell center on the zero level set
- * @param[in] i cell index
+ * @param[in] id cell id
  * @return the projection point
  */
-std::array<double,3> LevelSetObject::computeProjectionPoint(long i) const{
-    double value = getLS(i);
+std::array<double,3> LevelSetObject::computeProjectionPoint(long id) const{
+    double value = getLS(id);
     if(utils::DoubleFloatingEqual()(value,levelSetDefaults::VALUE)){
         return levelSetDefaults::POINT;
     }
 
-    return m_kernelPtr->computeCellCentroid(i) -value *getGradient(i);
+    return m_kernelPtr->computeCellCentroid(id) -value *getGradient(id);
 }
 
 /*!
@@ -134,22 +134,22 @@ std::array<double,3> LevelSetObject::computeVertexProjectionPoint(long vertexId)
 
 /*!
  * Get the part id of projection point
- * @param[in] i cell index
+ * @param[in] id cell id
  * @return part id 
  */
-int LevelSetObject::getPart(long i) const {
-    BITPIT_UNUSED(i) ;
+int LevelSetObject::getPart(long id) const {
+    BITPIT_UNUSED(id) ;
     return levelSetDefaults::PART ;
 }
 
 /*!
  * Get the surface normal at the projection point. 
  * The base implementation will return the levelset gradient.
- * @param[in] i cell index
+ * @param[in] id cell id
  * @return surface normal
  */
-std::array<double,3> LevelSetObject::getNormal(long i) const {
-    return getGradient(i);
+std::array<double,3> LevelSetObject::getNormal(long id) const {
+    return getGradient(id);
 }
 
 /*!
@@ -158,7 +158,7 @@ std::array<double,3> LevelSetObject::getNormal(long i) const {
  * @return sign of levelset
  */
 short LevelSetObject::getSign(long id)const{
-    return ( static_cast<short>(sign(getLS(i) )) );
+    return ( static_cast<short>(sign(getLS(id) )) );
 }
 
 /*!
@@ -169,12 +169,12 @@ void LevelSetObject::propagateSign(){
 
 /*!
  * If cell centroid lies within the narrow band and hence levelset is computet exactly
- * @param[in] i cell index
+ * @param[in] id cell id
  * @return true/false if the centroid is in narrow band
  */
-bool LevelSetObject::isInNarrowBand(long i)const{
+bool LevelSetObject::isInNarrowBand(long id)const{
     assert( m_narrowBand > 0 && "Need to set size of narrow >0 before calling isInNarrowBand");
-    return ( std::abs(getLS(i)) <= m_narrowBand );
+    return ( std::abs(getLS(id)) <= m_narrowBand );
 }
 
 /*!
@@ -223,11 +223,11 @@ void LevelSetObject::setSizeNarrowBand(double r){
  * LevelSetIntersectionStatus::TRUE/::FALSE is returned accordingly. 
  * Errors of the method are related to the ratio of surface curvature over cell size.
  *
- * @param[in] i cell index
+ * @param[in] id cell id
  * @param[in] mode describes the types of check that should be performed
  * @return indicator regarding intersection
  */
-LevelSetIntersectionStatus LevelSetObject::intersectSurface(long i, LevelSetIntersectionMode mode) const{
+LevelSetIntersectionStatus LevelSetObject::intersectSurface(long id, LevelSetIntersectionMode mode) const{
 
     double incircle, circumcircle;
 
@@ -236,8 +236,8 @@ LevelSetIntersectionStatus LevelSetObject::intersectSurface(long i, LevelSetInte
     switch(mode){
         case LevelSetIntersectionMode::FAST_GUARANTEE_TRUE:
         {
-            incircle = m_kernelPtr->computeCellIncircle(i) ;
-            if(utils::DoubleFloatingLessEqual()(std::abs(getLS(i)), incircle, distanceTolerance, distanceTolerance)){
+            incircle = m_kernelPtr->computeCellIncircle(id) ;
+            if(utils::DoubleFloatingLessEqual()(std::abs(getLS(id)), incircle, distanceTolerance, distanceTolerance)){
                 return LevelSetIntersectionStatus::TRUE;
             } else {
                 return LevelSetIntersectionStatus::FALSE;
@@ -248,8 +248,8 @@ LevelSetIntersectionStatus LevelSetObject::intersectSurface(long i, LevelSetInte
 
         case LevelSetIntersectionMode::FAST_GUARANTEE_FALSE:
         {
-            circumcircle = m_kernelPtr->computeCellCircumcircle(i) ;
-            if(utils::DoubleFloatingGreater()(std::abs(getLS(i)), circumcircle, distanceTolerance, distanceTolerance)){
+            circumcircle = m_kernelPtr->computeCellCircumcircle(id) ;
+            if(utils::DoubleFloatingGreater()(std::abs(getLS(id)), circumcircle, distanceTolerance, distanceTolerance)){
                 return LevelSetIntersectionStatus::FALSE;
             } else {
                 return LevelSetIntersectionStatus::TRUE;
@@ -260,13 +260,13 @@ LevelSetIntersectionStatus LevelSetObject::intersectSurface(long i, LevelSetInte
 
         case LevelSetIntersectionMode::FAST_FUZZY:
         {
-            circumcircle = m_kernelPtr->computeCellCircumcircle(i) ;
-            if(utils::DoubleFloatingGreater()(std::abs(getLS(i)), circumcircle, distanceTolerance, distanceTolerance)){
+            circumcircle = m_kernelPtr->computeCellCircumcircle(id) ;
+            if(utils::DoubleFloatingGreater()(std::abs(getLS(id)), circumcircle, distanceTolerance, distanceTolerance)){
                 return LevelSetIntersectionStatus::FALSE;
             }
 
-            incircle = m_kernelPtr->computeCellIncircle(i) ;
-            if(utils::DoubleFloatingLessEqual()(std::abs(getLS(i)), incircle, distanceTolerance, distanceTolerance)){
+            incircle = m_kernelPtr->computeCellIncircle(id) ;
+            if(utils::DoubleFloatingLessEqual()(std::abs(getLS(id)), incircle, distanceTolerance, distanceTolerance)){
                 return LevelSetIntersectionStatus::TRUE;
             }
 
@@ -277,19 +277,19 @@ LevelSetIntersectionStatus LevelSetObject::intersectSurface(long i, LevelSetInte
 
         case LevelSetIntersectionMode::ACCURATE:
         {
-            circumcircle = m_kernelPtr->computeCellCircumcircle(i) ;
-            if(utils::DoubleFloatingGreater()(std::abs(getLS(i)), circumcircle, distanceTolerance, distanceTolerance)){
+            circumcircle = m_kernelPtr->computeCellCircumcircle(id) ;
+            if(utils::DoubleFloatingGreater()(std::abs(getLS(id)), circumcircle, distanceTolerance, distanceTolerance)){
                 return LevelSetIntersectionStatus::FALSE;
             }
 
-            incircle = m_kernelPtr->computeCellIncircle(i) ;
-            if(utils::DoubleFloatingLessEqual()(std::abs(getLS(i)), incircle, distanceTolerance, distanceTolerance)){
+            incircle = m_kernelPtr->computeCellIncircle(id) ;
+            if(utils::DoubleFloatingLessEqual()(std::abs(getLS(id)), incircle, distanceTolerance, distanceTolerance)){
                 return LevelSetIntersectionStatus::TRUE;
             }
 
-            std::array<double,3> root = computeProjectionPoint(i);
-            std::array<double,3> normal = getGradient(i);
-            if( m_kernelPtr->intersectCellPlane(i,root,normal, distanceTolerance) ){
+            std::array<double,3> root = computeProjectionPoint(id);
+            std::array<double,3> normal = getGradient(id);
+            if( m_kernelPtr->intersectCellPlane(id,root,normal, distanceTolerance) ){
                 return LevelSetIntersectionStatus::TRUE;
             } else {
                 return LevelSetIntersectionStatus::FALSE;
@@ -305,11 +305,11 @@ LevelSetIntersectionStatus LevelSetObject::intersectSurface(long i, LevelSetInte
 
 /*!
  * Returns the characterstic size at the support
- * @param[in] i cell index
+ * @param[in] id cell id
  * @return feature size
  */
-double LevelSetObject::getSurfaceFeatureSize(long i) const{
-    BITPIT_UNUSED(i);
+double LevelSetObject::getSurfaceFeatureSize(long id) const{
+    BITPIT_UNUSED(id);
     return (- levelSetDefaults::SIZE);
 }
 
