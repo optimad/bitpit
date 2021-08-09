@@ -140,7 +140,7 @@ int subtest_001(int rank)
 
         for( auto & cell : mesh.getCells() ){
             long id = cell.getId() ;
-            if( std::abs(object0.getLS(id)) < 100. ){
+            if( std::abs(object0.getValue(id)) < 100. ){
                 mesh.markCellForRefinement(id) ;
             }
         }

@@ -92,6 +92,15 @@ LevelSetInfo LevelSetBoolean::getLevelSetInfo( long id)const{
  * @return levelset value in cell
  */
 double LevelSetBoolean::getLS( long id)const {
+    return getValue(id) ;
+}
+
+/*!
+ * Get the levelset value
+ * @param[in] id cell id
+ * @return levelset value in cell
+ */
+double LevelSetBoolean::getValue( long id)const {
     return booleanOperation(id).value ;
 }
 
@@ -272,11 +281,11 @@ LevelSetObject* LevelSetBoolean::getCompetentObject( long id, double *factor) co
     double result, second;
     LevelSetObject *resPtr, *secPtr;
 
-    result = m_objPtr[0]->getLS(id);
+    result = m_objPtr[0]->getValue(id);
     resPtr = m_objPtr[0];
 
     for( size_t n=1; n<m_objPtr.size(); ++n){
-        second = m_objPtr[n]->getLS(id) ;
+        second = m_objPtr[n]->getValue(id) ;
         secPtr = m_objPtr[n];
 
         if( getBooleanOperation() == LevelSetBooleanOperation::UNION){
@@ -300,7 +309,7 @@ LevelSetObject* LevelSetBoolean::getCompetentObject( long id, double *factor) co
     }
 
     if(factor){
-        *factor = (utils::DoubleFloatingEqual()(resPtr->getLS(id),result)) ? 1. : -1.;
+        *factor = (utils::DoubleFloatingEqual()(resPtr->getValue(id),result)) ? 1. : -1.;
     }
 
     return resPtr;
@@ -341,7 +350,7 @@ LevelSetInfo LevelSetBoolean::booleanOperation(long id) const{
 
     LevelSetInfo result = m_objPtr[0]->getLevelSetInfo(id);
     for( size_t n=1; n<m_objPtr.size(); ++n){
-        double value = m_objPtr[n]->getLS(id) ;
+        double value = m_objPtr[n]->getValue(id) ;
 
         if( getBooleanOperation() == LevelSetBooleanOperation::UNION){
             if(result.value>value) {
