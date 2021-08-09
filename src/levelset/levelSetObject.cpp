@@ -102,7 +102,7 @@ bool LevelSetObject::isPrimary( ) const {
  * @return the projection point
  */
 std::array<double,3> LevelSetObject::computeProjectionPoint(long id) const{
-    double value = getLS(id);
+    double value = getValue(id);
     if(utils::DoubleFloatingEqual()(value,levelSetDefaults::VALUE)){
         return levelSetDefaults::POINT;
     }
@@ -158,7 +158,7 @@ std::array<double,3> LevelSetObject::getNormal(long id) const {
  * @return sign of levelset
  */
 short LevelSetObject::getSign(long id)const{
-    return ( static_cast<short>(sign(getLS(id) )) );
+    return ( static_cast<short>(sign(getValue(id) )) );
 }
 
 /*!
@@ -174,7 +174,7 @@ void LevelSetObject::propagateSign(){
  */
 bool LevelSetObject::isInNarrowBand(long id)const{
     assert( m_narrowBand > 0 && "Need to set size of narrow >0 before calling isInNarrowBand");
-    return ( std::abs(getLS(id)) <= m_narrowBand );
+    return ( std::abs(getValue(id)) <= m_narrowBand );
 }
 
 /*!
@@ -237,7 +237,7 @@ LevelSetIntersectionStatus LevelSetObject::intersectSurface(long id, LevelSetInt
         case LevelSetIntersectionMode::FAST_GUARANTEE_TRUE:
         {
             incircle = m_kernelPtr->computeCellIncircle(id) ;
-            if(utils::DoubleFloatingLessEqual()(std::abs(getLS(id)), incircle, distanceTolerance, distanceTolerance)){
+            if(utils::DoubleFloatingLessEqual()(std::abs(getValue(id)), incircle, distanceTolerance, distanceTolerance)){
                 return LevelSetIntersectionStatus::TRUE;
             } else {
                 return LevelSetIntersectionStatus::FALSE;
@@ -249,7 +249,7 @@ LevelSetIntersectionStatus LevelSetObject::intersectSurface(long id, LevelSetInt
         case LevelSetIntersectionMode::FAST_GUARANTEE_FALSE:
         {
             circumcircle = m_kernelPtr->computeCellCircumcircle(id) ;
-            if(utils::DoubleFloatingGreater()(std::abs(getLS(id)), circumcircle, distanceTolerance, distanceTolerance)){
+            if(utils::DoubleFloatingGreater()(std::abs(getValue(id)), circumcircle, distanceTolerance, distanceTolerance)){
                 return LevelSetIntersectionStatus::FALSE;
             } else {
                 return LevelSetIntersectionStatus::TRUE;
@@ -261,12 +261,12 @@ LevelSetIntersectionStatus LevelSetObject::intersectSurface(long id, LevelSetInt
         case LevelSetIntersectionMode::FAST_FUZZY:
         {
             circumcircle = m_kernelPtr->computeCellCircumcircle(id) ;
-            if(utils::DoubleFloatingGreater()(std::abs(getLS(id)), circumcircle, distanceTolerance, distanceTolerance)){
+            if(utils::DoubleFloatingGreater()(std::abs(getValue(id)), circumcircle, distanceTolerance, distanceTolerance)){
                 return LevelSetIntersectionStatus::FALSE;
             }
 
             incircle = m_kernelPtr->computeCellIncircle(id) ;
-            if(utils::DoubleFloatingLessEqual()(std::abs(getLS(id)), incircle, distanceTolerance, distanceTolerance)){
+            if(utils::DoubleFloatingLessEqual()(std::abs(getValue(id)), incircle, distanceTolerance, distanceTolerance)){
                 return LevelSetIntersectionStatus::TRUE;
             }
 
@@ -278,12 +278,12 @@ LevelSetIntersectionStatus LevelSetObject::intersectSurface(long id, LevelSetInt
         case LevelSetIntersectionMode::ACCURATE:
         {
             circumcircle = m_kernelPtr->computeCellCircumcircle(id) ;
-            if(utils::DoubleFloatingGreater()(std::abs(getLS(id)), circumcircle, distanceTolerance, distanceTolerance)){
+            if(utils::DoubleFloatingGreater()(std::abs(getValue(id)), circumcircle, distanceTolerance, distanceTolerance)){
                 return LevelSetIntersectionStatus::FALSE;
             }
 
             incircle = m_kernelPtr->computeCellIncircle(id) ;
-            if(utils::DoubleFloatingLessEqual()(std::abs(getLS(id)), incircle, distanceTolerance, distanceTolerance)){
+            if(utils::DoubleFloatingLessEqual()(std::abs(getValue(id)), incircle, distanceTolerance, distanceTolerance)){
                 return LevelSetIntersectionStatus::TRUE;
             }
 
@@ -519,7 +519,7 @@ void LevelSetObject::flushData( std::fstream &stream, const std::string &name, V
 
         for( const Cell &cell : m_kernelPtr->getMesh()->getVTKCellWriteRange() ){
             long cellId = cell.getId();
-            double value = getLS(cellId);
+            double value = getValue(cellId);
             (*writeFunctionPtr)(stream,value);
         }
 

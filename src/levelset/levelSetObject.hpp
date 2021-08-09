@@ -109,7 +109,8 @@ class LevelSetObject : public VTKBaseStreamer{
     virtual bool                                isPrimary() const ;
 
     virtual LevelSetInfo                        getLevelSetInfo(long ) const =0;
-    virtual double                              getLS(long ) const =0;
+    BITPIT_DEPRECATED(virtual double            getLS(long ) const) =0;
+    virtual double                              getValue(long ) const =0;
     virtual std::array<double,3>                getGradient(long ) const =0 ;
     std::array<double,3>                        computeProjectionPoint(long ) const;
 

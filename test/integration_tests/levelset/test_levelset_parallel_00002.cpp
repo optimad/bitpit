@@ -170,12 +170,12 @@ int subtest_001(int rank)
 
         for( auto & cell : mesh.getCells() ){
             long id = cell.getId() ;
-            if( std::abs(object0.getLS(id)) < mesh.evalCellSize(id) ){
+            if( std::abs(object0.getValue(id)) < mesh.evalCellSize(id) ){
                 mesh.markCellForRefinement(id) ;
             }
 
             if( i<4){
-                if( std::abs(object1.getLS(id)) < mesh.evalCellSize(id) ){
+                if( std::abs(object1.getValue(id)) < mesh.evalCellSize(id) ){
                     mesh.markCellForRefinement(id) ;
                 }
             }
