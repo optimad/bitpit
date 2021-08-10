@@ -112,7 +112,8 @@ class LevelSetSegmentation : public LevelSetCachedObject {
 
     protected:
 
-    void                                        __clear() override ;
+    void                                        _clear() override ;
+
     void                                        _dump( std::ostream &) override ;
     void                                        _restore( std::istream &) override ;
 

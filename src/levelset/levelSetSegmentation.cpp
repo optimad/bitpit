@@ -730,8 +730,12 @@ void LevelSetSegmentation::getGlobalBoundingBox( std::array<double,3> &minP, std
 /*!
  * Clear the segmentation and the specified kernel.
  */
-void LevelSetSegmentation::__clear( ){
+void LevelSetSegmentation::_clear( ){
 
+    // Clear data of base class
+    LevelSetCachedObject::_clear() ;
+
+    // Clear segmentation data
     m_surfaceInfo.clear() ;
 }
 

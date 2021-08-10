@@ -151,13 +151,6 @@ void LevelSetCachedObject::_clearAfterMeshAdaption( const std::vector<adaption::
  */
 void LevelSetCachedObject::_clear( ){
     m_ls.clear() ;
-    __clear() ;
-}
-
-/*! 
- * Clears all levelset information in derived classes
- */
-void LevelSetCachedObject::__clear( ){
 }
 
 /*!
