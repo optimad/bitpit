@@ -1204,8 +1204,12 @@ void LevelSetSegmentation::__clearAfterMeshAdaption( const std::vector<adaption:
  * Writes LevelSetSegmentation to stream in binary format
  * @param[in] stream output stream
  */
-void LevelSetSegmentation::__dump( std::ostream &stream ){
+void LevelSetSegmentation::_dump( std::ostream &stream ){
 
+    // Write data of base class
+    LevelSetCachedObject::_dump( stream ) ;
+
+    // Write surface information
     utils::binary::write( stream, m_surfaceInfo.size() ) ;
 
     bitpit::PiercedVector<SurfaceInfo>::iterator infoItr, infoEnd = m_surfaceInfo.end() ;
@@ -1220,21 +1224,24 @@ void LevelSetSegmentation::__dump( std::ostream &stream ){
  * Reads LevelSetSegmentation from stream in binary format
  * @param[in] stream output stream
  */
-void LevelSetSegmentation::__restore( std::istream &stream ){
+void LevelSetSegmentation::_restore( std::istream &stream ){
 
-    size_t size;
+    // Read data of base class
+    LevelSetCachedObject::_restore( stream ) ;
 
-    long id;
-    long support;
-    std::array<double,3> normal;
+    // Write surface information
+    std::size_t nInfoItems;
+    utils::binary::read( stream, nInfoItems ) ;
+    m_surfaceInfo.reserve(nInfoItems);
 
-    utils::binary::read( stream, size ) ;
-    m_surfaceInfo.reserve(size);
-
-    for( size_t i=0; i<size; ++i){
+    for( std::size_t i=0; i<nInfoItems; ++i){
+        long id;
         utils::binary::read( stream, id );
 
+        long support;
         utils::binary::read( stream, support );
+
+        std::array<double,3> normal;
         utils::binary::read( stream, normal );
 
         m_surfaceInfo.insert(id, SurfaceInfo(support,normal));
