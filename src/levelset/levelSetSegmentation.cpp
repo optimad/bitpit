@@ -1176,8 +1176,12 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *visitee, const 
  * are not in the mesh anymore
  * @param[in] mapper information concerning mesh adaption
  */
-void LevelSetSegmentation::__clearAfterMeshAdaption( const std::vector<adaption::Info> &mapper ){
+void LevelSetSegmentation::_clearAfterMeshAdaption( const std::vector<adaption::Info> &mapper ){
 
+    // Prune data of base class
+    LevelSetCachedObject::_clearAfterMeshAdaption( mapper ) ;
+
+    // Prune segmentation data
     for ( const auto &info : mapper ){
         // Consider only changes on cells
         if( info.entity != adaption::Entity::ENTITY_CELL ){
