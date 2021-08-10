@@ -82,9 +82,7 @@ class LevelSetCachedObject : public LevelSetObject{
     virtual void                                __clearAfterMeshAdaption(const std::vector<adaption::Info> & ) ;
 
     void                                        _dump( std::ostream &) override ;
-    virtual void                                __dump(std::ostream &) ; 
     void                                        _restore( std::istream &) override ;
-    virtual void                                __restore(std::istream &) ; 
 
 # if BITPIT_ENABLE_MPI
     void                                        _writeCommunicationBuffer( const std::vector<long> &, SendBuffer & ) override ;
