@@ -119,8 +119,8 @@ class LevelSetSegmentation : public LevelSetCachedObject {
     void                                        __clearAfterMeshAdaption(const std::vector<adaption::Info> &) override ;
 
 # if BITPIT_ENABLE_MPI
-    void                                        __writeCommunicationBuffer(const std::vector<long> &, SendBuffer &) override ;
-    void                                        __readCommunicationBuffer(const std::vector<long> &, RecvBuffer &)  override ;
+    void                                        _writeCommunicationBuffer(const std::vector<long> &, SendBuffer &) override ;
+    void                                        _readCommunicationBuffer(const std::vector<long> &, RecvBuffer &)  override ;
 # endif
 
     void                                        getBoundingBox( std::array<double,3> &, std::array<double,3> &) const override;

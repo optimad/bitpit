@@ -1248,32 +1248,32 @@ void LevelSetSegmentation::__restore( std::istream &stream ){
  * @param[in] sendList list of cells to be sent
  * @param[in,out] dataBuffer buffer for second communication containing data
  */
-void LevelSetSegmentation::__writeCommunicationBuffer( const std::vector<long> &sendList, SendBuffer &dataBuffer ){
+void LevelSetSegmentation::_writeCommunicationBuffer( const std::vector<long> &sendList, SendBuffer &dataBuffer ){
+
+    // Flush data of base class
+    LevelSetCachedObject::_writeCommunicationBuffer( sendList, dataBuffer ) ;
 
     // Evaluate the size of the buffer
-    long nItems = 0;
-    for( const auto &index : sendList){
-        auto infoItr = m_surfaceInfo.find(index) ;
-        if( infoItr != m_surfaceInfo.end() ){
-            nItems++ ;
+    std::size_t nInfoItems = 0;
+    for( long id : sendList){
+        if( m_surfaceInfo.exists(id)){
+            ++nInfoItems ;
         }
     }
 
-    dataBuffer.setSize(dataBuffer.getSize() + sizeof(long) + nItems* ( 2*sizeof(long) +3*sizeof(double) ));
+    dataBuffer.setSize(dataBuffer.getSize() + sizeof(std::size_t) + nInfoItems* ( sizeof(std::size_t) +sizeof(long) +3*sizeof(double) ));
 
     // Fill the buffer
-    dataBuffer << nItems ;
+    dataBuffer << nInfoItems ;
 
-    long index = 0 ;
-    for( long id : sendList){
+    for( std::size_t k = 0; k < sendList.size(); ++k){
+        long id = sendList[k];
         auto infoItr = m_surfaceInfo.find(id) ;
         if( infoItr != m_surfaceInfo.end() ){
-            dataBuffer << index ;
+            dataBuffer << k ;
             dataBuffer << infoItr->support;
             dataBuffer << infoItr->normal;
         }
-
-        ++index;
     }
 }
 
@@ -1282,16 +1282,20 @@ void LevelSetSegmentation::__writeCommunicationBuffer( const std::vector<long> &
  * @param[in] recvList list of cells to be received
  * @param[in,out] dataBuffer buffer containing the data
  */
-void LevelSetSegmentation::__readCommunicationBuffer( const std::vector<long> &recvList, RecvBuffer &dataBuffer ){
+void LevelSetSegmentation::_readCommunicationBuffer( const std::vector<long> &recvList, RecvBuffer &dataBuffer ){
 
-    long nItems ;
-    dataBuffer >> nItems ;
+    // Read data of base class
+    LevelSetCachedObject::_readCommunicationBuffer( recvList, dataBuffer ) ;
 
-    for( long i=0; i<nItems; ++i){
+    // Read surface information
+    std::size_t nInfoItems ;
+    dataBuffer >> nInfoItems ;
+
+    for( std::size_t i=0; i<nInfoItems; ++i){
         // Get the id of the element
-        long index;
-        dataBuffer >> index;
-        long id = recvList[index] ;
+        std::size_t k ;
+        dataBuffer >> k ;
+        long id = recvList[k] ;
 
         // Assign the data of the element
         auto infoItr = m_surfaceInfo.find(id) ;
