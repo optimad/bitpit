@@ -88,9 +88,7 @@ class LevelSetCachedObject : public LevelSetObject{
 
 # if BITPIT_ENABLE_MPI
     void                                        _writeCommunicationBuffer( const std::vector<long> &, SendBuffer & ) override ;
-    virtual void                                __writeCommunicationBuffer( const std::vector<long> &, SendBuffer & ) ; 
     void                                        _readCommunicationBuffer( const std::vector<long> &, RecvBuffer & )  override;
-    virtual void                                __readCommunicationBuffer( const std::vector<long> &, RecvBuffer & ) ; 
 # endif 
 
     public:

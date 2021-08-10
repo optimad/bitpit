@@ -682,40 +682,27 @@ void LevelSetCachedObject::__restore( std::istream &stream ){
 void LevelSetCachedObject::_writeCommunicationBuffer( const std::vector<long> &sendList, SendBuffer &dataBuffer ){
 
     // Evaluate the size of the buffer
-    long nItems = 0;
-    for( const auto &index : sendList){
-        if( m_ls.exists(index)){
-            nItems++ ;
+    std::size_t nInfoItems = 0;
+    for( long id : sendList){
+        if( m_ls.exists(id)){
+            ++nInfoItems ;
         }
     }
 
-    dataBuffer.setSize(dataBuffer.getSize() + sizeof(long) + nItems* (sizeof(long) +4*sizeof(double)) ) ;
+    dataBuffer.setSize(dataBuffer.getSize() + sizeof(std::size_t) + nInfoItems* (sizeof(std::size_t) +4*sizeof(double)) ) ;
 
     // Fill the buffer
-    dataBuffer << nItems ;
+    dataBuffer << nInfoItems ;
 
-    long index = 0;
-    for( long id : sendList){
-        auto lsInfoItr = m_ls.find(id) ;
-        if( lsInfoItr != m_ls.end() ){
-            dataBuffer << index ;
-            dataBuffer << lsInfoItr->value ;
-            dataBuffer << lsInfoItr->gradient ;
+    for( std::size_t k = 0; k < sendList.size(); ++k){
+        long id = sendList[k];
+        auto infoItr = m_ls.find(id) ;
+        if( infoItr != m_ls.end() ){
+            dataBuffer << k ;
+            dataBuffer << infoItr->value ;
+            dataBuffer << infoItr->gradient ;
         }
-        ++index ;
     }
-
-    __writeCommunicationBuffer( sendList, dataBuffer) ;
-}
-
-/*!
- * Flushing of data of derived class to communication buffers for partitioning
- * @param[in] sendList list of cells to be sent
- * @param[in,out] dataBuffer buffer for second communication containing data
- */
-void LevelSetCachedObject::__writeCommunicationBuffer( const std::vector<long> &sendList, SendBuffer &dataBuffer ){
-    BITPIT_UNUSED(sendList);
-    BITPIT_UNUSED(dataBuffer);
 }
 
 /*!
@@ -725,17 +712,17 @@ void LevelSetCachedObject::__writeCommunicationBuffer( const std::vector<long> &
  */
 void LevelSetCachedObject::_readCommunicationBuffer( const std::vector<long> &recvList, RecvBuffer &dataBuffer ){
 
-    long nItems ;
-    dataBuffer >> nItems ;
+    std::size_t nInfoItems ;
+    dataBuffer >> nInfoItems ;
 
-    for( int i=0; i<nItems; ++i){
+    for( std::size_t i=0; i<nInfoItems; ++i){
         // Determine the id of the element
-        long index ;
-        dataBuffer >> index ;
-        long id = recvList[index] ;
+        std::size_t k ;
+        dataBuffer >> k ;
+        long id = recvList[k] ;
 
         // Assign the data of the element
-        PiercedVector<LevelSetInfo>::iterator infoItr = m_ls.find(id) ;
+        auto infoItr = m_ls.find(id) ;
         if( infoItr == m_ls.end() ){
             infoItr = m_ls.emplace(id) ;
         }
@@ -743,18 +730,6 @@ void LevelSetCachedObject::_readCommunicationBuffer( const std::vector<long> &re
         dataBuffer >> infoItr->value ;
         dataBuffer >> infoItr->gradient ;
     }
-
-    __readCommunicationBuffer( recvList, dataBuffer ) ;
-}
-
-/*!
- * Processing of communication buffer of derived class into data structure
- * @param[in] recvList list of cells to be received
- * @param[in,out] dataBuffer buffer containing the data
- */
-void LevelSetCachedObject::__readCommunicationBuffer( const std::vector<long> &recvList, RecvBuffer &dataBuffer ){
-    BITPIT_UNUSED(recvList);
-    BITPIT_UNUSED(dataBuffer);
 }
 
 #endif 
