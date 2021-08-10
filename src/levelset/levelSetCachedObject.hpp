@@ -75,8 +75,6 @@ class LevelSetCachedObject : public LevelSetObject{
 #endif
 
     void                                        _clear( ) override ;
-    virtual void                                __clear() ;
-
 
     void                                        _clearAfterMeshAdaption(const std::vector<adaption::Info> & ) override ;
 
