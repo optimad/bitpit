@@ -116,7 +116,7 @@ class LevelSetSegmentation : public LevelSetCachedObject {
     void                                        _dump( std::ostream &) override ;
     void                                        _restore( std::istream &) override ;
 
-    void                                        __clearAfterMeshAdaption(const std::vector<adaption::Info> &) override ;
+    void                                        _clearAfterMeshAdaption(const std::vector<adaption::Info> &) override ;
 
 # if BITPIT_ENABLE_MPI
     void                                        _writeCommunicationBuffer(const std::vector<long> &, SendBuffer &) override ;

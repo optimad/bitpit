@@ -144,17 +144,6 @@ void LevelSetCachedObject::_clearAfterMeshAdaption( const std::vector<adaption::
 
     m_ls.flush() ;
 
-    __clearAfterMeshAdaption( mapper ) ;
-
-    return ;
-}
-
-/*! 
- * Deletes non-existing items after grid adaption in derived classes
- * @param[in] mapper mapping info
- */
-void LevelSetCachedObject::__clearAfterMeshAdaption( const std::vector<adaption::Info> &mapper ){
-    BITPIT_UNUSED(mapper);
 }
 
 /*! 
