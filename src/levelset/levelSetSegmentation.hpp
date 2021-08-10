@@ -113,8 +113,8 @@ class LevelSetSegmentation : public LevelSetCachedObject {
     protected:
 
     void                                        __clear() override ;
-    void                                        __dump( std::ostream &) override ;
-    void                                        __restore( std::istream &) override ;
+    void                                        _dump( std::ostream &) override ;
+    void                                        _restore( std::istream &) override ;
 
     void                                        __clearAfterMeshAdaption(const std::vector<adaption::Info> &) override ;
 

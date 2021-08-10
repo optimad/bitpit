@@ -622,7 +622,7 @@ void LevelSetCachedObject::setSign(long id, int sign) {
  */
 void LevelSetCachedObject::_dump( std::ostream &stream ){
 
-    utils::binary::write(stream, (long) m_ls.size() ) ;
+    utils::binary::write(stream, m_ls.size() ) ;
     bitpit::PiercedVector<LevelSetInfo>::iterator   infoItr, infoEnd = m_ls.end() ;
 
     for( infoItr=m_ls.begin(); infoItr!=infoEnd; ++infoItr){
@@ -630,16 +630,6 @@ void LevelSetCachedObject::_dump( std::ostream &stream ){
         utils::binary::write(stream, infoItr->value) ;
         utils::binary::write(stream, infoItr->gradient) ;
     }
-
-    __dump(stream) ;
-}
-
-/*!
- * Writes information of derived class to stream in binary format
- * @param[in] stream output stream
- */
-void LevelSetCachedObject::__dump( std::ostream &stream ){
-    BITPIT_UNUSED(stream);
 }
 
 /*!
@@ -648,28 +638,22 @@ void LevelSetCachedObject::__dump( std::ostream &stream ){
  */
 void LevelSetCachedObject::_restore( std::istream &stream ){
 
-    long i, n, id;
-    LevelSetInfo cellInfo;
+    std::size_t nInfoItems;
+    utils::binary::read(stream, nInfoItems);
+    m_ls.reserve(nInfoItems);
 
-    utils::binary::read(stream, n);
-
-    m_ls.reserve(n);
-    for( i=0; i<n; ++i){
+    for( std::size_t i=0; i<nInfoItems; ++i){
+        long id;
         utils::binary::read(stream, id) ;
-        utils::binary::read(stream, cellInfo.value) ;
-        utils::binary::read(stream, cellInfo.gradient) ;
-        m_ls.insert(id, cellInfo) ;
+
+        double value;
+        utils::binary::read(stream, value) ;
+
+        std::array<double,3> gradient;
+        utils::binary::read(stream, gradient) ;
+
+        m_ls.insert(id, LevelSetInfo(value, gradient)) ;
     }
-
-    __restore(stream) ;
-}
-
-/*!
- * Reads information of derived class from stream in binary format
- * @param[in] stream output stream
- */
-void LevelSetCachedObject::__restore( std::istream &stream ){
-    BITPIT_UNUSED(stream);
 }
 
 #if BITPIT_ENABLE_MPI
