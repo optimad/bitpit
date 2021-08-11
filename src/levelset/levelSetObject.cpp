@@ -177,16 +177,6 @@ void LevelSetObject::propagateSign(){
 }
 
 /*!
- * If cell centroid lies within the narrow band and hence levelset is computet exactly
- * @param[in] id cell id
- * @return true/false if the centroid is in narrow band
- */
-bool LevelSetObject::isInNarrowBand(long id)const{
-    assert( m_narrowBand > 0 && "Need to set size of narrow >0 before calling isInNarrowBand");
-    return ( std::abs(getValue(id)) <= m_narrowBand );
-}
-
-/*!
  * Get the current size of the narrow band.
  * A size equal or less than zero means that the levelset will be evaluated
  * only on cells that intersect the surface.

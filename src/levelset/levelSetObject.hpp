@@ -125,7 +125,8 @@ class LevelSetObject : public VTKBaseStreamer{
     virtual LevelSetInfo                        computeLevelSetInfo(const std::array<double,3> &) const =0;
     std::array<double,3>                        computeProjectionPoint(const std::array<double,3> &) const;
 
-    bool                                        isInNarrowBand(long ) const;
+    virtual bool                                isInNarrowBand(long ) const = 0;
+
     double                                      getSizeNarrowBand() const;
 
     LevelSetIntersectionStatus                  intersectSurface(long, LevelSetIntersectionMode=LevelSetIntersectionMode::FAST_FUZZY) const;
