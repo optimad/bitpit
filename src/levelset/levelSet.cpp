@@ -72,8 +72,8 @@ LevelSet::LevelSet() {
 
     m_narrowBandSize = levelSetDefaults::NARROWBAND_SIZE;
 
-    m_signedDF    = true ;
-    m_propagateS  = false;
+    m_signedDistance = true ;
+    m_propagateSign  = false;
 
 }
 
@@ -456,11 +456,11 @@ void LevelSet::clear(){
 }
 
 /*!
- * Set if the signed or unsigned levelset function should be computed.
- * @param[in] flag true/false for signed /unsigned Level-Set function .
+ * Set if the signed or unsigned levelset distance should be computed.
+ * @param[in] flag true/false for signed /unsigned levelset distance.
  */
 void LevelSet::setSign(bool flag){
-    m_signedDF = flag;
+    m_signedDistance = flag;
 
 }
 
@@ -469,7 +469,7 @@ void LevelSet::setSign(bool flag){
  * @param[in] flag True/false to active/disable the propagation .
  */
 void LevelSet::setPropagateSign(bool flag){
-    m_propagateS = flag;
+    m_propagateSign = flag;
 }
 
 /*!
@@ -510,12 +510,12 @@ void LevelSet::compute(){
     assert(m_kernel && "LevelSet::setMesh() must be called prior to LevelSet::compute()");
 
     for( int objectId : m_order){
-        auto &visitor = *(m_objects.at(objectId)) ;
-        visitor.computeLSInNarrowBand(m_signedDF) ;
+        LevelSetObject &object = *(m_objects.at(objectId)) ;
+        object.computeLSInNarrowBand(m_signedDistance) ;
 #if BITPIT_ENABLE_MPI
-        visitor.exchangeGhosts();
+        object.exchangeGhosts();
 #endif
-        if(m_propagateS) visitor.propagateSign() ;
+        if(m_propagateSign) object.propagateSign() ;
     }
 }
 
@@ -594,40 +594,40 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
 
     // Update objects
     for( int objectId : m_order){
-        auto &visitor = *(m_objects.at(objectId)) ;
+        LevelSetObject &object = *(m_objects.at(objectId)) ;
 
 #if BITPIT_ENABLE_MPI
         // Start partitioning update
         if (updatePartitioning) {
-            visitor.startExchange( partitioningSendList, dataCommunicator.get() );
+            object.startExchange( partitioningSendList, dataCommunicator.get() );
         }
 #endif
 
         // Clear data structures after mesh update
-        visitor.clearAfterMeshAdaption( mapper ) ;
+        object.clearAfterMeshAdaption( mapper ) ;
 
 #if BITPIT_ENABLE_MPI
         // Complete partitioning update
         if (updatePartitioning) {
-            visitor.completeExchange( partitioningRecvList, dataCommunicator.get() );
+            object.completeExchange( partitioningRecvList, dataCommunicator.get() );
         }
 #endif
 
         // Update levelset inside narrow band
         if (updateNarrowBand) {
-            visitor.updateLSInNarrowBand( mapper, m_signedDF ) ;
+            object.updateLSInNarrowBand( mapper, m_signedDistance ) ;
         }
 
 #if BITPIT_ENABLE_MPI
         // Update data on ghost cells
-        visitor.exchangeGhosts();
+        object.exchangeGhosts();
 #endif
 
         // Propagate sign
         //
         // It's not possible to communicate sign information, therefore sign
         // needs to be propagated also when the mesh is only partitioned.
-        if(m_propagateS) visitor.propagateSign() ;
+        if(m_propagateSign) object.propagateSign() ;
     }
 
 }
@@ -654,8 +654,8 @@ void LevelSet::dump( std::ostream &stream ){
 
     utils::binary::write(stream, m_order);
     utils::binary::write(stream, m_narrowBandSize);
-    utils::binary::write(stream, m_signedDF);
-    utils::binary::write(stream, m_propagateS);
+    utils::binary::write(stream, m_signedDistance);
+    utils::binary::write(stream, m_propagateSign);
 
     for( const auto &object : m_objects ){
         object.second->dump( stream ) ;
@@ -672,8 +672,8 @@ void LevelSet::restore( std::istream &stream ){
 
     utils::binary::read(stream, m_order);
     utils::binary::read(stream, m_narrowBandSize);
-    utils::binary::read(stream, m_signedDF);
-    utils::binary::read(stream, m_propagateS);
+    utils::binary::read(stream, m_signedDistance);
+    utils::binary::read(stream, m_propagateSign);
 
     for( const auto &object : m_objects ){
         object.second->restore( stream ) ;
