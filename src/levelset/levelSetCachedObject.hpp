@@ -103,6 +103,8 @@ class LevelSetCachedObject : public LevelSetObject{
 
     void                                        propagateSign() override ;
 
+    bool                                        isInNarrowBand(long id) const override;
+
 };
 
 

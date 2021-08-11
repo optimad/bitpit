@@ -430,4 +430,17 @@ int LevelSetBoolean::getPrimaryObjectId(long cellId) const{
     
 }
 
+/*!
+ * If cell centroid lies within the narrow band and hence levelset is computet exactly
+ * @param[in] id cell id
+ * @return true/false if the centroid is in narrow band
+ */
+bool LevelSetBoolean::isInNarrowBand(long id)const{
+
+    double objectFactor;
+    LevelSetObject *componentObject = getCompetentObject(id, &objectFactor);
+
+    return componentObject->isInNarrowBand(id);
+}
+
 }
