@@ -74,8 +74,6 @@ class LevelSetObject : public VTKBaseStreamer{
 
     short                                       evalValueSign(double) const ;
 
-    virtual void                                propagateSign() ;
-
     void                                        dump(std::ostream &);
     void                                        restore(std::istream &);
 
