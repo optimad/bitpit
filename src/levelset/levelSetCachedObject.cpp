@@ -488,8 +488,8 @@ bool LevelSetCachedObject::isPropagatedSignAvailable() {
  * \param[in,out] externalSign is the sign of the external region
  */
 void LevelSetCachedObject::initializeCellSignPropagation(long cellId, signed char cellSign,
-                                                         const std::array<double, 3> &boxMin,
-                                                         const std::array<double, 3> &boxMax,
+                                                         const std::array<double, 3> &objectBoxMin,
+                                                         const std::array<double, 3> &objectBoxMax,
                                                          int *cellStatus, std::vector<long> *seeds,
                                                          long *nWaiting, long *nExternal,
                                                          signed char *externalSign) {

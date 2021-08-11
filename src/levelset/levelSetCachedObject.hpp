@@ -55,8 +55,8 @@ class LevelSetCachedObject : public LevelSetObject{
     static const signed char                    PROPAGATION_SIGN_DUMMY;
 
     void                                        initializeCellSignPropagation( long cellId, signed char cellSign,
-                                                                               const std::array<double, 3> &boxMin,
-                                                                               const std::array<double, 3> &boxMax,
+                                                                               const std::array<double, 3> &objectBoxMin,
+                                                                               const std::array<double, 3> &objectBoxMax,
                                                                                int *cellStatus, std::vector<long> *seeds,
                                                                                long *nWaiting, long *nExternal,
                                                                                signed char *externalSign ) ;
