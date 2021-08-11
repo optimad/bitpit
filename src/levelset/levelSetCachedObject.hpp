@@ -33,6 +33,8 @@
 # include "bitpit_containers.hpp"
 
 # include "levelSetBoundedObject.hpp"
+# include "levelSetSignPropagator.hpp"
+
 namespace bitpit{
 
 namespace adaption{
@@ -45,36 +47,10 @@ class RecvBuffer;
 class LevelSetKernel;
 class LevelSetObject;
 
-class LevelSetCachedObject : public LevelSetObject, public LevelSetBoundedObject {
-
-    private:
-    static const int                            PROPAGATION_STATUS_EXTERNAL;
-    static const int                            PROPAGATION_STATUS_WAITING;
-    static const int                            PROPAGATION_STATUS_REACHED;
-
-    static const signed char                    PROPAGATION_SIGN_UNDEFINED;
-    static const signed char                    PROPAGATION_SIGN_DUMMY;
-
-    void                                        initializeCellSignPropagation( long cellId, signed char cellSign,
-                                                                               const std::array<double, 3> &objectBoxMin,
-                                                                               const std::array<double, 3> &objectBoxMax,
-                                                                               int *cellStatus, std::vector<long> *seeds,
-                                                                               long *nWaiting, long *nExternal,
-                                                                               signed char *externalSign ) ;
-
-    void                                        propagateSeedSign( const std::vector<long> &seeds,
-                                                                   PiercedStorage<int, long> *status,
-                                                                   long *nWaiting, signed char *externalSign ) ;
-
-    void                                        initializeSignPropagationStorage();
-
-    bool                                        isPropagatedSignAvailable();
+class LevelSetCachedObject : public LevelSetObject, public LevelSetBoundedObject, public LevelSetSignStorage {
 
     protected:
     PiercedVector<LevelSetInfo>                 m_ls ;          /**< Levelset information for each cell */
-
-    bool                                        m_propagatedSignAvailable;  /** Controls if the levelset sign has been propagated */
-    PiercedStorage<signed char>                 m_propagatedSign;           /** Levelset sign propagated on the cells if the whole mesh */
 
     void                                        _clear( ) override ;
 
@@ -96,8 +72,6 @@ class LevelSetCachedObject : public LevelSetObject, public LevelSetBoundedObject
     double                                      getValue(long ) const override ;
     short                                       getSign(long ) const override ;
     std::array<double,3>                        getGradient(long ) const override ;
-
-    void                                        propagateSign() override ;
 
     bool                                        isInNarrowBand(long id) const override;
 

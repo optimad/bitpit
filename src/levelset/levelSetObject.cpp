@@ -171,12 +171,6 @@ short LevelSetObject::evalValueSign(double value)const{
 }
 
 /*!
- * Propgates the sign to levelset function throughout the grid
- */
-void LevelSetObject::propagateSign(){
-}
-
-/*!
  * Get the current size of the narrow band.
  * A size equal or less than zero means that the levelset will be evaluated
  * only on cells that intersect the surface.
