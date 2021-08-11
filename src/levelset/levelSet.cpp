@@ -37,6 +37,7 @@
 # include "levelSetCachedObject.hpp"
 # include "levelSetBoolean.hpp"
 # include "levelSetSegmentation.hpp"
+# include "levelSetSignPropagator.hpp"
 # include "levelSetMask.hpp"
 
 # include "levelSet.hpp"
@@ -509,13 +510,23 @@ void LevelSet::compute(){
 
     assert(m_kernel && "LevelSet::setMesh() must be called prior to LevelSet::compute()");
 
+    std::unique_ptr<LevelSetSignPropagator> signPropagator ;
+    if (m_propagateSign) {
+        signPropagator = std::unique_ptr<LevelSetSignPropagator>(new LevelSetSignPropagator(m_kernel->getMesh())) ;
+    }
+
     for( int objectId : m_order){
-        LevelSetObject &object = *(m_objects.at(objectId)) ;
-        object.computeLSInNarrowBand(m_signedDistance) ;
+        LevelSetObject *object = m_objects.at(objectId).get() ;
+        object->computeLSInNarrowBand(m_signedDistance) ;
 #if BITPIT_ENABLE_MPI
-        object.exchangeGhosts();
+        object->exchangeGhosts();
 #endif
-        if(m_propagateSign) object.propagateSign() ;
+        if(m_propagateSign) {
+            LevelSetSignStorage *signStorage = dynamic_cast<LevelSetSignStorage *>(object);
+            if (signStorage) {
+                signPropagator->execute(object, signStorage);
+            }
+        }
     }
 }
 
@@ -592,42 +603,53 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
     // Update kernel
     m_kernel->updateGeometryCache( mapper ) ;
 
+    // Create sign propagator
+    std::unique_ptr<LevelSetSignPropagator> signPropagator ;
+    if (m_propagateSign) {
+        signPropagator = std::unique_ptr<LevelSetSignPropagator>(new LevelSetSignPropagator(m_kernel->getMesh())) ;
+    }
+
     // Update objects
     for( int objectId : m_order){
-        LevelSetObject &object = *(m_objects.at(objectId)) ;
+        LevelSetObject *object = m_objects.at(objectId).get() ;
 
 #if BITPIT_ENABLE_MPI
         // Start partitioning update
         if (updatePartitioning) {
-            object.startExchange( partitioningSendList, dataCommunicator.get() );
+            object->startExchange( partitioningSendList, dataCommunicator.get() );
         }
 #endif
 
         // Clear data structures after mesh update
-        object.clearAfterMeshAdaption( mapper ) ;
+        object->clearAfterMeshAdaption( mapper ) ;
 
 #if BITPIT_ENABLE_MPI
         // Complete partitioning update
         if (updatePartitioning) {
-            object.completeExchange( partitioningRecvList, dataCommunicator.get() );
+            object->completeExchange( partitioningRecvList, dataCommunicator.get() );
         }
 #endif
 
         // Update levelset inside narrow band
         if (updateNarrowBand) {
-            object.updateLSInNarrowBand( mapper, m_signedDistance ) ;
+            object->updateLSInNarrowBand( mapper, m_signedDistance ) ;
         }
 
 #if BITPIT_ENABLE_MPI
         // Update data on ghost cells
-        object.exchangeGhosts();
+        object->exchangeGhosts();
 #endif
 
         // Propagate sign
         //
         // It's not possible to communicate sign information, therefore sign
         // needs to be propagated also when the mesh is only partitioned.
-        if(m_propagateSign) object.propagateSign() ;
+        if (m_propagateSign) {
+            LevelSetSignStorage *signStorage = dynamic_cast<LevelSetSignStorage *>(object);
+            if (signStorage) {
+                signPropagator->execute(mapper, object, signStorage);
+            }
+        }
     }
 
 }
