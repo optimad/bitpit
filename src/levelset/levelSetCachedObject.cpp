@@ -654,6 +654,16 @@ void LevelSetCachedObject::propagateSeedSign(const std::vector<long> &seeds,
 }
 
 /*!
+ * If cell lies within the narrow band and hence its levelset is computed
+ * exactly.
+ * @param[in] id cell id
+ * @return true/false if the centroid is in narrow band
+ */
+bool LevelSetCachedObject::isInNarrowBand(long id)const{
+    return m_ls.exists(id);
+}
+
+/*!
  * Writes LevelSetCachedObject to stream in binary format
  * @param[in] stream output stream
  */

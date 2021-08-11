@@ -82,6 +82,8 @@ class LevelSetBoolean: public LevelSetMetaObject {
     int                                         getPrimaryObjectId(long ) const override;
     std::vector<const LevelSetObject*>          getPrimaryObjects() const override;
 
+    bool                                        isInNarrowBand(long ) const override;
+
 };
 
 }
