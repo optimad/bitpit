@@ -1138,7 +1138,7 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *levelsetKernel,
         long intersectedNeighId = Cell::NULL_ID;
         for (int n = 0; n < nNeighbours; ++n) {
             long neighId = neighbours[n];
-            if (!m_ls.exists(neighId)) {
+            if (!isInNarrowBand(neighId)) {
                 continue;
             }
 
