@@ -163,7 +163,7 @@ void LevelSetCachedObject::_clearAfterMeshAdaption( const std::vector<adaption::
                 map.type == adaption::Type::TYPE_COARSENING  ){
 
                 for ( auto & parent : map.previous){
-                    if( m_ls.exists(parent) ) 
+                    if( isInNarrowBand(parent) )
                         m_ls.erase(parent,true) ;
                 }
             }
