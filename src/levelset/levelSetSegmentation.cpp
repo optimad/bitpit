@@ -1127,12 +1127,20 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *visitee, const 
         const Cell &cell = mesh.getCell(cellId);
 
         // Consider only cells with a neighbour that intersects the surface
+        //
+        // Care must be take to use only information from cells inside the
+        // narrow band, that's because values outside the narrowband are not
+        // up-to-date at this stage.
         const long *neighbours = cell.getAdjacencies() ;
         int nNeighbours = cell.getAdjacencyCount() ;
 
         long intersectedNeighId = Cell::NULL_ID;
         for (int n = 0; n < nNeighbours; ++n) {
             long neighId = neighbours[n];
+            if (!m_ls.exists(neighId)) {
+                continue;
+            }
+
             if( intersectSurface(neighId,LevelSetIntersectionMode::FAST_GUARANTEE_FALSE) == LevelSetIntersectionStatus::TRUE){
                 intersectedNeighId = neighId;
                 break;
