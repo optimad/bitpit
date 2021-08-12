@@ -32,6 +32,7 @@
 
 # include "bitpit_containers.hpp"
 
+# include "levelSetBoundedObject.hpp"
 namespace bitpit{
 
 namespace adaption{
@@ -44,7 +45,7 @@ class RecvBuffer;
 class LevelSetKernel;
 class LevelSetObject;
 
-class LevelSetCachedObject : public LevelSetObject{
+class LevelSetCachedObject : public LevelSetObject, public LevelSetBoundedObject {
 
     private:
     static const int                            PROPAGATION_STATUS_EXTERNAL;
@@ -74,11 +75,6 @@ class LevelSetCachedObject : public LevelSetObject{
 
     bool                                        m_propagatedSignAvailable;  /** Controls if the levelset sign has been propagated */
     PiercedStorage<signed char>                 m_propagatedSign;           /** Levelset sign propagated on the cells if the whole mesh */
-
-    virtual void                                getBoundingBox( std::array<double,3> &, std::array<double,3> & )const =0  ;
-# if BITPIT_ENABLE_MPI
-    virtual void                                getGlobalBoundingBox( std::array<double,3> &, std::array<double,3> & )const =0  ;
-#endif
 
     void                                        _clear( ) override ;
 
