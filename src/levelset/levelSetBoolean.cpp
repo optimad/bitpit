@@ -37,6 +37,89 @@
 namespace bitpit {
 
 /*!
+	@class      LevelSetBooleanResult
+	@ingroup    levelset
+	@brief      Class for evaluating boolean results.
+*/
+
+/*!
+ * Constructor
+ *
+ * @param[in] operation type of boolean operation
+ */
+LevelSetBooleanResult::LevelSetBooleanResult(LevelSetBooleanOperation operation)
+    : m_operation(operation), m_object(nullptr), m_objectSign(0), m_value(levelSetDefaults::VALUE)
+{
+}
+
+/*!
+ * Constructor
+ *
+ * @param[in] operation type of boolean operation
+ * @param[in] object is the object that will be used to initialize the result
+ * @param[in] value is the value that will be used to initialize the result
+ */
+LevelSetBooleanResult::LevelSetBooleanResult(LevelSetBooleanOperation operation, LevelSetObject *object, double value)
+    : m_operation(operation), m_object(object), m_objectSign(1), m_value(value)
+{
+}
+
+/*!
+ * Update the result.
+ *
+ * @param[in] object is the object that will be used to update the result
+ * @param[in] value is the value that will be used to update the result
+ */
+void LevelSetBooleanResult::update(LevelSetObject *object, double value)
+{
+    if( m_operation == LevelSetBooleanOperation::UNION){
+        if(m_value > value) {
+            m_object     = object;
+            m_objectSign = 1;
+
+            m_value = m_objectSign * value;
+        }
+
+    } else if ( m_operation == LevelSetBooleanOperation::INTERSECTION){
+        if(m_value < value) {
+            m_object     = object;
+            m_objectSign = 1;
+
+            m_value = m_objectSign * value;
+        }
+
+    } else if ( m_operation == LevelSetBooleanOperation::SUBTRACTION){
+        if(m_value < - value) {
+            m_object     = object;
+            m_objectSign = -1;
+
+            m_value = m_objectSign * value;
+        }
+    }
+}
+
+/*!
+ * Get the object associated with the results.
+ */
+LevelSetObject * LevelSetBooleanResult::getObject() const {
+    return m_object;
+}
+
+/*!
+ * Get the object sign associated with the results.
+ */
+int LevelSetBooleanResult::getObjectSign() const {
+    return m_objectSign;
+}
+
+/*!
+ * Get the value associated with the results.
+ */
+double LevelSetBooleanResult::getValue() const {
+    return m_value;
+}
+
+/*!
 	@class      LevelSetBoolean
 	@ingroup    levelset
 	@brief      Class which deals with boolean operation between two LevelSetObjects
@@ -51,8 +134,8 @@ namespace bitpit {
  */
 LevelSetBoolean::LevelSetBoolean( int id, LevelSetBooleanOperation op, LevelSetObject *ptr1, LevelSetObject *ptr2  ) :LevelSetMetaObject(id) {
     m_operation = op;
-    m_objPtr.push_back(ptr1);
-    m_objPtr.push_back(ptr2);
+    m_objects.push_back(ptr1);
+    m_objects.push_back(ptr2);
 }
 
 /*!
@@ -64,7 +147,7 @@ LevelSetBoolean::LevelSetBoolean( int id, LevelSetBooleanOperation op, LevelSetO
  */
 LevelSetBoolean::LevelSetBoolean( int id, LevelSetBooleanOperation op, const std::vector<LevelSetObject*> &objPtr ) :LevelSetMetaObject(id) {
     m_operation = op;
-    m_objPtr = objPtr;
+    m_objects = objPtr;
 }
 
 /*!
@@ -74,7 +157,7 @@ LevelSetBoolean::LevelSetBoolean( int id, LevelSetBooleanOperation op, const std
  */
 LevelSetBoolean::LevelSetBoolean( const LevelSetBoolean &other) :LevelSetMetaObject(other) {
     m_operation = other.m_operation;
-    m_objPtr = other.m_objPtr;
+    m_objects = other.m_objects;
 }
 
 /*!
@@ -83,7 +166,16 @@ LevelSetBoolean::LevelSetBoolean( const LevelSetBoolean &other) :LevelSetMetaObj
  * @return LevelSetInfo
 */
 LevelSetInfo LevelSetBoolean::getLevelSetInfo( long id)const{
-    return booleanOperation(id) ;
+    LevelSetBooleanResult result = computeBooleanResult( id ) ;
+    const LevelSetObject *resultObject = result.getObject();
+    if ( resultObject ) {
+        double value = result.getValue();
+        std::array<double, 3> gradient = static_cast<double>(result.getObjectSign()) * resultObject->getGradient( id ) ;
+
+        return LevelSetInfo(value, gradient) ;
+    }
+
+    return LevelSetInfo() ;
 } 
 
 /*!
@@ -101,7 +193,15 @@ double LevelSetBoolean::getLS( long id)const {
  * @return levelset value in cell
  */
 double LevelSetBoolean::getValue( long id)const {
-    return booleanOperation(id).value ;
+    const LevelSetBooleanResult result = computeBooleanResult( id ) ;
+    const LevelSetObject *resultObject = result.getObject();
+    if ( resultObject ) {
+        double value = result.getValue();
+
+        return value ;
+    }
+
+    return levelSetDefaults::VALUE ;
 }
 
 /*!
@@ -110,7 +210,15 @@ double LevelSetBoolean::getValue( long id)const {
  * @return levelset gradient in cell 
  */
 std::array<double,3> LevelSetBoolean::getGradient(long id) const {
-    return booleanOperation(id).gradient ;
+    const LevelSetBooleanResult result = computeBooleanResult( id ) ;
+    const LevelSetObject *resultObject = result.getObject();
+    if ( resultObject ) {
+        std::array<double, 3> gradient = static_cast<double>(result.getObjectSign()) * resultObject->getGradient( id ) ;
+
+        return gradient ;
+    }
+
+    return levelSetDefaults::GRADIENT ;
 }
 
 /*!
@@ -119,8 +227,17 @@ std::array<double,3> LevelSetBoolean::getGradient(long id) const {
  * @return LevelSetInfo
 */
 LevelSetInfo LevelSetBoolean::computeLevelSetInfo( const std::array<double,3> &coords) const{
-    return booleanOperation(coords) ;
+    const LevelSetBooleanResult result = computeBooleanResult( coords ) ;
+    const LevelSetObject *componentObject = result.getObject();
+    if ( componentObject ) {
+        LevelSetInfo levelSetInfo = componentObject->computeLevelSetInfo( coords ) ;
+        levelSetInfo.value    *= result.getObjectSign();
+        levelSetInfo.gradient *= static_cast<double>(result.getObjectSign());
 
+        return levelSetInfo;
+    }
+
+    return LevelSetInfo() ;
 }
 
 /*!
@@ -154,14 +271,13 @@ LevelSetBoolean* LevelSetBoolean::clone() const {
  */
 std::array<double,3> LevelSetBoolean::getNormal( long id ) const{
 
-    double factor;
-    LevelSetObject *objPtr = getCompetentObject(id,&factor) ;
-
-    if( objPtr == nullptr){
-        return levelSetDefaults::GRADIENT;
+    const LevelSetBooleanResult result = computeBooleanResult(id) ;
+    const LevelSetObject *resultObject = result.getObject();
+    if ( resultObject ) {
+        return (static_cast<double>(result.getObjectSign()) * resultObject->getNormal(id)) ;
     }
 
-    return objPtr->getNormal(id) *factor; ;
+    return levelSetDefaults::GRADIENT;
 }
 
 /*!
@@ -170,13 +286,14 @@ std::array<double,3> LevelSetBoolean::getNormal( long id ) const{
  * @return closest part
  */
 int LevelSetBoolean::getPart( long id ) const{
-    LevelSetObject *objPtr = getCompetentObject(id) ;
 
-    if( objPtr == nullptr){
-        return levelSetDefaults::PART;
+    const LevelSetBooleanResult result = computeBooleanResult(id) ;
+    const LevelSetObject *resultObject = result.getObject();
+    if ( resultObject ) {
+        return resultObject->getPart(id) ;
     }
 
-    return objPtr->getPart(id) ;
+    return levelSetDefaults::PART;
 }
 
 /*!
@@ -214,12 +331,14 @@ LevelSetBooleanOperation LevelSetBoolean::getBooleanOperation() const{
  */
 double LevelSetBoolean::getSurfaceFeatureSize( long id ) const {
 
-    LevelSetObject *objectPtr = getCompetentObject(id);
-    if (!objectPtr) {
-        return (- levelSetDefaults::SIZE);
+    const LevelSetBooleanResult result = computeBooleanResult(id) ;
+    const LevelSetObject *resultObject = result.getObject();
+    if ( resultObject ) {
+        return resultObject->getSurfaceFeatureSize(id);
     }
 
-    return objectPtr->getSurfaceFeatureSize(id);
+    return (- levelSetDefaults::SIZE);
+
 }
 
 /*!
@@ -230,7 +349,7 @@ double LevelSetBoolean::getMinSurfaceFeatureSize() const {
 
     bool   minimumValid = false;
     double minimumSize  = levelSetDefaults::SIZE;
-    for( const auto & object : m_objPtr ){
+    for( const auto & object : m_objects ){
         double objectMinimumSize = object->getMinSurfaceFeatureSize();
         if (objectMinimumSize < 0) {
             continue;
@@ -254,65 +373,12 @@ double LevelSetBoolean::getMinSurfaceFeatureSize() const {
 double LevelSetBoolean::getMaxSurfaceFeatureSize() const {
 
     double maximumSize = - levelSetDefaults::SIZE;
-    for( const auto & object : m_objPtr ){
+    for( const auto & object : m_objects ){
         double objectMaximumSize = object->getMaxSurfaceFeatureSize();
         maximumSize = std::max(objectMaximumSize, maximumSize);
     }
 
     return maximumSize;
-}
-
-/*
- * Determines the relevant object which determines the levelset value in the cell
- * Taken from http://www.iue.tuwien.ac.at/phd/ertl/node57.html
- * @param[in] id cell index
- * @param[in,out] factor if is not null, on output it will contain the multiplier
- * of the levelset function of the competent primary object according the boolean
- * operation. In particular, for substractions the relevant levelset could be
- * -1.0*levelset_primary_object.
- * @return pointer to competent LevelSetObject
- */
-LevelSetObject* LevelSetBoolean::getCompetentObject( long id, double *factor) const{
-
-    if(m_objPtr.size()==0){ 
-        return nullptr;
-    }
-
-    double result, second;
-    LevelSetObject *resPtr, *secPtr;
-
-    result = m_objPtr[0]->getValue(id);
-    resPtr = m_objPtr[0];
-
-    for( size_t n=1; n<m_objPtr.size(); ++n){
-        second = m_objPtr[n]->getValue(id) ;
-        secPtr = m_objPtr[n];
-
-        if( getBooleanOperation() == LevelSetBooleanOperation::UNION){
-            if(result>second) {
-                result = second;
-                resPtr = secPtr;
-            }
-
-        } else if ( getBooleanOperation() == LevelSetBooleanOperation::INTERSECTION){
-            if(result<second) {
-                result = second;
-                resPtr = secPtr;
-            }
-
-        } else if ( getBooleanOperation() == LevelSetBooleanOperation::SUBTRACTION){
-            if(result<-1.*second) {
-                result = -1.*second;
-                resPtr = secPtr;
-            }
-        }
-    }
-
-    if(factor){
-        *factor = (utils::DoubleFloatingEqual()(resPtr->getValue(id),result)) ? 1. : -1.;
-    }
-
-    return resPtr;
 }
 
 /*!
@@ -323,10 +389,10 @@ std::vector<const LevelSetObject*> LevelSetBoolean::getPrimaryObjects() const{
 
     std::vector<const LevelSetObject*> objects;
 
-    for( LevelSetObject* object : m_objPtr){
-        if( LevelSetMetaObject *meta = dynamic_cast<LevelSetMetaObject*>(object) ){
-            std::vector<const LevelSetObject*> subObjects = meta->getPrimaryObjects();
-            objects.insert(objects.end(), subObjects.begin(), subObjects.end());
+    for( LevelSetObject *object : m_objects){
+        if( LevelSetMetaObject *resultMetaObject = dynamic_cast<LevelSetMetaObject*>(object) ){
+            std::vector<const LevelSetObject*> resultSubObjects = resultMetaObject->getPrimaryObjects();
+            objects.insert(objects.end(), resultSubObjects.begin(), resultSubObjects.end());
         } else {
             objects.push_back(object);
         }
@@ -337,97 +403,24 @@ std::vector<const LevelSetObject*> LevelSetBoolean::getPrimaryObjects() const{
 }
 
 /*!
- * Performs the bolean operation
- * Taken from http://www.iue.tuwien.ac.at/phd/ertl/node57.html
- * @param[in] id cell index
- * @return resulting levelset value and gradient in LevelSetInfo
- */
-LevelSetInfo LevelSetBoolean::booleanOperation(long id) const{
-
-    if(m_objPtr.empty()){
-        return LevelSetInfo();
-    }
-
-    LevelSetInfo result = m_objPtr[0]->getLevelSetInfo(id);
-    for( size_t n=1; n<m_objPtr.size(); ++n){
-        double value = m_objPtr[n]->getValue(id) ;
-
-        if( getBooleanOperation() == LevelSetBooleanOperation::UNION){
-            if(result.value>value) {
-                result = m_objPtr[n]->getLevelSetInfo(id);
-            }
-
-        } else if ( getBooleanOperation() == LevelSetBooleanOperation::INTERSECTION){
-            if(result.value<value) {
-                result = m_objPtr[n]->getLevelSetInfo(id);
-            }
-
-        } else if ( getBooleanOperation() == LevelSetBooleanOperation::SUBTRACTION){
-            if(result.value<-value) {
-                result = m_objPtr[n]->getLevelSetInfo(id);
-                result.value *= -1.;
-                result.gradient *= -1.;
-            }
-        }
-    }
-
-    return result;
-}
-
-/*!
- * Performs the bolean operation
- * Taken from http://www.iue.tuwien.ac.at/phd/ertl/node57.html
- * @param[in] coords point coordinates
- * @return resulting levelset value and gradient in LevelSetInfo
- */
-LevelSetInfo LevelSetBoolean::booleanOperation(const std::array<double,3> &coords) const{
-
-    if(m_objPtr.empty()){
-        return LevelSetInfo();
-    }
-
-    LevelSetInfo result = m_objPtr[0]->computeLevelSetInfo(coords);
-    for( size_t n=1; n<m_objPtr.size(); ++n){
-        LevelSetInfo second = m_objPtr[n]->computeLevelSetInfo(coords);
-        double value = second.value;
-
-        if( getBooleanOperation() == LevelSetBooleanOperation::UNION){
-            if(result.value>value) {
-                result = second;
-            }
-
-        } else if ( getBooleanOperation() == LevelSetBooleanOperation::INTERSECTION){
-            if(result.value<value) {
-                result = second;
-            }
-
-        } else if ( getBooleanOperation() == LevelSetBooleanOperation::SUBTRACTION){
-            if(result.value<-value) {
-                result = second;
-                result.value *= -1.;
-                result.gradient *= -1.;
-            }
-        }
-    }
-
-    return result;
-}
-
-/*!
  * Get the index of the primary object
- * @param[in] cellId cell index
+ * @param[in] id cell index
  * @return primary object
  */
-int LevelSetBoolean::getPrimaryObjectId(long cellId) const{
+int LevelSetBoolean::getPrimaryObjectId(long id) const{
 
-    LevelSetObject *obj = getCompetentObject(cellId);
-
-    if( LevelSetMetaObject *meta = dynamic_cast<LevelSetMetaObject*>(obj) ){
-        return meta->getPrimaryObjectId(cellId);
+    const LevelSetBooleanResult result = computeBooleanResult(id) ;
+    const LevelSetObject *resultObject = result.getObject();
+    if ( resultObject ) {
+        if( const LevelSetMetaObject *resultMetaObject = dynamic_cast<const LevelSetMetaObject*>(resultObject) ){
+            return resultMetaObject->getPrimaryObjectId(id);
+        } else {
+            return resultObject->getId();
+        }
     }
 
-    return obj->getId();
-    
+    return levelSetDefaults::OBJECT;
+
 }
 
 /*!
@@ -437,10 +430,56 @@ int LevelSetBoolean::getPrimaryObjectId(long cellId) const{
  */
 bool LevelSetBoolean::isInNarrowBand(long id)const{
 
-    double objectFactor;
-    LevelSetObject *componentObject = getCompetentObject(id, &objectFactor);
+    const LevelSetBooleanResult result = computeBooleanResult(id) ;
+    const LevelSetObject *resultObject = result.getObject();
+    if ( resultObject ) {
+        return resultObject->isInNarrowBand(id);
+    }
 
-    return componentObject->isInNarrowBand(id);
+    return false;
+
+}
+
+/*!
+ * Compute the result of the boolean operation.
+ * @param[in] id cell index
+ * @return result of the boolean operation.
+ */
+LevelSetBooleanResult LevelSetBoolean::computeBooleanResult( long id ) const{
+
+    // Early return if the are no objects
+    if (m_objects.empty()) {
+        return LevelSetBooleanResult( getBooleanOperation() );
+    }
+
+    // Identify informaiton about the source
+    LevelSetBooleanResult result( getBooleanOperation(), m_objects[0], m_objects[0]->getValue(id) ) ;
+    for( size_t n=1; n<m_objects.size(); ++n){
+        result.update(m_objects[n], m_objects[n]->getValue(id));
+    }
+
+    return result;
+}
+
+/*!
+ * Compute the result of the boolean operation.
+ * @param[in] coords point coordinates
+ * @return result of the boolean operation.
+ */
+LevelSetBooleanResult LevelSetBoolean::computeBooleanResult( const std::array<double,3> &coords ) const{
+
+    // Early return if the are no objects
+    if (m_objects.empty()) {
+        return LevelSetBooleanResult( getBooleanOperation() );
+    }
+
+    // Identify informaiton about the source
+    LevelSetBooleanResult result( getBooleanOperation(), m_objects[0], m_objects[0]->computeLevelSetInfo(coords).value);
+    for( size_t n=1; n<m_objects.size(); ++n){
+        result.update(m_objects[n], m_objects[n]->computeLevelSetInfo( coords ).value );
+    }
+
+    return result;
 }
 
 }
