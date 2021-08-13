@@ -108,7 +108,7 @@ class LevelSetObject : public VTKBaseStreamer{
     int                                         getId() const ;
     virtual bool                                isPrimary() const ;
 
-    virtual LevelSetInfo                        getLevelSetInfo(long ) const =0;
+    BITPIT_DEPRECATED(virtual LevelSetInfo      getLevelSetInfo(long ) const) =0;
     BITPIT_DEPRECATED(virtual double            getLS(long ) const) =0;
     virtual double                              getValue(long ) const =0;
     virtual short                               getSign(long ) const ;

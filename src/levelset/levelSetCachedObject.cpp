@@ -54,7 +54,9 @@ namespace bitpit {
  * @param[in] id id assigned to object
  */
 LevelSetCachedObject::LevelSetCachedObject(int id)
-    : LevelSetObject(id), LevelSetSignStorage()
+    : LevelSetObject(id), LevelSetSignStorage(),
+      m_narrowBandValues(1, &m_narrowBandKernel, PiercedSyncMaster::SYNC_MODE_JOURNALED),
+      m_narrowBandGradients(1, &m_narrowBandKernel, PiercedSyncMaster::SYNC_MODE_JOURNALED)
 {
 }
 
@@ -63,14 +65,17 @@ LevelSetCachedObject::LevelSetCachedObject(int id)
  * @param[in] i cell idex
  * @return LevelSetInfo of cell
 */
-LevelSetInfo LevelSetCachedObject::getLevelSetInfo( long i)const{
+LevelSetInfo LevelSetCachedObject::getLevelSetInfo( long id)const{
 
-    auto itr = m_ls.find(i);
-    if ( itr == m_ls.end() ){
-        return LevelSetInfo();
+    auto narrowBandItr = m_narrowBandKernel.find(id) ;
+    if( narrowBandItr != m_narrowBandKernel.end() ){
+        double value = m_narrowBandValues.rawAt(narrowBandItr.getRawIndex());
+        const std::array<double, 3> &gradient = m_narrowBandGradients.rawAt(narrowBandItr.getRawIndex());
+
+        return LevelSetInfo(value, gradient);
     }
 
-    return *itr;
+    return LevelSetInfo();
 
 } 
 
@@ -92,12 +97,12 @@ double LevelSetCachedObject::getLS( long id)const {
  */
 double LevelSetCachedObject::getValue( long id)const {
 
-    auto itr = m_ls.find(id);
-    if ( itr == m_ls.end() ){
-        return getSign(id) * levelSetDefaults::VALUE;
+    auto narrowBandItr = m_narrowBandKernel.find(id) ;
+    if( narrowBandItr != m_narrowBandKernel.end() ){
+        return m_narrowBandValues.rawAt(narrowBandItr.getRawIndex());
     }
 
-    return itr->value;
+    return getSign(id) * levelSetDefaults::VALUE;
 
 }
 
@@ -108,10 +113,12 @@ double LevelSetCachedObject::getValue( long id)const {
  */
 short LevelSetCachedObject::getSign( long id ) const {
 
-    // Check if the sign can be evaluated from narrowband distance
-    auto itr = m_ls.find(id);
-    if ( itr != m_ls.end() ){
-        return evalValueSign(itr->value);
+    // Check if the sign can be evaluated from narrowband value
+    auto narrowBandItr = m_narrowBandKernel.find(id) ;
+    if( narrowBandItr != m_narrowBandKernel.end() ){
+        double value = m_narrowBandValues.rawAt(narrowBandItr.getRawIndex());
+
+        return evalValueSign(value);
     }
 
     // Check if the sign can be evaluated from the propagation
@@ -136,12 +143,12 @@ short LevelSetCachedObject::getSign( long id ) const {
  */
 std::array<double,3> LevelSetCachedObject::getGradient(long id) const {
 
-    auto itr = m_ls.find(id);
-    if ( itr == m_ls.end() ){
-        return levelSetDefaults::GRADIENT;
+    auto narrowBandItr = m_narrowBandKernel.find(id) ;
+    if( narrowBandItr != m_narrowBandKernel.end() ){
+        return m_narrowBandGradients.rawAt(narrowBandItr.getRawIndex());
     }
 
-    return itr->gradient;
+    return levelSetDefaults::GRADIENT;
 
 }
 
@@ -151,22 +158,20 @@ std::array<double,3> LevelSetCachedObject::getGradient(long id) const {
  */
 void LevelSetCachedObject::_clearAfterMeshAdaption( const std::vector<adaption::Info> &mapper ){
 
-    for ( auto & map : mapper ){
-        if( map.entity == adaption::Entity::ENTITY_CELL ){
-            if( map.type == adaption::Type::TYPE_DELETION || 
-                map.type == adaption::Type::TYPE_PARTITION_SEND  ||
-                map.type == adaption::Type::TYPE_REFINEMENT  ||
-                map.type == adaption::Type::TYPE_COARSENING  ){
+    // Clear stale narrow band entries
+    for (const adaption::Info &adaptionInfo : mapper) {
+        if (adaptionInfo.entity != adaption::Entity::ENTITY_CELL) {
+            continue;
+        }
 
-                for ( auto & parent : map.previous){
-                    if( isInNarrowBand(parent) )
-                        m_ls.erase(parent,true) ;
-                }
+        for (long cellId : adaptionInfo.previous) {
+            if (containsNarrowBandEntry(cellId)) {
+                eraseNarrowBandEntry(cellId, false);
             }
         }
     }
 
-    m_ls.flush() ;
+    syncNarrowBandStorages();
 
     // Sign propgation needs to be updated
     setStoredSignDirty(true);
@@ -177,8 +182,12 @@ void LevelSetCachedObject::_clearAfterMeshAdaption( const std::vector<adaption::
  * Clears all levelset information
  */
 void LevelSetCachedObject::_clear( ){
-    m_ls.clear() ;
 
+    // Clear narrow band entries
+    m_narrowBandKernel.clear() ;
+    syncNarrowBandStorages() ;
+
+    // Clear sign propgation storage
     clearSignStorage();
 }
 
@@ -189,7 +198,7 @@ void LevelSetCachedObject::_clear( ){
  * @return true/false if the centroid is in narrow band
  */
 bool LevelSetCachedObject::isInNarrowBand(long id)const{
-    return m_ls.exists(id);
+    return containsNarrowBandEntry(id);
 }
 
 /*!
@@ -198,15 +207,12 @@ bool LevelSetCachedObject::isInNarrowBand(long id)const{
  */
 void LevelSetCachedObject::_dump( std::ostream &stream ){
 
-    // Levelset information
-    utils::binary::write(stream, m_ls.size() ) ;
-    bitpit::PiercedVector<LevelSetInfo>::iterator   infoItr, infoEnd = m_ls.end() ;
+    // Narrow band kernel
+    m_narrowBandKernel.dump( stream );
 
-    for( infoItr=m_ls.begin(); infoItr!=infoEnd; ++infoItr){
-        utils::binary::write(stream, infoItr.getId()) ;
-        utils::binary::write(stream, infoItr->value) ;
-        utils::binary::write(stream, infoItr->gradient) ;
-    }
+    // Narrow band storages
+    m_narrowBandValues.dump( stream );
+    m_narrowBandGradients.dump( stream );
 
     // Stored sign
     LevelSetSignStorage::dumpStoredSign( stream );
@@ -218,23 +224,12 @@ void LevelSetCachedObject::_dump( std::ostream &stream ){
  */
 void LevelSetCachedObject::_restore( std::istream &stream ){
 
-    // Levelset information
-    std::size_t nInfoItems;
-    utils::binary::read(stream, nInfoItems);
-    m_ls.reserve(nInfoItems);
+    // Narrow band kernel
+    m_narrowBandKernel.restore( stream );
 
-    for( std::size_t i=0; i<nInfoItems; ++i){
-        long id;
-        utils::binary::read(stream, id) ;
-
-        double value;
-        utils::binary::read(stream, value) ;
-
-        std::array<double,3> gradient;
-        utils::binary::read(stream, gradient) ;
-
-        m_ls.insert(id, LevelSetInfo(value, gradient)) ;
-    }
+    // Narrow band storages
+    m_narrowBandValues.restore( stream );
+    m_narrowBandGradients.restore( stream );
 
     // Stored sign
     LevelSetSignStorage::restoreStoredSign( stream );
@@ -255,24 +250,28 @@ void LevelSetCachedObject::_writeCommunicationBuffer( const std::vector<long> &s
     // Evaluate the size of the buffer
     std::size_t nInfoItems = 0;
     for( long id : sendList){
-        if( m_ls.exists(id)){
+        if( containsNarrowBandEntry(id)){
             ++nInfoItems ;
         }
     }
 
-    dataBuffer.setSize(dataBuffer.getSize() + sizeof(std::size_t) + nInfoItems* (sizeof(std::size_t) +4*sizeof(double)) ) ;
+    dataBuffer.setSize(dataBuffer.getSize() + sizeof(std::size_t) + nInfoItems* getNarrowBandEntryBinarySize() ) ;
 
     // Fill the buffer
     dataBuffer << nInfoItems ;
 
     for( std::size_t k = 0; k < sendList.size(); ++k){
         long id = sendList[k];
-        auto infoItr = m_ls.find(id) ;
-        if( infoItr != m_ls.end() ){
-            dataBuffer << k ;
-            dataBuffer << infoItr->value ;
-            dataBuffer << infoItr->gradient ;
+        NarrowBandIterator narrowBandItr = getNarrowBandEntryIterator(id) ;
+        if( narrowBandItr == m_narrowBandKernel.end() ){
+            continue;
         }
+
+        // Write the index of the cell
+        dataBuffer << k ;
+
+        // Write the narrowband entry
+        writeNarrowBandEntryCommunicationBuffer(narrowBandItr, dataBuffer);
     }
 }
 
@@ -290,22 +289,153 @@ void LevelSetCachedObject::_readCommunicationBuffer( const std::vector<long> &re
     dataBuffer >> nInfoItems ;
 
     for( std::size_t i=0; i<nInfoItems; ++i){
-        // Determine the id of the element
+        // Read the id of the cell
         std::size_t k ;
         dataBuffer >> k ;
         long id = recvList[k] ;
 
-        // Assign the data of the element
-        auto infoItr = m_ls.find(id) ;
-        if( infoItr == m_ls.end() ){
-            infoItr = m_ls.emplace(id) ;
+        // Create the narrowband entry
+        NarrowBandIterator narrowBandItr = getNarrowBandEntryIterator(id) ;
+        if( narrowBandItr == m_narrowBandKernel.end() ){
+            narrowBandItr = createNarrowBandEntry(id);
         }
 
-        dataBuffer >> infoItr->value ;
-        dataBuffer >> infoItr->gradient ;
+        // Fill the information associated to the narrowband entry
+        readNarrowBandEntryCommunicationBuffer(narrowBandItr, dataBuffer);
     }
 }
 
-#endif 
+#endif
+
+/*!
+ * Create a new narrow band entry.
+ *
+ * \param id is id of the cell
+ * \param sync controls if the kernel will be synched
+ * \result An iterator pointing to the newly created narrowband kernel entry.
+ */
+LevelSetCachedObject::NarrowBandIterator LevelSetCachedObject::createNarrowBandEntry(long id, bool sync) {
+
+    NarrowBandKernel::FillAction action = m_narrowBandKernel.fillHead(id) ;
+    if (sync) {
+        syncNarrowBandStorages() ;
+    }
+
+    return m_narrowBandKernel.rawFind(action.info[PiercedSyncAction::INFO_POS]);
+
+}
+
+/*!
+ * Delete a narrow band entry.
+ *
+ * \param id is id of the cell
+ * \param sync controls if the kernel will be synched
+ */
+void LevelSetCachedObject::eraseNarrowBandEntry(long id, bool sync) {
+
+    m_narrowBandKernel.erase(id, sync) ;
+    if (sync) {
+        syncNarrowBandStorages() ;
+    }
+
+}
+
+/*!
+ * Checks if the object contains a narrow band entry for the specified cell.
+ *
+ * \param id is id of the cell
+ * \result Return true is the object contains a narrow band entry for the
+ * specified cell, false otherwise.
+ */
+bool LevelSetCachedObject::containsNarrowBandEntry(long id) const {
+
+    return m_narrowBandKernel.contains(id) ;
+
+}
+
+/*!
+ * Get an iterator pointing to the narrowband entry associated with the
+ * specified cell.
+ *
+ * \param id is id of the cell
+ * \result An iterator pointing to the narrowband entry associated with the
+ * specified cell.
+ */
+LevelSetCachedObject::NarrowBandIterator LevelSetCachedObject::getNarrowBandEntryIterator(long id) const {
+
+    return m_narrowBandKernel.find(id);
+
+}
+
+/*!
+ * Set the information associated with the specified narrow band entry.
+ *
+ * \param itr is an iterator pointing to the narrowband entry
+ * \param value is the levelset value
+ * \param gradient is the levelset gradient
+ */
+void LevelSetCachedObject::setNarrowBandEntry(NarrowBandIterator itr, double value, const std::array<double, 3> &gradient) {
+
+    std::size_t rawId = itr.getRawIndex();
+
+    m_narrowBandValues.rawAt(rawId)    = value;
+    m_narrowBandGradients.rawAt(rawId) = gradient;
+
+}
+
+/*!
+ * Synchronize narrow band storages with the kernel.
+ */
+void LevelSetCachedObject::syncNarrowBandStorages() {
+
+    m_narrowBandKernel.flush() ;
+    m_narrowBandKernel.sync() ;
+
+}
+
+#if BITPIT_ENABLE_MPI
+/*!
+ * Get the size, expressed in bytes, of a narrowband entry.
+ *
+ * \result The size, expressed in bytes, of a narrowband entry.
+ */
+std::size_t LevelSetCachedObject::getNarrowBandEntryBinarySize() const {
+
+    std::size_t entrySize = sizeof(double) + sizeof(std::array<double, 3>) ;
+
+    return entrySize;
+
+}
+
+/*!
+ * Write narrow band entry into the communication buffer.
+ *
+ * \param narrowBandItr is an iterator pointing to the narrowband entry
+ * \param[in,out] dataBuffer is the communication buffer
+ */
+void LevelSetCachedObject::writeNarrowBandEntryCommunicationBuffer( NarrowBandIterator narrowBandItr, SendBuffer &dataBuffer ){
+
+    std::size_t narrowBandRawId = narrowBandItr.getRawIndex();
+
+    dataBuffer << m_narrowBandValues.rawAt(narrowBandRawId);
+    dataBuffer << m_narrowBandGradients.rawAt(narrowBandRawId);
+
+}
+
+/*!
+ * Read narrow band entry from the communication buffer.
+ *
+ * \param narrowBandItr is an iterator pointing to the narrowband entry
+ * \param[in,out] dataBuffer is the communication buffer
+ */
+void LevelSetCachedObject::readNarrowBandEntryCommunicationBuffer( NarrowBandIterator narrowBandItr, RecvBuffer &dataBuffer ){
+
+    std::size_t narrowBandRawId = narrowBandItr.getRawIndex();
+
+    dataBuffer >> m_narrowBandValues.rawAt(narrowBandRawId);
+    dataBuffer >> m_narrowBandGradients.rawAt(narrowBandRawId);
+
+}
+#endif
 
 }
