@@ -317,7 +317,6 @@ void VolOctreeMapper::_mappingAdaptionReferenceUpdate(const std::vector<adaption
                                 mappedRank = mappedRanks[imapped];
                             } else {
                                 OctantIR *poct = m_partitionIR.map_rank_rec_octantIR[mappedRanks[imapped]][mappedId];
-                                octm = &poct->octant;
                                 mortonmapped = mappedPatch->getTree().getMorton(&poct->octant);
                                 mortonlastdescmapped = mappedPatch->getTree().getLastDescMorton(&poct->octant);
                                 levelmapped = mappedPatch->getTree().getLevel(&poct->octant);
