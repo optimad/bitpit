@@ -230,13 +230,14 @@ LevelSetIntersectionStatus LevelSetObject::intersectSurface(long id, LevelSetInt
 
     double incircle, circumcircle;
 
+    double absoluteDistance  = std::abs(getValue(id));
     double distanceTolerance = m_kernelPtr->getMesh()->getTol();
 
     switch(mode){
         case LevelSetIntersectionMode::FAST_GUARANTEE_TRUE:
         {
             incircle = m_kernelPtr->computeCellIncircle(id) ;
-            if(utils::DoubleFloatingLessEqual()(std::abs(getValue(id)), incircle, distanceTolerance, distanceTolerance)){
+            if(utils::DoubleFloatingLessEqual()(absoluteDistance, incircle, distanceTolerance, distanceTolerance)){
                 return LevelSetIntersectionStatus::TRUE;
             } else {
                 return LevelSetIntersectionStatus::FALSE;
@@ -248,7 +249,7 @@ LevelSetIntersectionStatus LevelSetObject::intersectSurface(long id, LevelSetInt
         case LevelSetIntersectionMode::FAST_GUARANTEE_FALSE:
         {
             circumcircle = m_kernelPtr->computeCellCircumcircle(id) ;
-            if(utils::DoubleFloatingGreater()(std::abs(getValue(id)), circumcircle, distanceTolerance, distanceTolerance)){
+            if(utils::DoubleFloatingGreater()(absoluteDistance, circumcircle, distanceTolerance, distanceTolerance)){
                 return LevelSetIntersectionStatus::FALSE;
             } else {
                 return LevelSetIntersectionStatus::TRUE;
@@ -260,12 +261,12 @@ LevelSetIntersectionStatus LevelSetObject::intersectSurface(long id, LevelSetInt
         case LevelSetIntersectionMode::FAST_FUZZY:
         {
             circumcircle = m_kernelPtr->computeCellCircumcircle(id) ;
-            if(utils::DoubleFloatingGreater()(std::abs(getValue(id)), circumcircle, distanceTolerance, distanceTolerance)){
+            if(utils::DoubleFloatingGreater()(absoluteDistance, circumcircle, distanceTolerance, distanceTolerance)){
                 return LevelSetIntersectionStatus::FALSE;
             }
 
             incircle = m_kernelPtr->computeCellIncircle(id) ;
-            if(utils::DoubleFloatingLessEqual()(std::abs(getValue(id)), incircle, distanceTolerance, distanceTolerance)){
+            if(utils::DoubleFloatingLessEqual()(absoluteDistance, incircle, distanceTolerance, distanceTolerance)){
                 return LevelSetIntersectionStatus::TRUE;
             }
 
@@ -277,12 +278,12 @@ LevelSetIntersectionStatus LevelSetObject::intersectSurface(long id, LevelSetInt
         case LevelSetIntersectionMode::ACCURATE:
         {
             circumcircle = m_kernelPtr->computeCellCircumcircle(id) ;
-            if(utils::DoubleFloatingGreater()(std::abs(getValue(id)), circumcircle, distanceTolerance, distanceTolerance)){
+            if(utils::DoubleFloatingGreater()(absoluteDistance, circumcircle, distanceTolerance, distanceTolerance)){
                 return LevelSetIntersectionStatus::FALSE;
             }
 
             incircle = m_kernelPtr->computeCellIncircle(id) ;
-            if(utils::DoubleFloatingLessEqual()(std::abs(getValue(id)), incircle, distanceTolerance, distanceTolerance)){
+            if(utils::DoubleFloatingLessEqual()(absoluteDistance, incircle, distanceTolerance, distanceTolerance)){
                 return LevelSetIntersectionStatus::TRUE;
             }
 
