@@ -40,16 +40,39 @@ namespace adaption{
 class LevelSetObject ;
 class LevelSetMetaObject ;
 
+class LevelSetBooleanResult {
+
+    private:
+    LevelSetBooleanOperation                    m_operation;            /**< Boolean operation */
+
+    LevelSetObject                             *m_object;               /**< Object that defines the result */
+    int                                         m_objectSign;           /**< Sign associated with the object */
+
+    double                                      m_value;                /**< Value of the results */
+
+    public:
+    LevelSetBooleanResult(LevelSetBooleanOperation operation) ;
+    LevelSetBooleanResult(LevelSetBooleanOperation operation, LevelSetObject *object, double value) ;
+
+    void update(LevelSetObject *object, double value) ;
+
+    LevelSetObject * getObject() const ;
+    int getObjectSign () const ;
+
+    double getValue() const ;
+
+};
+
 class LevelSetBoolean: public LevelSetMetaObject {
 
     private:
     LevelSetBooleanOperation                    m_operation;            /**< identifier of operation */
-    std::vector<LevelSetObject*>                m_objPtr;               /**< pointers to objects */
+    std::vector<LevelSetObject*>                m_objects;              /**< pointers to objects */
 
-    LevelSetInfo                                booleanOperation(long ) const ;
-    LevelSetInfo                                booleanOperation(const std::array<double,3> &) const ;
     LevelSetBooleanOperation                    getBooleanOperation() const;
-    LevelSetObject*                             getCompetentObject(long, double *factorPtr=nullptr) const ;
+
+    LevelSetBooleanResult                       computeBooleanResult( long ) const ;
+    LevelSetBooleanResult                       computeBooleanResult( const std::array<double,3> &coords ) const ;
 
     protected:
     void                                        _dump( std::ostream &) override;
