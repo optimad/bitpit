@@ -238,7 +238,7 @@ int LevelSet::addObject( LevelSetBooleanOperation operation, int id1, int id2, i
  */
 int LevelSet::addObject( LevelSetBooleanOperation operation, const std::vector<int> &ids, int id ) {
 
-    std::vector<LevelSetObject*> ptr;
+    std::vector<const LevelSetObject*> ptr;
     for( int id : ids){
         ptr.push_back( m_objects.at(id).get() );
     }
