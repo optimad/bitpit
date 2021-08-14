@@ -35,6 +35,7 @@
 # include <mpi.h>
 # include "bitpit_communications.hpp"
 # endif
+# include "bitpit_common.hpp"
 
 namespace bitpit{
 
@@ -73,8 +74,8 @@ class LevelSetKernel{
 
     virtual bool                                intersectCellPlane(long, const std::array<double,3> &, const std::array<double,3> &, double) =0;
 
-    bool                                        isPointInCell(long, const std::array<double,3> &) const;
-    double                                      isCellInsideBoundingBox(long, const std::array<double,3> &, const std::array<double,3> & ) const;
+    BITPIT_DEPRECATED(bool                      isPointInCell(long, const std::array<double,3> &) const);
+    BITPIT_DEPRECATED(double                    isCellInsideBoundingBox(long, const std::array<double,3> &, const std::array<double,3> & ) const);
 
 # if BITPIT_ENABLE_MPI
     void                                        initializeCommunicator();
