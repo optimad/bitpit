@@ -58,7 +58,7 @@ VolOctree* LevelSetOctree::getOctreeMesh() const{
  * @param[in] id is the index of cell
  * @return radius of incircle
  */
-double LevelSetOctree::computeCellIncircle(long id) {
+double LevelSetOctree::computeCellIncircle(long id) const {
     int cellLevel = m_octree->getCellLevel(id);
     return m_levelToCellIncircle[cellLevel];
 }
@@ -68,7 +68,7 @@ double LevelSetOctree::computeCellIncircle(long id) {
  * @param[in] id is the index of cell
  * @return radius of incircle
  */
-double LevelSetOctree::computeCellCircumcircle( long id ) {
+double LevelSetOctree::computeCellCircumcircle( long id ) const {
     int cellLevel = m_octree->getCellLevel(id);
     return m_levelToCellCircumcircle[cellLevel];
 }

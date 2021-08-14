@@ -47,11 +47,11 @@ class LevelSetCartesian : public LevelSetKernel{
 
     VolCartesian *                              getCartesianMesh() const;
 
-    double                                      getCellIncircle();
-    double                                      getCellCircumcircle();
+    double                                      getCellIncircle() const;
+    double                                      getCellCircumcircle() const;
 
-    double                                      computeCellIncircle(long) override;
-    double                                      computeCellCircumcircle(long) override;
+    double                                      computeCellIncircle(long) const override;
+    double                                      computeCellCircumcircle(long) const override;
 
     void                                        clearGeometryCache() override;
     void                                        updateGeometryCache(const std::vector<adaption::Info> &) override;
