@@ -43,7 +43,7 @@ namespace bitpit {
  * Constructor
  * @param[in] id id assigned to object
  */
-LevelSetObject::LevelSetObject(int id) :m_kernelPtr(nullptr), m_narrowBand(levelSetDefaults::NARROWBAND_SIZE) {
+LevelSetObject::LevelSetObject(int id) : m_nReferences(0), m_kernelPtr(nullptr), m_narrowBand(levelSetDefaults::NARROWBAND_SIZE) {
     setId(id);
 }
 
@@ -53,6 +53,39 @@ LevelSetObject::LevelSetObject(int id) :m_kernelPtr(nullptr), m_narrowBand(level
  */
 void LevelSetObject::setId(int id) {
     m_id = id;
+}
+
+/*!
+ * Increment reference count.
+ */
+std::size_t LevelSetObject::incrementReferenceCount() {
+
+    ++m_nReferences;
+
+    return m_nReferences;
+
+}
+
+/*!
+ * Decrement reference count.
+ */
+std::size_t LevelSetObject::decrementReferenceCount() {
+
+    assert(m_nReferences > 0);
+    --m_nReferences;
+
+    return m_nReferences;
+
+}
+
+/*!
+ * Count how many times the object is referenced by other objects.
+ * @result The number of times the object is referenced by other objects.
+ */
+std::size_t LevelSetObject::getReferenceCount() const {
+
+    return m_nReferences ;
+
 }
 
 /*!

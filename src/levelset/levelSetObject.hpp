@@ -55,7 +55,12 @@ class LevelSetObject : public VTKBaseStreamer{
     private:
     int                                         m_id;           /**< identifier of object */
 
+    std::size_t                                 m_nReferences;
+
     void                                        setId(int id);
+
+    std::size_t                                 incrementReferenceCount();
+    std::size_t                                 decrementReferenceCount();
 
     protected:
     LevelSetObject(int);
@@ -107,6 +112,8 @@ class LevelSetObject : public VTKBaseStreamer{
 
     int                                         getId() const ;
     virtual bool                                isPrimary() const ;
+
+    std::size_t                                 getReferenceCount() const ;
 
     BITPIT_DEPRECATED(virtual LevelSetInfo      getLevelSetInfo(long ) const) =0;
     BITPIT_DEPRECATED(virtual double            getLS(long ) const) =0;
