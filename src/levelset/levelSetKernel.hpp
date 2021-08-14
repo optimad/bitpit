@@ -64,15 +64,16 @@ class LevelSetKernel{
 
     VolumeKernel*                               getMesh() const;
 
+    const std::array<double,3> &                computeCellCentroid(long);
     virtual double                              computeCellIncircle(long);
     virtual double                              computeCellCircumcircle(long);
-    virtual bool                                intersectCellPlane(long, const std::array<double,3> &, const std::array<double,3> &, double) =0;
-    bool                                        isPointInCell(long, const std::array<double,3> &);
 
     virtual void                                clearGeometryCache();
     virtual void                                updateGeometryCache(const std::vector<adaption::Info> &);
 
-    const std::array<double,3> &                computeCellCentroid(long);
+    virtual bool                                intersectCellPlane(long, const std::array<double,3> &, const std::array<double,3> &, double) =0;
+
+    bool                                        isPointInCell(long, const std::array<double,3> &);
     double                                      isCellInsideBoundingBox(long, const std::array<double,3> &, const std::array<double,3> & );
 
 # if BITPIT_ENABLE_MPI
