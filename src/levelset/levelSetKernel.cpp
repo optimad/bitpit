@@ -218,34 +218,20 @@ bool LevelSetKernel::isPointInCell(long id, const std::array<double,3> &pointCoo
 /*!
  * Checks if the specified cell is inside the given bounding box
  * @param[in] id is the id of the cell
- * @param[in] minPoint is the lower left point of the boungind box
- * @param[in] maxPoint is the upper right point of the boungind box
+ * @param[in] boxMin is the lower left point of the boungind box
+ * @param[in] boxMax is the upper right point of the boungind box
  * @result True if the specified cell is inside the given bounding box, false
  * otherwise.
  */
-double LevelSetKernel::isCellInsideBoundingBox( long id, const std::array<double, 3> &minPoint, const std::array<double, 3> &maxPoint ) const {
+double LevelSetKernel::isCellInsideBoundingBox( long id, const std::array<double, 3> &boxMin, const std::array<double, 3> &boxMax ) const {
 
-    const Cell &cell = m_mesh->getCell(id);
-    double tolerance = m_mesh->getTol();
+    double distanceTolerance = m_mesh->getTol();
 
-    std::array<double, 3> cellMinPoint;
-    std::array<double, 3> cellMaxPoint;
+    std::array<double,3> cellBoxMin;
+    std::array<double,3> cellBoxMax;
+    m_mesh->evalCellBoundingBox(id, &cellBoxMin, &cellBoxMax);
 
-    cellMinPoint.fill(   std::numeric_limits<double>::max() ) ;
-    cellMaxPoint.fill( - std::numeric_limits<double>::max() ) ;
-
-    ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
-    int nCellVertices = cellVertexIds.size();
-    for (int i = 0; i < nCellVertices; ++i) {
-        long vertexId = cellVertexIds[i];
-        const std::array<double, 3> &vertexCoords = m_mesh->getVertexCoords(vertexId);
-        for (int d = 0; d < 3; ++d) {
-            cellMinPoint[d] = std::min( vertexCoords[d] - tolerance, cellMinPoint[d]) ;
-            cellMaxPoint[d] = std::max( vertexCoords[d] + tolerance, cellMaxPoint[d]) ;
-        }
-    }
-
-    return CGElem::intersectBoxBox(minPoint, maxPoint, cellMinPoint, cellMaxPoint);
+    return CGElem::intersectBoxBox(cellBoxMin, cellBoxMax, boxMin, boxMax, 3, distanceTolerance);
 }
 
 # if BITPIT_ENABLE_MPI
