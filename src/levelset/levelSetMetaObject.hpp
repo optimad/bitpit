@@ -25,6 +25,8 @@
 # ifndef __BITPIT_LEVELSET_META_HPP__
 # define __BITPIT_LEVELSET_META_HPP__
 
+#include <bitpit_common.hpp>
+
 namespace bitpit{
 
 class LevelSetObject;
@@ -34,8 +36,19 @@ class LevelSetMetaObject : public LevelSetObject{
     LevelSetMetaObject(int);
 
     bool            isPrimary() const override;
-    virtual int     getPrimaryObjectId( long ) const =0;
-    virtual std::vector<const LevelSetObject *> getPrimaryObjects() const =0;
+
+    virtual const LevelSetObject *    getReferenceObject( long ) const =0;
+    virtual const LevelSetObject *    getReferencePrimaryObject( long ) const;
+
+    int getReferenceObjectId( long ) const;
+    int getReferencePrimaryObjectId( long ) const;
+    BITPIT_DEPRECATED(int getPrimaryObjectId( long ) const);
+
+    virtual std::vector<const LevelSetObject *> getSourceObjects() const =0;
+    virtual std::vector<const LevelSetObject *> getPrimarySourceObjects() const;
+
+    std::vector<int> getSourceObjectIds() const;
+    std::vector<int> getPrimarySourceObjectIds() const;
 
 };
 
