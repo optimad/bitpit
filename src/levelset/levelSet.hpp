@@ -53,17 +53,17 @@ class LevelSet{
     private:
     IndexGenerator<long> m_objectIdentifierGenerator; /**< Object identifier generator */
 
-    std::unique_ptr<LevelSetKernel>                             m_kernel ;              /**< LevelSet computational kernel */
-    std::unordered_map<int,std::unique_ptr<LevelSetObject>>     m_objects ;              /**< Objects defining the boundaries */
+    std::unique_ptr<LevelSetKernel>                             m_kernel ;            /**< LevelSet computational kernel */
+    std::unordered_map<int,std::unique_ptr<LevelSetObject>>     m_objects ;           /**< Objects defining the boundaries */
 
-    std::vector<int>        m_order ;               /**< Processing order of objects */
-    double                  m_narrowBandSize;       /**< Size of narrowban, negative values means that the narrowband is disabled  */
-    bool                    m_signedDistance;       /**< Flag for sigend/unsigned distance (default = true) */
-    bool                    m_propagateSign;        /**< Flag for sign propagation from narrow band (default = false) */
+    std::vector<int>        m_objectsProcessingOrder ; /**< Processing order of objects */
+    double                  m_narrowBandSize;          /**< Size of narrowban, negative values means that the narrowband is disabled  */
+    bool                    m_signedDistance;          /**< Flag for sigend/unsigned distance (default = true) */
+    bool                    m_propagateSign;           /**< Flag for sign propagation from narrow band (default = false) */
 
     int                     registerObject( std::unique_ptr<LevelSetObject> && ) ;
-    void                    addProcessingOrder(int) ;
-    bool                    removeProcessingOrder(int) ;
+    void                    setObjectProcessingOrder(int) ;
+    bool                    unsetObjectProcessingOrder(int) ;
 
     public:
     LevelSet() ;
