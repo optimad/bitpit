@@ -312,6 +312,8 @@ int LevelSet::registerObject( std::unique_ptr<LevelSetObject> &&object ) {
 
     setObjectProcessingOrder(id);
 
+    incrementObjectsReferenceCount(id);
+
     return id;
 }
 
@@ -326,20 +328,44 @@ void LevelSet::removeObjects() {
 
 /*!
  * Remove a levelset object
- * If an object is referenced by other objects it cannot be deleted.
- *
+ * Objects that are sources for other objects cannot be deleted.
  * @param[in] id id of object to be removed
  * @return true if object has been found and removed
  */
 bool LevelSet::removeObject(int id) {
-    if( m_objects.count(id) != 0){
-        m_objectIdentifierGenerator.trash(id);
-        m_objects.erase(id);
-        unsetObjectProcessingOrder(id);
-        return true;
-    } 
+    if( !isObjectRemovable(id) ) {
+        return false;
+    }
 
-    return false;
+    decrementObjectsReferenceCount(id);
+    unsetObjectProcessingOrder(id);
+    m_objectIdentifierGenerator.trash(id);
+    m_objects.erase(id);
+
+    return true;
+
+}
+
+/*!
+ * Check if an object can be deleted.
+ * Non-existent objects or objects that are sources for other objects cannot
+ * be deleted.
+ * @param[in] id id of object
+ * @return true if object can be deleted
+ */
+bool LevelSet::isObjectRemovable(int id) {
+    auto objectItr = m_objects.find(id) ;
+    if( objectItr == m_objects.end() ){
+        return false;
+    }
+
+    const LevelSetObject *object = objectItr->second.get() ;
+    if( object->getReferenceCount() > 0 ) {
+        return false;
+    }
+
+    return true;
+
 }
 
 /*!
@@ -387,6 +413,46 @@ void LevelSet::unsetObjectProcessingOrder(int id){
     std::vector<int>::iterator processingOrderItr = std::find(processingOrderBegin, processingOrderEnd, id);
     assert(processingOrderItr != processingOrderEnd);
     m_objectsProcessingOrder.erase(processingOrderItr);
+
+}
+
+/*!
+ * Increment reference counting for the sources of the specified object.
+ * @param parentId is the id of the parent object
+ */
+void LevelSet::incrementObjectsReferenceCount(int parentId) {
+
+    const LevelSetObject *parentObject = getObjectPtr(parentId);
+    if( parentObject->isPrimary() ){
+        return;
+    }
+
+    if( const LevelSetMetaObject *parentMetaObject = dynamic_cast<const LevelSetMetaObject*>(parentObject) ){
+        for ( const LevelSetObject *sourceObject : parentMetaObject->getSourceObjects() ){
+            int sourceObjectId = sourceObject->getId();
+            getObjectPtr(sourceObjectId)->incrementReferenceCount();
+        }
+    }
+
+}
+
+/*!
+ * Decrement reference counting for the sources of the specified object.
+ * @param parentId is the id of the parent object
+ */
+void LevelSet::decrementObjectsReferenceCount(int parentId) {
+
+    const LevelSetObject *parentObject = getObjectPtr(parentId);
+    if( parentObject->isPrimary() ){
+        return;
+    }
+
+    if( const LevelSetMetaObject *parentMetaObject = dynamic_cast<const LevelSetMetaObject*>(parentObject) ){
+        for ( const LevelSetObject *sourceObject : parentMetaObject->getSourceObjects() ){
+            int sourceObjectId = sourceObject->getId();
+            getObjectPtr(sourceObjectId)->decrementReferenceCount();
+        }
+    }
 
 }
 
