@@ -126,7 +126,7 @@ void LevelSetKernel::updateGeometryCache( const std::vector<adaption::Info> &map
  * @param[in] id is the index of cell
  * @return The centroid of the cell.
  */
-const std::array<double,3> & LevelSetKernel::computeCellCentroid( long id ) {
+const std::array<double,3> & LevelSetKernel::computeCellCentroid( long id ) const {
 
     auto centroidItr = m_cellCentroids.find( id ) ;
     if ( centroidItr == m_cellCentroids.end() ) {
@@ -142,7 +142,7 @@ const std::array<double,3> & LevelSetKernel::computeCellCentroid( long id ) {
  * @param[in] id is the index of cell
  * @return radius of incircle
  */
-double LevelSetKernel::computeCellIncircle( long id ) {
+double LevelSetKernel::computeCellIncircle( long id ) const {
 
     VolumeKernel *patch = getMesh();
     Cell &cell = patch->getCell(id);
@@ -176,7 +176,7 @@ double LevelSetKernel::computeCellIncircle( long id ) {
  * @param[in] id is the index of cell
  * @return radius of incircle
  */
-double LevelSetKernel::computeCellCircumcircle( long id ) {
+double LevelSetKernel::computeCellCircumcircle( long id ) const {
 
     VolumeKernel *patch = getMesh();
     Cell &cell = patch->getCell(id);
@@ -211,7 +211,7 @@ double LevelSetKernel::computeCellCircumcircle( long id ) {
  * @param[in] pointCoords are the point coordinates
  * @return true if point is inside, false otherwise
  */
-bool LevelSetKernel::isPointInCell(long id, const std::array<double,3> &pointCoords){
+bool LevelSetKernel::isPointInCell(long id, const std::array<double,3> &pointCoords) const {
     return getMesh()->isPointInside(id,pointCoords);
 }
 
@@ -223,7 +223,7 @@ bool LevelSetKernel::isPointInCell(long id, const std::array<double,3> &pointCoo
  * @result True if the specified cell is inside the given bounding box, false
  * otherwise.
  */
-double LevelSetKernel::isCellInsideBoundingBox( long id, const std::array<double, 3> &minPoint, const std::array<double, 3> &maxPoint ){
+double LevelSetKernel::isCellInsideBoundingBox( long id, const std::array<double, 3> &minPoint, const std::array<double, 3> &maxPoint ) const {
 
     const Cell &cell = m_mesh->getCell(id);
     double tolerance = m_mesh->getTol();

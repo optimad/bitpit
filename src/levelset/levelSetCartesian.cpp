@@ -58,7 +58,7 @@ VolCartesian* LevelSetCartesian::getCartesianMesh() const{
  * Get the radius of the incircle of the cells.
  * @return radius of incircle
  */
-double LevelSetCartesian::getCellIncircle() {
+double LevelSetCartesian::getCellIncircle() const {
 
     return m_cellIncircle;
 }
@@ -68,7 +68,7 @@ double LevelSetCartesian::getCellIncircle() {
  * @param[in] id is the index of cell
  * @return radius of incircle
  */
-double LevelSetCartesian::computeCellIncircle(long id) {
+double LevelSetCartesian::computeCellIncircle(long id) const {
 
     BITPIT_UNUSED(id);
 
@@ -79,7 +79,7 @@ double LevelSetCartesian::computeCellIncircle(long id) {
  * Get the radius of the circumcircle of the cells.
  * @return radius of circumcircle
  */
-double LevelSetCartesian::getCellCircumcircle() {
+double LevelSetCartesian::getCellCircumcircle() const {
 
     return m_cellCircumcircle;
 }
@@ -89,7 +89,7 @@ double LevelSetCartesian::getCellCircumcircle() {
  * @param[in] id is the index of cell
  * @return radius of incircle
  */
-double LevelSetCartesian::computeCellCircumcircle( long id ) {
+double LevelSetCartesian::computeCellCircumcircle( long id ) const {
 
     BITPIT_UNUSED(id);
 
