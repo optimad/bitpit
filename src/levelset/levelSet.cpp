@@ -292,12 +292,12 @@ int LevelSet::addObject( std::unique_ptr<LevelSetObject> &&object ) {
  */
 int LevelSet::registerObject( std::unique_ptr<LevelSetObject> &&object ) {
 
-    int objectId = object->getId();
-    if (objectId == levelSetDefaults::OBJECT) {
-        objectId = m_objectIdentifierGenerator.generate();
-        object->setId(objectId);
+    int id = object->getId();
+    if (id == levelSetDefaults::OBJECT) {
+        id = m_objectIdentifierGenerator.generate();
+        object->setId(id);
     } else {
-        m_objectIdentifierGenerator.setAssigned(objectId);
+        m_objectIdentifierGenerator.setAssigned(id);
     }
 
     if( m_kernel){
@@ -308,11 +308,11 @@ int LevelSet::registerObject( std::unique_ptr<LevelSetObject> &&object ) {
         object->setSizeNarrowBand(m_narrowBandSize);
     }
 
-    m_objects[objectId] = std::move(object) ;
+    m_objects[id] = std::move(object) ;
 
-    addProcessingOrder(objectId);
+    setObjectProcessingOrder(id);
 
-    return objectId;
+    return id;
 }
 
 /*!
@@ -321,11 +321,13 @@ int LevelSet::registerObject( std::unique_ptr<LevelSetObject> &&object ) {
 void LevelSet::removeObjects() {
     m_objectIdentifierGenerator.reset();
     m_objects.clear();
-    m_order.clear();
+    m_objectsProcessingOrder.clear();
 }
 
 /*!
  * Remove a levelset object
+ * If an object is referenced by other objects it cannot be deleted.
+ *
  * @param[in] id id of object to be removed
  * @return true if object has been found and removed
  */
@@ -333,7 +335,7 @@ bool LevelSet::removeObject(int id) {
     if( m_objects.count(id) != 0){
         m_objectIdentifierGenerator.trash(id);
         m_objects.erase(id);
-        bool found = removeProcessingOrder(id);
+        bool found = unsetObjectProcessingOrder(id);
         BITPIT_UNUSED(found);
         assert(found);
         return true;
@@ -343,55 +345,55 @@ bool LevelSet::removeObject(int id) {
 }
 
 /*!
- * Adds the object to the processing order.
+ * Set the processing order of the specified object.
  *
  * The insertion order determines the processing order 
  * but priority is given to primary objects. 
  *
  * This function must be called whan a new object is inserted into m_objectss.
  *
- * @param[in] objectId the id of the newly added object
+ * @param[in] id the id of the newly added object
  */
-void LevelSet::addProcessingOrder( int objectId ) {
+void LevelSet::setObjectProcessingOrder( int id ) {
 
-    bool primary = m_objects.at(objectId)->isPrimary() ;
+    bool primary = m_objects.at(id)->isPrimary() ;
 
     if(primary){
-        std::vector<int>::iterator orderItr = m_order.begin() ;
-        bool iterate( orderItr != m_order.end()) ;
+        std::vector<int>::iterator objectsOrderItr = m_objectsProcessingOrder.begin() ;
+        bool iterate( objectsOrderItr != m_objectsProcessingOrder.end()) ;
 
         while(iterate){
-            int id = *orderItr ;
+            int id = *objectsOrderItr ;
             if( m_objects.at(id)->isPrimary() ){
-                ++orderItr ;
-                iterate = orderItr != m_order.end() ;
+                ++objectsOrderItr ;
+                iterate = objectsOrderItr != m_objectsProcessingOrder.end() ;
             } else {
                 iterate = false;
             }
         }
 
-        m_order.insert(orderItr,objectId) ;
+        m_objectsProcessingOrder.insert(objectsOrderItr,id) ;
 
     } else {
-        m_order.push_back(objectId) ;
+        m_objectsProcessingOrder.push_back(id) ;
 
     }
 
 }
 
 /*!
- * Removes the object from the processing order.
+ * Unset the processing order of the specified object.
  * This function must be called whan a object is removed fromm_objectss.
- * @param[in] objectId the id of the newly added object
+ * @param[in] id the id of the newly added object
  * @return true if object has been found and removed
  */
-bool LevelSet::removeProcessingOrder(int objectId){
+bool LevelSet::unsetObjectProcessingOrder(int id){
 
-    std::vector<int>::iterator orderItr;
+    std::vector<int>::iterator objectsOrderItr;
 
-    for(orderItr=m_order.begin(); orderItr!=m_order.end(); ++orderItr){
-        if(*orderItr==objectId){
-            m_order.erase(orderItr);
+    for(objectsOrderItr=m_objectsProcessingOrder.begin(); objectsOrderItr!=m_objectsProcessingOrder.end(); ++objectsOrderItr){
+        if(*objectsOrderItr==id){
+            m_objectsProcessingOrder.erase(objectsOrderItr);
             return true;
         }
     }
@@ -515,8 +517,8 @@ void LevelSet::compute(){
         signPropagator = std::unique_ptr<LevelSetSignPropagator>(new LevelSetSignPropagator(m_kernel->getMesh())) ;
     }
 
-    for( int objectId : m_order){
-        LevelSetObject *object = m_objects.at(objectId).get() ;
+    for( int id : m_objectsProcessingOrder){
+        LevelSetObject *object = m_objects.at(id).get() ;
         object->computeLSInNarrowBand(m_signedDistance) ;
 #if BITPIT_ENABLE_MPI
         object->exchangeGhosts();
@@ -610,8 +612,8 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
     }
 
     // Update objects
-    for( int objectId : m_order){
-        LevelSetObject *object = m_objects.at(objectId).get() ;
+    for( int id : m_objectsProcessingOrder){
+        LevelSetObject *object = m_objects.at(id).get() ;
 
 #if BITPIT_ENABLE_MPI
         // Start partitioning update
@@ -674,7 +676,7 @@ void LevelSet::dump( std::ostream &stream ){
 
     m_objectIdentifierGenerator.dump(stream);
 
-    utils::binary::write(stream, m_order);
+    utils::binary::write(stream, m_objectsProcessingOrder);
     utils::binary::write(stream, m_narrowBandSize);
     utils::binary::write(stream, m_signedDistance);
     utils::binary::write(stream, m_propagateSign);
@@ -692,7 +694,7 @@ void LevelSet::restore( std::istream &stream ){
 
     m_objectIdentifierGenerator.restore(stream);
 
-    utils::binary::read(stream, m_order);
+    utils::binary::read(stream, m_objectsProcessingOrder);
     utils::binary::read(stream, m_narrowBandSize);
     utils::binary::read(stream, m_signedDistance);
     utils::binary::read(stream, m_propagateSign);
