@@ -66,6 +66,9 @@ class LevelSet{
     void                    setObjectProcessingOrder(int) ;
     void                    unsetObjectProcessingOrder(int) ;
 
+    void                    incrementObjectsReferenceCount(int parentId) ;
+    void                    decrementObjectsReferenceCount(int parentId) ;
+
     public:
     LevelSet() ;
 
@@ -88,6 +91,8 @@ class LevelSet{
 
     void                    removeObjects();
     bool                    removeObject(int);
+
+    bool                    isObjectRemovable(int);
 
     LevelSetObject &  getObject( int ) const ;
     LevelSetObject *  getObjectPtr( int ) const ;
