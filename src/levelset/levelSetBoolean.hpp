@@ -45,18 +45,18 @@ class LevelSetBooleanResult {
     private:
     LevelSetBooleanOperation                    m_operation;            /**< Boolean operation */
 
-    LevelSetObject                             *m_object;               /**< Object that defines the result */
+    const LevelSetObject                       *m_object;               /**< Object that defines the result */
     int                                         m_objectSign;           /**< Sign associated with the object */
 
     double                                      m_value;                /**< Value of the results */
 
     public:
     LevelSetBooleanResult(LevelSetBooleanOperation operation) ;
-    LevelSetBooleanResult(LevelSetBooleanOperation operation, LevelSetObject *object, double value) ;
+    LevelSetBooleanResult(LevelSetBooleanOperation operation, const LevelSetObject *object, double value) ;
 
-    void update(LevelSetObject *object, double value) ;
+    void update(const LevelSetObject *object, double value) ;
 
-    LevelSetObject * getObject() const ;
+    const LevelSetObject * getObject() const ;
     int getObjectSign () const ;
 
     double getValue() const ;
@@ -67,7 +67,7 @@ class LevelSetBoolean: public LevelSetMetaObject {
 
     private:
     LevelSetBooleanOperation                    m_operation;            /**< identifier of operation */
-    std::vector<LevelSetObject*>                m_objects;              /**< pointers to objects */
+    std::vector<const LevelSetObject*>          m_sourceObjects;        /**< Pointers to source objects */
 
     LevelSetBooleanOperation                    getBooleanOperation() const;
 
@@ -79,8 +79,8 @@ class LevelSetBoolean: public LevelSetMetaObject {
     void                                        _restore( std::istream &) override;
 
     public:
-    LevelSetBoolean(int, LevelSetBooleanOperation, LevelSetObject*, LevelSetObject*);
-    LevelSetBoolean(int, LevelSetBooleanOperation, const std::vector<LevelSetObject*> &);
+    LevelSetBoolean(int, LevelSetBooleanOperation, const LevelSetObject*, const LevelSetObject*);
+    LevelSetBoolean(int, LevelSetBooleanOperation, const std::vector<const LevelSetObject*> &);
     LevelSetBoolean(const LevelSetBoolean &);
 
     LevelSetBoolean*                            clone() const override;
@@ -102,8 +102,9 @@ class LevelSetBoolean: public LevelSetMetaObject {
     void                                        computeLSInNarrowBand(bool) override;
     void                                        updateLSInNarrowBand(const std::vector<adaption::Info> &, bool) override;
 
-    int                                         getPrimaryObjectId(long ) const override;
-    std::vector<const LevelSetObject*>          getPrimaryObjects() const override;
+    const LevelSetObject *                      getReferenceObject( long ) const override;
+
+    std::vector<const LevelSetObject *>         getSourceObjects() const override;
 
     bool                                        isInNarrowBand(long ) const override;
 

@@ -59,7 +59,7 @@ LevelSetBooleanResult::LevelSetBooleanResult(LevelSetBooleanOperation operation)
  * @param[in] object is the object that will be used to initialize the result
  * @param[in] value is the value that will be used to initialize the result
  */
-LevelSetBooleanResult::LevelSetBooleanResult(LevelSetBooleanOperation operation, LevelSetObject *object, double value)
+LevelSetBooleanResult::LevelSetBooleanResult(LevelSetBooleanOperation operation, const LevelSetObject *object, double value)
     : m_operation(operation), m_object(object), m_objectSign(1), m_value(value)
 {
 }
@@ -70,7 +70,7 @@ LevelSetBooleanResult::LevelSetBooleanResult(LevelSetBooleanOperation operation,
  * @param[in] object is the object that will be used to update the result
  * @param[in] value is the value that will be used to update the result
  */
-void LevelSetBooleanResult::update(LevelSetObject *object, double value)
+void LevelSetBooleanResult::update(const LevelSetObject *object, double value)
 {
     if( m_operation == LevelSetBooleanOperation::UNION){
         if(m_value > value) {
@@ -101,7 +101,7 @@ void LevelSetBooleanResult::update(LevelSetObject *object, double value)
 /*!
  * Get the object associated with the results.
  */
-LevelSetObject * LevelSetBooleanResult::getObject() const {
+const LevelSetObject * LevelSetBooleanResult::getObject() const {
     return m_object;
 }
 
@@ -129,13 +129,13 @@ double LevelSetBooleanResult::getValue() const {
  * Constructor taking two objects.
  * @param[in] id identifier of object
  * @param[in] op type of boolean operation
- * @param[in] ptr1 pointer to first object
- * @param[in] ptr2 pointer to second object
+ * @param[in] source1 pointer to first source object
+ * @param[in] source2 pointer to second source object
  */
-LevelSetBoolean::LevelSetBoolean( int id, LevelSetBooleanOperation op, LevelSetObject *ptr1, LevelSetObject *ptr2  ) :LevelSetMetaObject(id) {
+LevelSetBoolean::LevelSetBoolean( int id, LevelSetBooleanOperation op, const LevelSetObject *source1, const LevelSetObject *source2  ) :LevelSetMetaObject(id) {
     m_operation = op;
-    m_objects.push_back(ptr1);
-    m_objects.push_back(ptr2);
+    m_sourceObjects.push_back(source1);
+    m_sourceObjects.push_back(source2);
 }
 
 /*!
@@ -143,11 +143,11 @@ LevelSetBoolean::LevelSetBoolean( int id, LevelSetBooleanOperation op, LevelSetO
  * The boolean operation will be applied recursivly on each entry.
  * @param[in] id identifier of object
  * @param[in] op type of boolean operation
- * @param[in] objPtr vector of pointers to objects
+ * @param[in] sourceObjects pointers to source objects
  */
-LevelSetBoolean::LevelSetBoolean( int id, LevelSetBooleanOperation op, const std::vector<LevelSetObject*> &objPtr ) :LevelSetMetaObject(id) {
-    m_operation = op;
-    m_objects = objPtr;
+LevelSetBoolean::LevelSetBoolean( int id, LevelSetBooleanOperation op, const std::vector<const LevelSetObject*> &sourceObjects ) :LevelSetMetaObject(id) {
+    m_operation     = op;
+    m_sourceObjects = sourceObjects;
 }
 
 /*!
@@ -156,8 +156,8 @@ LevelSetBoolean::LevelSetBoolean( int id, LevelSetBooleanOperation op, const std
  * @param[in] other object to be coppied
  */
 LevelSetBoolean::LevelSetBoolean( const LevelSetBoolean &other) :LevelSetMetaObject(other) {
-    m_operation = other.m_operation;
-    m_objects = other.m_objects;
+    m_operation     = other.m_operation;
+    m_sourceObjects = other.m_sourceObjects;
 }
 
 /*!
@@ -349,7 +349,7 @@ double LevelSetBoolean::getMinSurfaceFeatureSize() const {
 
     bool   minimumValid = false;
     double minimumSize  = levelSetDefaults::SIZE;
-    for( const LevelSetObject *object : m_objects ){
+    for( const LevelSetObject *object : m_sourceObjects ){
         double objectMinimumSize = object->getMinSurfaceFeatureSize();
         if (objectMinimumSize < 0) {
             continue;
@@ -373,7 +373,7 @@ double LevelSetBoolean::getMinSurfaceFeatureSize() const {
 double LevelSetBoolean::getMaxSurfaceFeatureSize() const {
 
     double maximumSize = - levelSetDefaults::SIZE;
-    for( const LevelSetObject *object : m_objects ){
+    for( const LevelSetObject *object : m_sourceObjects ){
         double objectMaximumSize = object->getMaxSurfaceFeatureSize();
         maximumSize = std::max(objectMaximumSize, maximumSize);
     }
@@ -382,44 +382,27 @@ double LevelSetBoolean::getMaxSurfaceFeatureSize() const {
 }
 
 /*!
- * Get all primary objects that compose the boolean object
- * \return pointers to all primary objects involved the definition of the boolean object
+ * Get the object that defines the levelset information for the specified cell.
+ * @param[in] id cell index
+ * @return The object that defines the levelset information for the specified
+ * cell.
  */
-std::vector<const LevelSetObject*> LevelSetBoolean::getPrimaryObjects() const{
+const LevelSetObject * LevelSetBoolean::getReferenceObject(long id) const{
 
-    std::vector<const LevelSetObject*> objects;
+    const LevelSetBooleanResult result = computeBooleanResult(id) ;
 
-    for( LevelSetObject *object : m_objects){
-        if( LevelSetMetaObject *resultMetaObject = dynamic_cast<LevelSetMetaObject*>(object) ){
-            std::vector<const LevelSetObject*> resultSubObjects = resultMetaObject->getPrimaryObjects();
-            objects.insert(objects.end(), resultSubObjects.begin(), resultSubObjects.end());
-        } else {
-            objects.push_back(object);
-        }
-    }
-
-    return objects;
+    return result.getObject();
 
 }
 
 /*!
- * Get the index of the primary object
- * @param[in] id cell index
- * @return primary object
+ * Get all objects that compose the boolean object
+ * \return pointers to all primary objects involved in the definition of the
+ * boolean object levelset information.
  */
-int LevelSetBoolean::getPrimaryObjectId(long id) const{
+std::vector<const LevelSetObject*> LevelSetBoolean::getSourceObjects() const{
 
-    const LevelSetBooleanResult result = computeBooleanResult(id) ;
-    const LevelSetObject *resultObject = result.getObject();
-    if ( resultObject ) {
-        if( const LevelSetMetaObject *resultMetaObject = dynamic_cast<const LevelSetMetaObject*>(resultObject) ){
-            return resultMetaObject->getPrimaryObjectId(id);
-        } else {
-            return resultObject->getId();
-        }
-    }
-
-    return levelSetDefaults::OBJECT;
+    return m_sourceObjects;
 
 }
 
@@ -448,14 +431,14 @@ bool LevelSetBoolean::isInNarrowBand(long id)const{
 LevelSetBooleanResult LevelSetBoolean::computeBooleanResult( long id ) const{
 
     // Early return if the are no objects
-    if (m_objects.empty()) {
+    if (m_sourceObjects.empty()) {
         return LevelSetBooleanResult( getBooleanOperation() );
     }
 
     // Identify informaiton about the source
-    LevelSetBooleanResult result( getBooleanOperation(), m_objects[0], m_objects[0]->getValue(id) ) ;
-    for( size_t n=1; n<m_objects.size(); ++n){
-        result.update(m_objects[n], m_objects[n]->getValue(id));
+    LevelSetBooleanResult result( getBooleanOperation(), m_sourceObjects[0], m_sourceObjects[0]->getValue(id) ) ;
+    for( size_t n=1; n<m_sourceObjects.size(); ++n){
+        result.update(m_sourceObjects[n], m_sourceObjects[n]->getValue(id));
     }
 
     return result;
@@ -469,14 +452,14 @@ LevelSetBooleanResult LevelSetBoolean::computeBooleanResult( long id ) const{
 LevelSetBooleanResult LevelSetBoolean::computeBooleanResult( const std::array<double,3> &coords ) const{
 
     // Early return if the are no objects
-    if (m_objects.empty()) {
+    if (m_sourceObjects.empty()) {
         return LevelSetBooleanResult( getBooleanOperation() );
     }
 
     // Identify informaiton about the source
-    LevelSetBooleanResult result( getBooleanOperation(), m_objects[0], m_objects[0]->computeLevelSetInfo(coords).value);
-    for( size_t n=1; n<m_objects.size(); ++n){
-        result.update(m_objects[n], m_objects[n]->computeLevelSetInfo( coords ).value );
+    LevelSetBooleanResult result( getBooleanOperation(), m_sourceObjects[0], m_sourceObjects[0]->computeLevelSetInfo(coords).value);
+    for( size_t n=1; n<m_sourceObjects.size(); ++n){
+        result.update(m_sourceObjects[n], m_sourceObjects[n]->computeLevelSetInfo( coords ).value );
     }
 
     return result;
