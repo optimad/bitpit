@@ -62,8 +62,9 @@ class LevelSet{
     bool                    m_propagateSign;           /**< Flag for sign propagation from narrow band (default = false) */
 
     int                     registerObject( std::unique_ptr<LevelSetObject> && ) ;
+
     void                    setObjectProcessingOrder(int) ;
-    bool                    unsetObjectProcessingOrder(int) ;
+    void                    unsetObjectProcessingOrder(int) ;
 
     public:
     LevelSet() ;
