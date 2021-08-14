@@ -319,9 +319,9 @@ int LevelSet::registerObject( std::unique_ptr<LevelSetObject> &&object ) {
  * Remove all levelset objects
  */
 void LevelSet::removeObjects() {
+    m_objectsProcessingOrder.clear();
     m_objectIdentifierGenerator.reset();
     m_objects.clear();
-    m_objectsProcessingOrder.clear();
 }
 
 /*!
@@ -335,9 +335,7 @@ bool LevelSet::removeObject(int id) {
     if( m_objects.count(id) != 0){
         m_objectIdentifierGenerator.trash(id);
         m_objects.erase(id);
-        bool found = unsetObjectProcessingOrder(id);
-        BITPIT_UNUSED(found);
-        assert(found);
+        unsetObjectProcessingOrder(id);
         return true;
     } 
 
@@ -347,58 +345,49 @@ bool LevelSet::removeObject(int id) {
 /*!
  * Set the processing order of the specified object.
  *
- * The insertion order determines the processing order 
- * but priority is given to primary objects. 
+ * The insertion order determines the processing order, however priority is
+ * given to primary objects.
  *
- * This function must be called whan a new object is inserted into m_objectss.
+ * This function must be called when a new object is added.
  *
- * @param[in] id the id of the newly added object
+ * @param[in] id the id of the object
  */
 void LevelSet::setObjectProcessingOrder( int id ) {
 
-    bool primary = m_objects.at(id)->isPrimary() ;
+    std::vector<int>::iterator processingOrderItr;
+    if(getObjectPtr(id)->isPrimary()){
+        std::vector<int>::iterator processingOrderBegin = m_objectsProcessingOrder.begin();
+        std::vector<int>::iterator processingOrderEnd   = m_objectsProcessingOrder.end();
 
-    if(primary){
-        std::vector<int>::iterator objectsOrderItr = m_objectsProcessingOrder.begin() ;
-        bool iterate( objectsOrderItr != m_objectsProcessingOrder.end()) ;
-
-        while(iterate){
-            int id = *objectsOrderItr ;
-            if( m_objects.at(id)->isPrimary() ){
-                ++objectsOrderItr ;
-                iterate = objectsOrderItr != m_objectsProcessingOrder.end() ;
-            } else {
-                iterate = false;
+        for (processingOrderItr = processingOrderBegin; processingOrderItr != processingOrderEnd; ++processingOrderItr) {
+            int candidateId = *processingOrderItr ;
+            const LevelSetObject *candidateObject = getObjectPtr(candidateId) ;
+            if( !candidateObject->isPrimary() ){
+                break;
             }
         }
-
-        m_objectsProcessingOrder.insert(objectsOrderItr,id) ;
-
     } else {
-        m_objectsProcessingOrder.push_back(id) ;
-
+        processingOrderItr = m_objectsProcessingOrder.end();
     }
+
+    m_objectsProcessingOrder.insert(processingOrderItr,id) ;
 
 }
 
 /*!
  * Unset the processing order of the specified object.
- * This function must be called whan a object is removed fromm_objectss.
- * @param[in] id the id of the newly added object
- * @return true if object has been found and removed
+ * This function must be called whan a object is removed.
+ * @param[in] id the id of the object
  */
-bool LevelSet::unsetObjectProcessingOrder(int id){
+void LevelSet::unsetObjectProcessingOrder(int id){
 
-    std::vector<int>::iterator objectsOrderItr;
+    std::vector<int>::iterator processingOrderBegin = m_objectsProcessingOrder.begin();
+    std::vector<int>::iterator processingOrderEnd   = m_objectsProcessingOrder.end();
 
-    for(objectsOrderItr=m_objectsProcessingOrder.begin(); objectsOrderItr!=m_objectsProcessingOrder.end(); ++objectsOrderItr){
-        if(*objectsOrderItr==id){
-            m_objectsProcessingOrder.erase(objectsOrderItr);
-            return true;
-        }
-    }
-    
-    return false ;
+    std::vector<int>::iterator processingOrderItr = std::find(processingOrderBegin, processingOrderEnd, id);
+    assert(processingOrderItr != processingOrderEnd);
+    m_objectsProcessingOrder.erase(processingOrderItr);
+
 }
 
 /*!
