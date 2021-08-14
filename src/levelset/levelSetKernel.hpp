@@ -49,7 +49,7 @@ class LevelSetObject ;
 class LevelSetKernel{
 
     private:
-    std::unordered_map<long, std::array<double,3>> m_cellCentroids; /**< Cached cell center coordinates*/
+    mutable std::unordered_map<long, std::array<double,3>> m_cellCentroids; /**< Cached cell center coordinates*/
 
     protected:
     VolumeKernel*                               m_mesh;        /**< Pointer to underlying mesh*/
@@ -64,17 +64,17 @@ class LevelSetKernel{
 
     VolumeKernel*                               getMesh() const;
 
-    const std::array<double,3> &                computeCellCentroid(long);
-    virtual double                              computeCellIncircle(long);
-    virtual double                              computeCellCircumcircle(long);
+    const std::array<double,3> &                computeCellCentroid(long) const;
+    virtual double                              computeCellIncircle(long) const;
+    virtual double                              computeCellCircumcircle(long) const;
 
     virtual void                                clearGeometryCache();
     virtual void                                updateGeometryCache(const std::vector<adaption::Info> &);
 
     virtual bool                                intersectCellPlane(long, const std::array<double,3> &, const std::array<double,3> &, double) =0;
 
-    bool                                        isPointInCell(long, const std::array<double,3> &);
-    double                                      isCellInsideBoundingBox(long, const std::array<double,3> &, const std::array<double,3> & );
+    bool                                        isPointInCell(long, const std::array<double,3> &) const;
+    double                                      isCellInsideBoundingBox(long, const std::array<double,3> &, const std::array<double,3> & ) const;
 
 # if BITPIT_ENABLE_MPI
     void                                        initializeCommunicator();

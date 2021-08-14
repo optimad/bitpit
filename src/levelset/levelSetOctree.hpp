@@ -46,8 +46,8 @@ class LevelSetOctree : public LevelSetKernel{
 
     VolOctree *                                 getOctreeMesh() const;
 
-    double                                      computeCellIncircle(long) override;
-    double                                      computeCellCircumcircle(long) override;
+    double                                      computeCellIncircle(long) const override;
+    double                                      computeCellCircumcircle(long) const override;
 
     void                                        clearGeometryCache() override;
     void                                        updateGeometryCache(const std::vector<adaption::Info> &) override;
