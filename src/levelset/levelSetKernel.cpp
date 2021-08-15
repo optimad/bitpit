@@ -150,7 +150,7 @@ double LevelSetKernel::computeCellIncircle( long id ) const {
     const long* interfaceIds = cell.getInterfaces();
     int interfaceCount = cell.getInterfaceCount();
     
-    std::array<double,3> cellCenter = computeCellCentroid(id);
+    const std::array<double,3> &cellCenter = computeCellCentroid(id);
 
     double radius = std::numeric_limits<double>::max() ;
     for (int k = 0; k < interfaceCount; ++k) {
@@ -184,7 +184,7 @@ double LevelSetKernel::computeCellCircumcircle( long id ) const {
     const long* interfaceIds = cell.getInterfaces();
     int interfaceCount = cell.getInterfaceCount();
 
-    std::array<double,3> cellCenter = computeCellCentroid(id);
+    const std::array<double,3> &cellCenter = computeCellCentroid(id);
 
     double radius = -std::numeric_limits<double>::max() ;
     for (int k = 0; k < interfaceCount; ++k) {
