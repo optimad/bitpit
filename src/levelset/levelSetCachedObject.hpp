@@ -44,7 +44,6 @@ namespace adaption{
 class SendBuffer;
 class RecvBuffer;
 
-class LevelSetKernel;
 class LevelSetObject;
 
 class LevelSetCachedObject : public LevelSetObject, public LevelSetBoundedObject, public LevelSetSignStorage {
