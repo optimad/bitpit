@@ -40,7 +40,7 @@
 #include "levelSetOctree.hpp"
 
 #include "levelSetObject.hpp"
-#include "levelSetMetaObject.hpp"
+#include "levelSetProxyObject.hpp"
 #include "levelSetCachedObject.hpp"
 #include "levelSetSegmentation.hpp"
 #include "levelSetBoolean.hpp"

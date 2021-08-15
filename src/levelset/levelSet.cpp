@@ -33,7 +33,7 @@
 # include "levelSetCartesian.hpp"
 # include "levelSetOctree.hpp"
 # include "levelSetObject.hpp"
-# include "levelSetMetaObject.hpp"
+# include "levelSetProxyObject.hpp"
 # include "levelSetCachedObject.hpp"
 # include "levelSetBoolean.hpp"
 # include "levelSetSegmentation.hpp"
@@ -427,8 +427,8 @@ void LevelSet::incrementObjectsReferenceCount(int parentId) {
         return;
     }
 
-    if( const LevelSetMetaObject *parentMetaObject = dynamic_cast<const LevelSetMetaObject*>(parentObject) ){
-        for ( const LevelSetObject *sourceObject : parentMetaObject->getSourceObjects() ){
+    if( const LevelSetProxyObject *parentProxyObject = dynamic_cast<const LevelSetProxyObject*>(parentObject) ){
+        for ( const LevelSetObject *sourceObject : parentProxyObject->getSourceObjects() ){
             int sourceObjectId = sourceObject->getId();
             getObjectPtr(sourceObjectId)->incrementReferenceCount();
         }
@@ -447,8 +447,8 @@ void LevelSet::decrementObjectsReferenceCount(int parentId) {
         return;
     }
 
-    if( const LevelSetMetaObject *parentMetaObject = dynamic_cast<const LevelSetMetaObject*>(parentObject) ){
-        for ( const LevelSetObject *sourceObject : parentMetaObject->getSourceObjects() ){
+    if( const LevelSetProxyObject *parentProxyObject = dynamic_cast<const LevelSetProxyObject*>(parentObject) ){
+        for ( const LevelSetObject *sourceObject : parentProxyObject->getSourceObjects() ){
             int sourceObjectId = sourceObject->getId();
             getObjectPtr(sourceObjectId)->decrementReferenceCount();
         }

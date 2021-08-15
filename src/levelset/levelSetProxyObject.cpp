@@ -25,12 +25,12 @@
 # include "bitpit_common.hpp"
 
 # include "levelSetObject.hpp"
-# include "levelSetMetaObject.hpp"
+# include "levelSetProxyObject.hpp"
 
 namespace bitpit {
 
 /*!
-	@interface LevelSetMetaObject
+	@interface LevelSetProxyObject
 	@ingroup levelset
 	@brief Interface class for all objects, which depend on other LevelSetObjects
 */
@@ -38,19 +38,19 @@ namespace bitpit {
 /*!
  * Constructor
  */
-LevelSetMetaObject::LevelSetMetaObject(int id) : LevelSetObject(id){
+LevelSetProxyObject::LevelSetProxyObject(int id) : LevelSetObject(id){
 }
 
 /*!
  * Checks if the object is a primary object (e.g. of a surface triangulation)
  * or not (e.g. derived by boolean operations between two levelsets).
  *
- * Meta-objects are non-primary objects by definition.
+ * Proxy-objects are non-primary objects by definition.
  *
- * @return Returns always true, because meta-objects are non-primary objects
+ * @return Returns always true, because proxy-objects are non-primary objects
  * by definition.
  */
-bool LevelSetMetaObject::isPrimary() const{
+bool LevelSetProxyObject::isPrimary() const{
     return false;
 } 
 
@@ -61,7 +61,7 @@ bool LevelSetMetaObject::isPrimary() const{
  * @return The the primary object that defines the levelset information for
  * the specified cell.
  */
-const LevelSetObject * LevelSetMetaObject::getReferencePrimaryObject(long id) const{
+const LevelSetObject * LevelSetProxyObject::getReferencePrimaryObject(long id) const{
 
     const LevelSetObject *referenceObject = getReferenceObject(id);
     if (!referenceObject) {
@@ -72,8 +72,8 @@ const LevelSetObject * LevelSetMetaObject::getReferencePrimaryObject(long id) co
         return referenceObject;
     }
 
-    if( const LevelSetMetaObject *referenceMetaObject = dynamic_cast<const LevelSetMetaObject*>(referenceObject) ){
-        return referenceMetaObject->getReferencePrimaryObject(id);
+    if( const LevelSetProxyObject *referenceProxyObject = dynamic_cast<const LevelSetProxyObject*>(referenceObject) ){
+        return referenceProxyObject->getReferencePrimaryObject(id);
     }
 
     return nullptr;
@@ -87,7 +87,7 @@ const LevelSetObject * LevelSetMetaObject::getReferencePrimaryObject(long id) co
  * @return The id of the object that defines the levelset information for the
  * specified cell.
  */
-int LevelSetMetaObject::getReferenceObjectId(long id) const{
+int LevelSetProxyObject::getReferenceObjectId(long id) const{
 
     const LevelSetObject *referenceObject = getReferenceObject(id);
     if (!referenceObject) {
@@ -105,7 +105,7 @@ int LevelSetMetaObject::getReferenceObjectId(long id) const{
  * @return The the primary object that defines the levelset information for
  * the specified cell.
  */
-int LevelSetMetaObject::getReferencePrimaryObjectId(long id) const{
+int LevelSetProxyObject::getReferencePrimaryObjectId(long id) const{
 
     const LevelSetObject *referencePrimaryObject = getReferenceObject(id);
     if (!referencePrimaryObject) {
@@ -123,23 +123,23 @@ int LevelSetMetaObject::getReferencePrimaryObjectId(long id) const{
  * @return The id of the object that defines the levelset information for the
  * specified cell.
  */
-int LevelSetMetaObject::getPrimaryObjectId(long id) const{
+int LevelSetProxyObject::getPrimaryObjectId(long id) const{
 
     return getReferencePrimaryObjectId(id);
 
 }
 
 /*!
- * Get all primary objects that compose the meta object.
+ * Get all primary objects that compose the proxy object.
  * \return pointers to all primary objects involved in the definition of the
- * meta object levelset information.
+ * proxy object levelset information.
  */
-std::vector<const LevelSetObject*> LevelSetMetaObject::getPrimarySourceObjects() const{
+std::vector<const LevelSetObject*> LevelSetProxyObject::getPrimarySourceObjects() const{
 
     std::vector<const LevelSetObject*> objects;
     for( const LevelSetObject *sourceObject : getSourceObjects()){
-        if( const LevelSetMetaObject *metaSourceObject = dynamic_cast<const LevelSetMetaObject*>(sourceObject) ){
-            std::vector<const LevelSetObject*> sourcePrimarySourceObjects = metaSourceObject->getPrimarySourceObjects();
+        if( const LevelSetProxyObject *proxySourceObject = dynamic_cast<const LevelSetProxyObject*>(sourceObject) ){
+            std::vector<const LevelSetObject*> sourcePrimarySourceObjects = proxySourceObject->getPrimarySourceObjects();
             objects.insert(objects.end(), sourcePrimarySourceObjects.begin(), sourcePrimarySourceObjects.end());
         } else {
             objects.push_back(sourceObject);
@@ -155,7 +155,7 @@ std::vector<const LevelSetObject*> LevelSetMetaObject::getPrimarySourceObjects()
  * \return identifiers of all primary objects involved in the definition of the
  * meta object levelset information.
  */
-std::vector<int> LevelSetMetaObject::getSourceObjectIds() const{
+std::vector<int> LevelSetProxyObject::getSourceObjectIds() const{
 
     std::vector<const LevelSetObject*> sourceObjects = getSourceObjects();
     std::size_t nSourceObjects = sourceObjects.size();
@@ -175,7 +175,7 @@ std::vector<int> LevelSetMetaObject::getSourceObjectIds() const{
  * \return identifiers of all primary objects involved in the definition of the
  * meta object levelset information.
  */
-std::vector<int> LevelSetMetaObject::getPrimarySourceObjectIds() const{
+std::vector<int> LevelSetProxyObject::getPrimarySourceObjectIds() const{
 
     std::vector<const LevelSetObject*> primaryObjects = getPrimarySourceObjects();
     std::size_t nPrimaryObjects = primaryObjects.size();
