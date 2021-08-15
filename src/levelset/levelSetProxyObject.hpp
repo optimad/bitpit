@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-# ifndef __BITPIT_LEVELSET_META_HPP__
-# define __BITPIT_LEVELSET_META_HPP__
+# ifndef __BITPIT_LEVELSET_PROXY_OBJECT_HPP__
+# define __BITPIT_LEVELSET_PROXY_OBJECT_HPP__
 
 #include <bitpit_common.hpp>
 
@@ -31,9 +31,9 @@ namespace bitpit{
 
 class LevelSetObject;
 
-class LevelSetMetaObject : public LevelSetObject{
+class LevelSetProxyObject : public LevelSetObject{
     public:
-    LevelSetMetaObject(int);
+    LevelSetProxyObject(int);
 
     bool            isPrimary() const override;
 
@@ -52,7 +52,8 @@ class LevelSetMetaObject : public LevelSetObject{
 
 };
 
-
+// Compatibility with older versions
+typedef LevelSetProxyObject LevelSetMetaObject;
 
 }
 

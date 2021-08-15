@@ -38,7 +38,7 @@ namespace adaption{
 }
 
 class LevelSetObject ;
-class LevelSetMetaObject ;
+class LevelSetProxyObject ;
 
 class LevelSetBooleanResult {
 
@@ -63,7 +63,7 @@ class LevelSetBooleanResult {
 
 };
 
-class LevelSetBoolean: public LevelSetMetaObject {
+class LevelSetBoolean: public LevelSetProxyObject {
 
     private:
     LevelSetBooleanOperation                    m_operation;            /**< identifier of operation */
