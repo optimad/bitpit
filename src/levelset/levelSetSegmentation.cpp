@@ -876,7 +876,7 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetCartesian *levelsetKer
         alreadyProcessed.insert(cellId);
 
         // Find segment associated to the cell
-        std::array<double,3> cellCentroid = levelsetKernel->computeCellCentroid(cellId);
+        const std::array<double,3> &cellCentroid = levelsetKernel->computeCellCentroid(cellId);
 
         long segmentId;
         double distance;
@@ -946,7 +946,7 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *levelsetKernel
         //
         // If no segment is identified the cell is not processed.
         long cellId = cell.getId();
-        std::array<double,3> cellCentroid = levelsetKernel->computeCellCentroid(cellId);
+        const std::array<double,3> &cellCentroid = levelsetKernel->computeCellCentroid(cellId);
         double cellCircumcircle = levelsetKernel->computeCellCircumcircle(cellId);
 
         double searchRadius = std::max(m_narrowBand, cellCircumcircle);
@@ -1011,7 +1011,7 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *levelsetKernel
             }
 
             // Identify the segment associated with the neighbour
-            std::array<double,3> neighCentroid = levelsetKernel->computeCellCentroid(neighId);
+            const std::array<double,3> &neighCentroid = levelsetKernel->computeCellCentroid(neighId);
 
             double searchRadius = 1.05 * norm2(neighCentroid - cellProjectionPoint);
 
@@ -1090,7 +1090,7 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *levelsetKernel,
             // explicitly set by the user.
             //
             // If no segment is identified the cell is not processed.
-            std::array<double,3> centroid = levelsetKernel->computeCellCentroid(cellId);
+            const std::array<double,3> &centroid = levelsetKernel->computeCellCentroid(cellId);
 
             double searchRadius = std::max(m_narrowBand, levelsetKernel->computeCellCircumcircle(cellId));
 
@@ -1153,7 +1153,7 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *levelsetKernel,
         }
 
         // Identify the segment associated with the cell
-        std::array<double,3> cellCentroid = levelsetKernel->computeCellCentroid(cellId);
+        const std::array<double,3> &cellCentroid = levelsetKernel->computeCellCentroid(cellId);
         std::array<double,3> neighProjectionPoint = computeProjectionPoint(intersectedNeighId);
 
         double searchRadius = 1.05 * norm2(cellCentroid - neighProjectionPoint);
