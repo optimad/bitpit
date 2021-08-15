@@ -31,7 +31,7 @@
 # include "adaption.hpp"
 
 # include "levelSetObject.hpp"
-# include "levelSetMetaObject.hpp"
+# include "levelSetProxyObject.hpp"
 # include "levelSetBoolean.hpp"
 
 namespace bitpit {
@@ -132,7 +132,7 @@ double LevelSetBooleanResult::getValue() const {
  * @param[in] source1 pointer to first source object
  * @param[in] source2 pointer to second source object
  */
-LevelSetBoolean::LevelSetBoolean( int id, LevelSetBooleanOperation op, const LevelSetObject *source1, const LevelSetObject *source2  ) :LevelSetMetaObject(id) {
+LevelSetBoolean::LevelSetBoolean( int id, LevelSetBooleanOperation op, const LevelSetObject *source1, const LevelSetObject *source2  ) :LevelSetProxyObject(id) {
     m_operation = op;
     m_sourceObjects.push_back(source1);
     m_sourceObjects.push_back(source2);
@@ -145,7 +145,7 @@ LevelSetBoolean::LevelSetBoolean( int id, LevelSetBooleanOperation op, const Lev
  * @param[in] op type of boolean operation
  * @param[in] sourceObjects pointers to source objects
  */
-LevelSetBoolean::LevelSetBoolean( int id, LevelSetBooleanOperation op, const std::vector<const LevelSetObject*> &sourceObjects ) :LevelSetMetaObject(id) {
+LevelSetBoolean::LevelSetBoolean( int id, LevelSetBooleanOperation op, const std::vector<const LevelSetObject*> &sourceObjects ) :LevelSetProxyObject(id) {
     m_operation     = op;
     m_sourceObjects = sourceObjects;
 }
@@ -155,7 +155,7 @@ LevelSetBoolean::LevelSetBoolean( int id, LevelSetBooleanOperation op, const std
  * Assigns same id to new object;
  * @param[in] other object to be coppied
  */
-LevelSetBoolean::LevelSetBoolean( const LevelSetBoolean &other) :LevelSetMetaObject(other) {
+LevelSetBoolean::LevelSetBoolean( const LevelSetBoolean &other) :LevelSetProxyObject(other) {
     m_operation     = other.m_operation;
     m_sourceObjects = other.m_sourceObjects;
 }
