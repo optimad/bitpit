@@ -93,20 +93,33 @@ private:
 
 };
 
+class LevelSetSegmentationNarrowBandCache : public LevelSetNarrowBandCache
+{
+    protected:
+    Storage<long>                              *m_supportIds;      /** Support ids of the cells inside the narrow band */
+    Storage<std::array<double,3>>              *m_surfaceNormals;  /** Surface normal associated with the cells inside the narrow band */
+
+    public:
+    LevelSetSegmentationNarrowBandCache();
+
+    long                                        getSupportId(const KernelIterator &itr) const;
+    const std::array<double, 3> &               getSurfaceNormal(const KernelIterator &itr) const;
+
+    void                                        set(const KernelIterator &itr, double value, const std::array<double, 3> &gradient) = delete ;
+    void                                        set(const KernelIterator &itr, double value, const std::array<double, 3> &gradient, long semgnetId, const std::array<double, 3> &surfaceNormal) ;
+
+    void                                        swap(LevelSetSegmentationNarrowBandCache &other) noexcept;
+
+};
+
 class LevelSetSegmentation : public LevelSetCachedObject {
 
     private:
     std::shared_ptr<const SegmentationKernel> m_segmentation;
 
-    NarrowBandStorage<long>                     m_narrowBandSupportIds;      /** Support ids of the cells inside the narrow band */
-    NarrowBandStorage<std::array<double,3>>     m_narrowBandSurfaceNormals;  /** Surface normal associated with the cells inside the narrow band */
-
     double                                      getSegmentSize( long ) const;
 
     protected:
-
-    void                                        _dump( std::ostream &) override ;
-    void                                        _restore( std::istream &) override ;
 
     void                                        getBoundingBox( std::array<double,3> &, std::array<double,3> &) const override;
 # if BITPIT_ENABLE_MPI
@@ -117,13 +130,9 @@ class LevelSetSegmentation : public LevelSetCachedObject {
     void                                        computeLSInNarrowBand( LevelSetOctree *, bool);
     void                                        updateLSInNarrowBand(LevelSetOctree *, const std::vector<adaption::Info> &, bool);
 
-    void                                        setNarrowBandEntry(NarrowBandIterator itr, double value, const std::array<double, 3> &gradient, long semgnetId, const std::array<double, 3> &surfaceNormal);
-
-# if BITPIT_ENABLE_MPI
-    std::size_t                                 getNarrowBandEntryBinarySize() const override;
-    void                                        writeNarrowBandEntryCommunicationBuffer( NarrowBandIterator narrowBandItr, SendBuffer &dataBuffer ) override;
-    void                                        readNarrowBandEntryCommunicationBuffer( NarrowBandIterator narrowBandItr, RecvBuffer &dataBuffer ) override;
-#endif
+    LevelSetSegmentationNarrowBandCache *       getNarrowBandCache() override ;
+    const LevelSetSegmentationNarrowBandCache * getNarrowBandCache() const override ;
+    std::shared_ptr<LevelSetNarrowBandCache>    createNarrowBandCache() override ;
 
     public:
     LevelSetSegmentation(int);
