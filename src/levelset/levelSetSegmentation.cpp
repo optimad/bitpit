@@ -41,6 +41,82 @@
 namespace bitpit {
 
 /*!
+	@ingroup levelset
+	@interface LevelSetCachedObject
+	@brief Interface class for all objects which need to store the discrete values of levelset function.
+*/
+
+/*!
+ * Constructor.
+ */
+LevelSetSegmentationNarrowBandCache::LevelSetSegmentationNarrowBandCache() : LevelSetNarrowBandCache() {
+
+    m_supportIds     = addStorage<long>(getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_JOURNALED);
+    m_surfaceNormals = addStorage<std::array<double, 3>>(getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_JOURNALED);
+
+}
+
+/*!
+ * Get the support id of the specified entry.
+ *
+ * \param itr is an iterator pointing to the entry
+ * \result The support id of the specified entry.
+ */
+long LevelSetSegmentationNarrowBandCache::getSupportId(const KernelIterator &itr) const {
+
+    std::size_t rawId = itr.getRawIndex();
+
+    return m_supportIds->rawAt(rawId);
+
+}
+
+/*!
+ * Get the surface normal of the specified entry.
+ *
+ * \param itr is an iterator pointing to the entry
+ * \result The surface normal of the specified entry.
+ */
+const std::array<double, 3> & LevelSetSegmentationNarrowBandCache::getSurfaceNormal(const KernelIterator &itr) const {
+
+    std::size_t rawId = itr.getRawIndex();
+
+    return m_surfaceNormals->rawAt(rawId);
+
+}
+
+/*!
+ * Set the specified cache entry.
+ *
+ * \param itr is an iterator pointing to the narrow band entry
+ * \param value is the levelset value
+ * \param gradient is the levelset gradient
+ * \param supportId is the support id
+ * \param normal is the surface normal at the projection point
+ */
+void LevelSetSegmentationNarrowBandCache::set(const LevelSetNarrowBandCache::KernelIterator &itr, double value, const std::array<double, 3> &gradient, long supportId, const std::array<double, 3> &surfaceNormal) {
+
+    LevelSetNarrowBandCache::set(itr, value, gradient);
+
+    std::size_t rawId = itr.getRawIndex();
+
+    m_supportIds->rawAt(rawId)     = supportId;
+    m_surfaceNormals->rawAt(rawId) = surfaceNormal;
+
+}
+
+/*!
+ * Exchanges the content of the cache with the content the specified other
+ * cache.
+ *
+ * \param other is another cache whose content is swapped with that of this
+ * cache
+ */
+void LevelSetSegmentationNarrowBandCache::swap(LevelSetSegmentationNarrowBandCache &other) noexcept
+{
+    LevelSetNarrowBandCache::swap(other);
+}
+
+/*!
     @class      SegmentationKernel
     @ingroup    levelset
     @brief      Segmentation kernel
@@ -487,9 +563,7 @@ std::array<double,3> SegmentationKernel::computeSegmentVertexNormal( const SurfU
  */
 LevelSetSegmentation::LevelSetSegmentation(int id)
     : LevelSetCachedObject(id),
-      m_segmentation(nullptr),
-      m_narrowBandSupportIds(1, &m_narrowBandKernel, PiercedSyncMaster::SYNC_MODE_JOURNALED),
-      m_narrowBandSurfaceNormals(1, &m_narrowBandKernel, PiercedSyncMaster::SYNC_MODE_JOURNALED)
+      m_segmentation(nullptr)
 {
 }
 
@@ -574,9 +648,10 @@ int LevelSetSegmentation::getPart( long id ) const{
  */
 std::array<double,3> LevelSetSegmentation::getNormal( long id ) const{
 
-    auto narrowBandItr = m_narrowBandKernel.find(id) ;
-    if( narrowBandItr != m_narrowBandKernel.end() ){
-        return m_narrowBandSurfaceNormals.rawAt(narrowBandItr.getRawIndex());
+    const LevelSetSegmentationNarrowBandCache *narrowBandCache = getNarrowBandCache();
+    LevelSetNarrowBandCache::KernelIterator narrowBandCacheItr = narrowBandCache->find(id) ;
+    if( narrowBandCacheItr != narrowBandCache->end() ){
+        return narrowBandCache->getSurfaceNormal(narrowBandCacheItr);
     }
 
     return levelSetDefaults::GRADIENT ;
@@ -591,9 +666,10 @@ std::array<double,3> LevelSetSegmentation::getNormal( long id ) const{
  */
 long LevelSetSegmentation::getSupport( long id ) const{
 
-    auto narrowBandItr = m_narrowBandKernel.find(id) ;
-    if( narrowBandItr != m_narrowBandKernel.end() ){
-        return m_narrowBandSupportIds.rawAt(narrowBandItr.getRawIndex());
+    const LevelSetSegmentationNarrowBandCache *narrowBandCache = getNarrowBandCache();
+    LevelSetNarrowBandCache::KernelIterator narrowBandCacheItr = narrowBandCache->find(id) ;
+    if( narrowBandCacheItr != narrowBandCache->end() ){
+        return narrowBandCache->getSupportId(narrowBandCacheItr);
     }
 
     return levelSetDefaults::SUPPORT ;
@@ -841,6 +917,8 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetCartesian *levelsetKer
     //
     // The initial process list is gradually expanded considering all the
     // neighbours with a distance less than the search radius.
+    LevelSetSegmentationNarrowBandCache *narrowBandCache = getNarrowBandCache();
+
     std::unordered_set<long> alreadyProcessed;
     while (!processList.empty()) {
         // Get the cell to process
@@ -866,8 +944,9 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetCartesian *levelsetKer
             throw std::runtime_error ("Unable to extract the levelset information from segment.");
         }
 
-        NarrowBandIterator narrowBandItr = createNarrowBandEntry(cellId, true) ;
-        setNarrowBandEntry(narrowBandItr, distance, gradient, segmentId, normal);
+
+        LevelSetSegmentationNarrowBandCache::KernelIterator narrowBandCacheItr = narrowBandCache->insert(cellId, true) ;
+        narrowBandCache->set(narrowBandCacheItr, distance, gradient, segmentId, normal);
 
         // Add cell neighbours to the process list
         const Cell &cell = mesh.getCell(cellId);
@@ -901,6 +980,8 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *levelsetKernel
     std::unordered_set<long> intersectedCells;
 
     // Evaluate levelset information
+    LevelSetSegmentationNarrowBandCache *narrowBandCache = getNarrowBandCache();
+
     for( const Cell &cell : mesh.getCells() ){
 
         // Identify the segment associated with the cell
@@ -934,8 +1015,8 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *levelsetKernel
             throw std::runtime_error ("Unable to extract the levelset information from segment.");
         }
 
-        NarrowBandIterator narrowBandItr = createNarrowBandEntry(cellId, true) ;
-        setNarrowBandEntry(narrowBandItr, distance, gradient, segmentId, normal) ;
+        LevelSetSegmentationNarrowBandCache::KernelIterator narrowBandCacheItr = narrowBandCache->insert(cellId, true) ;
+        narrowBandCache->set(narrowBandCacheItr, distance, gradient, segmentId, normal);
 
         // Update the list of cells that intersects the surface
         //
@@ -969,7 +1050,7 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *levelsetKernel
             // or because is a neighbour of an intersected cells already
             // processed.
             long neighId = neighbours[n];
-            if( containsNarrowBandEntry(neighId) ){
+            if( narrowBandCache->contains(neighId) ){
                 continue;
             }
 
@@ -993,8 +1074,8 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *levelsetKernel
                 throw std::runtime_error ("Unable to extract the levelset information from segment.");
             }
 
-            NarrowBandIterator narrowBandItr = createNarrowBandEntry(neighId, true) ;
-            setNarrowBandEntry(narrowBandItr, distance, gradient, segmentId, normal);
+            LevelSetSegmentationNarrowBandCache::KernelIterator narrowBandCacheItr = narrowBandCache->insert(neighId, true) ;
+            narrowBandCache->set(narrowBandCacheItr, distance, gradient, segmentId, normal);
         }
     }
 }
@@ -1016,6 +1097,7 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *levelsetKernel
 void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *levelsetKernel, const std::vector<adaption::Info> &mapper, bool signd){
 
     VolumeKernel &mesh = *(levelsetKernel->getMesh()) ;
+    LevelSetSegmentationNarrowBandCache *narrowBandCache = getNarrowBandCache();
 
     std::vector<long> cellsOutsideNarrowband;
 
@@ -1068,8 +1150,8 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *levelsetKernel,
                 throw std::runtime_error ("Unable to extract the levelset information from segment.");
             }
 
-            NarrowBandIterator narrowBandItr = createNarrowBandEntry(cellId, true) ;
-            setNarrowBandEntry(narrowBandItr, distance, gradient, segmentId, normal);
+            LevelSetSegmentationNarrowBandCache::KernelIterator narrowBandCacheItr = narrowBandCache->insert(cellId, true) ;
+            narrowBandCache->set(narrowBandCacheItr, distance, gradient, segmentId, normal);
         }
 
     }
@@ -1127,37 +1209,9 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *levelsetKernel,
             throw std::runtime_error ("Unable to extract the levelset information from segment.");
         }
 
-        NarrowBandIterator narrowBandItr = createNarrowBandEntry(cellId, true) ;
-        setNarrowBandEntry(narrowBandItr, distance, gradient, segmentId, normal);
+        LevelSetSegmentationNarrowBandCache::KernelIterator narrowBandCacheItr = narrowBandCache->insert(cellId, true) ;
+        narrowBandCache->set(narrowBandCacheItr, distance, gradient, segmentId, normal);
     }
-}
-
-/*!
- * Writes LevelSetSegmentation to stream in binary format
- * @param[in] stream output stream
- */
-void LevelSetSegmentation::_dump( std::ostream &stream ){
-
-    // Write data of base class
-    LevelSetCachedObject::_dump( stream ) ;
-
-    // Write surface information
-    m_narrowBandSupportIds.dump( stream );
-    m_narrowBandSurfaceNormals.dump( stream );
-}
-
-/*!
- * Reads LevelSetSegmentation from stream in binary format
- * @param[in] stream output stream
- */
-void LevelSetSegmentation::_restore( std::istream &stream ){
-
-    // Read data of base class
-    LevelSetCachedObject::_restore( stream ) ;
-
-    // Read surface information
-    m_narrowBandSupportIds.restore( stream );
-    m_narrowBandSurfaceNormals.restore( stream );
 }
 
 /*!
@@ -1184,73 +1238,34 @@ LevelSetInfo LevelSetSegmentation::computeLevelSetInfo(const std::array<double,3
 }
 
 /*!
- * Set the information associated with the specified narrow band entry.
+ * Get a pointer to the segmentation storage.
  *
- * \param itr is an iterator pointing to the narrowband entry
- * \param value is the levelset value
- * \param gradient is the levelset gradient
- * \param supportId is the support id
- * \param gradient is the surface normal at the projection point
+ * \result A pointer to the segmentation storage.
  */
-void LevelSetSegmentation::setNarrowBandEntry(NarrowBandIterator itr, double value, const std::array<double, 3> &gradient, long supportId, const std::array<double, 3> &surfaceNormal) {
+LevelSetSegmentationNarrowBandCache * LevelSetSegmentation::getNarrowBandCache() {
 
-    LevelSetCachedObject::setNarrowBandEntry(itr, value, gradient);
-
-    std::size_t rawId = itr.getRawIndex();
-
-    m_narrowBandSupportIds.rawAt(rawId)     = supportId;
-    m_narrowBandSurfaceNormals.rawAt(rawId) = surfaceNormal;
-
-}
-
-#if BITPIT_ENABLE_MPI
-/*!
- * Get the size, expressed in bytes, of a narrowband entry.
- *
- * \result The size, expressed in bytes, of a narrowband entry.
- */
-std::size_t LevelSetSegmentation::getNarrowBandEntryBinarySize() const {
-
-    std::size_t entrySize = LevelSetCachedObject::getNarrowBandEntryBinarySize();
-    entrySize += sizeof(long) + sizeof(std::array<double, 3>) ;
-
-    return entrySize;
+    return static_cast<LevelSetSegmentationNarrowBandCache *>(LevelSetCachedObject::getNarrowBandCache());
 
 }
 
 /*!
- * Write narrow band entry into the communication buffer.
+ * Get a constant pointer to the segmentation storage.
  *
- * \param narrowBandItr is an iterator pointing to the narrowband entry
- * \param[in,out] dataBuffer is the communication buffer
+ * \result A constant pointer to the segmentation storage.
  */
-void LevelSetSegmentation::writeNarrowBandEntryCommunicationBuffer( NarrowBandIterator narrowBandItr, SendBuffer &dataBuffer ){
+const LevelSetSegmentationNarrowBandCache * LevelSetSegmentation::getNarrowBandCache() const {
 
-    LevelSetCachedObject::writeNarrowBandEntryCommunicationBuffer(narrowBandItr, dataBuffer);
-
-    std::size_t narrowBandRawId = narrowBandItr.getRawIndex();
-
-    dataBuffer << m_narrowBandSupportIds.rawAt(narrowBandRawId);
-    dataBuffer << m_narrowBandSurfaceNormals.rawAt(narrowBandRawId);
+    return static_cast<const LevelSetSegmentationNarrowBandCache *>(LevelSetCachedObject::getNarrowBandCache());
 
 }
 
 /*!
- * Read narrow band entry from the communication buffer.
- *
- * \param narrowBandItr is an iterator pointing to the narrowband entry
- * \param[in,out] dataBuffer is the communication buffer
+ * Create the storage for the narrow band data.
  */
-void LevelSetSegmentation::readNarrowBandEntryCommunicationBuffer( NarrowBandIterator narrowBandItr, RecvBuffer &dataBuffer ){
+std::shared_ptr<LevelSetNarrowBandCache> LevelSetSegmentation::createNarrowBandCache() {
 
-    LevelSetCachedObject::readNarrowBandEntryCommunicationBuffer(narrowBandItr, dataBuffer);
-
-    std::size_t narrowBandRawId = narrowBandItr.getRawIndex();
-
-    dataBuffer >> m_narrowBandSupportIds.rawAt(narrowBandRawId);
-    dataBuffer >> m_narrowBandSurfaceNormals.rawAt(narrowBandRawId);
+    return std::shared_ptr<LevelSetNarrowBandCache>(new LevelSetSegmentationNarrowBandCache());
 
 }
-#endif
 
 }

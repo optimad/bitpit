@@ -34,6 +34,7 @@
 
 # include "levelSetBoundedObject.hpp"
 # include "levelSetSignedObject.hpp"
+# include "levelSetStorage.hpp"
 
 namespace bitpit{
 
@@ -46,19 +47,52 @@ class RecvBuffer;
 
 class LevelSetObject;
 
-class LevelSetCachedObject : public LevelSetObject, public LevelSetBoundedObject, public LevelSetSignedObjectInterface {
+class LevelSetNarrowBandCache : public LevelSetInternalPiercedStorageManager
+{
+    protected:
+    Storage<double>                            *m_values;    /** Levelset values of the cells inside the narrow band */
+    Storage<std::array<double, 3>>             *m_gradients; /** Levelset gradient of the cells inside the narrow band */
+
+    public:
+    LevelSetNarrowBandCache();
+
+    bool isDirty() const = delete;
+    void setDirty(bool dirty) = delete;
+
+    double                                      getValue(const KernelIterator &itr) const;
+    const std::array<double, 3> &               getGradient(const KernelIterator &itr) const;
+
+    void                                        set(const KernelIterator &itr, double value, const std::array<double, 3> &gradient);
+
+    void                                        swap(LevelSetNarrowBandCache &other) noexcept;
+
+};
+
+class LevelSetCachedObjectInterface : public virtual LevelSetObjectInterface {
+
+public:
+    LevelSetNarrowBandCache * initializeNarrowBandCache();
+
+    virtual LevelSetNarrowBandCache * getNarrowBandCache();
+    virtual const LevelSetNarrowBandCache * getNarrowBandCache() const;
+
+    void clearNarrowBandCache();
+
+    void dumpNarrowBandCache(std::ostream &stream);
+    void restoreNarrowBandCache(std::istream &stream);
+
+    void swap(LevelSetCachedObjectInterface &other) noexcept;
+
+protected:
+    std::shared_ptr<LevelSetNarrowBandCache> m_narrowBandCache; //! Narrow band cache
+
+    virtual std::shared_ptr<LevelSetNarrowBandCache> createNarrowBandCache() = 0;
+
+};
+
+class LevelSetCachedObject : public LevelSetObject, public LevelSetCachedObjectInterface, public LevelSetBoundedObject, public LevelSetSignedObjectInterface {
 
     protected:
-
-    typedef PiercedKernel<long>                 NarrowBandKernel;
-    typedef NarrowBandKernel::const_iterator    NarrowBandIterator;
-
-    template<typename T>
-    using NarrowBandStorage = PiercedStorage<T, long>;
-
-    NarrowBandKernel                            m_narrowBandKernel;    /** Pierced kernel for storing cell information in the narrow band */
-    NarrowBandStorage<double>                   m_narrowBandValues;    /** Levelset values of the cells inside the narrow band */
-    NarrowBandStorage<std::array<double, 3>>    m_narrowBandGradients; /** Levelset gradient of the cells inside the narrow band */
 
     void                                        _clear( ) override ;
 
@@ -72,24 +106,14 @@ class LevelSetCachedObject : public LevelSetObject, public LevelSetBoundedObject
     void                                        _readCommunicationBuffer( const std::vector<long> &, RecvBuffer & )  override;
 # endif 
 
-    NarrowBandIterator                          createNarrowBandEntry(long id, bool sync = true);
-    void                                        eraseNarrowBandEntry(long id, bool sync = true);
-    bool                                        containsNarrowBandEntry(long id) const;
-    NarrowBandIterator                          getNarrowBandEntryIterator(long id) const;
-    void                                        setNarrowBandEntry(NarrowBandIterator itr, double distance, const std::array<double, 3> &gradient);
-
-    void                                        syncNarrowBandStorages();
+    std::shared_ptr<LevelSetNarrowBandCache>    createNarrowBandCache() override;
 
     std::shared_ptr<LevelSetSignStorage>        createSignStorage() override;
 
-    # if BITPIT_ENABLE_MPI
-    virtual std::size_t                         getNarrowBandEntryBinarySize() const;
-    virtual void                                writeNarrowBandEntryCommunicationBuffer( NarrowBandIterator narrowBandItr, SendBuffer &dataBuffer ) ;
-    virtual void                                readNarrowBandEntryCommunicationBuffer( NarrowBandIterator narrowBandItr, RecvBuffer &dataBuffer ) ;
-#endif
-
     public:
     LevelSetCachedObject(int);
+
+    void                                        setKernel(LevelSetKernel *) override ;
 
     LevelSetInfo                                getLevelSetInfo(long ) const override ;
     double                                      getLS(long ) const override ;
