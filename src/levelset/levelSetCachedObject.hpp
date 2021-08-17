@@ -33,7 +33,7 @@
 # include "bitpit_containers.hpp"
 
 # include "levelSetBoundedObject.hpp"
-# include "levelSetSignPropagator.hpp"
+# include "levelSetSignedObject.hpp"
 
 namespace bitpit{
 
@@ -46,7 +46,7 @@ class RecvBuffer;
 
 class LevelSetObject;
 
-class LevelSetCachedObject : public LevelSetObject, public LevelSetBoundedObject, public LevelSetSignStorage {
+class LevelSetCachedObject : public LevelSetObject, public LevelSetBoundedObject, public LevelSetSignedObjectInterface {
 
     protected:
 
@@ -79,6 +79,8 @@ class LevelSetCachedObject : public LevelSetObject, public LevelSetBoundedObject
     void                                        setNarrowBandEntry(NarrowBandIterator itr, double distance, const std::array<double, 3> &gradient);
 
     void                                        syncNarrowBandStorages();
+
+    std::shared_ptr<LevelSetSignStorage>        createSignStorage() override;
 
     # if BITPIT_ENABLE_MPI
     virtual std::size_t                         getNarrowBandEntryBinarySize() const;
