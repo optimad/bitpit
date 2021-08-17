@@ -48,7 +48,24 @@ class RecvBuffer;
 class LevelSet;
 class LevelSetKernel;
 
-class LevelSetObject : public VTKBaseStreamer{
+class LevelSetObjectInterface {
+
+    public:
+    virtual LevelSetKernel *                    getKernel() = 0;
+    virtual const LevelSetKernel *              getKernel() const = 0;
+    virtual void                                setKernel(LevelSetKernel *) = 0;
+
+    BITPIT_DEPRECATED(virtual LevelSetInfo      getLevelSetInfo(long ) const) = 0;
+    BITPIT_DEPRECATED(virtual double            getLS(long ) const) = 0;
+    virtual double                              getValue(long ) const = 0;
+    virtual short                               getSign(long ) const = 0 ;
+    virtual std::array<double,3>                getGradient(long ) const = 0 ;
+
+    virtual bool                                isInNarrowBand(long ) const = 0;
+
+};
+
+class LevelSetObject : public VTKBaseStreamer, public virtual LevelSetObjectInterface {
 
     friend LevelSet;
 
@@ -65,8 +82,8 @@ class LevelSetObject : public VTKBaseStreamer{
     protected:
     LevelSetObject(int);
 
-    void                                        setKernel(LevelSetKernel *);
-    LevelSetKernel *                            getKernel();
+    void                                        setKernel(LevelSetKernel *) override;
+    LevelSetKernel *                            getKernel() override;
 
     void                                        clear();
 
@@ -106,7 +123,7 @@ class LevelSetObject : public VTKBaseStreamer{
     public:
     virtual ~LevelSetObject() = default;
 
-    const LevelSetKernel *                      getKernel() const;
+    const LevelSetKernel *                      getKernel() const override;
 
     virtual LevelSetObject*                     clone() const =0;
 
@@ -115,21 +132,15 @@ class LevelSetObject : public VTKBaseStreamer{
 
     std::size_t                                 getReferenceCount() const ;
 
-    BITPIT_DEPRECATED(virtual LevelSetInfo      getLevelSetInfo(long ) const) =0;
-    BITPIT_DEPRECATED(virtual double            getLS(long ) const) =0;
-    virtual double                              getValue(long ) const =0;
-    virtual short                               getSign(long ) const ;
-    virtual std::array<double,3>                getGradient(long ) const =0 ;
-    std::array<double,3>                        computeProjectionPoint(long ) const;
+    short                                       getSign(long ) const override;
 
+    std::array<double,3>                        computeProjectionPoint(long ) const;
     std::array<double,3>                        computeVertexProjectionPoint(long ) const;
 
     virtual int                                 getPart(long ) const ;
     virtual std::array<double,3>                getNormal(long ) const;
     virtual LevelSetInfo                        computeLevelSetInfo(const std::array<double,3> &) const =0;
     std::array<double,3>                        computeProjectionPoint(const std::array<double,3> &) const;
-
-    virtual bool                                isInNarrowBand(long ) const = 0;
 
     double                                      getSizeNarrowBand() const;
 
