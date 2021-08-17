@@ -28,165 +28,12 @@
 # endif
 
 # include "bitpit_CG.hpp"
-# include "bitpit_patchkernel.hpp"
 
 # include "levelSetBoundedObject.hpp"
 # include "levelSetKernel.hpp"
-# include "levelSetObject.hpp"
 # include "levelSetSignPropagator.hpp"
 
 namespace bitpit {
-
-/*!
- * \ingroup levelset
- * \class LevelSetSignStorage
- * \brief The class LevelSetSignStorage allows to store the levelset sign
- * on the whole mesh.
- */
-
-const LevelSetSignStorage::Sign LevelSetSignStorage::SIGN_UNDEFINED = -2;
-const LevelSetSignStorage::Sign LevelSetSignStorage::SIGN_NEGATIVE  = -1;
-const LevelSetSignStorage::Sign LevelSetSignStorage::SIGN_ZERO      =  0;
-const LevelSetSignStorage::Sign LevelSetSignStorage::SIGN_POSITIVE  =  1;
-
-/*!
- * Constructor.
- */
-LevelSetSignStorage::LevelSetSignStorage()
-    : m_dirty(true), m_storage(1)
-{
-}
-
-/*!
- * Check if the stored sign is dirty.
- *
- * \result Returns true if the stored sign is dirty, false
- * otherwise.
- */
-bool LevelSetSignStorage::isStoredSignDirty() const
-{
-    return m_dirty;
-}
-
-/*!
- * Set the stored sign as dirty.
- *
- * \param dirty is set to true the stored will be set as dirty
- */
-void LevelSetSignStorage::setStoredSignDirty(bool dirty)
-{
-    m_dirty = dirty;
-}
-
-/*!
- * Check if the sign storage has been initialized.
- *
- * \result Return true if the sign storage has been initialized, false
- * otherwise.
- */
-bool LevelSetSignStorage::isSignStorageInitialized() const
-{
-    return (m_storage.getKernel() != nullptr);
-}
-
-/*!
- * Initialize the storage.
- *
- * \param cellKernel is the kernel of the cells
- */
-void LevelSetSignStorage::initializeSignStorage(bitpit::PiercedKernel<long> *cellKernel)
-{
-    m_storage.setDynamicKernel(cellKernel, PiercedSyncMaster::SyncMode::SYNC_MODE_JOURNALED);
-}
-
-/*!
- * Clear the storage.
- *
- * \param release if it's true the memory hold by the container will
- * be released, otherwise the container will be cleared but its
- * memory will not be relased
- */
-void LevelSetSignStorage::clearSignStorage(bool release)
-{
-    m_storage.unsetKernel(release);
-    setStoredSignDirty(true);
-}
-
-/*!
- * Get the sign of the specified cell.
- *
- * \param id is the id of the cell
- * \result The sign of the specified cell.
- */
-LevelSetSignStorage::Sign LevelSetSignStorage::getStoredSign(long id) const
-{
-    return m_storage.at(id);
-}
-
-/*!
- * Get the sign of the specified cell.
- *
- * \param itr is the iterator pointing to the cell
- * \result The sign of the specified cell.
- */
-LevelSetSignStorage::Sign LevelSetSignStorage::getStoredSign(const VolumeKernel::CellConstIterator &itr) const
-{
-    return rawGetStoredSign(itr.getRawIndex());
-}
-
-/*!
- * Get the sign of the specified cell.
- *
- * \param rawIndex is the raw index of the cell
- * \result The sign of the specified cell.
- */
-LevelSetSignStorage::Sign LevelSetSignStorage::rawGetStoredSign(std::size_t rawIndex) const
-{
-    return m_storage.rawAt(rawIndex);
-}
-
-/*!
- * Set the sign of all the stored cells.
- *
- * \param sign is the sign that will be set
- */
-void LevelSetSignStorage::setStoredSign(Sign sign)
-{
-    m_storage.fill(sign);
-}
-
-/*!
- * Set the sign of the specified cell.
- *
- * \param itr is the iterator pointing to the cell
- * \param sign is the sign that will be set
- */
-void LevelSetSignStorage::setStoredSign(const VolumeKernel::CellConstIterator &itr, Sign sign)
-{
-    m_storage.rawAt(itr.getRawIndex()) = sign;
-}
-
-/*!
- * Dump storage information.
- *
- * \param stream is the output stream
- */
-void LevelSetSignStorage::dumpStoredSign(std::ostream &stream)
-{
-    utils::binary::write(stream, m_dirty);
-    m_storage.dump(stream);
-}
-
-/*!
- * Restore storage information.
- *
- * \param stream is the output stream
- */
-void LevelSetSignStorage::restoreStoredSign(std::istream &stream)
-{
-    utils::binary::read(stream, m_dirty);
-    m_storage.restore(stream);
-}
 
 /*!
     \ingroup levelset
@@ -225,27 +72,18 @@ LevelSetSignPropagator::LevelSetSignPropagator(VolumeKernel *mesh)
  * The function assumes that the storage to the propagated sign is not yet
  * initialized. Therefore, the storage will be created and initialized.
  *
- * \param object is the object that whose sign will be propagated
- * \param[in,out] storage is the storage for the propagated sign
+ * \param[in,out] object is the object that whose sign will be propagated
  */
-void LevelSetSignPropagator::execute(const LevelSetObject *object, LevelSetSignStorage *storage)
+void LevelSetSignPropagator::execute(LevelSetSignedObjectInterface *object)
 {
-    // Early return if the stored sign is not dirty
-    if (!storage->isStoredSignDirty()) {
-        return;
-    }
-
-    // Set storage kernel
-    storage->initializeSignStorage(&(object->getKernel()->getMesh()->getCells()));
+    // Initialize the storage
+    LevelSetSignStorage *storage = object->initializeSignStorage();
 
     // Reset stored sign
-    storage->setStoredSign(LevelSetSignStorage::SIGN_UNDEFINED);
+    storage->fill(LevelSetSignStorage::SIGN_UNDEFINED);
 
     // Propagate sign
     propagate(object, storage);
-
-    // The propagated sign is now up-to-date
-    storage->setStoredSignDirty(false);
 }
 
 /*!
@@ -257,41 +95,48 @@ void LevelSetSignPropagator::execute(const LevelSetObject *object, LevelSetSignS
  * storage will be created and initialized.
  *
  * \param adaptionData are the information about mesh adaption
- * \param object is the object that whose sign will be propagated
- * \param[in,out] storage is the storage for the propagated sign
+ * \param[in,out] object is the object that whose sign will be propagated
  */
-void LevelSetSignPropagator::execute(const std::vector<adaption::Info> &adaptionData, const LevelSetObject *object, LevelSetSignStorage *storage)
+void LevelSetSignPropagator::execute(const std::vector<adaption::Info> &adaptionData, LevelSetSignedObjectInterface *object)
 {
-    // Early return if the storage has not been initialized
-    if (!storage->isSignStorageInitialized()) {
-        execute(object, storage);
+    // Get the storage
+    //
+    // If the storage is not initialized yet, the sign should be evaluated
+    // from scratch.
+    LevelSetSignStorage *storage = object->getSignStorage();
+    if (!storage) {
+        execute(object);
         return;
     }
 
-    // Early return if the stored sign is not dirty
-    if (!storage->isStoredSignDirty()) {
-        return;
-    }
-
-    // Reset stored sign of new cells
-    const PiercedVector<Cell, long> &meshCells = m_mesh->getCells();
-
+    // Initialize stored sign of new cells
+    bool propagationNeeded = false;
     for (const adaption::Info &adaptionInfo : adaptionData) {
         if (adaptionInfo.entity != adaption::Entity::ENTITY_CELL) {
             continue;
         }
 
+        propagationNeeded = true;
+
         for (long cellId : adaptionInfo.current) {
-            VolumeKernel::CellConstIterator cellItr = meshCells.find(cellId);
-            storage->setStoredSign(cellItr, LevelSetSignStorage::SIGN_UNDEFINED);
+            LevelSetSignStorage::KernelIterator cellStorageItr = storage->find(cellId);
+            storage->at(cellStorageItr) = LevelSetSignStorage::SIGN_UNDEFINED;
         }
+    }
+
+#if BITPIT_ENABLE_MPI
+    if (m_mesh->isPartitioned()) {
+        MPI_Allreduce(MPI_IN_PLACE, &propagationNeeded, 1, MPI_C_BOOL, MPI_LOR, m_mesh->getCommunicator());
+    }
+#endif
+
+    // Early return if propagation is not needed
+    if (!propagationNeeded) {
+        return;
     }
 
     // Propagate sign
     propagate(object, storage);
-
-    // The propagated sign is now up-to-date
-    storage->setStoredSignDirty(false);
 }
 
 /*!
@@ -301,7 +146,7 @@ void LevelSetSignPropagator::execute(const std::vector<adaption::Info> &adaption
  * \param object is the object that whose sign will be propagated
  * \param[in,out] storage is the storage for the propagated sign
  */
-void LevelSetSignPropagator::propagate(const LevelSetObject *object, LevelSetSignStorage *storage)
+void LevelSetSignPropagator::propagate(const LevelSetObjectInterface *object, LevelSetSignStorage *storage)
 {
     // Initialize propagation information
     initializePropagation(object);
@@ -314,7 +159,9 @@ void LevelSetSignPropagator::propagate(const LevelSetObject *object, LevelSetSig
 
     std::vector<std::size_t> rawSeeds;
     for (VolumeKernel::CellConstIterator cellItr = cellBegin; cellItr != cellEnd; ++cellItr) {
-        int cellSign = storage->getStoredSign(cellItr);
+        std::size_t cellRawId = cellItr.getRawIndex();
+        LevelSetSignStorage::KernelIterator cellSignStorageItr = storage->rawFind(cellRawId);
+        int cellSign = storage->at(cellSignStorageItr);
         if (cellSign == LevelSetSignStorage::SIGN_UNDEFINED) {
             long cellId = cellItr.getId();
             if (object->isInNarrowBand(cellId)) {
@@ -323,8 +170,7 @@ void LevelSetSignPropagator::propagate(const LevelSetObject *object, LevelSetSig
         }
 
         if (cellSign != LevelSetSignStorage::SIGN_UNDEFINED) {
-            std::size_t cellRawId = cellItr.getRawIndex();
-            setSign(cellItr, cellSign, storage);
+            setSign(cellRawId, cellSign, storage);
             rawSeeds.push_back(cellRawId);
         }
     }
@@ -384,7 +230,8 @@ void LevelSetSignPropagator::propagate(const LevelSetObject *object, LevelSetSig
                 for (long cellId : sendIds) {
                     exchangedSign = LevelSetSignStorage::SIGN_UNDEFINED;
                     if (m_propagationStates.at(cellId) == STATE_REACHED) {
-                        exchangedSign = storage->getStoredSign(cellId);
+                        LevelSetSignStorage::KernelIterator exchangedSignStorageItr = storage->find(cellId);
+                        exchangedSign = storage->at(exchangedSignStorageItr);
                     }
                     buffer << exchangedSign;
                 }
@@ -413,7 +260,7 @@ void LevelSetSignPropagator::propagate(const LevelSetObject *object, LevelSetSig
                     std::size_t cellRawId = cellItr.getRawIndex();
                     PropagationState cellPropagationState = m_propagationStates.rawAt(cellRawId);
                     if (cellPropagationState == STATE_WAITING) {
-                        setSign(cellItr, exchangedSign, storage);
+                        setSign(cellRawId, exchangedSign, storage);
                         rawSeeds.push_back(cellRawId);
                     } else if (cellPropagationState == STATE_REACHED) {
                         assert(object->getSign(cellId) == exchangedSign);
@@ -483,12 +330,12 @@ void LevelSetSignPropagator::propagate(const LevelSetObject *object, LevelSetSig
                 continue;
             }
 
-            setSign(cellItr, m_externalSign, storage);
+            setSign(cellRawId, m_externalSign, storage);
         }
     }
 
-    // Cleanup
-    finalizePropagation();
+    // Finalize propagation
+    finalizePropagation(storage);
 }
 
 /*!
@@ -496,7 +343,7 @@ void LevelSetSignPropagator::propagate(const LevelSetObject *object, LevelSetSig
  *
  * \param object is the object that whose sign will be propagated
  */
-void LevelSetSignPropagator::initializePropagation(const LevelSetObject *object)
+void LevelSetSignPropagator::initializePropagation(const LevelSetObjectInterface *object)
 {
     // Initialize propagation state
     m_nWaiting = m_mesh->getCellCount();
@@ -617,7 +464,8 @@ void LevelSetSignPropagator::executeSeedPropagation(const std::vector<std::size_
         std::size_t seedRawId = rawSeeds[rawSeedCursor];
 
         // Get the sign of the seed
-        LevelSetSignStorage::Sign seedSign = storage->rawGetStoredSign(seedRawId);
+        LevelSetSignStorage::KernelIterator seedSignStorageItr = storage->rawFind(seedRawId);
+        LevelSetSignStorage::Sign seedSign = storage->at(seedSignStorageItr);
         assert(seedSign >= -1 && seedSign <= 1);
 
         // Initialize the process list with the seed
@@ -629,16 +477,14 @@ void LevelSetSignPropagator::executeSeedPropagation(const std::vector<std::size_
             std::size_t cellRawId = rawProcessList.back();
             rawProcessList.resize(rawProcessList.size() - 1);
 
-            // Cell information
-            VolumeKernel::CellConstIterator cellItr = meshCells.rawFind(cellRawId);
-
             // Set the sign of the cell
             //
             // We need to set the sign only if it has not already been set
             // (for example, the sign of the seeds is already set).
-            LevelSetSignStorage::Sign cellSign = storage->getStoredSign(cellItr);
+            LevelSetSignStorage::KernelIterator cellSignStorageItr = storage->rawFind(cellRawId);
+            LevelSetSignStorage::Sign cellSign = storage->at(cellSignStorageItr);
             if (cellSign == LevelSetSignStorage::SIGN_UNDEFINED) {
-                setSign(cellItr, seedSign, storage);
+                setSign(cellRawId, seedSign, storage);
             }
 
             // Process cell neighbours
@@ -647,7 +493,7 @@ void LevelSetSignPropagator::executeSeedPropagation(const std::vector<std::size_
             // process list. When the propagation reaches an external cell
             // the sign of the seed frow which the propagation started will
             // be the sign of the external region.
-            const Cell &cell = *cellItr;
+            const Cell &cell = meshCells.rawAt(cellRawId);
             const long *cellNeighs = cell.getAdjacencies();
             int nCellNeighs = cell.getAdjacencyCount();
             for(int n = 0; n < nCellNeighs; ++n){
@@ -687,26 +533,32 @@ void LevelSetSignPropagator::executeSeedPropagation(const std::vector<std::size_
 
 /*!
  * Finalize information used for sign propagation
+ *
+ * \param[out] storage is the storage for the propagated sign
  */
-void LevelSetSignPropagator::finalizePropagation()
+void LevelSetSignPropagator::finalizePropagation(LevelSetSignStorage *storage)
 {
     // Reset propagation state
     m_propagationStates.unsetKernel(false);
+
+    // The propagated sign is now up-to-date
+    storage->setDirty(false);
 }
 
 /*!
  * Set the sign associated with the cell and update propagation information
  *
- * \param cellId is the id of the cell
+ * \param cellRawId is the raw id of the cell
  * \param cellSign is the sign associated with the cell
  * \param[out] storage is the storage for the propagated sign
  */
-void LevelSetSignPropagator::setSign(const VolumeKernel::CellConstIterator &cellItr, LevelSetSignStorage::Sign cellSign, LevelSetSignStorage *storage)
+void LevelSetSignPropagator::setSign(std::size_t cellRawId, LevelSetSignStorage::Sign cellSign, LevelSetSignStorage *storage)
 {
     assert(cellSign >= -1 && cellSign <= 1);
 
     // Set the sign of the cell
-    storage->setStoredSign(cellItr, cellSign);
+    LevelSetSignStorage::KernelIterator cellStorageItr = storage->rawFind(cellRawId);
+    storage->at(cellStorageItr) = cellSign;
 
     // Update the state of the cell
     //
@@ -715,7 +567,6 @@ void LevelSetSignPropagator::setSign(const VolumeKernel::CellConstIterator &cell
     //
     // If the cell is waiting for the propagation, the counter of the
     // waiting cell list should be updated.
-    std::size_t cellRawId = cellItr.getRawIndex();
     PropagationState *cellState = m_propagationStates.rawData(cellRawId);
     if (*cellState == STATE_EXTERNAL) {
         if (m_externalSign == LevelSetSignStorage::SIGN_UNDEFINED) {
