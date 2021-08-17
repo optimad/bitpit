@@ -54,10 +54,22 @@ namespace bitpit {
  * @param[in] id id assigned to object
  */
 LevelSetCachedObject::LevelSetCachedObject(int id)
-    : LevelSetObject(id), LevelSetSignStorage(),
+    : LevelSetObject(id),
       m_narrowBandValues(1, &m_narrowBandKernel, PiercedSyncMaster::SYNC_MODE_JOURNALED),
       m_narrowBandGradients(1, &m_narrowBandKernel, PiercedSyncMaster::SYNC_MODE_JOURNALED)
 {
+}
+
+/*!
+ * Create the storage for sign propagation.
+ */
+std::shared_ptr<LevelSetSignStorage> LevelSetCachedObject::createSignStorage() {
+
+    VolumeKernel *mesh = m_kernelPtr->getMesh() ;
+    assert(mesh) ;
+
+    return std::shared_ptr<LevelSetSignStorage>(new LevelSetSignStorage(&(mesh->getCells())));
+
 }
 
 /*!
@@ -122,8 +134,9 @@ short LevelSetCachedObject::getSign( long id ) const {
     }
 
     // Check if the sign can be evaluated from the propagation
-    if (!isStoredSignDirty()) {
-        LevelSetSignStorage::Sign propagatedSign = getStoredSign(id);
+    if (!isSignStorageDirty()) {
+        LevelSetSignStorage::KernelIterator signStorageItr = getSignStorage()->find(id);
+        LevelSetSignStorage::Sign propagatedSign = getSignStorage()->at(signStorageItr);
         if (propagatedSign != LevelSetSignStorage::SIGN_UNDEFINED) {
             return static_cast<short>(propagatedSign);
         }
@@ -173,8 +186,6 @@ void LevelSetCachedObject::_clearAfterMeshAdaption( const std::vector<adaption::
 
     syncNarrowBandStorages();
 
-    // Sign propgation needs to be updated
-    setStoredSignDirty(true);
 
 }
 
@@ -215,7 +226,7 @@ void LevelSetCachedObject::_dump( std::ostream &stream ){
     m_narrowBandGradients.dump( stream );
 
     // Stored sign
-    LevelSetSignStorage::dumpStoredSign( stream );
+    dumpSignStorage( stream );
 }
 
 /*!
@@ -232,7 +243,7 @@ void LevelSetCachedObject::_restore( std::istream &stream ){
     m_narrowBandGradients.restore( stream );
 
     // Stored sign
-    LevelSetSignStorage::restoreStoredSign( stream );
+    restoreSignStorage( stream );
 }
 
 #if BITPIT_ENABLE_MPI

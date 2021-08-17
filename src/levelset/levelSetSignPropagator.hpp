@@ -25,60 +25,19 @@
 # ifndef __BITPIT_LEVELSET_SIGN_PROPAGATOR_HPP__
 # define __BITPIT_LEVELSET_SIGN_PROPAGATOR_HPP__
 
-# include "bitpit_containers.hpp"
 # include "bitpit_patchkernel.hpp"
 
+# include "levelSetSignedObject.hpp"
+
 namespace bitpit{
-
-class LevelSetSignPropagator;
-
-class LevelSetSignStorage {
-
-friend class LevelSetSignPropagator;
-
-public:
-    typedef signed char Sign;
-
-    static const Sign SIGN_UNDEFINED;
-    static const Sign SIGN_NEGATIVE;
-    static const Sign SIGN_ZERO;
-    static const Sign SIGN_POSITIVE;
-
-    bool isStoredSignDirty() const;
-
-    Sign getStoredSign(long id) const;
-    Sign getStoredSign(const VolumeKernel::CellConstIterator &itr) const;
-
-    Sign rawGetStoredSign(std::size_t rawIndex) const;
-
-protected:
-    LevelSetSignStorage();
-
-    bool isSignStorageInitialized() const;
-    void initializeSignStorage(PiercedKernel<long> *cellKernel);
-    void clearSignStorage(bool release = true);
-
-    void setStoredSignDirty(bool dirty);
-
-    void setStoredSign(Sign sign);
-    void setStoredSign(const VolumeKernel::CellConstIterator &itr, Sign sign);
-
-    void dumpStoredSign(std::ostream &stream);
-    void restoreStoredSign(std::istream &stream);
-
-private:
-    bool m_dirty; /** Check if the storage is dirty */
-    PiercedStorage<signed char> m_storage; /** Storage for the levelset sign */
-
-};
 
 class LevelSetSignPropagator {
 
 public:
     LevelSetSignPropagator(VolumeKernel *mesh);
 
-    void execute(const LevelSetObject *object, LevelSetSignStorage *storage);
-    void execute(const std::vector<adaption::Info> &adaptionData, const LevelSetObject *object, LevelSetSignStorage *storage);
+    void execute(LevelSetSignedObjectInterface *object);
+    void execute(const std::vector<adaption::Info> &adaptionData, LevelSetSignedObjectInterface *object);
 
 private:
     typedef signed char PropagationState;
@@ -94,13 +53,13 @@ private:
     LevelSetSignStorage::Sign m_externalSign;
     PiercedStorage<PropagationState, long> m_propagationStates;
 
-    void propagate(const LevelSetObject *object, LevelSetSignStorage *storage);
+    void propagate(const LevelSetObjectInterface *object, LevelSetSignStorage *storage);
 
-    void initializePropagation(const LevelSetObject *object);
+    void initializePropagation(const LevelSetObjectInterface *object);
     void executeSeedPropagation(const std::vector<std::size_t> &rawSeeds, LevelSetSignStorage *storage);
-    void finalizePropagation();
+    void finalizePropagation(LevelSetSignStorage *storage);
 
-    void setSign(const VolumeKernel::CellConstIterator &cellItr, LevelSetSignStorage::Sign sign, LevelSetSignStorage *storage);
+    void setSign(std::size_t cellRawId, LevelSetSignStorage::Sign sign, LevelSetSignStorage *storage);
 
 };
 

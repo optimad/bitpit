@@ -43,6 +43,7 @@
 #include "levelSetProxyObject.hpp"
 #include "levelSetCachedObject.hpp"
 #include "levelSetSegmentation.hpp"
+#include "levelSetSignedObject.hpp"
 #include "levelSetBoolean.hpp"
 
 #include "levelSet.hpp"

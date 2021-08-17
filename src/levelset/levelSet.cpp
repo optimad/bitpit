@@ -37,6 +37,7 @@
 # include "levelSetCachedObject.hpp"
 # include "levelSetBoolean.hpp"
 # include "levelSetSegmentation.hpp"
+# include "levelSetSignedObject.hpp"
 # include "levelSetSignPropagator.hpp"
 # include "levelSetMask.hpp"
 
@@ -574,15 +575,30 @@ void LevelSet::compute(){
 
     for( int id : m_objectsProcessingOrder){
         LevelSetObject *object = m_objects.at(id).get() ;
+
+        LevelSetSignedObjectInterface *signPropagationObject;
+        if (m_propagateSign) {
+            signPropagationObject = dynamic_cast<LevelSetSignedObjectInterface *>(object);
+        } else {
+            signPropagationObject = nullptr;
+        }
+
+        // Flag propagated sign as dirty
+        //
+        // The propagated sign will be set as non-dirty by the sign propagator.
+        if (signPropagationObject) {
+            signPropagationObject->setSignStorageDirty(true);
+        }
+
+        // Compute levelset inside the narrowband
         object->computeLSInNarrowBand(m_signedDistance) ;
 #if BITPIT_ENABLE_MPI
         object->exchangeGhosts();
 #endif
-        if(m_propagateSign) {
-            LevelSetSignStorage *signStorage = dynamic_cast<LevelSetSignStorage *>(object);
-            if (signStorage) {
-                signPropagator->execute(object, signStorage);
-            }
+
+        // Propagate sign
+        if(signPropagationObject) {
+            signPropagator->execute(signPropagationObject);
         }
     }
 }
@@ -670,12 +686,26 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
     for( int id : m_objectsProcessingOrder){
         LevelSetObject *object = m_objects.at(id).get() ;
 
+        LevelSetSignedObjectInterface *signPropagationObject;
+        if (m_propagateSign) {
+            signPropagationObject = dynamic_cast<LevelSetSignedObjectInterface *>(object);
+        } else {
+            signPropagationObject = nullptr;
+        }
+
 #if BITPIT_ENABLE_MPI
         // Start partitioning update
         if (updatePartitioning) {
             object->startExchange( partitioningSendList, dataCommunicator.get() );
         }
 #endif
+
+        // Propagated sign is now dirty
+        //
+        // The propagated sign will be set as non-dirty by the sign propagator.
+        if (signPropagationObject) {
+            signPropagationObject->setSignStorageDirty(true);
+        }
 
         // Clear data structures after mesh update
         object->clearAfterMeshAdaption( mapper ) ;
@@ -701,11 +731,8 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
         //
         // It's not possible to communicate sign information, therefore sign
         // needs to be propagated also when the mesh is only partitioned.
-        if (m_propagateSign) {
-            LevelSetSignStorage *signStorage = dynamic_cast<LevelSetSignStorage *>(object);
-            if (signStorage) {
-                signPropagator->execute(mapper, object, signStorage);
-            }
+        if (signPropagationObject) {
+            signPropagator->execute(mapper, signPropagationObject);
         }
     }
 
