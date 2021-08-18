@@ -81,6 +81,8 @@ public:
     void dumpNarrowBandCache(std::ostream &stream);
     void restoreNarrowBandCache(std::istream &stream);
 
+    bool isInNarrowBand(long id) const override;
+
     void swap(LevelSetCachedObjectInterface &other) noexcept;
 
 protected:
@@ -120,8 +122,6 @@ class LevelSetCachedObject : public LevelSetObject, public LevelSetCachedObjectI
     double                                      getValue(long ) const override ;
     short                                       getSign(long ) const override ;
     std::array<double,3>                        getGradient(long ) const override ;
-
-    bool                                        isInNarrowBand(long id) const override;
 
 };
 
