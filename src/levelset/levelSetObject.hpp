@@ -89,8 +89,8 @@ class LevelSetObject : public VTKBaseStreamer, public virtual LevelSetObjectInte
 
     void                                        setSizeNarrowBand(double) ;
 
-    virtual void                                computeLSInNarrowBand(bool);
-    virtual void                                updateLSInNarrowBand(const std::vector<adaption::Info> &, bool);
+    virtual void                                computeNarrowBand(bool);
+    virtual void                                updateNarrowBand(const std::vector<adaption::Info> &, bool);
     void                                        clearAfterMeshAdaption(const std::vector<adaption::Info>&);
 
     short                                       evalValueSign(double) const ;

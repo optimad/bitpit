@@ -360,7 +360,7 @@ double LevelSetObject::getMaxSurfaceFeatureSize() const{
  * Calculates the value and gradient of the levelset function within the narrow band
  * @param[in] signd if signed distances should be calculted
  */
-void LevelSetObject::computeLSInNarrowBand(bool signd){
+void LevelSetObject::computeNarrowBand(bool signd){
     BITPIT_UNUSED(signd);
 }
 
@@ -369,7 +369,7 @@ void LevelSetObject::computeLSInNarrowBand(bool signd){
  * @param[in] mapper information regarding mesh adaption
  * @param[in] signd if signed distances should be calculted
  */
-void LevelSetObject::updateLSInNarrowBand(const std::vector<adaption::Info> &mapper, bool signd){
+void LevelSetObject::updateNarrowBand(const std::vector<adaption::Info> &mapper, bool signd){
     BITPIT_UNUSED(mapper);
     BITPIT_UNUSED(signd);
 }
