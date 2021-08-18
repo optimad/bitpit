@@ -90,7 +90,7 @@ protected:
 
 };
 
-class LevelSetCachedObject : public LevelSetObject, public LevelSetCachedObjectInterface, public LevelSetBoundedObject, public LevelSetSignedObjectInterface {
+class LevelSetCachedObject : public LevelSetObject, public LevelSetCachedObjectInterface, public LevelSetSignedObjectInterface {
 
     protected:
 
