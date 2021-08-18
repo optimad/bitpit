@@ -71,7 +71,7 @@ class LevelSet{
 
     void                    compute( const std::unordered_set<LevelSetObject *> &objectProcessList) ;
 
-    void                    update( const std::vector<adaption::Info> &mapper, const std::unordered_set<LevelSetObject *> &objectProcessList );
+    void                    update( const std::vector<adaption::Info> &adaptionData, const std::unordered_set<LevelSetObject *> &objectProcessList );
 
     std::unordered_set<LevelSetObject *> getObjectProcessList() const ;
     std::unordered_set<LevelSetObject *> getObjectProcessList(std::size_t nObjects, const int *objectIds) const ;
@@ -128,9 +128,9 @@ class LevelSet{
     void                    compute( int id ) ;
     void                    compute( const std::vector<int> &ids ) ;
 
-    void                    update( const std::vector<adaption::Info> &mapper );
-    void                    update( const std::vector<adaption::Info> &mapper, int id );
-    void                    update( const std::vector<adaption::Info> &mapper, const std::vector<int> &ids );
+    void                    update( const std::vector<adaption::Info> &adaptionData );
+    void                    update( const std::vector<adaption::Info> &adaptionData, int id );
+    void                    update( const std::vector<adaption::Info> &adaptionData, const std::vector<int> &ids );
 
 # if BITPIT_ENABLE_MPI
     BITPIT_DEPRECATED(void  partition( const std::vector<adaption::Info> & ));

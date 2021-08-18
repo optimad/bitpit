@@ -105,9 +105,9 @@ void LevelSetOctree::clearGeometryCache(  ) {
 /*!
  * Updates the geometry cache after an adaption.
  */
-void LevelSetOctree::updateGeometryCache( const std::vector<adaption::Info> &mapper ) {
+void LevelSetOctree::updateGeometryCache( const std::vector<adaption::Info> &adaptionData ) {
 
-    LevelSetKernel::updateGeometryCache(mapper);
+    LevelSetKernel::updateGeometryCache(adaptionData);
 
     updateCellCirclesCache();
 

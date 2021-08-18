@@ -90,8 +90,10 @@ void LevelSetKernel::clearGeometryCache(  ) {
 
 /*!
  * Updates the geometry cache after an adaption.
+ *
+ * @param[in] adaptionData are the information about the adaption
  */
-void LevelSetKernel::updateGeometryCache( const std::vector<adaption::Info> &mapper ) {
+void LevelSetKernel::updateGeometryCache( const std::vector<adaption::Info> &adaptionData ) {
 
     // If there are no cells in the mesh we can just delete all the cache
     if ( m_mesh->getCellCount() == 0) {
@@ -100,12 +102,12 @@ void LevelSetKernel::updateGeometryCache( const std::vector<adaption::Info> &map
     }
 
     // Remove the previous cells from the cache
-    for ( auto & map : mapper ){
-        if( map.entity != adaption::Entity::ENTITY_CELL ){
+    for ( const adaption::Info &adaptionInfo : adaptionData ){
+        if( adaptionInfo.entity != adaption::Entity::ENTITY_CELL ){
             continue;
         }
 
-        for ( auto & previousId : map.previous){
+        for ( auto & previousId : adaptionInfo.previous){
             auto centroidItr = m_cellCentroids.find( previousId ) ;
             if ( centroidItr == m_cellCentroids.end() ) {
                 continue ;

@@ -353,13 +353,13 @@ std::array<double,3> LevelSetCachedObject::getGradient(long id) const {
 
 /*! 
  * Deletes non-existing items after grid adaption.
- * @param[in] mapper mapping info
+ * @param[in] adaptionData are the information about the adaption
  */
-void LevelSetCachedObject::_clearAfterMeshAdaption( const std::vector<adaption::Info> &mapper ){
+void LevelSetCachedObject::_clearAfterMeshAdaption( const std::vector<adaption::Info> &adaptionData ){
 
     // Clear stale narrow band entries
     LevelSetNarrowBandCache *narrowBandCache = getNarrowBandCache();
-    for (const adaption::Info &adaptionInfo : mapper) {
+    for (const adaption::Info &adaptionInfo : adaptionData) {
         if (adaptionInfo.entity != adaption::Entity::ENTITY_CELL) {
             continue;
         }
