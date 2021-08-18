@@ -112,7 +112,7 @@ class LevelSetSegmentationNarrowBandCache : public LevelSetNarrowBandCache
 
 };
 
-class LevelSetSegmentation : public LevelSetCachedObject {
+class LevelSetSegmentation : public LevelSetCachedObject, public LevelSetBoundedObject {
 
     private:
     std::shared_ptr<const SegmentationKernel> m_segmentation;
