@@ -194,6 +194,18 @@ void LevelSetCachedObjectInterface::restoreNarrowBandCache(std::istream &stream)
 }
 
 /*!
+ * Check if the specified cell lies within the narrow band and hence its
+ * levelset is computed exactly.
+ *
+ * \param[in] id is the cell id
+ * \resutl Return true if the cell is in the narrow band, falst otherwise.
+ */
+bool LevelSetCachedObjectInterface::isInNarrowBand(long id)const
+{
+    return m_narrowBandCache->contains(id);
+}
+
+/*!
  * Exchanges the content of the object with the content the specified other
  * object.
  *
@@ -385,16 +397,6 @@ void LevelSetCachedObject::_clear( ){
 
     // Clear sign propgation storage
     clearSignStorage();
-}
-
-/*!
- * If cell lies within the narrow band and hence its levelset is computed
- * exactly.
- * @param[in] id cell id
- * @return true/false if the centroid is in narrow band
- */
-bool LevelSetCachedObject::isInNarrowBand(long id)const{
-    return getNarrowBandCache()->contains(id);
 }
 
 /*!
