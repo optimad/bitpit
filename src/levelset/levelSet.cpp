@@ -643,7 +643,7 @@ void LevelSet::compute( const std::unordered_set<LevelSetObject *> &objectProces
         }
 
         // Compute levelset inside the narrowband
-        object->computeLSInNarrowBand(m_signedDistance) ;
+        object->computeNarrowBand(m_signedDistance) ;
 #if BITPIT_ENABLE_MPI
         object->exchangeGhosts();
 #endif
@@ -828,7 +828,7 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper, const std::uno
 
         // Update levelset inside narrow band
         if (updateNarrowBand) {
-            object->updateLSInNarrowBand( mapper, m_signedDistance ) ;
+            object->updateNarrowBand( mapper, m_signedDistance ) ;
         }
 
 #if BITPIT_ENABLE_MPI
