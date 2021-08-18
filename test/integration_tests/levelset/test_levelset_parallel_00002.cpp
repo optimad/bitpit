@@ -119,7 +119,7 @@ int subtest_001(int rank)
 
     bitpit::LevelSet levelset;
 
-    std::vector<bitpit::adaption::Info> mapper ;
+    std::vector<bitpit::adaption::Info> adaptionData ;
     int id0, id1, id2 ;
     std::vector<int> ids;
 
@@ -152,10 +152,10 @@ int subtest_001(int rank)
     mesh.write() ;
 
     // Mesh Partitioning
-    mapper = mesh.partition(true) ;
+    adaptionData = mesh.partition(true) ;
 
     start = std::chrono::system_clock::now();
-    levelset.update(mapper) ;
+    levelset.update(adaptionData) ;
     end = std::chrono::system_clock::now();
 
     elapsed_part = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
@@ -181,9 +181,9 @@ int subtest_001(int rank)
             }
         }
 
-        mapper = mesh.update(true) ;
+        adaptionData = mesh.update(true) ;
         start = std::chrono::system_clock::now();
-        levelset.update(mapper) ;
+        levelset.update(adaptionData) ;
         end = std::chrono::system_clock::now();
 
         elapsed_refi += std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();

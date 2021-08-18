@@ -366,28 +366,28 @@ void LevelSetObject::computeNarrowBand(bool signd){
 
 /*!
  * Updates the value and gradient of the levelset function within the narrow band
- * @param[in] mapper information regarding mesh adaption
+ * @param[in] adaptionData are the information about the adaption
  * @param[in] signd if signed distances should be calculted
  */
-void LevelSetObject::updateNarrowBand(const std::vector<adaption::Info> &mapper, bool signd){
-    BITPIT_UNUSED(mapper);
+void LevelSetObject::updateNarrowBand(const std::vector<adaption::Info> &adaptionData, bool signd){
+    BITPIT_UNUSED(adaptionData);
     BITPIT_UNUSED(signd);
 }
 
 /*! 
  * Deletes non-existing items and items outside the narrow band after grid adaption.
- * @param[in] mapper mapping info
+ * @param[in] adaptionData are the information about the adaption
  */
-void LevelSetObject::clearAfterMeshAdaption( const std::vector<adaption::Info> &mapper ){
-    _clearAfterMeshAdaption( mapper ) ;
+void LevelSetObject::clearAfterMeshAdaption( const std::vector<adaption::Info> &adaptionData ){
+    _clearAfterMeshAdaption( adaptionData ) ;
 }
 
 /*!
  * Clears data structure after mesh modification
- * @param[in] mapper mapper describing mesh modifications
+ * @param[in] adaptionData are the information about the adaption
  */
-void LevelSetObject::_clearAfterMeshAdaption( const std::vector<adaption::Info> &mapper ){
-    BITPIT_UNUSED(mapper) ;
+void LevelSetObject::_clearAfterMeshAdaption( const std::vector<adaption::Info> &adaptionData ){
+    BITPIT_UNUSED(adaptionData) ;
 }
 
 /*! 

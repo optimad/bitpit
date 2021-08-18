@@ -807,10 +807,10 @@ void LevelSetSegmentation::computeNarrowBand(bool signd){
 
 /*!
  * Updates the levelset function within the narrow band after mesh adaptation.
- * @param[in] mapper information concerning mesh adaption 
+ * @param[in] adaptionData are the information about the adaption
  * @param[in] signd if signed- or unsigned- distance function should be calculated
  */
-void LevelSetSegmentation::updateNarrowBand( const std::vector<adaption::Info> &mapper, bool signd){
+void LevelSetSegmentation::updateNarrowBand( const std::vector<adaption::Info> &adaptionData, bool signd){
 
     log::cout() << "Updating levelset within the narrow band... " << std::endl;
     if( LevelSetCartesian* lsCartesian= dynamic_cast<LevelSetCartesian*>(m_kernelPtr) ){
@@ -822,7 +822,7 @@ void LevelSetSegmentation::updateNarrowBand( const std::vector<adaption::Info> &
     }
 
     if( LevelSetOctree* lsOctree = dynamic_cast<LevelSetOctree*>(m_kernelPtr) ){
-        updateNarrowBand( lsOctree, mapper, signd ) ;
+        updateNarrowBand( lsOctree, adaptionData, signd ) ;
         return;
     }
 
@@ -1091,10 +1091,10 @@ void LevelSetSegmentation::computeNarrowBand( LevelSetOctree *levelsetKernel, bo
  * evaluated only on the cells that intersect the surface and on all their
  * first neighbours.
  * @param[in] levelsetKernel the octree LevelSetKernel
- * @param[in] mapper the adaption mapper
+ * @param[in] adaptionData are the information about the adaption
  * @param[in] signd whether signed distance should be calculated
  */
-void LevelSetSegmentation::updateNarrowBand( LevelSetOctree *levelsetKernel, const std::vector<adaption::Info> &mapper, bool signd){
+void LevelSetSegmentation::updateNarrowBand( LevelSetOctree *levelsetKernel, const std::vector<adaption::Info> &adaptionData, bool signd){
 
     VolumeKernel &mesh = *(levelsetKernel->getMesh()) ;
     LevelSetSegmentationNarrowBandCache *narrowBandCache = getNarrowBandCache();
@@ -1106,19 +1106,19 @@ void LevelSetSegmentation::updateNarrowBand( LevelSetOctree *levelsetKernel, con
     // When searching for the segment associated to a cell, the search radius
     // is evaluated as the maximum value between the narroband size and the
     // distance above which the cell will surely not intersect the surface.
-    for( const auto &event : mapper ){
+    for( const adaption::Info &adaptionInfo : adaptionData ){
 
-        if( event.entity != adaption::Entity::ENTITY_CELL ){
+        if( adaptionInfo.entity != adaption::Entity::ENTITY_CELL ){
             continue;
         }
 
-        if( event.type == adaption::Type::TYPE_PARTITION_SEND){
+        if( adaptionInfo.type == adaption::Type::TYPE_PARTITION_SEND){
             continue;
-        } else if( event.type == adaption::Type::TYPE_PARTITION_RECV){
+        } else if( adaptionInfo.type == adaption::Type::TYPE_PARTITION_RECV){
             continue;
         }
 
-        for( long cellId : event.current ){
+        for( long cellId : adaptionInfo.current ){
 
             // Identify the segment associated with the cell
             //

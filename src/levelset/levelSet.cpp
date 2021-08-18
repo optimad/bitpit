@@ -660,13 +660,13 @@ void LevelSet::compute( const std::unordered_set<LevelSetObject *> &objectProces
  * Before being able to update the levelset, it has to be computed.
  * Levelset and associated information will be updated on both internal and
  * ghost cells.
- * @param[in] mapper mapper conatining mesh modifications
+ * @param[in] adaptionData are the information about the adaption
  */
-void LevelSet::update( const std::vector<adaption::Info> &mapper ){
+void LevelSet::update( const std::vector<adaption::Info> &adaptionData ){
 
     std::unordered_set<LevelSetObject *> objectProcessList = getObjectProcessList();
 
-    update(mapper, objectProcessList);
+    update(adaptionData, objectProcessList);
 
 }
 
@@ -677,14 +677,14 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
  * object will be updated as well.
  * Levelset and associated information will be updated on both internal and
  * ghost cells.
- * @param[in] mapper mapper conatining mesh modifications
+ * @param[in] adaptionData are the information about the adaption
  * @param[in] id identifier of object.
  */
-void LevelSet::update( const std::vector<adaption::Info> &mapper, int id){
+void LevelSet::update( const std::vector<adaption::Info> &adaptionData, int id){
 
     std::unordered_set<LevelSetObject *> objectProcessList = getObjectProcessList(1, &id);
 
-    update(mapper, objectProcessList);
+    update(adaptionData, objectProcessList);
 
 }
 
@@ -695,14 +695,14 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper, int id){
  * objects will be updated as well.
  * Levelset and associated information will be updated on both internal and
  * ghost cells.
- * @param[in] mapper mapper conatining mesh modifications
+ * @param[in] adaptionData are the information about the adaption
  * @param[in] ids identifiers of objects.
  */
-void LevelSet::update( const std::vector<adaption::Info> &mapper, const std::vector<int> &ids ){
+void LevelSet::update( const std::vector<adaption::Info> &adaptionData, const std::vector<int> &ids ){
 
     std::unordered_set<LevelSetObject *> objectProcessList = getObjectProcessList(ids.size(), ids.data());
 
-    update(mapper, objectProcessList);
+    update(adaptionData, objectProcessList);
 
 }
 
@@ -714,9 +714,9 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper, const std::vec
  * objects.
  * Levelset and associated information will be updated on both internal and
  * ghost cells.
- * @param[in] mapper mapper conatining mesh modifications
+ * @param[in] adaptionData are the information about the adaption
  */
-void LevelSet::update( const std::vector<adaption::Info> &mapper, const std::unordered_set<LevelSetObject *> &objectProcessList ){
+void LevelSet::update( const std::vector<adaption::Info> &adaptionData, const std::unordered_set<LevelSetObject *> &objectProcessList ){
 
     assert(m_kernel && "LevelSet::setMesh() must be called prior to LevelSet::partition()");
 
@@ -734,26 +734,26 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper, const std::uno
     }
 #endif
 
-    // Inspect mapper to detect what needs to be updated
+    // Inspect adaption data to detect what needs to be updated
     std::unordered_map<int,std::vector<long>> partitioningSendList ;
     std::unordered_map<int,std::vector<long>> partitioningRecvList ;
 
     bool updateNarrowBand   = false;
     bool updatePartitioning = false;
-    for( const auto &event : mapper){
-        if( event.entity != adaption::Entity::ENTITY_CELL){
+    for( const adaption::Info &adaptionInfo : adaptionData){
+        if( adaptionInfo.entity != adaption::Entity::ENTITY_CELL){
             continue;
         }
 
-        if( event.type == adaption::Type::TYPE_PARTITION_SEND){
-            partitioningSendList.insert({{event.rank,event.previous}}) ;
+        if( adaptionInfo.type == adaption::Type::TYPE_PARTITION_SEND){
+            partitioningSendList.insert({{adaptionInfo.rank,adaptionInfo.previous}}) ;
             updatePartitioning = true;
-        } else if( event.type == adaption::Type::TYPE_PARTITION_RECV){
-            partitioningRecvList.insert({{event.rank,event.current}}) ;
+        } else if( adaptionInfo.type == adaption::Type::TYPE_PARTITION_RECV){
+            partitioningRecvList.insert({{adaptionInfo.rank,adaptionInfo.current}}) ;
             updatePartitioning = true;
         } else {
             if (!updateNarrowBand) {
-                for (long cellId : event.current) {
+                for (long cellId : adaptionInfo.current) {
                     const Cell &cell = mesh->getCell(cellId);
                     if (cell.isInterior()) {
                         updateNarrowBand = true;
@@ -780,7 +780,7 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper, const std::uno
 #endif
 
     // Update kernel
-    m_kernel->updateGeometryCache( mapper ) ;
+    m_kernel->updateGeometryCache( adaptionData ) ;
 
     // Create sign propagator
     std::unique_ptr<LevelSetSignPropagator> signPropagator ;
@@ -817,7 +817,7 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper, const std::uno
         }
 
         // Clear data structures after mesh update
-        object->clearAfterMeshAdaption( mapper ) ;
+        object->clearAfterMeshAdaption( adaptionData ) ;
 
 #if BITPIT_ENABLE_MPI
         // Complete partitioning update
@@ -828,7 +828,7 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper, const std::uno
 
         // Update levelset inside narrow band
         if (updateNarrowBand) {
-            object->updateNarrowBand( mapper, m_signedDistance ) ;
+            object->updateNarrowBand( adaptionData, m_signedDistance ) ;
         }
 
 #if BITPIT_ENABLE_MPI
@@ -841,7 +841,7 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper, const std::uno
         // It's not possible to communicate sign information, therefore sign
         // needs to be propagated also when the mesh is only partitioned.
         if (signPropagationObject) {
-            signPropagator->execute(mapper, signPropagationObject);
+            signPropagator->execute(adaptionData, signPropagationObject);
         }
     }
 
@@ -850,11 +850,11 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper, const std::uno
 #if BITPIT_ENABLE_MPI
 /*!
  * Updates the levelset after mesh partitioning.
- * @param[in] mapper mapper conatining mesh modifications
+ * @param[in] adaptionData are the information about the adaption
  */
-void LevelSet::partition( const std::vector<adaption::Info> &mapper ){
+void LevelSet::partition( const std::vector<adaption::Info> &adaptionData ){
 
-    update ( mapper ) ;
+    update ( adaptionData ) ;
 
 }
 #endif
