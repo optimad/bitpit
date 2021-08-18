@@ -560,11 +560,60 @@ void LevelSet::setSizeNarrowBand(double r){
 
 /*!
  * Computes levelset on given mesh with respect to the objects.
- * This routines needs to be called at least once.
- * Each object should compute the levelset and associated
- * information on both internal and ghost cells.
+ * Levelset and associated information will be computed on both internal and
+ * ghost cells.
  */
 void LevelSet::compute(){
+
+    std::unordered_set<LevelSetObject *> objectProcessList = getObjectProcessList();
+
+    compute(objectProcessList);
+
+}
+
+/*!
+ * Computes levelset on given mesh with respect to the specified object.
+ * All source objects needed for evaluating the levelset on the specified
+ * object will be computed as well.
+ * Levelset and associated information will be computed on both internal and
+ * ghost cells.
+ * @param[in] id identifier of object.
+ */
+void LevelSet::compute( int id ){
+
+    std::unordered_set<LevelSetObject *> objectProcessList = getObjectProcessList(1, &id);
+
+    compute(objectProcessList);
+
+}
+
+/*!
+ * Computes levelset on given mesh with respect to the specified objects.
+ * All source objects needed for evaluating the levelset on the specified
+ * objects will be computed as well.
+ * Levelset and associated information will be computed on both internal and
+ * ghost cells.
+ * @param[in] ids identifiers of objects.
+ */
+void LevelSet::compute( const std::vector<int> &ids ){
+
+    std::unordered_set<LevelSetObject *> objectProcessList = getObjectProcessList(ids.size(), ids.data());
+
+    compute(objectProcessList);
+
+}
+
+/*!
+ * Computes levelset on given mesh with respect to the specified objects.
+ * Only the specified objects will be computed, it's up to the caller to
+ * provide an object process list that contains all the needed source
+ * objects.
+ * Levelset and associated information will be computed on both internal and
+ * ghost cells.
+ * @param[in] nObjects identifiers of objects.
+ * @param[in] objectIds identifiers of objects.
+ */
+void LevelSet::compute( const std::unordered_set<LevelSetObject *> &objectProcessList ){
 
     assert(m_kernel && "LevelSet::setMesh() must be called prior to LevelSet::compute()");
 
@@ -575,6 +624,9 @@ void LevelSet::compute(){
 
     for( int id : m_objectsProcessingOrder){
         LevelSetObject *object = m_objects.at(id).get() ;
+        if (objectProcessList.count(object) == 0) {
+            continue;
+        }
 
         LevelSetSignedObjectInterface *signPropagationObject;
         if (m_propagateSign) {
@@ -605,12 +657,66 @@ void LevelSet::compute(){
 
 /*!
  * Updates the levelset after a mesh update.
- * Each object should compute the levelset and associated
- * information on both internal and ghost cells.
- *
+ * Before being able to update the levelset, it has to be computed.
+ * Levelset and associated information will be updated on both internal and
+ * ghost cells.
  * @param[in] mapper mapper conatining mesh modifications
  */
 void LevelSet::update( const std::vector<adaption::Info> &mapper ){
+
+    std::unordered_set<LevelSetObject *> objectProcessList = getObjectProcessList();
+
+    update(mapper, objectProcessList);
+
+}
+
+/*!
+ * Computes levelset on given mesh with respect to the specified object.
+ * Before being able to update the levelset, it has to be computed.
+ * All source objects needed for evaluating the levelset on the specified
+ * object will be updated as well.
+ * Levelset and associated information will be updated on both internal and
+ * ghost cells.
+ * @param[in] mapper mapper conatining mesh modifications
+ * @param[in] id identifier of object.
+ */
+void LevelSet::update( const std::vector<adaption::Info> &mapper, int id){
+
+    std::unordered_set<LevelSetObject *> objectProcessList = getObjectProcessList(1, &id);
+
+    update(mapper, objectProcessList);
+
+}
+
+/*!
+ * Computes levelset on given mesh with respect to the specified objects.
+ * Before being able to update the levelset, it has to be computed.
+ * All source objects needed for evaluating the levelset on the specified
+ * objects will be updated as well.
+ * Levelset and associated information will be updated on both internal and
+ * ghost cells.
+ * @param[in] mapper mapper conatining mesh modifications
+ * @param[in] ids identifiers of objects.
+ */
+void LevelSet::update( const std::vector<adaption::Info> &mapper, const std::vector<int> &ids ){
+
+    std::unordered_set<LevelSetObject *> objectProcessList = getObjectProcessList(ids.size(), ids.data());
+
+    update(mapper, objectProcessList);
+
+}
+
+/*!
+ * Updates the levelset after a mesh update.
+ * Before being able to update the levelset, it has to be computed.
+ * Only the specified objects will be updated, it's up to the caller to
+ * provide an object process list that contains all the needed source
+ * objects.
+ * Levelset and associated information will be updated on both internal and
+ * ghost cells.
+ * @param[in] mapper mapper conatining mesh modifications
+ */
+void LevelSet::update( const std::vector<adaption::Info> &mapper, const std::unordered_set<LevelSetObject *> &objectProcessList ){
 
     assert(m_kernel && "LevelSet::setMesh() must be called prior to LevelSet::partition()");
 
@@ -685,6 +791,9 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
     // Update objects
     for( int id : m_objectsProcessingOrder){
         LevelSetObject *object = m_objects.at(id).get() ;
+        if (objectProcessList.count(object) == 0) {
+            continue;
+        }
 
         LevelSetSignedObjectInterface *signPropagationObject;
         if (m_propagateSign) {
@@ -749,6 +858,54 @@ void LevelSet::partition( const std::vector<adaption::Info> &mapper ){
 
 }
 #endif
+
+/*!
+ * Return the list of all objects that can be processed.
+ * @return the list of all objects that can be processed.
+ */
+std::unordered_set<LevelSetObject *> LevelSet::getObjectProcessList() const{
+
+    std::unordered_set<LevelSetObject *> objectProcessList;
+    for (const auto &entry : m_objects) {
+        objectProcessList.insert(entry.second.get()) ;
+    }
+
+    return objectProcessList;
+
+}
+
+/*!
+ * Return the list of objects that need to be processed in order to evaluate
+ * the levelset of the specified objects.
+ * The levelset of an objects may depend on the levelset of other objects,
+ * therefore to evaluate the levelset of the specified object it may be
+ * needed to process also other objects.
+ * @param[in] nObjects is the number of objects.
+ * @param[in] objectIds are the object identifiers.
+ * @return the list of objects that need to be processed in order to
+ * evaluate the lsevelset of the specified objects.
+ */
+std::unordered_set<LevelSetObject *> LevelSet::getObjectProcessList(std::size_t nObjects, const int *objectIds) const{
+
+    std::unordered_set<LevelSetObject *> objectProcessList;
+    for (std::size_t i = 0; i < nObjects; ++i) {
+        int objectId = objectIds[i] ;
+        LevelSetObject *object = getObjectPtr(objectId) ;
+        if (objectProcessList.count(object) != 0) {
+            continue;
+        }
+
+        objectProcessList.insert(object);
+        if( const LevelSetProxyObject *proxyObject = dynamic_cast<const LevelSetProxyObject*>(object) ){
+            std::vector<int> sourceObjectIds = proxyObject->getSourceObjectIds();
+            std::unordered_set<LevelSetObject *> sourceObjectProcessList = getObjectProcessList(sourceObjectIds.size(), sourceObjectIds.data()) ;
+            objectProcessList.insert(sourceObjectProcessList.begin(), sourceObjectProcessList.end());
+        }
+    }
+
+    return objectProcessList;
+
+}
 
 /*! 
  * Writes LevelSetKernel to stream in binary format

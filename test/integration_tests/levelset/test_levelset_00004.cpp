@@ -144,7 +144,6 @@ int subtest_001()
     // Set levelset configuration
     bitpit::LevelSet levelset;
 
-    std::vector<bitpit::adaption::Info> mapper ;
     int id0, id1, id2, id3, id4, id5;
 
     levelset.setMesh(&mesh) ;
@@ -215,6 +214,12 @@ int subtest_001()
         bitpit::log::cout() << "Wrong reference count for object 5." << std::endl;
         return 1;
     }
+
+    // Compute the levelset
+    levelset.compute( ids );
+
+    bitpit::log::cout() << " - Exporting data" << std::endl;
+    mesh.write() ;
 
     // Test deletion of objects
     bool deleted;
