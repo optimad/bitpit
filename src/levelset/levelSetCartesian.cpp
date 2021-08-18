@@ -128,9 +128,9 @@ void LevelSetCartesian::clearGeometryCache(  ) {
 /*!
  * Updates the geometry cache after an adaption.
  */
-void LevelSetCartesian::updateGeometryCache( const std::vector<adaption::Info> &mapper ) {
+void LevelSetCartesian::updateGeometryCache( const std::vector<adaption::Info> &adaptionData ) {
 
-    LevelSetKernel::updateGeometryCache(mapper);
+    LevelSetKernel::updateGeometryCache(adaptionData);
 
     updateCellCirclesCache();
 

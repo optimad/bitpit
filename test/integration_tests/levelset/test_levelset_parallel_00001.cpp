@@ -95,7 +95,7 @@ int subtest_001(int rank)
     std::chrono::time_point<std::chrono::system_clock>    start, end;
     int elapsed_init, elapsed_part, elapsed_refi(0);
 
-    std::vector<bitpit::adaption::Info> mapper ;
+    std::vector<bitpit::adaption::Info> adaptionData ;
 
     levelset.setMesh(&mesh) ;
     levelset.setPropagateSign(true);
@@ -117,9 +117,9 @@ int subtest_001(int rank)
     // Partition the mesh over available processes
     start = std::chrono::system_clock::now();
 
-    mapper = mesh.partition(true) ;
+    adaptionData = mesh.partition(true) ;
 
-    levelset.update(mapper) ;
+    levelset.update(adaptionData) ;
 
     end = std::chrono::system_clock::now();
     elapsed_part = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
@@ -145,9 +145,9 @@ int subtest_001(int rank)
             }
         }
 
-        mapper = mesh.update(true) ;
+        adaptionData = mesh.update(true) ;
         start = std::chrono::system_clock::now();
-        levelset.update(mapper) ;
+        levelset.update(adaptionData) ;
         end = std::chrono::system_clock::now();
 
         elapsed_refi += std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
