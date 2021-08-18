@@ -792,15 +792,15 @@ void LevelSetSegmentation::getGlobalBoundingBox( std::array<double,3> &minP, std
  * Computes the levelset function within the narrow band
  * @param[in] signd if signed- or unsigned- distance function should be calculated
  */
-void LevelSetSegmentation::computeLSInNarrowBand(bool signd){
+void LevelSetSegmentation::computeNarrowBand(bool signd){
 
     log::cout() << "Computing levelset within the narrow band... " << std::endl;
 
     if( LevelSetCartesian* lsCartesian = dynamic_cast<LevelSetCartesian*>(m_kernelPtr) ){
-        computeLSInNarrowBand( lsCartesian, signd) ;
+        computeNarrowBand( lsCartesian, signd) ;
 
     } else if ( LevelSetOctree* lsOctree = dynamic_cast<LevelSetOctree*>(m_kernelPtr) ){
-        computeLSInNarrowBand( lsOctree, signd) ;
+        computeNarrowBand( lsOctree, signd) ;
 
     }
 }
@@ -810,19 +810,19 @@ void LevelSetSegmentation::computeLSInNarrowBand(bool signd){
  * @param[in] mapper information concerning mesh adaption 
  * @param[in] signd if signed- or unsigned- distance function should be calculated
  */
-void LevelSetSegmentation::updateLSInNarrowBand( const std::vector<adaption::Info> &mapper, bool signd){
+void LevelSetSegmentation::updateNarrowBand( const std::vector<adaption::Info> &mapper, bool signd){
 
     log::cout() << "Updating levelset within the narrow band... " << std::endl;
     if( LevelSetCartesian* lsCartesian= dynamic_cast<LevelSetCartesian*>(m_kernelPtr) ){
 
         // Update is not implemented for Cartesian patches
         clear( ) ;
-        computeLSInNarrowBand( lsCartesian, signd) ;
+        computeNarrowBand( lsCartesian, signd) ;
         return;
     }
 
     if( LevelSetOctree* lsOctree = dynamic_cast<LevelSetOctree*>(m_kernelPtr) ){
-        updateLSInNarrowBand( lsOctree, mapper, signd ) ;
+        updateNarrowBand( lsOctree, mapper, signd ) ;
         return;
     }
 
@@ -839,7 +839,7 @@ void LevelSetSegmentation::updateLSInNarrowBand( const std::vector<adaption::Inf
  * @param[in] levelsetKernel the octree LevelSetKernel
  * @param[in] signd whether signed distance should be calculated
  */
-void LevelSetSegmentation::computeLSInNarrowBand( LevelSetCartesian *levelsetKernel, bool signd){
+void LevelSetSegmentation::computeNarrowBand( LevelSetCartesian *levelsetKernel, bool signd){
 
     log::cout() << " Compute levelset on cartesian mesh"  << std::endl;
 
@@ -973,7 +973,7 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetCartesian *levelsetKer
  * \param[in] levelsetKernel the octree LevelSetKernel
  * \param[in] signd whether signed distance should be calculated
  */
-void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *levelsetKernel, bool signd){
+void LevelSetSegmentation::computeNarrowBand( LevelSetOctree *levelsetKernel, bool signd){
 
     VolumeKernel &mesh = *(levelsetKernel->getMesh()) ;
 
@@ -1094,7 +1094,7 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *levelsetKernel
  * @param[in] mapper the adaption mapper
  * @param[in] signd whether signed distance should be calculated
  */
-void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *levelsetKernel, const std::vector<adaption::Info> &mapper, bool signd){
+void LevelSetSegmentation::updateNarrowBand( LevelSetOctree *levelsetKernel, const std::vector<adaption::Info> &mapper, bool signd){
 
     VolumeKernel &mesh = *(levelsetKernel->getMesh()) ;
     LevelSetSegmentationNarrowBandCache *narrowBandCache = getNarrowBandCache();
