@@ -79,6 +79,9 @@ class LevelSetBoolean: public LevelSetProxyObject {
     void                                        _dump( std::ostream &) override;
     void                                        _restore( std::istream &) override;
 
+    void                                        computeLSInNarrowBand(bool) override;
+    void                                        updateLSInNarrowBand(const std::vector<adaption::Info> &, bool) override;
+
     public:
     LevelSetBoolean(int, LevelSetBooleanOperation, const LevelSetObject*, const LevelSetObject*);
     LevelSetBoolean(int, LevelSetBooleanOperation, const std::vector<const LevelSetObject*> &);
@@ -99,9 +102,6 @@ class LevelSetBoolean: public LevelSetProxyObject {
 
     double                                      getMinSurfaceFeatureSize() const override;
     double                                      getMaxSurfaceFeatureSize() const override;
-
-    void                                        computeLSInNarrowBand(bool) override;
-    void                                        updateLSInNarrowBand(const std::vector<adaption::Info> &, bool) override;
 
     const LevelSetObject *                      getReferenceObject( long ) const override;
 
