@@ -241,6 +241,25 @@ LevelSetInfo LevelSetBoolean::computeLevelSetInfo( const std::array<double,3> &c
 }
 
 /*!
+ * Replace a source object.
+ * @param[in] current current source object
+ * @param[in] updated updated source object
+ */
+void LevelSetBoolean::replaceSourceObject(const LevelSetObject *current, const LevelSetObject *updated){
+
+    std::size_t nSources = m_sourceObjects.size();
+    for (std::size_t i = 0; i < nSources; ++i) {
+        const LevelSetObject *source = m_sourceObjects[i];
+        if (source == current) {
+            m_sourceObjects[i] = updated;
+            return;
+        }
+    }
+
+    throw std::runtime_error("Unable to find the source that should be replaced.");
+}
+
+/*!
  * Writes LevelSetBoolean to stream in binary format
  * @param[in] stream output stream
  */
