@@ -81,9 +81,6 @@ class LevelSetBooleanObject: public LevelSetProxyObject {
     void                                        _dump( std::ostream &) override;
     void                                        _restore( std::istream &) override;
 
-    void                                        computeNarrowBand(bool) override;
-    void                                        updateNarrowBand(const std::vector<adaption::Info> &, bool) override;
-
     public:
     LevelSetBooleanObject(int, LevelSetBooleanOperation, const LevelSetObject*, const LevelSetObject*);
     LevelSetBooleanObject(int, LevelSetBooleanOperation, const std::vector<const LevelSetObject*> &);
