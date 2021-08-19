@@ -257,7 +257,7 @@ std::shared_ptr<LevelSetNarrowBandCache> LevelSetImmutableObject::createNarrowBa
  */
 std::shared_ptr<LevelSetSignStorage> LevelSetImmutableObject::createSignStorage()
 {
-    VolumeKernel *mesh = m_kernelPtr->getMesh();
+    VolumeKernel *mesh = m_kernel->getMesh();
     assert(mesh);
     return std::shared_ptr<LevelSetSignStorage>(new LevelSetSignStorage(&(mesh->getCells())));
 }

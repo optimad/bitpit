@@ -779,8 +779,8 @@ void LevelSetSegmentationObject::getBoundingBox( std::array<double,3> &minP, std
 void LevelSetSegmentationObject::getGlobalBoundingBox( std::array<double,3> &minP, std::array<double,3> &maxP ) const {
     getBoundingBox(minP, maxP);
 
-    if (m_kernelPtr->getMesh()->isPartitioned()) {
-        MPI_Comm communicator = m_kernelPtr->getCommunicator();
+    if (m_kernel->getMesh()->isPartitioned()) {
+        MPI_Comm communicator = m_kernel->getCommunicator();
 
         MPI_Allreduce(MPI_IN_PLACE, minP.data(), 3, MPI_DOUBLE, MPI_MIN, communicator);
         MPI_Allreduce(MPI_IN_PLACE, maxP.data(), 3, MPI_DOUBLE, MPI_MAX, communicator);
@@ -796,10 +796,10 @@ void LevelSetSegmentationObject::computeNarrowBand(bool signd){
 
     log::cout() << "Computing levelset within the narrow band... " << std::endl;
 
-    if( LevelSetCartesianKernel* lsCartesian = dynamic_cast<LevelSetCartesianKernel*>(m_kernelPtr) ){
+    if( LevelSetCartesianKernel* lsCartesian = dynamic_cast<LevelSetCartesianKernel*>(m_kernel) ){
         computeNarrowBand( lsCartesian, signd) ;
 
-    } else if ( LevelSetOctreeKernel* lsOctree = dynamic_cast<LevelSetOctreeKernel*>(m_kernelPtr) ){
+    } else if ( LevelSetOctreeKernel* lsOctree = dynamic_cast<LevelSetOctreeKernel*>(m_kernel) ){
         computeNarrowBand( lsOctree, signd) ;
 
     }
@@ -813,7 +813,7 @@ void LevelSetSegmentationObject::computeNarrowBand(bool signd){
 void LevelSetSegmentationObject::updateNarrowBand( const std::vector<adaption::Info> &adaptionData, bool signd){
 
     log::cout() << "Updating levelset within the narrow band... " << std::endl;
-    if( LevelSetCartesianKernel* lsCartesian= dynamic_cast<LevelSetCartesianKernel*>(m_kernelPtr) ){
+    if( LevelSetCartesianKernel* lsCartesian= dynamic_cast<LevelSetCartesianKernel*>(m_kernel) ){
 
         // Update is not implemented for Cartesian patches
         clear( ) ;
@@ -821,7 +821,7 @@ void LevelSetSegmentationObject::updateNarrowBand( const std::vector<adaption::I
         return;
     }
 
-    if( LevelSetOctreeKernel* lsOctree = dynamic_cast<LevelSetOctreeKernel*>(m_kernelPtr) ){
+    if( LevelSetOctreeKernel* lsOctree = dynamic_cast<LevelSetOctreeKernel*>(m_kernel) ){
         updateNarrowBand( lsOctree, adaptionData, signd ) ;
         return;
     }
@@ -857,7 +857,7 @@ void LevelSetSegmentationObject::computeNarrowBand( LevelSetCartesianKernel *lev
     // the narrow band size is equal or less than zero, the levelset will be
     // evaluated on the cells that intersect the surface and on all their
     // first neighbours.
-    double searchRadius = std::max(m_narrowBand, 2 * levelsetKernel->getCellCircumcircle());
+    double searchRadius = std::max(m_narrowBandSize, 2 * levelsetKernel->getCellCircumcircle());
 
     // Define mesh bounding box
     //
@@ -998,7 +998,7 @@ void LevelSetSegmentationObject::computeNarrowBand( LevelSetOctreeKernel *levels
         const std::array<double,3> &cellCentroid = levelsetKernel->computeCellCentroid(cellId);
         double cellCircumcircle = levelsetKernel->computeCellCircumcircle(cellId);
 
-        double searchRadius = std::max(m_narrowBand, cellCircumcircle);
+        double searchRadius = std::max(m_narrowBandSize, cellCircumcircle);
 
         long segmentId;
         double distance;
@@ -1024,7 +1024,7 @@ void LevelSetSegmentationObject::computeNarrowBand( LevelSetOctreeKernel *levels
         // intersects the surface because only cells that intersect the surface
         // are considered, otherwise we need to check if the absolute distance
         // associated with the cell is lower than the intersection distance.
-        if (m_narrowBand < 0 || cellCircumcircle < std::abs(distance)) {
+        if (m_narrowBandSize < 0 || cellCircumcircle < std::abs(distance)) {
             intersectedCells.insert(cellId);
         }
 
@@ -1132,7 +1132,7 @@ void LevelSetSegmentationObject::updateNarrowBand( LevelSetOctreeKernel *levelse
             // If no segment is identified the cell is not processed.
             const std::array<double,3> &centroid = levelsetKernel->computeCellCentroid(cellId);
 
-            double searchRadius = std::max(m_narrowBand, levelsetKernel->computeCellCircumcircle(cellId));
+            double searchRadius = std::max(m_narrowBandSize, levelsetKernel->computeCellCircumcircle(cellId));
 
             long segmentId;
             double distance;
