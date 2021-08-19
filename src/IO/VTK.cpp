@@ -330,6 +330,22 @@ void VTK::removeData( const std::string &name ){
 }
 
 /*!
+ * Check if the VTK contains the specified user data
+ * @param[in] name name of field
+ */
+bool VTK::hasData( const std::string &name ) const {
+
+    for ( const VTKField &field : m_data ) {
+        if( field.getName() == name){
+            return true;
+        }
+    }
+
+    return false;
+
+}
+
+/*!
  * Enables field for reading and writing
  * @param[in] name name of field to be enabled
  */
