@@ -22,11 +22,11 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_LEVELSET_IMMUTABLE_HPP__
-#define __BITPIT_LEVELSET_IMMUTABLE_HPP__
+#ifndef __BITPIT_LEVELSET_IMMUTABLE_OBJECT_HPP__
+#define __BITPIT_LEVELSET_IMMUTABLE_OBJECT_HPP__
 
 #include "levelSetObject.hpp"
-#include "levelSetBoolean.hpp"
+#include "levelSetBooleanObject.hpp"
 #include "levelSetCachedObject.hpp"
 #include "levelSetSignedObject.hpp"
 
@@ -37,7 +37,7 @@ class LevelSetImmutableObject : public LevelSetObject, public LevelSetCachedObje
 
 public:
     LevelSetImmutableObject(LevelSetCachedObject *object);
-    LevelSetImmutableObject(LevelSetBoolean *object);
+    LevelSetImmutableObject(LevelSetBooleanObject *object);
 
     LevelSetImmutableObject * clone() const override;
 

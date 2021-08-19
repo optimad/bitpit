@@ -22,35 +22,45 @@
  *
 \*---------------------------------------------------------------------------*/
 
-# include "bitpit_voloctree.hpp"
+# include "bitpit_volcartesian.hpp"
 # include "bitpit_CG.hpp"
+
 # include "levelSetKernel.hpp"
-# include "levelSetOctree.hpp"
+# include "levelSetCartesianKernel.hpp"
 
 namespace bitpit {
 
 /*!
- *  @ingroup    levelset
- *  @class      LevelSetOctree
- *  @brief      Implements LevelSetKernel for octree meshes
- */
+	@ingroup    levelset
+	@class      LevelSetCartesianKernel
+	@brief      Implements LevelSetKernel for cartesian meshes
+*/
 
 /*!
  * Constructor
  */
-LevelSetOctree::LevelSetOctree(VolOctree & patch ): LevelSetKernel( (static_cast<VolumeKernel*>(&patch)) ){
-    m_octree = &patch ;
+LevelSetCartesianKernel::LevelSetCartesianKernel(VolCartesian &patch ): LevelSetKernel( (static_cast<VolumeKernel*>(&patch)) ){
+    m_cartesian = &patch ;
 
     clearCellCirclesCache();
     updateCellCirclesCache();
 }
 
 /*!
- * Returns a pointer to VolOctree
- * @return pointer to VolOctree
+ * Returns a pointer to VolCartesian
+ * @return pointer to VolCartesian
  */
-VolOctree* LevelSetOctree::getOctreeMesh() const{
-    return m_octree ;
+VolCartesian* LevelSetCartesianKernel::getCartesianMesh() const{
+    return m_cartesian ;
+}
+
+/*!
+ * Get the radius of the incircle of the cells.
+ * @return radius of incircle
+ */
+double LevelSetCartesianKernel::getCellIncircle() const {
+
+    return m_cellIncircle;
 }
 
 /*!
@@ -58,9 +68,20 @@ VolOctree* LevelSetOctree::getOctreeMesh() const{
  * @param[in] id is the index of cell
  * @return radius of incircle
  */
-double LevelSetOctree::computeCellIncircle(long id) const {
-    int cellLevel = m_octree->getCellLevel(id);
-    return m_levelToCellIncircle[cellLevel];
+double LevelSetCartesianKernel::computeCellIncircle(long id) const {
+
+    BITPIT_UNUSED(id);
+
+    return getCellIncircle();
+}
+
+/*!
+ * Get the radius of the circumcircle of the cells.
+ * @return radius of circumcircle
+ */
+double LevelSetCartesianKernel::getCellCircumcircle() const {
+
+    return m_cellCircumcircle;
 }
 
 /*!
@@ -68,9 +89,11 @@ double LevelSetOctree::computeCellIncircle(long id) const {
  * @param[in] id is the index of cell
  * @return radius of incircle
  */
-double LevelSetOctree::computeCellCircumcircle( long id ) const {
-    int cellLevel = m_octree->getCellLevel(id);
-    return m_levelToCellCircumcircle[cellLevel];
+double LevelSetCartesianKernel::computeCellCircumcircle( long id ) const {
+
+    BITPIT_UNUSED(id);
+
+    return getCellCircumcircle();
 }
 
 /*!
@@ -81,20 +104,20 @@ double LevelSetOctree::computeCellCircumcircle( long id ) const {
  * @param[in] tolerance is the tolerance used for distance comparisons
  * @return true if intersect
  */
-bool LevelSetOctree::intersectCellPlane( long id, const std::array<double,3> &root, const std::array<double,3> &normal, double tolerance ) {
+bool LevelSetCartesianKernel::intersectCellPlane( long id, const std::array<double,3> &root, const std::array<double,3> &normal, double tolerance ) {
 
     std::array<double,3> minPoint;
     std::array<double,3> maxPoint;
-    m_octree->evalCellBoundingBox(id, &minPoint, &maxPoint);
+    m_cartesian->evalCellBoundingBox(id, &minPoint, &maxPoint);
 
-    int dim = m_octree->getDimension();
+    int dim = m_cartesian->getDimension();
     return CGElem::intersectPlaneBox( root, normal, minPoint, maxPoint, dim, tolerance);
 }
 
 /*!
  * Clears the geometry cache.
  */
-void LevelSetOctree::clearGeometryCache(  ) {
+void LevelSetCartesianKernel::clearGeometryCache(  ) {
 
     LevelSetKernel::clearGeometryCache();
 
@@ -105,7 +128,7 @@ void LevelSetOctree::clearGeometryCache(  ) {
 /*!
  * Updates the geometry cache after an adaption.
  */
-void LevelSetOctree::updateGeometryCache( const std::vector<adaption::Info> &adaptionData ) {
+void LevelSetCartesianKernel::updateGeometryCache( const std::vector<adaption::Info> &adaptionData ) {
 
     LevelSetKernel::updateGeometryCache(adaptionData);
 
@@ -116,29 +139,29 @@ void LevelSetOctree::updateGeometryCache( const std::vector<adaption::Info> &ada
 /*!
  * Clears the cache that hold information about cell incircle and circumcircle.
  */
-void LevelSetOctree::clearCellCirclesCache(  ) {
+void LevelSetCartesianKernel::clearCellCirclesCache(  ) {
 
-    m_levelToCellIncircle.clear();
-    m_levelToCellCircumcircle.clear();
+    m_cellIncircle     = 0.;
+    m_cellCircumcircle = 0.;
 
 }
 
 /*!
  * Updates the cache that hold information about cell incircle and circumcircle.
  */
-void LevelSetOctree::updateCellCirclesCache(  ) {
+void LevelSetCartesianKernel::updateCellCirclesCache(  ) {
 
-    int dimension = m_octree->getDimension();
-    int maxLevel  = m_octree->getTree().getMaxLevel();
+    int dimension = m_cartesian->getDimension();
+    std::array<double,3> spacing = m_cartesian->getSpacing();
 
-    m_levelToCellIncircle.resize(maxLevel + 1);
-    m_levelToCellCircumcircle.resize(maxLevel + 1);
-    for (int level = 0; level <= maxLevel; ++level) {
-        double levelSize = m_octree->getTree().levelToSize(level);
-
-        m_levelToCellIncircle[level]     = 0.5 * levelSize;
-        m_levelToCellCircumcircle[level] = 0.5 * std::sqrt(dimension) * levelSize;
+    m_cellIncircle     = std::numeric_limits<double>::max();
+    m_cellCircumcircle = 0.;
+    for(int i=0; i<dimension; ++i){
+        m_cellIncircle      = std::min(m_cellIncircle, spacing[i]);
+        m_cellCircumcircle += spacing[i] * spacing[i];
     }
+    m_cellIncircle     = 0.5 * m_cellIncircle;
+    m_cellCircumcircle = 0.5 * std::sqrt(m_cellCircumcircle);
 
 }
 }

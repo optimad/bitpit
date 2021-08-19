@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-# ifndef __BITPIT_LEVELSET_MASK_HPP__
-# define __BITPIT_LEVELSET_MASK_HPP__
+# ifndef __BITPIT_LEVELSET_MASK_OBJECT_HPP__
+# define __BITPIT_LEVELSET_MASK_OBJECT_HPP__
 
 // Standard Template Library
 # include <vector>
@@ -33,9 +33,9 @@ namespace bitpit{
 
 class PatchKernel;
 class SurfUnstructured;
-class LevelSetSegmentation;
+class LevelSetSegmentationObject;
 
-class LevelSetMask : public LevelSetSegmentation {
+class LevelSetMaskObject : public LevelSetSegmentationObject {
 
     private:
     std::unique_ptr<SurfUnstructured> extractCellEnvelope(const std::unordered_set<long> &, const VolumeKernel &, std::unordered_map<long,long> &);
@@ -44,9 +44,12 @@ class LevelSetMask : public LevelSetSegmentation {
 
 
     public:
-    LevelSetMask(int, const std::unordered_set<long> &, const VolumeKernel &);
-    LevelSetMask(int, const std::vector<long> &, long, bool, const VolumeKernel &);
+    LevelSetMaskObject(int, const std::unordered_set<long> &, const VolumeKernel &);
+    LevelSetMaskObject(int, const std::vector<long> &, long, bool, const VolumeKernel &);
 };
+
+// Typdefs for compatibility with older versions
+typedef LevelSetMaskObject LevelSetMask;
 
 }
 
