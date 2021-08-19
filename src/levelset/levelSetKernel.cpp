@@ -29,6 +29,7 @@
 
 # include "levelSetObject.hpp"
 # include "levelSetKernel.hpp"
+# include "levelSetSignPropagator.hpp"
 
 namespace bitpit {
 
@@ -318,5 +319,18 @@ std::unique_ptr<DataCommunicator> LevelSetKernel::createDataCommunicator( ) cons
 }
 
 #endif
+
+/*!
+    Create the sign propagator.
+
+    The sign propagator allow to propagate the levelset sign from the narrow
+    band to the rest of the domain.
+
+    \result The newlycreated sign propagator.
+*/
+std::unique_ptr<LevelSetSignPropagator> LevelSetKernel::createSignPropagator( ) const {
+
+    return std::unique_ptr<LevelSetSignPropagator>(new LevelSetSignPropagator(getMesh())) ;
+}
 
 }
