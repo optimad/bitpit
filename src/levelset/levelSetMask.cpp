@@ -199,7 +199,7 @@ std::unique_ptr<SurfUnstructured> LevelSetMask::extractFaceEnvelope(const std::v
         // Add face to envelope
         ElementType faceType = interface.getType();
         PatchKernel::CellIterator cellItr = envelope->addCell(faceType, std::move(faceEnvelopeConnect));
-        meshToEnvelope.insert({{faceIndex,cellItr->getId()}});
+        meshToEnvelope.insert({{faceIndex,cellItr.getId()}});
 	}
 
     envelope->squeeze();
