@@ -48,6 +48,46 @@ LevelSetObject::LevelSetObject(int id) : m_nReferences(0), m_kernelPtr(nullptr),
 }
 
 /*!
+ * Copy constructor
+ * @param[in] other is another object whose content is copied in this object
+ */
+LevelSetObject::LevelSetObject(const LevelSetObject &other)
+    : m_id(other.m_id),
+      m_nReferences(other.m_nReferences),
+      m_enabledVTKOutputs(other.m_enabledVTKOutputs),
+      m_narrowBand(other.m_narrowBand)
+{
+    setKernel(other.m_kernelPtr);
+}
+
+/*!
+ * Move constructor
+ * @param[in] other is another object whose content is copied in this object
+ */
+LevelSetObject::LevelSetObject(LevelSetObject &&other)
+    : m_id(other.m_id),
+      m_nReferences(other.m_nReferences),
+      m_enabledVTKOutputs(other.m_enabledVTKOutputs),
+      m_narrowBand(other.m_narrowBand)
+{
+    for ( LevelSetWriteField field : other.m_enabledVTKOutputs ) {
+        other.enableVTKOutput(field, false);
+    }
+
+    setKernel(other.m_kernelPtr);
+}
+
+/*!
+ * Destructor.
+ */
+LevelSetObject::~LevelSetObject() {
+    // Disable all output for the object
+    if (m_kernelPtr) {
+        enableVTKOutput(LevelSetWriteField::ALL, false);
+    }
+}
+
+/*!
  * Sets the identifier of object
  * @param[in] id is the identifier
  */
@@ -94,6 +134,10 @@ std::size_t LevelSetObject::getReferenceCount() const {
  */
 void LevelSetObject::setKernel(LevelSetKernel *kernel) {
     m_kernelPtr = kernel;
+
+    for ( LevelSetWriteField field : m_enabledVTKOutputs ) {
+        enableVTKOutput( field, true ) ;
+    }
 }
 
 /*!
@@ -408,8 +452,20 @@ void LevelSetObject::_clear( ){
  * @param[in] stream output stream
  */
 void LevelSetObject::dump( std::ostream &stream ){
+    // Identifier
     utils::binary::write(stream, m_id) ;
+
+    // Narroband size
     utils::binary::write(stream, m_narrowBand);
+
+    // Enabled VTK outputs
+    std::size_t nEnabledVTKOutputs = m_enabledVTKOutputs.size() ;
+    utils::binary::write(stream, nEnabledVTKOutputs) ;
+    for (LevelSetWriteField field : m_enabledVTKOutputs) {
+        utils::binary::write(stream, field) ;
+    }
+
+    // Additional information
     _dump(stream) ;
 }
 
@@ -426,8 +482,22 @@ void LevelSetObject::_dump( std::ostream &stream ){
  * @param[in] stream output stream
  */
 void LevelSetObject::restore( std::istream &stream ){
+    // Identifier
     utils::binary::read(stream, m_id) ;
+
+    // Narroband size
     utils::binary::read(stream, m_narrowBand);
+
+    // Enabled VTK outputs
+    std::size_t nEnabledVTKOutputs ;
+    utils::binary::read(stream, nEnabledVTKOutputs) ;
+    for (std::size_t i = 0; i < nEnabledVTKOutputs; ++i) {
+        LevelSetWriteField field ;
+        utils::binary::read(stream, field) ;
+        m_enabledVTKOutputs.insert(field) ;
+    }
+
+    // Additional information
     _restore(stream) ;
 }
 
@@ -469,52 +539,77 @@ void LevelSetObject::enableVTKOutput( LevelSetWriteField fieldset, const std::st
         fields.push_back(fieldset);
     }
 
-    for( LevelSetWriteField &field : fields){
+    VTK &vtkWriter = m_kernelPtr->getMesh()->getVTK() ;
+    for( const LevelSetWriteField &field : fields){
+        // Update the list of enabled VTK outputs
+        if (enable) {
+            m_enabledVTKOutputs.insert(field) ;
+        } else {
+            m_enabledVTKOutputs.erase(field) ;
+        }
 
-        std::stringstream name;
-        name << "levelset";
 
+        // Get name of the field
+        std::stringstream nameStream;
+        nameStream << "levelset";
         switch(field){
+
             case LevelSetWriteField::VALUE:
-                name << "Value_" << objectName;
-                if(enable){
-                    m_kernelPtr->getMesh()->getVTK().addData<double>( name.str(), VTKFieldType::SCALAR, VTKLocation::CELL, this);
-                } else {
-                    m_kernelPtr->getMesh()->getVTK().removeData( name.str());
-                }
+                nameStream << "Value_" << objectName;
                 break;
 
             case LevelSetWriteField::GRADIENT:
-                name << "Gradient_" << objectName;
-                if(enable){
-                    m_kernelPtr->getMesh()->getVTK().addData<double>( name.str(), VTKFieldType::VECTOR, VTKLocation::CELL, this);
-                } else {
-                    m_kernelPtr->getMesh()->getVTK().removeData( name.str());
-                }
+                nameStream << "Gradient_" << objectName;
                 break;
 
             case LevelSetWriteField::NORMAL:
-                name << "Normal_" << objectName;
-                if(enable){
-                    m_kernelPtr->getMesh()->getVTK().addData<double>( name.str(), VTKFieldType::VECTOR, VTKLocation::CELL, this);
-                } else {
-                    m_kernelPtr->getMesh()->getVTK().removeData( name.str());
-                }
+                nameStream << "Normal_" << objectName;
                 break;
 
             case LevelSetWriteField::PART:
-                name << "PartId_" << objectName;
-                if(enable){
-                    m_kernelPtr->getMesh()->getVTK().addData<int>( name.str(), VTKFieldType::SCALAR, VTKLocation::CELL, this);
-                } else {
-                    m_kernelPtr->getMesh()->getVTK().removeData( name.str());
-                }
+                nameStream << "PartId_" << objectName;
                 break;
 
             default:
+                std::cout << " field " << (int) field << std::endl;
                 throw std::runtime_error ("Unsupported value of field in LevelSetObject::addDataToVTK() ");
                 break;
+        }
 
+        std::string name = nameStream.str();
+
+        // Check if the state of the filed is already the requested one
+        if (enable == vtkWriter.hasData(name)) {
+            continue;
+        }
+
+        // Process the field
+        if (!enable) {
+            vtkWriter.removeData( name);
+        } else {
+            switch(field){
+
+                case LevelSetWriteField::VALUE:
+                    vtkWriter.addData<double>( name, VTKFieldType::SCALAR, VTKLocation::CELL, this);
+                    break;
+
+                case LevelSetWriteField::GRADIENT:
+                    vtkWriter.addData<double>( name, VTKFieldType::VECTOR, VTKLocation::CELL, this);
+                    break;
+
+                case LevelSetWriteField::NORMAL:
+                    vtkWriter.addData<double>( name, VTKFieldType::VECTOR, VTKLocation::CELL, this);
+                    break;
+
+                case LevelSetWriteField::PART:
+                    vtkWriter.addData<int>( name, VTKFieldType::SCALAR, VTKLocation::CELL, this);
+                    break;
+
+                default:
+                    throw std::runtime_error ("Unsupported value of field in LevelSetObject::addDataToVTK() ");
+                    break;
+
+            }
         }
     }
 
