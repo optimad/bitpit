@@ -43,7 +43,7 @@ namespace bitpit {
  * Constructor
  * @param[in] id id assigned to object
  */
-LevelSetObject::LevelSetObject(int id) : m_nReferences(0), m_kernelPtr(nullptr), m_narrowBand(levelSetDefaults::NARROWBAND_SIZE) {
+LevelSetObject::LevelSetObject(int id) : m_nReferences(0), m_kernel(nullptr), m_narrowBandSize(levelSetDefaults::NARROWBAND_SIZE) {
     setId(id);
 }
 
@@ -55,9 +55,9 @@ LevelSetObject::LevelSetObject(const LevelSetObject &other)
     : m_id(other.m_id),
       m_nReferences(other.m_nReferences),
       m_writtenFiedsVTK(other.m_writtenFiedsVTK),
-      m_narrowBand(other.m_narrowBand)
+      m_narrowBandSize(other.m_narrowBandSize)
 {
-    setKernel(other.m_kernelPtr);
+    setKernel(other.m_kernel);
 }
 
 /*!
@@ -68,13 +68,13 @@ LevelSetObject::LevelSetObject(LevelSetObject &&other)
     : m_id(other.m_id),
       m_nReferences(other.m_nReferences),
       m_writtenFiedsVTK(other.m_writtenFiedsVTK),
-      m_narrowBand(other.m_narrowBand)
+      m_narrowBandSize(other.m_narrowBandSize)
 {
     for ( LevelSetWriteField field : other.m_writtenFiedsVTK ) {
         other.enableVTKOutput(field, false);
     }
 
-    setKernel(other.m_kernelPtr);
+    setKernel(other.m_kernel);
 }
 
 /*!
@@ -82,7 +82,7 @@ LevelSetObject::LevelSetObject(LevelSetObject &&other)
  */
 LevelSetObject::~LevelSetObject() {
     // Disable all output for the object
-    if (m_kernelPtr) {
+    if (m_kernel) {
         enableVTKOutput(LevelSetWriteField::ALL, false);
     }
 }
@@ -133,7 +133,7 @@ std::size_t LevelSetObject::getReferenceCount() const {
  * @param[in] kernel is the LevelSetKernel
  */
 void LevelSetObject::setKernel(LevelSetKernel *kernel) {
-    m_kernelPtr = kernel;
+    m_kernel = kernel;
 
     for ( LevelSetWriteField field : m_writtenFiedsVTK ) {
         enableVTKOutput( field, true ) ;
@@ -145,7 +145,7 @@ void LevelSetObject::setKernel(LevelSetKernel *kernel) {
  * @return A pointer to the kernel for the object
  */
 LevelSetKernel * LevelSetObject::getKernel() {
-    return m_kernelPtr;
+    return m_kernel;
 }
 
 /*!
@@ -153,7 +153,7 @@ LevelSetKernel * LevelSetObject::getKernel() {
  * @return A constant pointer to the kernel for the object
  */
 const LevelSetKernel * LevelSetObject::getKernel() const {
-    return m_kernelPtr;
+    return m_kernel;
 }
 
 /*!
@@ -184,7 +184,7 @@ std::array<double,3> LevelSetObject::computeProjectionPoint(long id) const{
         return levelSetDefaults::POINT;
     }
 
-    return m_kernelPtr->computeCellCentroid(id) -value *getGradient(id);
+    return m_kernel->computeCellCentroid(id) -value *getGradient(id);
 }
 
 /*!
@@ -205,7 +205,7 @@ std::array<double,3> LevelSetObject::computeProjectionPoint(const std::array<dou
  */
 std::array<double,3> LevelSetObject::computeVertexProjectionPoint(long vertexId) const{
 
-    const std::array<double,3> &coords = m_kernelPtr->getMesh()->getVertexCoords(vertexId);
+    const std::array<double,3> &coords = m_kernel->getMesh()->getVertexCoords(vertexId);
     return computeProjectionPoint(coords);
 }
 
@@ -254,7 +254,7 @@ short LevelSetObject::evalValueSign(double value)const{
  * @return size of the current narrow band
  */
 double LevelSetObject::getSizeNarrowBand()const{
-    return m_narrowBand;
+    return m_narrowBandSize;
 }
 
 /*!
@@ -267,7 +267,7 @@ double LevelSetObject::getSizeNarrowBand()const{
  * @param[in] r size of the narrow band.
  */
 void LevelSetObject::setSizeNarrowBand(double r){
-    m_narrowBand = r;
+    m_narrowBandSize = r;
 }
 
 /*!
@@ -302,12 +302,12 @@ LevelSetIntersectionStatus LevelSetObject::intersectSurface(long id, LevelSetInt
     double incircle, circumcircle;
 
     double absoluteDistance  = std::abs(getValue(id));
-    double distanceTolerance = m_kernelPtr->getMesh()->getTol();
+    double distanceTolerance = m_kernel->getMesh()->getTol();
 
     switch(mode){
         case LevelSetIntersectionMode::FAST_GUARANTEE_TRUE:
         {
-            incircle = m_kernelPtr->computeCellIncircle(id) ;
+            incircle = m_kernel->computeCellIncircle(id) ;
             if(utils::DoubleFloatingLessEqual()(absoluteDistance, incircle, distanceTolerance, distanceTolerance)){
                 return LevelSetIntersectionStatus::TRUE;
             } else {
@@ -319,7 +319,7 @@ LevelSetIntersectionStatus LevelSetObject::intersectSurface(long id, LevelSetInt
 
         case LevelSetIntersectionMode::FAST_GUARANTEE_FALSE:
         {
-            circumcircle = m_kernelPtr->computeCellCircumcircle(id) ;
+            circumcircle = m_kernel->computeCellCircumcircle(id) ;
             if(utils::DoubleFloatingGreater()(absoluteDistance, circumcircle, distanceTolerance, distanceTolerance)){
                 return LevelSetIntersectionStatus::FALSE;
             } else {
@@ -331,12 +331,12 @@ LevelSetIntersectionStatus LevelSetObject::intersectSurface(long id, LevelSetInt
 
         case LevelSetIntersectionMode::FAST_FUZZY:
         {
-            circumcircle = m_kernelPtr->computeCellCircumcircle(id) ;
+            circumcircle = m_kernel->computeCellCircumcircle(id) ;
             if(utils::DoubleFloatingGreater()(absoluteDistance, circumcircle, distanceTolerance, distanceTolerance)){
                 return LevelSetIntersectionStatus::FALSE;
             }
 
-            incircle = m_kernelPtr->computeCellIncircle(id) ;
+            incircle = m_kernel->computeCellIncircle(id) ;
             if(utils::DoubleFloatingLessEqual()(absoluteDistance, incircle, distanceTolerance, distanceTolerance)){
                 return LevelSetIntersectionStatus::TRUE;
             }
@@ -348,19 +348,19 @@ LevelSetIntersectionStatus LevelSetObject::intersectSurface(long id, LevelSetInt
 
         case LevelSetIntersectionMode::ACCURATE:
         {
-            circumcircle = m_kernelPtr->computeCellCircumcircle(id) ;
+            circumcircle = m_kernel->computeCellCircumcircle(id) ;
             if(utils::DoubleFloatingGreater()(absoluteDistance, circumcircle, distanceTolerance, distanceTolerance)){
                 return LevelSetIntersectionStatus::FALSE;
             }
 
-            incircle = m_kernelPtr->computeCellIncircle(id) ;
+            incircle = m_kernel->computeCellIncircle(id) ;
             if(utils::DoubleFloatingLessEqual()(absoluteDistance, incircle, distanceTolerance, distanceTolerance)){
                 return LevelSetIntersectionStatus::TRUE;
             }
 
             std::array<double,3> root = computeProjectionPoint(id);
             std::array<double,3> normal = getGradient(id);
-            if( m_kernelPtr->intersectCellPlane(id,root,normal, distanceTolerance) ){
+            if( m_kernel->intersectCellPlane(id,root,normal, distanceTolerance) ){
                 return LevelSetIntersectionStatus::TRUE;
             } else {
                 return LevelSetIntersectionStatus::FALSE;
@@ -456,7 +456,7 @@ void LevelSetObject::dump( std::ostream &stream ){
     utils::binary::write(stream, m_id) ;
 
     // Narroband size
-    utils::binary::write(stream, m_narrowBand);
+    utils::binary::write(stream, m_narrowBandSize);
 
     // Written fields
     std::size_t nWrittenFieldsVTK = m_writtenFiedsVTK.size() ;
@@ -486,7 +486,7 @@ void LevelSetObject::restore( std::istream &stream ){
     utils::binary::read(stream, m_id) ;
 
     // Narroband size
-    utils::binary::read(stream, m_narrowBand);
+    utils::binary::read(stream, m_narrowBandSize);
 
     // Written fields
     std::size_t nWrittenFieldsVTK ;
@@ -524,7 +524,7 @@ void LevelSetObject::enableVTKOutput( LevelSetWriteField writeField, bool enable
         fields.push_back(writeField);
     }
 
-    VTK &vtkWriter = m_kernelPtr->getMesh()->getVTK() ;
+    VTK &vtkWriter = m_kernel->getMesh()->getVTK() ;
     for( const LevelSetWriteField &field : fields){
         // Update the list of written fields
         if (enable) {
@@ -625,7 +625,7 @@ void LevelSetObject::flushData( std::fstream &stream, const std::string &name, V
             BITPIT_UNREACHABLE("Non-existent VTK format.");
         }
 
-        for( const Cell &cell : m_kernelPtr->getMesh()->getVTKCellWriteRange() ){
+        for( const Cell &cell : m_kernel->getMesh()->getVTKCellWriteRange() ){
             long cellId = cell.getId();
             double value = getValue(cellId);
             (*writeFunctionPtr)(stream,value);
@@ -643,7 +643,7 @@ void LevelSetObject::flushData( std::fstream &stream, const std::string &name, V
             BITPIT_UNREACHABLE("Non-existent VTK format.");
         }
 
-        for( const Cell &cell : m_kernelPtr->getMesh()->getVTKCellWriteRange() ){
+        for( const Cell &cell : m_kernel->getMesh()->getVTKCellWriteRange() ){
             long cellId = cell.getId();
             const std::array<double,3> &value = getGradient(cellId);
             (*writeFunctionPtr)(stream,value);
@@ -661,7 +661,7 @@ void LevelSetObject::flushData( std::fstream &stream, const std::string &name, V
             BITPIT_UNREACHABLE("Non-existent VTK format.");
         }
 
-        for( const Cell &cell : m_kernelPtr->getMesh()->getVTKCellWriteRange() ){
+        for( const Cell &cell : m_kernel->getMesh()->getVTKCellWriteRange() ){
             long cellId = cell.getId();
             const std::array<double,3> &value = getNormal(cellId);
             (*writeFunctionPtr)(stream,value);
@@ -679,7 +679,7 @@ void LevelSetObject::flushData( std::fstream &stream, const std::string &name, V
             BITPIT_UNREACHABLE("Non-existent VTK format.");
         }
 
-        for( const Cell &cell : m_kernelPtr->getMesh()->getVTKCellWriteRange() ){
+        for( const Cell &cell : m_kernel->getMesh()->getVTKCellWriteRange() ){
             long cellId = cell.getId();
             int value = getPart(cellId);
             (*writeFunctionPtr)(stream,value);
@@ -702,13 +702,13 @@ void LevelSetObject::_restore( std::istream &stream ){
  */
 void LevelSetObject::exchangeGhosts(){
 
-    if (!m_kernelPtr->getMesh()->isPartitioned()) {
+    if (!m_kernel->getMesh()->isPartitioned()) {
         return;
     }
 
-    std::unique_ptr<DataCommunicator> dataCommunicator = m_kernelPtr->createDataCommunicator();
-    startExchange(m_kernelPtr->getMesh()->getGhostCellExchangeSources(), dataCommunicator.get());
-    completeExchange(m_kernelPtr->getMesh()->getGhostCellExchangeTargets(), dataCommunicator.get());
+    std::unique_ptr<DataCommunicator> dataCommunicator = m_kernel->createDataCommunicator();
+    startExchange(m_kernel->getMesh()->getGhostCellExchangeSources(), dataCommunicator.get());
+    completeExchange(m_kernel->getMesh()->getGhostCellExchangeTargets(), dataCommunicator.get());
 }
 
 /*!

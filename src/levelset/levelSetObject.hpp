@@ -110,8 +110,8 @@ class LevelSetObject : public VTKBaseStreamer, public virtual LevelSetObjectInte
 # endif
 
 
-    LevelSetKernel*                             m_kernelPtr;    /**< pointer to kernel */
-    double                                      m_narrowBand;   /**< Size of narrow band */
+    LevelSetKernel*                             m_kernel;           /**< Levelset kernel */
+    double                                      m_narrowBandSize;   /**< Size of narrow band */
 
     virtual void                                _clear();
     virtual void                                _clearAfterMeshAdaption(const std::vector<adaption::Info>&) ;
