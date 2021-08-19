@@ -134,6 +134,22 @@ void VTKNativeStreamer::removeData( const std::string &name){
 }
 
 /*!
+ * Check if the streamer constains the specified field
+ * @param[in] name name of field
+ */
+bool VTKNativeStreamer::hasData( const std::string &name ) const {
+
+    for ( const auto &fieldEntry : m_field ) {
+        if( fieldEntry.first == name){
+            return true;
+        }
+    }
+
+    return false;
+
+}
+
+/*!
  * Writes data to stream 
  * @param[in] str file stream for writing
  * @param[in] name name of field
