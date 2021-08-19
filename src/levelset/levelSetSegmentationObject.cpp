@@ -31,12 +31,12 @@
 # include "bitpit_volcartesian.hpp"
 
 # include "levelSetKernel.hpp"
-# include "levelSetCartesian.hpp"
-# include "levelSetOctree.hpp"
+# include "levelSetCartesianKernel.hpp"
+# include "levelSetOctreeKernel.hpp"
 
 # include "levelSetObject.hpp"
 # include "levelSetCachedObject.hpp"
-# include "levelSetSegmentation.hpp"
+# include "levelSetSegmentationObject.hpp"
 
 namespace bitpit {
 
@@ -561,7 +561,7 @@ std::array<double,3> SegmentationKernel::computeSegmentVertexNormal( const SurfU
  * Constructor
  * @param[in] id identifier of object
  */
-LevelSetSegmentation::LevelSetSegmentation(int id)
+LevelSetSegmentationObject::LevelSetSegmentationObject(int id)
     : LevelSetCachedObject(id),
       m_segmentation(nullptr)
 {
@@ -573,7 +573,7 @@ LevelSetSegmentation::LevelSetSegmentation(int id)
  * @param[in] STL unique pointer to surface mesh
  * @param[in] featureAngle feature angle. If the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge
  */
-LevelSetSegmentation::LevelSetSegmentation( int id, std::unique_ptr<const SurfUnstructured> &&STL, double featureAngle) :LevelSetSegmentation(id) {
+LevelSetSegmentationObject::LevelSetSegmentationObject( int id, std::unique_ptr<const SurfUnstructured> &&STL, double featureAngle) :LevelSetSegmentationObject(id) {
     setSegmentation( std::move(STL), featureAngle );
 }
 
@@ -583,7 +583,7 @@ LevelSetSegmentation::LevelSetSegmentation( int id, std::unique_ptr<const SurfUn
  * @param[in] STL pointer to surface mesh
  * @param[in] featureAngle feature angle; if the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge.
  */
-LevelSetSegmentation::LevelSetSegmentation( int id, const SurfUnstructured *STL, double featureAngle) :LevelSetSegmentation(id) {
+LevelSetSegmentationObject::LevelSetSegmentationObject( int id, const SurfUnstructured *STL, double featureAngle) :LevelSetSegmentationObject(id) {
     setSegmentation( STL, featureAngle );
 }
 
@@ -591,8 +591,8 @@ LevelSetSegmentation::LevelSetSegmentation( int id, const SurfUnstructured *STL,
  * Clones the object
  * @return pointer to cloned object
  */
-LevelSetSegmentation* LevelSetSegmentation::clone() const {
-    return new LevelSetSegmentation( *this ); 
+LevelSetSegmentationObject * LevelSetSegmentationObject::clone() const {
+    return new LevelSetSegmentationObject( *this );
 }
 
 /*!
@@ -600,7 +600,7 @@ LevelSetSegmentation* LevelSetSegmentation::clone() const {
  * @param[in] surface pointer to surface
  * @param[in] featureAngle feature angle. If the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge
  */
-void LevelSetSegmentation::setSegmentation( const SurfUnstructured *surface, double featureAngle){
+void LevelSetSegmentationObject::setSegmentation( const SurfUnstructured *surface, double featureAngle){
 
     m_segmentation = std::make_shared<const SegmentationKernel>(surface, featureAngle);
 }
@@ -610,7 +610,7 @@ void LevelSetSegmentation::setSegmentation( const SurfUnstructured *surface, dou
  * @param[in,out] surface pointer to surface
  * @param[in] featureAngle feature angle. If the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge
  */
-void LevelSetSegmentation::setSegmentation( std::unique_ptr<const SurfUnstructured> &&surface, double featureAngle){
+void LevelSetSegmentationObject::setSegmentation( std::unique_ptr<const SurfUnstructured> &&surface, double featureAngle){
 
     m_segmentation = std::make_shared<const SegmentationKernel>(std::move(surface), featureAngle);
 }
@@ -619,7 +619,7 @@ void LevelSetSegmentation::setSegmentation( std::unique_ptr<const SurfUnstructur
  * Get a constant refernce to the segmentation
  * @return constant reference to the segmentation
  */
-const SegmentationKernel & LevelSetSegmentation::getSegmentation() const {
+const SegmentationKernel & LevelSetSegmentationObject::getSegmentation() const {
     return *m_segmentation ;
 }
 
@@ -628,7 +628,7 @@ const SegmentationKernel & LevelSetSegmentation::getSegmentation() const {
  * @param[in] id index of cell
  * @return closest segment in narrow band
  */
-int LevelSetSegmentation::getPart( long id ) const{
+int LevelSetSegmentationObject::getPart( long id ) const{
 
     long supportId = getSupport(id);
 
@@ -646,7 +646,7 @@ int LevelSetSegmentation::getPart( long id ) const{
  * @param[in] id index of cell
  * @return surface normal
  */
-std::array<double,3> LevelSetSegmentation::getNormal( long id ) const{
+std::array<double,3> LevelSetSegmentationObject::getNormal( long id ) const{
 
     const LevelSetSegmentationNarrowBandCache *narrowBandCache = getNarrowBandCache();
     LevelSetNarrowBandCache::KernelIterator narrowBandCacheItr = narrowBandCache->find(id) ;
@@ -664,7 +664,7 @@ std::array<double,3> LevelSetSegmentation::getNormal( long id ) const{
  * @param[in] id index of cell
  * @return closest segment in narrow band
  */
-long LevelSetSegmentation::getSupport( long id ) const{
+long LevelSetSegmentationObject::getSupport( long id ) const{
 
     const LevelSetSegmentationNarrowBandCache *narrowBandCache = getNarrowBandCache();
     LevelSetNarrowBandCache::KernelIterator narrowBandCacheItr = narrowBandCache->find(id) ;
@@ -681,7 +681,7 @@ long LevelSetSegmentation::getSupport( long id ) const{
  * @param[in] id cell id
  * @return charcteristic size of support triangle
  */
-double LevelSetSegmentation::getSurfaceFeatureSize( long id ) const {
+double LevelSetSegmentationObject::getSurfaceFeatureSize( long id ) const {
 
     long support = getSupport(id);
     if (support == levelSetDefaults::SUPPORT) {
@@ -696,7 +696,7 @@ double LevelSetSegmentation::getSurfaceFeatureSize( long id ) const {
  * @param[in] id is the id of the segment
  * @return charcteristic size of the segment
  */
-double LevelSetSegmentation::getSegmentSize( long id ) const {
+double LevelSetSegmentationObject::getSegmentSize( long id ) const {
 
     const SurfUnstructured &m_surface = m_segmentation->getSurface();
 
@@ -715,7 +715,7 @@ double LevelSetSegmentation::getSegmentSize( long id ) const {
  * Get the smallest characterstic size within the triangultaion
  * @return smallest charcteristic size within the triangulation
  */
-double LevelSetSegmentation::getMinSurfaceFeatureSize( ) const {
+double LevelSetSegmentationObject::getMinSurfaceFeatureSize( ) const {
 
     const SurfUnstructured &m_surface = m_segmentation->getSurface();
 
@@ -742,7 +742,7 @@ double LevelSetSegmentation::getMinSurfaceFeatureSize( ) const {
  * Get the largest characterstic size within the triangultaion
  * @return largest charcteristic size within the triangulation
  */
-double LevelSetSegmentation::getMaxSurfaceFeatureSize( ) const {
+double LevelSetSegmentationObject::getMaxSurfaceFeatureSize( ) const {
 
     const SurfUnstructured &m_surface = m_segmentation->getSurface();
 
@@ -760,7 +760,7 @@ double LevelSetSegmentation::getMaxSurfaceFeatureSize( ) const {
  * @param[out] minP minimum point
  * @param[out] maxP maximum point
  */
-void LevelSetSegmentation::getBoundingBox( std::array<double,3> &minP, std::array<double,3> &maxP ) const {
+void LevelSetSegmentationObject::getBoundingBox( std::array<double,3> &minP, std::array<double,3> &maxP ) const {
     const SurfUnstructured &m_surface = m_segmentation->getSurface();
     m_surface.getBoundingBox(minP,maxP) ;
 }
@@ -776,7 +776,7 @@ void LevelSetSegmentation::getBoundingBox( std::array<double,3> &minP, std::arra
  * @param[out] minP minimum point
  * @param[out] maxP maximum point
  */
-void LevelSetSegmentation::getGlobalBoundingBox( std::array<double,3> &minP, std::array<double,3> &maxP ) const {
+void LevelSetSegmentationObject::getGlobalBoundingBox( std::array<double,3> &minP, std::array<double,3> &maxP ) const {
     getBoundingBox(minP, maxP);
 
     if (m_kernelPtr->getMesh()->isPartitioned()) {
@@ -792,14 +792,14 @@ void LevelSetSegmentation::getGlobalBoundingBox( std::array<double,3> &minP, std
  * Computes the levelset function within the narrow band
  * @param[in] signd if signed- or unsigned- distance function should be calculated
  */
-void LevelSetSegmentation::computeNarrowBand(bool signd){
+void LevelSetSegmentationObject::computeNarrowBand(bool signd){
 
     log::cout() << "Computing levelset within the narrow band... " << std::endl;
 
-    if( LevelSetCartesian* lsCartesian = dynamic_cast<LevelSetCartesian*>(m_kernelPtr) ){
+    if( LevelSetCartesianKernel* lsCartesian = dynamic_cast<LevelSetCartesianKernel*>(m_kernelPtr) ){
         computeNarrowBand( lsCartesian, signd) ;
 
-    } else if ( LevelSetOctree* lsOctree = dynamic_cast<LevelSetOctree*>(m_kernelPtr) ){
+    } else if ( LevelSetOctreeKernel* lsOctree = dynamic_cast<LevelSetOctreeKernel*>(m_kernelPtr) ){
         computeNarrowBand( lsOctree, signd) ;
 
     }
@@ -810,10 +810,10 @@ void LevelSetSegmentation::computeNarrowBand(bool signd){
  * @param[in] adaptionData are the information about the adaption
  * @param[in] signd if signed- or unsigned- distance function should be calculated
  */
-void LevelSetSegmentation::updateNarrowBand( const std::vector<adaption::Info> &adaptionData, bool signd){
+void LevelSetSegmentationObject::updateNarrowBand( const std::vector<adaption::Info> &adaptionData, bool signd){
 
     log::cout() << "Updating levelset within the narrow band... " << std::endl;
-    if( LevelSetCartesian* lsCartesian= dynamic_cast<LevelSetCartesian*>(m_kernelPtr) ){
+    if( LevelSetCartesianKernel* lsCartesian= dynamic_cast<LevelSetCartesianKernel*>(m_kernelPtr) ){
 
         // Update is not implemented for Cartesian patches
         clear( ) ;
@@ -821,7 +821,7 @@ void LevelSetSegmentation::updateNarrowBand( const std::vector<adaption::Info> &
         return;
     }
 
-    if( LevelSetOctree* lsOctree = dynamic_cast<LevelSetOctree*>(m_kernelPtr) ){
+    if( LevelSetOctreeKernel* lsOctree = dynamic_cast<LevelSetOctreeKernel*>(m_kernelPtr) ){
         updateNarrowBand( lsOctree, adaptionData, signd ) ;
         return;
     }
@@ -839,7 +839,7 @@ void LevelSetSegmentation::updateNarrowBand( const std::vector<adaption::Info> &
  * @param[in] levelsetKernel the octree LevelSetKernel
  * @param[in] signd whether signed distance should be calculated
  */
-void LevelSetSegmentation::computeNarrowBand( LevelSetCartesian *levelsetKernel, bool signd){
+void LevelSetSegmentationObject::computeNarrowBand( LevelSetCartesianKernel *levelsetKernel, bool signd){
 
     log::cout() << " Compute levelset on cartesian mesh"  << std::endl;
 
@@ -973,7 +973,7 @@ void LevelSetSegmentation::computeNarrowBand( LevelSetCartesian *levelsetKernel,
  * \param[in] levelsetKernel the octree LevelSetKernel
  * \param[in] signd whether signed distance should be calculated
  */
-void LevelSetSegmentation::computeNarrowBand( LevelSetOctree *levelsetKernel, bool signd){
+void LevelSetSegmentationObject::computeNarrowBand( LevelSetOctreeKernel *levelsetKernel, bool signd){
 
     VolumeKernel &mesh = *(levelsetKernel->getMesh()) ;
 
@@ -1094,7 +1094,7 @@ void LevelSetSegmentation::computeNarrowBand( LevelSetOctree *levelsetKernel, bo
  * @param[in] adaptionData are the information about the adaption
  * @param[in] signd whether signed distance should be calculated
  */
-void LevelSetSegmentation::updateNarrowBand( LevelSetOctree *levelsetKernel, const std::vector<adaption::Info> &adaptionData, bool signd){
+void LevelSetSegmentationObject::updateNarrowBand( LevelSetOctreeKernel *levelsetKernel, const std::vector<adaption::Info> &adaptionData, bool signd){
 
     VolumeKernel &mesh = *(levelsetKernel->getMesh()) ;
     LevelSetSegmentationNarrowBandCache *narrowBandCache = getNarrowBandCache();
@@ -1219,7 +1219,7 @@ void LevelSetSegmentation::updateNarrowBand( LevelSetOctree *levelsetKernel, con
  * \param[in] coords coordinates of the point
  * \return the LevelSetInfo
  */
-LevelSetInfo LevelSetSegmentation::computeLevelSetInfo(const std::array<double,3> &coords) const {
+LevelSetInfo LevelSetSegmentationObject::computeLevelSetInfo(const std::array<double,3> &coords) const {
 
     long segmentId;
     double distance;
@@ -1242,7 +1242,7 @@ LevelSetInfo LevelSetSegmentation::computeLevelSetInfo(const std::array<double,3
  *
  * \result A pointer to the segmentation storage.
  */
-LevelSetSegmentationNarrowBandCache * LevelSetSegmentation::getNarrowBandCache() {
+LevelSetSegmentationNarrowBandCache * LevelSetSegmentationObject::getNarrowBandCache() {
 
     return static_cast<LevelSetSegmentationNarrowBandCache *>(LevelSetCachedObject::getNarrowBandCache());
 
@@ -1253,7 +1253,7 @@ LevelSetSegmentationNarrowBandCache * LevelSetSegmentation::getNarrowBandCache()
  *
  * \result A constant pointer to the segmentation storage.
  */
-const LevelSetSegmentationNarrowBandCache * LevelSetSegmentation::getNarrowBandCache() const {
+const LevelSetSegmentationNarrowBandCache * LevelSetSegmentationObject::getNarrowBandCache() const {
 
     return static_cast<const LevelSetSegmentationNarrowBandCache *>(LevelSetCachedObject::getNarrowBandCache());
 
@@ -1262,7 +1262,7 @@ const LevelSetSegmentationNarrowBandCache * LevelSetSegmentation::getNarrowBandC
 /*!
  * Create the storage for the narrow band data.
  */
-std::shared_ptr<LevelSetNarrowBandCache> LevelSetSegmentation::createNarrowBandCache() {
+std::shared_ptr<LevelSetNarrowBandCache> LevelSetSegmentationObject::createNarrowBandCache() {
 
     return std::shared_ptr<LevelSetNarrowBandCache>(new LevelSetSegmentationNarrowBandCache());
 

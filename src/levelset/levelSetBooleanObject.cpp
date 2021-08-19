@@ -32,7 +32,7 @@
 
 # include "levelSetObject.hpp"
 # include "levelSetProxyObject.hpp"
-# include "levelSetBoolean.hpp"
+# include "levelSetBooleanObject.hpp"
 
 namespace bitpit {
 
@@ -120,7 +120,7 @@ double LevelSetBooleanResult::getValue() const {
 }
 
 /*!
-	@class      LevelSetBoolean
+	@class      LevelSetBooleanObject
 	@ingroup    levelset
 	@brief      Class which deals with boolean operation between two LevelSetObjects
 */
@@ -132,7 +132,7 @@ double LevelSetBooleanResult::getValue() const {
  * @param[in] source1 pointer to first source object
  * @param[in] source2 pointer to second source object
  */
-LevelSetBoolean::LevelSetBoolean( int id, LevelSetBooleanOperation op, const LevelSetObject *source1, const LevelSetObject *source2  ) :LevelSetProxyObject(id) {
+LevelSetBooleanObject::LevelSetBooleanObject( int id, LevelSetBooleanOperation op, const LevelSetObject *source1, const LevelSetObject *source2  ) :LevelSetProxyObject(id) {
     m_operation = op;
     m_sourceObjects.push_back(source1);
     m_sourceObjects.push_back(source2);
@@ -145,7 +145,7 @@ LevelSetBoolean::LevelSetBoolean( int id, LevelSetBooleanOperation op, const Lev
  * @param[in] op type of boolean operation
  * @param[in] sourceObjects pointers to source objects
  */
-LevelSetBoolean::LevelSetBoolean( int id, LevelSetBooleanOperation op, const std::vector<const LevelSetObject*> &sourceObjects ) :LevelSetProxyObject(id) {
+LevelSetBooleanObject::LevelSetBooleanObject( int id, LevelSetBooleanOperation op, const std::vector<const LevelSetObject*> &sourceObjects ) :LevelSetProxyObject(id) {
     m_operation     = op;
     m_sourceObjects = sourceObjects;
 }
@@ -155,7 +155,7 @@ LevelSetBoolean::LevelSetBoolean( int id, LevelSetBooleanOperation op, const std
  * Assigns same id to new object;
  * @param[in] other object to be coppied
  */
-LevelSetBoolean::LevelSetBoolean( const LevelSetBoolean &other) :LevelSetProxyObject(other) {
+LevelSetBooleanObject::LevelSetBooleanObject( const LevelSetBooleanObject &other) :LevelSetProxyObject(other) {
     m_operation     = other.m_operation;
     m_sourceObjects = other.m_sourceObjects;
 }
@@ -165,7 +165,7 @@ LevelSetBoolean::LevelSetBoolean( const LevelSetBoolean &other) :LevelSetProxyOb
  * @param[in] id cell id
  * @return LevelSetInfo
 */
-LevelSetInfo LevelSetBoolean::getLevelSetInfo( long id)const{
+LevelSetInfo LevelSetBooleanObject::getLevelSetInfo( long id)const{
     LevelSetBooleanResult result = computeBooleanResult( id ) ;
     const LevelSetObject *resultObject = result.getObject();
     if ( resultObject ) {
@@ -183,7 +183,7 @@ LevelSetInfo LevelSetBoolean::getLevelSetInfo( long id)const{
  * @param[in] id cell id
  * @return levelset value in cell
  */
-double LevelSetBoolean::getLS( long id)const {
+double LevelSetBooleanObject::getLS( long id)const {
     return getValue(id) ;
 }
 
@@ -192,7 +192,7 @@ double LevelSetBoolean::getLS( long id)const {
  * @param[in] id cell id
  * @return levelset value in cell
  */
-double LevelSetBoolean::getValue( long id)const {
+double LevelSetBooleanObject::getValue( long id)const {
     const LevelSetBooleanResult result = computeBooleanResult( id ) ;
     const LevelSetObject *resultObject = result.getObject();
     if ( resultObject ) {
@@ -209,7 +209,7 @@ double LevelSetBoolean::getValue( long id)const {
  * @param[in] id cell id
  * @return levelset gradient in cell 
  */
-std::array<double,3> LevelSetBoolean::getGradient(long id) const {
+std::array<double,3> LevelSetBooleanObject::getGradient(long id) const {
     const LevelSetBooleanResult result = computeBooleanResult( id ) ;
     const LevelSetObject *resultObject = result.getObject();
     if ( resultObject ) {
@@ -226,7 +226,7 @@ std::array<double,3> LevelSetBoolean::getGradient(long id) const {
  * @param[in] coords point coordinates
  * @return LevelSetInfo
 */
-LevelSetInfo LevelSetBoolean::computeLevelSetInfo( const std::array<double,3> &coords) const{
+LevelSetInfo LevelSetBooleanObject::computeLevelSetInfo( const std::array<double,3> &coords) const{
     const LevelSetBooleanResult result = computeBooleanResult( coords ) ;
     const LevelSetObject *componentObject = result.getObject();
     if ( componentObject ) {
@@ -245,7 +245,7 @@ LevelSetInfo LevelSetBoolean::computeLevelSetInfo( const std::array<double,3> &c
  * @param[in] current current source object
  * @param[in] updated updated source object
  */
-void LevelSetBoolean::replaceSourceObject(const LevelSetObject *current, const LevelSetObject *updated){
+void LevelSetBooleanObject::replaceSourceObject(const LevelSetObject *current, const LevelSetObject *updated){
 
     std::size_t nSources = m_sourceObjects.size();
     for (std::size_t i = 0; i < nSources; ++i) {
@@ -260,18 +260,18 @@ void LevelSetBoolean::replaceSourceObject(const LevelSetObject *current, const L
 }
 
 /*!
- * Writes LevelSetBoolean to stream in binary format
+ * Writes LevelSetBooleanObject to stream in binary format
  * @param[in] stream output stream
  */
-void LevelSetBoolean::_dump( std::ostream &stream ){
+void LevelSetBooleanObject::_dump( std::ostream &stream ){
     BITPIT_UNUSED(stream);
 }
 
 /*!
- * Reads LevelSetBoolean from stream in binary format
+ * Reads LevelSetBooleanObject from stream in binary format
  * @param[in] stream output stream
  */
-void LevelSetBoolean::_restore( std::istream &stream ){
+void LevelSetBooleanObject::_restore( std::istream &stream ){
     BITPIT_UNUSED(stream);
 }
 
@@ -279,8 +279,8 @@ void LevelSetBoolean::_restore( std::istream &stream ){
  * Clones the object
  * @return pointer to cloned object
  */
-LevelSetBoolean* LevelSetBoolean::clone() const {
-    return new LevelSetBoolean( *this ); 
+LevelSetBooleanObject* LevelSetBooleanObject::clone() const {
+    return new LevelSetBooleanObject( *this );
 }
 
 /*!
@@ -288,7 +288,7 @@ LevelSetBoolean* LevelSetBoolean::clone() const {
  * @param[in] id cell index
  * @return closest part
  */
-std::array<double,3> LevelSetBoolean::getNormal( long id ) const{
+std::array<double,3> LevelSetBooleanObject::getNormal( long id ) const{
 
     const LevelSetBooleanResult result = computeBooleanResult(id) ;
     const LevelSetObject *resultObject = result.getObject();
@@ -304,7 +304,7 @@ std::array<double,3> LevelSetBoolean::getNormal( long id ) const{
  * @param[in] id cell index
  * @return closest part
  */
-int LevelSetBoolean::getPart( long id ) const{
+int LevelSetBooleanObject::getPart( long id ) const{
 
     const LevelSetBooleanResult result = computeBooleanResult(id) ;
     const LevelSetObject *resultObject = result.getObject();
@@ -319,7 +319,7 @@ int LevelSetBoolean::getPart( long id ) const{
  * Computes the levelset function within the narrow band
  * @param[in] signd if signed- or unsigned- distance function should be calculated
  */
-void LevelSetBoolean::computeNarrowBand(bool signd){
+void LevelSetBooleanObject::computeNarrowBand(bool signd){
     BITPIT_UNUSED(signd) ;
     log::cout() << "Computing levelset within the narrow band... " << std::endl;
 }
@@ -329,7 +329,7 @@ void LevelSetBoolean::computeNarrowBand(bool signd){
  * @param[in] adaptionData are the information about the adaption
  * @param[in] signd if signed- or unsigned- distance function should be calculated
  */
-void LevelSetBoolean::updateNarrowBand( const std::vector<adaption::Info> &adaptionData, bool signd){
+void LevelSetBooleanObject::updateNarrowBand( const std::vector<adaption::Info> &adaptionData, bool signd){
     BITPIT_UNUSED(adaptionData);
     BITPIT_UNUSED(signd);
     log::cout() << "Updating levelset within the narrow band... " << std::endl;
@@ -339,7 +339,7 @@ void LevelSetBoolean::updateNarrowBand( const std::vector<adaption::Info> &adapt
  * Returns the boolean operation
  * @return boolean operation
  */
-LevelSetBooleanOperation LevelSetBoolean::getBooleanOperation() const{
+LevelSetBooleanOperation LevelSetBooleanObject::getBooleanOperation() const{
     return m_operation;
 }
 
@@ -348,7 +348,7 @@ LevelSetBooleanOperation LevelSetBoolean::getBooleanOperation() const{
  * @param[in] id cell index
  * @return charcteristic size
  */
-double LevelSetBoolean::getSurfaceFeatureSize( long id ) const {
+double LevelSetBooleanObject::getSurfaceFeatureSize( long id ) const {
 
     const LevelSetBooleanResult result = computeBooleanResult(id) ;
     const LevelSetObject *resultObject = result.getObject();
@@ -364,7 +364,7 @@ double LevelSetBoolean::getSurfaceFeatureSize( long id ) const {
  * Get the smallest surface feature size
  * @return charcteristic size
  */
-double LevelSetBoolean::getMinSurfaceFeatureSize() const {
+double LevelSetBooleanObject::getMinSurfaceFeatureSize() const {
 
     bool   minimumValid = false;
     double minimumSize  = levelSetDefaults::SIZE;
@@ -389,7 +389,7 @@ double LevelSetBoolean::getMinSurfaceFeatureSize() const {
  * Get the largest surface feature size
  * @return charcteristic size
  */
-double LevelSetBoolean::getMaxSurfaceFeatureSize() const {
+double LevelSetBooleanObject::getMaxSurfaceFeatureSize() const {
 
     double maximumSize = - levelSetDefaults::SIZE;
     for( const LevelSetObject *object : m_sourceObjects ){
@@ -406,7 +406,7 @@ double LevelSetBoolean::getMaxSurfaceFeatureSize() const {
  * @return The object that defines the levelset information for the specified
  * cell.
  */
-const LevelSetObject * LevelSetBoolean::getReferenceObject(long id) const{
+const LevelSetObject * LevelSetBooleanObject::getReferenceObject(long id) const{
 
     const LevelSetBooleanResult result = computeBooleanResult(id) ;
 
@@ -419,7 +419,7 @@ const LevelSetObject * LevelSetBoolean::getReferenceObject(long id) const{
  * \return pointers to all primary objects involved in the definition of the
  * boolean object levelset information.
  */
-std::vector<const LevelSetObject*> LevelSetBoolean::getSourceObjects() const{
+std::vector<const LevelSetObject*> LevelSetBooleanObject::getSourceObjects() const{
 
     return m_sourceObjects;
 
@@ -430,7 +430,7 @@ std::vector<const LevelSetObject*> LevelSetBoolean::getSourceObjects() const{
  * @param[in] id cell index
  * @return result of the boolean operation.
  */
-LevelSetBooleanResult LevelSetBoolean::computeBooleanResult( long id ) const{
+LevelSetBooleanResult LevelSetBooleanObject::computeBooleanResult( long id ) const{
 
     // Early return if the are no objects
     if (m_sourceObjects.empty()) {
@@ -451,7 +451,7 @@ LevelSetBooleanResult LevelSetBoolean::computeBooleanResult( long id ) const{
  * @param[in] coords point coordinates
  * @return result of the boolean operation.
  */
-LevelSetBooleanResult LevelSetBoolean::computeBooleanResult( const std::array<double,3> &coords ) const{
+LevelSetBooleanResult LevelSetBooleanObject::computeBooleanResult( const std::array<double,3> &coords ) const{
 
     // Early return if the are no objects
     if (m_sourceObjects.empty()) {

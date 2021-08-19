@@ -34,8 +34,8 @@
 # include "bitpit_voloctree.hpp"
 
 # include "levelSetKernel.hpp"
-# include "levelSetCartesian.hpp"
-# include "levelSetOctree.hpp"
+# include "levelSetCartesianKernel.hpp"
+# include "levelSetOctreeKernel.hpp"
 # include "levelSetObject.hpp"
 # include "levelSetCachedObject.hpp"
 # include "levelSetSignPropagator.hpp"

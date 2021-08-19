@@ -22,15 +22,15 @@
  *
 \*---------------------------------------------------------------------------*/
 
-# ifndef __BITPIT_LEVELSET_OCTREE_HPP__
-# define __BITPIT_LEVELSET_OCTREE_HPP__
+# ifndef __BITPIT_LEVELSET_OCTREE_KERNEL_HPP__
+# define __BITPIT_LEVELSET_OCTREE_KERNEL_HPP__
 
 namespace bitpit{
 
 class VolOctree;
 class LevelSetKernel ;
 
-class LevelSetOctree : public LevelSetKernel{
+class LevelSetOctreeKernel : public LevelSetKernel{
 
     private:
     VolOctree*                                  m_octree ;       /**< Pointer to underlying octree mesh*/
@@ -42,7 +42,7 @@ class LevelSetOctree : public LevelSetKernel{
     void                                        updateCellCirclesCache();
 
     public:
-    LevelSetOctree( VolOctree & );
+    LevelSetOctreeKernel( VolOctree & );
 
     VolOctree *                                 getOctreeMesh() const;
 
@@ -55,6 +55,9 @@ class LevelSetOctree : public LevelSetKernel{
     bool                                        intersectCellPlane(long, const std::array<double,3> &, const std::array<double,3> &, double) override;
 
 };
+
+// Typdefs for compatibility with older versions
+typedef LevelSetOctreeKernel LevelSetOctree;
 
 }
 

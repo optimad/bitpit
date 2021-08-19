@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-# ifndef __BITPIT_LEVELSET_CARTESIAN_HPP__
-# define __BITPIT_LEVELSET_CARTESIAN_HPP__
+# ifndef __BITPIT_LEVELSET_CARTESIAN_KERNEL_HPP__
+# define __BITPIT_LEVELSET_CARTESIAN_KERNEL_HPP__
 
 
 namespace bitpit{
@@ -31,7 +31,7 @@ namespace bitpit{
 class VolCartesian;
 class LevelSetKernel;
 
-class LevelSetCartesian : public LevelSetKernel{
+class LevelSetCartesianKernel : public LevelSetKernel{
 
     private:
     VolCartesian*                               m_cartesian ;       /**< Pointer to underlying cartesian mesh*/
@@ -43,7 +43,7 @@ class LevelSetCartesian : public LevelSetKernel{
     void                                        updateCellCirclesCache();
 
     public:
-    LevelSetCartesian( VolCartesian & );
+    LevelSetCartesianKernel( VolCartesian & );
 
     VolCartesian *                              getCartesianMesh() const;
 
@@ -59,6 +59,9 @@ class LevelSetCartesian : public LevelSetKernel{
     bool                                        intersectCellPlane(long, const std::array<double,3> &, const std::array<double,3> &, double) override;
 
 };
+
+// Typdefs for compatibility with older versions
+typedef LevelSetCartesianKernel LevelSetCartesian;
 
 }
 
