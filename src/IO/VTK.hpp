@@ -224,6 +224,7 @@ class VTKNativeStreamer : public VTKBaseStreamer {
         template<class T>
         void                    addData( const std::string &, std::vector<T> & ) ;
         void                    removeData( const std::string & ) ;
+        bool                    hasData( const std::string & ) const ;
         void                    flushData( std::fstream &, const std::string &, VTKFormat) override ;
         void                    absorbData( std::fstream &, const std::string &, VTKFormat, uint64_t, uint8_t, VTKDataType) override ;
 };
@@ -336,6 +337,8 @@ class VTK{
         void                    removeData( const std::string & ) ;
         void                    enableData( const std::string & ) ;
         void                    disableData( const std::string & ) ;
+
+        bool                    hasData( const std::string & ) const ;
 
         std::vector<VTKField>::const_iterator    getDataBegin( ) const ;
         std::vector<VTKField>::const_iterator    getDataEnd( ) const ;
