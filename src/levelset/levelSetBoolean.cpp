@@ -407,23 +407,6 @@ std::vector<const LevelSetObject*> LevelSetBoolean::getSourceObjects() const{
 }
 
 /*!
- * If cell centroid lies within the narrow band and hence levelset is computet exactly
- * @param[in] id cell id
- * @return true/false if the centroid is in narrow band
- */
-bool LevelSetBoolean::isInNarrowBand(long id)const{
-
-    const LevelSetBooleanResult result = computeBooleanResult(id) ;
-    const LevelSetObject *resultObject = result.getObject();
-    if ( resultObject ) {
-        return resultObject->isInNarrowBand(id);
-    }
-
-    return false;
-
-}
-
-/*!
  * Compute the result of the boolean operation.
  * @param[in] id cell index
  * @return result of the boolean operation.
