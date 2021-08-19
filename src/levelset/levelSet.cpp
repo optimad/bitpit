@@ -30,17 +30,17 @@
 
 # include "levelSetCommon.hpp"
 # include "levelSetKernel.hpp"
-# include "levelSetCartesian.hpp"
-# include "levelSetOctree.hpp"
+# include "levelSetCartesianKernel.hpp"
+# include "levelSetOctreeKernel.hpp"
 # include "levelSetObject.hpp"
 # include "levelSetProxyObject.hpp"
 # include "levelSetCachedObject.hpp"
 # include "levelSetImmutableObject.hpp"
-# include "levelSetBoolean.hpp"
-# include "levelSetSegmentation.hpp"
+# include "levelSetBooleanObject.hpp"
+# include "levelSetSegmentationObject.hpp"
 # include "levelSetSignedObject.hpp"
 # include "levelSetSignPropagator.hpp"
-# include "levelSetMask.hpp"
+# include "levelSetMaskObject.hpp"
 
 # include "levelSet.hpp"
 
@@ -112,7 +112,7 @@ void LevelSet::setMesh( VolCartesian* cartesian ) {
         throw std::runtime_error ("Mesh can be set just once.");
     }
 
-    LevelSetKernel *kernel = new LevelSetCartesian( *cartesian) ;
+    LevelSetKernel *kernel = new LevelSetCartesianKernel( *cartesian) ;
     m_kernel = std::unique_ptr<LevelSetKernel>(kernel);
 
 # if BITPIT_ENABLE_MPI
@@ -132,7 +132,7 @@ void LevelSet::setMesh( VolOctree* octree ) {
         throw std::runtime_error ("Mesh can be set just once.");
     }
 
-    LevelSetKernel *kernel = new LevelSetOctree( *octree) ;
+    LevelSetKernel *kernel = new LevelSetOctreeKernel( *octree) ;
     m_kernel = std::unique_ptr<LevelSetKernel>(kernel);
 
 # if BITPIT_ENABLE_MPI
@@ -144,7 +144,7 @@ void LevelSet::setMesh( VolOctree* octree ) {
 }
 
 /*!
- * Adds a LevelSetSegmentation object
+ * Adds a segmentation object
  * @param[in] segmentation surface segmentation
  * @param[in] angle feature angle
  * @param[in] id identifier of object; in case no id is provided the insertion
@@ -152,14 +152,14 @@ void LevelSet::setMesh( VolOctree* octree ) {
  */
 int LevelSet::addObject( std::unique_ptr<SurfUnstructured> &&segmentation, double angle, int id ) {
 
-    LevelSetSegmentation* lsSeg = new LevelSetSegmentation(id, std::move(segmentation), angle ) ;
+    LevelSetSegmentationObject *lsSeg = new LevelSetSegmentationObject(id, std::move(segmentation), angle ) ;
     LevelSetObject *object = static_cast<LevelSetObject *>(lsSeg);
 
     return registerObject(std::unique_ptr<LevelSetObject>(object));
 }
 
 /*!
- * Adds a LevelSetSegmentation object
+ * Adds a segmentation object
  * @param[in] segmentation surface segmentation
  * @param[in] angle feature angle
  * @param[in] id identifier of object; in case no id is provided the insertion
@@ -167,14 +167,14 @@ int LevelSet::addObject( std::unique_ptr<SurfUnstructured> &&segmentation, doubl
  */
 int LevelSet::addObject( SurfUnstructured *segmentation, double angle, int id ) {
 
-    LevelSetSegmentation* lsSeg = new LevelSetSegmentation(id, segmentation, angle) ;
+    LevelSetSegmentationObject *lsSeg = new LevelSetSegmentationObject(id, segmentation, angle) ;
     LevelSetObject *object = static_cast<LevelSetObject *>(lsSeg);
 
     return registerObject(std::unique_ptr<LevelSetObject>(object));
 }
 
 /*!
- * Adds a LevelSetSegmentation object
+ * Adds a segmentation object
  * @param[in] segmentation surface segmentation
  * @param[in] angle feature angle
  * @param[in] id identifier of object; in case no id is provided the insertion
@@ -189,14 +189,14 @@ int LevelSet::addObject( std::unique_ptr<SurfaceKernel> &&segmentation, double a
 
     segmentation.release();
     std::unique_ptr<SurfUnstructured> surfUnstructuredUPtr = std::unique_ptr<SurfUnstructured>(surfUnstructured) ;
-    LevelSetSegmentation* lsSeg = new LevelSetSegmentation(id, std::move(surfUnstructuredUPtr), angle) ;
+    LevelSetSegmentationObject *lsSeg = new LevelSetSegmentationObject(id, std::move(surfUnstructuredUPtr), angle) ;
 
     LevelSetObject *object = static_cast<LevelSetObject *>(lsSeg);
     return registerObject(std::unique_ptr<LevelSetObject>(object));
 }
 
 /*!
- * Adds a LevelSetSegmentation object
+ * Adds a segmentation object
  * @param[in] segmentation surface segmentation
  * @param[in] angle feature angle
  * @param[in] id identifier of object; in case no id is provided the insertion
@@ -209,7 +209,7 @@ int LevelSet::addObject( SurfaceKernel *segmentation, double angle, int id ) {
         throw std::runtime_error ("Segmentation type not supported");
     }
 
-    LevelSetSegmentation* lsSeg = new LevelSetSegmentation(id,surfUnstructured, angle) ;
+    LevelSetSegmentationObject *lsSeg = new LevelSetSegmentationObject(id,surfUnstructured, angle) ;
 
     LevelSetObject *object = static_cast<LevelSetObject *>(lsSeg);
     return registerObject(std::unique_ptr<LevelSetObject>(object));
@@ -228,7 +228,7 @@ int LevelSet::addObject( LevelSetBooleanOperation operation, int id1, int id2, i
     LevelSetObject *ptr1 = m_objects.at(id1).get() ;
     LevelSetObject *ptr2 = m_objects.at(id2).get() ;
 
-    return registerObject( std::unique_ptr<LevelSetObject>( new LevelSetBoolean(id, operation, ptr1, ptr2 ) ));
+    return registerObject( std::unique_ptr<LevelSetObject>( new LevelSetBooleanObject(id, operation, ptr1, ptr2 ) ));
 }
 
 /*!
@@ -245,7 +245,7 @@ int LevelSet::addObject( LevelSetBooleanOperation operation, const std::vector<i
         ptr.push_back( m_objects.at(id).get() );
     }
 
-    return registerObject( std::unique_ptr<LevelSetObject>( new LevelSetBoolean(id, operation, ptr) ));
+    return registerObject( std::unique_ptr<LevelSetObject>( new LevelSetBooleanObject(id, operation, ptr) ));
 }
 /*!
  * Adds a LevelSetMask object composed of the external envelope of a list of mesh cells.
@@ -256,9 +256,9 @@ int LevelSet::addObject( LevelSetBooleanOperation operation, const std::vector<i
  */
 int LevelSet::addObject( const std::unordered_set<long> &list, int id ) {
 
-    assert(m_kernel && " levelset: setMesh must be called befor adding a LevelSetMask object ");
+    assert(m_kernel && " levelset: setMesh must be called befor adding a mask object ");
 
-    return registerObject( std::unique_ptr<LevelSetObject>( new LevelSetMask(id, list, *m_kernel->getMesh()) ) );
+    return registerObject( std::unique_ptr<LevelSetObject>( new LevelSetMaskObject(id, list, *m_kernel->getMesh()) ) );
 }
 
 /*!
@@ -272,9 +272,9 @@ int LevelSet::addObject( const std::unordered_set<long> &list, int id ) {
  */
 int LevelSet::addObject( const std::vector<long> &list, long refInterface, bool invert, int id ) {
 
-    assert(m_kernel && " levelset: setMesh must be called befor adding a LevelSetMask object ");
+    assert(m_kernel && " levelset: setMesh must be called befor adding a mask object ");
 
-    return registerObject( std::unique_ptr<LevelSetObject>( new LevelSetMask(id, list, refInterface, invert, *m_kernel->getMesh())) );
+    return registerObject( std::unique_ptr<LevelSetObject>( new LevelSetMaskObject(id, list, refInterface, invert, *m_kernel->getMesh())) );
 };
 
 /*!
@@ -420,7 +420,7 @@ void LevelSet::makeObjectImmutable( int id ) {
 
     // Create the immutable object
     std::unique_ptr<LevelSetObject> immutableObject;
-    if (LevelSetBoolean *booleanObject = dynamic_cast<LevelSetBoolean*>( object )) {
+    if (LevelSetBooleanObject *booleanObject = dynamic_cast<LevelSetBooleanObject*>( object )) {
         immutableObject = std::unique_ptr<LevelSetObject>(new LevelSetImmutableObject(booleanObject));
     } else if (LevelSetCachedObject *cachedObject = dynamic_cast<LevelSetCachedObject*>( object )) {
         immutableObject = std::unique_ptr<LevelSetObject>(new LevelSetImmutableObject(cachedObject));

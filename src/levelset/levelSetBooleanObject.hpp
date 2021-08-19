@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-# ifndef __BITPIT_LEVELSET_BOOLEAN_HPP__
-# define __BITPIT_LEVELSET_BOOLEAN_HPP__
+# ifndef __BITPIT_LEVELSET_BOOLEAN_OBJECT_HPP__
+# define __BITPIT_LEVELSET_BOOLEAN_OBJECT_HPP__
 
 // Standard Template Library
 # include <array>
@@ -64,7 +64,7 @@ class LevelSetBooleanResult {
 
 };
 
-class LevelSetBoolean: public LevelSetProxyObject {
+class LevelSetBooleanObject: public LevelSetProxyObject {
 
     private:
     LevelSetBooleanOperation                    m_operation;            /**< identifier of operation */
@@ -85,11 +85,11 @@ class LevelSetBoolean: public LevelSetProxyObject {
     void                                        updateNarrowBand(const std::vector<adaption::Info> &, bool) override;
 
     public:
-    LevelSetBoolean(int, LevelSetBooleanOperation, const LevelSetObject*, const LevelSetObject*);
-    LevelSetBoolean(int, LevelSetBooleanOperation, const std::vector<const LevelSetObject*> &);
-    LevelSetBoolean(const LevelSetBoolean &);
+    LevelSetBooleanObject(int, LevelSetBooleanOperation, const LevelSetObject*, const LevelSetObject*);
+    LevelSetBooleanObject(int, LevelSetBooleanOperation, const std::vector<const LevelSetObject*> &);
+    LevelSetBooleanObject(const LevelSetBooleanObject &);
 
-    LevelSetBoolean*                            clone() const override;
+    LevelSetBooleanObject*                      clone() const override;
 
     LevelSetInfo                                getLevelSetInfo(long ) const override;
     double                                      getLS(long ) const override;
@@ -110,6 +110,9 @@ class LevelSetBoolean: public LevelSetProxyObject {
     std::vector<const LevelSetObject *>         getSourceObjects() const override;
 
 };
+
+// Typdefs for compatibility with older versions
+typedef LevelSetBooleanObject LevelSetBoolean;
 
 }
 

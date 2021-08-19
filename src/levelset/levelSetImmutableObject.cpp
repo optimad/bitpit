@@ -77,11 +77,11 @@ LevelSetImmutableObject::LevelSetImmutableObject(LevelSetCachedObject *source)
  * immutable object. Since source contents will be moved into the object, on
  * output the source will be in an undefined state
  */
-LevelSetImmutableObject::LevelSetImmutableObject(LevelSetBoolean *source)
+LevelSetImmutableObject::LevelSetImmutableObject(LevelSetBooleanObject *source)
     : LevelSetObject(*source)
 {
     // Mesh information
-    const VolumeKernel *mesh = (const_cast<const LevelSetBoolean *>(source))->getKernel()->getMesh();
+    const VolumeKernel *mesh = (const_cast<const LevelSetBooleanObject *>(source))->getKernel()->getMesh();
 
     VolumeKernel::CellConstIterator cellBegin = mesh->cellConstBegin();
     VolumeKernel::CellConstIterator cellEnd   = mesh->cellConstEnd();

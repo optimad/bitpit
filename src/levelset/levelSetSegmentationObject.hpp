@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-# ifndef __BITPIT_LEVELSET_SEGMENTATION_HPP__
-# define __BITPIT_LEVELSET_SEGMENTATION_HPP__
+# ifndef __BITPIT_LEVELSET_SEGMENTATION_OBJECT_HPP__
+# define __BITPIT_LEVELSET_SEGMENTATION_OBJECT_HPP__
 
 // Standard Template Library
 # include <array>
@@ -46,8 +46,8 @@ class SendBuffer;
 class RecvBuffer;
 
 class LevelSetKernel;
-class LevelSetCartesian;
-class LevelSetOctree;
+class LevelSetCartesianKernel;
+class LevelSetOctreeKernel;
 class LevelSetCachedObject;
 
 class SegmentationKernel {
@@ -112,7 +112,7 @@ class LevelSetSegmentationNarrowBandCache : public LevelSetNarrowBandCache
 
 };
 
-class LevelSetSegmentation : public LevelSetCachedObject, public LevelSetBoundedObject {
+class LevelSetSegmentationObject : public LevelSetCachedObject, public LevelSetBoundedObject {
 
     private:
     std::shared_ptr<const SegmentationKernel> m_segmentation;
@@ -127,21 +127,21 @@ class LevelSetSegmentation : public LevelSetCachedObject, public LevelSetBounded
 #endif
 
     void                                        computeNarrowBand(bool) override;
-    void                                        computeNarrowBand( LevelSetCartesian *, bool);
-    void                                        computeNarrowBand( LevelSetOctree *, bool);
+    void                                        computeNarrowBand( LevelSetCartesianKernel *, bool);
+    void                                        computeNarrowBand( LevelSetOctreeKernel *, bool);
     void                                        updateNarrowBand(const std::vector<adaption::Info> &, bool) override;
-    void                                        updateNarrowBand(LevelSetOctree *, const std::vector<adaption::Info> &, bool);
+    void                                        updateNarrowBand(LevelSetOctreeKernel *, const std::vector<adaption::Info> &, bool);
 
     LevelSetSegmentationNarrowBandCache *       getNarrowBandCache() override ;
     const LevelSetSegmentationNarrowBandCache * getNarrowBandCache() const override ;
     std::shared_ptr<LevelSetNarrowBandCache>    createNarrowBandCache() override ;
 
     public:
-    LevelSetSegmentation(int);
-    LevelSetSegmentation(int, std::unique_ptr<const SurfUnstructured> &&, double featureAngle = 2. * BITPIT_PI);
-    LevelSetSegmentation(int, const SurfUnstructured*, double featureAngle = 2. * BITPIT_PI);
+    LevelSetSegmentationObject(int);
+    LevelSetSegmentationObject(int, std::unique_ptr<const SurfUnstructured> &&, double featureAngle = 2. * BITPIT_PI);
+    LevelSetSegmentationObject(int, const SurfUnstructured*, double featureAngle = 2. * BITPIT_PI);
 
-    LevelSetSegmentation*                       clone() const override ;
+    LevelSetSegmentationObject *                clone() const override ;
 
     void                                        setSegmentation(std::unique_ptr<const SurfUnstructured> &&patch, double featureAngle = 2. * BITPIT_PI) ;
     void                                        setSegmentation(const SurfUnstructured *patch, double featureAngle = 2. * BITPIT_PI) ;
@@ -158,6 +158,9 @@ class LevelSetSegmentation : public LevelSetCachedObject, public LevelSetBounded
     LevelSetInfo                                computeLevelSetInfo(const std::array<double,3> &) const override;
 
 };
+
+// Typdefs for compatibility with older versions
+typedef LevelSetSegmentationObject LevelSetSegmentation;
 
 }
 

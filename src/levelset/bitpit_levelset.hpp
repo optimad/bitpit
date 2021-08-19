@@ -36,15 +36,16 @@
 #include "levelSetCommon.hpp"
 
 #include "levelSetKernel.hpp"
-#include "levelSetCartesian.hpp"
-#include "levelSetOctree.hpp"
+#include "levelSetCartesianKernel.hpp"
+#include "levelSetOctreeKernel.hpp"
 
 #include "levelSetObject.hpp"
 #include "levelSetProxyObject.hpp"
 #include "levelSetCachedObject.hpp"
-#include "levelSetSegmentation.hpp"
+#include "levelSetSegmentationObject.hpp"
 #include "levelSetSignedObject.hpp"
-#include "levelSetBoolean.hpp"
+#include "levelSetBooleanObject.hpp"
+#include "levelSetMaskObject.hpp"
 
 #include "levelSet.hpp"
 
