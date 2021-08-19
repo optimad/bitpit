@@ -30,6 +30,7 @@
 # include <array>
 # include <vector>
 # include <unordered_map>
+# include <unordered_set>
 
 # include "bitpit_IO.hpp"
 # if BITPIT_ENABLE_MPI
@@ -74,6 +75,8 @@ class LevelSetObject : public VTKBaseStreamer, public virtual LevelSetObjectInte
 
     std::size_t                                 m_nReferences;
 
+    std::unordered_set<LevelSetWriteField, utils::hashing::hash<LevelSetWriteField>> m_enabledVTKOutputs;
+
     void                                        setId(int id);
 
     std::size_t                                 incrementReferenceCount();
@@ -81,6 +84,8 @@ class LevelSetObject : public VTKBaseStreamer, public virtual LevelSetObjectInte
 
     protected:
     LevelSetObject(int);
+    LevelSetObject(const LevelSetObject &other);
+    LevelSetObject(LevelSetObject &&other);
 
     void                                        setKernel(LevelSetKernel *) override;
     LevelSetKernel *                            getKernel() override;
@@ -121,7 +126,7 @@ class LevelSetObject : public VTKBaseStreamer, public virtual LevelSetObjectInte
 # endif 
 
     public:
-    virtual ~LevelSetObject() = default;
+    virtual ~LevelSetObject();
 
     const LevelSetKernel *                      getKernel() const override;
 
