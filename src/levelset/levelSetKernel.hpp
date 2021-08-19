@@ -46,6 +46,7 @@ namespace adaption{
 class VolumeKernel ;
 
 class LevelSetObject ;
+class LevelSetSignPropagator;
 
 class LevelSetKernel{
 
@@ -85,6 +86,8 @@ class LevelSetKernel{
 
     std::unique_ptr<DataCommunicator>           createDataCommunicator() const;
 # endif
+
+    virtual std::unique_ptr<LevelSetSignPropagator>     createSignPropagator() const ;
 
 };
 

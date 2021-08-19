@@ -705,7 +705,7 @@ void LevelSet::compute( const std::unordered_set<LevelSetObject *> &objectProces
 
     std::unique_ptr<LevelSetSignPropagator> signPropagator ;
     if (m_propagateSign) {
-        signPropagator = std::unique_ptr<LevelSetSignPropagator>(new LevelSetSignPropagator(m_kernel->getMesh())) ;
+        signPropagator = m_kernel->createSignPropagator() ;
     }
 
     for( int id : m_objectsProcessingOrder){
@@ -867,7 +867,7 @@ void LevelSet::update( const std::vector<adaption::Info> &adaptionData, const st
     // Create sign propagator
     std::unique_ptr<LevelSetSignPropagator> signPropagator ;
     if (m_propagateSign) {
-        signPropagator = std::unique_ptr<LevelSetSignPropagator>(new LevelSetSignPropagator(m_kernel->getMesh())) ;
+        signPropagator = m_kernel->createSignPropagator() ;
     }
 
     // Update objects
