@@ -107,8 +107,6 @@ class LevelSetBoolean: public LevelSetProxyObject {
 
     std::vector<const LevelSetObject *>         getSourceObjects() const override;
 
-    bool                                        isInNarrowBand(long ) const override;
-
 };
 
 }

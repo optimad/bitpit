@@ -37,6 +37,8 @@ class LevelSetProxyObject : public LevelSetObject{
 
     bool            isPrimary() const override;
 
+    bool            isInNarrowBand(long id) const override;
+
     virtual const LevelSetObject *    getReferenceObject( long ) const =0;
     virtual const LevelSetObject *    getReferencePrimaryObject( long ) const;
 
