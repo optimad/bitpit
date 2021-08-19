@@ -63,6 +63,8 @@ class LevelSet{
 
     int                     registerObject( std::unique_ptr<LevelSetObject> && ) ;
 
+    bool                    removeObject(int id, bool force);
+
     void                    setObjectProcessingOrder(int) ;
     void                    unsetObjectProcessingOrder(int) ;
 
