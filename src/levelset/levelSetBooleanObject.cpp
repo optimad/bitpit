@@ -315,26 +315,6 @@ int LevelSetBooleanObject::getPart( long id ) const{
     return levelSetDefaults::PART;
 }
 
-/*!
- * Computes the levelset function within the narrow band
- * @param[in] signd if signed- or unsigned- distance function should be calculated
- */
-void LevelSetBooleanObject::computeNarrowBand(bool signd){
-    BITPIT_UNUSED(signd) ;
-    log::cout() << "Computing levelset within the narrow band... " << std::endl;
-}
-
-/*!
- * Updates the levelset function within the narrow band after mesh adaptation.
- * @param[in] adaptionData are the information about the adaption
- * @param[in] signd if signed- or unsigned- distance function should be calculated
- */
-void LevelSetBooleanObject::updateNarrowBand( const std::vector<adaption::Info> &adaptionData, bool signd){
-    BITPIT_UNUSED(adaptionData);
-    BITPIT_UNUSED(signd);
-    log::cout() << "Updating levelset within the narrow band... " << std::endl;
-}
-
 /*
  * Returns the boolean operation
  * @return boolean operation
