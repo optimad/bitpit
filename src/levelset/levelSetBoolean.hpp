@@ -76,6 +76,8 @@ class LevelSetBoolean: public LevelSetProxyObject {
     LevelSetBooleanResult                       computeBooleanResult( const std::array<double,3> &coords ) const ;
 
     protected:
+    void                                        replaceSourceObject(const LevelSetObject *current, const LevelSetObject *updated) override ;
+
     void                                        _dump( std::ostream &) override;
     void                                        _restore( std::istream &) override;
 
