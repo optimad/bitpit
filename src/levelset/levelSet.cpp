@@ -334,7 +334,21 @@ void LevelSet::removeObjects() {
  * @return true if object has been found and removed
  */
 bool LevelSet::removeObject(int id) {
-    if( !isObjectRemovable(id) ) {
+    return removeObject(id, false);
+
+}
+
+/*!
+ * Remove a levelset object
+ * Objects that are sources for other objects cannot be deleted unless the
+ * removal is forced.
+ * @param[in] id id of object to be removed
+ * @param[in] force if set to true the object will be deleted also if
+ * it's a non-remobable object
+ * @return true if object has been found and removed
+ */
+bool LevelSet::removeObject(int id, bool force) {
+    if( !force && !isObjectRemovable(id) ) {
         return false;
     }
 
