@@ -102,7 +102,7 @@ public:
 	double getSpacing(int direction) const;
 
 	void switchMemoryMode(MemoryMode mode);
-	MemoryMode getMemoryMode();
+	MemoryMode getMemoryMode() const;
 
 	bool isPointInside(const std::array<double, 3> &point) const override;
 	bool isPointInside(long id, const std::array<double, 3> &point) const override;
@@ -110,7 +110,7 @@ public:
 	std::array<int, 3> locatePointCartesian(const std::array<double, 3> &point) const;
 	long locateClosestVertex(std::array<double,3> const &point) const;
 	std::array<int, 3> locateClosestVertexCartesian(std::array<double,3> const &point) const;
-	long locateClosestCell(std::array<double,3> const &point);
+	long locateClosestCell(std::array<double,3> const &point) const;
 	std::array<int, 3> locateClosestCellCartesian(std::array<double,3> const &point) const;
 
 	std::vector<long> extractCellSubSet(std::array<int, 3> const &ijkMin, std::array<int, 3> const &ijkMax) const;
