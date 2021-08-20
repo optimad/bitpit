@@ -510,8 +510,8 @@ std::vector<int> LevelSet::getObjectIds( ) const{
  * Clear LevelSet entirely, deleteing kernel and objects
  */
 void LevelSet::clear(){
-    m_kernel.reset();
     removeObjects();
+    m_kernel.reset();
 }
 
 /*!
