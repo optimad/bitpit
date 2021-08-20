@@ -976,7 +976,7 @@ void VolCartesian::setMemoryMode(MemoryMode mode)
 
 	\result The current memory mode.
 */
-VolCartesian::MemoryMode VolCartesian::getMemoryMode()
+VolCartesian::MemoryMode VolCartesian::getMemoryMode() const
 {
 	return m_memoryMode;
 }
@@ -1362,7 +1362,7 @@ std::array<int, 3> VolCartesian::locateClosestVertexCartesian(std::array<double,
 	\param[in] point is the point to be checked
 	\result Returns the linear id of the closest cell to the point.
 */
-long VolCartesian::locateClosestCell(const std::array<double, 3> &point)
+long VolCartesian::locateClosestCell(const std::array<double, 3> &point) const
 {
     std::array<int, 3> pointIjk = locateClosestCellCartesian(point);
     return getCellLinearId(pointIjk);
