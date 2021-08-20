@@ -844,8 +844,13 @@ void LevelSetSegmentationObject::computeNarrowBand( LevelSetCartesianKernel *lev
     log::cout() << " Compute levelset on cartesian mesh"  << std::endl;
 
     // Get mesh information
-    VolCartesian &mesh = *(levelsetKernel->getCartesianMesh() ) ;
+    const VolCartesian &mesh = *(levelsetKernel->getCartesianMesh() ) ;
     int meshDimension = mesh.getDimension();
+    VolCartesian::MemoryMode meshMemoryMode = mesh.getMemoryMode();
+
+    ElementType meshCellType = mesh.getCellType();
+    const ReferenceElementInfo &meshCellTypeInfo = ReferenceElementInfo::getInfo(meshCellType);
+    int meshCellFaceCount = meshCellTypeInfo.nFaces;
 
     // Get surface information
     const SurfUnstructured &surface = m_segmentation->getSurface();
@@ -949,13 +954,22 @@ void LevelSetSegmentationObject::computeNarrowBand( LevelSetCartesianKernel *lev
         narrowBandCache->set(narrowBandCacheItr, distance, gradient, segmentId, normal);
 
         // Add cell neighbours to the process list
-        const Cell &cell = mesh.getCell(cellId);
-        const long *neighbours = cell.getAdjacencies() ;
-        int nNeighbours = cell.getAdjacencyCount() ;
-        for (int n = 0; n < nNeighbours; ++n) {
-            long neighId = neighbours[n];
-            if (alreadyProcessed.count(neighId) == 0) {
-                processList.insert(neighId);
+        if (meshMemoryMode == VolCartesian::MEMORY_LIGHT) {
+            for (int face = 0; face < meshCellFaceCount; ++face) {
+                long neighId = mesh.getCellFaceNeighsLinearId(cellId, face);
+                if (neighId >= 0 && alreadyProcessed.count(neighId) == 0) {
+                    processList.insert(neighId);
+                }
+            }
+        } else {
+            const Cell &cell = mesh.getCell(cellId);
+            const long *neighbours = cell.getAdjacencies() ;
+            int nNeighbours = cell.getAdjacencyCount() ;
+            for (int n = 0; n < nNeighbours; ++n) {
+                long neighId = neighbours[n];
+                if (alreadyProcessed.count(neighId) == 0) {
+                    processList.insert(neighId);
+                }
             }
         }
     }
