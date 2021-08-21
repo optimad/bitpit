@@ -25,10 +25,11 @@
 # ifndef __BITPIT_LEVELSET_OCTREE_KERNEL_HPP__
 # define __BITPIT_LEVELSET_OCTREE_KERNEL_HPP__
 
+#include "levelSetKernel.hpp"
+
 namespace bitpit{
 
 class VolOctree;
-class LevelSetKernel ;
 
 class LevelSetOctreeKernel : public LevelSetKernel{
 
