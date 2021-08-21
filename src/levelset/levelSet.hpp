@@ -33,6 +33,7 @@
 # include <memory>
 
 # include "levelSetCommon.hpp"
+# include "levelSetObjectFactory.hpp"
 
 namespace bitpit{
 
