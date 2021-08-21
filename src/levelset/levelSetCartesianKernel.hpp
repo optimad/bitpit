@@ -25,11 +25,11 @@
 # ifndef __BITPIT_LEVELSET_CARTESIAN_KERNEL_HPP__
 # define __BITPIT_LEVELSET_CARTESIAN_KERNEL_HPP__
 
+#include "levelSetKernel.hpp"
 
 namespace bitpit{
 
 class VolCartesian;
-class LevelSetKernel;
 
 class LevelSetCartesianKernel : public LevelSetKernel{
 
