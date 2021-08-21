@@ -24,11 +24,10 @@
 
 # include <cassert>
 
+# include "bitpit_IO.hpp"
 # include "bitpit_common.hpp"
 # include "bitpit_operators.hpp"
-
-# include "logger.hpp"
-# include "adaption.hpp"
+# include "bitpit_patchkernel.hpp"
 
 # include "levelSetObject.hpp"
 # include "levelSetProxyObject.hpp"
