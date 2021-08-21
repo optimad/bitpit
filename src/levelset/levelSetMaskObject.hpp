@@ -29,11 +29,12 @@
 # include <vector>
 # include <set>
 
+#include "levelSetSegmentationObject.hpp"
+
 namespace bitpit{
 
 class PatchKernel;
 class SurfUnstructured;
-class LevelSetSegmentationObject;
 
 class LevelSetMaskObject : public LevelSetSegmentationObject {
 
