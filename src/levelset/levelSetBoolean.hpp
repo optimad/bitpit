@@ -30,6 +30,7 @@
 # include <vector>
 
 # include "levelSetCommon.hpp"
+# include "levelSetProxyObject.hpp"
 
 namespace bitpit{
 
