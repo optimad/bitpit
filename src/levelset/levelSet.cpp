@@ -649,12 +649,8 @@ void LevelSet::compute( const std::unordered_set<LevelSetObject *> &objectProces
             signPropagationObject = nullptr;
         }
 
-        // Flag propagated sign as dirty
-        //
-        // The propagated sign will be set as non-dirty by the sign propagator.
-        if (signPropagationObject) {
-            signPropagationObject->setSignStorageDirty(true);
-        }
+        // Clear the object
+        object->clear();
 
         // Compute levelset inside the narrowband
         object->computeNarrowBand(m_signedDistance) ;
