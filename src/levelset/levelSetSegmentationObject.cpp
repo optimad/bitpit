@@ -22,99 +22,18 @@
  *
 \*---------------------------------------------------------------------------*/
 
-# include <cassert>
+# define __BITPIT_LEVELSET_SEGMENTATION_OBJECT_SRC__
 
-# include "bitpit_common.hpp"
-# include "bitpit_operators.hpp"
-# include "bitpit_CG.hpp"
-# include "bitpit_surfunstructured.hpp"
-# include "bitpit_volcartesian.hpp"
-
-# include "levelSetKernel.hpp"
-# include "levelSetCartesianKernel.hpp"
-# include "levelSetOctreeKernel.hpp"
-
-# include "levelSetObject.hpp"
-# include "levelSetCachedObject.hpp"
 # include "levelSetSegmentationObject.hpp"
 
 namespace bitpit {
 
-/*!
-	@ingroup levelset
-	@interface LevelSetCachedObject
-	@brief Interface class for all objects which need to store the discrete values of levelset function.
-*/
+// Explicit instantization
+template class LevelSetSegmentationNarrowBandCacheBase<LevelSetExternalPiercedStorageManager>;
+template class LevelSetSegmentationNarrowBandCacheBase<LevelSetInternalPiercedStorageManager>;
 
-/*!
- * Constructor.
- */
-LevelSetSegmentationNarrowBandCache::LevelSetSegmentationNarrowBandCache() : LevelSetNarrowBandCache() {
-
-    m_supportIds     = addStorage<long>(getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_JOURNALED);
-    m_surfaceNormals = addStorage<std::array<double, 3>>(getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_JOURNALED);
-
-}
-
-/*!
- * Get the support id of the specified entry.
- *
- * \param itr is an iterator pointing to the entry
- * \result The support id of the specified entry.
- */
-long LevelSetSegmentationNarrowBandCache::getSupportId(const KernelIterator &itr) const {
-
-    std::size_t rawId = itr.getRawIndex();
-
-    return m_supportIds->rawAt(rawId);
-
-}
-
-/*!
- * Get the surface normal of the specified entry.
- *
- * \param itr is an iterator pointing to the entry
- * \result The surface normal of the specified entry.
- */
-const std::array<double, 3> & LevelSetSegmentationNarrowBandCache::getSurfaceNormal(const KernelIterator &itr) const {
-
-    std::size_t rawId = itr.getRawIndex();
-
-    return m_surfaceNormals->rawAt(rawId);
-
-}
-
-/*!
- * Set the specified cache entry.
- *
- * \param itr is an iterator pointing to the narrow band entry
- * \param value is the levelset value
- * \param gradient is the levelset gradient
- * \param supportId is the support id
- * \param normal is the surface normal at the projection point
- */
-void LevelSetSegmentationNarrowBandCache::set(const LevelSetNarrowBandCache::KernelIterator &itr, double value, const std::array<double, 3> &gradient, long supportId, const std::array<double, 3> &surfaceNormal) {
-
-    LevelSetNarrowBandCache::set(itr, value, gradient);
-
-    std::size_t rawId = itr.getRawIndex();
-
-    m_supportIds->rawAt(rawId)     = supportId;
-    m_surfaceNormals->rawAt(rawId) = surfaceNormal;
-
-}
-
-/*!
- * Exchanges the content of the cache with the content the specified other
- * cache.
- *
- * \param other is another cache whose content is swapped with that of this
- * cache
- */
-void LevelSetSegmentationNarrowBandCache::swap(LevelSetSegmentationNarrowBandCache &other) noexcept
-{
-    LevelSetNarrowBandCache::swap(other);
-}
+template class LevelSetSegmentationObject<LevelSetSegmentationNarrowBandCache<LevelSetExternalPiercedStorageManager>>;
+template class LevelSetSegmentationObject<LevelSetSegmentationNarrowBandCache<LevelSetInternalPiercedStorageManager>>;
 
 /*!
     @class      SegmentationKernel
@@ -552,734 +471,141 @@ std::array<double,3> SegmentationKernel::computeSegmentVertexNormal( const SurfU
 }
 
 /*!
-	@class      LevelSetSegmentation
-	@ingroup    levelset
-	@brief      Implements visitor pattern fo segmentated geometries
-*/
-
-/*!
  * Constructor
- * @param[in] id identifier of object
+ *
+ * \param kernel is the container associated with the storage manager
  */
-LevelSetSegmentationObject::LevelSetSegmentationObject(int id)
-    : LevelSetCachedObject(id),
-      m_segmentation(nullptr)
+LevelSetSegmentationNarrowBandCache<LevelSetExternalPiercedStorageManager>::LevelSetSegmentationNarrowBandCache(Kernel *kernel)
+    : LevelSetExternalPiercedStorageManager(kernel), LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>(kernel), LevelSetSegmentationNarrowBandCacheBase<LevelSetExternalPiercedStorageManager>()
 {
+    m_supportIds     = this->template addStorage<long>(this->getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_JOURNALED);
+    m_surfaceNormals = this->template addStorage<std::array<double, 3>>(this->getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_JOURNALED);
+}
+
+/*!
+ * Get a reference to the support id of the specified entry.
+ *
+ * \param itr is an iterator pointing to the entry
+ * \result The support id of the specified entry.
+ */
+long & LevelSetSegmentationNarrowBandCache<LevelSetExternalPiercedStorageManager>::getSupportId(const KernelIterator &itr)
+{
+    std::size_t rawId = itr.getRawIndex();
+
+    return m_supportIds->rawAt(rawId);
+}
+
+/*!
+ * Get the support id of the specified entry.
+ *
+ * \param itr is an iterator pointing to the entry
+ * \result The support id of the specified entry.
+ */
+long LevelSetSegmentationNarrowBandCache<LevelSetExternalPiercedStorageManager>::getSupportId(const KernelIterator &itr) const
+{
+    std::size_t rawId = itr.getRawIndex();
+
+    return m_supportIds->rawAt(rawId);
+}
+
+/*!
+ * Get a reference to the surface normal of the specified entry.
+ *
+ * \param itr is an iterator pointing to the entry
+ * \result The surface normal of the specified entry.
+ */
+std::array<double, 3> & LevelSetSegmentationNarrowBandCache<LevelSetExternalPiercedStorageManager>::getSurfaceNormal(const KernelIterator &itr)
+{
+    std::size_t rawId = itr.getRawIndex();
+
+    return m_surfaceNormals->rawAt(rawId);
+}
+
+/*!
+ * Get the surface normal of the specified entry.
+ *
+ * \param itr is an iterator pointing to the entry
+ * \result The surface normal of the specified entry.
+ */
+const std::array<double, 3> & LevelSetSegmentationNarrowBandCache<LevelSetExternalPiercedStorageManager>::getSurfaceNormal(const KernelIterator &itr) const
+{
+    std::size_t rawId = itr.getRawIndex();
+
+    return m_surfaceNormals->rawAt(rawId);
 }
 
 /*!
  * Constructor
- * @param[in] id identifier of object
- * @param[in] STL unique pointer to surface mesh
- * @param[in] featureAngle feature angle. If the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge
  */
-LevelSetSegmentationObject::LevelSetSegmentationObject( int id, std::unique_ptr<const SurfUnstructured> &&STL, double featureAngle) :LevelSetSegmentationObject(id) {
-    setSegmentation( std::move(STL), featureAngle );
+LevelSetSegmentationNarrowBandCache<LevelSetInternalPiercedStorageManager>::LevelSetSegmentationNarrowBandCache()
+    : LevelSetInternalPiercedStorageManager(), LevelSetNarrowBandCache<LevelSetInternalPiercedStorageManager>(), LevelSetSegmentationNarrowBandCacheBase<LevelSetInternalPiercedStorageManager>()
+{
+    m_supportIds     = this->template addStorage<long>(this->getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_JOURNALED);
+    m_surfaceNormals = this->template addStorage<std::array<double, 3>>(this->getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_JOURNALED);
 }
 
 /*!
- * Constructor
- * @param[in] id identifier of object
- * @param[in] STL pointer to surface mesh
- * @param[in] featureAngle feature angle; if the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge.
- */
-LevelSetSegmentationObject::LevelSetSegmentationObject( int id, const SurfUnstructured *STL, double featureAngle) :LevelSetSegmentationObject(id) {
-    setSegmentation( STL, featureAngle );
-}
-
-/*!
- * Clones the object
- * @return pointer to cloned object
- */
-LevelSetSegmentationObject * LevelSetSegmentationObject::clone() const {
-    return new LevelSetSegmentationObject( *this );
-}
-
-/*!
- * Set the segmentation
- * @param[in] surface pointer to surface
- * @param[in] featureAngle feature angle. If the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge
- */
-void LevelSetSegmentationObject::setSegmentation( const SurfUnstructured *surface, double featureAngle){
-
-    m_segmentation = std::make_shared<const SegmentationKernel>(surface, featureAngle);
-}
-
-/*!
- * Set the segmentation
- * @param[in,out] surface pointer to surface
- * @param[in] featureAngle feature angle. If the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge
- */
-void LevelSetSegmentationObject::setSegmentation( std::unique_ptr<const SurfUnstructured> &&surface, double featureAngle){
-
-    m_segmentation = std::make_shared<const SegmentationKernel>(std::move(surface), featureAngle);
-}
-
-/*!
- * Get a constant refernce to the segmentation
- * @return constant reference to the segmentation
- */
-const SegmentationKernel & LevelSetSegmentationObject::getSegmentation() const {
-    return *m_segmentation ;
-}
-
-/*!
- * Gets the closest support within the narrow band of cell
- * @param[in] id index of cell
- * @return closest segment in narrow band
- */
-int LevelSetSegmentationObject::getPart( long id ) const{
-
-    long supportId = getSupport(id);
-
-    if( supportId != levelSetDefaults::SUPPORT){
-        const SurfUnstructured &m_surface = m_segmentation->getSurface();
-        return m_surface.getCell(supportId).getPID();
-    } else { 
-        return levelSetDefaults::PART ;
-    }
-
-}
-
-/*!
- * Gets the surface normal at the projection point
- * @param[in] id index of cell
- * @return surface normal
- */
-std::array<double,3> LevelSetSegmentationObject::getNormal( long id ) const{
-
-    const LevelSetSegmentationNarrowBandCache *narrowBandCache = getNarrowBandCache();
-    LevelSetNarrowBandCache::KernelIterator narrowBandCacheItr = narrowBandCache->find(id) ;
-    if( narrowBandCacheItr != narrowBandCache->end() ){
-        return narrowBandCache->getSurfaceNormal(narrowBandCacheItr);
-    }
-
-    return levelSetDefaults::GRADIENT ;
-
-}
-
-
-/*!
- * Gets the closest support within the narrow band of cell
- * @param[in] id index of cell
- * @return closest segment in narrow band
- */
-long LevelSetSegmentationObject::getSupport( long id ) const{
-
-    const LevelSetSegmentationNarrowBandCache *narrowBandCache = getNarrowBandCache();
-    LevelSetNarrowBandCache::KernelIterator narrowBandCacheItr = narrowBandCache->find(id) ;
-    if( narrowBandCacheItr != narrowBandCache->end() ){
-        return narrowBandCache->getSupportId(narrowBandCacheItr);
-    }
-
-    return levelSetDefaults::SUPPORT ;
-
-}
-
-/*!
- * Get size of support triangle
- * @param[in] id cell id
- * @return charcteristic size of support triangle
- */
-double LevelSetSegmentationObject::getSurfaceFeatureSize( long id ) const {
-
-    long support = getSupport(id);
-    if (support == levelSetDefaults::SUPPORT) {
-        return (- levelSetDefaults::SIZE);
-    }
-
-    return getSegmentSize(support);
-}
-
-/*!
- * Get the sie of a segment
- * @param[in] id is the id of the segment
- * @return charcteristic size of the segment
- */
-double LevelSetSegmentationObject::getSegmentSize( long id ) const {
-
-    const SurfUnstructured &m_surface = m_segmentation->getSurface();
-
-    int spaceDimension = m_surface.getSpaceDimension();
-    if (spaceDimension == 2) {
-        return m_surface.evalCellArea(id); //TODO check
-    } else if (spaceDimension == 3) {
-        int dummy;
-        return m_surface.evalMinEdgeLength(id, dummy);
-    }
-
-    return (- levelSetDefaults::SIZE);
-}
-
-/*!
- * Get the smallest characterstic size within the triangultaion
- * @return smallest charcteristic size within the triangulation
- */
-double LevelSetSegmentationObject::getMinSurfaceFeatureSize( ) const {
-
-    const SurfUnstructured &m_surface = m_segmentation->getSurface();
-
-    bool   minimumValid = false;
-    double minimumSize  = levelSetDefaults::SIZE;
-    for( const Cell &cell : m_surface.getCells() ){
-        double segmentSize = getSegmentSize(cell.getId());
-        if (segmentSize < 0) {
-            continue;
-        }
-
-        minimumValid = true;
-        minimumSize  = std::min(segmentSize, minimumSize);
-    }
-
-    if (!minimumValid) {
-        minimumSize = - levelSetDefaults::SIZE;
-    }
-
-    return minimumSize;
-}
-
-/*!
- * Get the largest characterstic size within the triangultaion
- * @return largest charcteristic size within the triangulation
- */
-double LevelSetSegmentationObject::getMaxSurfaceFeatureSize( ) const {
-
-    const SurfUnstructured &m_surface = m_segmentation->getSurface();
-
-    double maximumSize = - levelSetDefaults::SIZE;
-    for( const Cell &cell : m_surface.getCells() ){
-        double segmentSize = getSegmentSize(cell.getId());
-        maximumSize = std::max(segmentSize, maximumSize);
-    }
-
-    return maximumSize;
-}
-
-/*!
- * Computes axis aligned global bounding box of object
- * @param[out] minP minimum point
- * @param[out] maxP maximum point
- */
-void LevelSetSegmentationObject::getBoundingBox( std::array<double,3> &minP, std::array<double,3> &maxP ) const {
-    const SurfUnstructured &m_surface = m_segmentation->getSurface();
-    m_surface.getBoundingBox(minP,maxP) ;
-}
-
-#if BITPIT_ENABLE_MPI
-/*!
- * Computes axis aligned bounding box of object
+ * Get a reference to the support id of the specified entry.
  *
- * The current process may only have the portion of the object needed for
- * evaluating the levelset on the interior cells, this function allows to
- * evaluate the overall bounding box across all process.
+ * \param itr is an iterator pointing to the entry
+ * \result The support id of the specified entry.
+ */
+long & LevelSetSegmentationNarrowBandCache<LevelSetInternalPiercedStorageManager>::getSupportId(const KernelIterator &itr)
+{
+    std::size_t rawId = itr.getRawIndex();
+
+    return m_supportIds->rawAt(rawId);
+}
+
+/*!
+ * Get the support id of the specified entry.
  *
- * @param[out] minP minimum point
- * @param[out] maxP maximum point
+ * \param itr is an iterator pointing to the entry
+ * \result The support id of the specified entry.
  */
-void LevelSetSegmentationObject::getGlobalBoundingBox( std::array<double,3> &minP, std::array<double,3> &maxP ) const {
-    getBoundingBox(minP, maxP);
+long LevelSetSegmentationNarrowBandCache<LevelSetInternalPiercedStorageManager>::getSupportId(const KernelIterator &itr) const
+{
+    std::size_t rawId = itr.getRawIndex();
 
-    if (m_kernel->getMesh()->isPartitioned()) {
-        MPI_Comm communicator = m_kernel->getCommunicator();
-
-        MPI_Allreduce(MPI_IN_PLACE, minP.data(), 3, MPI_DOUBLE, MPI_MIN, communicator);
-        MPI_Allreduce(MPI_IN_PLACE, maxP.data(), 3, MPI_DOUBLE, MPI_MAX, communicator);
-    }
-}
-#endif
-
-/*!
- * Computes the levelset function within the narrow band
- * @param[in] signd if signed- or unsigned- distance function should be calculated
- */
-void LevelSetSegmentationObject::computeNarrowBand(bool signd){
-
-    log::cout() << "Computing levelset within the narrow band... " << std::endl;
-
-    if( LevelSetCartesianKernel* lsCartesian = dynamic_cast<LevelSetCartesianKernel*>(m_kernel) ){
-        computeNarrowBand( lsCartesian, signd) ;
-
-    } else if ( LevelSetOctreeKernel* lsOctree = dynamic_cast<LevelSetOctreeKernel*>(m_kernel) ){
-        computeNarrowBand( lsOctree, signd) ;
-
-    }
+    return m_supportIds->rawAt(rawId);
 }
 
 /*!
- * Updates the levelset function within the narrow band after mesh adaptation.
- * @param[in] adaptionData are the information about the adaption
- * @param[in] signd if signed- or unsigned- distance function should be calculated
- */
-void LevelSetSegmentationObject::updateNarrowBand( const std::vector<adaption::Info> &adaptionData, bool signd){
-
-    log::cout() << "Updating levelset within the narrow band... " << std::endl;
-    if( LevelSetCartesianKernel* lsCartesian= dynamic_cast<LevelSetCartesianKernel*>(m_kernel) ){
-
-        // Update is not implemented for Cartesian patches
-        clear( ) ;
-        computeNarrowBand( lsCartesian, signd) ;
-        return;
-    }
-
-    if( LevelSetOctreeKernel* lsOctree = dynamic_cast<LevelSetOctreeKernel*>(m_kernel) ){
-        updateNarrowBand( lsOctree, adaptionData, signd ) ;
-        return;
-    }
-
-
-}
-
-/*!
- * Computes the levelset within the narrow band on an cartesian grid.
- * If the size of the narrow band has been set, the method will compute the
- * levelset values only of those cells within the threshold.
- * In case the size of the narrow band has not been set, levelset will be
- * evaluated only on the cells that intersect the surface and on all their
- * first neighbours.
- * @param[in] levelsetKernel the octree LevelSetKernel
- * @param[in] signd whether signed distance should be calculated
- */
-void LevelSetSegmentationObject::computeNarrowBand( LevelSetCartesianKernel *levelsetKernel, bool signd){
-
-    log::cout() << " Compute levelset on cartesian mesh"  << std::endl;
-
-    // Get mesh information
-    const VolCartesian &mesh = *(levelsetKernel->getCartesianMesh() ) ;
-    int meshDimension = mesh.getDimension();
-    VolCartesian::MemoryMode meshMemoryMode = mesh.getMemoryMode();
-
-    ElementType meshCellType = mesh.getCellType();
-    const ReferenceElementInfo &meshCellTypeInfo = ReferenceElementInfo::getInfo(meshCellType);
-    int meshCellFaceCount = meshCellTypeInfo.nFaces;
-
-    // Get surface information
-    const SurfUnstructured &surface = m_segmentation->getSurface();
-
-    // Define search radius
-    //
-    // Search radius should be equal to the maximum between the narrow band
-    // size and the diameter of the circumcircle. This guarantees that, when
-    // the narrow band size is equal or less than zero, the levelset will be
-    // evaluated on the cells that intersect the surface and on all their
-    // first neighbours.
-    double searchRadius = std::max(m_narrowBandSize, 2 * levelsetKernel->getCellCircumcircle());
-
-    // Define mesh bounding box
-    //
-    // The bounding box is inflated be the search radius.
-    std::array<double,3> meshMinPoint;
-    std::array<double,3> meshMaxPoint;
-    mesh.getBoundingBox(meshMinPoint, meshMaxPoint) ;
-    for (int d = 0; d < meshDimension; ++d) {
-        meshMinPoint[d] -= searchRadius;
-        meshMaxPoint[d] += searchRadius;
-    }
-
-    // Initialize process list
-    //
-    // Process list is initialized with cells that are certainly inside the
-    // narrow band. Those cells are the one that contain the vertices of the
-    // segments or the intersection between the segments and the bounding box
-    // of the patch.
-    std::unordered_set<long> processList;
-
-    std::vector<std::array<double,3>> intersectionPoints;
-    std::vector<std::array<double,3>> segmentVertexCoords;
-    for (const Cell &segment : surface.getCells()) {
-        // Get segment info
-        ConstProxyVector<long> segmentVertexIds = segment.getVertexIds();
-        std::size_t nSegmentVertices = segmentVertexIds.size();
-
-        // Get segment coordinates
-        segmentVertexCoords.resize(nSegmentVertices);
-        surface.getVertexCoords(nSegmentVertices, segmentVertexIds.data(), segmentVertexCoords.data());
-
-        // Add to the process list the cells that contain the vertices of the
-        // segment or the intersection between the segment and the bounding box
-        // of the patch.
-        int nInnerVertices = 0;
-        for (const std::array<double,3> &vertexPoint : segmentVertexCoords) {
-            long cellId = mesh.locatePoint(vertexPoint);
-            if (cellId < 0) {
-                continue;
-            }
-
-            processList.insert(cellId);
-            ++nInnerVertices;
-        }
-
-        if (nInnerVertices == 0) {
-            if (CGElem::intersectBoxPolygon(meshMinPoint, meshMaxPoint, segmentVertexCoords, false, true, true, intersectionPoints, meshDimension)) {
-                for (const std::array<double,3> &intersectionPoint : intersectionPoints){
-                    long cellId = mesh.locateClosestCell(intersectionPoint);
-                    processList.insert(cellId);
-                }
-            }
-        }
-    }
-
-    // Evaluate the levelset within the narrow band
-    //
-    // The initial process list is gradually expanded considering all the
-    // neighbours with a distance less than the search radius.
-    LevelSetSegmentationNarrowBandCache *narrowBandCache = getNarrowBandCache();
-
-    std::unordered_set<long> alreadyProcessed;
-    while (!processList.empty()) {
-        // Get the cell to process
-        long cellId = *(processList.begin());
-        processList.erase(cellId);
-        alreadyProcessed.insert(cellId);
-
-        // Find segment associated to the cell
-        const std::array<double,3> &cellCentroid = levelsetKernel->computeCellCentroid(cellId);
-
-        long segmentId;
-        double distance;
-        m_segmentation->getSearchTree().findPointClosestCell(cellCentroid, searchRadius, &segmentId, &distance);
-        if(segmentId < 0){
-            continue;
-        }
-
-        // Evaluate levelset information
-        std::array<double, 3> gradient;
-        std::array<double, 3> normal;
-        int error = m_segmentation->getSegmentInfo(cellCentroid, segmentId, signd, distance, gradient, normal);
-        if (error) {
-            throw std::runtime_error ("Unable to extract the levelset information from segment.");
-        }
-
-
-        LevelSetSegmentationNarrowBandCache::KernelIterator narrowBandCacheItr = narrowBandCache->insert(cellId, true) ;
-        narrowBandCache->set(narrowBandCacheItr, distance, gradient, segmentId, normal);
-
-        // Add cell neighbours to the process list
-        if (meshMemoryMode == VolCartesian::MEMORY_LIGHT) {
-            for (int face = 0; face < meshCellFaceCount; ++face) {
-                long neighId = mesh.getCellFaceNeighsLinearId(cellId, face);
-                if (neighId >= 0 && alreadyProcessed.count(neighId) == 0) {
-                    processList.insert(neighId);
-                }
-            }
-        } else {
-            const Cell &cell = mesh.getCell(cellId);
-            const long *neighbours = cell.getAdjacencies() ;
-            int nNeighbours = cell.getAdjacencyCount() ;
-            for (int n = 0; n < nNeighbours; ++n) {
-                long neighId = neighbours[n];
-                if (alreadyProcessed.count(neighId) == 0) {
-                    processList.insert(neighId);
-                }
-            }
-        }
-    }
-}
-
-/*!
- * Computes the levelset within the narrow band on an octree grid.
- * If the size of the narrow band has been set, the method will compute the
- * levelset values on the cells that intersect the surface, on all their
- * first neighbours and on the cells with a distance from the surface less
- * than the threshold.
- * In case the size of the narrow band has not been set, levelset will be
- * evaluated only on the cells that intersect the surface and on all their
- * first neighbours.
- * \param[in] levelsetKernel the octree LevelSetKernel
- * \param[in] signd whether signed distance should be calculated
- */
-void LevelSetSegmentationObject::computeNarrowBand( LevelSetOctreeKernel *levelsetKernel, bool signd){
-
-    VolumeKernel &mesh = *(levelsetKernel->getMesh()) ;
-
-    std::unordered_set<long> intersectedCells;
-
-    // Evaluate levelset information
-    LevelSetSegmentationNarrowBandCache *narrowBandCache = getNarrowBandCache();
-
-    for( const Cell &cell : mesh.getCells() ){
-
-        // Identify the segment associated with the cell
-        //
-        // The search radius is evaluated as the maximum value between the
-        // narroband size and the distance above which the cell will surely
-        // not intersect the surface. In this way, cells that intersect the
-        // surface are always included in the narrowband, even if their
-        // distance from the surface is greater than then narrowband size
-        // explicitly set by the user.
-        //
-        // If no segment is identified the cell is not processed.
-        long cellId = cell.getId();
-        const std::array<double,3> &cellCentroid = levelsetKernel->computeCellCentroid(cellId);
-        double cellCircumcircle = levelsetKernel->computeCellCircumcircle(cellId);
-
-        double searchRadius = std::max(m_narrowBandSize, cellCircumcircle);
-
-        long segmentId;
-        double distance;
-        m_segmentation->getSearchTree().findPointClosestCell(cellCentroid, searchRadius, &segmentId, &distance);
-        if(segmentId < 0){
-            continue;
-        }
-
-        // Evaluate levelset information
-        std::array<double,3> gradient;
-        std::array<double,3> normal;
-        int error = m_segmentation->getSegmentInfo(cellCentroid, segmentId, signd, distance, gradient, normal);
-        if (error) {
-            throw std::runtime_error ("Unable to extract the levelset information from segment.");
-        }
-
-        LevelSetSegmentationNarrowBandCache::KernelIterator narrowBandCacheItr = narrowBandCache->insert(cellId, true) ;
-        narrowBandCache->set(narrowBandCacheItr, distance, gradient, segmentId, normal);
-
-        // Update the list of cells that intersects the surface
-        //
-        // When the narrowband size is not explicitly set, the cell will always
-        // intersects the surface because only cells that intersect the surface
-        // are considered, otherwise we need to check if the absolute distance
-        // associated with the cell is lower than the intersection distance.
-        if (m_narrowBandSize < 0 || cellCircumcircle < std::abs(distance)) {
-            intersectedCells.insert(cellId);
-        }
-
-    }
-
-    // Process the neighbours of the cells that intersect the surface
-    //
-    // If a cell intersects the surface, we need to evaluate the levelset
-    // of all its neigbours.
-    for( long cellId : intersectedCells){
-
-        Cell const &cell = mesh.getCell(cellId);
-        
-        std::array<double,3> cellProjectionPoint = computeProjectionPoint(cellId);
-
-        const long *neighbours = cell.getAdjacencies() ;
-        int nNeighbours = cell.getAdjacencyCount() ;
-        for (int n = 0; n < nNeighbours; ++n) {
-            // Skip the neighbour if it has already been processed
-            //
-            // The neighbour may already have been processed either because
-            // it distance from the segmentation is within the search radius,
-            // or because is a neighbour of an intersected cells already
-            // processed.
-            long neighId = neighbours[n];
-            if( narrowBandCache->contains(neighId) ){
-                continue;
-            }
-
-            // Identify the segment associated with the neighbour
-            const std::array<double,3> &neighCentroid = levelsetKernel->computeCellCentroid(neighId);
-
-            double searchRadius = 1.05 * norm2(neighCentroid - cellProjectionPoint);
-
-            long segmentId;
-            double distance;
-            m_segmentation->getSearchTree().findPointClosestCell(neighCentroid, searchRadius, &segmentId, &distance);
-            if (segmentId < 0) {
-                assert(false && "Should not pass here");
-            }
-
-            // Evaluate negihbour leveset information
-            std::array<double,3> gradient;
-            std::array<double,3> normal;
-            int error = m_segmentation->getSegmentInfo(neighCentroid, segmentId, signd, distance, gradient, normal);
-            if (error) {
-                throw std::runtime_error ("Unable to extract the levelset information from segment.");
-            }
-
-            LevelSetSegmentationNarrowBandCache::KernelIterator narrowBandCacheItr = narrowBandCache->insert(neighId, true) ;
-            narrowBandCache->set(narrowBandCacheItr, distance, gradient, segmentId, normal);
-        }
-    }
-}
-
-/*!
- * Updates the levelset within the narrow band on an octree grid after an grid
- * adaption.
- * If the size of the narrow band has been set, the method will compute the
- * levelset values on the cells that intersect the surface, on all their
- * first neighbours and on the cells with a distance from the surface less
- * than the threshold.
- * In case the size of the narrow band has not been set, levelset will be
- * evaluated only on the cells that intersect the surface and on all their
- * first neighbours.
- * @param[in] levelsetKernel the octree LevelSetKernel
- * @param[in] adaptionData are the information about the adaption
- * @param[in] signd whether signed distance should be calculated
- */
-void LevelSetSegmentationObject::updateNarrowBand( LevelSetOctreeKernel *levelsetKernel, const std::vector<adaption::Info> &adaptionData, bool signd){
-
-    VolumeKernel &mesh = *(levelsetKernel->getMesh()) ;
-    LevelSetSegmentationNarrowBandCache *narrowBandCache = getNarrowBandCache();
-
-    std::vector<long> cellsOutsideNarrowband;
-
-    // Evaluate the levelset of the cells
-    //
-    // When searching for the segment associated to a cell, the search radius
-    // is evaluated as the maximum value between the narroband size and the
-    // distance above which the cell will surely not intersect the surface.
-    for( const adaption::Info &adaptionInfo : adaptionData ){
-
-        if( adaptionInfo.entity != adaption::Entity::ENTITY_CELL ){
-            continue;
-        }
-
-        if( adaptionInfo.type == adaption::Type::TYPE_PARTITION_SEND){
-            continue;
-        } else if( adaptionInfo.type == adaption::Type::TYPE_PARTITION_RECV){
-            continue;
-        }
-
-        for( long cellId : adaptionInfo.current ){
-
-            // Identify the segment associated with the cell
-            //
-            // The search radius is evaluated as the maximum value between the
-            // narroband size and the distance above which the cell will surely
-            // not intersect the surface. In this way, cells that intersect the
-            // surface are always included in the narrowband, even if their
-            // distance from the surface is greater than then narrowband size
-            // explicitly set by the user.
-            //
-            // If no segment is identified the cell is not processed.
-            const std::array<double,3> &centroid = levelsetKernel->computeCellCentroid(cellId);
-
-            double searchRadius = std::max(m_narrowBandSize, levelsetKernel->computeCellCircumcircle(cellId));
-
-            long segmentId;
-            double distance;
-            m_segmentation->getSearchTree().findPointClosestCell(centroid, searchRadius, &segmentId, &distance);
-            if (segmentId < 0) {
-                cellsOutsideNarrowband.push_back(cellId);
-                continue;
-            }
-
-            // Evaluate levelset information
-            std::array<double,3> gradient;
-            std::array<double,3> normal;
-            int error = m_segmentation->getSegmentInfo(centroid, segmentId, signd, distance, gradient, normal);
-            if (error) {
-                throw std::runtime_error ("Unable to extract the levelset information from segment.");
-            }
-
-            LevelSetSegmentationNarrowBandCache::KernelIterator narrowBandCacheItr = narrowBandCache->insert(cellId, true) ;
-            narrowBandCache->set(narrowBandCacheItr, distance, gradient, segmentId, normal);
-        }
-
-    }
-
-    // Cells with neighbours that intersect the surface need to be added to
-    // the narrowband even if they don't intersect the surface themself or
-    // have a distance from the surface greater than the narroband size.
-    for( long cellId : cellsOutsideNarrowband){
-        const Cell &cell = mesh.getCell(cellId);
-
-        // Consider only cells with a neighbour that intersects the surface
-        //
-        // Care must be take to use only information from cells inside the
-        // narrow band, that's because values outside the narrowband are not
-        // up-to-date at this stage.
-        const long *neighbours = cell.getAdjacencies() ;
-        int nNeighbours = cell.getAdjacencyCount() ;
-
-        long intersectedNeighId = Cell::NULL_ID;
-        for (int n = 0; n < nNeighbours; ++n) {
-            long neighId = neighbours[n];
-            if (!isInNarrowBand(neighId)) {
-                continue;
-            }
-
-            if( intersectSurface(neighId,LevelSetIntersectionMode::FAST_GUARANTEE_FALSE) == LevelSetIntersectionStatus::TRUE){
-                intersectedNeighId = neighId;
-                break;
-            }
-        }
-
-        if (intersectedNeighId == Cell::NULL_ID) {
-            continue;
-        }
-
-        // Identify the segment associated with the cell
-        const std::array<double,3> &cellCentroid = levelsetKernel->computeCellCentroid(cellId);
-        std::array<double,3> neighProjectionPoint = computeProjectionPoint(intersectedNeighId);
-
-        double searchRadius = 1.05 * norm2(cellCentroid - neighProjectionPoint);
-
-        long segmentId;
-        double distance;
-        m_segmentation->getSearchTree().findPointClosestCell(cellCentroid, searchRadius, &segmentId, &distance);
-        if (segmentId < 0) {
-            assert(false && "Should not pass here");
-            continue;
-        }
-
-        // Evaluate levelset information for the cell
-        std::array<double,3> gradient;
-        std::array<double,3> normal;
-        int error = m_segmentation->getSegmentInfo(cellCentroid, segmentId, signd, distance, gradient, normal);
-        if (error) {
-            throw std::runtime_error ("Unable to extract the levelset information from segment.");
-        }
-
-        LevelSetSegmentationNarrowBandCache::KernelIterator narrowBandCacheItr = narrowBandCache->insert(cellId, true) ;
-        narrowBandCache->set(narrowBandCacheItr, distance, gradient, segmentId, normal);
-    }
-}
-
-/*!
- * Computes the LevelSetInfo of a point
- * \param[in] coords coordinates of the point
- * \return the LevelSetInfo
- */
-LevelSetInfo LevelSetSegmentationObject::computeLevelSetInfo(const std::array<double,3> &coords) const {
-
-    long segmentId;
-    double distance;
-    std::array<double,3> gradient;
-    std::array<double,3> normal;
-
-    m_segmentation->getSearchTree().findPointClosestCell(coords, &segmentId, &distance);
-
-    int error = m_segmentation->getSegmentInfo(coords, segmentId, false, distance, gradient, normal);
-    if (error) {
-        throw std::runtime_error ("Unable to extract the levelset information from segment.");
-    }
-
-    return LevelSetInfo(distance,gradient);
-
-}
-
-/*!
- * Get a pointer to the segmentation storage.
+ * Get a reference to the surface normal of the specified entry.
  *
- * \result A pointer to the segmentation storage.
+ * \param itr is an iterator pointing to the entry
+ * \result The surface normal of the specified entry.
  */
-LevelSetSegmentationNarrowBandCache * LevelSetSegmentationObject::getNarrowBandCache() {
+std::array<double, 3> & LevelSetSegmentationNarrowBandCache<LevelSetInternalPiercedStorageManager>::getSurfaceNormal(const KernelIterator &itr)
+{
+    std::size_t rawId = itr.getRawIndex();
 
-    return static_cast<LevelSetSegmentationNarrowBandCache *>(LevelSetCachedObject::getNarrowBandCache());
-
+    return m_surfaceNormals->rawAt(rawId);
 }
 
 /*!
- * Get a constant pointer to the segmentation storage.
+ * Get the surface normal of the specified entry.
  *
- * \result A constant pointer to the segmentation storage.
+ * \param itr is an iterator pointing to the entry
+ * \result The surface normal of the specified entry.
  */
-const LevelSetSegmentationNarrowBandCache * LevelSetSegmentationObject::getNarrowBandCache() const {
+const std::array<double, 3> & LevelSetSegmentationNarrowBandCache<LevelSetInternalPiercedStorageManager>::getSurfaceNormal(const KernelIterator &itr) const
+{
+    std::size_t rawId = itr.getRawIndex();
 
-    return static_cast<const LevelSetSegmentationNarrowBandCache *>(LevelSetCachedObject::getNarrowBandCache());
-
+    return m_surfaceNormals->rawAt(rawId);
 }
-
 /*!
- * Create the storage for the narrow band data.
+ * Create the narrow band cache.
+ *
+ * @param ojbect is the levelset object for which the ache will be created
  */
-std::shared_ptr<LevelSetNarrowBandCache> LevelSetSegmentationObject::createNarrowBandCache() {
+std::shared_ptr<LevelSetSegmentationNarrowBandCache<LevelSetExternalPiercedStorageManager>> LevelSetNarrowBandCacheFactory<LevelSetSegmentationNarrowBandCache<LevelSetExternalPiercedStorageManager>>::create(LevelSetCachedObjectInterface<LevelSetSegmentationNarrowBandCache<LevelSetExternalPiercedStorageManager>> *object)
+{
+    VolumeKernel *mesh = object->getKernel()->getMesh();
+    PiercedVector<Cell, long> &cells = mesh->getCells();
 
-    return std::shared_ptr<LevelSetNarrowBandCache>(new LevelSetSegmentationNarrowBandCache());
-
+    return std::shared_ptr<LevelSetSegmentationNarrowBandCache<LevelSetExternalPiercedStorageManager>>(new LevelSetSegmentationNarrowBandCache<LevelSetExternalPiercedStorageManager>(&cells));
 }
 
 }

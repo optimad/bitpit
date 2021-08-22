@@ -22,42 +22,136 @@
  *
 \*---------------------------------------------------------------------------*/
 
-# if BITPIT_ENABLE_MPI
-# include <mpi.h>
-# include "bitpit_communications.hpp"
-# endif
+#define __BITPIT_LEVELSET_CACHED_SRC__
 
-# include "bitpit_operators.hpp"
-# include "bitpit_CG.hpp"
-# include "bitpit_patchkernel.hpp"
-# include "bitpit_volcartesian.hpp"
-# include "bitpit_voloctree.hpp"
-
-# include "levelSetKernel.hpp"
-# include "levelSetCartesianKernel.hpp"
-# include "levelSetOctreeKernel.hpp"
-# include "levelSetObject.hpp"
 # include "levelSetCachedObject.hpp"
-# include "levelSetSignPropagator.hpp"
-# include "levelSet.hpp"
+
+# include "bitpit_patchkernel.hpp"
 
 namespace bitpit {
 
+// Explicit instantization
+template class LevelSetNarrowBandCacheBase<LevelSetExternalPiercedStorageManager>;
+template class LevelSetNarrowBandCacheBase<LevelSetInternalPiercedStorageManager>;
+
+template class LevelSetCachedObjectInterface<LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>>;
+template class LevelSetCachedObjectInterface<LevelSetNarrowBandCache<LevelSetInternalPiercedStorageManager>>;
+
+template class LevelSetCachedObject<LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>>;
+template class LevelSetCachedObject<LevelSetNarrowBandCache<LevelSetInternalPiercedStorageManager>>;
 
 /*!
-	@ingroup levelset
-	@interface LevelSetNarrowBandCache
-	@brief Base class for defining narrow band caches.
-*/
-
-/*!
- * Constructor.
+ * Constructor
+ *
+ * \param kernel is the container associated with the storage manager
  */
-LevelSetNarrowBandCache::LevelSetNarrowBandCache() {
-
+LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>::LevelSetNarrowBandCache(Kernel *kernel)
+    : LevelSetExternalPiercedStorageManager(kernel), LevelSetNarrowBandCacheBase<LevelSetExternalPiercedStorageManager>()
+{
     m_values    = addStorage<double>(getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_JOURNALED);
     m_gradients = addStorage<std::array<double, 3>>(getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_JOURNALED);
 
+    m_narrowBandFlag = addStorage<char>(getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_JOURNALED);
+    m_narrowBandFlag->fill(0);
+}
+
+/*!
+ * Insert a kernel entry with the specified id.
+ *
+ * This function cannot be used.
+ *
+ * \param id is id of the entry
+ * \param sync controls if the storages will be synched
+ * \result A kernel iterator pointing to the newly created entry.
+ */
+LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>::KernelIterator LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>::insert(long id, bool sync)
+{
+    BITPIT_UNUSED(sync);
+
+    KernelIterator iterator = m_kernel->find(id);
+    std::size_t rawId = iterator.getRawIndex();
+
+    m_narrowBandFlag->rawAt(rawId) = 1;
+
+    return iterator;
+}
+
+/*!
+ * Erase from the kernel the entry with the specified id.
+ *
+ * This function cannot be used.
+ *
+ * \param id is id of the cell
+ * \param sync controls if the kernel will be synched
+ */
+void LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>::erase(long id, bool sync)
+{
+    BITPIT_UNUSED(sync);
+
+    KernelIterator iterator = m_kernel->find(id);
+    std::size_t rawId = iterator.getRawIndex();
+
+    m_narrowBandFlag->rawAt(rawId) = 0;
+}
+
+/*!
+ * Checks if the kernel contains an entry with the specified id.
+ *
+ * \param id is id of the entry
+ * \result Return true if kernel contains an entry with the specified id,
+ * false otherwise.
+ */
+bool LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>::contains(long id) const
+{
+    KernelIterator iterator = m_kernel->find(id);
+    std::size_t rawId = iterator.getRawIndex();
+
+    return (m_narrowBandFlag->rawAt(rawId) == 1);
+}
+
+/*!
+ * Get a kernel iterator for the entry with the specified id.
+ *
+ * \param id is id of the entry
+ * \result A kernel iterator pointing to the specified entry.
+ */
+LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>::KernelIterator LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>::find(long id) const
+{
+    KernelIterator iterator = m_kernel->find(id);
+    std::size_t rawId = iterator.getRawIndex();
+    if (m_narrowBandFlag->rawAt(rawId) == 0) {
+        return m_kernel->end();
+    }
+
+    return iterator;
+}
+
+/*!
+ * Get a kernel iterator for the entry with the specified raw id.
+ *
+ * \param rawId is raw id of the entry
+ * \result A kernel iterator pointing to the specified entry.
+ */
+LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>::KernelIterator LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>::rawFind(std::size_t rawId) const
+{
+    if (m_narrowBandFlag->rawAt(rawId) == 0) {
+        return m_kernel->end();
+    }
+
+     return m_kernel->rawFind(rawId);
+}
+
+/*!
+ * Get a reference to the levelset value of the specified entry.
+ *
+ * \param itr is an iterator pointing to the entry
+ * \result A reference to the levelset value of the specified entry.
+ */
+double & LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>::getValue(const KernelIterator &itr)
+{
+    std::size_t rawId = itr.getRawIndex();
+
+    return m_values->rawAt(rawId);
 }
 
 /*!
@@ -66,12 +160,24 @@ LevelSetNarrowBandCache::LevelSetNarrowBandCache() {
  * \param itr is an iterator pointing to the entry
  * \result The levelset value of the specified entry.
  */
-double LevelSetNarrowBandCache::getValue(const KernelIterator &itr) const {
-
+double LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>::getValue(const KernelIterator &itr) const
+{
     std::size_t rawId = itr.getRawIndex();
 
     return m_values->rawAt(rawId);
+}
 
+/*!
+ * Get a reference to the levelset gradient of the specified entry.
+ *
+ * \param itr is an iterator pointing to the entry
+ * \result A reference to the levelset gradient of the specified entry.
+ */
+std::array<double, 3> & LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>::getGradient(const KernelIterator &itr)
+{
+    std::size_t rawId = itr.getRawIndex();
+
+    return m_gradients->rawAt(rawId);
 }
 
 /*!
@@ -80,379 +186,145 @@ double LevelSetNarrowBandCache::getValue(const KernelIterator &itr) const {
  * \param itr is an iterator pointing to the entry
  * \result The levelset gradient of the specified entry.
  */
-const std::array<double, 3> & LevelSetNarrowBandCache::getGradient(const KernelIterator &itr) const {
-
+const std::array<double, 3> & LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>::getGradient(const KernelIterator &itr) const
+{
     std::size_t rawId = itr.getRawIndex();
 
     return m_gradients->rawAt(rawId);
-
 }
 
 /*!
- * Set the specified cache entry.
- *
- * \param itr is an iterator pointing to the cache entry
- * \param value is the levelset value
- * \param gradient is the levelset gradient
+ * Clear the kernel of the storage manager.
  */
-void LevelSetNarrowBandCache::set(const KernelIterator &itr, double value, const std::array<double, 3> &gradient) {
-
-    std::size_t rawId = itr.getRawIndex();
-
-    m_values->rawAt(rawId)    = value;
-    m_gradients->rawAt(rawId) = gradient;
-
-}
-
-/*!
- * Exchanges the content of the cache with the content the specified other
- * cache.
- *
- * \param other is another cache whose content is swapped with that of this
- * cache
- */
-void LevelSetNarrowBandCache::swap(LevelSetNarrowBandCache &other) noexcept
+void LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>::clearKernel()
 {
-    LevelSetInternalPiercedStorageManager::swap(other);
+    LevelSetNarrowBandCacheBase<LevelSetExternalPiercedStorageManager>::clearKernel();
 
-    std::swap(other.m_values, m_values);
-    std::swap(other.m_gradients, m_gradients);
+    m_narrowBandFlag->fill(0);
 }
 
 /*!
- * \ingroup levelset
- * \class LevelSetCachedObjectInterface
- * \brief The class LevelSetCachedObjectInterface allows to define objects
- * that cache narrow band information.
- */
-
-/*!
- * Initialize the cache.
- */
-LevelSetNarrowBandCache * LevelSetCachedObjectInterface::initializeNarrowBandCache()
-{
-    m_narrowBandCache = createNarrowBandCache();
-
-    return getNarrowBandCache();
-}
-
-/*!
- * Get a pointer to the cache.
- *
- * \result A pointer to the cache.
- */
-LevelSetNarrowBandCache * LevelSetCachedObjectInterface::getNarrowBandCache()
-{
-    return m_narrowBandCache.get();
-}
-
-/*!
- * Get a constant pointer to the cache.
- *
- * \result A constant pointer to the cache.
- */
-const LevelSetNarrowBandCache * LevelSetCachedObjectInterface::getNarrowBandCache() const
-{
-    return m_narrowBandCache.get();
-}
-
-/*!
- * Clear the storage.
- */
-void LevelSetCachedObjectInterface::clearNarrowBandCache()
-{
-    // Narrowband cache
-    if (m_narrowBandCache) {
-        m_narrowBandCache->clear();
-    }
-}
-
-/*!
- * Dump the storage.
+ * Dump the kernel of the storage manager.
  *
  * \param stream is the output stream
  */
-void LevelSetCachedObjectInterface::dumpNarrowBandCache(std::ostream &stream)
+void LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>::dumpKernel(std::ostream &stream)
 {
-    // Narrowband cache
-    if (m_narrowBandCache) {
-        m_narrowBandCache->dump( stream );
-    }
+    LevelSetNarrowBandCacheBase<LevelSetExternalPiercedStorageManager>::dumpKernel(stream);
+
+    m_narrowBandFlag->dump(stream);
 }
 
 /*!
- * Restore the storage.
+ * Restore the kernel of the storage manager.
  *
  * \param stream is the input stream
  */
-void LevelSetCachedObjectInterface::restoreNarrowBandCache(std::istream &stream)
+void LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>::restoreKernel(std::istream &stream)
 {
-    // Narrowband cache
-    if (m_narrowBandCache) {
-        m_narrowBandCache->restore( stream );
-    }
+    LevelSetNarrowBandCacheBase<LevelSetExternalPiercedStorageManager>::restore(stream);
+
+    m_narrowBandFlag->restore(stream);
 }
 
 /*!
- * Check if the specified cell lies within the narrow band and hence its
- * levelset is computed exactly.
+ * Exchanges the content of the storage manager with the content the specified
+ * other storage manager.
  *
- * \param[in] id is the cell id
- * \resutl Return true if the cell is in the narrow band, falst otherwise.
+ * \param other is another storage manager whose content is swapped with that
+ * of this storage manager
  */
-bool LevelSetCachedObjectInterface::isInNarrowBand(long id)const
+void LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>::swap(LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager> &other) noexcept
 {
-    return m_narrowBandCache->contains(id);
-}
+    LevelSetNarrowBandCacheBase<LevelSetExternalPiercedStorageManager>::swap(other);
 
-/*!
- * Exchanges the content of the object with the content the specified other
- * object.
- *
- * \param other is another object whose content is swapped with that of this
- * object
- */
-void LevelSetCachedObjectInterface::swap(LevelSetCachedObjectInterface &other) noexcept
-{
-    m_narrowBandCache.swap(other.m_narrowBandCache);
+    std::swap(other.m_narrowBandFlag, m_narrowBandFlag);
 }
-
-/*!
-	@ingroup levelset
-	@interface LevelSetCachedObject
-	@brief Interface class for all objects which need to store the discrete values of levelset function.
-*/
 
 /*!
  * Constructor
- * @param[in] id id assigned to object
  */
-LevelSetCachedObject::LevelSetCachedObject(int id)
-    : LevelSetObject(id)
+LevelSetNarrowBandCache<LevelSetInternalPiercedStorageManager>::LevelSetNarrowBandCache()
+    : LevelSetInternalPiercedStorageManager(), LevelSetNarrowBandCacheBase<LevelSetInternalPiercedStorageManager>()
 {
+    m_values    = addStorage<double>(getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_JOURNALED);
+    m_gradients = addStorage<std::array<double, 3>>(getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_JOURNALED);
 }
 
 /*!
- * Sets the kernel for the object
- * @param[in] kernel is the LevelSetKernel
+ * Get the levelset value of the specified entry.
+ *
+ * \param itr is an iterator pointing to the entry
+ * \result The levelset value of the specified entry.
  */
-void LevelSetCachedObject::setKernel(LevelSetKernel *kernel) {
+double LevelSetNarrowBandCache<LevelSetInternalPiercedStorageManager>::getValue(const KernelIterator &itr) const
+{
+    std::size_t rawId = itr.getRawIndex();
 
-    LevelSetObject::setKernel(kernel);
-
-    initializeNarrowBandCache();
-
+    return m_values->rawAt(rawId);
 }
 
 /*!
- * Create the storage for the narrow band data.
+ * Get a reference to the levelset value of the specified entry.
+ *
+ * \param itr is an iterator pointing to the entry
+ * \result A reference to the levelset value of the specified entry.
  */
-std::shared_ptr<LevelSetNarrowBandCache> LevelSetCachedObject::createNarrowBandCache() {
+double & LevelSetNarrowBandCache<LevelSetInternalPiercedStorageManager>::getValue(const KernelIterator &itr)
+{
+    std::size_t rawId = itr.getRawIndex();
 
-    return std::shared_ptr<LevelSetNarrowBandCache>(new LevelSetNarrowBandCache());
-
+    return m_values->rawAt(rawId);
 }
 
 /*!
- * Create the storage for sign propagation.
+ * Get the levelset gradient of the specified entry.
+ *
+ * \param itr is an iterator pointing to the entry
+ * \result The levelset gradient of the specified entry.
  */
-std::shared_ptr<LevelSetSignStorage> LevelSetCachedObject::createSignStorage() {
+const std::array<double, 3> & LevelSetNarrowBandCache<LevelSetInternalPiercedStorageManager>::getGradient(const KernelIterator &itr) const
+{
+    std::size_t rawId = itr.getRawIndex();
 
-    VolumeKernel *mesh = m_kernel->getMesh() ;
-    assert(mesh) ;
-
-    return std::shared_ptr<LevelSetSignStorage>(new LevelSetSignStorage(&(mesh->getCells())));
-
+    return m_gradients->rawAt(rawId);
 }
 
 /*!
- * Get LevelSetInfo of cell
- * @param[in] i cell idex
- * @return LevelSetInfo of cell
-*/
-LevelSetInfo LevelSetCachedObject::getLevelSetInfo( long id)const{
-
-    const LevelSetNarrowBandCache *narrowBandCache = getNarrowBandCache();
-    LevelSetNarrowBandCache::KernelIterator narrowBandCacheItr = narrowBandCache->find(id) ;
-    if( narrowBandCacheItr != narrowBandCache->end() ){
-        double value = narrowBandCache->getValue(narrowBandCacheItr);
-        const std::array<double, 3> &gradient = narrowBandCache->getGradient(narrowBandCacheItr);
-
-        return LevelSetInfo(value, gradient);
-    }
-
-    return LevelSetInfo();
-
-} 
-
-/*!
- * Get the levelset value of cell
- * @param[in] id cell id
- * @return levelset value in cell
+ * Get a reference to the levelset gradient of the specified entry.
+ *
+ * \param itr is an iterator pointing to the entry
+ * \result A reference to the levelset gradient of the specified entry.
  */
-double LevelSetCachedObject::getLS( long id)const {
+std::array<double, 3> & LevelSetNarrowBandCache<LevelSetInternalPiercedStorageManager>::getGradient(const KernelIterator &itr)
+{
+    std::size_t rawId = itr.getRawIndex();
 
-    return getValue(id);
-
+    return m_gradients->rawAt(rawId);
 }
 
 /*!
- * Get the levelset value of cell
- * @param[in] id cell id
- * @return levelset value in cell
+ * Exchanges the content of the storage manager with the content the specified
+ * other storage manager.
+ *
+ * \param other is another storage manager whose content is swapped with that
+ * of this storage manager
  */
-double LevelSetCachedObject::getValue( long id)const {
-
-    const LevelSetNarrowBandCache *narrowBandCache = getNarrowBandCache();
-    LevelSetNarrowBandCache::KernelIterator narrowBandCacheItr = narrowBandCache->find(id) ;
-    if( narrowBandCacheItr != narrowBandCache->end() ){
-        return narrowBandCache->getValue(narrowBandCacheItr);
-    }
-
-    return getSign(id) * levelSetDefaults::VALUE;
-
+void LevelSetNarrowBandCache<LevelSetInternalPiercedStorageManager>::swap(LevelSetNarrowBandCache<LevelSetInternalPiercedStorageManager> &other) noexcept
+{
+    LevelSetNarrowBandCacheBase<LevelSetInternalPiercedStorageManager>::swap(other);
 }
-
 /*!
- * Get the sign of the levelset function
- * @param[in] id cell id
- * @return sign of levelset
+ * Create the narrow band cache.
+ *
+ * @param ojbect is the levelset object for which the ache will be created
  */
-short LevelSetCachedObject::getSign( long id ) const {
+std::shared_ptr<LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>> LevelSetNarrowBandCacheFactory<LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>>::create(LevelSetCachedObjectInterface<LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>> *object)
+{
+    VolumeKernel *mesh = object->getKernel()->getMesh();
+    PiercedVector<Cell, long> &cells = mesh->getCells();
 
-    // Check if the sign can be evaluated from narrowband value
-    const LevelSetNarrowBandCache *narrowBandCache = getNarrowBandCache();
-    LevelSetNarrowBandCache::KernelIterator narrowBandCacheItr = narrowBandCache->find(id) ;
-    if( narrowBandCacheItr != narrowBandCache->end() ){
-        double value = narrowBandCache->getValue(narrowBandCacheItr);
-
-        return evalValueSign(value);
-    }
-
-    // Check if the sign can be evaluated from the propagation
-    if (!isSignStorageDirty()) {
-        const LevelSetSignStorage *propagatedSignStorage = getSignStorage();
-        LevelSetSignStorage::KernelIterator propagatedSignStorageItr = propagatedSignStorage->find(id);
-        LevelSetSignStorage::Sign propagatedSign = propagatedSignStorage->at(propagatedSignStorageItr);
-        if (propagatedSign != LevelSetSignStorage::SIGN_UNDEFINED) {
-            return static_cast<short>(propagatedSign);
-        }
-    }
-
-    // Unable to evaluate the sign
-    //
-    // The sign cannot be evaluated, let's return the defualt sign.
-    return levelSetDefaults::SIGN;
-
+    return std::shared_ptr<LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>>(new LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>(&cells));
 }
-
-/*!
- * Get the levelset gradient of cell
- * @param[in] id cell id
- * @return levelset gradient in cell 
- */
-std::array<double,3> LevelSetCachedObject::getGradient(long id) const {
-
-    const LevelSetNarrowBandCache *narrowBandCache = getNarrowBandCache();
-    LevelSetNarrowBandCache::KernelIterator narrowBandCacheItr = narrowBandCache->find(id) ;
-    if( narrowBandCacheItr != narrowBandCache->end() ){
-        return narrowBandCache->getGradient(narrowBandCacheItr);
-    }
-
-    return levelSetDefaults::GRADIENT;
-
-}
-
-/*! 
- * Deletes non-existing items after grid adaption.
- * @param[in] adaptionData are the information about the adaption
- */
-void LevelSetCachedObject::_clearAfterMeshAdaption( const std::vector<adaption::Info> &adaptionData ){
-
-    // Clear stale narrow band entries
-    LevelSetNarrowBandCache *narrowBandCache = getNarrowBandCache();
-    for (const adaption::Info &adaptionInfo : adaptionData) {
-        if (adaptionInfo.entity != adaption::Entity::ENTITY_CELL) {
-            continue;
-        }
-
-        for (long cellId : adaptionInfo.previous) {
-            if (narrowBandCache->contains(cellId)) {
-                narrowBandCache->erase(cellId, false);
-            }
-        }
-    }
-
-    narrowBandCache->syncStorages();
-
-}
-
-/*! 
- * Clears all levelset information
- */
-void LevelSetCachedObject::_clear( ){
-
-    // Clear narrow band entries
-    clearNarrowBandCache();
-
-    // Clear sign propgation storage
-    clearSignStorage();
-}
-
-/*!
- * Writes LevelSetCachedObject to stream in binary format
- * @param[in] stream output stream
- */
-void LevelSetCachedObject::_dump( std::ostream &stream ){
-
-    // Narrow band storage
-    dumpNarrowBandCache( stream );
-
-    // Stored sign
-    dumpSignStorage( stream );
-}
-
-/*!
- * Reads LevelSetCachedObject from stream in binary format
- * @param[in] stream output stream
- */
-void LevelSetCachedObject::_restore( std::istream &stream ){
-
-    // Narrow band storage
-    restoreNarrowBandCache( stream );
-
-    // Stored sign
-    restoreSignStorage( stream );
-}
-
-#if BITPIT_ENABLE_MPI
-
-/*!
- * Flushing of data to communication buffers for partitioning
- * Sign data is not written into the buffer, because sign storage is kept in
- * sync with the mesh, hence, when this function is called, entries associated
- * with the cells to send as already been deleted.
- * @param[in] sendList list of cells to be sent
- * @param[in,out] dataBuffer buffer for second communication containing data
- */
-void LevelSetCachedObject::_writeCommunicationBuffer( const std::vector<long> &sendList, SendBuffer &dataBuffer ){
-
-    getNarrowBandCache()->write(sendList, dataBuffer);
-}
-
-/*!
- * Processing of communication buffer into data structure
- * Sign data is not read from the buffer, because sign storage is kept in
- * sync with the mesh, hence, when the buffer is written, entries associated
- * with the cells to send as already been deleted.
- * @param[in] recvList list of cells to be received
- * @param[in,out] dataBuffer buffer containing the data
- */
-void LevelSetCachedObject::_readCommunicationBuffer( const std::vector<long> &recvList, RecvBuffer &dataBuffer ){
-
-    getNarrowBandCache()->read(recvList, dataBuffer);
-}
-
-#endif
 
 }
