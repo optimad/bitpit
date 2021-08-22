@@ -33,6 +33,7 @@
 # include "bitpit_containers.hpp"
 
 # include "levelSetBoundedObject.hpp"
+# include "levelSetKernel.hpp"
 # include "levelSetSignedObject.hpp"
 # include "levelSetStorage.hpp"
 
@@ -47,34 +48,101 @@ class RecvBuffer;
 
 class LevelSetObject;
 
-class LevelSetNarrowBandCache : public LevelSetInternalPiercedStorageManager
+template<typename storage_manager_t>
+class LevelSetNarrowBandCacheBase : public virtual storage_manager_t
 {
-    protected:
-    Storage<double>                            *m_values;    /** Levelset values of the cells inside the narrow band */
-    Storage<std::array<double, 3>>             *m_gradients; /** Levelset gradient of the cells inside the narrow band */
-
     public:
-    LevelSetNarrowBandCache();
+    using typename storage_manager_t::Kernel;
+    using typename storage_manager_t::KernelIterator;
+
+    template<typename T>
+    using Storage = typename storage_manager_t::template Storage<T>;
 
     bool isDirty() const = delete;
     void setDirty(bool dirty) = delete;
 
-    double                                      getValue(const KernelIterator &itr) const;
-    const std::array<double, 3> &               getGradient(const KernelIterator &itr) const;
+    virtual double &                            getValue(const KernelIterator &itr) = 0;
+    virtual double                              getValue(const KernelIterator &itr) const = 0;
+
+    virtual std::array<double, 3> &             getGradient(const KernelIterator &itr) = 0;
+    virtual const std::array<double, 3> &       getGradient(const KernelIterator &itr) const = 0;
 
     void                                        set(const KernelIterator &itr, double value, const std::array<double, 3> &gradient);
 
-    void                                        swap(LevelSetNarrowBandCache &other) noexcept;
+    void                                        swap(LevelSetNarrowBandCacheBase &other) noexcept;
+
+    protected:
+    Storage<double>                            *m_values;    /** Levelset values of the cells inside the narrow band */
+    Storage<std::array<double, 3>>             *m_gradients; /** Levelset gradient of the cells inside the narrow band */
+
+    LevelSetNarrowBandCacheBase();
 
 };
 
+template<typename storage_manager_t>
+class LevelSetNarrowBandCache : public virtual storage_manager_t, public virtual LevelSetNarrowBandCacheBase<storage_manager_t>
+{
+
+};
+
+template<>
+class LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager> : public virtual LevelSetExternalPiercedStorageManager, public virtual LevelSetNarrowBandCacheBase<LevelSetExternalPiercedStorageManager>
+{
+
+public:
+    LevelSetNarrowBandCache(Kernel *kernel);
+
+    KernelIterator insert(long id, bool sync = true) override;
+    void erase(long id, bool sync = true) override;
+
+    bool contains(long id) const override;
+
+    KernelIterator find(long id) const override;
+    KernelIterator rawFind(std::size_t) const override;
+
+    double &                            getValue(const KernelIterator &itr) override;
+    double                              getValue(const KernelIterator &itr) const override;
+
+    std::array<double, 3> &             getGradient(const KernelIterator &itr) override;
+    const std::array<double, 3> &       getGradient(const KernelIterator &itr) const override;
+
+    void swap(LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager> &other) noexcept;
+
+protected:
+    Storage<char> *m_narrowBandFlag; //! Flag that defines if the entry is inside the narrow band
+
+    void clearKernel() override;
+
+    void dumpKernel(std::ostream &stream) override;
+    void restoreKernel(std::istream &stream) override;
+
+};
+
+template<>
+class LevelSetNarrowBandCache<LevelSetInternalPiercedStorageManager> : public virtual LevelSetInternalPiercedStorageManager, public virtual LevelSetNarrowBandCacheBase<LevelSetInternalPiercedStorageManager>
+{
+
+public:
+    LevelSetNarrowBandCache();
+
+    double &                            getValue(const KernelIterator &itr) override;
+    double                              getValue(const KernelIterator &itr) const override;
+
+    std::array<double, 3> &             getGradient(const KernelIterator &itr) override;
+    const std::array<double, 3> &       getGradient(const KernelIterator &itr) const override;
+
+    void swap(LevelSetNarrowBandCache<LevelSetInternalPiercedStorageManager> &other) noexcept;
+
+};
+
+template<typename narrow_band_cache_t>
 class LevelSetCachedObjectInterface : public virtual LevelSetObjectInterface {
 
 public:
-    LevelSetNarrowBandCache * initializeNarrowBandCache();
+    narrow_band_cache_t * initializeNarrowBandCache();
 
-    virtual LevelSetNarrowBandCache * getNarrowBandCache();
-    virtual const LevelSetNarrowBandCache * getNarrowBandCache() const;
+    narrow_band_cache_t * getNarrowBandCache();
+    const narrow_band_cache_t * getNarrowBandCache() const;
 
     void clearNarrowBandCache();
 
@@ -86,16 +154,34 @@ public:
     void swap(LevelSetCachedObjectInterface &other) noexcept;
 
 protected:
-    std::shared_ptr<LevelSetNarrowBandCache> m_narrowBandCache; //! Narrow band cache
+    std::shared_ptr<narrow_band_cache_t> m_narrowBandCache; //! Narrow band cache
 
-    virtual std::shared_ptr<LevelSetNarrowBandCache> createNarrowBandCache() = 0;
+    LevelSetCachedObjectInterface() = default;
 
 };
 
-class LevelSetCachedObject : public LevelSetObject, public LevelSetCachedObjectInterface, public LevelSetSignedObjectInterface {
+template<typename narrow_band_cache_t>
+class LevelSetNarrowBandCacheFactory
+{
+
+public:
+    static std::shared_ptr<narrow_band_cache_t> create(LevelSetCachedObjectInterface<narrow_band_cache_t> *object);
+
+};
+
+template<>
+class LevelSetNarrowBandCacheFactory<LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>>
+{
+
+public:
+    static std::shared_ptr<LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>> create(LevelSetCachedObjectInterface<LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>> *object);
+
+};
+
+template<typename narrow_band_cache_t>
+class LevelSetCachedObject : public LevelSetObject, public LevelSetCachedObjectInterface<narrow_band_cache_t>, public LevelSetSignedObjectInterface {
 
     protected:
-
     void                                        _clear( ) override ;
 
     void                                        _clearAfterMeshAdaption(const std::vector<adaption::Info> & ) override ;
@@ -107,8 +193,6 @@ class LevelSetCachedObject : public LevelSetObject, public LevelSetCachedObjectI
     void                                        _writeCommunicationBuffer( const std::vector<long> &, SendBuffer & ) override ;
     void                                        _readCommunicationBuffer( const std::vector<long> &, RecvBuffer & )  override;
 # endif 
-
-    std::shared_ptr<LevelSetNarrowBandCache>    createNarrowBandCache() override;
 
     std::shared_ptr<LevelSetSignStorage>        createSignStorage() override;
 
@@ -125,8 +209,25 @@ class LevelSetCachedObject : public LevelSetObject, public LevelSetCachedObjectI
 
 };
 
+}
 
+// Include template implementations
+# include "levelSetCachedObject.tpp"
+
+// Explicit instantization
+#ifndef __BITPIT_LEVELSET_CACHED_SRC__
+namespace bitpit {
+
+extern template class LevelSetNarrowBandCacheBase<LevelSetExternalPiercedStorageManager>;
+extern template class LevelSetNarrowBandCacheBase<LevelSetInternalPiercedStorageManager>;
+
+extern template class LevelSetCachedObjectInterface<LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>>;
+extern template class LevelSetCachedObjectInterface<LevelSetNarrowBandCache<LevelSetInternalPiercedStorageManager>>;
+
+extern template class LevelSetCachedObject<LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>>;
+extern template class LevelSetCachedObject<LevelSetNarrowBandCache<LevelSetInternalPiercedStorageManager>>;
 
 }
+#endif
 
 #endif 

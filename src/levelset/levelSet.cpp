@@ -41,6 +41,7 @@
 # include "levelSetSignedObject.hpp"
 # include "levelSetSignPropagator.hpp"
 # include "levelSetMaskObject.hpp"
+# include "levelSetObjectFactory.hpp"
 
 # include "levelSet.hpp"
 
@@ -62,14 +63,26 @@ namespace bitpit {
  * The user may set the size of the narrow band explicitly.
  * Alternatively LevelSet will guarantee a least on cell center with exact levelset values across the zero-levelset iso-surface.
  *
+ * LevelSet can use two types of storages: sparse or dense. When sparse storage
+ * is used, objects will only allocate space for storing information of cells
+ * that are inside the narrow band. Instead, when dense storage is used, objects
+ * will still evaluate information only for cells inside the narrow band, but
+ * they will allocate space for all cells of the mesh. If the narrow band covers
+ * a large portion of the domain, it will be more efficient to allocate space
+ * for all the cells of the mesh, rather than keep track of the cells inside
+ * the narrow band and store space only for those cells.
+ *
  * LevelSet will test if the underlying mesh can provide a MPI communicator.
  * In case LevelSet is parallelized according the underlying mesh partitioning.
 */
 
 /*!
  * Default constructor
+ *
+ * \param storageType is the storage type that will be used for storing
+ * levelset information.
  */
-LevelSet::LevelSet() {
+LevelSet::LevelSet(LevelSetStorageType storageType) : m_storageType(storageType) {
 
     m_objects.clear() ;
 
@@ -78,6 +91,14 @@ LevelSet::LevelSet() {
     m_signedDistance = true ;
     m_propagateSign  = false;
 
+}
+
+/*!
+ * Get the storage type that will be used for storing levelset information.
+ * @return storage type that will be used for storing levelset information
+*/
+LevelSetStorageType LevelSet::getStorageType() const{
+    return m_storageType ;
 }
 
 /*!
@@ -136,6 +157,7 @@ std::unique_ptr<LevelSetKernel> LevelSet::createKernel( VolOctree* octree ) {
 
 /*!
  * Adds a segmentation object
+ * Objects can be added to the levelset only after setting the mesh.
  * @param[in] segmentation surface segmentation
  * @param[in] angle feature angle
  * @param[in] id identifier of object; in case no id is provided the insertion
@@ -143,13 +165,14 @@ std::unique_ptr<LevelSetKernel> LevelSet::createKernel( VolOctree* octree ) {
  */
 int LevelSet::addObject( std::unique_ptr<SurfUnstructured> &&segmentation, double angle, int id ) {
 
-    std::unique_ptr<LevelSetObject> object = LevelSetObjectFactory::createSegmentationObject(m_kernel.get(), id, std::move(segmentation), angle ) ;
+    std::unique_ptr<LevelSetObject> object = LevelSetObjectFactory::createSegmentationObject<LevelSetSegmentationNarrowBandCache, int &, std::unique_ptr<SurfUnstructured> &&, double &>(m_kernel.get(), m_storageType, id, std::move(segmentation), angle ) ;
 
     return registerObject(std::move(object));
 }
 
 /*!
  * Adds a segmentation object
+ * Objects can be added to the levelset only after setting the mesh.
  * @param[in] segmentation surface segmentation
  * @param[in] angle feature angle
  * @param[in] id identifier of object; in case no id is provided the insertion
@@ -157,13 +180,14 @@ int LevelSet::addObject( std::unique_ptr<SurfUnstructured> &&segmentation, doubl
  */
 int LevelSet::addObject( SurfUnstructured *segmentation, double angle, int id ) {
 
-    std::unique_ptr<LevelSetObject> object = LevelSetObjectFactory::createSegmentationObject( m_kernel.get(), id, segmentation, angle ) ;
+    std::unique_ptr<LevelSetObject> object = LevelSetObjectFactory::createSegmentationObject<LevelSetSegmentationNarrowBandCache, int &, SurfUnstructured * &, double &>( m_kernel.get(), m_storageType, id, segmentation, angle ) ;
 
     return registerObject(std::move(object));
 }
 
 /*!
  * Adds a segmentation object
+ * Objects can be added to the levelset only after setting the mesh.
  * @param[in] segmentation surface segmentation
  * @param[in] angle feature angle
  * @param[in] id identifier of object; in case no id is provided the insertion
@@ -179,13 +203,14 @@ int LevelSet::addObject( std::unique_ptr<SurfaceKernel> &&segmentation, double a
     segmentation.release();
     std::unique_ptr<SurfUnstructured> surfUnstructuredUPtr = std::unique_ptr<SurfUnstructured>(surfUnstructured) ;
 
-    std::unique_ptr<LevelSetObject> object = LevelSetObjectFactory::createSegmentationObject( m_kernel.get(), id, std::move(surfUnstructuredUPtr), angle ) ;
+    std::unique_ptr<LevelSetObject> object = LevelSetObjectFactory::createSegmentationObject<LevelSetSegmentationNarrowBandCache, int &, std::unique_ptr<SurfUnstructured> &&, double &>( m_kernel.get(), m_storageType, id, std::move(surfUnstructuredUPtr), angle ) ;
 
     return registerObject(std::move(object));
 }
 
 /*!
  * Adds a segmentation object
+ * Objects can be added to the levelset only after setting the mesh.
  * @param[in] segmentation surface segmentation
  * @param[in] angle feature angle
  * @param[in] id identifier of object; in case no id is provided the insertion
@@ -198,13 +223,14 @@ int LevelSet::addObject( SurfaceKernel *segmentation, double angle, int id ) {
         throw std::runtime_error ("Segmentation type not supported");
     }
 
-    std::unique_ptr<LevelSetObject> object = LevelSetObjectFactory::createSegmentationObject( m_kernel.get(), id, surfUnstructured, angle ) ;
+    std::unique_ptr<LevelSetObject> object = LevelSetObjectFactory::createSegmentationObject<LevelSetSegmentationNarrowBandCache, int &, SurfUnstructured * &, double &>( m_kernel.get(), m_storageType, id, surfUnstructured, angle ) ;
 
     return registerObject(std::move(object));
 }
 
 /*!
  * Adds a boolean operation between two objects
+ * Objects can be added to the levelset only after setting the mesh.
  * @param[in] operation boolean operation
  * @param[in] id1 id of first operand
  * @param[in] id2 id of second operand
@@ -216,13 +242,14 @@ int LevelSet::addObject( LevelSetBooleanOperation operation, int id1, int id2, i
     LevelSetObject *ptr1 = m_objects.at(id1).get() ;
     LevelSetObject *ptr2 = m_objects.at(id2).get() ;
 
-    std::unique_ptr<LevelSetObject> object = LevelSetObjectFactory::createBooleanObject( m_kernel.get(), id, operation, ptr1, ptr2 ) ;
+    std::unique_ptr<LevelSetObject> object = LevelSetObjectFactory::createBooleanObject( m_kernel.get(), m_storageType, id, operation, ptr1, ptr2 ) ;
 
     return registerObject(std::move(object));
 }
 
 /*!
  * Adds a boolean operation between that will be applied recursivly to a series of objects
+ * Objects can be added to the levelset only after setting the mesh.
  * @param[in] operation boolean operation
  * @param[in] ids vector with indices of operand objects
  * @param[in] id id to be assigned to object. In case default value is passed the insertion order will be used as identifier
@@ -235,13 +262,13 @@ int LevelSet::addObject( LevelSetBooleanOperation operation, const std::vector<i
         ptr.push_back( m_objects.at(id).get() );
     }
 
-    std::unique_ptr<LevelSetObject> object = LevelSetObjectFactory::createBooleanObject( m_kernel.get(), id, operation, ptr ) ;
+    std::unique_ptr<LevelSetObject> object = LevelSetObjectFactory::createBooleanObject( m_kernel.get(), m_storageType, id, operation, ptr ) ;
 
     return registerObject(std::move(object));
 }
 /*!
  * Adds a LevelSetMask object composed of the external envelope of a list of mesh cells.
- * The function setMesh() must have been called prior.
+ * Objects can be added to the levelset only after setting the mesh.
  * @param[in] list list of indices of cells
  * @param[in] id id to be assigned to object. In case default value is passed the insertion order will be used as identifier
  * @return identifier of new object
@@ -250,14 +277,14 @@ int LevelSet::addObject( const std::unordered_set<long> &list, int id ) {
 
     assert(m_kernel && " levelset: setMesh must be called befor adding a mask object ");
 
-    std::unique_ptr<LevelSetObject> object = LevelSetObjectFactory::createMaskObject( m_kernel.get(), id, list, *m_kernel->getMesh() ) ;
+    std::unique_ptr<LevelSetObject> object = LevelSetObjectFactory::createMaskObject<LevelSetMaskNarrowBandCache, int &, const std::unordered_set<long> &, const VolumeKernel &>( m_kernel.get(), m_storageType, id, list, *m_kernel->getMesh() ) ;
 
     return registerObject(std::move(object));
 }
 
 /*!
  * Adds a LevelSetMask object composed of a list of interfaces
- * The function setMesh() must have been called prior.
+ * Objects can be added to the levelset only after setting the mesh.
  * @param[in] list list of indices of interfaces
  * @param[in] refInterface id of reference interface
  * @param[in] invert if orientation should be inverted with respect to the reference interface
@@ -268,13 +295,14 @@ int LevelSet::addObject( const std::vector<long> &list, long refInterface, bool 
 
     assert(m_kernel && " levelset: setMesh must be called befor adding a mask object ");
 
-    std::unique_ptr<LevelSetObject> object = LevelSetObjectFactory::createMaskObject( m_kernel.get(), id, list, refInterface, invert, *m_kernel->getMesh() ) ;
+    std::unique_ptr<LevelSetObject> object = LevelSetObjectFactory::createMaskObject<LevelSetMaskNarrowBandCache, int &, const std::vector<long> &, long &, bool &, const VolumeKernel &>( m_kernel.get(), m_storageType, id, list, refInterface, invert, *m_kernel->getMesh() ) ;
 
     return registerObject(std::move(object));
 };
 
 /*!
  * Adds a generic LevelSetObject
+ * Objects can be added to the levelset only after setting the mesh.
  * @param[in] object generic object
  * @return the index associated to the object
  */
@@ -415,8 +443,8 @@ void LevelSet::makeObjectImmutable( int id ) {
     }
 
     // Create the immutable object
-    std::unique_ptr<LevelSetObject> immutableObject = LevelSetObjectFactory::createImmutableObject(m_kernel.get(), object) ;
-    assert(immutableObject);
+    std::unique_ptr<LevelSetObject> immutableObject = LevelSetObjectFactory::createImmutableObject<LevelSetImmutableNarrowBandCache>( m_kernel.get(), m_storageType, object ) ;
+    assert( immutableObject );
 
     // Update referring objects
     for (int referringProxyObjectId : referringProxyObjectIds) {
@@ -444,7 +472,7 @@ void LevelSet::makeObjectImmutable( int id ) {
 void LevelSet::setObjectProcessingOrder( int id ) {
 
     // Immutable objects are not processed.
-    if (dynamic_cast<const LevelSetImmutableObject*>(getObjectPtr(id))) {
+    if (dynamic_cast<const LevelSetImmutableObjectBase*>(getObjectPtr(id))) {
         return;
     }
 
@@ -481,7 +509,7 @@ void LevelSet::setObjectProcessingOrder( int id ) {
 void LevelSet::unsetObjectProcessingOrder(int id){
 
     // Immutable objects are not processed.
-    if (dynamic_cast<const LevelSetImmutableObject*>(getObjectPtr(id))) {
+    if (dynamic_cast<const LevelSetImmutableObjectBase*>(getObjectPtr(id))) {
         return;
     }
 
@@ -989,6 +1017,8 @@ void LevelSet::dump( std::ostream &stream ){
 
     m_objectIdentifierGenerator.dump(stream);
 
+    utils::binary::write(stream, m_storageType);
+
     utils::binary::write(stream, m_objectsProcessingOrder);
     utils::binary::write(stream, m_narrowBandSize);
     utils::binary::write(stream, m_signedDistance);
@@ -1006,6 +1036,8 @@ void LevelSet::dump( std::ostream &stream ){
 void LevelSet::restore( std::istream &stream ){
 
     m_objectIdentifierGenerator.restore(stream);
+
+    utils::binary::read(stream, m_storageType);
 
     utils::binary::read(stream, m_objectsProcessingOrder);
     utils::binary::read(stream, m_narrowBandSize);

@@ -33,7 +33,6 @@
 # include <memory>
 
 # include "levelSetCommon.hpp"
-# include "levelSetObjectFactory.hpp"
 
 namespace bitpit{
 
@@ -52,6 +51,8 @@ class LevelSetObject;
 class LevelSet{
 
     private:
+    LevelSetStorageType m_storageType; /**< Storage type to be used for storing levelset information */
+
     IndexGenerator<long> m_objectIdentifierGenerator; /**< Object identifier generator */
 
     std::unique_ptr<LevelSetKernel>                             m_kernel ;            /**< LevelSet computational kernel */
@@ -84,10 +85,12 @@ class LevelSet{
     std::unordered_set<LevelSetObject *> getObjectProcessList(std::size_t nObjects, const int *objectIds) const ;
 
     public:
-    LevelSet() ;
+    LevelSet(LevelSetStorageType storageType = LevelSetStorageType::SPARSE) ;
 
     LevelSet(LevelSet&& other) = default;
     void                    clear();
+
+    LevelSetStorageType     getStorageType() const ;
 
     void                    setMesh( VolumeKernel* ) ;
 
