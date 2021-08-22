@@ -31,9 +31,15 @@
 # include <unordered_set>
 # include <unordered_map>
 
+#include "bitpit_CG.hpp"
 #include "bitpit_surfunstructured.hpp"
+#include "bitpit_volcartesian.hpp"
+#include "bitpit_voloctree.hpp"
 
 #include "levelSetCommon.hpp"
+#include "levelSetCachedObject.hpp"
+#include "levelSetCartesianKernel.hpp"
+#include "levelSetOctreeKernel.hpp"
 
 namespace bitpit{
 
@@ -44,11 +50,6 @@ class SurfaceSkdTree;
 
 class SendBuffer;
 class RecvBuffer;
-
-class LevelSetKernel;
-class LevelSetCartesianKernel;
-class LevelSetOctreeKernel;
-class LevelSetCachedObject;
 
 class SegmentationKernel {
 
@@ -93,26 +94,82 @@ private:
 
 };
 
-class LevelSetSegmentationNarrowBandCache : public LevelSetNarrowBandCache
+template<typename storage_manager_t>
+class LevelSetSegmentationNarrowBandCacheBase : public virtual LevelSetNarrowBandCacheBase<storage_manager_t>
 {
-    protected:
-    Storage<long>                              *m_supportIds;      /** Support ids of the cells inside the narrow band */
-    Storage<std::array<double,3>>              *m_surfaceNormals;  /** Surface normal associated with the cells inside the narrow band */
-
     public:
-    LevelSetSegmentationNarrowBandCache();
+    using typename LevelSetNarrowBandCacheBase<storage_manager_t>::Kernel;
+    using typename LevelSetNarrowBandCacheBase<storage_manager_t>::KernelIterator;
 
-    long                                        getSupportId(const KernelIterator &itr) const;
-    const std::array<double, 3> &               getSurfaceNormal(const KernelIterator &itr) const;
+    template<typename T>
+    using Storage = typename LevelSetNarrowBandCache<storage_manager_t>::template Storage<T>;
+
+    LevelSetSegmentationNarrowBandCacheBase();
+
+    virtual long &                                      getSupportId(const KernelIterator &itr) = 0;
+    virtual long                                        getSupportId(const KernelIterator &itr) const = 0;
+
+    virtual std::array<double, 3> &                     getSurfaceNormal(const KernelIterator &itr) = 0;
+    virtual const std::array<double, 3> &               getSurfaceNormal(const KernelIterator &itr) const = 0;
 
     void                                        set(const KernelIterator &itr, double value, const std::array<double, 3> &gradient) = delete ;
     void                                        set(const KernelIterator &itr, double value, const std::array<double, 3> &gradient, long semgnetId, const std::array<double, 3> &surfaceNormal) ;
 
-    void                                        swap(LevelSetSegmentationNarrowBandCache &other) noexcept;
+    void                                        swap(LevelSetSegmentationNarrowBandCacheBase &other) noexcept;
+
+    protected:
+    Storage<long>                              *m_supportIds;      /** Support ids of the cells inside the narrow band */
+    Storage<std::array<double,3>>              *m_surfaceNormals;  /** Surface normal associated with the cells inside the narrow band */
 
 };
 
-class LevelSetSegmentationObject : public LevelSetCachedObject, public LevelSetBoundedObject {
+template<typename storage_manager_t>
+class LevelSetSegmentationNarrowBandCache : public virtual storage_manager_t, public virtual LevelSetNarrowBandCache<storage_manager_t>, public virtual LevelSetSegmentationNarrowBandCacheBase<storage_manager_t>
+{
+
+};
+
+template<>
+class LevelSetSegmentationNarrowBandCache<LevelSetExternalPiercedStorageManager> : public virtual LevelSetExternalPiercedStorageManager, public virtual LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>, public virtual LevelSetSegmentationNarrowBandCacheBase<LevelSetExternalPiercedStorageManager>
+{
+
+public:
+    LevelSetSegmentationNarrowBandCache(Kernel *kernel);
+
+    long &                                      getSupportId(const KernelIterator &itr) override;
+    long                                        getSupportId(const KernelIterator &itr) const override;
+
+    std::array<double, 3> &                     getSurfaceNormal(const KernelIterator &itr) override;
+    const std::array<double, 3> &               getSurfaceNormal(const KernelIterator &itr) const override;
+
+};
+
+template<>
+class LevelSetSegmentationNarrowBandCache<LevelSetInternalPiercedStorageManager> : public virtual LevelSetInternalPiercedStorageManager, public virtual LevelSetNarrowBandCache<LevelSetInternalPiercedStorageManager>, public virtual LevelSetSegmentationNarrowBandCacheBase<LevelSetInternalPiercedStorageManager>
+{
+
+public:
+    LevelSetSegmentationNarrowBandCache();
+
+    long &                                      getSupportId(const KernelIterator &itr) override;
+    long                                        getSupportId(const KernelIterator &itr) const override;
+
+    std::array<double, 3> &                     getSurfaceNormal(const KernelIterator &itr) override;
+    const std::array<double, 3> &               getSurfaceNormal(const KernelIterator &itr) const override;
+
+};
+
+template<>
+class LevelSetNarrowBandCacheFactory<LevelSetSegmentationNarrowBandCache<LevelSetExternalPiercedStorageManager>>
+{
+
+public:
+    static std::shared_ptr<LevelSetSegmentationNarrowBandCache<LevelSetExternalPiercedStorageManager>> create(LevelSetCachedObjectInterface<LevelSetSegmentationNarrowBandCache<LevelSetExternalPiercedStorageManager>> *object);
+
+};
+
+template<typename narrow_band_cache_t>
+class LevelSetSegmentationObject : public LevelSetCachedObject<narrow_band_cache_t>, public LevelSetBoundedObject {
 
     private:
     std::shared_ptr<const SegmentationKernel> m_segmentation;
@@ -132,11 +189,8 @@ class LevelSetSegmentationObject : public LevelSetCachedObject, public LevelSetB
     void                                        updateNarrowBand(const std::vector<adaption::Info> &, bool) override;
     void                                        updateNarrowBand(LevelSetOctreeKernel *, const std::vector<adaption::Info> &, bool);
 
-    LevelSetSegmentationNarrowBandCache *       getNarrowBandCache() override ;
-    const LevelSetSegmentationNarrowBandCache * getNarrowBandCache() const override ;
-    std::shared_ptr<LevelSetNarrowBandCache>    createNarrowBandCache() override ;
-
     public:
+
     LevelSetSegmentationObject(int);
     LevelSetSegmentationObject(int, std::unique_ptr<const SurfUnstructured> &&, double featureAngle = 2. * BITPIT_PI);
     LevelSetSegmentationObject(int, const SurfUnstructured*, double featureAngle = 2. * BITPIT_PI);
@@ -160,8 +214,25 @@ class LevelSetSegmentationObject : public LevelSetCachedObject, public LevelSetB
 };
 
 // Typdefs for compatibility with older versions
-typedef LevelSetSegmentationObject LevelSetSegmentation;
+typedef LevelSetSegmentationObject<LevelSetSegmentationNarrowBandCache<LevelSetInternalPiercedStorageManager>> LevelSetSegmentation;
 
 }
+
+// Include template implementations
+#include "levelSetSegmentationObject.tpp"
+
+
+// Explicit instantization
+#ifndef __BITPIT_LEVELSET_SEGMENTATION_OBJECT_SRC__
+namespace bitpit {
+
+extern template class LevelSetSegmentationNarrowBandCacheBase<LevelSetExternalPiercedStorageManager>;
+extern template class LevelSetSegmentationNarrowBandCacheBase<LevelSetInternalPiercedStorageManager>;
+
+extern template class LevelSetSegmentationObject<LevelSetSegmentationNarrowBandCache<LevelSetExternalPiercedStorageManager>>;
+extern template class LevelSetSegmentationObject<LevelSetSegmentationNarrowBandCache<LevelSetInternalPiercedStorageManager>>;
+
+}
+#endif
 
 #endif

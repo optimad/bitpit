@@ -32,11 +32,22 @@
 
 namespace bitpit {
 
-class LevelSetImmutableObject : public LevelSetObject, public LevelSetCachedObjectInterface, public LevelSetSignedObjectInterface
+class LevelSetImmutableObjectBase {
+
+protected:
+    LevelSetImmutableObjectBase() = default;
+
+};
+
+template<typename storage_manager_t>
+using LevelSetImmutableNarrowBandCache = LevelSetNarrowBandCache<storage_manager_t>;
+
+template<typename narrow_band_cache_t>
+class LevelSetImmutableObject : public LevelSetObject, public LevelSetImmutableObjectBase, public LevelSetCachedObjectInterface<narrow_band_cache_t>, public LevelSetSignedObjectInterface
 {
 
 public:
-    LevelSetImmutableObject(LevelSetCachedObject *object);
+    LevelSetImmutableObject(LevelSetCachedObject<narrow_band_cache_t> *object);
     LevelSetImmutableObject(LevelSetBooleanObject *object);
 
     LevelSetImmutableObject * clone() const override;
@@ -50,8 +61,6 @@ public:
     LevelSetInfo computeLevelSetInfo(const std::array<double,3> &coords) const override;
 
 protected:
-    std::shared_ptr<LevelSetNarrowBandCache> createNarrowBandCache() override;
-
     std::shared_ptr<LevelSetSignStorage> createSignStorage() override;
 
     LevelSetImmutableObject(int);
@@ -64,5 +73,18 @@ protected:
 };
 
 }
+
+// Include template implementations
+#include "levelSetImmutableObject.tpp"
+
+// Explicit instantization
+#ifndef __BITPIT_LEVELSET_IMMUTABLE_OBJECT_SRC__
+namespace bitpit {
+
+extern template class LevelSetImmutableObject<LevelSetImmutableNarrowBandCache<LevelSetExternalPiercedStorageManager>>;
+extern template class LevelSetImmutableObject<LevelSetImmutableNarrowBandCache<LevelSetInternalPiercedStorageManager>>;
+
+}
+#endif
 
 #endif

@@ -30,6 +30,8 @@
 namespace bitpit{
 
 class VolOctree;
+class LevelSetExternalPiercedStorageManager;
+class LevelSetInternalPiercedStorageManager;
 
 class LevelSetOctreeKernel : public LevelSetKernel{
 
@@ -43,6 +45,9 @@ class LevelSetOctreeKernel : public LevelSetKernel{
     void                                        updateCellCirclesCache();
 
     public:
+    typedef LevelSetExternalPiercedStorageManager DenseStorageManager;
+    typedef LevelSetInternalPiercedStorageManager SparseStorageManager;
+
     LevelSetOctreeKernel( VolOctree & );
 
     VolOctree *                                 getOctreeMesh() const;

@@ -29,14 +29,23 @@
 # include <vector>
 # include <set>
 
-#include "levelSetSegmentationObject.hpp"
+# include "bitpit_operators.hpp"
+# include "bitpit_surfunstructured.hpp"
+
+# include "levelSetCartesianKernel.hpp"
+# include "levelSetOctreeKernel.hpp"
+# include "levelSetSegmentationObject.hpp"
 
 namespace bitpit{
 
 class PatchKernel;
 class SurfUnstructured;
 
-class LevelSetMaskObject : public LevelSetSegmentationObject {
+template<typename storage_manager_t>
+using LevelSetMaskNarrowBandCache = LevelSetSegmentationNarrowBandCache<storage_manager_t>;
+
+template<typename storage_manager_t>
+class LevelSetMaskObject : public LevelSetSegmentationObject<storage_manager_t> {
 
     private:
     std::unique_ptr<SurfUnstructured> extractCellEnvelope(const std::unordered_set<long> &, const VolumeKernel &, std::unordered_map<long,long> &);
@@ -50,8 +59,21 @@ class LevelSetMaskObject : public LevelSetSegmentationObject {
 };
 
 // Typdefs for compatibility with older versions
-typedef LevelSetMaskObject LevelSetMask;
+typedef LevelSetMaskObject<LevelSetInternalPiercedStorageManager> LevelSetMask;
 
 }
+
+// Include template implementations
+#include "levelSetMaskObject.tpp"
+
+// Explicit instantization
+#ifndef __BITPIT_LEVELSET_MASK_OBJECT_SRC__
+namespace bitpit {
+
+extern template class LevelSetMaskObject<LevelSetMaskNarrowBandCache<LevelSetExternalPiercedStorageManager>>;
+extern template class LevelSetMaskObject<LevelSetMaskNarrowBandCache<LevelSetInternalPiercedStorageManager>>;
+
+}
+#endif
 
 #endif
