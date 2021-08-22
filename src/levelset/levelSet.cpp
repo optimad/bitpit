@@ -87,15 +87,26 @@ LevelSet::LevelSet() {
  */
 void LevelSet::setMesh( VolumeKernel* mesh ) {
 
+    if (m_kernel) {
+        throw std::runtime_error ("Mesh can be set just once.");
+    }
+
     if( VolCartesian* cartesian = dynamic_cast<VolCartesian*> (mesh) ){
-        setMesh(cartesian) ;
+        m_kernel = createKernel(cartesian) ;
 
     } else if( VolOctree* octree = dynamic_cast<VolOctree*> (mesh) ){
-        setMesh(octree) ;
-    
+        m_kernel = createKernel(octree) ;
+
     } else{
         throw std::runtime_error ("Mesh non supported in LevelSet::setMesh()");
     } 
+
+# if BITPIT_ENABLE_MPI
+    // Initialize the communicator
+    if (m_kernel->getMesh()->isPartitioned()) {
+        m_kernel->initializeCommunicator();
+    }
+# endif
 
     for( auto &obj : m_objects){
         obj.second->setKernel(m_kernel.get());
@@ -104,43 +115,23 @@ void LevelSet::setMesh( VolumeKernel* mesh ) {
 }
 
 /*!
- * Sets the grid on which the levelset function should be computed.
+ * Creates the kernel onto which the levelset function should be computed.
  * @param[in] cartesian cartesian patch
  */
-void LevelSet::setMesh( VolCartesian* cartesian ) {
-    if (m_kernel) {
-        throw std::runtime_error ("Mesh can be set just once.");
-    }
+std::unique_ptr<LevelSetKernel> LevelSet::createKernel( VolCartesian* cartesian ) {
 
-    LevelSetKernel *kernel = new LevelSetCartesianKernel( *cartesian) ;
-    m_kernel = std::unique_ptr<LevelSetKernel>(kernel);
+    return std::unique_ptr<LevelSetKernel>(new LevelSetCartesianKernel( *cartesian)) ;
 
-# if BITPIT_ENABLE_MPI
-    // Initialize the communicator
-    if (m_kernel->getMesh()->isPartitioned()) {
-        m_kernel->initializeCommunicator();
-    }
-# endif
 }
 
 /*!
- * Sets the grid on which the levelset function should be computed.
+ * Creates the kernel onto which the levelset function should be computed.
  * @param[in] octree octree patch
  */
-void LevelSet::setMesh( VolOctree* octree ) {
-    if (m_kernel) {
-        throw std::runtime_error ("Mesh can be set just once.");
-    }
+std::unique_ptr<LevelSetKernel> LevelSet::createKernel( VolOctree* octree ) {
 
-    LevelSetKernel *kernel = new LevelSetOctreeKernel( *octree) ;
-    m_kernel = std::unique_ptr<LevelSetKernel>(kernel);
+    return std::unique_ptr<LevelSetKernel>(new LevelSetOctreeKernel( *octree)) ;
 
-# if BITPIT_ENABLE_MPI
-    // Initialize the communicator
-    if (m_kernel->getMesh()->isPartitioned()) {
-        m_kernel->initializeCommunicator();
-    }
-# endif
 }
 
 /*!
