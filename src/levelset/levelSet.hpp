@@ -62,6 +62,10 @@ class LevelSet{
     bool                    m_signedDistance;          /**< Flag for sigend/unsigned distance (default = true) */
     bool                    m_propagateSign;           /**< Flag for sign propagation from narrow band (default = false) */
 
+    std::unique_ptr<LevelSetKernel>  createKernel( VolCartesian* ) ;
+    std::unique_ptr<LevelSetKernel>  createKernel( VolOctree* ) ;
+
+
     int                     registerObject( std::unique_ptr<LevelSetObject> && ) ;
 
     bool                    removeObject(int id, bool force);
@@ -86,8 +90,6 @@ class LevelSet{
     void                    clear();
 
     void                    setMesh( VolumeKernel* ) ;
-    void                    setMesh( VolCartesian* ) ;
-    void                    setMesh( VolOctree* ) ;
 
     int                     addObject( std::unique_ptr<SurfaceKernel> &&, double, int id = levelSetDefaults::OBJECT ) ;
     int                     addObject( SurfaceKernel *, double, int id = levelSetDefaults::OBJECT ) ;
