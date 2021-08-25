@@ -777,14 +777,12 @@ void LevelSetSegmentation::updateLSInNarrowBand( const std::vector<adaption::Inf
 }
 
 /*!
- * Computes the levelset within the narrow band on an
- * cartesian grid.
- * If the size of the narrow band has been set, the
- * method will compute the levelset values only of those
- * cells within the threshold. 
- * In case the size of the narrow band has not been set,
- * the method will calculate the levelset within a band
- * containing one cell on each side of the surface.
+ * Computes the levelset within the narrow band on an cartesian grid.
+ * If the size of the narrow band has been set, the method will compute the
+ * levelset values only of those cells within the threshold.
+ * In case the size of the narrow band has not been set, levelset will be
+ * evaluated only on the cells that intersect the surface and on all their
+ * first neighbours.
  * @param[in] visitee the octree LevelSetKernel
  * @param[in] signd whether signed distance should be calculated
  */
@@ -805,7 +803,7 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetCartesian *visitee, bo
     // size and the diameter of the circumcircle. This guarantees that, when
     // the narrow band size is equal or less than zero, the levelset will be
     // evaluated on the cells that intersect the surface and on all their
-    // neighbours.
+    // first neighbours.
     double searchRadius = std::max(m_narrowBand, 2 * visitee->getCellCircumcircle());
 
     // Define mesh bounding box
@@ -913,14 +911,14 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetCartesian *visitee, bo
 }
 
 /*!
- * Computes the levelset within the narrow band on an
- * octree grid.
- * If the size of the narrow band has been set, the
- * method will compute the levelset values only of those
- * cells within the threshold. 
- * In case the size of the narrow band has not been set,
- * the method will calculate the levelset within the cells
- * that intersect the surface and within their first neighbours,
+ * Computes the levelset within the narrow band on an octree grid.
+ * If the size of the narrow band has been set, the method will compute the
+ * levelset values on the cells that intersect the surface, on all their
+ * first neighbours and on the cells with a distance from the surface less
+ * than the threshold.
+ * In case the size of the narrow band has not been set, levelset will be
+ * evaluated only on the cells that intersect the surface and on all their
+ * first neighbours.
  * \param[in] visitee the octree LevelSetKernel
  * \param[in] signd whether signed distance should be calculated
  */
@@ -1040,15 +1038,15 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *visitee, bool 
 }
 
 /*!
- * Updates the levelset within the narrow band on an
- * octree grid after an grid adaption.
- * If the size of the narrow band has been set, the
- * method will compute the levelset values only of those
- * cells within the threshold. 
- * In case the size of the narrow band has not been set,
- * the method will calculate the levelset within the cells
- * that intersect the surface and within their first neighbours,
- * @param[in] visitee the octree LevelSetKernel
+ * Updates the levelset within the narrow band on an octree grid after an grid
+ * adaption.
+ * If the size of the narrow band has been set, the method will compute the
+ * levelset values on the cells that intersect the surface, on all their
+ * first neighbours and on the cells with a distance from the surface less
+ * than the threshold.
+ * In case the size of the narrow band has not been set, levelset will be
+ * evaluated only on the cells that intersect the surface and on all their
+ * first neighbours.
  * @param[in] mapper the adaption mapper
  * @param[in] signd whether signed distance should be calculated
  */

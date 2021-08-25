@@ -484,8 +484,8 @@ double LevelSet::getSizeNarrowBand() const{
 
 /*!
  * Manually set the physical size of the narrow band.
- * Setting a size equal or less than zero levelset will be evaluated only on
- * cells that intersect the surface.
+ * Setting a size equal or less than zero, levelset will be evaluated only on
+ * the cells that intersect the surface and on all their first neighbours.
  * After setting the size of the narrowband, the levelset is not automatically
  * updated. It's up to the caller to make sure the levelset will be properly
  * updated if the size of the narrowband changes.
