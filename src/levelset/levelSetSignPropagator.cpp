@@ -28,6 +28,7 @@
 # endif
 
 # include "bitpit_CG.hpp"
+# include "bitpit_volcartesian.hpp"
 
 # include "levelSetBoundedObject.hpp"
 # include "levelSetKernel.hpp"
@@ -143,11 +144,20 @@ void LevelSetSignPropagator::execute(const std::vector<adaption::Info> &adaption
  * Propagate the sign of the signed distance function from narrow band to
  * entire domain.
  *
+ * Sign propagation does not work for Cartesian meshes in memory-light mode.
+ *
  * \param object is the object that whose sign will be propagated
  * \param[in,out] storage is the storage for the propagated sign
  */
 void LevelSetSignPropagator::propagate(const LevelSetObjectInterface *object, LevelSetSignStorage *storage)
 {
+    // Sign propagation does not work for Cartesian meshes in memory-light mode.
+    if (VolCartesian *cartesianMesh = dynamic_cast<VolCartesian *>(m_mesh)) {
+        if (cartesianMesh->getMemoryMode() == VolCartesian::MEMORY_LIGHT) {
+            throw std::runtime_error("Sign propagation does not work for Cartesian meshes in memory-light mode.");
+        }
+    }
+
     // Initialize propagation information
     initializePropagation(object);
 
