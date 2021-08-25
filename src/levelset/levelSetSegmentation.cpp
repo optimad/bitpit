@@ -800,7 +800,13 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetCartesian *visitee, bo
     const SurfUnstructured &surface = m_segmentation->getSurface();
 
     // Define search radius
-    double searchRadius = std::max(m_narrowBand, visitee->getCellCircumcircle());
+    //
+    // Search radius should be equal to the maximum between the narrow band
+    // size and the diameter of the circumcircle. This guarantees that, when
+    // the narrow band size is equal or less than zero, the levelset will be
+    // evaluated on the cells that intersect the surface and on all their
+    // neighbours.
+    double searchRadius = std::max(m_narrowBand, 2 * visitee->getCellCircumcircle());
 
     // Define mesh bounding box
     //
