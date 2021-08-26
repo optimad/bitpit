@@ -343,6 +343,9 @@ public:
     PiercedKernel();
     PiercedKernel(std::size_t n);
 
+    // Destructor
+    ~PiercedKernel() override;
+
     // Methods that modify the kernel as a whole
     ClearAction clear(bool release = true);
     ReserveAction reserve(std::size_t n);

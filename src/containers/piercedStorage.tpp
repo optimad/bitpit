@@ -142,6 +142,15 @@ PiercedStorageSyncSlave<id_t>::PiercedStorageSyncSlave(const PiercedStorageSyncS
 }
 
 /**
+* Destructor
+*/
+template<typename id_t>
+PiercedStorageSyncSlave<id_t>::~PiercedStorageSyncSlave()
+{
+    detachKernel();
+}
+
+/**
 * Sets the kernel that will be used by the storage
 *
 * The storage will NOT be synchronized with the kernel. Every change to the

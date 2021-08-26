@@ -57,6 +57,17 @@ PiercedKernel<id_t>::PiercedKernel(std::size_t n)
 }
 
 /**
+* Destructor
+*/
+template<typename id_t>
+PiercedKernel<id_t>::~PiercedKernel()
+{
+    for (PiercedStorageSyncSlave<id_t> *storage : getStorages()) {
+        storage->unsetKernel();
+    }
+}
+
+/**
 * Updates the id of the specified element.
 *
 * \param currentId is the current id of the element
