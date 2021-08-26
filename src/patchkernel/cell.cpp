@@ -453,8 +453,8 @@ void Cell::setInterfaces(const std::vector<std::vector<long>> &interfaces)
 	    return;
 	}
 
-	assert(interfaces.size() == getFaceCount());
-	assert(m_interfaces.size() == getFaceCount());
+	assert((int) interfaces.size() == getFaceCount());
+	assert((int) m_interfaces.size() == getFaceCount());
 	m_interfaces.initialize(interfaces);
 }
 
@@ -469,8 +469,8 @@ void Cell::setInterfaces(FlatVector2D<long> &&interfaces)
 	    return;
 	}
 
-	assert(m_interfaces.size() == getFaceCount());
-	assert(interfaces.size() == getFaceCount());
+	assert((int) m_interfaces.size() == getFaceCount());
+	assert((int) interfaces.size() == getFaceCount());
 	m_interfaces.swap(interfaces);
 }
 
@@ -723,8 +723,8 @@ void Cell::setAdjacencies(const std::vector<std::vector<long>> &adjacencies)
 	    return;
 	}
 
-	assert(m_adjacencies.size() == getFaceCount());
-	assert(adjacencies.size() == getFaceCount());
+	assert((int) m_adjacencies.size() == getFaceCount());
+	assert((int) adjacencies.size() == getFaceCount());
 	m_adjacencies.initialize(adjacencies);
 }
 
@@ -739,8 +739,8 @@ void Cell::setAdjacencies(FlatVector2D<long> &&adjacencies)
 	    return;
 	}
 
-	assert(m_adjacencies.size() == getFaceCount());
-	assert(adjacencies.size() == getFaceCount());
+	assert((int) m_adjacencies.size() == getFaceCount());
+	assert((int) adjacencies.size() == getFaceCount());
 	m_adjacencies.swap(adjacencies);
 }
 
