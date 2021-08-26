@@ -67,6 +67,10 @@ PiercedVector<value_t, id_t>::PiercedVector(const PiercedVector<value_t, id_t> &
     : PiercedVectorKernel<id_t>(x),
       PiercedVectorStorage<value_t, id_t>(x, this, x.getSyncMode())
 {
+    // Since we have copied the kernel, the list of registered slaves contains
+    // also the internal storage of other vector. We need to unregister that
+    // storage from the kernel.
+    this->unregisterSlave(&x);
 }
 
 /**
