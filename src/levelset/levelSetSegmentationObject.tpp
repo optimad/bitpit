@@ -474,12 +474,11 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
     // neighbours with a distance less than the search radius.
     narrow_band_cache_t *narrowBandCache = this->getNarrowBandCache();
 
-    std::unordered_set<long> alreadyProcessed;
+    std::unordered_set<long> outsideNarrowBand;
     while (!processList.empty()) {
         // Get the cell to process
         long cellId = *(processList.begin());
         processList.erase(cellId);
-        alreadyProcessed.insert(cellId);
 
         // Find segment associated to the cell
         const std::array<double,3> &cellCentroid = levelsetKernel->computeCellCentroid(cellId);
@@ -488,6 +487,7 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
         double distance;
         m_segmentation->getSearchTree().findPointClosestCell(cellCentroid, searchRadius, &segmentId, &distance);
         if(segmentId < 0){
+            outsideNarrowBand.insert(cellId);
             continue;
         }
 
@@ -507,8 +507,10 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
         if (meshMemoryMode == VolCartesian::MEMORY_LIGHT) {
             for (int face = 0; face < meshCellFaceCount; ++face) {
                 long neighId = mesh.getCellFaceNeighsLinearId(cellId, face);
-                if (neighId >= 0 && alreadyProcessed.count(neighId) == 0) {
-                    processList.insert(neighId);
+                if (neighId >= 0) {
+                    if (!this->isInNarrowBand(neighId) && (outsideNarrowBand.count(neighId) == 0)) {
+                        processList.insert(neighId);
+                    }
                 }
             }
         } else {
@@ -517,7 +519,7 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
             int nNeighbours = cell.getAdjacencyCount() ;
             for (int n = 0; n < nNeighbours; ++n) {
                 long neighId = neighbours[n];
-                if (alreadyProcessed.count(neighId) == 0) {
+                if (!this->isInNarrowBand(neighId) && (outsideNarrowBand.count(neighId) == 0)) {
                     processList.insert(neighId);
                 }
             }
