@@ -41,7 +41,7 @@
 namespace bitpit {
 
 template<typename id_t>
-class BasePiercedStorage;
+class PiercedStorageSyncSlave;
 
 class BasePiercedKernel : public PiercedSyncMaster {
 
@@ -119,7 +119,7 @@ template<typename PKR_id_t>
 friend class PiercedKernelRange;
 
 template<typename BPS_id_t>
-friend class BasePiercedStorage;
+friend class PiercedStorageSyncSlave;
 
 template<typename PS_value_t, typename PS_id_t>
 friend class PiercedStorage;
@@ -453,6 +453,10 @@ protected:
     SortAction _sort(std::size_t begin, std::size_t end);
     SqueezeAction _squeeze();
     ShrinkToFitAction _shrinkToFit();
+
+    // Methods to handle the storage
+    std::vector<PiercedStorageSyncSlave<id_t> *> getStorages();
+    std::vector<const PiercedStorageSyncSlave<id_t> *> getStorages() const;
 
 private:
     /**
