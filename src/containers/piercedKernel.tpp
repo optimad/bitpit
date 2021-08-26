@@ -2084,6 +2084,51 @@ std::size_t PiercedKernel<id_t>::front() const
 }
 
 /**
+* Get the storages assocaited with the kernel.
+*
+* \result The storages assocaited with the kernel.
+*/
+template<typename id_t>
+std::vector<PiercedStorageSyncSlave<id_t> *> PiercedKernel<id_t>::getStorages()
+{
+    std::size_t storageIdx = 0;
+    std::vector<PiercedStorageSyncSlave<id_t> *> storges(m_slaves.size());
+    for (auto &slaveEntry : m_slaves) {
+        PiercedSyncSlave *slave = slaveEntry.first;
+        PiercedStorageSyncSlave<id_t> *piercedStorage = dynamic_cast<PiercedStorageSyncSlave<id_t> *>(slave);
+        if (piercedStorage) {
+            storges[storageIdx] = piercedStorage;
+            ++storageIdx;
+        }
+    }
+
+    return storges;
+}
+
+/**
+* Get the storages assocaited with the kernel.
+*
+* \result The storages assocaited with the kernel.
+*/
+template<typename id_t>
+std::vector<const PiercedStorageSyncSlave<id_t> *> PiercedKernel<id_t>::getStorages() const
+{
+    std::size_t storageIdx = 0;
+    std::vector<PiercedStorageSyncSlave<id_t> *> storges(m_slaves.size());
+    for (const auto &slaveEntry : m_slaves) {
+        const PiercedSyncSlave *slave = slaveEntry.first;
+        const PiercedStorageSyncSlave<id_t> *piercedStorage = dynamic_cast<PiercedStorageSyncSlave<id_t> *>(slave);
+        if (piercedStorage) {
+            storges[storageIdx] = piercedStorage;
+            ++storageIdx;
+
+        }
+    }
+
+    return storges;
+}
+
+/**
 * Returns the first non-empty position before the specified starting position.
 *
 * If the starting position is the first posistion, an exception is thrown.
