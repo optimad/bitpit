@@ -40,6 +40,9 @@
 
 namespace bitpit {
 
+template<typename id_t>
+class BasePiercedStorage;
+
 class BasePiercedKernel : public PiercedSyncMaster {
 
 public:
@@ -114,6 +117,9 @@ friend class PiercedKernelIterator;
 
 template<typename PKR_id_t>
 friend class PiercedKernelRange;
+
+template<typename BPS_id_t>
+friend class BasePiercedStorage;
 
 template<typename PS_value_t, typename PS_id_t>
 friend class PiercedStorage;
