@@ -94,7 +94,7 @@ public:
     };
 
     // Virtual destructor
-    virtual ~PiercedStorageSyncSlave() = default;
+    virtual ~PiercedStorageSyncSlave();
 
     // Methods for synchronizing the storage
     void setStaticKernel(const PiercedKernel<id_t> *kernel);
