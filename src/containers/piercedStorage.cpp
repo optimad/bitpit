@@ -26,19 +26,4 @@
 
 namespace bitpit {
 
-/**
-* \ingroup container
-* \class BasePiercedStorage
-*
-* \brief Base class for the pierced storages.
-*/
-
-/**
-* Constructor.
-*/
-BasePiercedStorage::BasePiercedStorage()
-    : PiercedSyncSlave()
-{
-}
-
 }

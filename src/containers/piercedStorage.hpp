@@ -39,13 +39,92 @@
 
 namespace bitpit {
 
-class BasePiercedStorage : public PiercedSyncSlave {
+/**
+* \ingroup container
+* \class BasePiercedStorage
+*
+* \brief Base class for the pierced storages.
+*/
+class BasePiercedStorage {
 
 public:
     virtual ~BasePiercedStorage() = default;
 
 protected:
-    BasePiercedStorage();
+    BasePiercedStorage() = default;
+
+};
+
+/**
+* \ingroup container
+* \class PiercedStorageSyncSlave
+*
+* \brief Base class for defining storages that acts like a slave in pierced
+* synchronization.
+*/
+template<typename id_t = long>
+class PiercedStorageSyncSlave : public PiercedSyncSlave, public BasePiercedStorage {
+
+public:
+    // Template typedef
+
+    /**
+    * Kernel template
+    */
+    template<typename PK_id_t>
+    using Kernel = PiercedKernel<PK_id_t>;
+
+    // Typedefs
+
+    /*!
+    * Type of ids stored in the container
+    */
+    typedef typename Kernel<id_t>::id_type id_type;
+
+    /**
+    * Kernel
+    */
+    typedef Kernel<id_t> kernel_t;
+
+    // Enums
+    enum KernelType {
+        KERNEL_NONE    = -1,
+        KERNEL_STATIC  =  0,
+        KERNEL_DYNAMIC =  1
+    };
+
+    // Virtual destructor
+    virtual ~PiercedStorageSyncSlave() = default;
+
+    // Methods for synchronizing the storage
+    void setStaticKernel(const PiercedKernel<id_t> *kernel);
+    void setDynamicKernel(PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode);
+    void unsetKernel(bool release = true);
+    const PiercedKernel<id_t> * getKernel() const;
+    KernelType getKernelType() const;
+    PiercedSyncMaster::SyncMode getSyncMode() const;
+
+    // Methods that modify the container as a whole
+    void swap(PiercedStorageSyncSlave<id_t> &x) noexcept;
+
+protected:
+    const PiercedKernel<id_t> *m_const_kernel;
+    PiercedKernel<id_t> *m_kernel;
+
+    // Constructors and initialization
+    PiercedStorageSyncSlave();
+    PiercedStorageSyncSlave(const PiercedKernel<id_t> *kernel);
+    PiercedStorageSyncSlave(PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode);
+    PiercedStorageSyncSlave(const PiercedStorageSyncSlave<id_t> &x, const PiercedKernel<id_t> *kernel);
+    PiercedStorageSyncSlave(const PiercedStorageSyncSlave<id_t> &x, PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode);
+    PiercedStorageSyncSlave(const PiercedStorageSyncSlave<id_t> &x);
+    PiercedStorageSyncSlave(PiercedStorageSyncSlave<id_t> &&x) = default;
+
+    // Methods for synchronizing the storage
+    virtual void _postSetStaticKernel();
+    virtual void _postSetDynamicKernel();
+    virtual void _postUnsetKernel(bool release = true);
+    void detachKernel();
 
 };
 
@@ -62,7 +141,7 @@ protected:
 * \tparam id_t is the type of the ids associated to the elements
 */
 template<typename value_t, typename id_t = long>
-class PiercedStorage : public BasePiercedStorage {
+class PiercedStorage : public PiercedStorageSyncSlave<id_t> {
 
 // Friendships
 template<typename PI_value_t, typename PI_id_t, typename PI_value_no_cv_t>
@@ -147,7 +226,7 @@ public:
     * Kernel template
     */
     template<typename PK_id_t>
-    using Kernel = PiercedKernel<PK_id_t>;
+    using Kernel = typename PiercedStorageSyncSlave<id_t>::template Kernel<PK_id_t>;
 
     // Typedefs
 
@@ -162,9 +241,14 @@ public:
     typedef typename Kernel<id_t>::id_type id_type;
 
     /**
-    * Kernel type
+    * Kernel
     */
     typedef Kernel<id_t> kernel_t;
+
+    /**
+    * Kernel type
+    */
+    typedef typename PiercedStorageSyncSlave<id_t>::KernelType KernelType;
 
     /**
     * Container
@@ -221,13 +305,6 @@ public:
     */
     typedef PiercedStorageRange<const value_t, id_t> const_range;
 
-    // Enums
-    enum KernelType {
-        KERNEL_NONE    = -1,
-        KERNEL_STATIC  =  0,
-        KERNEL_DYNAMIC =  1
-    };
-
     /**
     * Checks if the storage has the 'restore' capability
     */
@@ -263,18 +340,8 @@ public:
     PiercedStorage(const PiercedStorage<value_t, id_t> &x);
     PiercedStorage(PiercedStorage<value_t, id_t> &&x) = default;
 
-    ~PiercedStorage();
-
     // Methods for accessing container properties
     std::size_t getFieldCount() const;
-
-    // Methods for synchronizing the storage
-    void setStaticKernel(const PiercedKernel<id_t> *kernel);
-    void setDynamicKernel(PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode);
-    void unsetKernel(bool release = true);
-    const PiercedKernel<id_t> * getKernel() const;
-    KernelType getKernelType() const;
-    PiercedSyncMaster::SyncMode getSyncMode() const;
 
     // Methods that modify the container as a whole
     void swap(PiercedStorage &x) noexcept;
@@ -352,13 +419,16 @@ public:
     void dump(std::ostream &stream) const;
 
 protected:
+    // Methods for synchronizing the storage
+    void _postSetStaticKernel() override;
+    void _postSetDynamicKernel() override;
+    void _postUnsetKernel(bool release = true) override;
+
     // Methos for getting information on the storage
     std::size_t rawSize() const;
 
     // Methods for synchronizing the storage
     void commitSyncAction(const PiercedSyncAction &action) override;
-
-    void detachKernel();
 
     // Methos for updating the storage
     void rawReserve(std::size_t n);
@@ -393,9 +463,6 @@ protected:
 private:
     std::size_t m_nFields;
     container_t m_fields;
-
-    const PiercedKernel<id_t> *m_const_kernel;
-    PiercedKernel<id_t> *m_kernel;
 
     void restoreField(std::istream &stream, std::vector<bool>::reference value);
 

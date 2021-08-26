@@ -28,34 +28,22 @@
 namespace bitpit {
 
 /**
-*   Constructor.
+* Constructor.
 */
-template<typename value_t, typename id_t>
-PiercedStorage<value_t, id_t>::PiercedStorage()
-    : BasePiercedStorage(), m_nFields(1), m_const_kernel(nullptr), m_kernel(nullptr)
+template<typename id_t>
+PiercedStorageSyncSlave<id_t>::PiercedStorageSyncSlave()
+    : m_const_kernel(nullptr), m_kernel(nullptr)
 {
 }
 
 /**
 * Constructor.
 *
-* \param nFields is the number of fields in the storage
-*/
-template<typename value_t, typename id_t>
-PiercedStorage<value_t, id_t>::PiercedStorage(std::size_t nFields)
-    : BasePiercedStorage(), m_nFields(nFields), m_const_kernel(nullptr), m_kernel(nullptr)
-{
-}
-
-/**
-* Constructor.
-*
-* \param nFields is the number of fields in the storage
 * \param kernel is the kernel that will be set
 */
-template<typename value_t, typename id_t>
-PiercedStorage<value_t, id_t>::PiercedStorage(std::size_t nFields, const PiercedKernel<id_t> *kernel)
-    : BasePiercedStorage(), m_nFields(nFields), m_const_kernel(nullptr), m_kernel(nullptr)
+template<typename id_t>
+PiercedStorageSyncSlave<id_t>::PiercedStorageSyncSlave(const PiercedKernel<id_t> *kernel)
+    : PiercedStorageSyncSlave<id_t>()
 {
     setStaticKernel(kernel);
 }
@@ -63,13 +51,12 @@ PiercedStorage<value_t, id_t>::PiercedStorage(std::size_t nFields, const Pierced
 /**
 * Constructor.
 *
-* \param nFields is the number of fields in the storage
 * \param kernel is the kernel that will be set
 * \param syncMode is the synchronization mode that will be used for the storage
 */
-template<typename value_t, typename id_t>
-PiercedStorage<value_t, id_t>::PiercedStorage(std::size_t nFields, PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode)
-    : BasePiercedStorage(), m_nFields(nFields), m_const_kernel(nullptr), m_kernel(nullptr)
+template<typename id_t>
+PiercedStorageSyncSlave<id_t>::PiercedStorageSyncSlave(PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode)
+    : PiercedStorageSyncSlave<id_t>()
 {
     setDynamicKernel(kernel, syncMode);
 }
@@ -81,10 +68,9 @@ PiercedStorage<value_t, id_t>::PiercedStorage(std::size_t nFields, PiercedKernel
 * the same template parameters) whose content is copied in this container
 * \param kernel is the kernel that will be set
 */
-template<typename value_t, typename id_t>
-PiercedStorage<value_t, id_t>::PiercedStorage(const PiercedStorage<value_t, id_t> &x, const PiercedKernel<id_t> *kernel)
-    : m_nFields(x.m_nFields), m_fields(x.m_fields),
-      m_const_kernel(nullptr), m_kernel(nullptr)
+template<typename id_t>
+PiercedStorageSyncSlave<id_t>::PiercedStorageSyncSlave(const PiercedStorageSyncSlave<id_t> &x, const PiercedKernel<id_t> *kernel)
+    : PiercedStorageSyncSlave<id_t>()
 {
     KernelType kernelType = x.getKernelType();
     switch (kernelType) {
@@ -120,10 +106,9 @@ PiercedStorage<value_t, id_t>::PiercedStorage(const PiercedStorage<value_t, id_t
 * \param kernel is the kernel that will be set
 * \param syncMode is the synchronization mode that will be used for the storage
 */
-template<typename value_t, typename id_t>
-PiercedStorage<value_t, id_t>::PiercedStorage(const PiercedStorage<value_t, id_t> &x, PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode)
-    : m_nFields(x.m_nFields), m_fields(x.m_fields),
-      m_const_kernel(nullptr), m_kernel(nullptr)
+template<typename id_t>
+PiercedStorageSyncSlave<id_t>::PiercedStorageSyncSlave(const PiercedStorageSyncSlave<id_t> &x, PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode)
+    : PiercedStorageSyncSlave<id_t>()
 {
     KernelType kernelType = x.getKernelType();
     switch (kernelType) {
@@ -157,38 +142,6 @@ PiercedStorage<value_t, id_t>::PiercedStorage(const PiercedStorage<value_t, id_t
 }
 
 /**
-* Copy constructor.
-*
-* \param x is another container of the same type (i.e., instantiated with
-* the same template parameters) whose content is copied in this container
-*/
-template<typename value_t, typename id_t>
-PiercedStorage<value_t, id_t>::PiercedStorage(const PiercedStorage<value_t, id_t> &x)
-    : PiercedStorage<value_t, id_t>(x, nullptr)
-{
-}
-
-/**
-* Destructor
-*/
-template<typename value_t, typename id_t>
-PiercedStorage<value_t, id_t>::~PiercedStorage()
-{
-    detachKernel();
-}
-
-/**
-* Gets the number of fields in the storage.
-*
-* \result The number of fields in the storage.
-*/
-template<typename value_t, typename id_t>
-std::size_t PiercedStorage<value_t, id_t>::getFieldCount() const
-{
-    return m_nFields;
-}
-
-/**
 * Sets the kernel that will be used by the storage
 *
 * The storage will NOT be synchronized with the kernel. Every change to the
@@ -196,9 +149,10 @@ std::size_t PiercedStorage<value_t, id_t>::getFieldCount() const
 *
 * \param kernel is the kernel that will be set
 */
-template<typename value_t, typename id_t>
-void PiercedStorage<value_t, id_t>::setStaticKernel(const PiercedKernel<id_t> *kernel)
+template<typename id_t>
+void PiercedStorageSyncSlave<id_t>::setStaticKernel(const PiercedKernel<id_t> *kernel)
 {
+    // Set the kernel
     if (!kernel) {
         throw std::runtime_error("Unable to set the kernel. Provided kernel is not valid.");
     } else if (m_kernel != nullptr) {
@@ -208,7 +162,22 @@ void PiercedStorage<value_t, id_t>::setStaticKernel(const PiercedKernel<id_t> *k
     m_kernel       = nullptr;
     m_const_kernel = kernel;
 
-    rawResize(m_const_kernel->rawSize());
+    // Action to be performed afetr setting the kernel
+    _postSetStaticKernel();
+}
+
+/**
+* Internal function that will be called after setting a static kernel.
+*
+* The storage will NOT be synchronized with the kernel. Every change to the
+* kernel can potentially invalidate the link between kernel and storage.
+*
+* \param kernel is the kernel that will be set
+*/
+template<typename id_t>
+void PiercedStorageSyncSlave<id_t>::_postSetStaticKernel()
+{
+    // Nothing to do
 }
 
 /**
@@ -219,8 +188,8 @@ void PiercedStorage<value_t, id_t>::setStaticKernel(const PiercedKernel<id_t> *k
 * \param kernel is the kernel that will be set
 * \param syncMode is the synchronization mode that will be used for the storage
 */
-template<typename value_t, typename id_t>
-void PiercedStorage<value_t, id_t>::setDynamicKernel(PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode)
+template<typename id_t>
+void PiercedStorageSyncSlave<id_t>::setDynamicKernel(PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode)
 {
     // Set the static kernel
     setStaticKernel(kernel);
@@ -228,6 +197,20 @@ void PiercedStorage<value_t, id_t>::setDynamicKernel(PiercedKernel<id_t> *kernel
     // Register the storage for dynamic synchronization
     m_kernel = kernel;
     m_kernel->registerSlave(this, syncMode);
+
+    // Action to be performed afetr setting the kernel
+    _postSetDynamicKernel();
+}
+
+/**
+* Internal function that will be called after setting a dynamic kernel.
+*
+* The storage will dynamically synchronized with the kernel.
+*/
+template<typename id_t>
+void PiercedStorageSyncSlave<id_t>::_postSetDynamicKernel()
+{
+    // Nothing to do
 }
 
 /**
@@ -237,21 +220,36 @@ void PiercedStorage<value_t, id_t>::setDynamicKernel(PiercedKernel<id_t> *kernel
 * be released, otherwise the container will be cleared but its
 * memory will not be released
 */
-template<typename value_t, typename id_t>
-void PiercedStorage<value_t, id_t>::unsetKernel(bool release)
+template<typename id_t>
+void PiercedStorageSyncSlave<id_t>::unsetKernel(bool release)
 {
     // Detach the kernel
     detachKernel();
 
-    // Clear the storage
-    rawClear(release);
+    // Action to be performed afetr unsetting the kernel
+    _postUnsetKernel(release);
+}
+
+/**
+* Internal function that will be called after unsetting the kernel.
+*
+* \param release if it's true the memory hold by the container will
+* be released, otherwise the container will be cleared but its
+* memory will not be released
+*/
+template<typename id_t>
+void PiercedStorageSyncSlave<id_t>::_postUnsetKernel(bool release)
+{
+    BITPIT_UNUSED(release);
+
+    // Nothing to do
 }
 
 /**
 * Detach the kernel without clearing the container.
 */
-template<typename value_t, typename id_t>
-void PiercedStorage<value_t, id_t>::detachKernel()
+template<typename id_t>
+void PiercedStorageSyncSlave<id_t>::detachKernel()
 {
     if (!m_const_kernel) {
         return;
@@ -270,8 +268,8 @@ void PiercedStorage<value_t, id_t>::detachKernel()
 *
 * \result A constant reference to the kernel of the storage.
 */
-template<typename value_t, typename id_t>
-const PiercedKernel<id_t> * PiercedStorage<value_t, id_t>::getKernel() const
+template<typename id_t>
+const PiercedKernel<id_t> * PiercedStorageSyncSlave<id_t>::getKernel() const
 {
     return m_const_kernel;
 }
@@ -281,8 +279,8 @@ const PiercedKernel<id_t> * PiercedStorage<value_t, id_t>::getKernel() const
 *
 * \return The type of kernel set for the storage.
 */
-template<typename value_t, typename id_t>
-typename PiercedStorage<value_t, id_t>::KernelType PiercedStorage<value_t, id_t>::getKernelType() const
+template<typename id_t>
+typename PiercedStorageSyncSlave<id_t>::KernelType PiercedStorageSyncSlave<id_t>::getKernelType() const
 {
     if (m_kernel) {
         return KERNEL_DYNAMIC;
@@ -298,14 +296,190 @@ typename PiercedStorage<value_t, id_t>::KernelType PiercedStorage<value_t, id_t>
 *
 * \result The synchronization mode of the storage.
 */
-template<typename value_t, typename id_t>
-PiercedSyncMaster::SyncMode PiercedStorage<value_t, id_t>::getSyncMode() const
+template<typename id_t>
+PiercedSyncMaster::SyncMode PiercedStorageSyncSlave<id_t>::getSyncMode() const
 {
     if (getKernelType() == KERNEL_NONE || getKernelType() == KERNEL_STATIC) {
         return PiercedKernel<id_t>::SYNC_MODE_DISABLED;
     } else {
         return m_const_kernel->getSlaveSyncMode(this);
     }
+}
+
+/**
+* Exchanges the content of the storage by the content of x, which is another
+* storage object of the same type. Sizes may differ but the number of fields
+* has to be the same.
+*
+* After the call to this member function, the elements in this storage are
+* those which were in x before the call, and the elements of x are those
+* which were in this. All iterators, references and pointers remain valid
+* for the swapped objects.
+*
+* \param x is another storage of the same type (i.e., instantiated with the
+* same template parameters) whose content is swapped with that of this
+* storage.
+*/
+template<typename id_t>
+void PiercedStorageSyncSlave<id_t>::swap(PiercedStorageSyncSlave<id_t> &x) noexcept
+{
+    PiercedSyncSlave::swap(x);
+    std::swap(x.m_kernel, m_kernel);
+    std::swap(x.m_const_kernel, m_const_kernel);
+}
+
+/**
+*   Constructor.
+*/
+template<typename value_t, typename id_t>
+PiercedStorage<value_t, id_t>::PiercedStorage()
+    : PiercedStorageSyncSlave<id_t>(), m_nFields(1)
+{
+}
+
+/**
+* Constructor.
+*
+* \param nFields is the number of fields in the storage
+*/
+template<typename value_t, typename id_t>
+PiercedStorage<value_t, id_t>::PiercedStorage(std::size_t nFields)
+    : PiercedStorageSyncSlave<id_t>(), m_nFields(nFields)
+{
+}
+
+/**
+* Constructor.
+*
+* \param nFields is the number of fields in the storage
+* \param kernel is the kernel that will be set
+*/
+template<typename value_t, typename id_t>
+PiercedStorage<value_t, id_t>::PiercedStorage(std::size_t nFields, const PiercedKernel<id_t> *kernel)
+    : PiercedStorageSyncSlave<id_t>(kernel), m_nFields(nFields)
+{
+    // Base class construcotr cannot call virtual functions
+    _postSetStaticKernel();
+}
+
+/**
+* Constructor.
+*
+* \param nFields is the number of fields in the storage
+* \param kernel is the kernel that will be set
+* \param syncMode is the synchronization mode that will be used for the storage
+*/
+template<typename value_t, typename id_t>
+PiercedStorage<value_t, id_t>::PiercedStorage(std::size_t nFields, PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode)
+    : PiercedStorageSyncSlave<id_t>(kernel, syncMode), m_nFields(nFields)
+{
+    // Base class construcotr cannot call virtual functions
+    _postSetStaticKernel();
+    _postSetDynamicKernel();
+}
+
+/**
+* Constructor.
+*
+* \param x is another container of the same type (i.e., instantiated with
+* the same template parameters) whose content is copied in this container
+* \param kernel is the kernel that will be set
+*/
+template<typename value_t, typename id_t>
+PiercedStorage<value_t, id_t>::PiercedStorage(const PiercedStorage<value_t, id_t> &x, const PiercedKernel<id_t> *kernel)
+    : PiercedStorageSyncSlave<id_t>(x, kernel), m_nFields(x.m_nFields), m_fields(x.m_fields)
+{
+    // Base class construcotr cannot call virtual functions
+    if (this->getKernel()) {
+        _postSetStaticKernel();
+    }
+}
+
+/**
+* Constructor.
+*
+* \param x is another container of the same type (i.e., instantiated with
+* the same template parameters) whose content is copied in this container
+* \param kernel is the kernel that will be set
+* \param syncMode is the synchronization mode that will be used for the storage
+*/
+template<typename value_t, typename id_t>
+PiercedStorage<value_t, id_t>::PiercedStorage(const PiercedStorage<value_t, id_t> &x, PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode)
+    : PiercedStorageSyncSlave<id_t>(x, kernel, syncMode), m_nFields(x.m_nFields), m_fields(x.m_fields)
+{
+    // Base class construcotr cannot call virtual functions
+    if (this->getKernel()) {
+        _postSetStaticKernel();
+
+        KernelType kernelType = this->getKernelType();
+        if (kernelType == this->KERNEL_DYNAMIC) {
+            _postSetDynamicKernel();
+        }
+    }
+}
+
+/**
+* Copy constructor.
+*
+* \param x is another container of the same type (i.e., instantiated with
+* the same template parameters) whose content is copied in this container
+*/
+template<typename value_t, typename id_t>
+PiercedStorage<value_t, id_t>::PiercedStorage(const PiercedStorage<value_t, id_t> &x)
+    : PiercedStorage<value_t, id_t>(x, nullptr)
+{
+}
+
+/**
+* Gets the number of fields in the storage.
+*
+* \result The number of fields in the storage.
+*/
+template<typename value_t, typename id_t>
+std::size_t PiercedStorage<value_t, id_t>::getFieldCount() const
+{
+    return m_nFields;
+}
+
+
+/**
+* Internal function that will be called after setting a static kernel.
+*
+* The storage will NOT be synchronized with the kernel. Every change to the
+* kernel can potentially invalidate the link between kernel and storage.
+*
+* \param kernel is the kernel that will be set
+*/
+template<typename value_t, typename id_t>
+void PiercedStorage<value_t, id_t>::_postSetStaticKernel()
+{
+    // Resize the storage
+    rawResize(this->m_const_kernel->rawSize());
+}
+
+/**
+* Internal function that will be called after setting a dynamic kernel.
+*
+* The storage will dynamically synchronized with the kernel.
+*/
+template<typename value_t, typename id_t>
+void PiercedStorage<value_t, id_t>::_postSetDynamicKernel()
+{
+    // Nothing to do
+}
+
+/**
+* Internal function that will be called after unsetting the kernel.
+*
+* \param release if it's true the memory hold by the container will
+* be released, otherwise the container will be cleared but its
+* memory will not be released
+*/
+template<typename value_t, typename id_t>
+void PiercedStorage<value_t, id_t>::_postUnsetKernel(bool release)
+{
+    // Clear the storage
+    rawClear(release);
 }
 
 /**
@@ -716,11 +890,9 @@ void PiercedStorage<value_t, id_t>::swap(PiercedStorage &x) noexcept
         exit(EXIT_FAILURE);
     }
 
-    PiercedSyncSlave::swap(x);
+    PiercedStorageSyncSlave<id_t>::swap(x);
     std::swap(x.m_nFields, m_nFields);
     std::swap(x.m_fields, m_fields);
-    std::swap(x.m_kernel, m_kernel);
-    std::swap(x.m_const_kernel, m_const_kernel);
 }
 
 /**
@@ -770,7 +942,7 @@ __PS_POINTER__ PiercedStorage<value_t, id_t>::data()
 template<typename value_t, typename id_t>
 __PS_POINTER__ PiercedStorage<value_t, id_t>::data(id_t id, std::size_t offset)
 {
-    std::size_t pos = m_const_kernel->getPos(id);
+    std::size_t pos = this->m_const_kernel->getPos(id);
 
     return rawData(pos, offset);
 }
@@ -785,7 +957,7 @@ __PS_POINTER__ PiercedStorage<value_t, id_t>::data(id_t id, std::size_t offset)
 template<typename value_t, typename id_t>
 __PS_CONST_POINTER__ PiercedStorage<value_t, id_t>::data(id_t id, std::size_t offset) const
 {
-    std::size_t pos = m_const_kernel->getPos(id);
+    std::size_t pos = this->m_const_kernel->getPos(id);
 
     return rawData(pos, offset);
 }
@@ -831,11 +1003,11 @@ __PS_CONST_POINTER__ PiercedStorage<value_t, id_t>::rawData(std::size_t pos, std
 template<typename value_t, typename id_t>
 __PS_REFERENCE__ PiercedStorage<value_t, id_t>::front(std::size_t k)
 {
-    if (m_const_kernel->empty()) {
+    if (this->m_const_kernel->empty()) {
         throw std::out_of_range("Vector is empty");
     }
 
-    return rawAt(m_const_kernel->front(), k);
+    return rawAt(this->m_const_kernel->front(), k);
 }
 
 /**
@@ -849,11 +1021,11 @@ __PS_REFERENCE__ PiercedStorage<value_t, id_t>::front(std::size_t k)
 template<typename value_t, typename id_t>
 __PS_CONST_REFERENCE__ PiercedStorage<value_t, id_t>::front(std::size_t k) const
 {
-    if (m_const_kernel->empty()) {
+    if (this->m_const_kernel->empty()) {
         throw std::out_of_range("Vector is empty");
     }
 
-    return rawAt(m_const_kernel->front(), k);
+    return rawAt(this->m_const_kernel->front(), k);
 }
 
 /**
@@ -867,11 +1039,11 @@ __PS_CONST_REFERENCE__ PiercedStorage<value_t, id_t>::front(std::size_t k) const
 template<typename value_t, typename id_t>
 __PS_REFERENCE__ PiercedStorage<value_t, id_t>::back(std::size_t k)
 {
-    if (m_const_kernel->empty()) {
+    if (this->m_const_kernel->empty()) {
         throw std::out_of_range("Vector is empty");
     }
 
-    return rawAt(m_const_kernel->back(), k);
+    return rawAt(this->m_const_kernel->back(), k);
 }
 
 /**
@@ -885,11 +1057,11 @@ __PS_REFERENCE__ PiercedStorage<value_t, id_t>::back(std::size_t k)
 template<typename value_t, typename id_t>
 __PS_CONST_REFERENCE__ PiercedStorage<value_t, id_t>::back(std::size_t k) const
 {
-    if (m_const_kernel->empty()) {
+    if (this->m_const_kernel->empty()) {
         throw std::out_of_range("Vector is empty");
     }
 
-    return rawAt(m_const_kernel->back(), k);
+    return rawAt(this->m_const_kernel->back(), k);
 }
 
 
@@ -903,7 +1075,7 @@ __PS_CONST_REFERENCE__ PiercedStorage<value_t, id_t>::back(std::size_t k) const
 template<typename value_t, typename id_t>
 __PS_REFERENCE__ PiercedStorage<value_t, id_t>::at(id_t id, std::size_t k)
 {
-    std::size_t pos = m_const_kernel->getPos(id);
+    std::size_t pos = this->m_const_kernel->getPos(id);
 
     return rawAt(pos, k);
 }
@@ -918,7 +1090,7 @@ __PS_REFERENCE__ PiercedStorage<value_t, id_t>::at(id_t id, std::size_t k)
 template<typename value_t, typename id_t>
 __PS_CONST_REFERENCE__ PiercedStorage<value_t, id_t>::at(id_t id, std::size_t k) const
 {
-    std::size_t pos = m_const_kernel->getPos(id);
+    std::size_t pos = this->m_const_kernel->getPos(id);
 
     return rawAt(pos, k);
 }
@@ -956,7 +1128,7 @@ __PS_CONST_REFERENCE__ PiercedStorage<value_t, id_t>::operator[](id_t id) const
 template<typename value_t, typename id_t>
 void PiercedStorage<value_t, id_t>::copy(id_t id, value_t *values) const
 {
-    std::size_t pos = m_const_kernel->getPos(id);
+    std::size_t pos = this->m_const_kernel->getPos(id);
 
     rawCopy(pos, getFieldCount(), 0, values);
 }
@@ -972,7 +1144,7 @@ void PiercedStorage<value_t, id_t>::copy(id_t id, value_t *values) const
 template<typename value_t, typename id_t>
 void PiercedStorage<value_t, id_t>::copy(id_t id, std::size_t nFields, std::size_t offset, value_t *values) const
 {
-    std::size_t pos = m_const_kernel->getPos(id);
+    std::size_t pos = this->m_const_kernel->getPos(id);
 
     rawCopy(pos, nFields, offset, values);
 }
@@ -1001,7 +1173,7 @@ void PiercedStorage<value_t, id_t>::set(id_t id, const value_t &value)
 template<typename value_t, typename id_t>
 void PiercedStorage<value_t, id_t>::set(id_t id, std::size_t k, const value_t &value)
 {
-    std::size_t pos = m_const_kernel->getPos(id);
+    std::size_t pos = this->m_const_kernel->getPos(id);
 
     rawSet(pos, k, value);
 }
@@ -1015,7 +1187,7 @@ void PiercedStorage<value_t, id_t>::set(id_t id, std::size_t k, const value_t &v
 template<typename value_t, typename id_t>
 void PiercedStorage<value_t, id_t>::set(id_t id, const value_t *values)
 {
-    std::size_t pos = m_const_kernel->getPos(id);
+    std::size_t pos = this->m_const_kernel->getPos(id);
 
     rawSet(pos, getFieldCount(), 0, values);
 }
@@ -1031,7 +1203,7 @@ void PiercedStorage<value_t, id_t>::set(id_t id, const value_t *values)
 template<typename value_t, typename id_t>
 void PiercedStorage<value_t, id_t>::set(id_t id, std::size_t nFields, std::size_t offset, const value_t *values)
 {
-    std::size_t pos = m_const_kernel->getPos(id);
+    std::size_t pos = this->m_const_kernel->getPos(id);
 
     rawSet(pos, nFields, offset, values);
 }
@@ -1160,7 +1332,7 @@ void PiercedStorage<value_t, id_t>::rawSet(std::size_t pos, std::size_t nFields,
 template<typename value_t, typename id_t>
 typename PiercedStorage<value_t, id_t>::iterator PiercedStorage<value_t, id_t>::find(const id_t &id) noexcept
 {
-    typename PiercedKernel<id_t>::const_iterator iterator = m_const_kernel->find(id);
+    typename PiercedKernel<id_t>::const_iterator iterator = this->m_const_kernel->find(id);
 
     return rawFind(iterator.getPos());
 }
@@ -1174,7 +1346,7 @@ typename PiercedStorage<value_t, id_t>::iterator PiercedStorage<value_t, id_t>::
 template<typename value_t, typename id_t>
 typename PiercedStorage<value_t, id_t>::const_iterator PiercedStorage<value_t, id_t>::find(const id_t &id) const noexcept
 {
-    typename PiercedKernel<id_t>::const_iterator iterator = m_const_kernel->find(id);
+    typename PiercedKernel<id_t>::const_iterator iterator = this->m_const_kernel->find(id);
 
     return rawFind(iterator.getPos());
 }
@@ -1211,7 +1383,7 @@ typename PiercedStorage<value_t, id_t>::const_iterator PiercedStorage<value_t, i
 template<typename value_t, typename id_t>
 typename PiercedStorage<value_t, id_t>::iterator PiercedStorage<value_t, id_t>::begin() noexcept
 {
-    return rawFind(m_const_kernel->m_begin_pos);
+    return rawFind(this->m_const_kernel->m_begin_pos);
 }
 
 /*!
@@ -1222,7 +1394,7 @@ typename PiercedStorage<value_t, id_t>::iterator PiercedStorage<value_t, id_t>::
 template<typename value_t, typename id_t>
 typename PiercedStorage<value_t, id_t>::iterator PiercedStorage<value_t, id_t>::end() noexcept
 {
-    return rawFind(m_const_kernel->m_end_pos);
+    return rawFind(this->m_const_kernel->m_end_pos);
 }
 
 /*!
@@ -1257,7 +1429,7 @@ typename PiercedStorage<value_t, id_t>::const_iterator PiercedStorage<value_t, i
 template<typename value_t, typename id_t>
 typename PiercedStorage<value_t, id_t>::const_iterator PiercedStorage<value_t, id_t>::cbegin() const noexcept
 {
-    return rawFind(m_const_kernel->m_begin_pos);
+    return rawFind(this->m_const_kernel->m_begin_pos);
 }
 
 /*!
@@ -1269,7 +1441,7 @@ typename PiercedStorage<value_t, id_t>::const_iterator PiercedStorage<value_t, i
 template<typename value_t, typename id_t>
 typename PiercedStorage<value_t, id_t>::const_iterator PiercedStorage<value_t, id_t>::cend() const noexcept
 {
-    return rawFind(m_const_kernel->m_end_pos);
+    return rawFind(this->m_const_kernel->m_end_pos);
 }
 
 /*!
