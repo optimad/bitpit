@@ -160,11 +160,35 @@ public:
 };
 
 template<>
+class LevelSetSegmentationNarrowBandCache<LevelSetDirectStorageManager> : public virtual LevelSetDirectStorageManager, public virtual LevelSetNarrowBandCache<LevelSetDirectStorageManager>, public virtual LevelSetSegmentationNarrowBandCacheBase<LevelSetDirectStorageManager>
+{
+
+public:
+    LevelSetSegmentationNarrowBandCache(std::size_t nItems);
+
+    long &                                      getSupportId(const KernelIterator &itr) override;
+    long                                        getSupportId(const KernelIterator &itr) const override;
+
+    std::array<double, 3> &                     getSurfaceNormal(const KernelIterator &itr) override;
+    const std::array<double, 3> &               getSurfaceNormal(const KernelIterator &itr) const override;
+
+};
+
+template<>
 class LevelSetNarrowBandCacheFactory<LevelSetSegmentationNarrowBandCache<LevelSetExternalPiercedStorageManager>>
 {
 
 public:
     static std::shared_ptr<LevelSetSegmentationNarrowBandCache<LevelSetExternalPiercedStorageManager>> create(LevelSetCachedObjectInterface<LevelSetSegmentationNarrowBandCache<LevelSetExternalPiercedStorageManager>> *object);
+
+};
+
+template<>
+class LevelSetNarrowBandCacheFactory<LevelSetSegmentationNarrowBandCache<LevelSetDirectStorageManager>>
+{
+
+public:
+    static std::shared_ptr<LevelSetSegmentationNarrowBandCache<LevelSetDirectStorageManager>> create(LevelSetCachedObjectInterface<LevelSetSegmentationNarrowBandCache<LevelSetDirectStorageManager>> *object);
 
 };
 
@@ -228,9 +252,11 @@ namespace bitpit {
 
 extern template class LevelSetSegmentationNarrowBandCacheBase<LevelSetExternalPiercedStorageManager>;
 extern template class LevelSetSegmentationNarrowBandCacheBase<LevelSetInternalPiercedStorageManager>;
+extern template class LevelSetSegmentationNarrowBandCacheBase<LevelSetDirectStorageManager>;
 
 extern template class LevelSetSegmentationObject<LevelSetSegmentationNarrowBandCache<LevelSetExternalPiercedStorageManager>>;
 extern template class LevelSetSegmentationObject<LevelSetSegmentationNarrowBandCache<LevelSetInternalPiercedStorageManager>>;
+extern template class LevelSetSegmentationObject<LevelSetSegmentationNarrowBandCache<LevelSetDirectStorageManager>>;
 
 }
 #endif

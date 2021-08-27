@@ -339,4 +339,172 @@ void LevelSetInternalPiercedStorageManager::swap(LevelSetInternalPiercedStorageM
     m_internalKernel.swap(other.m_internalKernel);
 }
 
+/*!
+ * \ingroup levelset
+ * \interface LevelSetDirectStorageManager
+ * \brief Is the template class for defining levelset storages managers that
+ * don't need a kernel.
+ *
+ * The kernel of this storage manager is a dummy kernel and contains the number
+ * of items that each storage will contain.
+ */
+
+/*!
+ * Constructor.
+ */
+LevelSetDirectStorageManager::LevelSetDirectStorageManager()
+    : LevelSetDirectStorageManager(0)
+{
+}
+
+/*!
+ * Constructor.
+ *
+ * \param nItems is the number of items each storage will contain
+ */
+LevelSetDirectStorageManager::LevelSetDirectStorageManager(std::size_t nItems)
+    : LevelSetStorageManager<std::size_t, std::size_t>(nullptr), m_nItems(nItems)
+{
+}
+
+/*!
+ * Insert a kernel entry with the specified id.
+ *
+ * This function cannot be used.
+ *
+ * \param id is id of the entry
+ * \param sync controls if the storages will be synched
+ * \result A kernel iterator pointing to the newly created entry.
+ */
+LevelSetDirectStorageManager::KernelIterator LevelSetDirectStorageManager::insert(long id, bool sync)
+{
+    BITPIT_UNUSED(sync);
+
+    return id;
+}
+
+/*!
+ * Erase from the kernel the entry with the specified id.
+ *
+ * This function cannot be used.
+ *
+ * \param id is id of the cell
+ * \param sync controls if the kernel will be synched
+ */
+void LevelSetDirectStorageManager::erase(long id, bool sync)
+{
+    BITPIT_UNUSED(id);
+    BITPIT_UNUSED(sync);
+
+    // Nothing to do
+}
+
+/*!
+ * Checks if the kernel contains an entry with the specified id.
+ *
+ * \param id is id of the entry
+ * \result Return true if kernel contains an entry with the specified id,
+ * false otherwise.
+ */
+bool LevelSetDirectStorageManager::contains(long id) const
+{
+    BITPIT_UNUSED(id);
+
+    return true;
+}
+
+/*!
+ * Get a kernel iterator for the entry with the specified id.
+ *
+ * \param id is id of the entry
+ * \result A kernel iterator pointing to the specified entry.
+ */
+LevelSetDirectStorageManager::KernelIterator LevelSetDirectStorageManager::find(long id) const
+{
+    return id;
+}
+
+/*!
+ * Get a kernel iterator for the entry with the specified raw id.
+ *
+ * \param rawId is raw id of the entry
+ * \result A kernel iterator pointing to the specified entry.
+ */
+LevelSetDirectStorageManager::KernelIterator LevelSetDirectStorageManager::rawFind(std::size_t rawId) const
+{
+    return rawId;
+}
+
+/*!
+ * Get a kernel iterator pointing to the first entry.
+ *
+ * \result A kernel iterator pointing to the first entry.
+ */
+LevelSetDirectStorageManager::KernelIterator LevelSetDirectStorageManager::begin() const
+{
+    return 0;
+}
+
+/*!
+ * Get a kernel iterator referring to the past-the-end entry.
+ *
+ * \result A kernel iterator referring to the past-the-end entry.
+ */
+LevelSetDirectStorageManager::KernelIterator LevelSetDirectStorageManager::end() const
+{
+    return m_nItems;
+}
+
+/*!
+ * Synchronize the storages with the kernel.
+ *
+ * This function cannot be used.
+ */
+void LevelSetDirectStorageManager::syncStorages()
+{
+    // Nothing to do
+}
+
+/*!
+ * Clear the kernel of the storage manager.
+ */
+void LevelSetDirectStorageManager::clearKernel()
+{
+    // Nothing to do
+}
+
+/*!
+ * Dump the kernel of the storage manager.
+ *
+ * \param stream is the output stream
+ */
+void LevelSetDirectStorageManager::dumpKernel(std::ostream &stream)
+{
+    utils::binary::write(stream, m_nItems);
+}
+
+/*!
+ * Restore the kernel of the storage manager.
+ *
+ * \param stream is the input stream
+ */
+void LevelSetDirectStorageManager::restoreKernel(std::istream &stream)
+{
+    utils::binary::read(stream, m_nItems);
+}
+
+/*!
+ * Exchanges the content of the storage manager with the content the specified
+ * other storage manager.
+ *
+ * \param other is another storage manager whose content is swapped with that
+ * of this storage manager
+ */
+void LevelSetDirectStorageManager::swap(LevelSetDirectStorageManager &other) noexcept
+{
+    LevelSetStorageManager<std::size_t, std::size_t>::swap(other);
+
+    std::swap(other.m_nItems, m_nItems);
+}
+
 }

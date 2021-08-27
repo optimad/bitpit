@@ -391,6 +391,120 @@ void LevelSetPiercedStorage<value_t, id_t>::readItem(const KernelIterator &kerne
 
 /*!
  * \ingroup levelset
+ * \interface LevelSetDirectStorage
+ * \brief Is the template class for defining levelset storages that .
+ */
+
+/*!
+ * Constructor.
+ *
+ * \param containerWrapper is the container wrapper
+ */
+template<typename value_t>
+LevelSetDirectStorage<value_t>::LevelSetDirectStorage(LevelSetContainerWrapper *containerWrapper)
+    : LevelSetBaseStorage<KernelIterator>(containerWrapper)
+{
+}
+
+/*!
+ * Clear the storage.
+ */
+template<typename value_t>
+void LevelSetDirectStorage<value_t>::clear()
+{
+    Container *container = static_cast<Container *>(this->getContainer());
+
+    container->clear();
+}
+
+/*!
+ * Dump the storage.
+ *
+ * \param stream is the output stream
+ */
+template<typename value_t>
+void LevelSetDirectStorage<value_t>::dump(std::ostream &stream)
+{
+    const Container *container = static_cast<const Container *>(this->getContainer());
+
+    for (const auto &item : *container) {
+        utils::binary::write(stream, item);
+    }
+}
+
+/*!
+ * Restore the storage.
+ *
+ * \param stream is the input stream
+ */
+template<typename value_t>
+void LevelSetDirectStorage<value_t>::restore(std::istream &stream)
+{
+    Container *container = static_cast<Container *>(this->getContainer());
+
+    for (auto &item : *container) {
+        utils::binary::read(stream, item);
+    }
+}
+
+/*!
+ * Exchanges the content of the storage with the content the specified other
+ * storage.
+ *
+ * \param other is another storage whose content is swapped with that of this
+ * storage
+ */
+template<typename value_t>
+void LevelSetDirectStorage<value_t>::swap(LevelSetDirectStorage<value_t> &other) noexcept
+{
+    LevelSetBaseStorage<KernelIterator>::swap(other);
+}
+
+#if BITPIT_ENABLE_MPI
+/*!
+ * Get the size, expressed in bytes, of an item.
+ *
+ * \result The size, expressed in bytes, of an item.
+ */
+template<typename value_t>
+std::size_t LevelSetDirectStorage<value_t>::getItemBinarySize() const
+{
+    return sizeof(value_t);
+}
+
+/*!
+ * Write narrow band entry into the communication buffer.
+ *
+ * \param kernelIterator is the kernel iterator pointing to entry associated to
+ * the item
+ * \param[in,out] buffer buffer for data communication
+ */
+template<typename value_t>
+void LevelSetDirectStorage<value_t>::writeItem(const KernelIterator &kernelIterator, SendBuffer &buffer)
+{
+    const Container *container = static_cast<const Container *>(this->getContainer());
+
+    buffer << (*container)[kernelIterator];
+}
+
+/*!
+ * Read narrow band entry from the communication buffer.
+ *
+ * \param kernelIterator is the kernel iterator pointing to entry associated to
+ * the item
+ * \param[in,out] buffer buffer containing data
+ */
+template<typename value_t>
+void LevelSetDirectStorage<value_t>::readItem(const KernelIterator &kernelIterator, RecvBuffer &buffer)
+{
+    Container *container = static_cast<Container *>(this->getContainer());
+
+    buffer >> (*container)[kernelIterator];
+}
+#endif
+
+/*!
+ * \ingroup levelset
  * \interface LevelSetStorageManager
  * \brief Is the template class for defining levelset storages managers.
  */
@@ -770,6 +884,27 @@ LevelSetExternalPiercedStorageManager::Storage<value_t> * LevelSetExternalPierce
     LevelSetContainerWrapper *containerWrapper = m_containers.back().get();
 
     std::unique_ptr<LevelSetBaseStorage<KernelIterator>> storage = std::unique_ptr<LevelSetBaseStorage<KernelIterator>>(new LevelSetPiercedStorage<value_t>(containerWrapper));
+
+    return static_cast<Storage<value_t> *>(LevelSetStorageManager<Kernel, KernelIterator>::addStorage(id, std::move(storage)));
+}
+
+/*!
+ * Add a new storage.
+ *
+ * If a storage with the same id is already in the manager, an exception will
+ * be thrown.
+ *
+ * \param id is the id that will be assigned to the storage
+ * \result Returns a pointer to the container.
+ */
+template<typename value_t>
+LevelSetDirectStorageManager::Storage<value_t> * LevelSetDirectStorageManager::addStorage(int id)
+{
+    std::unique_ptr<Storage<value_t>> container = std::unique_ptr<Storage<value_t>>(new Storage<value_t>(m_nItems));
+    m_containers.emplace_back(new LevelSetUniqueContainerWrapper<Storage<value_t>>(std::move(container)));
+    LevelSetContainerWrapper *containerWrapper = m_containers.back().get();
+
+    std::unique_ptr<LevelSetBaseStorage<KernelIterator>> storage = std::unique_ptr<LevelSetBaseStorage<KernelIterator>>(new LevelSetDirectStorage<value_t>(containerWrapper));
 
     return static_cast<Storage<value_t> *>(LevelSetStorageManager<Kernel, KernelIterator>::addStorage(id, std::move(storage)));
 }

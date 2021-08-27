@@ -31,9 +31,11 @@ namespace bitpit {
 // Explicit instantization
 template class LevelSetSegmentationNarrowBandCacheBase<LevelSetExternalPiercedStorageManager>;
 template class LevelSetSegmentationNarrowBandCacheBase<LevelSetInternalPiercedStorageManager>;
+template class LevelSetSegmentationNarrowBandCacheBase<LevelSetDirectStorageManager>;
 
 template class LevelSetSegmentationObject<LevelSetSegmentationNarrowBandCache<LevelSetExternalPiercedStorageManager>>;
 template class LevelSetSegmentationObject<LevelSetSegmentationNarrowBandCache<LevelSetInternalPiercedStorageManager>>;
+template class LevelSetSegmentationObject<LevelSetSegmentationNarrowBandCache<LevelSetDirectStorageManager>>;
 
 /*!
     @class      SegmentationKernel
@@ -595,6 +597,63 @@ const std::array<double, 3> & LevelSetSegmentationNarrowBandCache<LevelSetIntern
 
     return m_surfaceNormals->rawAt(rawId);
 }
+
+/*!
+ * Constructor
+ *
+ * \param nItems are the maximum number of items the cache will hold
+ */
+LevelSetSegmentationNarrowBandCache<LevelSetDirectStorageManager>::LevelSetSegmentationNarrowBandCache(std::size_t nItems)
+    : LevelSetDirectStorageManager(nItems), LevelSetNarrowBandCache<LevelSetDirectStorageManager>(nItems), LevelSetSegmentationNarrowBandCacheBase<LevelSetDirectStorageManager>()
+{
+    m_supportIds     = this->template addStorage<long>(this->getStorageCount());
+    m_surfaceNormals = this->template addStorage<std::array<double, 3>>(this->getStorageCount());
+}
+
+/*!
+ * Get a reference to the support id of the specified entry.
+ *
+ * \param itr is an iterator pointing to the entry
+ * \result The support id of the specified entry.
+ */
+long & LevelSetSegmentationNarrowBandCache<LevelSetDirectStorageManager>::getSupportId(const KernelIterator &itr)
+{
+    return (*m_supportIds)[itr];
+}
+
+/*!
+ * Get the support id of the specified entry.
+ *
+ * \param itr is an iterator pointing to the entry
+ * \result The support id of the specified entry.
+ */
+long LevelSetSegmentationNarrowBandCache<LevelSetDirectStorageManager>::getSupportId(const KernelIterator &itr) const
+{
+    return (*m_supportIds)[itr];
+}
+
+/*!
+ * Get a reference to the surface normal of the specified entry.
+ *
+ * \param itr is an iterator pointing to the entry
+ * \result The surface normal of the specified entry.
+ */
+std::array<double, 3> & LevelSetSegmentationNarrowBandCache<LevelSetDirectStorageManager>::getSurfaceNormal(const KernelIterator &itr)
+{
+    return (*m_surfaceNormals)[itr];
+}
+
+/*!
+ * Get the surface normal of the specified entry.
+ *
+ * \param itr is an iterator pointing to the entry
+ * \result The surface normal of the specified entry.
+ */
+const std::array<double, 3> & LevelSetSegmentationNarrowBandCache<LevelSetDirectStorageManager>::getSurfaceNormal(const KernelIterator &itr) const
+{
+    return (*m_surfaceNormals)[itr];
+}
+
 /*!
  * Create the narrow band cache.
  *
@@ -606,6 +665,19 @@ std::shared_ptr<LevelSetSegmentationNarrowBandCache<LevelSetExternalPiercedStora
     PiercedVector<Cell, long> &cells = mesh->getCells();
 
     return std::shared_ptr<LevelSetSegmentationNarrowBandCache<LevelSetExternalPiercedStorageManager>>(new LevelSetSegmentationNarrowBandCache<LevelSetExternalPiercedStorageManager>(&cells));
+}
+
+/*!
+ * Create the narrow band cache.
+ *
+ * @param ojbect is the levelset object for which the ache will be created
+ */
+std::shared_ptr<LevelSetSegmentationNarrowBandCache<LevelSetDirectStorageManager>> LevelSetNarrowBandCacheFactory<LevelSetSegmentationNarrowBandCache<LevelSetDirectStorageManager>>::create(LevelSetCachedObjectInterface<LevelSetSegmentationNarrowBandCache<LevelSetDirectStorageManager>> *object)
+{
+    const VolumeKernel *mesh = object->getKernel()->getMesh();
+    const std::size_t nCells = mesh->getCellCount();
+
+    return std::shared_ptr<LevelSetSegmentationNarrowBandCache<LevelSetDirectStorageManager>>(new LevelSetSegmentationNarrowBandCache<LevelSetDirectStorageManager>(nCells));
 }
 
 }

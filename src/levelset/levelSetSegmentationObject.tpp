@@ -379,6 +379,7 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::updateNarrowBand( const st
 
 /*!
  * Computes the levelset within the narrow band on an cartesian grid.
+ * The levelset can be computed also when the patch is in memory-light mode.
  * If the size of the narrow band has been set, the method will compute the
  * levelset values only of those cells within the threshold.
  * In case the size of the narrow band has not been set, levelset will be
