@@ -174,6 +174,31 @@ public:
 
 };
 
+template<typename value_t>
+class LevelSetDirectStorage : public LevelSetBaseStorage<std::size_t>
+{
+
+public:
+    typedef std::vector<value_t> Container;
+    typedef std::size_t KernelIterator;
+
+    LevelSetDirectStorage(LevelSetContainerWrapper *containerWrapper);
+
+    void clear() override;
+
+    void dump(std::ostream &stream) override;
+    void restore(std::istream &stream) override;
+
+#if BITPIT_ENABLE_MPI
+    std::size_t getItemBinarySize() const override;
+    void writeItem(const KernelIterator &kernelIterator, SendBuffer &buffer) override;
+    void readItem(const KernelIterator &kernelIterator, RecvBuffer &buffer) override;
+#endif
+
+    void swap(LevelSetDirectStorage<value_t> &other) noexcept;
+
+};
+
 template<typename kernel_t, typename kernel_iterator_t = typename kernel_t::const_iterator>
 class LevelSetStorageManager
 {
@@ -303,6 +328,44 @@ protected:
     Kernel m_internalKernel; //! Internal pierced kernel
 
     LevelSetInternalPiercedStorageManager();
+
+    void clearKernel() override;
+
+    void dumpKernel(std::ostream &stream) override;
+    void restoreKernel(std::istream &stream) override;
+
+};
+
+class LevelSetDirectStorageManager : public LevelSetStorageManager<std::size_t, std::size_t>
+{
+
+public:
+    template<typename T>
+    using Storage = std::vector<T>;
+
+    KernelIterator insert(long id, bool sync = true) override;
+    void erase(long id, bool sync = true) override;
+
+    bool contains(long id) const override;
+
+    KernelIterator find(long id) const override;
+    KernelIterator rawFind(std::size_t) const override;
+
+    KernelIterator begin() const override;
+    KernelIterator end() const override;
+
+    template<typename value_t>
+    Storage<value_t> * addStorage(int id);
+
+    void syncStorages() override;
+
+    void swap(LevelSetDirectStorageManager &other) noexcept;
+
+protected:
+    std::size_t m_nItems;
+
+    LevelSetDirectStorageManager();
+    LevelSetDirectStorageManager(std::size_t nItems);
 
     void clearKernel() override;
 

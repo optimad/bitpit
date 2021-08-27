@@ -30,7 +30,7 @@
 namespace bitpit{
 
 class VolCartesian;
-class LevelSetExternalPiercedStorageManager;
+class LevelSetDirectStorageManager;
 class LevelSetInternalPiercedStorageManager;
 
 class LevelSetCartesianKernel : public LevelSetKernel{
@@ -45,7 +45,7 @@ class LevelSetCartesianKernel : public LevelSetKernel{
     void                                        updateCellCirclesCache();
 
     public:
-    typedef LevelSetExternalPiercedStorageManager DenseStorageManager;
+    typedef LevelSetDirectStorageManager          DenseStorageManager;
     typedef LevelSetInternalPiercedStorageManager SparseStorageManager;
 
     LevelSetCartesianKernel( VolCartesian & );
