@@ -46,8 +46,8 @@ const int LevelSetCachedObject::PROPAGATION_STATUS_EXTERNAL = - 1;
 const int LevelSetCachedObject::PROPAGATION_STATUS_WAITING  =   0;
 const int LevelSetCachedObject::PROPAGATION_STATUS_REACHED  =   1;
 
-const int LevelSetCachedObject::PROPAGATION_SIGN_DUMMY     = -2;
-const int LevelSetCachedObject::PROPAGATION_SIGN_UNDEFINED = -3;
+const signed char LevelSetCachedObject::PROPAGATION_SIGN_DUMMY     = -2;
+const signed char LevelSetCachedObject::PROPAGATION_SIGN_UNDEFINED = -3;
 
 /*!
 	@ingroup levelset
@@ -59,7 +59,7 @@ const int LevelSetCachedObject::PROPAGATION_SIGN_UNDEFINED = -3;
  * Constructor
  * @param[in] id id assigned to object
  */
-LevelSetCachedObject::LevelSetCachedObject(int id) : LevelSetObject(id){
+LevelSetCachedObject::LevelSetCachedObject(int id) : LevelSetObject(id), m_propagatedSignAvailable(false), m_propagatedSign(1) {
 }
 
 /*!
@@ -98,10 +98,38 @@ double LevelSetCachedObject::getValue( long id)const {
 
     auto itr = m_ls.find(id);
     if ( itr == m_ls.end() ){
-        return levelSetDefaults::VALUE;
+        return getSign(id) * levelSetDefaults::VALUE;
     }
 
     return itr->value;
+
+}
+
+/*!
+ * Get the sign of the levelset function
+ * @param[in] id cell id
+ * @return sign of levelset
+ */
+short LevelSetCachedObject::getSign( long id ) const {
+
+    // Check if the sign can be evaluated from narrowband distance
+    auto itr = m_ls.find(id);
+    if ( itr != m_ls.end() ){
+        return evalValueSign(itr->value);
+    }
+
+    // Check if the sign can be evaluated from the propagation
+    if (m_propagatedSignAvailable) {
+        signed char propagatedSign = m_propagatedSign.at(id);
+        if (propagatedSign != PROPAGATION_SIGN_UNDEFINED) {
+            return static_cast<short>(propagatedSign);
+        }
+    }
+
+    // Unable to evaluate the sign
+    //
+    // The sign cannot be evaluated, let's return the defualt sign.
+    return levelSetDefaults::SIGN;
 
 }
 
@@ -139,6 +167,11 @@ void LevelSetCachedObject::_clearAfterMeshAdaption( const std::vector<adaption::
                         m_ls.erase(parent,true) ;
                 }
             }
+
+            for ( auto & child : map.current){
+                m_propagatedSignAvailable  = false;
+                m_propagatedSign.at(child) = PROPAGATION_SIGN_UNDEFINED;
+            }
         }
     }
 
@@ -151,6 +184,8 @@ void LevelSetCachedObject::_clearAfterMeshAdaption( const std::vector<adaption::
  */
 void LevelSetCachedObject::_clear( ){
     m_ls.clear() ;
+
+    m_propagatedSign.unsetKernel() ;
 }
 
 /*!
@@ -167,6 +202,22 @@ void LevelSetCachedObject::propagateSign() {
 
     std::vector<long> seeds;
     seeds.reserve(mesh.getCellCount());
+
+    // Early return if the sign is already available
+    bool isSignUpToDate = m_propagatedSignAvailable;
+#if BITPIT_ENABLE_MPI
+    if (mesh.isPartitioned()) {
+        MPI_Allreduce(MPI_IN_PLACE, &isSignUpToDate, 1, MPI_C_BOOL, MPI_LAND, m_kernelPtr->getCommunicator());
+    }
+#endif
+
+    if (isSignUpToDate) {
+        return;
+    }
+
+    // Initialize storage for the propagated sign
+    initializeSignPropagationStorage();
+    m_propagatedSign.fill(PROPAGATION_SIGN_UNDEFINED);
 
     // Evaluate the bounding box of the object
     //
@@ -199,22 +250,23 @@ void LevelSetCachedObject::propagateSign() {
     // propagation has started will be the sign of the external region.
     PiercedStorage<int, long> propagationStatus(1, &cells);
 
-    int externalSign = PROPAGATION_SIGN_UNDEFINED;
+    signed char externalSign = PROPAGATION_SIGN_UNDEFINED;
     long nExternal   = 0;
     long nWaiting    = mesh.getCellCount();
     for (auto itr = cellBegin; itr != cellEnd; ++itr) {
         long cellId = itr.getId();
         long cellRawId = itr.getRawIndex();
         int &cellPropagationStatus = propagationStatus.rawAt(cellRawId);
+        PiercedVector<LevelSetInfo>::iterator cellLevelSetInfoItr = m_ls.find(cellId);
 
-        int cellSign;
-        if (m_ls.find(cellId) != m_ls.end()) {
-            cellSign = getSign(cellId);
+        signed char *cellSign = m_propagatedSign.rawData(cellRawId);
+        if (cellLevelSetInfoItr != m_ls.end()) {
+            *cellSign = evalValueSign(cellLevelSetInfoItr->value);
         } else {
-            cellSign = PROPAGATION_SIGN_UNDEFINED;
+            *cellSign = PROPAGATION_SIGN_UNDEFINED;
         }
 
-        initializeCellSignPropagation(cellId, cellSign, boxMin, boxMax,
+        initializeCellSignPropagation(cellId, *cellSign, boxMin, boxMax,
                                       &cellPropagationStatus, &seeds,
                                       &nWaiting, &nExternal, &externalSign);
     }
@@ -245,15 +297,15 @@ void LevelSetCachedObject::propagateSign() {
         // Initialize the communicator for exchanging the sign of the ghosts
         DataCommunicator dataCommunicator(m_kernelPtr->getCommunicator());
 
-        int sign;
-        size_t dataSize = sizeof(sign);
+        signed char exchangedSign;
+        std::size_t exchangedDataSize = sizeof(exchangedSign);
 
         // Set the receives
         for (const auto &entry : mesh.getGhostCellExchangeTargets()) {
             const int rank = entry.first;
             const auto &list = entry.second;
 
-            dataCommunicator.setRecv(rank, list.size() * dataSize);
+            dataCommunicator.setRecv(rank, list.size() * exchangedDataSize);
         }
 
         // Set the sends
@@ -261,7 +313,7 @@ void LevelSetCachedObject::propagateSign() {
             const int rank = entry.first;
             auto &list = entry.second;
 
-            dataCommunicator.setSend(rank, list.size() * dataSize);
+            dataCommunicator.setSend(rank, list.size() * exchangedDataSize);
         }
 
         // Communicate the sign among the partitions
@@ -279,11 +331,11 @@ void LevelSetCachedObject::propagateSign() {
                 SendBuffer &buffer = dataCommunicator.getSendBuffer(rank);
 
                 for (long cellId : sendIds) {
-                    int sign = PROPAGATION_SIGN_UNDEFINED;
+                    exchangedSign = PROPAGATION_SIGN_UNDEFINED;
                     if (propagationStatus.at(cellId) == PROPAGATION_STATUS_REACHED) {
-                        sign = getSign(cellId);
+                        exchangedSign = m_propagatedSign.at(cellId);
                     }
-                    buffer << sign;
+                    buffer << exchangedSign;
                 }
 
                 dataCommunicator.startSend(rank);
@@ -301,8 +353,8 @@ void LevelSetCachedObject::propagateSign() {
 
                 // Receive data and detect new seeds
                 for (long cellId : recvIds) {
-                    buffer >> sign;
-                    if (sign == PROPAGATION_SIGN_UNDEFINED) {
+                    buffer >> exchangedSign;
+                    if (exchangedSign == PROPAGATION_SIGN_UNDEFINED) {
                         continue;
                     }
 
@@ -310,14 +362,14 @@ void LevelSetCachedObject::propagateSign() {
                     int &cellPropagationStatus = propagationStatus.rawAt(cellRawId);
                     if (cellPropagationStatus == PROPAGATION_STATUS_WAITING) {
                         // Set the sign
-                        setSign(cellId, sign);
+                        m_propagatedSign.rawAt(cellRawId) = exchangedSign;
 
                         // Initialize sign propagation
-                        initializeCellSignPropagation(cellId, sign, boxMin, boxMax,
+                        initializeCellSignPropagation(cellId, exchangedSign, boxMin, boxMax,
                                                       &cellPropagationStatus, &seeds,
                                                       &nWaiting, &nExternal, &externalSign);
                     } else if (cellPropagationStatus == PROPAGATION_STATUS_REACHED) {
-                        assert(getSign(cellId) == sign);
+                        assert(m_propagatedSign.at(cellId) == exchangedSign);
                     }
                 }
 
@@ -382,12 +434,37 @@ void LevelSetCachedObject::propagateSign() {
             continue;
         }
 
-        long cellId = itr.getId();
-        setSign(cellId, externalSign);
+        m_propagatedSign.rawAt(cellRawId) = externalSign;
         --nExternal;
     }
 
     assert(nExternal == 0);
+
+    // Propgated sign is now available
+    m_propagatedSignAvailable = true;
+}
+
+/*!
+ * Initialize storage needed for sign propagation.
+ */
+void LevelSetCachedObject::initializeSignPropagationStorage() {
+
+    PiercedKernel<long> *cellPiercedKernel = &(m_kernelPtr->getMesh()->getCells());
+    if (m_propagatedSign.getKernel() != cellPiercedKernel) {
+        m_propagatedSign.setDynamicKernel(cellPiercedKernel, PiercedKernel<long>::SyncMode::SYNC_MODE_JOURNALED);
+    }
+
+}
+
+/*!
+ * Checks if the sign has been propagated outside the narrowband.
+ *
+ * \result True is the sign has been propagated outside the narrowband, false
+ * otherwise.
+ */
+bool LevelSetCachedObject::isPropagatedSignAvailable() {
+
+    return m_propagatedSignAvailable;
 }
 
 /*!
@@ -410,12 +487,12 @@ void LevelSetCachedObject::propagateSign() {
  * \param[in,out] nExternal is the number of cells in the external region
  * \param[in,out] externalSign is the sign of the external region
  */
-void LevelSetCachedObject::initializeCellSignPropagation(long cellId, int cellSign,
-                                                         const std::array<double, 3> &objectBoxMin,
-                                                         const std::array<double, 3> &objectBoxMax,
+void LevelSetCachedObject::initializeCellSignPropagation(long cellId, signed char cellSign,
+                                                         const std::array<double, 3> &boxMin,
+                                                         const std::array<double, 3> &boxMax,
                                                          int *cellStatus, std::vector<long> *seeds,
                                                          long *nWaiting, long *nExternal,
-                                                         int *externalSign) {
+                                                         signed char *externalSign) {
 
     // Detect if the cell is external
     //
@@ -495,7 +572,7 @@ void LevelSetCachedObject::initializeCellSignPropagation(long cellId, int cellSi
  */
 void LevelSetCachedObject::propagateSeedSign(const std::vector<long> &seeds,
                                              PiercedStorage<int, long> *statuses,
-                                             long *nWaiting, int *externalSign) {
+                                             long *nWaiting, signed char *externalSign) {
 
     VolumeKernel const &mesh = *(m_kernelPtr->getMesh()) ;
 
@@ -508,10 +585,7 @@ void LevelSetCachedObject::propagateSeedSign(const std::vector<long> &seeds,
         long seedId = seeds[seedCursor];
 
         // Get the sign of the seed
-        int seedSign = getSign(seedId);
-        if (seedSign == PROPAGATION_SIGN_UNDEFINED) {
-            continue;
-        }
+        int seedSign = m_propagatedSign.at(seedId);
 
         // Initialize the process list with the seed
         processList.resize(1);
@@ -521,6 +595,9 @@ void LevelSetCachedObject::propagateSeedSign(const std::vector<long> &seeds,
         while (!processList.empty()) {
             long cellId = processList.back();
             processList.resize(processList.size() - 1);
+
+            // Cell information
+            PatchKernel::CellConstIterator cellItr = mesh.getCells().find(cellId);
 
             // Process non-seed cells
             bool isSeed = (cellId == seedId);
@@ -535,7 +612,8 @@ void LevelSetCachedObject::propagateSeedSign(const std::vector<long> &seeds,
                 }
 
                 // Set the sign of the cell
-                setSign(cellId, seedSign);
+                std::size_t cellRawId = cellItr.getRawIndex();
+                m_propagatedSign.rawAt(cellRawId) = seedSign;
                 cellStatus = PROPAGATION_STATUS_REACHED;
                 --(*nWaiting);
 
@@ -552,7 +630,7 @@ void LevelSetCachedObject::propagateSeedSign(const std::vector<long> &seeds,
             // process list. When the propagation reaches an external cell
             // the sign of the seed frow which the propagation started will
             // be the sign of the external region.
-            const Cell &cell = mesh.getCell(cellId);
+            const Cell &cell = *cellItr;
             const long *cellNeighs = cell.getAdjacencies() ;
             int nCellNeighs = cell.getAdjacencyCount() ;
             for(int n = 0; n < nCellNeighs; ++n){
@@ -576,34 +654,12 @@ void LevelSetCachedObject::propagateSeedSign(const std::vector<long> &seeds,
 }
 
 /*!
- * Set the sign of the specified cell.
- *
- * \param id is the id of the cell
- * \param sign is the sign that will be assiged to the cell
- */
-void LevelSetCachedObject::setSign(long id, int sign) {
-
-    // The sign has to be set only if it is different from the default sign
-    if (sign == levelSetDefaults::SIGN) {
-        return;
-    }
-
-    // Get the info associated to the id
-    PiercedVector<LevelSetInfo>::iterator infoItr = m_ls.find(id);
-    if (infoItr == m_ls.end()){
-        infoItr = m_ls.emplace(id);
-    }
-
-    // Update the sign
-    (*infoItr).value = sign * levelSetDefaults::VALUE;
-}
-
-/*!
  * Writes LevelSetCachedObject to stream in binary format
  * @param[in] stream output stream
  */
 void LevelSetCachedObject::_dump( std::ostream &stream ){
 
+    // Levelset information
     utils::binary::write(stream, m_ls.size() ) ;
     bitpit::PiercedVector<LevelSetInfo>::iterator   infoItr, infoEnd = m_ls.end() ;
 
@@ -611,6 +667,12 @@ void LevelSetCachedObject::_dump( std::ostream &stream ){
         utils::binary::write(stream, infoItr.getId()) ;
         utils::binary::write(stream, infoItr->value) ;
         utils::binary::write(stream, infoItr->gradient) ;
+    }
+
+    // Sign propagation
+    utils::binary::write(stream, m_propagatedSignAvailable) ;
+    if (isPropagatedSignAvailable()) {
+        m_propagatedSign.dump( stream );
     }
 }
 
@@ -620,6 +682,7 @@ void LevelSetCachedObject::_dump( std::ostream &stream ){
  */
 void LevelSetCachedObject::_restore( std::istream &stream ){
 
+    // Levelset information
     std::size_t nInfoItems;
     utils::binary::read(stream, nInfoItems);
     m_ls.reserve(nInfoItems);
@@ -636,12 +699,22 @@ void LevelSetCachedObject::_restore( std::istream &stream ){
 
         m_ls.insert(id, LevelSetInfo(value, gradient)) ;
     }
+
+    // Sign propagation
+    utils::binary::read(stream, m_propagatedSignAvailable) ;
+    if (isPropagatedSignAvailable()) {
+        initializeSignPropagationStorage();
+        m_propagatedSign.restore( stream );
+    }
 }
 
 #if BITPIT_ENABLE_MPI
 
 /*!
  * Flushing of data to communication buffers for partitioning
+ * Sign data is not written into the buffer, because sign storage is kept in
+ * sync with the mesh, hence, when this function is called, entries associated
+ * with the cells to send as already been deleted.
  * @param[in] sendList list of cells to be sent
  * @param[in,out] dataBuffer buffer for second communication containing data
  */
@@ -673,6 +746,9 @@ void LevelSetCachedObject::_writeCommunicationBuffer( const std::vector<long> &s
 
 /*!
  * Processing of communication buffer into data structure
+ * Sign data is not read from the buffer, because sign storage is kept in
+ * sync with the mesh, hence, when the buffer is written, entries associated
+ * with the cells to send as already been deleted.
  * @param[in] recvList list of cells to be received
  * @param[in,out] dataBuffer buffer containing the data
  */

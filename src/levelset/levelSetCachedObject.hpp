@@ -51,24 +51,30 @@ class LevelSetCachedObject : public LevelSetObject{
     static const int                            PROPAGATION_STATUS_WAITING;
     static const int                            PROPAGATION_STATUS_REACHED;
 
-    static const int                            PROPAGATION_SIGN_UNDEFINED;
-    static const int                            PROPAGATION_SIGN_DUMMY;
+    static const signed char                    PROPAGATION_SIGN_UNDEFINED;
+    static const signed char                    PROPAGATION_SIGN_DUMMY;
 
-    void                                        setSign( long id, int sign ) ;
-
-    void                                        initializeCellSignPropagation( long cellId, int cellSign,
-                                                                               const std::array<double, 3> &objectBoxMin,
-                                                                               const std::array<double, 3> &objectBoxMax,
+    void                                        initializeCellSignPropagation( long cellId, signed char cellSign,
+                                                                               const std::array<double, 3> &boxMin,
+                                                                               const std::array<double, 3> &boxMax,
                                                                                int *cellStatus, std::vector<long> *seeds,
                                                                                long *nWaiting, long *nExternal,
-                                                                               int *externalSign ) ;
+                                                                               signed char *externalSign ) ;
 
     void                                        propagateSeedSign( const std::vector<long> &seeds,
                                                                    PiercedStorage<int, long> *status,
-                                                                   long *nWaiting, int *externalSign ) ;
+                                                                   long *nWaiting, signed char *externalSign ) ;
+
+    void                                        initializeSignPropagationStorage();
+
+    bool                                        isPropagatedSignAvailable();
 
     protected:
     PiercedVector<LevelSetInfo>                 m_ls ;          /**< Levelset information for each cell */
+
+    bool                                        m_propagatedSignAvailable;  /** Controls if the levelset sign has been propagated */
+    PiercedStorage<signed char>                 m_propagatedSign;           /** Levelset sign propagated on the cells if the whole mesh */
+
     virtual void                                getBoundingBox( std::array<double,3> &, std::array<double,3> & )const =0  ;
 # if BITPIT_ENABLE_MPI
     virtual void                                getGlobalBoundingBox( std::array<double,3> &, std::array<double,3> & )const =0  ;
@@ -92,6 +98,7 @@ class LevelSetCachedObject : public LevelSetObject{
     LevelSetInfo                                getLevelSetInfo(long ) const override ;
     double                                      getLS(long ) const override ;
     double                                      getValue(long ) const override ;
+    short                                       getSign(long ) const override ;
     std::array<double,3>                        getGradient(long ) const override ;
 
     void                                        propagateSign() override ;
