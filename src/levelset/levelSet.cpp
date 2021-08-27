@@ -624,9 +624,10 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
 #endif
 
         // Propagate sign
-        if (updateNarrowBand) {
-            if(m_propagateS) visitor.propagateSign() ;
-        }
+        //
+        // It's not possible to communicate sign information, therefore sign
+        // needs to be propagated also when the mesh is only partitioned.
+        if(m_propagateS) visitor.propagateSign() ;
     }
 
 }
