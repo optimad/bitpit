@@ -349,7 +349,7 @@ double LevelSetBoolean::getMinSurfaceFeatureSize() const {
 
     bool   minimumValid = false;
     double minimumSize  = levelSetDefaults::SIZE;
-    for( const auto & object : m_objects ){
+    for( const LevelSetObject *object : m_objects ){
         double objectMinimumSize = object->getMinSurfaceFeatureSize();
         if (objectMinimumSize < 0) {
             continue;
@@ -373,7 +373,7 @@ double LevelSetBoolean::getMinSurfaceFeatureSize() const {
 double LevelSetBoolean::getMaxSurfaceFeatureSize() const {
 
     double maximumSize = - levelSetDefaults::SIZE;
-    for( const auto & object : m_objects ){
+    for( const LevelSetObject *object : m_objects ){
         double objectMaximumSize = object->getMaxSurfaceFeatureSize();
         maximumSize = std::max(objectMaximumSize, maximumSize);
     }
