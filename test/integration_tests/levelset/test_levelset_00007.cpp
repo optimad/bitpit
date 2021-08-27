@@ -267,13 +267,140 @@ int subtest_001()
     return 0;
 }
 
+/*!
+* Subtest 003
+*
+* Testing dense and sparse storage on a Cartesian mesh in light memory mode.
+*/
+int subtest_002()
+{
+    bitpit::log::cout() << std::endl;
+    bitpit::log::cout() << "Testing dense and sparse storage on an Cartesian mesh in light memory mode" << std::endl;
+
+    // Input geometry
+    bitpit::log::cout() << " - Loading geometry" << std::endl;
+
+    std::unique_ptr<bitpit::SurfUnstructured> segmentation = generateSegmentation();
+    segmentation->getVTK().setName("geometry_007");
+    segmentation->write();
+
+    bitpit::log::cout() << "n. vertex: " << segmentation->getVertexCount() << std::endl;
+    bitpit::log::cout() << "n. simplex: " << segmentation->getCellCount() << std::endl;
+
+    // Create the mesh
+    bitpit::log::cout() << " - Setting mesh" << std::endl;
+
+    std::unique_ptr<bitpit::VolCartesian> mesh = generateCartesianMesh(*segmentation);
+    mesh->switchMemoryMode(bitpit::VolCartesian::MEMORY_LIGHT);
+
+    // Initialize test
+    long testCellId0 = 13832;
+    long testCellId1 = 12438;
+    long testCellId2 = 10432;
+
+    int objectId = 0;
+
+    //
+    // Levelset - Sparse storage
+    //
+
+    // Initialize levelset
+    bitpit::LevelSet levelsetSparse(bitpit::LevelSetStorageType::SPARSE);
+    levelsetSparse.setMesh(mesh.get());
+    levelsetSparse.addObject(segmentation.get(), BITPIT_PI, objectId);
+
+    bitpit::log::cout() << "Computing levelset using sprase storage... " << std::endl;
+    std::chrono::time_point<std::chrono::system_clock> startSparse = std::chrono::system_clock::now();
+    levelsetSparse.compute( ) ;
+    std::chrono::time_point<std::chrono::system_clock> endSparse = std::chrono::system_clock::now();
+    int elapsedTimeSparse = std::chrono::duration_cast<std::chrono::milliseconds>(endSparse - startSparse).count();
+    bitpit::log::cout() << "Computation compreted in " << elapsedTimeSparse << " ms" << std::endl;
+
+    mesh->switchMemoryMode(bitpit::VolCartesian::MEMORY_NORMAL);
+    mesh->initializeAdjacencies();
+    mesh->update();
+
+    levelsetSparse.getObject(objectId).enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
+    mesh->getVTK().setName("levelset_007_cartesian_light_sparse");
+    mesh->write();
+
+    mesh->switchMemoryMode(bitpit::VolCartesian::MEMORY_LIGHT);
+
+    double sparseValue0 = levelsetSparse.getObject(objectId).getValue(testCellId0);
+    double sparseValue1 = levelsetSparse.getObject(objectId).getValue(testCellId1);
+    double sparseValue2 = levelsetSparse.getObject(objectId).getValue(testCellId2);
+
+    bitpit::log::cout() << " Sparse storage mode: levelset on cell " << testCellId0 << " is equal to " << sparseValue0 << std::endl;
+    bitpit::log::cout() << " Sparse storage mode: levelset on cell " << testCellId1 << " is equal to " << sparseValue1 << std::endl;
+    bitpit::log::cout() << " Sparse storage mode: levelset on cell " << testCellId2 << " is equal to " << sparseValue2 << std::endl;
+
+    //
+    // Levelset - Dense storage
+    //
+
+    // Initialize levelset
+    bitpit::LevelSet levelsetDense(bitpit::LevelSetStorageType::DENSE);
+    levelsetDense.setMesh(mesh.get());
+    levelsetDense.addObject(segmentation.get(), BITPIT_PI, objectId);
+
+    bitpit::log::cout() << "Computing levelset using dense storage... " << std::endl;
+    std::chrono::time_point<std::chrono::system_clock> startDense = std::chrono::system_clock::now();
+    levelsetDense.compute( ) ;
+    std::chrono::time_point<std::chrono::system_clock> endDense = std::chrono::system_clock::now();
+    int elapsedTimeDense = std::chrono::duration_cast<std::chrono::milliseconds>(endDense - startDense).count();
+    bitpit::log::cout() << "Computation compreted in " << elapsedTimeDense << " ms" << std::endl;
+
+    mesh->switchMemoryMode(bitpit::VolCartesian::MEMORY_NORMAL);
+    mesh->initializeAdjacencies();
+    mesh->update();
+
+    levelsetDense.getObject(objectId).enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
+    mesh->getVTK().setName("levelset_007_cartesian_light_dense");
+    mesh->write();
+
+    mesh->switchMemoryMode(bitpit::VolCartesian::MEMORY_LIGHT);
+
+    double denseValue0 = levelsetDense.getObject(objectId).getValue(testCellId0);
+    double denseValue1 = levelsetDense.getObject(objectId).getValue(testCellId1);
+    double denseValue2 = levelsetDense.getObject(objectId).getValue(testCellId2);
+
+    bitpit::log::cout() << " Dense storage mode: levelset on cell " << testCellId0 << " is equal to " << denseValue0 << std::endl;
+    bitpit::log::cout() << " Dense storage mode: levelset on cell " << testCellId1 << " is equal to " << denseValue1 << std::endl;
+    bitpit::log::cout() << " Dense storage mode: levelset on cell " << testCellId2 << " is equal to " << denseValue2 << std::endl;
+
+    //
+    // Comparison
+    //
+
+    bitpit::log::cout() << " Checking levelset values" << std::endl;
+
+    if (!bitpit::utils::DoubleFloatingEqual()(sparseValue0, denseValue0)) {
+        bitpit::log::cout() << "  - Value obtained for test cell #0 using sparse storage doesn't match the one obtained using dense storage." << std::endl;
+        return 1;
+    }
+    bitpit::log::cout() << "  - Value obtained for test cell #0 sparse storage matches the one obtained using dense storage." << std::endl;
+
+    if (!bitpit::utils::DoubleFloatingEqual()(sparseValue1, denseValue1)) {
+        bitpit::log::cout() << "  - Value obtained for test cell #1 using sparse storage doesn't match the one obtained using dense storage." << std::endl;
+        return 1;
+    }
+    bitpit::log::cout() << "  - Value obtained for test cell #1 sparse storage matches the one obtained using dense storage." << std::endl;
+
+    if (!bitpit::utils::DoubleFloatingEqual()(sparseValue2, denseValue2)) {
+        bitpit::log::cout() << "  - Value obtained for test cell #2 using sparse storage doesn't match the one obtained using dense storage." << std::endl;
+        return 1;
+    }
+    bitpit::log::cout() << "  - Value obtained for test cell #2 sparse storage matches the one obtained using dense storage." << std::endl;
+
+    return 0;
+}
 
 /*!
-* Subtest 002
+* Subtest 003
 *
 * Testing dense and sparse storage on an Octree mesh.
 */
-int subtest_002()
+int subtest_003()
 {
     bitpit::log::cout() << std::endl;
     bitpit::log::cout() << "Testing dense and sparse storage on an Octree mesh" << std::endl;
@@ -413,6 +540,11 @@ int main(int argc, char *argv[])
         }
 
         status = subtest_002();
+        if (status != 0) {
+            return status;
+        }
+
+        status = subtest_003();
         if (status != 0) {
             return status;
         }

@@ -135,6 +135,39 @@ public:
 
 };
 
+template<>
+class LevelSetNarrowBandCache<LevelSetDirectStorageManager> : public virtual LevelSetDirectStorageManager, public virtual LevelSetNarrowBandCacheBase<LevelSetDirectStorageManager>
+{
+
+public:
+    LevelSetNarrowBandCache(std::size_t nItems);
+
+    KernelIterator insert(long id, bool sync = true) override;
+    void erase(long id, bool sync = true) override;
+
+    bool contains(long id) const override;
+
+    KernelIterator find(long id) const override;
+    KernelIterator rawFind(std::size_t) const override;
+
+    double &                            getValue(const KernelIterator &itr) override;
+    double                              getValue(const KernelIterator &itr) const override;
+
+    std::array<double, 3> &             getGradient(const KernelIterator &itr) override;
+    const std::array<double, 3> &       getGradient(const KernelIterator &itr) const override;
+
+    void swap(LevelSetNarrowBandCache<LevelSetDirectStorageManager> &other) noexcept;
+
+protected:
+    Storage<char> *m_narrowBandFlag; //! Flag that defines if the entry is inside the narrow band
+
+    void clearKernel() override;
+
+    void dumpKernel(std::ostream &stream) override;
+    void restoreKernel(std::istream &stream) override;
+
+};
+
 template<typename narrow_band_cache_t>
 class LevelSetCachedObjectInterface : public virtual LevelSetObjectInterface {
 
@@ -175,6 +208,15 @@ class LevelSetNarrowBandCacheFactory<LevelSetNarrowBandCache<LevelSetExternalPie
 
 public:
     static std::shared_ptr<LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>> create(LevelSetCachedObjectInterface<LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>> *object);
+
+};
+
+template<>
+class LevelSetNarrowBandCacheFactory<LevelSetNarrowBandCache<LevelSetDirectStorageManager>>
+{
+
+public:
+    static std::shared_ptr<LevelSetNarrowBandCache<LevelSetDirectStorageManager>> create(LevelSetCachedObjectInterface<LevelSetNarrowBandCache<LevelSetDirectStorageManager>> *object);
 
 };
 
@@ -220,12 +262,15 @@ namespace bitpit {
 
 extern template class LevelSetNarrowBandCacheBase<LevelSetExternalPiercedStorageManager>;
 extern template class LevelSetNarrowBandCacheBase<LevelSetInternalPiercedStorageManager>;
+extern template class LevelSetNarrowBandCacheBase<LevelSetDirectStorageManager>;
 
 extern template class LevelSetCachedObjectInterface<LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>>;
 extern template class LevelSetCachedObjectInterface<LevelSetNarrowBandCache<LevelSetInternalPiercedStorageManager>>;
+extern template class LevelSetCachedObjectInterface<LevelSetNarrowBandCache<LevelSetDirectStorageManager>>;
 
 extern template class LevelSetCachedObject<LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>>;
 extern template class LevelSetCachedObject<LevelSetNarrowBandCache<LevelSetInternalPiercedStorageManager>>;
+extern template class LevelSetCachedObject<LevelSetNarrowBandCache<LevelSetDirectStorageManager>>;
 
 }
 #endif
