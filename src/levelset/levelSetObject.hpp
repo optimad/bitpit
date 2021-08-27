@@ -113,6 +113,7 @@ class LevelSetObject : public VTKBaseStreamer{
     virtual LevelSetInfo                        getLevelSetInfo(long ) const =0;
     BITPIT_DEPRECATED(virtual double            getLS(long ) const) =0;
     virtual double                              getValue(long ) const =0;
+    virtual short                               getSign(long ) const ;
     virtual std::array<double,3>                getGradient(long ) const =0 ;
     std::array<double,3>                        computeProjectionPoint(long ) const;
 
@@ -122,8 +123,6 @@ class LevelSetObject : public VTKBaseStreamer{
     virtual std::array<double,3>                getNormal(long ) const;
     virtual LevelSetInfo                        computeLevelSetInfo(const std::array<double,3> &) const =0;
     std::array<double,3>                        computeProjectionPoint(const std::array<double,3> &) const;
-
-    short                                       getSign(long ) const;
 
     bool                                        isInNarrowBand(long ) const;
     double                                      getSizeNarrowBand() const;
