@@ -50,6 +50,8 @@ namespace CGElem{
 /*!
  * \private
  * Projects points on a triangle.
+ * Transcribed from Christer Ericson's Real-Time Collision Detection book,
+ * it's effectively Cramer's rule for solving a linear system.
  * Projection points are the closest points to the original points within the triangle.
  *
  * \param[in] nPoints number of points
@@ -63,39 +65,30 @@ namespace CGElem{
  */
 void _projectPointsTriangle( int nPoints, array3D const *points, array3D const &Q0, array3D const &Q1, array3D const &Q2, array3D *proj, double *lambda )
 {
-
     assert( validTriangle(Q0,Q1,Q2) );
 
-    array3D s0 = Q1-Q0;
-    array3D s1 = Q2-Q0;
+    array3D v0 = Q1 - Q0;
+    array3D v1 = Q2 - Q0;
 
-    std::array<double, 4> A = {{ dotProduct(s0,s0), 0, dotProduct(s0,s1), dotProduct(s1,s1) }};
+    double d00 = dotProduct(v0, v0);
+    double d01 = dotProduct(v0, v1);
+    double d11 = dotProduct(v1, v1);
 
-    const int MAX_STACK_POINTS = 8;
-    BITPIT_CREATE_WORKSPACE(B, double, 2 * nPoints, 2 * MAX_STACK_POINTS);
-
-    for( int i=0; i<nPoints; ++i){
-        array3D rP = *points -Q0;
-        B[2*i]   = dotProduct(s0,rP); 
-        B[2*i+1] = dotProduct(s1,rP); 
-        ++points;
-    }
-
-    int info =  LAPACKE_dposv_work( LAPACK_COL_MAJOR, 'U', 2, nPoints, A.data(), 2, B, 2 );
-    assert( info == 0 );
-    BITPIT_UNUSED( info );
+    double denom = d00 * d11 - d01 * d01;
 
     for( int i=0; i<nPoints; ++i){
+        array3D v2 = points[i] - Q0;
 
-        double *b = &B[2*i];
+        double d20 = dotProduct(v2, v0);
+        double d21 = dotProduct(v2, v1);
 
-        lambda[0] = 1. -b[0] -b[1];
-        lambda[1] = b[0];
-        lambda[2] = b[1];
+        double *pointLambda = lambda + 3 * i;
+        pointLambda[1] = (d11 * d20 - d01 * d21) / denom;
+        pointLambda[2] = (d00 * d21 - d01 * d20) / denom;
+        pointLambda[0] = 1. - pointLambda[1] - pointLambda[2];
 
-        *proj = restrictPointTriangle( Q0, Q1, Q2, lambda);
-        lambda +=3;
-        proj += 1;
+        array3D *pointProjections = proj + i;
+        *pointProjections = restrictPointTriangle( Q0, Q1, Q2, pointLambda);
     }
 }
 
