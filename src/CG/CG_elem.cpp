@@ -94,57 +94,6 @@ void _projectPointsTriangle( int nPoints, array3D const *points, array3D const &
 
 /*!
  * \private
- * Project points on a plane described by a triangle
- *
- * \param[in] nPoints number of points
- * \param[in] points pointer to points' coordinates
- * \param[in] Q0 first triangle vertex
- * \param[in] Q1 second triangle vertex
- * \param[in] Q2 third triangle vertex
- * \param[out] proj pointer to the projection point; 
- * \param[out] lambda pointer to barycentric coordinates of projection points
- * \return distances
- */
-void _projectPointsPlane( int nPoints, array3D const *points, array3D const &Q0, array3D const &Q1, array3D const &Q2, array3D *proj, double *lambda )
-{
-
-    assert( validTriangle(Q0,Q1,Q2) );
-
-    array3D s0 = Q1-Q0;
-    array3D s1 = Q2-Q0;
-
-    std::array<double, 4> A = {{ dotProduct(s0,s0), 0, dotProduct(s0,s1), dotProduct(s1,s1) }};
-
-    const int MAX_STACK_POINTS = 8;
-    BITPIT_CREATE_WORKSPACE(B, double, 2 * nPoints, 2 * MAX_STACK_POINTS);
-
-    for( int i=0; i<nPoints; ++i){
-        array3D rP = *points -Q0;
-        B[2*i]   = dotProduct(s0,rP); 
-        B[2*i+1] = dotProduct(s1,rP); 
-        ++points;
-    }
-
-    int info =  LAPACKE_dposv_work( LAPACK_COL_MAJOR, 'U', 2, nPoints, A.data(), 2, B, 2 );
-    assert( info == 0 );
-    BITPIT_UNUSED( info );
-
-    for( int i=0; i<nPoints; ++i){
-
-        double *b = &B[2*i];
-
-        lambda[0] = 1. -b[0] -b[1];
-        lambda[1] = b[0];
-        lambda[2] = b[1];
-
-        *proj = reconstructPointFromBarycentricTriangle( Q0, Q1, Q2, lambda);
-        lambda +=3;
-        proj += 1;
-    }
-}
-
-/*!
- * \private
  * Computes intersection between an axis aligned bounding box and a triangle
  * \param[in] A0 min point of first box
  * \param[in] A1 max point of first box
