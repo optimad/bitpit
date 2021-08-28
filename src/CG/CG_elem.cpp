@@ -29,8 +29,6 @@
 
 # include <assert.h>
 
-# include "bitpit_private_lapacke.hpp"
-
 # include "bitpit_operators.hpp"
 
 # include "CG.hpp"
