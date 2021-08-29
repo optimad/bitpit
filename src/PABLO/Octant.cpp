@@ -127,6 +127,20 @@ Octant::Octant(uint8_t dim){
 };
 
 /*! Custom constructor of an octant.
+ * It builds a 2D or 3D octant with user defined Morton index and level.
+ * \param[in] dim Dimension of octant (2/3 for 2D/3D octant).
+ * \param[in] level Refinement level of octant (0 for root octant).
+ * \param[in] morton Morton number associated with the octant
+ */
+Octant::Octant(uint8_t dim, uint8_t level, uint64_t morton){
+	initialize(dim, level, true);
+
+	// Set the morton
+	m_morton = morton;
+
+};
+
+/*! Custom constructor of an octant.
  * It builds a 2D or 3D octant with user defined origin and level.
  * \param[in] dim Dimension of octant (2/3 for 2D/3D octant).
  * \param[in] level Refinement level of octant (0 for root octant).
