@@ -540,9 +540,22 @@ void DiscretizationStencilSolverAssembler<stencil_t>::getRowPattern(long rowInde
 {
     // Get stencil information
     const stencil_t &stencil = getRowStencil(rowIndex);
-    std::size_t stencilSize = stencil.size();
 
     // Get pattern
+    getPattern(stencil, pattern);
+}
+
+/*!
+ * Get the values of the specified row.
+ *
+ * \param stencil is the stencil
+ * \param pattern on output will contain the values of the specified stencil
+ */
+template<typename stencil_t>
+void DiscretizationStencilSolverAssembler<stencil_t>::getPattern(const stencil_t &stencil, ConstProxyVector<long> *pattern) const
+{
+    std::size_t stencilSize = stencil.size();
+
     const long *patternData = stencil.patternData();
     if (m_blockSize == 1) {
         pattern->set(patternData, stencilSize);
