@@ -180,6 +180,8 @@ public:
     // =================================================================================== //
     // PUBLIC METHODS
     // =================================================================================== //
+    uint64_t        computeLastDescMorton() const;
+    u32array3       computeLastDescCoordinates() const;
     uint64_t        computeFatherMorton() const;
     u32array3       computeFatherCoordinates() const;
 

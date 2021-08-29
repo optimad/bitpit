@@ -1080,7 +1080,7 @@ namespace bitpit {
         //
         // This is the Morton number of the last discendent of the same-size
         // virtual neighbour.
-        uint64_t lastCandidateMorton = sameSizeVirtualNeigh.buildLastDesc().getMorton();
+        uint64_t lastCandidateMorton = sameSizeVirtualNeigh.computeLastDescMorton();
 
         // Compute coordinates
         std::array<int64_t,3> coord;
@@ -1336,7 +1336,7 @@ namespace bitpit {
         //
         // This is the Morton number of the last discendent of the same-size
         // virtual neighbour.
-        uint64_t lastCandidateMorton = sameSizeVirtualNeigh.buildLastDesc().getMorton();
+        uint64_t lastCandidateMorton = sameSizeVirtualNeigh.computeLastDescMorton();
 
         // Compute coordinates
         std::array<int64_t,3> coord;
@@ -1581,7 +1581,7 @@ namespace bitpit {
         //
         // This is the Morton number of the last discendent of the same-size
         // virtual neighbour.
-        uint64_t lastCandidateMorton = sameSizeVirtualNeigh.buildLastDesc().getMorton();
+        uint64_t lastCandidateMorton = sameSizeVirtualNeigh.computeLastDescMorton();
 
         // Compute coordinates
         std::array<int64_t,3> coord;
