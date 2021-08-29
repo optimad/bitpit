@@ -158,6 +158,7 @@ public:
     Octant();
 private:
     Octant(uint8_t dim);
+    Octant(uint8_t dim, uint8_t level, uint64_t morton);
     Octant(uint8_t dim, uint8_t level, int32_t x, int32_t y, int32_t z = 0);
     Octant(bool bound, uint8_t dim, uint8_t level, int32_t x, int32_t y, int32_t z = 0);
     bool operator ==(const Octant & oct2);
