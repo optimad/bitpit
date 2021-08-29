@@ -598,17 +598,6 @@ uint64_t	Octant::getMorton() const{
 	return m_morton;
 };
 
-/** Compute the persistent XYZ key of the given node (without level).
- * \param[in] inode Local index of the node
- * \return persistent XYZ key of the node.
- */
-uint64_t	Octant::computeNodePersistentKey(uint8_t inode) const{
-
-	u32array3 node = getLogicalNode(inode);
-
-	return computeNodePersistentKey(node);
-};
-
 /** Compute the Morton index of the father of this octant.
  * \return Morton index of the father of this octant.
  */
@@ -628,6 +617,17 @@ u32array3	Octant::computeFatherCoordinates() const {
 		fatherCoordinates[i] -= fatherCoordinates[i]%(uint32_t(1) << (TreeConstants::MAX_LEVEL - max(0,(m_level-1))));
 	}
 	return fatherCoordinates;
+};
+
+/** Compute the persistent XYZ key of the given node (without level).
+ * \param[in] inode Local index of the node
+ * \return persistent XYZ key of the node.
+ */
+uint64_t	Octant::computeNodePersistentKey(uint8_t inode) const{
+
+	u32array3 node = getLogicalNode(inode);
+
+	return computeNodePersistentKey(node);
 };
 
 /** Compute the persistent XYZ key of the given node (without level).
