@@ -612,6 +612,28 @@ uint64_t	Octant::getMorton() const{
 	return m_morton;
 };
 
+/** Compute the Morton index of the last descendant octant of this octant.
+ * \return Morton index of the last descendant octant.
+ */
+uint64_t	Octant::computeLastDescMorton() const {
+	u32array3 lastDescCoordinates = computeLastDescCoordinates();
+	return PABLO::computeMorton(lastDescCoordinates[0], lastDescCoordinates[1], lastDescCoordinates[2]);
+};
+
+/** Compute the coordinates (i.e. the coordinates of the node 0) of the last
+ * descendant octant of this octant.
+ * \return The coordinates (i.e. the coordinates of the node 0) of the last
+ * descendant octant of this octant.
+ */
+u32array3	Octant::computeLastDescCoordinates() const {
+	u32array3 lastDescCoords = getLogicalCoordinates();
+	for (int i=0; i<m_dim; i++){
+		lastDescCoords[i] += (uint32_t(1) << (TreeConstants::MAX_LEVEL - m_level)) - 1;
+	}
+
+	return lastDescCoords;
+};
+
 /** Compute the Morton index of the father of this octant.
  * \return Morton index of the father of this octant.
  */
@@ -677,13 +699,9 @@ unsigned int Octant::getBinarySize()
  * \return Last descendant octant.
  */
 Octant	Octant::buildLastDesc() const {
-	u32array3 lastDescCoords = getLogicalCoordinates();
-	for (int i=0; i<m_dim; i++){
-		lastDescCoords[i] += (uint32_t(1) << (TreeConstants::MAX_LEVEL - m_level)) - 1;
-	}
-
-	Octant last_desc(m_dim, TreeConstants::MAX_LEVEL, lastDescCoords[0], lastDescCoords[1], lastDescCoords[2]);
-	return last_desc;
+	uint64_t lastDescMorton = computeLastDescMorton();
+	Octant lastDesc(m_dim, TreeConstants::MAX_LEVEL, lastDescMorton);
+	return lastDesc;
 };
 
 // =================================================================================== //
@@ -692,8 +710,8 @@ Octant	Octant::buildLastDesc() const {
  * \return Father octant.
  */
 Octant	Octant::buildFather() const {
-	u32array3 fatherCoordinates = computeFatherCoordinates();
-	Octant father(m_dim, max(0,m_level-1), fatherCoordinates[0], fatherCoordinates[1], fatherCoordinates[2]);
+	uint64_t fatherMorton = computeFatherMorton();
+	Octant father(m_dim, max(0,m_level-1), fatherMorton);
 	return father;
 };
 
