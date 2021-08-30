@@ -2760,54 +2760,76 @@ namespace bitpit {
     void
     ParaTree::findAllNodeNeighbours(const Octant* oct, uint32_t inode, u32vector & neighbours, bvector & isghost) const {
 
-        u32vector neigh_edge, neigh_face;
-        bvector isghost_edge, isghost_face;
+        int dim = getDim();
+        int octantLevel = getLevel(oct);
+
+        u32vector codimNeighnours;
+        bvector codimIsGhost;
 
         // Get vertex neighbours
-        int dim = getDim();
         m_octree.findNodeNeighbours(oct, inode, neighbours, isghost, false);
 
-        int octantLevel = getLevel(oct);
+        // Get edge neighbours
+        //
+        // On non uniform trees the vertex can be inside the edge of the
+        // neighbour (hanging nodes). To correctly consider these neighbours,
+        // the following logic can be used:
+        //  - if an edge neighbour has the same level or a lower level than
+        //    the current cell, then it certainly is also a vertex neighbour;
+        //  - if a edge neighbour has a higher level than the current cell,
+        //    it is necessary to check if the neighbour actually contains the
+        //    vertex.
         if (dim == 3) {
             for (int edge : m_treeConstants->nodeEdge[inode]) {
-                findNeighbours(oct, edge, 2, neigh_edge, isghost_edge);
-                for (std::size_t i = 0; i < neigh_edge.size(); ++i) {
+                findNeighbours(oct, edge, 2, codimNeighnours, codimIsGhost, false);
+                for (std::size_t i = 0; i < codimNeighnours.size(); ++i) {
                     const Octant* neighOctant;
-                    if (isghost_edge[i]==0) {
-                        neighOctant = &m_octree.m_octants[neigh_edge[i]];
+                    if (codimIsGhost[i]==0) {
+                        neighOctant = &m_octree.m_octants[codimNeighnours[i]];
                     }
                     else {
-                        neighOctant = &m_octree.m_ghosts[neigh_edge[i]];
+                        neighOctant = &m_octree.m_ghosts[codimNeighnours[i]];
                     }
                     int neighOctantLevel = getLevel(neighOctant);
                     if (neighOctantLevel <= octantLevel) {
-                        neighbours.push_back(neigh_edge[i]);
-                        isghost.push_back(isghost_edge[i]);
+                        neighbours.push_back(codimNeighnours[i]);
+                        isghost.push_back(codimIsGhost[i]);
                     } else if (isNodeOnOctant(oct, inode, neighOctant)) {
-                        neighbours.push_back(neigh_edge[i]);
-                        isghost.push_back(isghost_edge[i]);
+                        neighbours.push_back(codimNeighnours[i]);
+                        isghost.push_back(codimIsGhost[i]);
                     }
                 }
             }
         }
+
+        // Get face neighbours
+        //
+        // On non uniform trees the vertex can be inside the face of the
+        // neighbour (hanging nodes). To correctly consider these neighbours,
+        // the following logic can be used:
+        //  - if an face neighbour has the same level or a lower level than
+        //    the current cell, then it certainly is also a vertex neighbour;
+        //  - if a face neighbour has a higher level than the current cell,
+        //    it is necessary to check if the neighbour actually contains the
+        //    vertex.
         for (int j = 0; j < dim; ++j) {
             int face = m_treeConstants->nodeFace[inode][j];
-            findNeighbours(oct, face, 1, neigh_face, isghost_face);
-            for (std::size_t i = 0; i < neigh_face.size(); ++i) {
+            findNeighbours(oct, face, 1, codimNeighnours, codimIsGhost, false);
+            for (std::size_t i = 0; i < codimNeighnours.size(); ++i) {
                 const Octant* neighOctant;
-                if (isghost_face[i]==0) {
-                    neighOctant = &m_octree.m_octants[neigh_face[i]];
+                if (codimIsGhost[i]==0) {
+                    neighOctant = &m_octree.m_octants[codimNeighnours[i]];
                 }
                 else {
-                    neighOctant = &m_octree.m_ghosts[neigh_face[i]];
+                    neighOctant = &m_octree.m_ghosts[codimNeighnours[i]];
                 }
                 int neighOctantLevel = getLevel(neighOctant);
                 if (neighOctantLevel <= octantLevel) {
-                    neighbours.push_back(neigh_face[i]);
-                    isghost.push_back(isghost_face[i]);
+                    neighbours.push_back(codimNeighnours[i]);
+                    isghost.push_back(codimIsGhost[i]);
                 } else if (isNodeOnOctant(oct, inode, neighOctant)) {
-                    neighbours.push_back(neigh_face[i]);
-                    isghost.push_back(isghost_face[i]);
+                    neighbours.push_back(codimNeighnours[i]);
+                    isghost.push_back(codimIsGhost[i]);
                 }
             }
         }
