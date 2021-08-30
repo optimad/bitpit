@@ -2532,30 +2532,17 @@ void VolOctree::_findCellNeighs(long id, const std::vector<long> *blackList, std
 	OctantInfo octantInfo = getCellOctant(id);
 	const Octant *octant = getOctantPointer(octantInfo);
 
-	int dimension = getDimension();
-	std::array<uint8_t, 4> nCodimensionItems;
-	nCodimensionItems[0] = 0;
-	nCodimensionItems[1] = m_tree->getNfaces();
-	if (dimension == 3) {
-		nCodimensionItems[2] = m_tree->getNedges();
-	}
-	nCodimensionItems[dimension] = m_tree->getNnodes();
-
 	std::vector<uint32_t> neighTreeIds;
 	std::vector<bool> neighGhostFlags;
-	for(uint8_t codim = 1; codim <= dimension; ++codim){
-		for(int item = 0; item < nCodimensionItems[codim]; ++item){
-			m_tree->findNeighbours(octant, item, codim, neighTreeIds, neighGhostFlags);
+	m_tree->findAllCodimensionNeighbours(octant, neighTreeIds, neighGhostFlags);
 
-			int nNeighs = neighTreeIds.size();
-			for (int i = 0; i < nNeighs; ++i) {
-				OctantInfo neighOctantInfo(neighTreeIds[i], !neighGhostFlags[i]);
-				long neighId = getOctantId(neighOctantInfo);
+	int nNeighs = neighTreeIds.size();
+	for (int i = 0; i < nNeighs; ++i) {
+		OctantInfo neighOctantInfo(neighTreeIds[i], !neighGhostFlags[i]);
+		long neighId = getOctantId(neighOctantInfo);
 
-				if (!blackList || utils::findInOrderedVector<long>(neighId, *blackList) == blackList->end()) {
-					utils::addToOrderedVector<long>(neighId, *neighs);
-				}
-			}
+		if (!blackList || utils::findInOrderedVector<long>(neighId, *blackList) == blackList->end()) {
+			utils::addToOrderedVector<long>(neighId, *neighs);
 		}
 	}
 }
@@ -2636,59 +2623,20 @@ void VolOctree::_findCellVertexNeighs(long id, int vertex, const std::vector<lon
 {
 	// Get octant info
 	const OctantInfo octantInfo = getCellOctant(id);
+	const Octant *octant = getOctantPointer(octantInfo);
 
 	// Get vertex neighbours
-	int codimension = getDimension();
-	findOctantCodimensionNeighs(octantInfo, vertex, codimension, blackList, neighs);
+	std::vector<uint32_t> neighTreeIds;
+	std::vector<bool> neighGhostFlags;
+	m_tree->findAllNodeNeighbours(octant, vertex, neighTreeIds, neighGhostFlags);
 
-	// Add edge and face neighbours
-	//
-	// Get all face and edge neighbours and select the ones that contains the
-	// vertex for which the neighbours are requested. On un-balanced trees
-	// the vertex can be inside the face/edge of the neighbour (hanging nodes).
-	// To correctly consider these neighbours, the following logic can be
-	// used:
-	//   - if a face/edge neighbour has the same level or a lower level than
-	//     the current cell, then it certainly is also a vertex neighbour;
-	//   - if a face/edge neighbour has a higher level than the current cell,
-	//     it is necessary to check if the neighbour actually contains the
-	//     vertex.
-	//
-	// NOTE: in three dimension the function "_findCellEdgeNeighs" will return
-	// both edge and face neighbours.
-	const Octant *octant = getOctantPointer(octantInfo);
-	int octantLevel = octant->getLevel();
-	if (isThreeDimensional()) {
-		std::vector<long> edgeNeighs;
-		for (int edge : m_octantLocalEdgesOnVertex[vertex]) {
-			edgeNeighs.clear();
-			_findCellEdgeNeighs(id, edge, blackList, &edgeNeighs);
-			for (long neighId : edgeNeighs) {
-				const OctantInfo neighOctantInfo = getCellOctant(neighId);
-				const Octant *neighOctant = getOctantPointer(neighOctantInfo);
-				int neighOctantLevel = neighOctant->getLevel();
-				if (neighOctantLevel <= octantLevel) {
-					utils::addToOrderedVector<long>(neighId, *neighs);
-				} else if (m_tree->isNodeOnOctant(octant, vertex, neighOctant)) {
-					utils::addToOrderedVector<long>(neighId, *neighs);
-				}
-			}
-		}
-	} else {
-		std::vector<long> faceNeighs;
-		for (int face : m_octantLocalFacesOnVertex[vertex]) {
-			faceNeighs.clear();
-			_findCellFaceNeighs(id, face, blackList, &faceNeighs);
-			for (long neighId : faceNeighs) {
-				const OctantInfo neighOctantInfo = getCellOctant(neighId);
-				const Octant *neighOctant = getOctantPointer(neighOctantInfo);
-				int neighOctantLevel = neighOctant->getLevel();
-				if (neighOctantLevel <= octantLevel) {
-					utils::addToOrderedVector<long>(neighId, *neighs);
-				} else if (m_tree->isNodeOnOctant(octant, vertex, neighOctant)) {
-					utils::addToOrderedVector<long>(neighId, *neighs);
-				}
-			}
+	int nNeighs = neighTreeIds.size();
+	for (int i = 0; i < nNeighs; ++i) {
+		OctantInfo neighOctantInfo(neighTreeIds[i], !neighGhostFlags[i]);
+		long neighId = getOctantId(neighOctantInfo);
+
+		if (!blackList || utils::findInOrderedVector<long>(neighId, *blackList) == blackList->end()) {
+			utils::addToOrderedVector<long>(neighId, *neighs);
 		}
 	}
 }
