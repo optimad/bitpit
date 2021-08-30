@@ -481,6 +481,10 @@ namespace bitpit {
         void 		findGhostNeighbours(const Octant* oct, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost) const;
         void 		findAllNodeNeighbours(uint32_t idx, uint32_t inode, u32vector & neighbours, bvector & isghost);
         void 		findAllNodeNeighbours(const Octant* oct, uint32_t inode, u32vector & neighbours, bvector & isghost) const;
+        void 		findAllCodimensionNeighbours(uint32_t idx, u32vector & neighbours, bvector & isghost);
+        void 		findAllCodimensionNeighbours(const Octant* oct, u32vector & neighbours, bvector & isghost);
+        void 		findGhostAllCodimensionNeighbours(uint32_t idx, u32vector & neighbours, bvector & isghost);
+        void 		findGhostAllCodimensionNeighbours(Octant* oct, u32vector & neighbours, bvector & isghost);
         Octant* 	getPointOwner(const dvector &point);
         Octant* 	getPointOwner(const dvector &point, bool & isghost);
         Octant* 	getPointOwner(const darray3 &point);
@@ -491,10 +495,6 @@ namespace bitpit {
         uint32_t 	getPointOwnerIdx(const dvector &point, bool & isghost) const;
         uint32_t 	getPointOwnerIdx(const darray3 &point) const;
         uint32_t 	getPointOwnerIdx(const darray3 &point, bool & isghost) const;
-        void 		findAllCodimensionNeighbours(uint32_t idx, u32vector & neighbours, bvector & isghost);
-        void 		findAllCodimensionNeighbours(const Octant* oct, u32vector & neighbours, bvector & isghost);
-        void 		findGhostAllCodimensionNeighbours(uint32_t idx, u32vector & neighbours, bvector & isghost);
-        void 		findGhostAllCodimensionNeighbours(Octant* oct, u32vector & neighbours, bvector & isghost);
         void 		getMapping(uint32_t & idx, u32vector & mapper, bvector & isghost) const;
         void 		getMapping(uint32_t & idx, u32vector & mapper, bvector & isghost, ivector & rank) const;
         void 		getPreMapping(u32vector & idx, std::vector<int8_t> & markers, std::vector<bool> & isghost);
