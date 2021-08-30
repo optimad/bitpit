@@ -2870,7 +2870,7 @@ namespace bitpit {
      * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs.
      */
     void
-    ParaTree::findAllCodimensionNeighbours(Octant* oct, u32vector & neighbours, bvector & isghost){
+    ParaTree::findAllCodimensionNeighbours(const Octant* oct, u32vector & neighbours, bvector & isghost){
         std::array<uint8_t, 4> nCodimensionItems;
         nCodimensionItems[0] = 0;
         nCodimensionItems[1] = getNfaces();
