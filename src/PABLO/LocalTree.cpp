@@ -2314,7 +2314,7 @@ namespace bitpit {
 
                     //Balance through faces
                     for (iface=0; iface<m_treeConstants->nFaces; iface++){
-						findNeighbours(idx, iface, neigh, isghost);
+						findNeighbours(m_octants.data() + idx, iface, neigh, isghost, false);
 						sizeneigh = neigh.size();
 						for(i=0; i<sizeneigh; i++){
 							if (!isghost[i]){
@@ -2350,7 +2350,7 @@ namespace bitpit {
                     if (Bedge){
                         //Balance through edges
                         for (iedge=0; iedge<m_treeConstants->nEdges; iedge++){
-							findEdgeNeighbours(idx, iedge, neigh, isghost);
+							findEdgeNeighbours(m_octants.data() + idx, iedge, neigh, isghost, false);
 							sizeneigh = neigh.size();
 							for(i=0; i<sizeneigh; i++){
 								if (!isghost[i]){
@@ -2385,7 +2385,7 @@ namespace bitpit {
                     if (Bnode){
                         //Balance through nodes
                         for (inode=0; inode<m_treeConstants->nNodes; inode++){
-							findNodeNeighbours(idx, inode, neigh, isghost);
+							findNodeNeighbours(m_octants.data() + idx, inode, neigh, isghost, false);
 							sizeneigh = neigh.size();
 							for(i=0; i<sizeneigh; i++){
 								if (!isghost[i]){
@@ -2441,7 +2441,7 @@ namespace bitpit {
                     for (iface=0; iface<m_treeConstants->nFaces; iface++){
                         if(it->getPbound(iface) == true){
                             neigh.clear();
-                            findGhostNeighbours(idx, iface, neigh);
+                            findNeighbours(m_ghosts.data() + idx, iface, neigh, isghost, true);
                             sizeneigh = neigh.size();
                             for(i=0; i<sizeneigh; i++){
                                 if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
@@ -2459,7 +2459,7 @@ namespace bitpit {
                         //Balance through edges
                         for (iedge=0; iedge<m_treeConstants->nEdges; iedge++){
 							neigh.clear();
-							findGhostEdgeNeighbours(idx, iedge, neigh);
+							findEdgeNeighbours(m_ghosts.data() + idx, iedge, neigh, isghost, true);
 							sizeneigh = neigh.size();
 							for(i=0; i<sizeneigh; i++){
 								if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
@@ -2477,7 +2477,7 @@ namespace bitpit {
                         //Balance through nodes
                         for (inode=0; inode<m_treeConstants->nNodes; inode++){
 							neigh.clear();
-							findGhostNodeNeighbours(idx, inode, neigh);
+							findNodeNeighbours(m_ghosts.data() + idx, inode, neigh, isghost, true);
 							sizeneigh = neigh.size();
 							for(i=0; i<sizeneigh; i++){
 								if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
@@ -2509,7 +2509,7 @@ namespace bitpit {
                         //Balance through faces
                         for (iface=0; iface<m_treeConstants->nFaces; iface++){
                             if(!m_octants[idx].getPbound(iface)){
-                                findNeighbours(idx, iface, neigh, isghost);
+                                findNeighbours(m_octants.data() + idx, iface, neigh, isghost, false);
                                 sizeneigh = neigh.size();
                                 for(i=0; i<sizeneigh; i++){
                                     if (!isghost[i]){
@@ -2536,7 +2536,7 @@ namespace bitpit {
                         if (Bedge){
                             //Balance through edges
                             for (iedge=0; iedge<m_treeConstants->nEdges; iedge++){
-								findEdgeNeighbours(idx, iedge, neigh, isghost);
+								findEdgeNeighbours(m_octants.data() + idx, iedge, neigh, isghost, false);
 								sizeneigh = neigh.size();
 								for(i=0; i<sizeneigh; i++){
 									if (!isghost[i]){
@@ -2563,7 +2563,7 @@ namespace bitpit {
                         if (Bnode){
                             //Balance through nodes
                             for (inode=0; inode<m_treeConstants->nNodes; inode++){
-								findNodeNeighbours(idx, inode, neigh, isghost);
+								findNodeNeighbours(m_octants.data() + idx, inode, neigh, isghost, false);
 								sizeneigh = neigh.size();
 								for(i=0; i<sizeneigh; i++){
 									if (!isghost[i]){
@@ -2617,7 +2617,7 @@ namespace bitpit {
                     for (iface=0; iface<m_treeConstants->nFaces; iface++){
                         if(it->getPbound(iface) == true){
                             neigh.clear();
-                            findGhostNeighbours(idx, iface, neigh);
+                            findNeighbours(m_ghosts.data() + idx, iface, neigh, isghost, true);
                             sizeneigh = neigh.size();
                             for(i=0; i<sizeneigh; i++){
                                 if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
@@ -2635,7 +2635,7 @@ namespace bitpit {
                         //Balance through edges
                         for (iedge=0; iedge<m_treeConstants->nEdges; iedge++){
 							neigh.clear();
-							findGhostEdgeNeighbours(idx, iedge, neigh);
+							findEdgeNeighbours(m_ghosts.data() + idx, iedge, neigh, isghost, true);
 							sizeneigh = neigh.size();
 							for(i=0; i<sizeneigh; i++){
 								if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
@@ -2653,7 +2653,7 @@ namespace bitpit {
                         //Balance through nodes
                         for (inode=0; inode<m_treeConstants->nNodes; inode++){
 							neigh.clear();
-							findGhostNodeNeighbours(idx, inode, neigh);
+							findNodeNeighbours(m_ghosts.data() + idx, inode, neigh, isghost, true);
 							sizeneigh = neigh.size();
 							for(i=0; i<sizeneigh; i++){
 								if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
@@ -2685,7 +2685,7 @@ namespace bitpit {
                         //Balance through faces
                         for (iface=0; iface<m_treeConstants->nFaces; iface++){
                             if(!m_octants[idx].getPbound(iface)){
-                                findNeighbours(idx, iface, neigh, isghost);
+                                findNeighbours(m_octants.data() + idx, iface, neigh, isghost, false);
                                 sizeneigh = neigh.size();
                                 for(i=0; i<sizeneigh; i++){
                                     if (!isghost[i]){
@@ -2712,7 +2712,7 @@ namespace bitpit {
                         if (Bedge){
                             //Balance through edges
                             for (iedge=0; iedge<m_treeConstants->nEdges; iedge++){
-								findEdgeNeighbours(idx, iedge, neigh, isghost);
+								findEdgeNeighbours(m_octants.data() + idx, iedge, neigh, isghost, false);
 								sizeneigh = neigh.size();
 								for(i=0; i<sizeneigh; i++){
 									if (!isghost[i]){
@@ -2739,7 +2739,7 @@ namespace bitpit {
                         if (Bnode){
                             //Balance through nodes
                             for (inode=0; inode<m_treeConstants->nNodes; inode++){
-								findNodeNeighbours(idx, inode, neigh, isghost);
+								findNodeNeighbours(m_octants.data() + idx, inode, neigh, isghost, false);
 								sizeneigh = neigh.size();
 								for(i=0; i<sizeneigh; i++){
 									if (!isghost[i]){
@@ -2802,7 +2802,7 @@ namespace bitpit {
 		for (it = obegin; it != oend; ++it){
 			for (iface = 0; iface < m_dim; iface++){
 				iface2 = iface*2;
-				findGhostNeighbours(idx, iface2, neighbours);
+				findNeighbours(m_ghosts.data() + idx, iface2, neighbours, isghost, true);
 				nsize = neighbours.size();
 				if (!(it->m_info[iface2])){
 					//Internal intersection
@@ -2851,7 +2851,7 @@ namespace bitpit {
 		for (it = obegin; it != oend; ++it){
 			for (iface = 0; iface < m_dim; iface++){
 				iface2 = iface*2;
-				findNeighbours(idx, iface2, neighbours, isghost);
+				findNeighbours(m_octants.data() + idx, iface2, neighbours, isghost, false);
 				nsize = neighbours.size();
 				if (nsize) {
 					if (!(it->m_info[iface2])){
@@ -2960,7 +2960,7 @@ namespace bitpit {
 					}
 					else{
 						//Periodic intersection
-						findNeighbours(idx, iface2+1, neighbours, isghost);
+						findNeighbours(m_octants.data() + idx, iface2+1, neighbours, isghost, false);
 						nsize = neighbours.size();
 						for (i = 0; i < nsize; i++){
 							if (isghost[i]){
