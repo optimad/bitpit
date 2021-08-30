@@ -2868,19 +2868,16 @@ namespace bitpit {
         }
         nCodimensionItems[m_dim] = getNnodes();
 
-        neighbours.clear();
-        neighbours.reserve(26);
-        isghost.clear();
-        isghost.reserve(26);
         u32vector singleCodimNeighbours;
         bvector singleCodimIsGhost;
+
+        neighbours.clear();
+        isghost.clear();
         for(uint8_t codim = 1; codim <= m_dim; ++codim){
             for(int item = 0; item < nCodimensionItems[codim]; ++item){
-                findNeighbours(oct,item,codim,singleCodimNeighbours,singleCodimIsGhost);
-                for(size_t i = 0; i < singleCodimIsGhost.size(); ++i){
-                    isghost.push_back(singleCodimIsGhost[i]);
-                    neighbours.push_back(singleCodimNeighbours[i]);
-                }
+                findNeighbours(oct,item,codim,singleCodimNeighbours,singleCodimIsGhost,false);
+                neighbours.insert( neighbours.end(), singleCodimNeighbours.begin(), singleCodimNeighbours.end() );
+                isghost.insert( isghost.end(), singleCodimIsGhost.begin(), singleCodimIsGhost.end() );
             }
         }
     }
