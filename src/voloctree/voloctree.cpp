@@ -916,13 +916,8 @@ VolOctree::OctantHash VolOctree::evaluateOctantHash(const OctantInfo &octantInfo
 int VolOctree::getCellLevel(long id) const
 {
 	OctantInfo octantInfo = getCellOctant(id);
+	const Octant* octant = getOctantPointer(octantInfo);
 
-	const Octant* octant;
-	if (octantInfo.internal) {
-		octant = m_tree->getOctant(octantInfo.id);
-	} else {
-		octant = m_tree->getGhostOctant(octantInfo.id);
-	}
 	return octant->getLevel();
 }
 
