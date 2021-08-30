@@ -473,6 +473,7 @@ namespace bitpit {
         void        findNeighbours(const Octant* oct, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost, bool onlyinternals) const;
     public:
         void 		findNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost) const;
+        void 		findNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours) const;
         void 		findNeighbours(const Octant* oct, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost) const ;
         void 		findGhostNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours) const;
         void 		findGhostNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost) const;
