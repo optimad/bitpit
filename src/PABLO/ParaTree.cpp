@@ -2814,27 +2814,6 @@ namespace bitpit {
         findAllNodeNeighbours(oct, inode, neighbours, isghost);
     };
 
-    /** Compute neighbours adjacencies for every internal octant, storing them in a structure provided by the user
-     * \param[in] idx Index of the octant
-     * \param[out] globalNeighs Vector of global neighbours indices
-     */
-    void
-    ParaTree::findAllGlobalNeighbours(uint32_t idx, std::vector<uint64_t> &globalNeighs){
-
-        u32vector neighs;
-        bvector isghost;
-        findAllCodimensionNeighbours(idx,neighs,isghost);
-        size_t nofNeighs = neighs.size();
-
-        globalNeighs.resize(nofNeighs);
-        for(size_t n = 0; n < nofNeighs; ++n){
-            if(isghost[n])
-                globalNeighs[n] = getGhostGlobalIdx(neighs[n]);
-            else
-                globalNeighs[n] = getGlobalIdx(neighs[n]);
-        }
-    }
-
     /** Finds all the neighbours of an internal octant through all its boundaries of any codimension.
      * Returns a vector with the index of neighbours
      * in their structure (octants or ghosts) and sets isghost[i] = true if the
@@ -5286,6 +5265,8 @@ namespace bitpit {
                                       std::vector<AccretionData> *accretions) {
 
         // The neighbour of the internal seeds are the next layer of sources.
+        u32vector seedNeighLocalIds;
+        bvector seedNeighGhostFlag;
         for(AccretionData &accretion : *accretions){
             // If the accretion doesn't have internal seeds we can skip it
             std::size_t nSeeds = accretion.internalSeeds.size();
@@ -5315,9 +5296,20 @@ namespace bitpit {
                 // Find the 1-ring of the source
                 auto oneRingsCacheItr = oneRingsCache->find(seedLocalIdx);
                 if (oneRingsCacheItr == oneRingsCache->end()) {
+                    const Octant *seedOctant = getOctant(seedLocalIdx);
+                    findAllCodimensionNeighbours(seedOctant, seedNeighLocalIds, seedNeighGhostFlag);
+                    size_t nSeedNeighs = seedNeighLocalIds.size();
+
                     oneRingsCacheItr = oneRingsCache->insert({seedLocalIdx, std::vector<uint64_t>()}).first;
-                    findAllGlobalNeighbours(seedLocalIdx, oneRingsCacheItr->second);
-                    oneRingsCacheItr->second.push_back(getGlobalIdx(seedLocalIdx));
+                    oneRingsCacheItr->second.resize(nSeedNeighs + 1);
+                    for(size_t n = 0; n < nSeedNeighs; ++n){
+                        if (!seedNeighGhostFlag[n]) {
+                            oneRingsCacheItr->second[n] = getGlobalIdx(seedNeighLocalIds[n]);
+                        } else {
+                            oneRingsCacheItr->second[n] = getGhostGlobalIdx(seedNeighLocalIds[n]);
+                        }
+                    }
+                    oneRingsCacheItr->second[nSeedNeighs] = getGlobalIdx(seedLocalIdx);
                 }
                 const std::vector<uint64_t> &seedOneRing = oneRingsCacheItr->second;
 
