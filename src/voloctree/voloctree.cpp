@@ -2542,6 +2542,7 @@ void VolOctree::scale(const std::array<double, 3> &scaling, const std::array<dou
 void VolOctree::_findCellNeighs(long id, const std::vector<long> *blackList, std::vector<long> *neighs) const
 {
 	OctantInfo octantInfo = getCellOctant(id);
+	const Octant *octant = getOctantPointer(octantInfo);
 
 	int dimension = getDimension();
 	std::array<uint8_t, 4> nCodimensionItems;
@@ -2556,11 +2557,7 @@ void VolOctree::_findCellNeighs(long id, const std::vector<long> *blackList, std
 	std::vector<bool> neighGhostFlags;
 	for(uint8_t codim = 1; codim <= dimension; ++codim){
 		for(int item = 0; item < nCodimensionItems[codim]; ++item){
-			if (octantInfo.internal) {
-				m_tree->findNeighbours(octantInfo.id, item, codim, neighTreeIds, neighGhostFlags);
-			} else {
-				m_tree->findGhostNeighbours(octantInfo.id, item, codim, neighTreeIds, neighGhostFlags);
-			}
+			m_tree->findNeighbours(octant, item, codim, neighTreeIds, neighGhostFlags);
 
 			int nNeighs = neighTreeIds.size();
 			for (int i = 0; i < nNeighs; ++i) {
@@ -2732,13 +2729,11 @@ void VolOctree::findOctantCodimensionNeighs(const OctantInfo &octantInfo, int in
 		return;
 	}
 
+	const Octant *octant = getOctantPointer(octantInfo);
+
 	std::vector<uint32_t> neighTreeIds;
 	std::vector<bool> neighGhostFlags;
-	if (octantInfo.internal) {
-		m_tree->findNeighbours(octantInfo.id, index, codimension, neighTreeIds, neighGhostFlags);
-	} else {
-		m_tree->findGhostNeighbours(octantInfo.id, index, codimension, neighTreeIds, neighGhostFlags);
-	}
+	m_tree->findNeighbours(octant, index, codimension, neighTreeIds, neighGhostFlags);
 
 	int nNeighs = neighTreeIds.size();
 	for (int i = 0; i < nNeighs; ++i) {
