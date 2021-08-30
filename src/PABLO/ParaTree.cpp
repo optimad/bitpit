@@ -2918,29 +2918,7 @@ namespace bitpit {
      */
     void
     ParaTree::findGhostAllCodimensionNeighbours(Octant* oct, u32vector & neighbours, bvector & isghost){
-        std::array<uint8_t, 4> nCodimensionItems;
-        nCodimensionItems[0] = 0;
-        nCodimensionItems[1] = getNfaces();
-        if(m_dim == 3){
-            nCodimensionItems[2] = getNedges();
-        }
-        nCodimensionItems[m_dim] = getNnodes();
-
-        neighbours.clear();
-        neighbours.reserve(26);
-        isghost.clear();
-        isghost.reserve(26);
-        u32vector singleCodimNeighbours;
-        bvector singleCodimIsGhost;
-        for(uint8_t codim = 1; codim <= m_dim; ++codim){
-            for(int item = 0; item < nCodimensionItems[codim]; ++item){
-                findGhostNeighbours(oct,item,codim,singleCodimNeighbours,singleCodimIsGhost);
-                for(size_t i = 0; i < singleCodimIsGhost.size(); ++i){
-                    isghost.push_back(singleCodimIsGhost[i]);
-                    neighbours.push_back(singleCodimNeighbours[i]);
-                }
-            }
-        }
+        findAllCodimensionNeighbours(oct, neighbours, isghost);
     }
 
     /** Get the internal octant owner of an input point.
