@@ -16,6 +16,7 @@ addons:
       - liblapack-dev
       - liblapacke-dev
       - openmpi-bin
+      - libboost-all-dev
       - libopenmpi-dev
       - libpetsc3.6
       - libpetsc3.6.2-dev
@@ -63,6 +64,7 @@ jobs:
             - liblapack-dev
             - liblapacke-dev
             - openmpi-bin
+            - libboost-all-dev
             - libopenmpi-dev
             - libpetsc3.6
             - libpetsc3.6.2-dev
@@ -146,6 +148,7 @@ before_script:
         -DPETSC_ARCH=
         -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
         -DBITPIT_ENABLE_MPI=${BITPIT_ENABLE_MPI}
+        -DBITPIT_ENABLE_UNIT_TESTS=True
         -DBITPIT_VERBOSE_MAKE=True
         ..;
     fi
