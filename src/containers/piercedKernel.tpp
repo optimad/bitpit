@@ -2128,7 +2128,7 @@ std::vector<const PiercedStorageSyncSlave<id_t> *> PiercedKernel<id_t>::getStora
     std::vector<PiercedStorageSyncSlave<id_t> *> storges(m_slaves.size());
     for (const auto &slaveEntry : m_slaves) {
         const PiercedSyncSlave *slave = slaveEntry.first;
-        const PiercedStorageSyncSlave<id_t> *piercedStorage = dynamic_cast<PiercedStorageSyncSlave<id_t> *>(slave);
+        const PiercedStorageSyncSlave<id_t> *piercedStorage = dynamic_cast<const PiercedStorageSyncSlave<id_t> *>(slave);
         if (piercedStorage) {
             storges[storageIdx] = piercedStorage;
             ++storageIdx;
