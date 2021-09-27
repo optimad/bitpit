@@ -556,18 +556,18 @@ void PiercedStorage<value_t, id_t>::commitSyncAction(const PiercedSyncAction &ac
 
     case PiercedSyncAction::TYPE_APPEND:
     {
-        // Since we are increasing the sotrage by an element at the time
-        // calling a reserve will hurt performance badly because this will
-        // prevent the automatic reallocation of the storage.
+        // Since we may increase the sotrage by an element at the time calling
+        // a reserve will hurt performance badly because this will prevent the
+        // automatic reallocation of the storage.
         rawEmplaceBack();
         break;
     }
 
     case PiercedSyncAction::TYPE_INSERT:
     {
-        // Since we are increasing the sotrage by an element at the time
-        // calling a reserve will hurt performance badly because this will
-        // prevent the automatic reallocation of the storage.
+        // Since we may increase the sotrage by an element at the time calling
+        // a reserve will hurt performance badly because this will prevent the
+        // automatic reallocation of the storage.
         rawEmplace(action.info[PiercedSyncAction::INFO_POS]);
         break;
     }
@@ -579,9 +579,9 @@ void PiercedStorage<value_t, id_t>::commitSyncAction(const PiercedSyncAction &ac
 
     case PiercedSyncAction::TYPE_MOVE_APPEND:
     {
-        // Since we are increasing the sotrage by an element at the time
-        // calling a reserve will hurt performance badly because this will
-        // prevent the automatic reallocation of the storage.
+        // Since we may increase the sotrage by an element at the time calling
+        // a reserve will hurt performance badly because this will prevent the
+        // automatic reallocation of the storage.
         rawPushBack(std::move(rawAt(action.info[PiercedSyncAction::INFO_POS_FIRST])));
         rawEmreplace(action.info[PiercedSyncAction::INFO_POS_FIRST]);
         break;
@@ -589,9 +589,9 @@ void PiercedStorage<value_t, id_t>::commitSyncAction(const PiercedSyncAction &ac
 
     case PiercedSyncAction::TYPE_MOVE_INSERT:
     {
-        // Since we are increasing the sotrage by an element at the time
-        // calling a reserve will hurt performance badly because this will
-        // prevent the automatic reallocation of the storage.
+        // Since we may increase the sotrage by an element at the time calling
+        // a reserve will hurt performance badly because this will prevent the
+        // automatic reallocation of the storage.
         rawInsert(action.info[PiercedSyncAction::INFO_POS_SECOND], 1, std::move(rawAt(action.info[PiercedSyncAction::INFO_POS_FIRST])));
         rawEmreplace(action.info[PiercedSyncAction::INFO_POS_FIRST]);
         break;
@@ -605,6 +605,7 @@ void PiercedStorage<value_t, id_t>::commitSyncAction(const PiercedSyncAction &ac
     }
 
     case PiercedSyncAction::TYPE_PIERCE:
+    case PiercedSyncAction::TYPE_PIERCE_MULTIPLE:
     {
         // Nothing to do. To improve performance the element will not be
         // cleared.

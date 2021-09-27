@@ -282,11 +282,79 @@ void PiercedSyncMaster::commitSyncAction(PiercedSyncSlave *slave, const PiercedS
 */
 void PiercedSyncMaster::journalSyncAction(const PiercedSyncAction &action)
 {
+    // Get information about previous action
+    PiercedSyncAction *previousAction = nullptr;
+    if (!m_syncJournal.empty()) {
+        previousAction = &(m_syncJournal.back());
+    }
+
+    PiercedSyncAction::ActionType previousActionType = PiercedSyncAction::TYPE_UNDEFINED;
+    if (previousAction) {
+        previousActionType = previousAction->type;
+    }
+
+    // Journal current action
+    //
+    // If possible, current action will be merged with the previous one.
     switch (action.type) {
 
     case PiercedSyncAction::TYPE_CLEAR:
         m_syncJournal.resize(1);
         m_syncJournal[0] = action;
+        break;
+
+    case PiercedSyncAction::TYPE_APPEND:
+        if (previousActionType == PiercedSyncAction::TYPE_APPEND) {
+            previousAction->type = PiercedSyncAction::TYPE_RESIZE;
+            previousAction->info[PiercedSyncAction::INFO_SIZE] = action.info[PiercedSyncAction::INFO_POS] + 1;
+            previousAction->info[PiercedSyncAction::INFO_POS]  = std::numeric_limits<std::size_t>::max();
+        } else if (previousActionType == PiercedSyncAction::TYPE_RESIZE) {
+            previousAction->info[PiercedSyncAction::INFO_SIZE] = action.info[PiercedSyncAction::INFO_POS] + 1;
+        } else {
+            m_syncJournal.push_back(action);
+        }
+        break;
+
+    case PiercedSyncAction::TYPE_RESIZE:
+        if (previousActionType == PiercedSyncAction::TYPE_APPEND) {
+            previousAction->type = PiercedSyncAction::TYPE_RESIZE;
+            previousAction->info[PiercedSyncAction::INFO_SIZE] = action.info[PiercedSyncAction::INFO_SIZE];
+            previousAction->info[PiercedSyncAction::INFO_POS]  = std::numeric_limits<std::size_t>::max();
+        } else if (previousActionType == PiercedSyncAction::TYPE_RESIZE) {
+            previousAction->info[PiercedSyncAction::INFO_SIZE] = action.info[PiercedSyncAction::INFO_SIZE];
+        } else {
+            m_syncJournal.push_back(action);
+        }
+        break;
+
+    case PiercedSyncAction::TYPE_PIERCE:
+        if (previousActionType == PiercedSyncAction::TYPE_PIERCE) {
+            previousAction->type = PiercedSyncAction::TYPE_PIERCE_MULTIPLE;
+            previousAction->data = std::unique_ptr<std::vector<std::size_t>>(new std::vector<std::size_t>(2));
+            (*(previousAction->data))[0] = previousAction->info[PiercedSyncAction::INFO_POS];
+            (*(previousAction->data))[1] = action.info[PiercedSyncAction::INFO_POS];
+            previousAction->info[PiercedSyncAction::INFO_POS]      = std::numeric_limits<std::size_t>::max();
+            previousAction->info[PiercedSyncAction::INFO_POS_NEXT] = std::numeric_limits<std::size_t>::max();
+        } else if (previousActionType == PiercedSyncAction::TYPE_PIERCE_MULTIPLE) {
+            previousAction->data->push_back(action.info[PiercedSyncAction::INFO_POS]);
+        } else {
+            m_syncJournal.push_back(action);
+        }
+        break;
+
+    case PiercedSyncAction::TYPE_PIERCE_MULTIPLE:
+        if (previousActionType == PiercedSyncAction::TYPE_PIERCE) {
+            previousAction->type = PiercedSyncAction::TYPE_PIERCE_MULTIPLE;
+            previousAction->data = std::unique_ptr<std::vector<std::size_t>>(new std::vector<std::size_t>(action.data->size() + 1));
+            (*(previousAction->data))[0] = previousAction->info[PiercedSyncAction::INFO_POS];
+            previousAction->data->insert(previousAction->data->begin() + 1, action.data->begin(), action.data->end());
+            previousAction->info[PiercedSyncAction::INFO_POS]      = std::numeric_limits<std::size_t>::max();
+            previousAction->info[PiercedSyncAction::INFO_POS_NEXT] = std::numeric_limits<std::size_t>::max();
+        } else if (previousActionType == PiercedSyncAction::TYPE_PIERCE_MULTIPLE) {
+            previousAction->data->insert(previousAction->data->begin(), action.data->begin(), action.data->end());
+        } else {
+            m_syncJournal.push_back(action);
+        }
         break;
 
     case PiercedSyncAction::TYPE_NOOP:
