@@ -58,7 +58,8 @@ public:
         TYPE_MOVE_INSERT,
         TYPE_MOVE_OVERWRITE,
         TYPE_SWAP,
-        TYPE_PIERCE
+        TYPE_PIERCE,
+        TYPE_PIERCE_MULTIPLE
     };
 
     /**
