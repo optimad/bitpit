@@ -27,16 +27,16 @@
 
 #define  __PXI_POINTER_TYPE__ \
     typename std::conditional<std::is_const<value_t>::value, \
-        typename std::vector<value_no_cv_t>::const_pointer, \
-        typename std::vector<value_no_cv_t>::pointer>::type
+        typename container_t::const_pointer, \
+        typename container_t::pointer>::type
 
 #define  __PXI_REFERENCE_TYPE__ \
     typename std::conditional<std::is_const<value_t>::value, \
-        typename std::vector<value_no_cv_t>::const_reference, \
-        typename std::vector<value_no_cv_t>::reference>::type
+        typename container_t::const_reference, \
+        typename container_t::reference>::type
 
-#define  __PXI_REFERENCE__ typename ProxyVectorIterator<value_t, value_no_cv_t>::reference
-#define  __PXI_POINTER__   typename ProxyVectorIterator<value_t, value_no_cv_t>::pointer
+#define  __PXI_REFERENCE__ typename ProxyVectorIterator<value_t, container_t>::reference
+#define  __PXI_POINTER__   typename ProxyVectorIterator<value_t, container_t>::pointer
 
 #define __PXV_REFERENCE__             typename ProxyVector<value_t>::reference
 #define __PXV_CONST_REFERENCE__       typename ProxyVector<value_t>::const_reference
@@ -63,10 +63,9 @@ class ProxyVector;
     @brief Iterator for the class ProxyVector
 
     @tparam value_t is the type of the objects handled by the ProxyVector
-    @tparam pointer_t defines a pointer to the type iterated over
-    @tparam reference_t defines a reference to the type iterated over
+    @tparam container_t defines the type of container where the data is stored
 */
-template<typename value_t, typename value_no_cv_t = typename std::remove_cv<value_t>::type>
+template<typename value_t, typename container_t>
 class ProxyVectorIterator
     : public std::iterator<std::random_access_iterator_tag, value_t, std::ptrdiff_t, __PXI_POINTER_TYPE__, __PXI_REFERENCE_TYPE__>
 {
@@ -74,7 +73,7 @@ class ProxyVectorIterator
 template<typename PXV_value_t>
 friend class ProxyVector;
 
-friend class ProxyVectorIterator<typename std::add_const<value_t>::type, value_no_cv_t>;
+friend class ProxyVectorIterator<typename std::add_const<value_t>::type, container_t>;
 
 public:
     /*!
@@ -106,7 +105,7 @@ public:
     ProxyVectorIterator();
 
     template<typename other_value_t, typename std::enable_if<std::is_const<value_t>::value && !std::is_const<other_value_t>::value && std::is_same<other_value_t, typename std::remove_cv<value_t>::type>::value, int>::type = 0>
-    ProxyVectorIterator(const ProxyVectorIterator<other_value_t> &other);
+    ProxyVectorIterator(const ProxyVectorIterator<other_value_t, container_t> &other);
 
     // General methods
     void swap(ProxyVectorIterator& other) noexcept;
@@ -126,7 +125,7 @@ public:
     __PXI_POINTER__ operator->() const;
 
     template<typename other_value_t, typename std::enable_if<std::is_const<value_t>::value && !std::is_const<other_value_t>::value && std::is_same<other_value_t, typename std::remove_cv<value_t>::type>::value, int>::type = 0>
-    ProxyVectorIterator & operator=(const ProxyVectorIterator<other_value_t> &other);
+    ProxyVectorIterator & operator=(const ProxyVectorIterator<other_value_t, container_t> &other);
 
     /*!
         Two-way comparison.
@@ -218,19 +217,20 @@ protected:
     @brief Metafunction for generating ProxyVector storages.
 
     @tparam value_t is the type of the objects handled by the storage
-    @tparam pointer_t defines a pointer to the data stored
-    @tparam const_pointer_t defines a constant pointer to the data stored
+    @tparam container_t defines the type of container where the data is stored
 */
-template<typename value_t, typename pointer_t = typename std::vector<value_t>::pointer, typename const_pointer_t = typename std::vector<value_t>::const_pointer>
-class ProxyVectorStorage : public ProxyVectorStorageInterface<pointer_t, const_pointer_t>
+template<typename value_t, typename container_t>
+class ProxyVectorStorage : public ProxyVectorStorageInterface<typename container_t::pointer, typename container_t::const_pointer>
 {
 
 template<typename PXV_value_t>
 friend class ProxyVector;
 
 public:
-    typedef pointer_t pointer;
-    typedef const_pointer_t const_pointer;
+    typedef container_t container;
+
+    typedef typename container_t::pointer pointer;
+    typedef typename container_t::const_pointer const_pointer;
 
     ~ProxyVectorStorage();
 
@@ -253,13 +253,13 @@ private:
     static const int MEMORY_POOL_VECTOR_COUNT = 10;
     static const int MEMORY_POOL_MAX_CAPACITY = 128;
 
-    static std::vector<std::unique_ptr<std::vector<value_t>>> m_storagePool;
+    static std::vector<std::unique_ptr<container_t>> m_containerPool;
 
-    std::unique_ptr<std::vector<value_t>> createStorage(std::size_t size);
-    std::unique_ptr<std::vector<value_t>> createStorage(const std::unique_ptr<std::vector<value_t>> &source);
-    void destroyStorage(std::unique_ptr<std::vector<value_t>> *storage);
+    std::unique_ptr<container_t> createContainer(std::size_t size);
+    std::unique_ptr<container_t> createContainer(const std::unique_ptr<container_t> &source);
+    void destroyContainer(std::unique_ptr<container_t> *container);
 
-    std::unique_ptr<std::vector<value_t>> m_storage;
+    std::unique_ptr<container_t> m_container;
 
 };
 
@@ -287,6 +287,11 @@ private:
 
 public:
     /*!
+        Container type
+     */
+    typedef std::vector<value_no_cv_t> container_type;
+
+    /*!
         Type of data stored in the container
     */
     typedef value_t value_type;
@@ -294,50 +299,50 @@ public:
     /*!
         Iterator for the container
     */
-    typedef ProxyVectorIterator<value_t, value_no_cv_t> iterator;
+    typedef ProxyVectorIterator<value_t, container_type> iterator;
 
     /*!
         Constant iterator for the container
     */
-    typedef ProxyVectorIterator<typename std::add_const<value_no_cv_t>::type, value_no_cv_t> const_iterator;
+    typedef ProxyVectorIterator<typename std::add_const<value_no_cv_t>::type, container_type> const_iterator;
 
     /*!
         Pointer type
     */
     typedef
         typename std::conditional<std::is_const<value_t>::value,
-            typename std::vector<value_no_cv_t>::const_pointer,
-            typename std::vector<value_no_cv_t>::pointer>::type
+            typename container_type::const_pointer,
+            typename container_type::pointer>::type
         pointer;
 
     /*!
         Constant pointer
     */
-    typedef typename std::vector<value_no_cv_t>::const_pointer const_pointer;
+    typedef typename container_type::const_pointer const_pointer;
 
     /*!
         Storage pointer type
     */
-    typedef typename std::vector<value_no_cv_t>::pointer storage_pointer;
+    typedef typename container_type::pointer storage_pointer;
 
     /*!
         Constant storage pointer
     */
-    typedef typename std::vector<value_no_cv_t>::const_pointer storage_const_pointer;
+    typedef typename container_type::const_pointer storage_const_pointer;
 
     /*!
         Reference type
     */
     typedef
         typename std::conditional<std::is_const<value_t>::value,
-            typename std::vector<value_no_cv_t>::const_reference,
-            typename std::vector<value_no_cv_t>::reference>::type
+            typename container_type::const_reference,
+            typename container_type::reference>::type
         reference;
 
     /*!
         Constant reference
     */
-    typedef typename std::vector<value_no_cv_t>::const_reference const_reference;
+    typedef typename container_type::const_reference const_reference;
 
     /*!
         Flag to use the internal storage
@@ -416,7 +421,7 @@ private:
     */
     typedef
         typename std::conditional<std::is_const<value_t>::value,
-            ProxyVectorStorage<value_no_cv_t>,
+            ProxyVectorStorage<value_no_cv_t, container_type>,
             ProxyVectorDummyStorage<value_no_cv_t>>::type
         storage_t;
 
