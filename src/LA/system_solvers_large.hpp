@@ -174,7 +174,7 @@ public:
               DumpFormat matrixFormat = DUMP_BINARY, DumpFormat rhsFormat = DUMP_BINARY,
               DumpFormat solutionFormat = DUMP_BINARY) const;
 
-    void setNullSpace();
+    virtual void setNullSpace();
     void unsetNullSpace();
 
     KSPOptions & getKSPOptions();
