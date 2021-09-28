@@ -30,8 +30,8 @@ namespace bitpit {
 /*!
     Constructor
 */
-template<typename value_t, typename value_no_cv_t>
-ProxyVectorIterator<value_t, value_no_cv_t>::ProxyVectorIterator()
+template<typename value_t, typename container_t>
+ProxyVectorIterator<value_t, container_t>::ProxyVectorIterator()
     : m_position(nullptr)
 {
 }
@@ -44,9 +44,9 @@ ProxyVectorIterator<value_t, value_no_cv_t>::ProxyVectorIterator()
 
     \param other is the iterator that will be copied
 */
-template<typename value_t, typename value_no_cv_t>
+template<typename value_t, typename container_t>
 template<typename other_value_t, typename std::enable_if<std::is_const<value_t>::value && !std::is_const<other_value_t>::value && std::is_same<other_value_t, typename std::remove_cv<value_t>::type>::value, int>::type>
-ProxyVectorIterator<value_t, value_no_cv_t>::ProxyVectorIterator(const ProxyVectorIterator<other_value_t> &other)
+ProxyVectorIterator<value_t, container_t>::ProxyVectorIterator(const ProxyVectorIterator<other_value_t, container_t> &other)
     : m_position(other.m_position)
 {
 }
@@ -57,8 +57,8 @@ ProxyVectorIterator<value_t, value_no_cv_t>::ProxyVectorIterator(const ProxyVect
 
     \param other is the iterator to exchange values with
 */
-template<typename value_t, typename value_no_cv_t>
-void ProxyVectorIterator<value_t, value_no_cv_t>::swap(ProxyVectorIterator& other) noexcept
+template<typename value_t, typename container_t>
+void ProxyVectorIterator<value_t, container_t>::swap(ProxyVectorIterator& other) noexcept
 {
     std::swap(m_position, other.m_position);
 }
@@ -66,8 +66,8 @@ void ProxyVectorIterator<value_t, value_no_cv_t>::swap(ProxyVectorIterator& othe
 /*!
     Pre-increment operator.
 */
-template<typename value_t, typename value_no_cv_t>
-ProxyVectorIterator<value_t, value_no_cv_t> & ProxyVectorIterator<value_t, value_no_cv_t>::operator++()
+template<typename value_t, typename container_t>
+ProxyVectorIterator<value_t, container_t> & ProxyVectorIterator<value_t, container_t>::operator++()
 {
     m_position++;
 
@@ -77,8 +77,8 @@ ProxyVectorIterator<value_t, value_no_cv_t> & ProxyVectorIterator<value_t, value
 /*!
     Post-increment operator.
 */
-template<typename value_t, typename value_no_cv_t>
-ProxyVectorIterator<value_t, value_no_cv_t> ProxyVectorIterator<value_t, value_no_cv_t>::operator++(int)
+template<typename value_t, typename container_t>
+ProxyVectorIterator<value_t, container_t> ProxyVectorIterator<value_t, container_t>::operator++(int)
 {
     ProxyVectorIterator tmp(m_position);
 
@@ -90,8 +90,8 @@ ProxyVectorIterator<value_t, value_no_cv_t> ProxyVectorIterator<value_t, value_n
 /*!
     Pre-decrement operator.
 */
-template<typename value_t, typename value_no_cv_t>
-ProxyVectorIterator<value_t, value_no_cv_t> & ProxyVectorIterator<value_t, value_no_cv_t>::operator--()
+template<typename value_t, typename container_t>
+ProxyVectorIterator<value_t, container_t> & ProxyVectorIterator<value_t, container_t>::operator--()
 {
     m_position--;
 
@@ -101,8 +101,8 @@ ProxyVectorIterator<value_t, value_no_cv_t> & ProxyVectorIterator<value_t, value
 /*!
     Post-decrement operator.
 */
-template<typename value_t, typename value_no_cv_t>
-ProxyVectorIterator<value_t, value_no_cv_t> ProxyVectorIterator<value_t, value_no_cv_t>::operator--(int)
+template<typename value_t, typename container_t>
+ProxyVectorIterator<value_t, container_t> ProxyVectorIterator<value_t, container_t>::operator--(int)
 {
     ProxyVectorIterator tmp(m_position);
 
@@ -116,8 +116,8 @@ ProxyVectorIterator<value_t, value_no_cv_t> ProxyVectorIterator<value_t, value_n
 
     \param increment is the increment
 */
-template<typename value_t, typename value_no_cv_t>
-ProxyVectorIterator<value_t, value_no_cv_t>& ProxyVectorIterator<value_t, value_no_cv_t>::operator+=(int increment)
+template<typename value_t, typename container_t>
+ProxyVectorIterator<value_t, container_t>& ProxyVectorIterator<value_t, container_t>::operator+=(int increment)
 {
     m_position += increment;
 
@@ -129,8 +129,8 @@ ProxyVectorIterator<value_t, value_no_cv_t>& ProxyVectorIterator<value_t, value_
 
     \result A reference to the element currently pointed to by the iterator.
 */
-template<typename value_t, typename value_no_cv_t>
-__PXI_REFERENCE__ ProxyVectorIterator<value_t, value_no_cv_t>::operator*() const
+template<typename value_t, typename container_t>
+__PXI_REFERENCE__ ProxyVectorIterator<value_t, container_t>::operator*() const
 {
     return *m_position;
 }
@@ -140,8 +140,8 @@ __PXI_REFERENCE__ ProxyVectorIterator<value_t, value_no_cv_t>::operator*() const
 
     \result A reference to the element currently pointed to by the iterator.
 */
-template<typename value_t, typename value_no_cv_t>
-__PXI_POINTER__ ProxyVectorIterator<value_t, value_no_cv_t>::operator->() const
+template<typename value_t, typename container_t>
+__PXI_POINTER__ ProxyVectorIterator<value_t, container_t>::operator->() const
 {
     return m_position;
 }
@@ -152,9 +152,9 @@ __PXI_POINTER__ ProxyVectorIterator<value_t, value_no_cv_t>::operator->() const
 *
 * \param other is the iterator that will be copied
 */
-template<typename value_t, typename value_no_cv_t>
+template<typename value_t, typename container_t>
 template<typename other_value_t, typename std::enable_if<std::is_const<value_t>::value && !std::is_const<other_value_t>::value && std::is_same<other_value_t, typename std::remove_cv<value_t>::type>::value, int>::type>
-ProxyVectorIterator<value_t, value_no_cv_t> & ProxyVectorIterator<value_t, value_no_cv_t>::operator=(const ProxyVectorIterator<other_value_t> &other)
+ProxyVectorIterator<value_t, container_t> & ProxyVectorIterator<value_t, container_t>::operator=(const ProxyVectorIterator<other_value_t, container_t> &other)
 {
     m_position = other.m_position;
 
@@ -165,8 +165,8 @@ ProxyVectorIterator<value_t, value_no_cv_t> & ProxyVectorIterator<value_t, value
     Creates a new iterator and initializes it with the position of
     the const base iterator recevied in input.
 */
-template<typename value_t, typename value_no_cv_t>
-ProxyVectorIterator<value_t, value_no_cv_t>::ProxyVectorIterator(__PXI_POINTER__ position)
+template<typename value_t, typename container_t>
+ProxyVectorIterator<value_t, container_t>::ProxyVectorIterator(__PXI_POINTER__ position)
     : m_position(position)
 {
 }
@@ -177,8 +177,8 @@ ProxyVectorIterator<value_t, value_no_cv_t>::ProxyVectorIterator(__PXI_POINTER__
     \param other is the iterator from which the distance will be evaluated
     \result The distance between the specified iterator.
 */
-template<typename value_t, typename value_no_cv_t>
-std::size_t ProxyVectorIterator<value_t, value_no_cv_t>::operator-(const ProxyVectorIterator &other)
+template<typename value_t, typename container_t>
+std::size_t ProxyVectorIterator<value_t, container_t>::operator-(const ProxyVectorIterator &other)
 {
     return (m_position - other.m_position);
 }
@@ -262,75 +262,75 @@ void ProxyVectorDummyStorage<value_t, pointer_t, const_pointer_t>::resize(std::s
 /*!
     Memory pool
 */
-template<typename value_t, typename pointer_t, typename const_pointer_t>
-std::vector<std::unique_ptr<std::vector<value_t>>> ProxyVectorStorage<value_t, pointer_t, const_pointer_t>::m_storagePool = std::vector<std::unique_ptr<std::vector<value_t>>>();
+template<typename value_t, typename container_t>
+std::vector<std::unique_ptr<container_t>> ProxyVectorStorage<value_t, container_t>::m_containerPool = std::vector<std::unique_ptr<container_t>>();
 
 /*!
-    Create a storage.
+    Create a data container.
 
-    \param size is the size of the storage, expressed in number of elements.
+    \param size is the size of the container, expressed in number of elements.
 */
-template<typename value_t, typename pointer_t, typename const_pointer_t>
-std::unique_ptr<std::vector<value_t>> ProxyVectorStorage<value_t, pointer_t, const_pointer_t>::createStorage(std::size_t size)
+template<typename value_t, typename container_t>
+std::unique_ptr<container_t> ProxyVectorStorage<value_t, container_t>::createContainer(std::size_t size)
 {
     if (size == 0) {
-        return std::unique_ptr<std::vector<value_t>>(nullptr);
+        return std::unique_ptr<container_t>(nullptr);
     }
 
-    if (!m_storagePool.empty()) {
-        std::unique_ptr<std::vector<value_t>> storage = std::move(m_storagePool.back());
-        if (storage->size() < size) {
-            storage->resize(size);
+    if (!m_containerPool.empty()) {
+        std::unique_ptr<container_t> container = std::move(m_containerPool.back());
+        if (container->size() < size) {
+            container->resize(size);
         }
 
-        m_storagePool.resize(m_storagePool.size() - 1);
+        m_containerPool.resize(m_containerPool.size() - 1);
 
-        return storage;
+        return container;
     } else {
-        return std::unique_ptr<std::vector<value_t>>(new std::vector<value_t>(size));
+        return std::unique_ptr<container_t>(new container_t(size));
     }
 }
 
 /*!
-    Create a storage.
+    Create a data container.
 
-    \param source is the storage whose content will be copied in newly created
-    storage
+    \param source is the container whose content will be copied in newly
+    created container
 */
-template<typename value_t, typename pointer_t, typename const_pointer_t>
-std::unique_ptr<std::vector<value_t>> ProxyVectorStorage<value_t, pointer_t, const_pointer_t>::createStorage(const std::unique_ptr<std::vector<value_t>> &source)
+template<typename value_t, typename container_t>
+std::unique_ptr<container_t> ProxyVectorStorage<value_t, container_t>::createContainer(const std::unique_ptr<container_t> &source)
 {
     if (!source || source->empty()) {
-        return std::unique_ptr<std::vector<value_t>>(nullptr);
+        return std::unique_ptr<container_t>(nullptr);
     }
 
-    if (!m_storagePool.empty()) {
-        std::unique_ptr<std::vector<value_t>> storage = createStorage(source->size());
-        std::copy_n(source->data(), source->size(), storage->data());
+    if (!m_containerPool.empty()) {
+        std::unique_ptr<container_t> container = createContainer(source->size());
+        std::copy_n(source->data(), source->size(), container->data());
 
-        return storage;
+        return container;
     } else {
-        return std::unique_ptr<std::vector<value_t>>(new std::vector<value_t>(*source));
+        return std::unique_ptr<container_t>(new container_t(*source));
     }
 }
 
 /*!
-    Delete a storage.
+    Delete a data container.
 */
-template<typename value_t, typename pointer_t, typename const_pointer_t>
-void ProxyVectorStorage<value_t, pointer_t, const_pointer_t>::destroyStorage(std::unique_ptr<std::vector<value_t>> *storage)
+template<typename value_t, typename container_t>
+void ProxyVectorStorage<value_t, container_t>::destroyContainer(std::unique_ptr<container_t> *container)
 {
-    if (!(*storage)) {
+    if (!(*container)) {
         return;
     }
 
-    if (m_storagePool.size() < MEMORY_POOL_VECTOR_COUNT) {
-        if ((*storage)->size() > MEMORY_POOL_MAX_CAPACITY) {
-            (*storage)->resize(MEMORY_POOL_MAX_CAPACITY);
+    if (m_containerPool.size() < MEMORY_POOL_VECTOR_COUNT) {
+        if ((*container)->size() > MEMORY_POOL_MAX_CAPACITY) {
+            (*container)->resize(MEMORY_POOL_MAX_CAPACITY);
         }
 
-        m_storagePool.emplace_back(std::move(*storage));
-        storage->reset();
+        m_containerPool.emplace_back(std::move(*container));
+        container->reset();
     }
 }
 
@@ -339,9 +339,9 @@ void ProxyVectorStorage<value_t, pointer_t, const_pointer_t>::destroyStorage(std
 
     \param size is the size of the storage expressed in number of elements.
 */
-template<typename value_t, typename pointer_t, typename const_pointer_t>
-ProxyVectorStorage<value_t, pointer_t, const_pointer_t>::ProxyVectorStorage(std::size_t size)
-    : m_storage(createStorage(size))
+template<typename value_t, typename container_t>
+ProxyVectorStorage<value_t, container_t>::ProxyVectorStorage(std::size_t size)
+    : m_container(createContainer(size))
 {
 }
 
@@ -351,19 +351,19 @@ ProxyVectorStorage<value_t, pointer_t, const_pointer_t>::ProxyVectorStorage(std:
     \param x is another storage of the same type (i.e., instantiated with
     the same template parameters) whose content is copied in this container.
 */
-template<typename value_t, typename pointer_t, typename const_pointer_t>
-ProxyVectorStorage<value_t, pointer_t, const_pointer_t>::ProxyVectorStorage(const ProxyVectorStorage<value_t, pointer_t, const_pointer_t> &other)
-    : m_storage(createStorage(other.m_storage))
+template<typename value_t, typename container_t>
+ProxyVectorStorage<value_t, container_t>::ProxyVectorStorage(const ProxyVectorStorage<value_t, container_t> &other)
+    : m_container(createContainer(other.m_container))
 {
 }
 
 /*!
     Destructor.
 */
-template<typename value_t, typename pointer_t, typename const_pointer_t>
-ProxyVectorStorage<value_t, pointer_t, const_pointer_t>::~ProxyVectorStorage()
+template<typename value_t, typename container_t>
+ProxyVectorStorage<value_t, container_t>::~ProxyVectorStorage()
 {
-    destroyStorage(&m_storage);
+    destroyContainer(&m_container);
 }
 
 /*!
@@ -371,10 +371,10 @@ ProxyVectorStorage<value_t, pointer_t, const_pointer_t>::~ProxyVectorStorage()
 
     \param other is another storage of the same type
 */
-template<typename value_t, typename pointer_t, typename const_pointer_t>
-void ProxyVectorStorage<value_t, pointer_t, const_pointer_t>::swap(ProxyVectorStorage &other) noexcept
+template<typename value_t, typename container_t>
+void ProxyVectorStorage<value_t, container_t>::swap(ProxyVectorStorage &other) noexcept
 {
-    m_storage.swap(other.m_storage);
+    m_container.swap(other.m_container);
 }
 
 /*!
@@ -382,14 +382,14 @@ void ProxyVectorStorage<value_t, pointer_t, const_pointer_t>::swap(ProxyVectorSt
 
     \result A pointer to the data.
 */
-template<typename value_t, typename pointer_t, typename const_pointer_t>
-typename ProxyVectorStorage<value_t, pointer_t, const_pointer_t>::pointer ProxyVectorStorage<value_t, pointer_t, const_pointer_t>::data()
+template<typename value_t, typename container_t>
+typename ProxyVectorStorage<value_t, container_t>::pointer ProxyVectorStorage<value_t, container_t>::data()
 {
     if (empty()) {
         return nullptr;
     }
 
-    return m_storage->data();
+    return m_container->data();
 }
 
 /*!
@@ -397,14 +397,14 @@ typename ProxyVectorStorage<value_t, pointer_t, const_pointer_t>::pointer ProxyV
 
     \result A constant pointer to the data.
 */
-template<typename value_t, typename pointer_t, typename const_pointer_t>
-typename ProxyVectorStorage<value_t, pointer_t, const_pointer_t>::const_pointer ProxyVectorStorage<value_t, pointer_t, const_pointer_t>::data() const
+template<typename value_t, typename container_t>
+typename ProxyVectorStorage<value_t, container_t>::const_pointer ProxyVectorStorage<value_t, container_t>::data() const
 {
     if (empty()) {
         return nullptr;
     }
 
-    return m_storage->data();
+    return m_container->data();
 }
 
 /*!
@@ -412,14 +412,14 @@ typename ProxyVectorStorage<value_t, pointer_t, const_pointer_t>::const_pointer 
 
     \result Returns true if the storage is empty, false otherwise.
 */
-template<typename value_t, typename pointer_t, typename const_pointer_t>
-bool ProxyVectorStorage<value_t, pointer_t, const_pointer_t>::empty() const
+template<typename value_t, typename container_t>
+bool ProxyVectorStorage<value_t, container_t>::empty() const
 {
-    if (!m_storage) {
+    if (!m_container) {
         return true;
     }
 
-    return m_storage->empty();
+    return m_container->empty();
 }
 
 /*!
@@ -427,14 +427,14 @@ bool ProxyVectorStorage<value_t, pointer_t, const_pointer_t>::empty() const
 
     \result The size of the storage, expressed in number of elements.
 */
-template<typename value_t, typename pointer_t, typename const_pointer_t>
-std::size_t ProxyVectorStorage<value_t, pointer_t, const_pointer_t>::size() const
+template<typename value_t, typename container_t>
+std::size_t ProxyVectorStorage<value_t, container_t>::size() const
 {
-    if (!m_storage) {
+    if (!m_container) {
         return 0;
     }
 
-    return m_storage->size();
+    return m_container->size();
 }
 
 /*!
@@ -442,19 +442,19 @@ std::size_t ProxyVectorStorage<value_t, pointer_t, const_pointer_t>::size() cons
 
     \result The size of the storage expressed in number of elements.
 */
-template<typename value_t, typename pointer_t, typename const_pointer_t>
-void ProxyVectorStorage<value_t, pointer_t, const_pointer_t>::resize(std::size_t size)
+template<typename value_t, typename container_t>
+void ProxyVectorStorage<value_t, container_t>::resize(std::size_t size)
 {
     if (size == 0) {
-        destroyStorage(&m_storage);
+        destroyContainer(&m_container);
         return;
 
     }
 
-    if (m_storage) {
-        m_storage->resize(size);
+    if (m_container) {
+        m_container->resize(size);
     } else {
-        m_storage = createStorage(size);
+        m_container = createContainer(size);
     }
 }
 
