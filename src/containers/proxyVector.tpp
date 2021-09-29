@@ -368,6 +368,28 @@ ProxyVectorStorage<value_t, container_t>::~ProxyVectorStorage()
 }
 
 /*!
+    Get a reference to the data container associated with the storage.
+
+    \result A reference to the data container associated with the storage.
+*/
+template<typename value_t, typename container_t>
+container_t * ProxyVectorStorage<value_t, container_t>::container()
+{
+    return m_container.get();
+}
+
+/*!
+    Get a reference to the data container associated with the storage.
+
+    \result A reference to the data container associated with the storage.
+*/
+template<typename value_t, typename container_t>
+const container_t * ProxyVectorStorage<value_t, container_t>::container() const
+{
+    return m_container.get();
+}
+
+/*!
     Swaps the contents.
 
     \param other is another storage of the same type
@@ -729,6 +751,42 @@ __PXV_STORAGE_CONST_POINTER__ ProxyVector<value_t>::storedData() const noexcept
     }
 
     return internalData;
+}
+
+/*!
+    Returns a direct reference to the container associated with the internal
+    storage.
+
+    Interacting directly with the container associated with the internal
+    storage may leave the proxy vector in an inconsistent state. It's up
+    to the caller of this function to guarantee that this will not happen.
+
+    \result A direct reference to the container associated with the internal
+    storage.
+*/
+template<typename value_t>
+template<typename U, typename std::enable_if<std::is_const<U>::value, int>::type>
+typename ProxyVector<value_t>::container_type * ProxyVector<value_t>::storedDataContainer()
+{
+    return m_storage.container();
+}
+
+/*!
+    Returns a constant direct reference to the container associated with the
+    internal storage.
+
+    Interacting directly with the container associated with the internal
+    storage may leave the proxy vector in an inconsistent state. It's up
+    to the caller of this function to guarantee that this will not happen.
+
+    \result A constant direct reference to the container associated with the
+    internal storage.
+*/
+template<typename value_t>
+template<typename U, typename std::enable_if<std::is_const<U>::value, int>::type>
+const typename ProxyVector<value_t>::container_type * ProxyVector<value_t>::storedDataContainer() const
+{
+    return m_storage.container();
 }
 
 /*!
