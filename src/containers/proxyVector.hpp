@@ -227,7 +227,7 @@ template<typename PXV_value_t>
 friend class ProxyVector;
 
 public:
-    typedef container_t container;
+    typedef container_t container_type;
 
     typedef typename container_t::pointer pointer;
     typedef typename container_t::const_pointer const_pointer;
@@ -235,6 +235,9 @@ public:
     ~ProxyVectorStorage();
 
     void swap(ProxyVectorStorage &other) noexcept;
+
+    container_t * container();
+    const container_t * container() const;
 
     pointer data() override;
     const_pointer data() const override;
@@ -383,6 +386,11 @@ public:
 
     __PXV_STORAGE_POINTER__ storedData() noexcept;
     __PXV_STORAGE_CONST_POINTER__ storedData() const noexcept;
+
+    template<typename U = value_t, typename std::enable_if<std::is_const<U>::value, int>::type = 0>
+    container_type * storedDataContainer();
+    template<typename U = value_t, typename std::enable_if<std::is_const<U>::value, int>::type = 0>
+    const container_type * storedDataContainer() const;
 
     template<typename U = value_t, typename std::enable_if<!std::is_const<U>::value, int>::type = 0>
     __PXV_POINTER__ data() noexcept;
