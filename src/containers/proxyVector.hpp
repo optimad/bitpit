@@ -38,14 +38,14 @@
 #define  __PXI_REFERENCE__ typename ProxyVectorIterator<value_t, container_t>::reference
 #define  __PXI_POINTER__   typename ProxyVectorIterator<value_t, container_t>::pointer
 
-#define __PXV_REFERENCE__             typename ProxyVector<value_t>::reference
-#define __PXV_CONST_REFERENCE__       typename ProxyVector<value_t>::const_reference
-#define __PXV_POINTER__               typename ProxyVector<value_t>::pointer
-#define __PXV_CONST_POINTER__         typename ProxyVector<value_t>::const_pointer
-#define __PXV_STORAGE_POINTER__       typename ProxyVector<value_t>::storage_pointer
-#define __PXV_STORAGE_CONST_POINTER__ typename ProxyVector<value_t>::storage_const_pointer
-#define __PXV_ITERATOR__              typename ProxyVector<value_t>::iterator
-#define __PXV_CONST_ITERATOR__        typename ProxyVector<value_t>::const_iterator
+#define __PXV_REFERENCE__             typename ProxyVector<value_t, thread_safe>::reference
+#define __PXV_CONST_REFERENCE__       typename ProxyVector<value_t, thread_safe>::const_reference
+#define __PXV_POINTER__               typename ProxyVector<value_t, thread_safe>::pointer
+#define __PXV_CONST_POINTER__         typename ProxyVector<value_t, thread_safe>::const_pointer
+#define __PXV_STORAGE_POINTER__       typename ProxyVector<value_t, thread_safe>::storage_pointer
+#define __PXV_STORAGE_CONST_POINTER__ typename ProxyVector<value_t, thread_safe>::storage_const_pointer
+#define __PXV_ITERATOR__              typename ProxyVector<value_t, thread_safe>::iterator
+#define __PXV_CONST_ITERATOR__        typename ProxyVector<value_t, thread_safe>::const_iterator
 
 #include <cassert>
 #include <memory>
@@ -55,7 +55,7 @@
 
 namespace bitpit {
 
-template<typename PXV_value_t>
+template<typename PXV_value_t, bool PXV_thread_safe>
 class ProxyVector;
 
 /*!
@@ -70,7 +70,7 @@ class ProxyVectorIterator
     : public std::iterator<std::random_access_iterator_tag, value_t, std::ptrdiff_t, __PXI_POINTER_TYPE__, __PXI_REFERENCE_TYPE__>
 {
 
-template<typename PXV_value_t>
+template<typename PXV_value_t, bool PXV_thread_safe>
 friend class ProxyVector;
 
 friend class ProxyVectorIterator<typename std::add_const<value_t>::type, container_t>;
@@ -190,7 +190,7 @@ template<typename value_t, typename pointer_t = value_t *, typename const_pointe
 class ProxyVectorDummyStorage : public ProxyVectorStorageInterface<pointer_t, const_pointer_t>
 {
 
-template<typename PXV_value_t>
+template<typename PXV_value_t, bool PXV_thread_safe>
 friend class ProxyVector;
 
 public:
@@ -218,12 +218,14 @@ protected:
 
     @tparam value_t is the type of the objects handled by the storage
     @tparam container_t defines the type of container where the data is stored
+    @tparam thread_safe controls if it is safe to use the container in
+    a multi-threaded code
 */
-template<typename value_t, typename container_t>
+template<typename value_t, typename container_t, bool thread_safe>
 class ProxyVectorStorage : public ProxyVectorStorageInterface<typename container_t::pointer, typename container_t::const_pointer>
 {
 
-template<typename PXV_value_t>
+template<typename PXV_value_t, bool PXV_thread_safe>
 friend class ProxyVector;
 
 public:
@@ -280,8 +282,10 @@ private:
     bject itself.
 
     @tparam value_t is the type of the objects handled by the ProxyVector
+    @tparam thread_safe controls if it is safe to use the container in
+    a multi-threaded code
 */
-template<typename value_t>
+template<typename value_t, bool thread_safe = false>
 class ProxyVector
 {
 
@@ -429,7 +433,7 @@ private:
     */
     typedef
         typename std::conditional<std::is_const<value_t>::value,
-            ProxyVectorStorage<value_no_cv_t, container_type>,
+            ProxyVectorStorage<value_no_cv_t, container_type, thread_safe>,
             ProxyVectorDummyStorage<value_no_cv_t>>::type
         storage_t;
 
@@ -441,8 +445,8 @@ private:
 };
 
 // Constant proxy vector
-template<typename value_t>
-using ConstProxyVector = ProxyVector<const value_t>;
+template<typename value_t, bool thread_safe = false>
+using ConstProxyVector = ProxyVector<const value_t, thread_safe>;
 
 }
 
@@ -452,13 +456,21 @@ using ConstProxyVector = ProxyVector<const value_t>;
 namespace bitpit{
 
 // Some commonly used ProxyVectors are instantiated explicitly
-extern template class ProxyVector<int>;
-extern template class ProxyVector<long>;
-extern template class ProxyVector<double>;
+extern template class ProxyVector<int, true>;
+extern template class ProxyVector<long, true>;
+extern template class ProxyVector<double, true>;
 
-extern template class ProxyVector<const int>;
-extern template class ProxyVector<const long>;
-extern template class ProxyVector<const double>;
+extern template class ProxyVector<int, false>;
+extern template class ProxyVector<long, false>;
+extern template class ProxyVector<double, false>;
+
+extern template class ProxyVector<const int, true>;
+extern template class ProxyVector<const long, true>;
+extern template class ProxyVector<const double, true>;
+
+extern template class ProxyVector<const int, false>;
+extern template class ProxyVector<const long, false>;
+extern template class ProxyVector<const double, false>;
 
 }
 

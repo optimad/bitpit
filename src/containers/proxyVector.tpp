@@ -263,30 +263,34 @@ void ProxyVectorDummyStorage<value_t, pointer_t, const_pointer_t>::resize(std::s
 /*!
     Memory pool
 */
-template<typename value_t, typename container_t>
-std::vector<std::unique_ptr<container_t>> ProxyVectorStorage<value_t, container_t>::m_containerPool = std::vector<std::unique_ptr<container_t>>();
+template<typename value_t, typename container_t, bool thread_safe>
+std::vector<std::unique_ptr<container_t>> ProxyVectorStorage<value_t, container_t, thread_safe>::m_containerPool = std::vector<std::unique_ptr<container_t>>();
 
 /*!
     Create a data container.
 
     \param size is the size of the container, expressed in number of elements.
 */
-template<typename value_t, typename container_t>
-std::unique_ptr<container_t> ProxyVectorStorage<value_t, container_t>::createContainer(std::size_t size)
+template<typename value_t, typename container_t, bool thread_safe>
+std::unique_ptr<container_t> ProxyVectorStorage<value_t, container_t, thread_safe>::createContainer(std::size_t size)
 {
     if (size == 0) {
         return std::unique_ptr<container_t>(nullptr);
     }
 
-    if (!m_containerPool.empty()) {
-        std::unique_ptr<container_t> container = std::move(m_containerPool.back());
-        if (container->size() < size) {
-            container->resize(size);
+    if (!thread_safe) {
+        if (!m_containerPool.empty()) {
+            std::unique_ptr<container_t> container = std::move(m_containerPool.back());
+            if (container->size() < size) {
+                container->resize(size);
+            }
+
+            m_containerPool.resize(m_containerPool.size() - 1);
+
+            return container;
+        } else {
+            return std::unique_ptr<container_t>(new container_t(size));
         }
-
-        m_containerPool.resize(m_containerPool.size() - 1);
-
-        return container;
     } else {
         return std::unique_ptr<container_t>(new container_t(size));
     }
@@ -298,18 +302,22 @@ std::unique_ptr<container_t> ProxyVectorStorage<value_t, container_t>::createCon
     \param source is the container whose content will be copied in newly
     created container
 */
-template<typename value_t, typename container_t>
-std::unique_ptr<container_t> ProxyVectorStorage<value_t, container_t>::createContainer(const std::unique_ptr<container_t> &source)
+template<typename value_t, typename container_t, bool thread_safe>
+std::unique_ptr<container_t> ProxyVectorStorage<value_t, container_t, thread_safe>::createContainer(const std::unique_ptr<container_t> &source)
 {
     if (!source || source->empty()) {
         return std::unique_ptr<container_t>(nullptr);
     }
 
-    if (!m_containerPool.empty()) {
-        std::unique_ptr<container_t> container = createContainer(source->size());
-        std::copy_n(source->data(), source->size(), container->data());
+    if (!thread_safe) {
+        if (!m_containerPool.empty()) {
+            std::unique_ptr<container_t> container = createContainer(source->size());
+            std::copy_n(source->data(), source->size(), container->data());
 
-        return container;
+            return container;
+        } else {
+            return std::unique_ptr<container_t>(new container_t(*source));
+        }
     } else {
         return std::unique_ptr<container_t>(new container_t(*source));
     }
@@ -318,20 +326,22 @@ std::unique_ptr<container_t> ProxyVectorStorage<value_t, container_t>::createCon
 /*!
     Delete a data container.
 */
-template<typename value_t, typename container_t>
-void ProxyVectorStorage<value_t, container_t>::destroyContainer(std::unique_ptr<container_t> *container)
+template<typename value_t, typename container_t, bool thread_safe>
+void ProxyVectorStorage<value_t, container_t, thread_safe>::destroyContainer(std::unique_ptr<container_t> *container)
 {
     if (!(*container)) {
         return;
     }
 
-    if (m_containerPool.size() < MEMORY_POOL_VECTOR_COUNT) {
-        if ((*container)->size() > MEMORY_POOL_MAX_CAPACITY) {
-            (*container)->resize(MEMORY_POOL_MAX_CAPACITY);
-        }
+    if (!thread_safe) {
+        if (m_containerPool.size() < MEMORY_POOL_VECTOR_COUNT) {
+            if ((*container)->size() > MEMORY_POOL_MAX_CAPACITY) {
+                (*container)->resize(MEMORY_POOL_MAX_CAPACITY);
+            }
 
-        m_containerPool.emplace_back(std::move(*container));
-        container->reset();
+            m_containerPool.emplace_back(std::move(*container));
+            container->reset();
+        }
     }
 }
 
@@ -340,8 +350,8 @@ void ProxyVectorStorage<value_t, container_t>::destroyContainer(std::unique_ptr<
 
     \param size is the size of the storage expressed in number of elements.
 */
-template<typename value_t, typename container_t>
-ProxyVectorStorage<value_t, container_t>::ProxyVectorStorage(std::size_t size)
+template<typename value_t, typename container_t, bool thread_safe>
+ProxyVectorStorage<value_t, container_t, thread_safe>::ProxyVectorStorage(std::size_t size)
     : m_container(createContainer(size))
 {
 }
@@ -352,8 +362,8 @@ ProxyVectorStorage<value_t, container_t>::ProxyVectorStorage(std::size_t size)
     \param x is another storage of the same type (i.e., instantiated with
     the same template parameters) whose content is copied in this container.
 */
-template<typename value_t, typename container_t>
-ProxyVectorStorage<value_t, container_t>::ProxyVectorStorage(const ProxyVectorStorage<value_t, container_t> &other)
+template<typename value_t, typename container_t, bool thread_safe>
+ProxyVectorStorage<value_t, container_t, thread_safe>::ProxyVectorStorage(const ProxyVectorStorage<value_t, container_t, thread_safe> &other)
     : m_container(createContainer(other.m_container))
 {
 }
@@ -361,8 +371,8 @@ ProxyVectorStorage<value_t, container_t>::ProxyVectorStorage(const ProxyVectorSt
 /*!
     Destructor.
 */
-template<typename value_t, typename container_t>
-ProxyVectorStorage<value_t, container_t>::~ProxyVectorStorage()
+template<typename value_t, typename container_t, bool thread_safe>
+ProxyVectorStorage<value_t, container_t, thread_safe>::~ProxyVectorStorage()
 {
     destroyContainer(&m_container);
 }
@@ -372,8 +382,8 @@ ProxyVectorStorage<value_t, container_t>::~ProxyVectorStorage()
 
     \result A reference to the data container associated with the storage.
 */
-template<typename value_t, typename container_t>
-container_t * ProxyVectorStorage<value_t, container_t>::container()
+template<typename value_t, typename container_t, bool thread_safe>
+container_t * ProxyVectorStorage<value_t, container_t, thread_safe>::container()
 {
     return m_container.get();
 }
@@ -383,8 +393,8 @@ container_t * ProxyVectorStorage<value_t, container_t>::container()
 
     \result A reference to the data container associated with the storage.
 */
-template<typename value_t, typename container_t>
-const container_t * ProxyVectorStorage<value_t, container_t>::container() const
+template<typename value_t, typename container_t, bool thread_safe>
+const container_t * ProxyVectorStorage<value_t, container_t, thread_safe>::container() const
 {
     return m_container.get();
 }
@@ -394,8 +404,8 @@ const container_t * ProxyVectorStorage<value_t, container_t>::container() const
 
     \param other is another storage of the same type
 */
-template<typename value_t, typename container_t>
-void ProxyVectorStorage<value_t, container_t>::swap(ProxyVectorStorage &other) noexcept
+template<typename value_t, typename container_t, bool thread_safe>
+void ProxyVectorStorage<value_t, container_t, thread_safe>::swap(ProxyVectorStorage &other) noexcept
 {
     m_container.swap(other.m_container);
 }
@@ -405,8 +415,8 @@ void ProxyVectorStorage<value_t, container_t>::swap(ProxyVectorStorage &other) n
 
     \result A pointer to the data.
 */
-template<typename value_t, typename container_t>
-typename ProxyVectorStorage<value_t, container_t>::pointer ProxyVectorStorage<value_t, container_t>::data()
+template<typename value_t, typename container_t, bool thread_safe>
+typename ProxyVectorStorage<value_t, container_t, thread_safe>::pointer ProxyVectorStorage<value_t, container_t, thread_safe>::data()
 {
     if (empty()) {
         return nullptr;
@@ -420,8 +430,8 @@ typename ProxyVectorStorage<value_t, container_t>::pointer ProxyVectorStorage<va
 
     \result A constant pointer to the data.
 */
-template<typename value_t, typename container_t>
-typename ProxyVectorStorage<value_t, container_t>::const_pointer ProxyVectorStorage<value_t, container_t>::data() const
+template<typename value_t, typename container_t, bool thread_safe>
+typename ProxyVectorStorage<value_t, container_t, thread_safe>::const_pointer ProxyVectorStorage<value_t, container_t, thread_safe>::data() const
 {
     if (empty()) {
         return nullptr;
@@ -435,8 +445,8 @@ typename ProxyVectorStorage<value_t, container_t>::const_pointer ProxyVectorStor
 
     \result Returns true if the storage is empty, false otherwise.
 */
-template<typename value_t, typename container_t>
-bool ProxyVectorStorage<value_t, container_t>::empty() const
+template<typename value_t, typename container_t, bool thread_safe>
+bool ProxyVectorStorage<value_t, container_t, thread_safe>::empty() const
 {
     if (!m_container) {
         return true;
@@ -450,8 +460,8 @@ bool ProxyVectorStorage<value_t, container_t>::empty() const
 
     \result The size of the storage, expressed in number of elements.
 */
-template<typename value_t, typename container_t>
-std::size_t ProxyVectorStorage<value_t, container_t>::size() const
+template<typename value_t, typename container_t, bool thread_safe>
+std::size_t ProxyVectorStorage<value_t, container_t, thread_safe>::size() const
 {
     if (!m_container) {
         return 0;
@@ -465,8 +475,8 @@ std::size_t ProxyVectorStorage<value_t, container_t>::size() const
 
     \result The size of the storage expressed in number of elements.
 */
-template<typename value_t, typename container_t>
-void ProxyVectorStorage<value_t, container_t>::resize(std::size_t size)
+template<typename value_t, typename container_t, bool thread_safe>
+void ProxyVectorStorage<value_t, container_t, thread_safe>::resize(std::size_t size)
 {
     if (size == 0) {
         destroyContainer(&m_container);
@@ -484,8 +494,8 @@ void ProxyVectorStorage<value_t, container_t>::resize(std::size_t size)
 /*!
     Constructor
 */
-template<typename value_t>
-ProxyVector<value_t>::ProxyVector()
+template<typename value_t, bool thread_safe>
+ProxyVector<value_t, thread_safe>::ProxyVector()
     : m_size(0), m_data(nullptr)
 {
 }
@@ -502,10 +512,10 @@ ProxyVector<value_t>::ProxyVector()
 
     \param size is the number elements contained in the data
 */
-template<typename value_t>
+template<typename value_t, bool thread_safe>
 template<typename other_value_t, typename std::enable_if<std::is_const<other_value_t>::value, int>::type>
-ProxyVector<value_t>::ProxyVector(std::size_t size)
-    : ProxyVector<value_t>(INTERNAL_STORAGE, size, size)
+ProxyVector<value_t, thread_safe>::ProxyVector(std::size_t size)
+    : ProxyVector<value_t, thread_safe>(INTERNAL_STORAGE, size, size)
 {
 }
 
@@ -525,10 +535,10 @@ ProxyVector<value_t>::ProxyVector(std::size_t size)
     the size of the data, if a smaller capacity is specified the storage will
     be resized using data size
 */
-template<typename value_t>
+template<typename value_t, bool thread_safe>
 template<typename other_value_t, typename std::enable_if<std::is_const<other_value_t>::value, int>::type>
-ProxyVector<value_t>::ProxyVector(std::size_t size, std::size_t capacity)
-    : ProxyVector<value_t>::ProxyVector(INTERNAL_STORAGE, size, capacity)
+ProxyVector<value_t, thread_safe>::ProxyVector(std::size_t size, std::size_t capacity)
+    : ProxyVector<value_t, thread_safe>::ProxyVector(INTERNAL_STORAGE, size, capacity)
 {
 }
 
@@ -545,10 +555,10 @@ ProxyVector<value_t>::ProxyVector(std::size_t size, std::size_t capacity)
     \param data a pointer to the data
     \param size is the number elements contained in the data
 */
-template<typename value_t>
+template<typename value_t, bool thread_safe>
 template<typename other_value_t, typename std::enable_if<std::is_const<other_value_t>::value, int>::type>
-ProxyVector<value_t>::ProxyVector(__PXV_POINTER__ data, std::size_t size)
-    : ProxyVector<value_t>::ProxyVector(data, size, (data != INTERNAL_STORAGE) ? 0 : size)
+ProxyVector<value_t, thread_safe>::ProxyVector(__PXV_POINTER__ data, std::size_t size)
+    : ProxyVector<value_t, thread_safe>::ProxyVector(data, size, (data != INTERNAL_STORAGE) ? 0 : size)
 {
 }
 
@@ -569,9 +579,9 @@ ProxyVector<value_t>::ProxyVector(__PXV_POINTER__ data, std::size_t size)
     the size of the data, if a smaller capacity is specified the storage will
     be resized using data size
 */
-template<typename value_t>
+template<typename value_t, bool thread_safe>
 template<typename other_value_t, typename std::enable_if<std::is_const<other_value_t>::value, int>::type>
-ProxyVector<value_t>::ProxyVector(__PXV_POINTER__ data, std::size_t size, std::size_t capacity)
+ProxyVector<value_t, thread_safe>::ProxyVector(__PXV_POINTER__ data, std::size_t size, std::size_t capacity)
     : m_storage(capacity), m_size(size), m_data((data != INTERNAL_STORAGE) ? data : m_storage.data())
 {
 }
@@ -587,9 +597,9 @@ ProxyVector<value_t>::ProxyVector(__PXV_POINTER__ data, std::size_t size, std::s
     \param data a pointer to the data
     \param size is the number elements contained in the data
 */
-template<typename value_t>
+template<typename value_t, bool thread_safe>
 template<typename other_value_t, typename std::enable_if<!std::is_const<other_value_t>::value, int>::type>
-ProxyVector<value_t>::ProxyVector(__PXV_POINTER__ data, std::size_t size)
+ProxyVector<value_t, thread_safe>::ProxyVector(__PXV_POINTER__ data, std::size_t size)
     : m_storage(0), m_size(size), m_data(data)
 {
     assert(data != INTERNAL_STORAGE);
@@ -598,8 +608,8 @@ ProxyVector<value_t>::ProxyVector(__PXV_POINTER__ data, std::size_t size)
 /*!
     Copy constructor.
 */
-template<typename value_t>
-ProxyVector<value_t>::ProxyVector(const ProxyVector &other)
+template<typename value_t, bool thread_safe>
+ProxyVector<value_t, thread_safe>::ProxyVector(const ProxyVector &other)
     : m_storage(other.m_storage), m_size(other.m_size), m_data(other.storedData() ? m_storage.data() : other.m_data)
 {
 }
@@ -610,8 +620,8 @@ ProxyVector<value_t>::ProxyVector(const ProxyVector &other)
     Assigns new contents to the container, replacing its current contents,
     and modifying its size accordingly.
 */
-template<typename value_t>
-ProxyVector<value_t> & ProxyVector<value_t>::operator=(const ProxyVector &other)
+template<typename value_t, bool thread_safe>
+ProxyVector<value_t, thread_safe> & ProxyVector<value_t, thread_safe>::operator=(const ProxyVector &other)
 {
     if (this != &other) {
         ProxyVector temporary(other);
@@ -636,9 +646,9 @@ ProxyVector<value_t> & ProxyVector<value_t>::operator=(const ProxyVector &other)
     storage
     \param size is the number elements contained in the data
 */
-template<typename value_t>
+template<typename value_t, bool thread_safe>
 template<typename other_value_t, typename std::enable_if<std::is_const<other_value_t>::value, int>::type>
-void ProxyVector<value_t>::set(__PXV_POINTER__ data, std::size_t size)
+void ProxyVector<value_t, thread_safe>::set(__PXV_POINTER__ data, std::size_t size)
 {
     std::size_t capacity;
     if (data != INTERNAL_STORAGE) {
@@ -668,9 +678,9 @@ void ProxyVector<value_t>::set(__PXV_POINTER__ data, std::size_t size)
     the size of the data, if a smaller capacity is specified the storage
     will be resize using data size
 */
-template<typename value_t>
+template<typename value_t, bool thread_safe>
 template<typename other_value_t, typename std::enable_if<std::is_const<other_value_t>::value, int>::type>
-void ProxyVector<value_t>::set(__PXV_POINTER__ data, std::size_t size, std::size_t capacity)
+void ProxyVector<value_t, thread_safe>::set(__PXV_POINTER__ data, std::size_t size, std::size_t capacity)
 {
     m_storage.resize(std::max(size, capacity));
 
@@ -699,9 +709,9 @@ void ProxyVector<value_t>::set(__PXV_POINTER__ data, std::size_t size, std::size
     not allowed
     \param size is the number elements contained in the data
 */
-template<typename value_t>
+template<typename value_t, bool thread_safe>
 template<typename other_value_t, typename std::enable_if<!std::is_const<other_value_t>::value, int>::type>
-void ProxyVector<value_t>::set(__PXV_POINTER__ data, std::size_t size)
+void ProxyVector<value_t, thread_safe>::set(__PXV_POINTER__ data, std::size_t size)
 {
     assert(data != INTERNAL_STORAGE);
 
@@ -719,8 +729,8 @@ void ProxyVector<value_t>::set(__PXV_POINTER__ data, std::size_t size)
 
     \result A a direct pointer to the memory of the internal storage.
 */
-template<typename value_t>
-__PXV_STORAGE_POINTER__ ProxyVector<value_t>::storedData() noexcept
+template<typename value_t, bool thread_safe>
+__PXV_STORAGE_POINTER__ ProxyVector<value_t, thread_safe>::storedData() noexcept
 {
     __PXV_STORAGE_POINTER__ internalData = m_storage.data();
     if (!internalData) {
@@ -740,8 +750,8 @@ __PXV_STORAGE_POINTER__ ProxyVector<value_t>::storedData() noexcept
 
     \result A a direct pointer to the memory of the internal storage.
 */
-template<typename value_t>
-__PXV_STORAGE_CONST_POINTER__ ProxyVector<value_t>::storedData() const noexcept
+template<typename value_t, bool thread_safe>
+__PXV_STORAGE_CONST_POINTER__ ProxyVector<value_t, thread_safe>::storedData() const noexcept
 {
     __PXV_STORAGE_CONST_POINTER__ internalData = m_storage.data();
     if (!internalData) {
@@ -764,9 +774,9 @@ __PXV_STORAGE_CONST_POINTER__ ProxyVector<value_t>::storedData() const noexcept
     \result A direct reference to the container associated with the internal
     storage.
 */
-template<typename value_t>
+template<typename value_t, bool thread_safe>
 template<typename U, typename std::enable_if<std::is_const<U>::value, int>::type>
-typename ProxyVector<value_t>::container_type * ProxyVector<value_t>::storedDataContainer()
+typename ProxyVector<value_t, thread_safe>::container_type * ProxyVector<value_t, thread_safe>::storedDataContainer()
 {
     return m_storage.container();
 }
@@ -782,9 +792,9 @@ typename ProxyVector<value_t>::container_type * ProxyVector<value_t>::storedData
     \result A constant direct reference to the container associated with the
     internal storage.
 */
-template<typename value_t>
+template<typename value_t, bool thread_safe>
 template<typename U, typename std::enable_if<std::is_const<U>::value, int>::type>
-const typename ProxyVector<value_t>::container_type * ProxyVector<value_t>::storedDataContainer() const
+const typename ProxyVector<value_t, thread_safe>::container_type * ProxyVector<value_t, thread_safe>::storedDataContainer() const
 {
     return m_storage.container();
 }
@@ -794,8 +804,8 @@ const typename ProxyVector<value_t>::container_type * ProxyVector<value_t>::stor
 
     \param other is another container of the same type
 */
-template<typename value_t>
-void ProxyVector<value_t>::swap(ProxyVector &other)
+template<typename value_t, bool thread_safe>
+void ProxyVector<value_t, thread_safe>::swap(ProxyVector &other)
 {
     std::swap(m_size, other.m_size);
     std::swap(m_data, other.m_data);
@@ -808,8 +818,8 @@ void ProxyVector<value_t>::swap(ProxyVector &other)
 
     \result true if the containers are equal, false otherwise.
 */
-template<typename value_t>
-bool ProxyVector<value_t>::operator==(const ProxyVector& other) const
+template<typename value_t, bool thread_safe>
+bool ProxyVector<value_t, thread_safe>::operator==(const ProxyVector& other) const
 {
     if (m_size != other.m_size) {
         return false;
@@ -835,8 +845,8 @@ bool ProxyVector<value_t>::operator==(const ProxyVector& other) const
 
     \result true if the container size is 0, false otherwise.
 */
-template<typename value_t>
-bool ProxyVector<value_t>::empty() const
+template<typename value_t, bool thread_safe>
+bool ProxyVector<value_t, thread_safe>::empty() const
 {
     return size() == 0;
 }
@@ -846,8 +856,8 @@ bool ProxyVector<value_t>::empty() const
 
     \result The number of elements in the container.
 */
-template<typename value_t>
-std::size_t ProxyVector<value_t>::size() const
+template<typename value_t, bool thread_safe>
+std::size_t ProxyVector<value_t, thread_safe>::size() const
 {
     return m_size;
 }
@@ -857,9 +867,9 @@ std::size_t ProxyVector<value_t>::size() const
 
     \result A direct pointer to the memory where the elments are stored.
 */
-template<typename value_t>
+template<typename value_t, bool thread_safe>
 template<typename other_value_t, typename std::enable_if<!std::is_const<other_value_t>::value, int>::type>
-__PXV_POINTER__ ProxyVector<value_t>::data() noexcept
+__PXV_POINTER__ ProxyVector<value_t, thread_safe>::data() noexcept
 {
     return m_data;
 }
@@ -871,8 +881,8 @@ __PXV_POINTER__ ProxyVector<value_t>::data() noexcept
     \result A direct constant pointer to the memory where the elments are
     stored.
 */
-template<typename value_t>
-__PXV_CONST_POINTER__ ProxyVector<value_t>::data() const noexcept
+template<typename value_t, bool thread_safe>
+__PXV_CONST_POINTER__ ProxyVector<value_t, thread_safe>::data() const noexcept
 {
     return m_data;
 }
@@ -883,9 +893,9 @@ __PXV_CONST_POINTER__ ProxyVector<value_t>::data() const noexcept
     \param n is the position of the requested element
     \result A reference to the specified element.
 */
-template<typename value_t>
+template<typename value_t, bool thread_safe>
 template<typename other_value_t, typename std::enable_if<!std::is_const<other_value_t>::value, int>::type>
-__PXV_REFERENCE__ ProxyVector<value_t>::operator[](std::size_t n)
+__PXV_REFERENCE__ ProxyVector<value_t, thread_safe>::operator[](std::size_t n)
 {
     return m_data[n];
 }
@@ -896,8 +906,8 @@ __PXV_REFERENCE__ ProxyVector<value_t>::operator[](std::size_t n)
     \param n is the position of the requested element
     \result A constant reference to the specified element.
 */
-template<typename value_t>
-__PXV_CONST_REFERENCE__ ProxyVector<value_t>::operator[](std::size_t n) const
+template<typename value_t, bool thread_safe>
+__PXV_CONST_REFERENCE__ ProxyVector<value_t, thread_safe>::operator[](std::size_t n) const
 {
     return m_data[n];
 }
@@ -908,9 +918,9 @@ __PXV_CONST_REFERENCE__ ProxyVector<value_t>::operator[](std::size_t n) const
     \param n is the position of the requested element
     \result A reference to the specified element.
 */
-template<typename value_t>
+template<typename value_t, bool thread_safe>
 template<typename other_value_t, typename std::enable_if<!std::is_const<other_value_t>::value, int>::type>
-__PXV_REFERENCE__ ProxyVector<value_t>::at(std::size_t n)
+__PXV_REFERENCE__ ProxyVector<value_t, thread_safe>::at(std::size_t n)
 {
     return m_data[n];
 }
@@ -921,8 +931,8 @@ __PXV_REFERENCE__ ProxyVector<value_t>::at(std::size_t n)
     \param n is the position of the requested element
     \result A constant reference to the specified element.
 */
-template<typename value_t>
-__PXV_CONST_REFERENCE__ ProxyVector<value_t>::at(std::size_t n) const
+template<typename value_t, bool thread_safe>
+__PXV_CONST_REFERENCE__ ProxyVector<value_t, thread_safe>::at(std::size_t n) const
 {
     return m_data[n];
 }
@@ -932,9 +942,9 @@ __PXV_CONST_REFERENCE__ ProxyVector<value_t>::at(std::size_t n) const
 
     \result A reference to the first element in the container.
 */
-template<typename value_t>
+template<typename value_t, bool thread_safe>
 template<typename other_value_t, typename std::enable_if<!std::is_const<other_value_t>::value, int>::type>
-__PXV_REFERENCE__ ProxyVector<value_t>::front()
+__PXV_REFERENCE__ ProxyVector<value_t, thread_safe>::front()
 {
     return m_data[0];
 }
@@ -944,8 +954,8 @@ __PXV_REFERENCE__ ProxyVector<value_t>::front()
 
     \result A constant reference to the first element in the container.
 */
-template<typename value_t>
-__PXV_CONST_REFERENCE__ ProxyVector<value_t>::front() const
+template<typename value_t, bool thread_safe>
+__PXV_CONST_REFERENCE__ ProxyVector<value_t, thread_safe>::front() const
 {
     return m_data[0];
 }
@@ -955,9 +965,9 @@ __PXV_CONST_REFERENCE__ ProxyVector<value_t>::front() const
 
     \result A reference to the last element in the container.
 */
-template<typename value_t>
+template<typename value_t, bool thread_safe>
 template<typename other_value_t, typename std::enable_if<!std::is_const<other_value_t>::value, int>::type>
-__PXV_REFERENCE__ ProxyVector<value_t>::back()
+__PXV_REFERENCE__ ProxyVector<value_t, thread_safe>::back()
 {
     return m_data[m_size - 1];
 }
@@ -967,8 +977,8 @@ __PXV_REFERENCE__ ProxyVector<value_t>::back()
 
     \result A constant reference to the last element in the container.
 */
-template<typename value_t>
-__PXV_CONST_REFERENCE__ ProxyVector<value_t>::back() const
+template<typename value_t, bool thread_safe>
+__PXV_CONST_REFERENCE__ ProxyVector<value_t, thread_safe>::back() const
 {
     return m_data[m_size - 1];
 }
@@ -978,9 +988,9 @@ __PXV_CONST_REFERENCE__ ProxyVector<value_t>::back() const
 
     \result An iterator pointing to the first element in the container.
 */
-template<typename value_t>
+template<typename value_t, bool thread_safe>
 template<typename other_value_t, typename std::enable_if<!std::is_const<other_value_t>::value, int>::type>
-__PXV_ITERATOR__ ProxyVector<value_t>::begin()
+__PXV_ITERATOR__ ProxyVector<value_t, thread_safe>::begin()
 {
     return iterator(m_data);
 }
@@ -990,8 +1000,8 @@ __PXV_ITERATOR__ ProxyVector<value_t>::begin()
 
     \result A constant iterator pointing to the first element in the container.
 */
-template<typename value_t>
-__PXV_CONST_ITERATOR__ ProxyVector<value_t>::begin() const
+template<typename value_t, bool thread_safe>
+__PXV_CONST_ITERATOR__ ProxyVector<value_t, thread_safe>::begin() const
 {
     return const_iterator(m_data);
 }
@@ -1001,9 +1011,9 @@ __PXV_CONST_ITERATOR__ ProxyVector<value_t>::begin() const
 
     \result An iterator referring to the past-the-end element in the container.
 */
-template<typename value_t>
+template<typename value_t, bool thread_safe>
 template<typename other_value_t, typename std::enable_if<!std::is_const<other_value_t>::value, int>::type>
-__PXV_ITERATOR__ ProxyVector<value_t>::end()
+__PXV_ITERATOR__ ProxyVector<value_t, thread_safe>::end()
 {
     return iterator(m_data + m_size);
 }
@@ -1015,8 +1025,8 @@ __PXV_ITERATOR__ ProxyVector<value_t>::end()
     \result A constant iterator referring to the past-the-end element in the
     container.
 */
-template<typename value_t>
-__PXV_CONST_ITERATOR__ ProxyVector<value_t>::end() const
+template<typename value_t, bool thread_safe>
+__PXV_CONST_ITERATOR__ ProxyVector<value_t, thread_safe>::end() const
 {
     return const_iterator(m_data + m_size);
 }
@@ -1026,8 +1036,8 @@ __PXV_CONST_ITERATOR__ ProxyVector<value_t>::end() const
 
     \result A constant iterator pointing to the first element in the container.
 */
-template<typename value_t>
-__PXV_CONST_ITERATOR__ ProxyVector<value_t>::cbegin()
+template<typename value_t, bool thread_safe>
+__PXV_CONST_ITERATOR__ ProxyVector<value_t, thread_safe>::cbegin()
 {
     return const_iterator(m_data);
 }
@@ -1035,12 +1045,13 @@ __PXV_CONST_ITERATOR__ ProxyVector<value_t>::cbegin()
 /*!
     Returns a constant iterator referring to the past-the-end element in the
     container.
+git gui
 
     \result A constant iterator referring to the past-the-end element in the
     container.
 */
-template<typename value_t>
-__PXV_CONST_ITERATOR__ ProxyVector<value_t>::cend()
+template<typename value_t, bool thread_safe>
+__PXV_CONST_ITERATOR__ ProxyVector<value_t, thread_safe>::cend()
 {
     return const_iterator(m_data + m_size);
 }

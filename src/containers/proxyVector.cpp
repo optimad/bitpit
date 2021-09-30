@@ -27,12 +27,20 @@
 namespace bitpit{
 
 // Some commonly used ProxyVectors are instantiated explicitly
-template class ProxyVector<int>;
-template class ProxyVector<long>;
-template class ProxyVector<double>;
+template class ProxyVector<int, true>;
+template class ProxyVector<long, true>;
+template class ProxyVector<double, true>;
 
-template class ProxyVector<const int>;
-template class ProxyVector<const long>;
-template class ProxyVector<const double>;
+template class ProxyVector<int, false>;
+template class ProxyVector<long, false>;
+template class ProxyVector<double, false>;
+
+template class ProxyVector<const int, true>;
+template class ProxyVector<const long, true>;
+template class ProxyVector<const double, true>;
+
+template class ProxyVector<const int, false>;
+template class ProxyVector<const long, false>;
+template class ProxyVector<const double, false>;
 
 }
