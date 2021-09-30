@@ -226,6 +226,7 @@ typename ProxyVectorDummyStorage<value_t, pointer_t, const_pointer_t>::const_poi
 {
     return nullptr;
 }
+
 /*!
     Check if the storage is empty.
 
