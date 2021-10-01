@@ -1415,8 +1415,8 @@ void SystemSolver::preKSPSetupActions()
     if (m_KSPOptions.restart != PETSC_DEFAULT) {
         KSPGMRESSetRestart(m_KSP, m_KSPOptions.restart);
     }
-    if (m_KSPOptions.rtol != PETSC_DEFAULT || m_KSPOptions.maxits != PETSC_DEFAULT) {
-        KSPSetTolerances(m_KSP, m_KSPOptions.rtol, PETSC_DEFAULT, PETSC_DEFAULT, m_KSPOptions.maxits);
+    if (m_KSPOptions.rtol != PETSC_DEFAULT || m_KSPOptions.atol != PETSC_DEFAULT || m_KSPOptions.maxits != PETSC_DEFAULT) {
+        KSPSetTolerances(m_KSP, m_KSPOptions.rtol, m_KSPOptions.atol, PETSC_DEFAULT, m_KSPOptions.maxits);
     }
     KSPSetInitialGuessNonzero(m_KSP, PETSC_TRUE);
 }
