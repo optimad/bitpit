@@ -39,6 +39,7 @@ struct KSPOptions {
     PetscInt restart;
     PetscInt maxits;
     PetscScalar rtol;
+    PetscScalar atol;
 
     PetscInt overlap;
     PetscInt levels;
@@ -47,7 +48,8 @@ struct KSPOptions {
     PetscScalar subrtol;
 
     KSPOptions()
-        : restart(PETSC_DEFAULT), maxits(PETSC_DEFAULT), rtol(PETSC_DEFAULT),
+        : restart(PETSC_DEFAULT), maxits(PETSC_DEFAULT),
+          rtol(PETSC_DEFAULT), atol(PETSC_DEFAULT),
           overlap(PETSC_DEFAULT), levels(PETSC_DEFAULT),
           sublevels(PETSC_DEFAULT), subrtol(PETSC_DEFAULT)
     {
