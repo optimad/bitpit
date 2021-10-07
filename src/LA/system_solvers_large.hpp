@@ -193,6 +193,9 @@ public:
     void restoreSolutionRawPtr(double *raw_solution);
     void restoreSolutionRawReadPtr(const double *raw_solution) const;
 
+    bool isForceConsistencyEnabled() const;
+    void enableForceConsistency(bool enable);
+
 protected:
     Mat m_A;
     Vec m_rhs;
@@ -246,12 +249,16 @@ private:
     IS m_rowPermutation;
     IS m_colPermutation;
 
+    bool m_forceConsistency;
+
 #if BITPIT_ENABLE_MPI==1
     void setCommunicator(MPI_Comm communicator);
     void freeCommunicator();
 #endif
 
     void resetPermutations();
+
+    void removeNullSpaceFromRHS();
 
 };
 
