@@ -293,7 +293,8 @@ SystemSolver::SystemSolver(const std::string &prefix, bool debug)
       m_communicator(MPI_COMM_SELF), m_partitioned(false),
       m_rowGlobalOffset(0), m_colGlobalOffset(0),
 #endif
-      m_rowPermutation(nullptr), m_colPermutation(nullptr)
+      m_rowPermutation(nullptr), m_colPermutation(nullptr),
+      m_forceConsistency(false)
 {
     // Initialize Petsc
     if (m_nInstances == 0) {
@@ -715,6 +716,11 @@ void SystemSolver::solve()
 
     // Perfrom actions before KSP solution
     preKSPSolveActions();
+
+    // Force consistency
+    if (m_forceConsistency) {
+        removeNullSpaceFromRHS();
+    }
 
     // Solve the system
     m_KSPStatus.error = KSPSolve(m_KSP, m_rhs, m_solution);
@@ -1522,5 +1528,43 @@ void SystemSolver::freeCommunicator()
     }
 }
 #endif
+
+/*!
+    Remove null space components from right hand side.
+
+    The purpose of this function is to force right hand side consistency.
+    This is a hack, your model should produce consistent right hand sides.
+*/
+void SystemSolver::removeNullSpaceFromRHS()
+{
+    // Get the null space from the matrix
+    MatNullSpace nullspace;
+    MatGetNullSpace(m_A, &nullspace);
+
+    // Remove null space components from right hand side
+    MatNullSpaceRemove(nullspace, m_rhs);
+}
+
+/*!
+    Check if right hand side consistency is forced before solving the system.
+
+    In order to force right hand side consistency, null space components
+    are removed from the right hand side before solving the system.
+*/
+bool SystemSolver::isForceConsistencyEnabled() const
+{
+    return m_forceConsistency;
+}
+
+/*!
+    Enable or disable forcing right hand side consistency.
+
+    \param enable if set to true, right hand side consistency will be
+    forced before solving the system
+*/
+void SystemSolver::enableForceConsistency(bool enable)
+{
+    m_forceConsistency = enable;
+}
 
 }
