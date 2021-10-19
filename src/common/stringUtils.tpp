@@ -45,7 +45,15 @@ namespace string {
 */
 inline std::string & ltrim(std::string &s)
 {
-    s.erase(s.begin(), std::find_if(s.begin(), s.end(), not1(std::ptr_fun<int, int>(std::isspace))));
+    // The argument of the lambda function passed to the erase method is an
+    // unsigned char, that's because, like all other functions from <cctype>,
+    // the behavior of std::isspace is undefined if the argument's value is
+    // neither representable as unsigned char nor equal to EOF. To use these
+    // functions safely, they should not be directly used with standard
+    // algorithms when the iterator's value type is char or signed char.
+    // Instead, the value should be converted to unsigned char first (see
+    // https://en.cppreference.com/w/cpp/string/byte/isspace#Notes).
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char c){ return !std::isspace(c); }));
 
     return s;
 }
@@ -63,7 +71,15 @@ inline std::string & ltrim(std::string &s)
 */
 inline std::string &rtrim(std::string &s)
 {
-    s.erase(std::find_if(s.rbegin(), s.rend(), not1(std::ptr_fun<int, int>(isspace))).base(), s.end());
+    // The argument of the lambda function passed to the erase method is an
+    // unsigned char, that's because, like all other functions from <cctype>,
+    // the behavior of std::isspace is undefined if the argument's value is
+    // neither representable as unsigned char nor equal to EOF. To use these
+    // functions safely, they should not be directly used with standard
+    // algorithms when the iterator's value type is char or signed char.
+    // Instead, the value should be converted to unsigned char first (see
+    // https://en.cppreference.com/w/cpp/string/byte/isspace#Notes).
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char c){ return !std::isspace(c); }).base(), s.end());
 
     return s;
 }
