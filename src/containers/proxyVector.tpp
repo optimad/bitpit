@@ -270,11 +270,13 @@ std::vector<std::unique_ptr<container_t>> ProxyVectorStorage<value_t, container_
     Create a data container.
 
     \param size is the size of the container, expressed in number of elements.
+    \param allowEmpty controls if the container will be created also when the
+    requested size is zero
 */
 template<typename value_t, typename container_t, bool thread_safe>
-std::unique_ptr<container_t> ProxyVectorStorage<value_t, container_t, thread_safe>::createContainer(std::size_t size)
+std::unique_ptr<container_t> ProxyVectorStorage<value_t, container_t, thread_safe>::createContainer(std::size_t size, bool allowEmpty)
 {
-    if (size == 0) {
+    if (size == 0 && !allowEmpty) {
         return std::unique_ptr<container_t>(nullptr);
     }
 
@@ -301,17 +303,23 @@ std::unique_ptr<container_t> ProxyVectorStorage<value_t, container_t, thread_saf
 
     \param source is the container whose content will be copied in newly
     created container
+    \param allowEmpty controls if the container will be created also when the
+    source container is empty
 */
 template<typename value_t, typename container_t, bool thread_safe>
-std::unique_ptr<container_t> ProxyVectorStorage<value_t, container_t, thread_safe>::createContainer(const std::unique_ptr<container_t> &source)
+std::unique_ptr<container_t> ProxyVectorStorage<value_t, container_t, thread_safe>::createContainer(const std::unique_ptr<container_t> &source, bool allowEmpty)
 {
     if (!source || source->empty()) {
-        return std::unique_ptr<container_t>(nullptr);
+        if (allowEmpty) {
+            return createContainer(0, true);
+        } else {
+            return std::unique_ptr<container_t>(nullptr);
+        }
     }
 
     if (!thread_safe) {
         if (!m_containerPool.empty()) {
-            std::unique_ptr<container_t> container = createContainer(source->size());
+            std::unique_ptr<container_t> container = createContainer(source->size(), false);
             std::copy_n(source->data(), source->size(), container->data());
 
             return container;
@@ -352,7 +360,7 @@ void ProxyVectorStorage<value_t, container_t, thread_safe>::destroyContainer(std
 */
 template<typename value_t, typename container_t, bool thread_safe>
 ProxyVectorStorage<value_t, container_t, thread_safe>::ProxyVectorStorage(std::size_t size)
-    : m_container(createContainer(size))
+    : m_container(createContainer(size, false))
 {
 }
 
@@ -364,7 +372,7 @@ ProxyVectorStorage<value_t, container_t, thread_safe>::ProxyVectorStorage(std::s
 */
 template<typename value_t, typename container_t, bool thread_safe>
 ProxyVectorStorage<value_t, container_t, thread_safe>::ProxyVectorStorage(const ProxyVectorStorage<value_t, container_t, thread_safe> &other)
-    : m_container(createContainer(other.m_container))
+    : m_container(createContainer(other.m_container, false))
 {
 }
 
@@ -380,22 +388,34 @@ ProxyVectorStorage<value_t, container_t, thread_safe>::~ProxyVectorStorage()
 /*!
     Get a reference to the data container associated with the storage.
 
+    \param forceCreation if set to true and the storage is not associated with
+    a container, an empty container will be created
     \result A reference to the data container associated with the storage.
 */
 template<typename value_t, typename container_t, bool thread_safe>
-container_t * ProxyVectorStorage<value_t, container_t, thread_safe>::container()
+container_t * ProxyVectorStorage<value_t, container_t, thread_safe>::container(bool forceCreation)
 {
+    if (!m_container && forceCreation) {
+        m_container = createContainer(0, true);
+    }
+
     return m_container.get();
 }
 
 /*!
     Get a reference to the data container associated with the storage.
 
+    \param forceCreation if set to true and the storage is not associated with
+    a container, an empty container will be created
     \result A reference to the data container associated with the storage.
 */
 template<typename value_t, typename container_t, bool thread_safe>
-const container_t * ProxyVectorStorage<value_t, container_t, thread_safe>::container() const
+const container_t * ProxyVectorStorage<value_t, container_t, thread_safe>::container(bool forceCreation) const
 {
+    if (!m_container && forceCreation) {
+        m_container = createContainer(0, true);
+    }
+
     return m_container.get();
 }
 
@@ -487,7 +507,7 @@ void ProxyVectorStorage<value_t, container_t, thread_safe>::resize(std::size_t s
     if (m_container) {
         m_container->resize(size);
     } else {
-        m_container = createContainer(size);
+        m_container = createContainer(size, false);
     }
 }
 
@@ -771,14 +791,16 @@ __PXV_STORAGE_CONST_POINTER__ ProxyVector<value_t, thread_safe>::storedData() co
     storage may leave the proxy vector in an inconsistent state. It's up
     to the caller of this function to guarantee that this will not happen.
 
+    \param forceCreation if set to true and the storage is not associated with
+    a container, an empty container will be created
     \result A direct reference to the container associated with the internal
     storage.
 */
 template<typename value_t, bool thread_safe>
 template<typename U, typename std::enable_if<std::is_const<U>::value, int>::type>
-typename ProxyVector<value_t, thread_safe>::container_type * ProxyVector<value_t, thread_safe>::storedDataContainer()
+typename ProxyVector<value_t, thread_safe>::container_type * ProxyVector<value_t, thread_safe>::storedDataContainer(bool forceCreation)
 {
-    return m_storage.container();
+    return m_storage.container(forceCreation);
 }
 
 /*!
@@ -789,14 +811,16 @@ typename ProxyVector<value_t, thread_safe>::container_type * ProxyVector<value_t
     storage may leave the proxy vector in an inconsistent state. It's up
     to the caller of this function to guarantee that this will not happen.
 
+    \param forceCreation if set to true and the storage is not associated with
+    a container, an empty container will be created
     \result A constant direct reference to the container associated with the
     internal storage.
 */
 template<typename value_t, bool thread_safe>
 template<typename U, typename std::enable_if<std::is_const<U>::value, int>::type>
-const typename ProxyVector<value_t, thread_safe>::container_type * ProxyVector<value_t, thread_safe>::storedDataContainer() const
+const typename ProxyVector<value_t, thread_safe>::container_type * ProxyVector<value_t, thread_safe>::storedDataContainer(bool forceCreation) const
 {
-    return m_storage.container();
+    return m_storage.container(forceCreation);
 }
 
 /*!

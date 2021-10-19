@@ -238,8 +238,8 @@ public:
 
     void swap(ProxyVectorStorage &other) noexcept;
 
-    container_t * container();
-    const container_t * container() const;
+    container_t * container(bool forceCreation);
+    const container_t * container(bool forceCreation) const;
 
     pointer data() override;
     const_pointer data() const override;
@@ -260,8 +260,8 @@ private:
 
     static std::vector<std::unique_ptr<container_t>> m_containerPool;
 
-    std::unique_ptr<container_t> createContainer(std::size_t size);
-    std::unique_ptr<container_t> createContainer(const std::unique_ptr<container_t> &source);
+    std::unique_ptr<container_t> createContainer(std::size_t size, bool allowEmpty);
+    std::unique_ptr<container_t> createContainer(const std::unique_ptr<container_t> &source, bool allowEmpty);
     void destroyContainer(std::unique_ptr<container_t> *container);
 
     std::unique_ptr<container_t> m_container;
@@ -392,9 +392,9 @@ public:
     __PXV_STORAGE_CONST_POINTER__ storedData() const noexcept;
 
     template<typename U = value_t, typename std::enable_if<std::is_const<U>::value, int>::type = 0>
-    container_type * storedDataContainer();
+    container_type * storedDataContainer(bool forceCreation = false);
     template<typename U = value_t, typename std::enable_if<std::is_const<U>::value, int>::type = 0>
-    const container_type * storedDataContainer() const;
+    const container_type * storedDataContainer(bool forceCreation = false) const;
 
     template<typename U = value_t, typename std::enable_if<!std::is_const<U>::value, int>::type = 0>
     __PXV_POINTER__ data() noexcept;
