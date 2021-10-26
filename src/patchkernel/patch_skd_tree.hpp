@@ -29,6 +29,13 @@
 
 namespace bitpit {
 
+/*!
+ * @brief namespace containing default values
+ */
+namespace patchSkdTreeConstants{
+    const double MAX_LENGTH = 1.e18 ;       /**< Constant value for maximum length */
+};
+
 class PatchSkdTree;
 
 struct SkdPatchInfo {

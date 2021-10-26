@@ -193,8 +193,8 @@ std::array<double, 3> SkdPatchInfo::evalCachedBoxMean(std::size_t rawId) const
 * Default constructor.
 */
 SkdBox::SkdBox()
-    : m_boxMin{  std::numeric_limits<double>::max(),   std::numeric_limits<double>::max(),   std::numeric_limits<double>::max()},
-      m_boxMax{- std::numeric_limits<double>::max(), - std::numeric_limits<double>::max(), - std::numeric_limits<double>::max()}
+    : m_boxMin{  patchSkdTreeConstants::MAX_LENGTH,   patchSkdTreeConstants::MAX_LENGTH,   patchSkdTreeConstants::MAX_LENGTH},
+      m_boxMax{- patchSkdTreeConstants::MAX_LENGTH, - patchSkdTreeConstants::MAX_LENGTH, - patchSkdTreeConstants::MAX_LENGTH}
 {
 }
 
@@ -384,8 +384,8 @@ void SkdNode::initializeBoundingBox()
 {
     // Early return if there are no cells
     if (m_cellRangeBegin == m_cellRangeEnd){
-        m_boxMin.fill(  std::numeric_limits<double>::max());
-        m_boxMax.fill(- std::numeric_limits<double>::max());
+        m_boxMin.fill(  patchSkdTreeConstants::MAX_LENGTH);
+        m_boxMax.fill(- patchSkdTreeConstants::MAX_LENGTH);
 
         return;
     }
@@ -576,7 +576,7 @@ void SkdNode::findPointClosestCell(const std::array<double, 3> &point, bool inte
                                    long *id, double *closestDistance) const
 {
     *id       = Cell::NULL_ID;
-    *closestDistance = std::numeric_limits<double>::max();
+    *closestDistance = patchSkdTreeConstants::MAX_LENGTH;
 
     updatePointClosestCell(point, interiorCellsOnly, id, closestDistance);
 }

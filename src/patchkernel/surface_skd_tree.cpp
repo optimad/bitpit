@@ -74,7 +74,7 @@ void SurfaceSkdTree::clear(bool release)
 */
 double SurfaceSkdTree::evalPointDistance(const std::array<double, 3> &point) const
 {
-    return evalPointDistance(point, std::numeric_limits<double>::max(), false);
+    return evalPointDistance(point, patchSkdTreeConstants::MAX_LENGTH, false);
 }
 
 /*!
@@ -139,7 +139,7 @@ double SurfaceSkdTree::evalPointDistance(const std::array<double, 3> &point, dou
 */
 void SurfaceSkdTree::evalPointDistance(int nPoints, const std::array<double, 3> *points, double *distances) const
 {
-    std::vector<double> maxDistances(nPoints, std::numeric_limits<double>::max());
+    std::vector<double> maxDistances(nPoints, patchSkdTreeConstants::MAX_LENGTH);
 
     evalPointDistance(nPoints, points, maxDistances.data(), false, distances);
 }
@@ -231,7 +231,7 @@ void SurfaceSkdTree::evalPointDistance(int nPoints, const std::array<double, 3> 
 */
 void SurfaceSkdTree::evalPointGlobalDistance(int nPoints, const std::array<double, 3> *points, double *distances) const
 {
-    std::vector<double> maxDistances(nPoints, std::numeric_limits<double>::max());
+    std::vector<double> maxDistances(nPoints, patchSkdTreeConstants::MAX_LENGTH);
 
     evalPointGlobalDistance(nPoints, points, maxDistances.data(), distances);
 }
@@ -305,7 +305,7 @@ void SurfaceSkdTree::evalPointGlobalDistance(int nPoints, const std::array<doubl
 */
 long SurfaceSkdTree::findPointClosestCell(const std::array<double, 3> &point, long *id, double *distance) const
 {
-    return findPointClosestCell(point, std::numeric_limits<double>::max(), false, id, distance);
+    return findPointClosestCell(point, patchSkdTreeConstants::MAX_LENGTH, false, id, distance);
 }
 
 /*!
@@ -460,10 +460,9 @@ long SurfaceSkdTree::findPointClosestCell(const std::array<double, 3> &point, do
         ++nDistanceEvaluations;
     }
 
-    // If no closest cell was found set the distance to the maximum
-    // representable distance.
+    // If no closest cell was found set the distance to the maximum length constant.
     if (*id == Cell::NULL_ID) {
-        *distance = std::numeric_limits<double>::max();
+        *distance = patchSkdTreeConstants::MAX_LENGTH;
     }
 
     return nDistanceEvaluations;
@@ -484,7 +483,7 @@ long SurfaceSkdTree::findPointClosestCell(int nPoints, const std::array<double, 
 {
     long nDistanceEvaluations = 0;
     for (int i = 0; i < nPoints; ++i) {
-        nDistanceEvaluations += findPointClosestCell(points[i], std::numeric_limits<double>::max(), false, ids + i, distances + i);
+        nDistanceEvaluations += findPointClosestCell(points[i], patchSkdTreeConstants::MAX_LENGTH, false, ids + i, distances + i);
     }
 
     return nDistanceEvaluations;
@@ -585,7 +584,7 @@ long SurfaceSkdTree::findPointClosestCell(int nPoints, const std::array<double, 
 long SurfaceSkdTree::findPointClosestGlobalCell(int nPoints, const std::array<double, 3> *points,
                                                 long *ids, int *ranks, double *distances) const
 {
-    return findPointClosestGlobalCell(nPoints, points, std::numeric_limits<double>::max(), ids, ranks, distances);
+    return findPointClosestGlobalCell(nPoints, points, patchSkdTreeConstants::MAX_LENGTH, ids, ranks, distances);
 }
 
 /*!
