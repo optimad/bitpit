@@ -648,7 +648,7 @@ namespace bitpit {
                 ghostOffset += nofGhostFromThisProc;
             }
             communicator.waitAllSends();
-        };
+        }
 
         /** Distribute Load-Balancing the octants (with user defined weights) of the whole tree and data provided by the user
          * over the processes of the job following the Morton order.
@@ -976,7 +976,7 @@ namespace bitpit {
             if (userData) {
                 userData->resizeGhost(m_octree.m_sizeGhosts);
             }
-        };
+        }
 #endif
 
         // =============================================================================== //
