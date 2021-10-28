@@ -2646,16 +2646,13 @@ namespace bitpit {
     void
     ParaTree::findNeighbours(const Octant* oct, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost, bool onlyinternal) const{
 
-        bool	Fedge = ((codim==2) && (m_dim==3));
-        bool	Fnode = (codim == m_dim);
-
         if (codim == 1){
             m_octree.findNeighbours(oct, iface, neighbours, isghost, onlyinternal);
         }
-        else if (Fedge){
+        else if (codim == 2 && m_dim == 3){
             m_octree.findEdgeNeighbours(oct, iface, neighbours, isghost, onlyinternal);
         }
-        else if (Fnode){
+        else if (codim == m_dim){
             m_octree.findNodeNeighbours(oct, iface, neighbours, isghost, onlyinternal);
         }
         else {
