@@ -70,6 +70,8 @@ public:
     SkdBox();
     SkdBox(const std::array<double,3> &boxMin, const std::array<double,3> &boxMax);
 
+    bool isEmpty() const;
+
     const std::array<double, 3> & getBoxMin() const;
     const std::array<double, 3> & getBoxMax() const;
 
