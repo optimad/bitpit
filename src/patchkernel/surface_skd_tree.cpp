@@ -360,12 +360,28 @@ long SurfaceSkdTree::findPointClosestCell(const std::array<double, 3> &point, do
     // Initialize the cell id
     *id = Cell::NULL_ID;
 
+    // Get the root of the tree
+    std::size_t rootId = 0;
+    const SkdNode &root = m_nodes[rootId];
+    if (root.isEmpty()) {
+        *distance = std::numeric_limits<double>::max();
+
+        return 0;
+    }
+
     // Initialize a distance estimate
     //
     // The real distance will be lesser than or equal to the estimate.
-    std::size_t rootId = 0;
-    const SkdNode &root = m_nodes[rootId];
-    double squareDistanceEstimate = std::min(root.evalPointMaxSquareDistance(point), maxDistance * maxDistance);
+    //
+    // Care must be taken to avoid overflow when performing the multiplication.
+    double squaredMaxDistance;
+    if (maxDistance <= 1. || maxDistance < std::numeric_limits<double>::max() / maxDistance) {
+        squaredMaxDistance = maxDistance * maxDistance;
+    } else {
+        squaredMaxDistance = std::numeric_limits<double>::max();
+    }
+
+    double squareDistanceEstimate = std::min(root.evalPointMaxSquareDistance(point), squaredMaxDistance);
 
     // Get a list of candidates nodes
     //
@@ -442,9 +458,13 @@ long SurfaceSkdTree::findPointClosestCell(const std::array<double, 3> &point, do
     }
 
     // Process the candidates and find the closest cell
-    long nDistanceEvaluations = 0;
+    if (!candidateIds->empty()) {
+        *distance = std::sqrt(squareDistanceEstimate);
+    } else {
+        *distance = std::numeric_limits<double>::max();
+    }
 
-    *distance = std::sqrt(squareDistanceEstimate);
+    long nDistanceEvaluations = 0;
     for (std::size_t k = 0; k < candidateIds->size(); ++k) {
         // Do not consider nodes with a minimum distance greater than the
         // distance estimate
@@ -458,12 +478,6 @@ long SurfaceSkdTree::findPointClosestCell(const std::array<double, 3> &point, do
 
         node.updatePointClosestCell(point, interiorCellsOnly, id, distance);
         ++nDistanceEvaluations;
-    }
-
-    // If no closest cell was found set the distance to the maximum
-    // representable distance.
-    if (*id == Cell::NULL_ID) {
-        *distance = std::numeric_limits<double>::max();
     }
 
     return nDistanceEvaluations;
