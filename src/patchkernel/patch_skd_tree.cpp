@@ -252,6 +252,27 @@ const std::array<double, 3> & SkdBox::getBoxMax() const
 /*!
 * Evaluates the minimum distance between the specified point and the box.
 *
+* If the box is not valid, the specified defualt distance is returned.
+*
+* \param point is the point
+* \param emptyDistance is the distance that will be return when the box is
+* empty
+* \result The minimum distance between the specified point and the box.
+*/
+double SkdBox::evalPointMinDistance(const std::array<double, 3> &point, double emptyDistance) const
+{
+    if (isEmpty()) {
+        return emptyDistance;
+    }
+
+    return evalPointMinDistance(point);
+}
+
+/*!
+* Evaluates the minimum distance between the specified point and the box.
+*
+* If the box is empty, the result is undefined.
+*
 * \param point is the point
 * \result The minimum distance between the specified point and the box.
 */
@@ -261,19 +282,31 @@ double SkdBox::evalPointMinDistance(const std::array<double, 3> &point) const
 }
 
 /*!
-* Evaluates the maximum distance between the specified point and the box.
+* Evaluates the square of the minimum distance between the specified point
+* and the box.
+*
+* If the box is not valid, the specified default square distance is returned.
 *
 * \param point is the point
-* \result The maximum distance between the specified point and the box.
+* \param emptySquareDistance is the distance that will be return when the box
+* is empty
+* \result The square of the minimum distance between the specified point and
+* the box.
 */
-double SkdBox::evalPointMaxDistance(const std::array<double, 3> &point) const
+double SkdBox::evalPointMinSquareDistance(const std::array<double, 3> &point, double emptySquareDistance) const
 {
-    return std::sqrt(evalPointMaxSquareDistance(point));
+    if (isEmpty()) {
+        return emptySquareDistance;
+    }
+
+    return evalPointMinSquareDistance(point);
 }
 
 /*!
-* Evaluates the square of the minimum distance between the specified point and
-* the box.
+* Evaluates the square of the minimum distance between the specified point
+* and the box.
+*
+* If the box is empty, the result is undefined.
 *
 * \param point is the point
 * \result The square of the minimum distance between the specified point and
@@ -290,8 +323,63 @@ double SkdBox::evalPointMinSquareDistance(const std::array<double, 3> &point) co
 }
 
 /*!
-* Evaluates the square of the maximum distance between the specified point and
+* Evaluates the maximum distance between the specified point and the box.
+*
+* If the box is not valid, the specified default distance is returned.
+*
+* \param point is the point
+* \param emptyDistance is the distance that will be return when the box is
+* empty
+* \result The maximum distance between the specified point and the box.
+*/
+double SkdBox::evalPointMaxDistance(const std::array<double, 3> &point, double emptyDistance) const
+{
+    if (isEmpty()) {
+        return emptyDistance;
+    }
+
+    return evalPointMaxDistance(point);
+}
+
+/*!
+* Evaluates the maximum distance between the specified point and the box.
+*
+* If the box is empty, the result is undefined.
+*
+* \param point is the point
+* \result The maximum distance between the specified point and the box.
+*/
+double SkdBox::evalPointMaxDistance(const std::array<double, 3> &point) const
+{
+    return std::sqrt(evalPointMaxSquareDistance(point));
+}
+
+/*!
+* Evaluates the square of the maximum distance between the specified point
+* and the box.
+*
+* If the box is not valid, the specified default square distance is returned.
+*
+* \param point is the point
+* \param emptySquareDistance is the square distance that will be return when
+* the box is empty
+* \result The square of the maximum distance between the specified point and
 * the box.
+*/
+double SkdBox::evalPointMaxSquareDistance(const std::array<double, 3> &point, double emptySquareDistance) const
+{
+    if (isEmpty()) {
+        return emptySquareDistance;
+    }
+
+    return evalPointMaxSquareDistance(point);
+}
+
+/*!
+* Evaluates the square of the maximum distance between the specified point
+* and the box.
+*
+* If the box is empty, the result is undefined.
 *
 * \param point is the point
 * \result The square of the maximum distance between the specified point and

@@ -717,7 +717,7 @@ long SurfaceSkdTree::findPointClosestGlobalCell(int nPoints, const std::array<do
         // than or equal to the point maximum distance.
         double pointMaxDistance = globalMaxDistances[i];
         for (int rank = 0; rank < m_nProcessors; ++rank) {
-            pointMaxDistance = std::min(getPartitionBox(rank).evalPointMaxDistance(point), pointMaxDistance);
+            pointMaxDistance = std::min(getPartitionBox(rank).evalPointMaxDistance(point, std::numeric_limits<double>::max()), pointMaxDistance);
         }
 
         // Get cell distance information
