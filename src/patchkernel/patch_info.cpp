@@ -406,7 +406,7 @@ int PatchNumberingInfo::getCellRankFromLocal(long id) const
 */
 int PatchNumberingInfo::getCellRankFromConsecutive(long id) const
 {
-	if (m_patch->isPartitioned()) {
+	if (!m_patch->isPartitioned()) {
 		return m_patch->getRank();
 	}
 
