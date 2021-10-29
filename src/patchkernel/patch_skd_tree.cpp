@@ -211,6 +211,25 @@ SkdBox::SkdBox(const std::array<double,3> &boxMin, const std::array<double,3> &b
 }
 
 /*!
+* Check if the box is empty.
+*
+* An empty box has a minimum coordinates that is greater than the maximum
+* coordinate.
+*
+* \result Returns true if the box is empty, false otherwise.
+*/
+bool SkdBox::isEmpty() const
+{
+    for (int d = 0; d < 3; ++d) {
+        if (m_boxMin[d] > m_boxMax[d]) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/*!
 * Get the minimum coordinate of the box.
 *
 * \result The minimum coordinate of the box.
