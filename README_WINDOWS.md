@@ -5,7 +5,7 @@ This is a short guide to set a bitpit compliant 64bit Windows environment using 
 ## Requirements:
 - <B>Windows 8/10</B> (8.1 pro/10 tested)
 
-- <B>MSYS2</B> (64bit) https://www.msys2.org/ (tested version msys2-x86_64-20210419.exe)
+- <B>MSYS2</B> (64bit) https://www.msys2.org/ (tested version msys2-x86_64-20210725.exe)
 
 - <B>MSYS2 packages</B>:
   - base-devel
@@ -13,9 +13,7 @@ This is a short guide to set a bitpit compliant 64bit Windows environment using 
   - python
   - git (optional)
 
-
 - <B>MinGW64 packages</B>:
-
   - mingw-w64-x86_64-toolchain
   - mingw-w64-x86_64-lapack
   - mingw-w64-x86_64-msmpi
@@ -28,7 +26,13 @@ This is a short guide to set a bitpit compliant 64bit Windows environment using 
 
 - <B>Microsoft MPI</B>: MSMpiSetup.exe or msmpisdk.msi (downloadable for free from https://www.microsoft.com/ searching for "MicrosoftMPI v x.x.x". Here the exact version x.x.x must be compliant with the version of MinGW64 package mingw-w64-x86_64-msmpi. See MSMPI section in procedure chapter for details)
 
-- <B>PETSc library</B> https://www.mcs.anl.gov/petsc/download/index.html. Version 3.15.0 tested
+- <B>PETSc library</B>
+    The newest PETSc version tested with bitpit is 3.15.4.
+    You can get it alternatively:
+    - building from sources: https://www.mcs.anl.gov/petsc/download/index.html.
+    - from MinGW64 packages:
+        - mingw-w64-x86_64-petsc
+        - mingw-w64-x86_64-petsc-build
 
 ## Procedure
 #### Install MSYS2 (64 bit)/ MinGW64
@@ -214,7 +218,37 @@ user@machine MINGW64 ~
 
 **__PETSc__**
 
-First, __*PETSc* sources__ are needed. Download *PETSc v3.15.0* from https://www.mcs.anl.gov/petsc/download/index.html. This is the most recent version of PETSc tested with bitpit. If you want to have a try with different versions, please let us know your experience.
+_PETSc_ can be installed on the MSYS2/MinGW64 environment in two ways:
+
+1) *MinGW64 packages*:
+
+```bash
+user@machine MINGW64 ~
+> pacman -S mingw-w64-x86_64-petsc
+> pacman -S mingw-w64-x86_64-petsc-build
+```
+
+This will automatically install one of the most recent release version of PETSc (e.g., v.3.15.4). Within its periodical updates, the MSYS2-MINGW64 environment will update also the version of its own supported petsc package. Use the MSYS2 update command to check for updates.
+Once installed, the installation directory __*PETSC_DIR*__ will be found at:
+```bash
+>  <msys64 path>/mingw64/src/petsc-<version>
+```
+The package comes with different petsc libraries (in both static and shared form) for different architectures. The most important ones for bitpit are:
+- *dso* : for double precision, sequential threading, optimized petsc.
+- *dto* : for double precision, multi-threaded, optimized petsc.
+- *dmo* : for double precision, MPI-compliant, optimized petsc.
+
+You can choose between them using the __*PETSC_ARCH*__ variable (e.g., PETSC_ARCH=dmo).
+
+Finally, dlls for every petsc architectures shared libraries will be found in
+```bash
+>  <msys64 path>/mingw64/bin
+```
+
+
+2) *Building from sources*
+
+First, __*PETSc* sources__ are needed. Download *PETSc v3.15.4* from https://www.mcs.anl.gov/petsc/download/index.html. This is the most recent version of PETSc tested with bitpit. If you want to have a try with different versions, please let us know your experience.
 
 - Untar the downloaded *PETSc* archive and enter the *PETSc* sources folder from the *mingw64* shell.
 
@@ -223,35 +257,37 @@ First, __*PETSc* sources__ are needed. Download *PETSc v3.15.0* from https://www
 - Check if *mpiexec.exe* is available in the shell (type "mpiex" and complete with tab). If not please check again the section 4 of **MS-MPI** chapter.
 
 - We configure *PETSc* using a *Python* script (3.x version namely). Edit a new *Python* file, e.g. __*myConf.py*__, and add these lines:
-    ```python
-     configure_options = [
-     '--with-ar=/usr/bin/ar' ,
-     '--with-shared-libraries=0',
-     '--with-debugging=0',
-     '--with-visibility=0',
-     '--prefix=/c/msys64/mingw64/petsc',
-     'FOPTFLAGS=-O3 -fno-range-check',
-     'COPTFLAGS=-O3',
-     'CXXOPTFLAGS=-O3'
-     ]
+```python
+    configure_options = [
+    '--with-ar=/usr/bin/ar' ,
+    '--with-shared-libraries=0',
+    '--with-debugging=0',
+    '--with-visibility=0',
+    '--prefix=/c/msys64/mingw64/petsc',
+    'FOPTFLAGS=-O3 -fno-range-check',
+    'COPTFLAGS=-O3',
+    'CXXOPTFLAGS=-O3'
+    ]
 
-     if __name__ == '__main__':
-        import sys,os
-        sys.path.insert(0,os.path.abspath('config'))
-        import configure
-        configure.petsc_configure(configure_options)
-    ```
-    The prefix can be any path on your Windows machine, provided that it is specified as unix compliant - blank space free path (use **cygpath**, an example is reported in **MS-MPI** chapter, section 4). You can customize your *PETSc* configuration following the instructions at https://www.mcs.anl.gov/petsc/documentation/installation.html. The *Python* script above gives you an optimized installation of *PETSc* library that works with *bitpit*.
+    if __name__ == '__main__':
+    import sys,os
+    sys.path.insert(0,os.path.abspath('config'))
+    import configure
+    configure.petsc_configure(configure_options)
+```
+
+The prefix can be any path on your Windows machine, provided that it is specified as unix compliant - blank space free path (use **cygpath**, an example is reported in **MS-MPI** chapter, section 4). You can customize your *PETSc* configuration following the instructions at https://www.mcs.anl.gov/petsc/documentation/installation.html. The *Python* script above gives you a double precision, static(.a), optimized installation of *PETSc* library that works with *bitpit*.
 
 - Therefore, launch:
-    ```bash
-    user@machine MINGW64 ~
-    > /usr/bin/python2 myConf.py
-    ```
-    and follow the PETSc instructions to complete the installation ( copy and paste exactly the command lines PETSc suggests, up to the 'make...test' part).
+```bash
+user@machine MINGW64 ~
+> /usr/bin/python2 myConf.py
+```
+and follow the PETSc instructions to complete the installation ( copy and paste exactly the command lines PETSc suggests, up to the 'make...test' part).
 
-- Finally, export __*PETSC_DIR*__ and __*PETSC_ARCH*__ environment variables on *mingw64* local shell by adding  to *~/.bashrc* file : `export PETSC_DIR=#prefix# PETSC_ARCH=""`, where #prefix# is the path specified with --prefix in the python configuration script.
+-  Installation directory __*PETSC_DIR*__ will be at chosen `#prefix#`(that provided in the python configuration script) and __*PETSC_ARCH*__ will be empty.
 
+For both methods, __*PETSC_DIR*__ and __*PETSC_ARCH*__ can be exported into the mingw64 shell as temporary or permanent environment variables, to ease the retrieval of the correct petsc library.
 
 #### bitpit
 - Download *bitpit* master archive at https://github.com/optimad/bitpit/archive/master.zip or git clone it using SSH or HTTPS.
@@ -269,8 +305,13 @@ First, __*PETSc* sources__ are needed. Download *PETSc v3.15.0* from https://www
 
   - use __*mingw32-make*__ in place of standard *make* command to build *bitpit*.
 
-- **__Warning__ 1**: if *bitpit cmake* configuration exits with PETSc error, verify the values of *PETSC_DIR* and *PETSC_ARCH* *cmake* variables and possibly set them to the correct values, i.e. the values the relative environment variables have. If you used exactly *myConf.py* script above to configure *PETSc*, their values are
+- **__Warning__ 1**: if *bitpit cmake* configuration exits with PETSc error, verify the values of *PETSC_DIR* and *PETSC_ARCH* *cmake* variables and possibly set them to the correct values. If you used the Building From Sources method with exactly *myConf.py* script above to configure *PETSc*, their values are
    ```bash
    PETSC_DIR=/c/msys64/mingw64/petsc
    PETSC_ARCH=
+   ```
+   If you are using the MINGW64 binaries package, your msys64 is installed in /c/msys64, the petsc version is 3.15.4, and you want to use dmo (MPI compliant) architecture, their values will be:
+   ```bash
+   PETSC_DIR=/c/msys64/mingw64/src/petsc-3.15.4
+   PETSC_ARCH=dmo
    ```
