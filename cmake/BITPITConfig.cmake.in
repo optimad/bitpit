@@ -8,7 +8,7 @@
 # is needed
 if(NOT ("@BITPIT_CMAKE_CONFIG_DIR@" STREQUAL BITPIT_CMAKE_CONFIG_PATH_LAST))
     set(BITPIT_RECONFIGURE 1)
-    set(BITPIT_CMAKE_CONFIG_PATH_LAST CACHE INTERNAL "@BITPIT_CMAKE_CONFIG_DIR@" FORCE)
+    set(BITPIT_CMAKE_CONFIG_PATH_LAST "@BITPIT_CMAKE_CONFIG_DIR@" CACHE INTERNAL "Defines the last bitpit CMake configuration file loaded")
 endif()
 
 # Compute the installation prefix from this BITPITConfig.cmake file location.
