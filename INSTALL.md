@@ -1,4 +1,4 @@
-# BITPIT installation
+# bitpit installation
 
 bitpit runs on Linux and Mac OSX platforms.
 
@@ -25,7 +25,7 @@ When compiling bitpit, both shared library files and header library files are
 required. Therefore, in addition to the library packages, also the corresponding
 '*-devel' packages ('*-dev' in Debian-based distributions) are required.
 
-## Confguring BITPIT
+## Confguring bitpit
 bitpit uses ccmake as building tool.
 In the bitpit's root folder make a building folder, e.g. build
 ```bash
