@@ -230,7 +230,6 @@ const std::array<double, 3> & SkdBox::getBoxMax() const
     return m_boxMax;
 }
 
-
 /*!
 * Evaluates the minimum distance between the specified point and the box.
 *
