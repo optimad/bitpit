@@ -130,14 +130,6 @@ VolumeKernel::VolumeKernel(int id, int dimension, bool expert)
 }
 
 /*!
-	Destroys the patch.
-*/
-VolumeKernel::~VolumeKernel()
-{
-
-}
-
-/*!
 	Checks if the specified point is inside the patch.
 
 	\param[in] x is the x coordinate of the point

@@ -58,7 +58,7 @@ public:
     std::array<ElementType, MAX_ELEM_EDGES> edgeTypeStorage;
     std::array<std::array<int, MAX_ELEM_VERTICES>, MAX_ELEM_EDGES> edgeConnectStorage;
 
-    virtual ~ReferenceElementInfo();
+    virtual ~ReferenceElementInfo() = default;
 
     virtual double evalSize(const std::array<double, 3> *vertexCoords) const = 0;
 
