@@ -253,13 +253,6 @@ FlatMapping::FlatMapping(PatchKernel *patch)
 }
 
 /*!
-	Default destructor.
-*/
-FlatMapping::~FlatMapping()
-{
-}
-
-/*!
 	Gets the numbering associated to the flat mapping.
 
 	\result The numbering associated to the flat mapping.
@@ -318,13 +311,6 @@ CellFlatMapping::CellFlatMapping(PatchKernel *patch)
 		long &cellMapping = m_mapping.back();
 		cellMapping = flatId;
 	}
-}
-
-/*!
-	Default destructor.
-*/
-CellFlatMapping::~CellFlatMapping()
-{
 }
 
 /*!

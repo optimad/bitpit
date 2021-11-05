@@ -70,13 +70,6 @@ ReferenceElementInfo::ReferenceElementInfo(int _dimension, ElementType _type, in
 }
 
 /*!
-    Destructor
-*/
-ReferenceElementInfo::~ReferenceElementInfo()
-{
-}
-
-/*!
     Check if the sepcified element type is associated to a reference element.
 
     \param type is the type of element

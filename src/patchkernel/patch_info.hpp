@@ -35,7 +35,7 @@ class PatchKernel;
 class PatchInfo {
 
 public:
-	virtual ~PatchInfo();
+	virtual ~PatchInfo() = default;
 
 	PatchKernel const & getPatch() const;
 	void setPatch(PatchKernel const *patch);

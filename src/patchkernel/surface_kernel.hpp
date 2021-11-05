@@ -44,7 +44,6 @@ public:
         void setSpaceDimension(int dimension);
         int getSpaceDimension(void) const;
 
-	virtual ~SurfaceKernel();
         virtual double evalCellArea(long) const;
         virtual double evalEdgeLength(long, int) const;
         virtual double evalMinEdgeLength(long, int &) const;

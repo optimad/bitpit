@@ -116,7 +116,7 @@ public:
 	FlatMapping();
 	FlatMapping(PatchKernel *patch);
 
-	virtual ~FlatMapping();
+	virtual ~FlatMapping() = default;
 
 	virtual void update(const std::vector<adaption::Info> &adaptionData) = 0;
 
@@ -137,8 +137,6 @@ class CellFlatMapping : public FlatMapping
 public:
 	CellFlatMapping();
 	CellFlatMapping(PatchKernel *patch);
-
-	~CellFlatMapping();
 
 	void update(const std::vector<adaption::Info> &adaptionData) override;
 

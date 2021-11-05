@@ -161,14 +161,6 @@ SurfaceKernel::SurfaceKernel(int id, int patch_dim, int space_dim, bool expert)
 }
 
 /*!
-	Destroys the patch.
-*/
-SurfaceKernel::~SurfaceKernel()
-{
-
-}
-
-/*!
 	Initialize the patch
 */
 void SurfaceKernel::initialize()

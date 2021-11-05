@@ -50,13 +50,6 @@ PatchInfo::PatchInfo(PatchKernel const *patch)
 }
 
 /*!
-	Destructor
-*/
-PatchInfo::~PatchInfo()
-{
-}
-
-/*!
 	Gets the patch associated with the info.
 
 	\result Returns the patch associated with the info.
