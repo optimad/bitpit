@@ -59,8 +59,6 @@ class FileHandler{
         FileHandler( const std::string & dir_, const std::string & name_, const std::string & app_) ;
         FileHandler(  const FileHandler& other ) ;
 
-        ~FileHandler() ;
-
         FileHandler& operator=( const FileHandler& other) ;
 
         void                setDirectory( const std::string & d_) ;

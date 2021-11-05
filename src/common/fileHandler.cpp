@@ -69,13 +69,6 @@ FileHandler::FileHandler(const FileHandler& other){
 };
 
 /*!
- * Destructor.
- */
-FileHandler::~FileHandler(){
-
-} ;
-
-/*!
  * Assignment operator.
  */
 FileHandler&    FileHandler::operator=(const FileHandler& other){
