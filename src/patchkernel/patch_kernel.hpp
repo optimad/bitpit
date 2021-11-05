@@ -359,6 +359,9 @@ public:
 		PARTITIONING_ALTERED
 	};
 
+	PatchKernel(PatchKernel &&other);
+	PatchKernel & operator=(PatchKernel &&other);
+
 	virtual ~PatchKernel();
 
 	template<typename patch_t>

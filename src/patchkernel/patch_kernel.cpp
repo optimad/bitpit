@@ -280,6 +280,186 @@ PatchKernel::PatchKernel(const PatchKernel &other)
 }
 
 /*!
+	Move constructor.
+
+	\param other is another patch whose content is moved into this
+*/
+PatchKernel::PatchKernel(PatchKernel &&other)
+    : VTKBaseStreamer(std::move(other)),
+      m_vertices(std::move(other.m_vertices)),
+      m_cells(std::move(other.m_cells)),
+      m_interfaces(std::move(other.m_interfaces)),
+      m_alteredCells(std::move(other.m_alteredCells)),
+      m_alteredInterfaces(std::move(other.m_alteredInterfaces)),
+      m_vertexIdGenerator(std::move(other.m_vertexIdGenerator)),
+      m_interfaceIdGenerator(std::move(other.m_interfaceIdGenerator)),
+      m_cellIdGenerator(std::move(other.m_cellIdGenerator)),
+      m_nInternalVertices(std::move(other.m_nInternalVertices)),
+#if BITPIT_ENABLE_MPI==1
+      m_nGhostVertices(std::move(other.m_nGhostVertices)),
+#endif
+      m_lastInternalVertexId(std::move(other.m_lastInternalVertexId)),
+#if BITPIT_ENABLE_MPI==1
+      m_firstGhostVertexId(std::move(other.m_firstGhostVertexId)),
+#endif
+      m_nInternalCells(std::move(other.m_nInternalCells)),
+#if BITPIT_ENABLE_MPI==1
+      m_nGhostCells(std::move(other.m_nGhostCells)),
+#endif
+      m_lastInternalCellId(std::move(other.m_lastInternalCellId)),
+#if BITPIT_ENABLE_MPI==1
+      m_firstGhostCellId(std::move(other.m_firstGhostCellId)),
+#endif
+      m_vtk(std::move(other.m_vtk)),
+      m_vtkWriteTarget(std::move(other.m_vtkWriteTarget)),
+      m_vtkVertexMap(std::move(other.m_vtkVertexMap)),
+      m_boxFrozen(std::move(other.m_boxFrozen)),
+      m_boxDirty(std::move(other.m_boxDirty)),
+      m_boxMinPoint(std::move(other.m_boxMinPoint)),
+      m_boxMaxPoint(std::move(other.m_boxMaxPoint)),
+      m_boxMinCounter(std::move(other.m_boxMinCounter)),
+      m_boxMaxCounter(std::move(other.m_boxMaxCounter)),
+      m_adjacenciesBuildStrategy(std::move(other.m_adjacenciesBuildStrategy)),
+      m_interfacesBuildStrategy(std::move(other.m_interfacesBuildStrategy)),
+      m_spawnStatus(std::move(other.m_spawnStatus)),
+      m_adaptionStatus(std::move(other.m_adaptionStatus)),
+      m_expert(std::move(other.m_expert)),
+      m_id(std::move(other.m_id)),
+      m_dimension(std::move(other.m_dimension)),
+      m_toleranceCustom(std::move(other.m_toleranceCustom)),
+      m_tolerance(std::move(other.m_tolerance)),
+      m_rank(std::move(other.m_rank)),
+      m_nProcessors(std::move(other.m_nProcessors))
+#if BITPIT_ENABLE_MPI==1
+      , m_communicator(std::move(MPI_COMM_NULL)),
+      m_partitioningStatus(std::move(other.m_partitioningStatus)),
+      m_owner(std::move(other.m_owner)),
+      m_haloSize(std::move(other.m_haloSize)),
+      m_partitioningCellsTag(std::move(other.m_partitioningCellsTag)),
+      m_partitioningVerticesTag(std::move(other.m_partitioningVerticesTag)),
+      m_partitioningSerialization(std::move(other.m_partitioningSerialization)),
+      m_partitioningOutgoings(std::move(other.m_partitioningOutgoings)),
+      m_partitioningGlobalExchanges(std::move(other.m_partitioningGlobalExchanges)),
+      m_partitioningInfoDirty(std::move(other.m_partitioningInfoDirty)),
+      m_ghostVertexOwners(std::move(other.m_ghostVertexOwners)),
+      m_ghostVertexExchangeTargets(std::move(other.m_ghostVertexExchangeTargets)),
+      m_ghostVertexExchangeSources(std::move(other.m_ghostVertexExchangeSources)),
+      m_ghostCellOwners(std::move(other.m_ghostCellOwners)),
+      m_ghostCellExchangeTargets(std::move(other.m_ghostCellExchangeTargets)),
+      m_ghostCellExchangeSources(std::move(other.m_ghostCellExchangeSources))
+#endif
+{
+	// Handle patch regstration
+	patch::manager().unregisterPatch(&other);
+
+	patch::manager().registerPatch(this, m_id);
+	patch::manager().registerPatch(&other);
+
+	// Update the VTK streamer
+	//
+	// Pointers to VTK streamers has been copied, we need to replace all the
+	// pointer to the other object with pointer to this object.
+	replaceVTKStreamer(&other, this);
+
+#if BITPIT_ENABLE_MPI==1
+	// Handle the communication
+	std::swap(m_communicator, other.m_communicator);
+#endif
+}
+
+/**
+	Move assignment operator.
+
+	\param other is another patch whose content is copied into this
+*/
+PatchKernel & PatchKernel::operator=(PatchKernel &&other)
+{
+	VTKBaseStreamer::operator=(std::move(other));
+	m_vertices = std::move(other.m_vertices);
+	m_cells = std::move(other.m_cells);
+	m_interfaces = std::move(other.m_interfaces);
+	m_alteredCells = std::move(other.m_alteredCells);
+	m_alteredInterfaces = std::move(other.m_alteredInterfaces);
+	m_vertexIdGenerator = std::move(other.m_vertexIdGenerator);
+	m_interfaceIdGenerator = std::move(other.m_interfaceIdGenerator);
+	m_cellIdGenerator = std::move(other.m_cellIdGenerator);
+	m_nInternalVertices = std::move(other.m_nInternalVertices);
+#if BITPIT_ENABLE_MPI==1
+	m_nGhostVertices = std::move(other.m_nGhostVertices);
+#endif
+	m_lastInternalVertexId = std::move(other.m_lastInternalVertexId);
+#if BITPIT_ENABLE_MPI==1
+	m_firstGhostVertexId = std::move(other.m_firstGhostVertexId);
+#endif
+	m_nInternalCells = std::move(other.m_nInternalCells);
+#if BITPIT_ENABLE_MPI==1
+	m_nGhostCells = std::move(other.m_nGhostCells);
+#endif
+	m_lastInternalCellId = std::move(other.m_lastInternalCellId);
+#if BITPIT_ENABLE_MPI==1
+	m_firstGhostCellId = std::move(other.m_firstGhostCellId);
+#endif
+	m_vtk = std::move(other.m_vtk);
+	m_vtkWriteTarget = std::move(other.m_vtkWriteTarget);
+	m_vtkVertexMap = std::move(other.m_vtkVertexMap);
+	m_boxFrozen = std::move(other.m_boxFrozen);
+	m_boxDirty = std::move(other.m_boxDirty);
+	m_boxMinPoint = std::move(other.m_boxMinPoint);
+	m_boxMaxPoint = std::move(other.m_boxMaxPoint);
+	m_boxMinCounter = std::move(other.m_boxMinCounter);
+	m_boxMaxCounter = std::move(other.m_boxMaxCounter);
+	m_adjacenciesBuildStrategy = std::move(other.m_adjacenciesBuildStrategy);
+	m_interfacesBuildStrategy = std::move(other.m_interfacesBuildStrategy);
+	m_spawnStatus = std::move(other.m_spawnStatus);
+	m_adaptionStatus = std::move(other.m_adaptionStatus);
+	m_expert = std::move(other.m_expert);
+	m_id = std::move(other.m_id);
+	m_dimension = std::move(other.m_dimension);
+	m_toleranceCustom = std::move(other.m_toleranceCustom);
+	m_tolerance = std::move(other.m_tolerance);
+	m_rank = std::move(other.m_rank);
+	m_nProcessors = std::move(other.m_nProcessors);
+#if BITPIT_ENABLE_MPI==1
+	m_communicator = std::move(MPI_COMM_NULL);
+	m_partitioningStatus = std::move(other.m_partitioningStatus);
+	m_owner = std::move(other.m_owner);
+	m_haloSize = std::move(other.m_haloSize);
+	m_partitioningCellsTag = std::move(other.m_partitioningCellsTag);
+	m_partitioningVerticesTag = std::move(other.m_partitioningVerticesTag);
+	m_partitioningSerialization = std::move(other.m_partitioningSerialization);
+	m_partitioningOutgoings = std::move(other.m_partitioningOutgoings);
+	m_partitioningGlobalExchanges = std::move(other.m_partitioningGlobalExchanges);
+	m_partitioningInfoDirty = std::move(other.m_partitioningInfoDirty);
+	m_ghostVertexOwners = std::move(other.m_ghostVertexOwners);
+	m_ghostVertexExchangeTargets = std::move(other.m_ghostVertexExchangeTargets);
+	m_ghostVertexExchangeSources = std::move(other.m_ghostVertexExchangeSources);
+	m_ghostCellOwners = std::move(other.m_ghostCellOwners);
+	m_ghostCellExchangeTargets = std::move(other.m_ghostCellExchangeTargets);
+	m_ghostCellExchangeSources = std::move(other.m_ghostCellExchangeSources);
+#endif
+
+	// Handle patch regstration
+	patch::manager().unregisterPatch(this);
+	patch::manager().unregisterPatch(&other);
+
+	patch::manager().registerPatch(this, m_id);
+	patch::manager().registerPatch(&other);
+
+	// Update the VTK streamer
+	//
+	// Pointers to VTK streamers has been moved, we need to replace all the
+	// pointer to the other object with pointer to this object.
+	replaceVTKStreamer(&other, this);
+
+#if BITPIT_ENABLE_MPI==1
+	// Handle the communication
+	std::swap(m_communicator, other.m_communicator);
+#endif
+
+	return *this;
+}
+
+/*!
 	Initialize the patch
 */
 #if BITPIT_ENABLE_MPI==1
