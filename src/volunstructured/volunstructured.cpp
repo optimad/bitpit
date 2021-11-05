@@ -120,13 +120,6 @@ VolUnstructured::VolUnstructured(int id, int dimension)
 }
 
 /*!
-	Destroys the patch.
-*/
-VolUnstructured::~VolUnstructured()
-{
-}
-
-/*!
 	Creates a clone of the pach.
 
 	\result A clone of the pach.
