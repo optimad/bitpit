@@ -48,8 +48,6 @@ public:
 	VolUnstructured(int id, int dimension);
 #endif
 
-	~VolUnstructured();
-
 	std::unique_ptr<PatchKernel> clone() const override;
 
 	void setExpert(bool expert);
