@@ -340,6 +340,9 @@ public:
     PiercedStorage(const PiercedStorage<value_t, id_t> &x);
     PiercedStorage(PiercedStorage<value_t, id_t> &&x);
 
+    PiercedStorage & operator=(const PiercedStorage &other);
+    PiercedStorage & operator=(PiercedStorage &&other);
+
     // Methods for accessing container properties
     std::size_t getFieldCount() const;
 

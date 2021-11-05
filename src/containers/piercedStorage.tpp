@@ -503,6 +503,38 @@ PiercedStorage<value_t, id_t>::PiercedStorage(const PiercedStorage<value_t, id_t
 }
 
 /**
+* Copy assignment operator.
+*
+* \param x is another container of the same type (i.e., instantiated with
+* the same template parameters) whose content is copied in this container
+* \return A reference to the pierced storage.
+*/
+template<typename value_t, typename id_t>
+PiercedStorage<value_t, id_t> & PiercedStorage<value_t, id_t>::operator=(const PiercedStorage<value_t, id_t> &x)
+{
+    PiercedStorage<value_t, id_t> temporary(x, nullptr);
+    temporary.swap(*this);
+
+    return *this;
+}
+
+/**
+* Move assignment operator.
+*
+* \param other is another container of the same type (i.e., instantiated with
+* the same template parameters) whose content is moved in this container
+* \return A reference to the pierced storage.
+*/
+template<typename value_t, typename id_t>
+PiercedStorage<value_t, id_t> & PiercedStorage<value_t, id_t>::operator=(PiercedStorage<value_t, id_t> &&other)
+{
+    PiercedStorage<value_t, id_t> temporary(std::move(other));
+    temporary.swap(*this);
+
+    return *this;
+}
+
+/**
 * Gets the number of fields in the storage.
 *
 * \result The number of fields in the storage.
