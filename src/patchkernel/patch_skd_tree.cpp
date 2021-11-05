@@ -406,6 +406,10 @@ double SkdBox::evalPointMaxSquareDistance(const std::array<double, 3> &point) co
 */
 bool SkdBox::boxContainsPoint(const std::array<double, 3> &point, double offset) const
 {
+    if (isEmpty()) {
+        return false;
+    }
+
     for (int d = 0; d < 3; d++) {
         if (point[d] < (m_boxMin[d] - offset)) {
             return false;
