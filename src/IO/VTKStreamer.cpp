@@ -105,6 +105,21 @@ VTKNativeStreamer::VTKNativeStreamer( const VTKNativeStreamer &other ) {
 }
 
 /*!
+ * Copy assignment operator.
+ *
+ * \param other is antoher container of the same type, whose contents will
+ * be used to initialize the current container
+ */
+VTKNativeStreamer & VTKNativeStreamer::operator=(const VTKNativeStreamer &other) {
+
+    VTKNativeStreamer temporary(other);
+    std::swap(temporary, *this);
+
+    return *this;
+
+}
+
+/*!
  * Removes a field from streamer
  * @param[in] name name of field
  */
