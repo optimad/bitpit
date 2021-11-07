@@ -220,6 +220,8 @@ class VTKNativeStreamer : public VTKBaseStreamer {
     public:
         VTKNativeStreamer();
         VTKNativeStreamer( const VTKNativeStreamer & );
+        VTKNativeStreamer( VTKNativeStreamer && ) = default;
+
 
         template<class T>
         void                    addData( const std::string &, std::vector<T> & ) ;
