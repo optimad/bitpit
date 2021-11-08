@@ -148,8 +148,6 @@ public:
 	long getCellFaceNeighsLinearId(long id, int face) const;
 
 protected:
-	VolCartesian(const VolCartesian &other) = default;
-
 	std::vector<adaption::Info> _spawn(bool trackSpawn) override;
 
 	void _updateAdjacencies() override;
