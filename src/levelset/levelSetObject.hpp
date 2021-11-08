@@ -59,7 +59,6 @@ class LevelSetObject : public VTKBaseStreamer{
 
     protected:
     LevelSetObject(int);
-    LevelSetObject(const LevelSetObject &other) = default;
 
     void                                        setKernel(LevelSetKernel *);
     LevelSetKernel *                            getKernel();
