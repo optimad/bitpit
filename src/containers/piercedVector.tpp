@@ -80,9 +80,10 @@ PiercedVector<value_t, id_t>::PiercedVector(const PiercedVector<value_t, id_t> &
 * the same template parameters) whose content is copied in this container.
 */
 template<typename value_t, typename id_t>
-PiercedVector<value_t, id_t> & PiercedVector<value_t, id_t>::operator=(PiercedVector<value_t, id_t> x)
+PiercedVector<value_t, id_t> & PiercedVector<value_t, id_t>::operator=(const PiercedVector<value_t, id_t> &x)
 {
-    this->swap(x);
+    PiercedVector<value_t, id_t> temporary(x);
+    this->swap(temporary);
 
     return *this;
 }
