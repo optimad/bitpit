@@ -42,11 +42,6 @@ public:
 	Interface(long id, ElementType type, int connectSize = 0);
 	Interface(long id, ElementType type, std::unique_ptr<long[]> &&connectStorage);
 
-	Interface(const Interface &other) = default;
-	Interface(Interface&& other) = default;
-	Interface& operator = (const Interface &other) = default;
-	Interface& operator=(Interface&& other) = default;
-
 	void swap(Interface &other) noexcept;
 
 	void initialize(long id, ElementType type);

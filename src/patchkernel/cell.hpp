@@ -57,11 +57,6 @@ public:
 	Cell(long id, ElementType type, int connectSize, bool interior = true, bool storeInterfaces = true, bool storeAjacencies = true);
 	Cell(long id, ElementType type, std::unique_ptr<long[]> &&connectStorage, bool interior = true, bool storeInterfaces = true, bool storeAjacencies = true);
 
-	Cell(const Cell &other) = default;
-	Cell(Cell&& other) = default;
-	Cell& operator = (const Cell &other) = default;
-	Cell& operator=(Cell&& other) = default;
-
 	void swap(Cell &other) noexcept;
 
 	BITPIT_DEPRECATED(void initialize(long id, ElementType type, bool interior, bool storeNeighbourhood ));

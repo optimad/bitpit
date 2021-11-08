@@ -96,11 +96,6 @@ public:
 	Vertex(long id, bool interior = true);
 	Vertex(long id, const std::array<double, 3> &coords, bool interior = true);
 
-	Vertex(const Vertex &other) = default;
-	Vertex(Vertex &&other) = default;
-	Vertex& operator = (const Vertex &other) = default;
-	Vertex& operator=(Vertex &&other) = default;
-
 	void swap(Vertex &other) noexcept;
 
 	void initialize(long id, const std::array<double, 3> &coords, bool interior);
