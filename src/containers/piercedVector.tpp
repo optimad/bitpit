@@ -74,6 +74,23 @@ PiercedVector<value_t, id_t>::PiercedVector(const PiercedVector<value_t, id_t> &
 }
 
 /**
+* Move constructor
+*
+* \param x is another container of the same type (i.e., instantiated with
+* the same template parameters) whose content is copied in this container.
+*/
+template<typename value_t, typename id_t>
+PiercedVector<value_t, id_t>::PiercedVector(PiercedVector<value_t, id_t> &&x)
+    : PiercedVectorKernel<id_t>(std::move(x)),
+      PiercedVectorStorage<value_t, id_t>(std::move(x), this, x.getSyncMode())
+{
+    // Since we have swapped the kernel, the list of registered slaves contains
+    // also the internal storage of other vector. We need to unregister that
+    // storage from the kernel.
+    this->unregisterSlave(&x);
+}
+
+/**
 * Copy assignment operator.
 *
 * \param x is another container of the same type (i.e., instantiated with
@@ -84,6 +101,20 @@ PiercedVector<value_t, id_t> & PiercedVector<value_t, id_t>::operator=(const Pie
 {
     PiercedVector<value_t, id_t> temporary(x);
     this->swap(temporary);
+
+    return *this;
+}
+
+/**
+* Move assignment operator.
+*
+* \param x is another container of the same type (i.e., instantiated with
+* the same template parameters) whose content is moved in this container.
+*/
+template<typename value_t, typename id_t>
+PiercedVector<value_t, id_t> & PiercedVector<value_t, id_t>::operator=(PiercedVector<value_t, id_t> &&x)
+{
+    this->swap(x);
 
     return *this;
 }
