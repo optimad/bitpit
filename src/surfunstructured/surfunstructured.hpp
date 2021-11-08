@@ -73,8 +73,6 @@ public:
     int exportDGF(const std::string &filename);
 
 protected:
-    SurfUnstructured(const SurfUnstructured &other) = default;
-
     int _getDumpVersion() const override;
     void _dump(std::ostream &stream) const override;
     void _restore(std::istream &stream) override;
