@@ -824,6 +824,8 @@ void PiercedVector<value_t, id_t>::swap(PiercedVector &x) noexcept
         x.PiercedVectorStorage<value_t, id_t>::setDynamicKernel(&x, PiercedVectorKernel<id_t>::SYNC_MODE_DISABLED);
     } catch (const std::runtime_error &exception) {
         assert(false && "Error while swapping the PiercedVector!");
+        std::cout << "Error while swapping the PiercedVector!" << std::endl;
+        exit(0);
     }
 }
 
