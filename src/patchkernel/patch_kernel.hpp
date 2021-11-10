@@ -1075,6 +1075,8 @@ private:
 
 	void _deleteInterface(long id);
 
+	void replaceVTKStreamer(const VTKBaseStreamer *original, VTKBaseStreamer *updated);
+
 };
 
 }
