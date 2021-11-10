@@ -268,47 +268,7 @@ PatchKernel::PatchKernel(const PatchKernel &other)
 	patch::manager().registerPatch(this);
 
 	// Update the VTK streamer
-	//
-	// The pointer to VTK streamers are copied, if there are pointer to the
-	// original object they have to be replace with a pointer to this object.
-	std::vector<std::string> streamedGeomFields;
-	streamedGeomFields.reserve(m_vtk.getGeomDataCount());
-	for (auto itr = m_vtk.getGeomDataBegin(); itr != m_vtk.getGeomDataEnd(); ++itr) {
-		const VTKField &field = *itr;
-		if (&field.getStreamer() != &other) {
-			continue;
-		}
-
-		streamedGeomFields.push_back(field.getName());
-	}
-
-	for (const std::string &name : streamedGeomFields) {
-		const VTKField &field = *(m_vtk.findGeomData(name));
-		VTKField updatedField(field);
-		updatedField.setStreamer(*this);
-
-		m_vtk.setGeomData(std::move(updatedField));
-	}
-
-	std::vector<std::string> streamedDataFields;
-	streamedDataFields.reserve(m_vtk.getDataCount());
-	for (auto itr = m_vtk.getDataBegin(); itr != m_vtk.getDataEnd(); ++itr) {
-		const VTKField &field = *itr;
-		if (&field.getStreamer() != &other) {
-			continue;
-		}
-
-		streamedDataFields.push_back(field.getName());
-	}
-
-	for (const std::string &name : streamedDataFields) {
-		const VTKField &field = *(m_vtk.findData(name));
-		VTKField updatedField(field);
-		updatedField.setStreamer(*this);
-
-		m_vtk.removeData(field.getName());
-		m_vtk.addData(std::move(updatedField));
-	}
+	replaceVTKStreamer(&other, this);
 
 #if BITPIT_ENABLE_MPI==1
 	// Set the communicator
@@ -7269,6 +7229,59 @@ const PatchKernel::CellConstRange PatchKernel::getVTKCellWriteRange() const
 #endif
 	} else {
 		return CellConstRange(cellConstEnd(), cellConstEnd());
+	}
+}
+
+/*!
+	Replace the VTK streamer.
+
+	\param original is the original VTK streamer
+	\param updated is the updated VTK streamer
+*/
+void PatchKernel::replaceVTKStreamer(const VTKBaseStreamer *original, VTKBaseStreamer *updated)
+{
+	// Update the VTK streamer
+	//
+	// The pointer to VTK streamers are copied, if there are pointer to the
+	// original object they have to be replace with a pointer to this object.
+	// Geometry fields
+	std::vector<std::string> streamedGeomFields;
+	streamedGeomFields.reserve(m_vtk.getGeomDataCount());
+	for (auto itr = m_vtk.getGeomDataBegin(); itr != m_vtk.getGeomDataEnd(); ++itr) {
+		const VTKField &field = *itr;
+		if (&field.getStreamer() != original) {
+			continue;
+		}
+
+		streamedGeomFields.push_back(field.getName());
+	}
+
+	for (const std::string &name : streamedGeomFields) {
+		const VTKField &field = *(m_vtk.findGeomData(name));
+		VTKField updatedField(field);
+		updatedField.setStreamer(*updated);
+
+		m_vtk.setGeomData(std::move(updatedField));
+	}
+
+	std::vector<std::string> streamedDataFields;
+	streamedDataFields.reserve(m_vtk.getDataCount());
+	for (auto itr = m_vtk.getDataBegin(); itr != m_vtk.getDataEnd(); ++itr) {
+		const VTKField &field = *itr;
+		if (&field.getStreamer() != original) {
+			continue;
+		}
+
+		streamedDataFields.push_back(field.getName());
+	}
+
+	for (const std::string &name : streamedDataFields) {
+		const VTKField &field = *(m_vtk.findData(name));
+		VTKField updatedField(field);
+		updatedField.setStreamer(*updated);
+
+		m_vtk.removeData(field.getName());
+		m_vtk.addData(std::move(updatedField));
 	}
 }
 
