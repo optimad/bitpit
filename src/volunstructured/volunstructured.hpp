@@ -63,8 +63,6 @@ public:
 	long locatePoint(const std::array<double, 3> &point) const override;
 
 protected:
-	VolUnstructured(const VolUnstructured &other) = default;
-
 	int _getDumpVersion() const override;
 	void _dump(std::ostream &stream) const override;
 	void _restore(std::istream &stream) override;
