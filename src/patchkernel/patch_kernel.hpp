@@ -763,7 +763,7 @@ protected:
 	PatchKernel(int id, int dimension, bool expert);
 #endif
 	PatchKernel(const PatchKernel &other);
-    PatchKernel & operator=(const PatchKernel &other) = delete;
+	PatchKernel & operator=(const PatchKernel &other) = delete;
 
 	void clearBoundingBox();
 	bool isBoundingBoxFrozen() const;
