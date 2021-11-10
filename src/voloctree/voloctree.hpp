@@ -81,6 +81,8 @@ public:
 
 	~VolOctree();
 
+	VolOctree & operator=(const VolOctree &other);
+
 	std::unique_ptr<PatchKernel> clone() const override;
 
 	void reset() override;
