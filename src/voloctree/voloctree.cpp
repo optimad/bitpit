@@ -366,6 +366,19 @@ VolOctree::VolOctree(const VolOctree &other)
 }
 
 /*!
+	Copy assignment.
+
+	\param other is another patch whose content is copied in this element
+*/
+VolOctree & VolOctree::operator=(const VolOctree &other)
+{
+	VolOctree temporary(other);
+	std::swap(temporary, *this);
+
+	return *this;
+}
+
+/*!
 	Destructor.
 */
 VolOctree::~VolOctree()
