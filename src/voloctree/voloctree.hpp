@@ -78,10 +78,12 @@ public:
 #endif
 	VolOctree(std::unique_ptr<PabloUniform> &&tree, std::unique_ptr<PabloUniform> *adopter = nullptr);
 	VolOctree(int id, std::unique_ptr<PabloUniform> &&tree, std::unique_ptr<PabloUniform> *adopter = nullptr);
+	VolOctree(VolOctree &&other) = default;
 
 	~VolOctree();
 
 	VolOctree & operator=(const VolOctree &other);
+	VolOctree & operator=(VolOctree &&other) = default;
 
 	std::unique_ptr<PatchKernel> clone() const override;
 
