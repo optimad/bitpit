@@ -115,11 +115,11 @@ public:
     // Contructors
     PiercedVector();
     PiercedVector(std::size_t n);
-    PiercedVector(const PiercedVector<value_t, id_t> &x);
-    PiercedVector(PiercedVector<value_t, id_t> &&x);
+    PiercedVector(const PiercedVector<value_t, id_t> &other);
+    PiercedVector(PiercedVector<value_t, id_t> &&other);
 
-    PiercedVector<value_t, id_t> & operator=(const PiercedVector<value_t, id_t> &x);
-    PiercedVector<value_t, id_t> & operator=(PiercedVector<value_t, id_t> &&x);
+    PiercedVector<value_t, id_t> & operator=(const PiercedVector<value_t, id_t> &other);
+    PiercedVector<value_t, id_t> & operator=(PiercedVector<value_t, id_t> &&other);
 
     // Methods that modify the contents of the container
     iterator reclaim(id_t id);
@@ -173,7 +173,7 @@ public:
     void sortBefore(id_t referenceId, bool inclusive);
     void squeeze();
     void shrinkToFit();
-    void swap(PiercedVector &x) noexcept;
+    void swap(PiercedVector &other) noexcept;
 
     // Methods that extract information about the container
     const PiercedVectorKernel<id_t> & getKernel() const;

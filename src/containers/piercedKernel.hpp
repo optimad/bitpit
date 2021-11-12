@@ -356,7 +356,7 @@ public:
     SqueezeAction squeeze();
     ShrinkToFitAction shrinkToFit();
 
-    void swap(PiercedKernel &x) noexcept;
+    void swap(PiercedKernel &other) noexcept;
 
     void flush();
 

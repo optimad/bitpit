@@ -59,47 +59,47 @@ PiercedVector<value_t, id_t>::PiercedVector(std::size_t n)
 /**
 * Copy constructor
 *
-* \param x is another container of the same type (i.e., instantiated with
+* \param other is another container of the same type (i.e., instantiated with
 * the same template parameters) whose content is copied in this container.
 */
 template<typename value_t, typename id_t>
-PiercedVector<value_t, id_t>::PiercedVector(const PiercedVector<value_t, id_t> &x)
-    : PiercedVectorKernel<id_t>(x),
-      PiercedVectorStorage<value_t, id_t>(x, this, x.getSyncMode())
+PiercedVector<value_t, id_t>::PiercedVector(const PiercedVector<value_t, id_t> &other)
+    : PiercedVectorKernel<id_t>(other),
+      PiercedVectorStorage<value_t, id_t>(other, this, other.getSyncMode())
 {
     // Since we have copied the kernel, the list of registered slaves contains
     // also the internal storage of other vector. We need to unregister that
     // storage from the kernel.
-    this->unregisterSlave(&x);
+    this->unregisterSlave(&other);
 }
 
 /**
 * Move constructor
 *
-* \param x is another container of the same type (i.e., instantiated with
+* \param other is another container of the same type (i.e., instantiated with
 * the same template parameters) whose content is copied in this container.
 */
 template<typename value_t, typename id_t>
-PiercedVector<value_t, id_t>::PiercedVector(PiercedVector<value_t, id_t> &&x)
-    : PiercedVectorKernel<id_t>(std::move(x)),
-      PiercedVectorStorage<value_t, id_t>(std::move(x), this, x.getSyncMode())
+PiercedVector<value_t, id_t>::PiercedVector(PiercedVector<value_t, id_t> &&other)
+    : PiercedVectorKernel<id_t>(std::move(other)),
+      PiercedVectorStorage<value_t, id_t>(std::move(other), this, other.getSyncMode())
 {
     // Since we have swapped the kernel, the list of registered slaves contains
     // also the internal storage of other vector. We need to unregister that
     // storage from the kernel.
-    this->unregisterSlave(&x);
+    this->unregisterSlave(&other);
 }
 
 /**
 * Copy assignment operator.
 *
-* \param x is another container of the same type (i.e., instantiated with
+* \param other is another container of the same type (i.e., instantiated with
 * the same template parameters) whose content is copied in this container.
 */
 template<typename value_t, typename id_t>
-PiercedVector<value_t, id_t> & PiercedVector<value_t, id_t>::operator=(const PiercedVector<value_t, id_t> &x)
+PiercedVector<value_t, id_t> & PiercedVector<value_t, id_t>::operator=(const PiercedVector<value_t, id_t> &other)
 {
-    PiercedVector<value_t, id_t> temporary(x);
+    PiercedVector<value_t, id_t> temporary(other);
     this->swap(temporary);
 
     return *this;
@@ -108,13 +108,13 @@ PiercedVector<value_t, id_t> & PiercedVector<value_t, id_t>::operator=(const Pie
 /**
 * Move assignment operator.
 *
-* \param x is another container of the same type (i.e., instantiated with
+* \param other is another container of the same type (i.e., instantiated with
 * the same template parameters) whose content is moved in this container.
 */
 template<typename value_t, typename id_t>
-PiercedVector<value_t, id_t> & PiercedVector<value_t, id_t>::operator=(PiercedVector<value_t, id_t> &&x)
+PiercedVector<value_t, id_t> & PiercedVector<value_t, id_t>::operator=(PiercedVector<value_t, id_t> &&other)
 {
-    this->swap(x);
+    this->swap(other);
 
     return *this;
 }
@@ -793,25 +793,25 @@ void PiercedVector<value_t, id_t>::shrinkToFit()
 * which were in this. All iterators, references and pointers remain valid
 * for the swapped objects.
 *
-* \param x is another container of the same type (i.e., instantiated with
+* \param other is another container of the same type (i.e., instantiated with
 * the same template parameters) whose content is swapped with that of
 * this container.
 */
 template<typename value_t, typename id_t>
-void PiercedVector<value_t, id_t>::swap(PiercedVector &x) noexcept
+void PiercedVector<value_t, id_t>::swap(PiercedVector &other) noexcept
 {
     // The swap will swap also the slave-master information. This is not what
     // we want, therefore the two pierced storage will be unregistered and the
     // registered again after the swap. When the kernel is unset the storage
     // can't be clear, otherwise its contents will be lost.
     PiercedVectorStorage<value_t, id_t>::detachKernel();
-    x.PiercedVectorStorage<value_t, id_t>::detachKernel();
+    other.PiercedVectorStorage<value_t, id_t>::detachKernel();
 
     // Swap kernel data
-    PiercedVectorKernel<id_t>::swap(x);
+    PiercedVectorKernel<id_t>::swap(other);
 
     // Swap storage data
-    PiercedVectorStorage<value_t, id_t>::swap(x);
+    PiercedVectorStorage<value_t, id_t>::swap(other);
 
     // Re-register the storages
     //
@@ -821,7 +821,7 @@ void PiercedVector<value_t, id_t>::swap(PiercedVector &x) noexcept
     // previously cleared and the kernel we are trying to set is not null.
     try {
         PiercedVectorStorage<value_t, id_t>::setDynamicKernel(this, PiercedVectorKernel<id_t>::SYNC_MODE_DISABLED);
-        x.PiercedVectorStorage<value_t, id_t>::setDynamicKernel(&x, PiercedVectorKernel<id_t>::SYNC_MODE_DISABLED);
+        other.PiercedVectorStorage<value_t, id_t>::setDynamicKernel(&other, PiercedVectorKernel<id_t>::SYNC_MODE_DISABLED);
     } catch (const std::runtime_error &exception) {
         assert(false && "Error while swapping the PiercedVector!");
         std::cout << "Error while swapping the PiercedVector!" << std::endl;

@@ -590,26 +590,26 @@ typename PiercedKernel<id_t>::ShrinkToFitAction PiercedKernel<id_t>::_shrinkToFi
 * which were in this. All iterators, references and pointers remain valid
 * for the swapped objects.
 *
-* \param x Another kernel of the same type (i.e., instantiated with the same
-* template parameters) whose content is swapped with that of this kernel.
+* \param other is another kernel of the same type (i.e., instantiated with the
+* same template parameters) whose content is swapped with that of this kernel.
 */
 template<typename id_t>
-void PiercedKernel<id_t>::swap(PiercedKernel &x) noexcept
+void PiercedKernel<id_t>::swap(PiercedKernel &other) noexcept
 {
-    PiercedSyncMaster::swap(x);
+    PiercedSyncMaster::swap(other);
 
-    std::swap(x.m_begin_pos, m_begin_pos);
-    std::swap(x.m_end_pos, m_end_pos);
-    std::swap(x.m_dirty_begin_pos, m_dirty_begin_pos);
-    std::swap(x.m_ids, m_ids);
-    std::swap(x.m_pos, m_pos);
-    std::swap(x.m_holes, m_holes);
-    std::swap(x.m_holes_regular_begin, m_holes_regular_begin);
-    std::swap(x.m_holes_regular_end, m_holes_regular_end);
-    std::swap(x.m_holes_regular_sorted, m_holes_regular_sorted);
-    std::swap(x.m_holes_pending_begin, m_holes_pending_begin);
-    std::swap(x.m_holes_pending_end, m_holes_pending_end);
-    std::swap(x.m_holes_pending_sorted, m_holes_pending_sorted);
+    std::swap(other.m_begin_pos, m_begin_pos);
+    std::swap(other.m_end_pos, m_end_pos);
+    std::swap(other.m_dirty_begin_pos, m_dirty_begin_pos);
+    std::swap(other.m_ids, m_ids);
+    std::swap(other.m_pos, m_pos);
+    std::swap(other.m_holes, m_holes);
+    std::swap(other.m_holes_regular_begin, m_holes_regular_begin);
+    std::swap(other.m_holes_regular_end, m_holes_regular_end);
+    std::swap(other.m_holes_regular_sorted, m_holes_regular_sorted);
+    std::swap(other.m_holes_pending_begin, m_holes_pending_begin);
+    std::swap(other.m_holes_pending_end, m_holes_pending_end);
+    std::swap(other.m_holes_pending_sorted, m_holes_pending_sorted);
 }
 
 /**
