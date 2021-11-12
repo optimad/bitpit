@@ -98,21 +98,21 @@ RBFKernel::RBFKernel(const RBFKernel & other)
 /*!
  * Swap method. Exchange contents of each class member with those 
  * corresponding in the argument object.
- * \param[in] x object to be swapped
+ * \param[in] other object to be swapped
  */
-void RBFKernel::swap(RBFKernel &x) noexcept
+void RBFKernel::swap(RBFKernel &other) noexcept
 {
-   std::swap(m_fields, x.m_fields);
-   std::swap(m_mode, x.m_mode);
-   std::swap(m_supportRadius, x.m_supportRadius);
-   std::swap(m_typef, x.m_typef);
-   std::swap(m_fPtr, x.m_fPtr);
-   std::swap(m_error, x.m_error);
-   std::swap(m_value, x.m_value);
-   std::swap(m_weight, x.m_weight);
-   std::swap(m_activeNodes, x.m_activeNodes);
-   std::swap(m_maxFields, x.m_maxFields);
-   std::swap(m_nodes, x.m_nodes);
+   std::swap(m_fields, other.m_fields);
+   std::swap(m_mode, other.m_mode);
+   std::swap(m_supportRadius, other.m_supportRadius);
+   std::swap(m_typef, other.m_typef);
+   std::swap(m_fPtr, other.m_fPtr);
+   std::swap(m_error, other.m_error);
+   std::swap(m_value, other.m_value);
+   std::swap(m_weight, other.m_weight);
+   std::swap(m_activeNodes, other.m_activeNodes);
+   std::swap(m_maxFields, other.m_maxFields);
+   std::swap(m_nodes, other.m_nodes);
 }
 
 /*!
@@ -1001,13 +1001,13 @@ RBF & RBF::operator=(RBF other)
 /*!
  * Swap method. Exchange contents of each class member with those 
  * corresponding in the argument object.
- * \param[in] x object to be swapped
+ * \param[in] other object to be swapped
  */
-void RBF::swap(RBF &x) noexcept
+void RBF::swap(RBF &other) noexcept
 {
-    RBFKernel::swap(x);
+    RBFKernel::swap(other);
 
-    std::swap(m_node, x.m_node);
+    std::swap(m_node, other.m_node);
 }
 
 /*!
