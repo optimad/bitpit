@@ -841,19 +841,17 @@ double RBFKernel::evalError( )
 
     int                     i(0), j(0);
     //int                     index;
-    double                  maxError(0), relError, realValue, norm;
+    double                  maxError(0), relError, realValue;
     std::vector<double>     reconValues;
 
     for( int iX=0; iX< m_nodes; ++iX ) {
         reconValues = evalRBF( iX );
 
         j=0;
-        norm = 0.;
         relError = 0.;
         for( auto &val : reconValues ) {
             realValue = m_value[j][i];
             relError += std::pow( (val - realValue), 2  );
-            norm += std::pow( realValue, 2  );
 
             ++j;
         }
