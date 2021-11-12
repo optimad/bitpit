@@ -511,7 +511,7 @@ bool RBFKernel::removeData(int id)
 
     m_fields--;
     if(m_mode == RBFMode::INTERP)    m_value.erase(m_value.begin()+id);
-    else                            m_weight.erase(m_value.begin()+id);
+    else                             m_weight.erase(m_weight.begin()+id);
 
     return(true);
 }
