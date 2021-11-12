@@ -740,8 +740,8 @@ PiercedStorage<double> PODVolOctree::mapFieldsToPOD(const PiercedStorage<double>
                 int ii=0;
                 for (long idd : mappingInfo[id].ids){
                     int rank = mappingInfo[id].ranks[ii];
-                    const double *data = fields.data(idd);
-                    double vol = mesh->evalCellVolume(idd);
+                    const double *data;
+                    double vol;
                     if (rank != m_rank){
                         data = datarec[rank][idd].data();
                         vol = volrec[rank][idd];
