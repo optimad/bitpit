@@ -377,6 +377,21 @@ ProxyVectorStorage<value_t, container_t, thread_safe>::ProxyVectorStorage(const 
 }
 
 /*!
+    Copy assigment operator.
+
+    \param x is another storage of the same type (i.e., instantiated with
+    the same template parameters) whose content is copied in this container.
+*/
+template<typename value_t, typename container_t, bool thread_safe>
+ProxyVectorStorage<value_t, container_t, thread_safe> & ProxyVectorStorage<value_t, container_t, thread_safe>::operator=(const ProxyVectorStorage<value_t, container_t, thread_safe> &other)
+{
+    ProxyVectorStorage<value_t, container_t, thread_safe> temporary(other);
+    this->swap(temporary);
+
+    return *this;
+}
+
+/*!
     Destructor.
 */
 template<typename value_t, typename container_t, bool thread_safe>
