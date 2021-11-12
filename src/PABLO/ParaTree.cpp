@@ -3906,7 +3906,6 @@ namespace bitpit {
 
         // Find the partition using a bisection method
         int p = -1;
-        int length = m_nproc;
         int beg = 0;
         int end = m_nproc -1;
         int seed = m_nproc/2;
@@ -3921,8 +3920,7 @@ namespace bitpit {
                 if(morton <= m_partitionLastDesc[seed+1])
                     beg = seed + 1;
             }
-            length = end - beg;
-            seed = beg + length/2;
+            seed = beg + (end - beg) / 2;
         }
         if(beg!=0){
             while(m_partitionLastDesc[beg] == m_partitionLastDesc[beg-1]){
