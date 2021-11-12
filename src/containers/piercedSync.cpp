@@ -169,12 +169,12 @@ PiercedSyncSlave::PiercedSyncSlave()
 * which were in this. All iterators, references and pointers remain valid
 * for the swapped objects.
 *
-* \param x Another kernel of the same type (i.e., instantiated with the same
-* template parameters) whose content is swapped with that of this kernel.
+* \param other is another kernel of the same type (i.e., instantiated with the
+* same template parameters) whose content is swapped with that of this kernel.
 */
-void PiercedSyncSlave::swap(PiercedSyncSlave &x) noexcept
+void PiercedSyncSlave::swap(PiercedSyncSlave &other) noexcept
 {
-    BITPIT_UNUSED(x);
+    BITPIT_UNUSED(other);
 }
 
 /**
@@ -206,14 +206,14 @@ PiercedSyncMaster::PiercedSyncMaster()
 * which were in this. All iterators, references and pointers remain valid
 * for the swapped objects.
 *
-* \param x Another kernel of the same type (i.e., instantiated with the same
-* template parameters) whose content is swapped with that of this kernel.
+* \param other is another kernel of the same type (i.e., instantiated with the
+* same template parameters) whose content is swapped with that of this kernel.
 */
-void PiercedSyncMaster::swap(PiercedSyncMaster &x) noexcept
+void PiercedSyncMaster::swap(PiercedSyncMaster &other) noexcept
 {
-    std::swap(x.m_slaves, m_slaves);
-    std::swap(x.m_syncGroups, m_syncGroups);
-    std::swap(x.m_syncJournal, m_syncJournal);
+    std::swap(other.m_slaves, m_slaves);
+    std::swap(other.m_syncGroups, m_syncGroups);
+    std::swap(other.m_syncJournal, m_syncJournal);
 }
 
 /**

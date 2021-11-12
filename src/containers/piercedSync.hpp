@@ -108,7 +108,7 @@ friend class PiercedSyncMaster;
 protected:
     PiercedSyncSlave();
 
-    void swap(PiercedSyncSlave &x) noexcept;
+    void swap(PiercedSyncSlave &other) noexcept;
 
     virtual void commitSyncAction(const PiercedSyncAction &action) = 0;
 
@@ -182,7 +182,7 @@ protected:
     void sync();
     bool isSynced() const;
 
-    void swap(PiercedSyncMaster &x) noexcept;
+    void swap(PiercedSyncMaster &other) noexcept;
 
     void processSyncAction(const PiercedSyncAction &action);
 

@@ -64,15 +64,15 @@ PiercedStorageSyncSlave<id_t>::PiercedStorageSyncSlave(PiercedKernel<id_t> *kern
 /**
 * Constructor.
 *
-* \param x is another container of the same type (i.e., instantiated with
+* \param other is another container of the same type (i.e., instantiated with
 * the same template parameters) whose content is copied in this container
 * \param kernel is the kernel that will be set
 */
 template<typename id_t>
-PiercedStorageSyncSlave<id_t>::PiercedStorageSyncSlave(const PiercedStorageSyncSlave<id_t> &x, const PiercedKernel<id_t> *kernel)
+PiercedStorageSyncSlave<id_t>::PiercedStorageSyncSlave(const PiercedStorageSyncSlave<id_t> &other, const PiercedKernel<id_t> *kernel)
     : PiercedStorageSyncSlave<id_t>()
 {
-    KernelType kernelType = x.getKernelType();
+    KernelType kernelType = other.getKernelType();
     switch (kernelType) {
 
     case KERNEL_STATIC:
@@ -80,7 +80,7 @@ PiercedStorageSyncSlave<id_t>::PiercedStorageSyncSlave(const PiercedStorageSyncS
         if (kernel) {
             setStaticKernel(kernel);
         } else {
-            setStaticKernel(x.m_const_kernel);
+            setStaticKernel(other.m_const_kernel);
         }
         break;
     }
@@ -101,16 +101,16 @@ PiercedStorageSyncSlave<id_t>::PiercedStorageSyncSlave(const PiercedStorageSyncS
 /**
 * Constructor.
 *
-* \param x is another container of the same type (i.e., instantiated with
+* \param other is another container of the same type (i.e., instantiated with
 * the same template parameters) whose content is copied in this container
 * \param kernel is the kernel that will be set
 * \param syncMode is the synchronization mode that will be used for the storage
 */
 template<typename id_t>
-PiercedStorageSyncSlave<id_t>::PiercedStorageSyncSlave(const PiercedStorageSyncSlave<id_t> &x, PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode)
+PiercedStorageSyncSlave<id_t>::PiercedStorageSyncSlave(const PiercedStorageSyncSlave<id_t> &other, PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode)
     : PiercedStorageSyncSlave<id_t>()
 {
-    KernelType kernelType = x.getKernelType();
+    KernelType kernelType = other.getKernelType();
     switch (kernelType) {
 
     case KERNEL_STATIC:
@@ -118,7 +118,7 @@ PiercedStorageSyncSlave<id_t>::PiercedStorageSyncSlave(const PiercedStorageSyncS
         if (kernel) {
             setStaticKernel(kernel);
         } else {
-            setStaticKernel(x.m_const_kernel);
+            setStaticKernel(other.m_const_kernel);
         }
         break;
     }
@@ -128,7 +128,7 @@ PiercedStorageSyncSlave<id_t>::PiercedStorageSyncSlave(const PiercedStorageSyncS
         if (kernel) {
             setDynamicKernel(kernel, syncMode);
         } else {
-            setDynamicKernel(x.m_kernel, syncMode);
+            setDynamicKernel(other.m_kernel, syncMode);
         }
         break;
     }
@@ -144,28 +144,28 @@ PiercedStorageSyncSlave<id_t>::PiercedStorageSyncSlave(const PiercedStorageSyncS
 /**
 * Constructor.
 *
-* \param x is another container of the same type (i.e., instantiated with
+* \param other is another container of the same type (i.e., instantiated with
 * the same template parameters) whose content is moved in this container
 * \param kernel is the kernel that will be set
 * \param syncMode is the synchronization mode that will be used for the storage
 */
 template<typename id_t>
-PiercedStorageSyncSlave<id_t>::PiercedStorageSyncSlave(PiercedStorageSyncSlave<id_t> &&x)
+PiercedStorageSyncSlave<id_t>::PiercedStorageSyncSlave(PiercedStorageSyncSlave<id_t> &&other)
     : PiercedStorageSyncSlave<id_t>()
 {
     // Set kernel
-    KernelType kernelType = x.getKernelType();
+    KernelType kernelType = other.getKernelType();
     switch (kernelType) {
 
     case KERNEL_STATIC:
     {
-        setStaticKernel(x.m_const_kernel);
+        setStaticKernel(other.m_const_kernel);
         break;
     }
 
     case KERNEL_DYNAMIC:
     {
-        setDynamicKernel(x.m_kernel, x.getSyncMode());
+        setDynamicKernel(other.m_kernel, other.getSyncMode());
         break;
     }
 
@@ -177,7 +177,7 @@ PiercedStorageSyncSlave<id_t>::PiercedStorageSyncSlave(PiercedStorageSyncSlave<i
     }
 
     // Unset kernel of other storage slave
-    x.unsetKernel(true);
+    other.unsetKernel(true);
 }
 
 /**
@@ -364,16 +364,16 @@ PiercedSyncMaster::SyncMode PiercedStorageSyncSlave<id_t>::getSyncMode() const
 * which were in this. All iterators, references and pointers remain valid
 * for the swapped objects.
 *
-* \param x is another storage of the same type (i.e., instantiated with the
+* \param other is another storage of the same type (i.e., instantiated with the
 * same template parameters) whose content is swapped with that of this
 * storage.
 */
 template<typename id_t>
-void PiercedStorageSyncSlave<id_t>::swap(PiercedStorageSyncSlave<id_t> &x) noexcept
+void PiercedStorageSyncSlave<id_t>::swap(PiercedStorageSyncSlave<id_t> &other) noexcept
 {
-    PiercedSyncSlave::swap(x);
-    std::swap(x.m_kernel, m_kernel);
-    std::swap(x.m_const_kernel, m_const_kernel);
+    PiercedSyncSlave::swap(other);
+    std::swap(other.m_kernel, m_kernel);
+    std::swap(other.m_const_kernel, m_const_kernel);
 }
 
 /**
@@ -429,13 +429,13 @@ PiercedStorage<value_t, id_t>::PiercedStorage(std::size_t nFields, PiercedKernel
 /**
 * Constructor.
 *
-* \param x is another container of the same type (i.e., instantiated with
+* \param other is another container of the same type (i.e., instantiated with
 * the same template parameters) whose content is copied in this container
 * \param kernel is the kernel that will be set
 */
 template<typename value_t, typename id_t>
-PiercedStorage<value_t, id_t>::PiercedStorage(const PiercedStorage<value_t, id_t> &x, const PiercedKernel<id_t> *kernel)
-    : PiercedStorageSyncSlave<id_t>(x, kernel), m_nFields(x.m_nFields), m_fields(x.m_fields)
+PiercedStorage<value_t, id_t>::PiercedStorage(const PiercedStorage<value_t, id_t> &other, const PiercedKernel<id_t> *kernel)
+    : PiercedStorageSyncSlave<id_t>(other, kernel), m_nFields(other.m_nFields), m_fields(other.m_fields)
 {
     // Base class construcotr cannot call virtual functions
     if (this->getKernel()) {
@@ -446,14 +446,14 @@ PiercedStorage<value_t, id_t>::PiercedStorage(const PiercedStorage<value_t, id_t
 /**
 * Constructor.
 *
-* \param x is another container of the same type (i.e., instantiated with
+* \param other is another container of the same type (i.e., instantiated with
 * the same template parameters) whose content is copied in this container
 * \param kernel is the kernel that will be set
 * \param syncMode is the synchronization mode that will be used for the storage
 */
 template<typename value_t, typename id_t>
-PiercedStorage<value_t, id_t>::PiercedStorage(const PiercedStorage<value_t, id_t> &x, PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode)
-    : PiercedStorageSyncSlave<id_t>(x, kernel, syncMode), m_nFields(x.m_nFields), m_fields(x.m_fields)
+PiercedStorage<value_t, id_t>::PiercedStorage(const PiercedStorage<value_t, id_t> &other, PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode)
+    : PiercedStorageSyncSlave<id_t>(other, kernel, syncMode), m_nFields(other.m_nFields), m_fields(other.m_fields)
 {
     // Base class construcotr cannot call virtual functions
     if (this->getKernel()) {
@@ -469,15 +469,15 @@ PiercedStorage<value_t, id_t>::PiercedStorage(const PiercedStorage<value_t, id_t
 /**
 * Constructor.
 *
-* \param x is another container of the same type (i.e., instantiated with
+* \param other is another container of the same type (i.e., instantiated with
 * the same template parameters) whose content is moved in this container
 * \param kernel is the kernel that will be set
 * \param syncMode is the synchronization mode that will be used for the storage
 */
 template<typename value_t, typename id_t>
-PiercedStorage<value_t, id_t>::PiercedStorage(PiercedStorage<value_t, id_t> &&x)
-    : PiercedStorageSyncSlave<id_t>(std::move(x)),
-      m_nFields(std::move(x.m_nFields)), m_fields(std::move(x.m_fields))
+PiercedStorage<value_t, id_t>::PiercedStorage(PiercedStorage<value_t, id_t> &&other)
+    : PiercedStorageSyncSlave<id_t>(std::move(other)),
+      m_nFields(std::move(other.m_nFields)), m_fields(std::move(other.m_fields))
 {
     // Base class construcotr cannot call virtual functions
     if (this->getKernel()) {
@@ -493,26 +493,26 @@ PiercedStorage<value_t, id_t>::PiercedStorage(PiercedStorage<value_t, id_t> &&x)
 /**
 * Copy constructor.
 *
-* \param x is another container of the same type (i.e., instantiated with
+* \param other is another container of the same type (i.e., instantiated with
 * the same template parameters) whose content is copied in this container
 */
 template<typename value_t, typename id_t>
-PiercedStorage<value_t, id_t>::PiercedStorage(const PiercedStorage<value_t, id_t> &x)
-    : PiercedStorage<value_t, id_t>(x, nullptr)
+PiercedStorage<value_t, id_t>::PiercedStorage(const PiercedStorage<value_t, id_t> &other)
+    : PiercedStorage<value_t, id_t>(other, nullptr)
 {
 }
 
 /**
 * Copy assignment operator.
 *
-* \param x is another container of the same type (i.e., instantiated with
+* \param other is another container of the same type (i.e., instantiated with
 * the same template parameters) whose content is copied in this container
 * \return A reference to the pierced storage.
 */
 template<typename value_t, typename id_t>
-PiercedStorage<value_t, id_t> & PiercedStorage<value_t, id_t>::operator=(const PiercedStorage<value_t, id_t> &x)
+PiercedStorage<value_t, id_t> & PiercedStorage<value_t, id_t>::operator=(const PiercedStorage<value_t, id_t> &other)
 {
-    PiercedStorage<value_t, id_t> temporary(x, nullptr);
+    PiercedStorage<value_t, id_t> temporary(other, nullptr);
     temporary.swap(*this);
 
     return *this;
@@ -979,25 +979,25 @@ void PiercedStorage<value_t, id_t>::rawEmreplace(std::size_t pos, Args&&... args
 * which were in this. All iterators, references and pointers remain valid
 * for the swapped objects.
 *
-* \param x is another storage of the same type (i.e., instantiated with the
+* \param other is another storage of the same type (i.e., instantiated with the
 * same template parameters) whose content is swapped with that of this
 * storage.
 */
 template<typename value_t, typename id_t>
-void PiercedStorage<value_t, id_t>::swap(PiercedStorage &x) noexcept
+void PiercedStorage<value_t, id_t>::swap(PiercedStorage &other) noexcept
 {
     // It is only possible to swap two storages with the same number of field.
     // If this condition is not fulfilled we can not continue. However, we
     // cannot throw an exception because the function is declared snoexcept.
-    if (x.getFieldCount() != getFieldCount()) {
+    if (other.getFieldCount() != getFieldCount()) {
         std::cout << "It is only possible to swap storages with the same number of fields." << std::endl;
         assert(false);
         exit(EXIT_FAILURE);
     }
 
-    PiercedStorageSyncSlave<id_t>::swap(x);
-    std::swap(x.m_nFields, m_nFields);
-    std::swap(x.m_fields, m_fields);
+    PiercedStorageSyncSlave<id_t>::swap(other);
+    std::swap(other.m_nFields, m_nFields);
+    std::swap(other.m_fields, m_fields);
 }
 
 /**

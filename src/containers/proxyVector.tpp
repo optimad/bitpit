@@ -367,7 +367,7 @@ ProxyVectorStorage<value_t, container_t, thread_safe>::ProxyVectorStorage(std::s
 /*!
     Copy constructor.
 
-    \param x is another storage of the same type (i.e., instantiated with
+    \param other is another storage of the same type (i.e., instantiated with
     the same template parameters) whose content is copied in this container.
 */
 template<typename value_t, typename container_t, bool thread_safe>
@@ -379,7 +379,7 @@ ProxyVectorStorage<value_t, container_t, thread_safe>::ProxyVectorStorage(const 
 /*!
     Copy assigment operator.
 
-    \param x is another storage of the same type (i.e., instantiated with
+    \param other is another storage of the same type (i.e., instantiated with
     the same template parameters) whose content is copied in this container.
 */
 template<typename value_t, typename container_t, bool thread_safe>

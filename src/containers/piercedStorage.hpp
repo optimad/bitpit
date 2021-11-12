@@ -105,7 +105,7 @@ public:
     PiercedSyncMaster::SyncMode getSyncMode() const;
 
     // Methods that modify the container as a whole
-    void swap(PiercedStorageSyncSlave<id_t> &x) noexcept;
+    void swap(PiercedStorageSyncSlave<id_t> &other) noexcept;
 
 protected:
     const PiercedKernel<id_t> *m_const_kernel;
@@ -115,10 +115,10 @@ protected:
     PiercedStorageSyncSlave();
     PiercedStorageSyncSlave(const PiercedKernel<id_t> *kernel);
     PiercedStorageSyncSlave(PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode);
-    PiercedStorageSyncSlave(const PiercedStorageSyncSlave<id_t> &x, const PiercedKernel<id_t> *kernel);
-    PiercedStorageSyncSlave(const PiercedStorageSyncSlave<id_t> &x, PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode);
-    PiercedStorageSyncSlave(const PiercedStorageSyncSlave<id_t> &x);
-    PiercedStorageSyncSlave(PiercedStorageSyncSlave<id_t> &&x);
+    PiercedStorageSyncSlave(const PiercedStorageSyncSlave<id_t> &other, const PiercedKernel<id_t> *kernel);
+    PiercedStorageSyncSlave(const PiercedStorageSyncSlave<id_t> &other, PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode);
+    PiercedStorageSyncSlave(const PiercedStorageSyncSlave<id_t> &other);
+    PiercedStorageSyncSlave(PiercedStorageSyncSlave<id_t> &&other);
 
     // Methods for synchronizing the storage
     virtual void _postSetStaticKernel();
@@ -335,10 +335,10 @@ public:
     PiercedStorage(std::size_t nFields);
     PiercedStorage(std::size_t nFields, const PiercedKernel<id_t> *kernel);
     PiercedStorage(std::size_t nFields, PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode);
-    PiercedStorage(const PiercedStorage<value_t, id_t> &x, const PiercedKernel<id_t> *kernel);
-    PiercedStorage(const PiercedStorage<value_t, id_t> &x, PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode);
-    PiercedStorage(const PiercedStorage<value_t, id_t> &x);
-    PiercedStorage(PiercedStorage<value_t, id_t> &&x);
+    PiercedStorage(const PiercedStorage<value_t, id_t> &other, const PiercedKernel<id_t> *kernel);
+    PiercedStorage(const PiercedStorage<value_t, id_t> &other, PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode);
+    PiercedStorage(const PiercedStorage<value_t, id_t> &other);
+    PiercedStorage(PiercedStorage<value_t, id_t> &&other);
 
     PiercedStorage & operator=(const PiercedStorage &other);
     PiercedStorage & operator=(PiercedStorage &&other);
@@ -347,7 +347,7 @@ public:
     std::size_t getFieldCount() const;
 
     // Methods that modify the container as a whole
-    void swap(PiercedStorage &x) noexcept;
+    void swap(PiercedStorage &other) noexcept;
     void fill(const value_t &value);
 
     // Methos to access data stored in the container
