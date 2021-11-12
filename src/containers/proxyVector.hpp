@@ -254,6 +254,9 @@ protected:
     ProxyVectorStorage(const ProxyVectorStorage &other);
     ProxyVectorStorage(ProxyVectorStorage &&other) = default;
 
+    ProxyVectorStorage & operator=(const ProxyVectorStorage &other);
+    ProxyVectorStorage & operator=(ProxyVectorStorage &&other) = default;
+
 private:
     static const int MEMORY_POOL_VECTOR_COUNT = 10;
     static const int MEMORY_POOL_MAX_CAPACITY = 128;
