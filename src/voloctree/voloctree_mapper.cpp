@@ -300,7 +300,6 @@ void VolOctreeMapper::_mappingAdaptionReferenceUpdate(const std::vector<adaption
                         std::size_t imapped = 0;
                         for (long mappedId : mappedIds) {
                             VolOctree::OctantInfo oinfoprev;
-                            Octant * octm ;
                             uint64_t mortonmapped;
                             uint64_t mortonlastdescmapped;
                             uint8_t levelmapped;
@@ -309,7 +308,7 @@ void VolOctreeMapper::_mappingAdaptionReferenceUpdate(const std::vector<adaption
                             if (checkPart || mappedRanks[imapped] == m_rank) {
 #endif
                                 oinfoprev = mappedPatch->getCellOctant(mappedId);
-                                octm = mappedPatch->getOctantPointer(oinfoprev);
+                                Octant *octm = mappedPatch->getOctantPointer(oinfoprev);
                                 mortonmapped = mappedPatch->getTree().getMorton(octm);
                                 mortonlastdescmapped = mappedPatch->getTree().getLastDescMorton(octm);
                                 levelmapped = mappedPatch->getCellLevel(mappedId);
@@ -317,7 +316,7 @@ void VolOctreeMapper::_mappingAdaptionReferenceUpdate(const std::vector<adaption
                                 mappedRank = mappedRanks[imapped];
                             } else {
                                 OctantIR *poct = m_partitionIR.map_rank_rec_octantIR[mappedRanks[imapped]][mappedId];
-                                octm = &poct->octant;
+                                Octant *octm = &poct->octant;
                                 mortonmapped = mappedPatch->getTree().getMorton(&poct->octant);
                                 mortonlastdescmapped = mappedPatch->getTree().getLastDescMorton(&poct->octant);
                                 levelmapped = mappedPatch->getTree().getLevel(&poct->octant);
