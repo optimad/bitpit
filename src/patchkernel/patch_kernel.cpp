@@ -900,7 +900,7 @@ void PatchKernel::resetCells()
 /*!
 	Reset the interfaces of the patch.
 
-	This function doesn't change the build strategy, it only deletes the
+	This function doesn't change the build strategy, it only resets the
 	existing interface.
 */
 void PatchKernel::resetInterfaces()
@@ -913,28 +913,32 @@ void PatchKernel::resetInterfaces()
 	// Prune stale interfaces
 	pruneStaleInterfaces();
 
+	// Reset the interfaces
+	_resetInterfaces(false);
+
 	// All remaining interfaces will be deleted
 	setInterfaceAlterationFlags(FLAG_DELETED);
 
 	// Mark cell interfaces as dirty
 	setCellAlterationFlags(FLAG_INTERFACES_DIRTY);
-
-	// Reset the interfaces
-	_resetInterfaces();
 }
 
 /*!
 	Internal function to reset the interfaces of the patch.
 
 	This function doesn't change the alteration flags.
+
+	\param release if it's true the memory hold by the interfaces will be
+	released, otherwise the interfaces will be reset but their memory will
+	not be relased
 */
-void PatchKernel::_resetInterfaces()
+void PatchKernel::_resetInterfaces(bool release)
 {
 	for (auto &cell : m_cells) {
-		cell.resetInterfaces();
+		cell.resetInterfaces(!release);
 	}
 
-	m_interfaces.clear();
+	m_interfaces.clear(release);
 	if (m_interfaceIdGenerator) {
 		m_interfaceIdGenerator->reset();
 	}
@@ -5852,20 +5856,27 @@ void PatchKernel::initializeInterfaces(InterfacesBuildStrategy strategy)
 		throw std::runtime_error ("Adjacencies are mandatory for building the interfaces.");
 	}
 
-	// Initialize build strategy
+	// Get current build stategy
 	InterfacesBuildStrategy currentStrategy = getInterfacesBuildStrategy();
-	if (currentStrategy != strategy) {
-		// Reset interfaces
+
+	// Early return if we don't need interfaces
+	if (strategy == INTERFACES_NONE) {
 		if (currentStrategy != INTERFACES_NONE) {
 			destroyInterfaces();
 		}
 
-		// Set interfaces strategy
+		return;
+	}
+
+	// Update the build strategy
+	if (currentStrategy != strategy) {
 		setInterfacesBuildStrategy(strategy);
 	}
 
+	// Reset interfaces
+	resetInterfaces();
+
 	// Update the interfaces
-	setCellAlterationFlags(FLAG_INTERFACES_DIRTY);
 	updateInterfaces();
 }
 
@@ -5929,8 +5940,8 @@ void PatchKernel::destroyInterfaces()
 		return;
 	}
 
-	// Reset the interfaces
-	_resetInterfaces();
+	// Destroy the interfaces
+	_resetInterfaces(true);
 
 	// Clear list of cells with dirty adjacencies
 	unsetCellAlterationFlags(FLAG_INTERFACES_DIRTY);
@@ -5964,6 +5975,10 @@ void PatchKernel::pruneStaleInterfaces()
 
 		long cellId = entry.first;
 		Cell &cell = m_cells.at(cellId);
+		if (cell.getInterfaceCount() == 0) {
+			continue;
+		}
+
 		int nCellFaces = cell.getFaceCount();
 		for (int face = nCellFaces - 1; face >= 0; --face) {
 			long *faceInterfaces = cell.getInterfaces(face);
