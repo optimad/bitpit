@@ -1512,6 +1512,30 @@ PatchKernel::VertexConstIterator PatchKernel::vertexConstEnd() const
 }
 
 /*!
+	Returns a constant iterator pointing to the first internal vertex.
+
+	\result A constant iterator to the first internal  vertex.
+*/
+PatchKernel::VertexConstIterator PatchKernel::internalVertexConstBegin() const
+{
+	return m_vertices.cbegin();
+}
+
+/*!
+	Returns a constant iterator pointing to last internal vertex.
+
+	\result A constant iterator to the last internal vertex.
+*/
+PatchKernel::VertexConstIterator PatchKernel::internalVertexConstEnd() const
+{
+	if (m_nInternalVertices > 0) {
+		return ++m_vertices.find(m_lastInternalVertexId);
+	} else {
+		return m_vertices.end();
+	}
+}
+
+/*!
 	Adds the specified vertex to the patch.
 
 	All new vertices will be temporarily added as internal vertices, is needed
