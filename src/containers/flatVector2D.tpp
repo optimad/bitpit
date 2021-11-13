@@ -606,9 +606,7 @@ template <class T>
 void FlatVector2D<T>::pushBack(std::size_t subArraySize, const T &value)
 {
     std::size_t previousLastIndex = m_index.back();
-    m_index.emplace_back();
-    std::size_t &lastIndex = m_index.back();
-    lastIndex = previousLastIndex + subArraySize;
+    m_index.emplace_back(previousLastIndex + subArraySize);
 
     m_v.resize(m_v.size() + subArraySize, value);
 }
@@ -640,9 +638,7 @@ template <class T>
 void FlatVector2D<T>::pushBack(std::size_t subArraySize, const T *subArray)
 {
     std::size_t previousLastIndex = m_index.back();
-    m_index.emplace_back();
-    std::size_t &lastIndex = m_index.back();
-    lastIndex = previousLastIndex + subArraySize;
+    m_index.emplace_back(previousLastIndex + subArraySize);
 
     m_v.reserve(m_v.size() + subArraySize);
     for (std::size_t j = 0; j < subArraySize; j++) {
@@ -664,9 +660,7 @@ void FlatVector2D<T>::pushBackItem(const T& value)
 {
     m_index.back()++;
 
-    m_v.emplace_back();
-    T &storedValue = m_v.back();
-    storedValue = value;
+    m_v.emplace_back(value);
 }
 
 /*!
@@ -681,9 +675,7 @@ void FlatVector2D<T>::pushBackItem(T &&value)
 {
     m_index.back()++;
 
-    m_v.emplace_back();
-    T &storedValue = m_v.back();
-    storedValue = std::move(value);
+    m_v.emplace_back(std::move(value));
 }
 
 /*!
