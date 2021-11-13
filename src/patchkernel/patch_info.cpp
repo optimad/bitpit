@@ -212,6 +212,9 @@ void PatchNumberingInfo::_extract()
 	}
 #endif
 
+	// Initialize data structure for consecutive ids
+	m_cellLocalToConsecutiveMap.reserve(m_patch->getCellCount());
+
 	// Evalaute the consecutive id of the internal cells
 	if (m_patch->getInternalCellCount() > 0) {
 		PatchKernel::CellConstIterator beginItr = m_patch->internalCellConstBegin();
@@ -226,9 +229,12 @@ void PatchNumberingInfo::_extract()
 			nativeIds[index++] = std::make_pair(nativeId, id);
 		}
 
+		auto nativeIdsBegin = nativeIds.begin();
+		auto nativeIdsEnd   = nativeIds.end();
+
 		std::sort(
-			nativeIds.begin(),
-			nativeIds.end(),
+			nativeIdsBegin,
+			nativeIdsEnd,
 			[](const std::pair<long, long> &x, const std::pair<long, long> &y) -> bool
 			{
 				return x.first < y.first;
@@ -242,7 +248,7 @@ void PatchNumberingInfo::_extract()
 #endif
 
 		consecutiveId = m_cellConsecutiveOffset;
-		for (auto itr = nativeIds.begin(); itr != nativeIds.end(); ++itr) {
+		for (auto itr = nativeIdsBegin; itr != nativeIdsEnd; ++itr) {
 			m_cellLocalToConsecutiveMap.insert({itr->second, consecutiveId++});
 		}
 	}
