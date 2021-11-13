@@ -827,7 +827,7 @@ protected:
 
 	void setInterfacesBuildStrategy(InterfacesBuildStrategy status);
 	void pruneStaleInterfaces();
-	virtual void _resetInterfaces();
+	virtual void _resetInterfaces(bool release);
 	virtual void _updateInterfaces();
 
 	bool testCellAlterationFlags(long id, AlterationFlags flags) const;
