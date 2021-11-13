@@ -5351,20 +5351,27 @@ void PatchKernel::buildAdjacencies()
 */
 void PatchKernel::initializeAdjacencies(AdjacenciesBuildStrategy strategy)
 {
-	// Initialize build strategy
+	// Get current build stategy
 	AdjacenciesBuildStrategy currentStrategy = getAdjacenciesBuildStrategy();
-	if (currentStrategy != strategy) {
-		// Reset adjacencies
+
+	// Early return if we don't need adjacencies
+	if (strategy == ADJACENCIES_NONE) {
 		if (currentStrategy != ADJACENCIES_NONE) {
 			destroyAdjacencies();
 		}
 
-		// Set adjacencies strategy
+		return;
+	}
+
+	// Update the build strategy
+	if (currentStrategy != strategy) {
 		setAdjacenciesBuildStrategy(strategy);
 	}
 
+	// Reset adjacencies
+	resetAdjacencies();
+
 	// Update the adjacencies
-	setCellAlterationFlags(FLAG_ADJACENCIES_DIRTY);
 	updateAdjacencies();
 }
 
@@ -5416,8 +5423,8 @@ void PatchKernel::destroyAdjacencies()
 		return;
 	}
 
-	// Reset the adjacencies
-	_resetAdjacencies();
+	// Destroy the adjacencies
+	_resetAdjacencies(true);
 
 	// Clear list of cells with dirty adjacencies
 	unsetCellAlterationFlags(FLAG_ADJACENCIES_DIRTY);
@@ -5429,7 +5436,7 @@ void PatchKernel::destroyAdjacencies()
 /*!
 	Reset the adjacencies.
 
-	This function doesn't change the build strategy, it only deletes the
+	This function doesn't change the build strategy, it only resets the
 	existing adjacencies.
 */
 void PatchKernel::resetAdjacencies()
@@ -5440,7 +5447,7 @@ void PatchKernel::resetAdjacencies()
 	}
 
 	// Reset adjacencies
-	_resetAdjacencies();
+	_resetAdjacencies(false);
 
 	// All cells have now dirty adjacencies
 	setCellAlterationFlags(FLAG_ADJACENCIES_DIRTY);
@@ -5450,11 +5457,15 @@ void PatchKernel::resetAdjacencies()
 	Internal function to reset the adjacencies.
 
 	This function doesn't change the alteration flags.
+
+	\param release if it's true the memory hold by the adjacencies will be
+	released, otherwise the adjacencies will be reset but their memory will
+	not be relased
 */
-void PatchKernel::_resetAdjacencies()
+void PatchKernel::_resetAdjacencies(bool release)
 {
 	for (Cell &cell : m_cells) {
-		cell.resetAdjacencies();
+		cell.resetAdjacencies(!release);
 	}
 }
 
@@ -5481,6 +5492,10 @@ void PatchKernel::pruneStaleAdjacencies()
 
 		long cellId = entry.first;
 		Cell &cell = m_cells.at(cellId);
+		if (cell.getAdjacencyCount() == 0) {
+			continue;
+		}
+
 		int nCellFaces = cell.getFaceCount();
 		for (int face = nCellFaces - 1; face >= 0; --face) {
 			long *faceAdjacencies = cell.getAdjacencies(face);

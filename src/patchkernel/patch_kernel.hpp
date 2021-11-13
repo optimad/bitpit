@@ -822,7 +822,7 @@ protected:
 	void setAdjacenciesBuildStrategy(AdjacenciesBuildStrategy status);
 	void resetAdjacencies();
 	void pruneStaleAdjacencies();
-	virtual void _resetAdjacencies();
+	virtual void _resetAdjacencies(bool release);
 	virtual void _updateAdjacencies();
 
 	void setInterfacesBuildStrategy(InterfacesBuildStrategy status);
