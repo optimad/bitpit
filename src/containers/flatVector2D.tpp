@@ -149,6 +149,17 @@ FlatVector2D<T>::FlatVector2D(const std::vector<std::vector<T> > &vector2D)
 }
 
 /*!
+    Check if the container has been initialized.
+
+    \result Returns true if the container has been initialized, false otherwise.
+*/
+template <class T>
+bool FlatVector2D<T>::isInitialized() const
+{
+    return (!m_index.empty());
+}
+
+/*!
     Initializes the container.
 
     \param sizes are the sizes of the vectors
@@ -976,6 +987,10 @@ T * FlatVector2D<T>::first()
 template <class T>
 std::size_t FlatVector2D<T>::size() const
 {
+    if (!isInitialized()) {
+        return 0;
+    }
+
     return (m_index.size() - 1);
 }
 
@@ -989,6 +1004,10 @@ std::size_t FlatVector2D<T>::size() const
 template <class T>
 std::size_t FlatVector2D<T>::capacity() const
 {
+    if (!isInitialized()) {
+        return 0;
+    }
+
     return m_index.capacity() - 1;
 }
 
@@ -1014,6 +1033,10 @@ void FlatVector2D<T>::merge()
 template <class T>
 std::size_t FlatVector2D<T>::getItemCount() const
 {
+    if (!isInitialized()) {
+        return 0;
+    }
+
     return m_v.size();
 }
 
@@ -1026,6 +1049,10 @@ std::size_t FlatVector2D<T>::getItemCount() const
 template <class T>
 std::size_t FlatVector2D<T>::getItemCount(std::size_t i) const
 {
+    if (!isInitialized()) {
+        return 0;
+    }
+
     return m_index[i + 1] - m_index[i];
 }
 
