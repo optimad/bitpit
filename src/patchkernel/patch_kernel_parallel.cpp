@@ -3765,6 +3765,8 @@ bool PatchKernel::arePartitioningInfoDirty(bool global) const
 {
 	if (!isPartitioned()) {
 		return false;
+	} else if (getProcessorCount() == 1) {
+		return false;
 	}
 
 	bool partitioningInfoDirty = m_partitioningInfoDirty;
@@ -3784,6 +3786,8 @@ bool PatchKernel::arePartitioningInfoDirty(bool global) const
 void PatchKernel::setPartitioningInfoDirty(bool dirty)
 {
 	if (dirty && !isPartitioned()) {
+		return;
+	} else if (getProcessorCount() == 1) {
 		return;
 	}
 
