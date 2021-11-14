@@ -2641,11 +2641,14 @@ PatchKernel::CellIterator PatchKernel::_addInternalCell(ElementType type, std::u
 #endif
 
 	// Create the cell
+	bool storeInterfaces  = (getInterfacesBuildStrategy() != INTERFACES_NONE);
+	bool storeAdjacencies = storeInterfaces || (getAdjacenciesBuildStrategy() != ADJACENCIES_NONE);
+
 	CellIterator iterator;
 	if (referenceId == Cell::NULL_ID) {
-		iterator = m_cells.emreclaim(id, id, type, std::move(connectStorage), true, true);
+		iterator = m_cells.emreclaim(id, id, type, std::move(connectStorage), true, storeInterfaces, storeAdjacencies);
 	} else {
-		iterator = m_cells.emreclaimBefore(referenceId, id, id, type, std::move(connectStorage), true, true);
+		iterator = m_cells.emreclaimBefore(referenceId, id, id, type, std::move(connectStorage), true, storeInterfaces, storeAdjacencies);
 	}
 	m_nInternalCells++;
 
@@ -2730,9 +2733,12 @@ void PatchKernel::_restoreInternalCell(const CellIterator &iterator, ElementType
 	//
 	// There is no need to set the id of the cell as assigned, because
 	// also the index generator will be restored.
+	bool storeInterfaces  = (getInterfacesBuildStrategy() != INTERFACES_NONE);
+	bool storeAdjacencies = storeInterfaces || (getAdjacenciesBuildStrategy() != ADJACENCIES_NONE);
+
 	long cellId = iterator.getId();
 	Cell &cell = *iterator;
-	cell.initialize(cellId, type, std::move(connectStorage), true, true);
+	cell.initialize(cellId, type, std::move(connectStorage), true, storeInterfaces, storeAdjacencies);
 	m_nInternalCells++;
 
 	// Set the alteration flags of the cell

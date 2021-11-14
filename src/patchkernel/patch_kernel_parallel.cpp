@@ -892,11 +892,14 @@ PatchKernel::CellIterator PatchKernel::_addGhostCell(ElementType type, std::uniq
 	//
 	// If there are internal cells, the ghost cell should be inserted
 	// after the last internal cell.
+	bool storeInterfaces  = (getInterfacesBuildStrategy() != INTERFACES_NONE);
+	bool storeAdjacencies = storeInterfaces || (getAdjacenciesBuildStrategy() != ADJACENCIES_NONE);
+
 	CellIterator iterator;
 	if (m_lastInternalCellId < 0) {
-		iterator = m_cells.emreclaim(id, id, type, std::move(connectStorage), false, true);
+		iterator = m_cells.emreclaim(id, id, type, std::move(connectStorage), false, storeInterfaces, storeAdjacencies);
 	} else {
-		iterator = m_cells.emreclaimAfter(m_lastInternalCellId, id, id, type, std::move(connectStorage), false, true);
+		iterator = m_cells.emreclaimAfter(m_lastInternalCellId, id, id, type, std::move(connectStorage), false, storeInterfaces, storeAdjacencies);
 	}
 	m_nGhostCells++;
 
@@ -975,9 +978,12 @@ void PatchKernel::_restoreGhostCell(const CellIterator &iterator, ElementType ty
 	//
 	// There is no need to set the id of the cell as assigned, because
 	// also the index generator will be restored.
+	bool storeInterfaces  = (getInterfacesBuildStrategy() != INTERFACES_NONE);
+	bool storeAdjacencies = storeInterfaces || (getAdjacenciesBuildStrategy() != ADJACENCIES_NONE);
+
 	long cellId = iterator.getId();
 	Cell &cell = *iterator;
-	cell.initialize(iterator.getId(), type, std::move(connectStorage), false, true);
+	cell.initialize(iterator.getId(), type, std::move(connectStorage), false, storeInterfaces, storeAdjacencies);
 	m_nGhostCells++;
 
 	// Set owner

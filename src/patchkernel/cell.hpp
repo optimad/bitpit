@@ -50,12 +50,12 @@ friend bitpit::IBinaryStream& (::operator>>) (bitpit::IBinaryStream& buf, Cell& 
 
 public:
 	Cell();
-	Cell(long id, ElementType type,
-	     bool interior = true, bool storeNeighbourhood = true);
-	Cell(long id, ElementType type, int connectSize,
-	     bool interior = true, bool storeNeighbourhood = true);
-	Cell(long id, ElementType type, std::unique_ptr<long[]> &&connectStorage,
-	     bool interior = true, bool storeNeighbourhood = true);
+	BITPIT_DEPRECATED(Cell(long id, ElementType type, bool interior, bool storeNeighbourhood));
+	BITPIT_DEPRECATED(Cell(long id, ElementType type, int connectSize, bool interior, bool storeNeighbourhood));
+	BITPIT_DEPRECATED(Cell(long id, ElementType type, std::unique_ptr<long[]> &&connectStorage, bool interior, bool storeNeighbourhood));
+	Cell(long id, ElementType type, bool interior = true, bool storeInterfaces = true, bool storeAjacencies = true);
+	Cell(long id, ElementType type, int connectSize, bool interior = true, bool storeInterfaces = true, bool storeAjacencies = true);
+	Cell(long id, ElementType type, std::unique_ptr<long[]> &&connectStorage, bool interior = true, bool storeInterfaces = true, bool storeAjacencies = true);
 
 	Cell(const Cell &other) = default;
 	Cell(Cell&& other) = default;
@@ -64,9 +64,12 @@ public:
 
 	void swap(Cell &other) noexcept;
 
-	void initialize(long id, ElementType type, bool interior, bool storeNeighbourhood = true);
-	void initialize(long id, ElementType type, int connectSize, bool interior, bool storeNeighbourhood = true);
-	void initialize(long id, ElementType type, std::unique_ptr<long[]> &&connectStorage, bool interior, bool storeNeighbourhood = true);
+	BITPIT_DEPRECATED(void initialize(long id, ElementType type, bool interior, bool storeNeighbourhood ));
+	BITPIT_DEPRECATED(void initialize(long id, ElementType type, int connectSize, bool interior, bool storeNeighbourhood));
+	BITPIT_DEPRECATED(void initialize(long id, ElementType type, std::unique_ptr<long[]> &&connectStorage, bool interior, bool storeNeighbourhood));
+	void initialize(long id, ElementType type, bool interior, bool storeInterfaces = true, bool storeAjacencies = true);
+	void initialize(long id, ElementType type, int connectSize, bool interior, bool storeInterfaces = true, bool storeAjacencies = true);
+	void initialize(long id, ElementType type, std::unique_ptr<long[]> &&connectStorage, bool interior, bool storeInterfaces = true, bool storeAjacencies = true);
 
 	bool isInterior() const;
 	
@@ -121,7 +124,7 @@ private:
 
 	bitpit::FlatVector2D<long> createNeighbourhoodStorage(bool storeNeighbourhood);
 
-	void _initialize(bool interior, bool initializeNeighbourhood, bool storeNeighbourhood);
+	void _initialize(bool interior, bool initializeInterfaces, bool storeInterfaces, bool initializeAdjacency, bool storeAdjacencies);
 
 };
 
