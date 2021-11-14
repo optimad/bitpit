@@ -706,6 +706,7 @@ public:
 
 	bool isPartitioned() const;
 	bool isPartitioningSupported() const;
+	bool arePartitioningInfoDirty(bool global = true) const;
 	PartitioningStatus getPartitioningStatus(bool global = false) const;
 	double evalPartitioningUnbalance() const;
 	double evalPartitioningUnbalance(const std::unordered_map<long, double> &cellWeights) const;
@@ -994,7 +995,6 @@ private:
 	std::vector<adaption::Info> _partitioningAlter_sendCells(const std::unordered_set<int> &recvRanks, bool trackPartitioning, std::unordered_map<long, int> *ghostCellOwnershipChanges);
 	std::vector<adaption::Info> _partitioningAlter_receiveCells(const std::unordered_set<int> &sendRanks, bool trackPartitioning, std::unordered_map<long, int> *ghostCellOwnershipChanges);
 
-	bool arePartitioningInfoDirty(bool global = true) const;
 	void setPartitioningInfoDirty(bool dirty);
 
 	void updatePartitioningInfo(bool forcedUpdated = false);
