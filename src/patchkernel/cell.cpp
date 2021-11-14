@@ -93,7 +93,7 @@ namespace bitpit {
 	must be taken to ensure that all members needed by the function are
 	already initialized at the time the function is called.
 
-	\param storeNeighbourhood defines is the cell should store neighbourhood
+	\param storeNeighbourhood defines if the cell should store neighbourhood
 	information
 */
 bitpit::FlatVector2D<long> Cell::createNeighbourhoodStorage(bool storeNeighbourhood)
@@ -128,8 +128,8 @@ Cell::Cell()
 
 	\param id is the id that will be assigned to the element
 	\param type is the type of the element
-	\param interior defines is the cell is interior or ghost
-	\param storeNeighbourhood defines is the cell should store neighbourhood
+	\param interior defines if the cell is interior or ghost
+	\param storeNeighbourhood defines if the cell should store neighbourhood
 	information
 */
 Cell::Cell(long id, ElementType type, bool interior, bool storeNeighbourhood)
@@ -144,8 +144,8 @@ Cell::Cell(long id, ElementType type, bool interior, bool storeNeighbourhood)
 	\param type is the type of the element
 	\param connectSize is the size of the connectivity, this is only used
 	if the element is not associated to a reference element
-	\param interior defines is the cell is interior or ghost
-	\param storeNeighbourhood defines is the cell should store neighbourhood
+	\param interior defines if the cell is interior or ghost
+	\param storeNeighbourhood defines if the cell should store neighbourhood
 	information
 */
 Cell::Cell(long id, ElementType type, int connectSize, bool interior, bool storeNeighbourhood)
@@ -160,8 +160,8 @@ Cell::Cell(long id, ElementType type, int connectSize, bool interior, bool store
 	\param type is the type of the element
 	\param connectStorage is the storage the contains or will contain
 	the connectivity of the element
-	\param interior defines is the cell is interior or ghost
-	\param storeNeighbourhood defines is the cell should store neighbourhood
+	\param interior defines if the cell is interior or ghost
+	\param storeNeighbourhood defines if the cell should store neighbourhood
 	information
 */
 Cell::Cell(long id, ElementType type, std::unique_ptr<long[]> &&connectStorage, bool interior, bool storeNeighbourhood)
@@ -174,7 +174,7 @@ Cell::Cell(long id, ElementType type, std::unique_ptr<long[]> &&connectStorage, 
 
 	\param id is the id that will be assigned to the element
 	\param type is the type of the element
-	\param interior defines is the cell is interior or ghost
+	\param interior defines if the cell is interior or ghost
 	\param storeInterfaces defines if the cell should initialize the storage
 	for storing interface information
 	\param storeAdjacencies defines if the cell should initialize the storage
@@ -195,7 +195,7 @@ Cell::Cell(long id, ElementType type, bool interior, bool storeInterfaces, bool 
 	\param type is the type of the element
 	\param connectSize is the size of the connectivity, this is only used
 	if the element is not associated to a reference element
-	\param interior defines is the cell is interior or ghost
+	\param interior defines if the cell is interior or ghost
 	\param storeInterfaces defines if the cell should initialize the storage
 	for storing interface information
 	\param storeAdjacencies defines if the cell should initialize the storage
@@ -216,7 +216,7 @@ Cell::Cell(long id, ElementType type, int connectSize, bool interior, bool store
 	\param type is the type of the element
 	\param connectStorage is the storage the contains or will contain
 	the connectivity of the element
-	\param interior defines is the cell is interior or ghost
+	\param interior defines if the cell is interior or ghost
 	\param storeInterfaces defines if the cell should initialize the storage
 	for storing interface information
 	\param storeAdjacencies defines if the cell should initialize the storage
@@ -283,7 +283,7 @@ void Cell::initialize(long id, ElementType type, int connectSize, bool interior,
 	\param connectStorage is the storage the contains or will contain
 	the connectivity of the element
 	\param interior if true the cell is flagged as interior
-	\param storeNeighbourhood defines is the cell should store neighbourhood
+	\param storeNeighbourhood defines if the cell should store neighbourhood
 	information
 */
 void Cell::initialize(long id, ElementType type, std::unique_ptr<long[]> &&connectStorage, bool interior, bool storeNeighbourhood)
