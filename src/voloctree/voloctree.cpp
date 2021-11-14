@@ -669,7 +669,7 @@ void VolOctree::simulateCellUpdate(long id, adaption::Marker marker, std::vector
 			virtualVertices->emplaceBack(vertexId, vertexId, m_tree->getNode(virtualOctant, i));
 		}
 
-		virtualCells->emplace_back(id, m_cellTypeInfo->type, std::move(connectStorage), true, false);
+		virtualCells->emplace_back(id, m_cellTypeInfo->type, std::move(connectStorage), true, false, false);
 	}
 }
 

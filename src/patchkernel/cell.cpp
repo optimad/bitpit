@@ -133,11 +133,8 @@ Cell::Cell()
 	information
 */
 Cell::Cell(long id, ElementType type, bool interior, bool storeNeighbourhood)
-	: Element(id, type),
-      m_interfaces(createNeighbourhoodStorage(storeNeighbourhood)),
-      m_adjacencies(createNeighbourhoodStorage(storeNeighbourhood))
+	: Cell(id, type, interior, storeNeighbourhood, storeNeighbourhood)
 {
-	_initialize(interior, false, false);
 }
 
 /*!
@@ -152,11 +149,8 @@ Cell::Cell(long id, ElementType type, bool interior, bool storeNeighbourhood)
 	information
 */
 Cell::Cell(long id, ElementType type, int connectSize, bool interior, bool storeNeighbourhood)
-	: Element(id, type, connectSize),
-      m_interfaces(createNeighbourhoodStorage(storeNeighbourhood)),
-      m_adjacencies(createNeighbourhoodStorage(storeNeighbourhood))
+	: Cell(id, type, connectSize, interior, storeNeighbourhood, storeNeighbourhood)
 {
-	_initialize(interior, false, false);
 }
 
 /*!
@@ -171,11 +165,69 @@ Cell::Cell(long id, ElementType type, int connectSize, bool interior, bool store
 	information
 */
 Cell::Cell(long id, ElementType type, std::unique_ptr<long[]> &&connectStorage, bool interior, bool storeNeighbourhood)
-	: Element(id, type, std::move(connectStorage)),
-      m_interfaces(createNeighbourhoodStorage(storeNeighbourhood)),
-      m_adjacencies(createNeighbourhoodStorage(storeNeighbourhood))
+	: Cell(id, type, std::move(connectStorage), interior, storeNeighbourhood, storeNeighbourhood)
 {
-	_initialize(interior, false, false);
+}
+
+/*!
+	Creates a new cell.
+
+	\param id is the id that will be assigned to the element
+	\param type is the type of the element
+	\param interior defines is the cell is interior or ghost
+	\param storeInterfaces defines if the cell should initialize the storage
+	for storing interface information
+	\param storeAdjacencies defines if the cell should initialize the storage
+	for storing adjacency information
+*/
+Cell::Cell(long id, ElementType type, bool interior, bool storeInterfaces, bool storeAdjacencies)
+	: Element(id, type),
+      m_interfaces(createNeighbourhoodStorage(storeInterfaces)),
+      m_adjacencies(createNeighbourhoodStorage(storeAdjacencies))
+{
+	_initialize(interior, false, false, false, false);
+}
+
+/*!
+	Creates a new cell.
+
+	\param id is the id that will be assigned to the element
+	\param type is the type of the element
+	\param connectSize is the size of the connectivity, this is only used
+	if the element is not associated to a reference element
+	\param interior defines is the cell is interior or ghost
+	\param storeInterfaces defines if the cell should initialize the storage
+	for storing interface information
+	\param storeAdjacencies defines if the cell should initialize the storage
+	for storing adjacency information
+*/
+Cell::Cell(long id, ElementType type, int connectSize, bool interior, bool storeInterfaces, bool storeAdjacencies)
+	: Element(id, type, connectSize),
+      m_interfaces(createNeighbourhoodStorage(storeInterfaces)),
+      m_adjacencies(createNeighbourhoodStorage(storeAdjacencies))
+{
+	_initialize(interior, false, false, false, false);
+}
+
+/*!
+	Creates a new cell.
+
+	\param id is the id that will be assigned to the element
+	\param type is the type of the element
+	\param connectStorage is the storage the contains or will contain
+	the connectivity of the element
+	\param interior defines is the cell is interior or ghost
+	\param storeInterfaces defines if the cell should initialize the storage
+	for storing interface information
+	\param storeAdjacencies defines if the cell should initialize the storage
+	for storing adjacency information
+*/
+Cell::Cell(long id, ElementType type, std::unique_ptr<long[]> &&connectStorage, bool interior, bool storeInterfaces, bool storeAdjacencies)
+	: Element(id, type, std::move(connectStorage)),
+      m_interfaces(createNeighbourhoodStorage(storeInterfaces)),
+      m_adjacencies(createNeighbourhoodStorage(storeAdjacencies))
+{
+	_initialize(interior, false, false, false, false);
 }
 
 /**
@@ -204,9 +256,7 @@ void Cell::swap(Cell &other) noexcept
 */
 void Cell::initialize(long id, ElementType type, bool interior, bool storeNeighbourhood)
 {
-	Element::initialize(id, type);
-
-	_initialize(interior, true, storeNeighbourhood);
+	initialize(id, type, interior, storeNeighbourhood, storeNeighbourhood);
 }
 
 /*!
@@ -222,9 +272,7 @@ void Cell::initialize(long id, ElementType type, bool interior, bool storeNeighb
 */
 void Cell::initialize(long id, ElementType type, int connectSize, bool interior, bool storeNeighbourhood)
 {
-	Element::initialize(id, type, connectSize);
-
-	_initialize(interior, true, storeNeighbourhood);
+	initialize(id, type, connectSize, interior, storeNeighbourhood, storeNeighbourhood);
 }
 
 /*!
@@ -240,28 +288,92 @@ void Cell::initialize(long id, ElementType type, int connectSize, bool interior,
 */
 void Cell::initialize(long id, ElementType type, std::unique_ptr<long[]> &&connectStorage, bool interior, bool storeNeighbourhood)
 {
+	initialize(id, type, std::move(connectStorage), interior, storeNeighbourhood, storeNeighbourhood);
+}
+
+/*!
+	Initializes the data structures of the cell.
+
+	\param id is the id of the element
+	\param type is the type of the element
+	\param interior if true the cell is flagged as interior
+	\param storeInterfaces defines if the cell should initialize the storage
+	for storing interface information
+	\param storeAdjacencies defines if the cell should initialize the storage
+	for storing adjacency information
+*/
+void Cell::initialize(long id, ElementType type, bool interior, bool storeInterfaces, bool storeAdjacencies)
+{
+	Element::initialize(id, type);
+
+	_initialize(interior, true, storeInterfaces, true, storeAdjacencies);
+}
+
+/*!
+	Initializes the data structures of the cell.
+
+	\param id is the id of the element
+	\param type is the type of the element
+	\param connectSize is the size of the connectivity, this is only used
+	if the element is not associated to a reference element
+	\param interior if true the cell is flagged as interior
+	\param storeInterfaces defines if the cell should initialize the storage
+	for storing interface information
+	\param storeAdjacencies defines if the cell should initialize the storage
+	for storing adjacency information
+*/
+void Cell::initialize(long id, ElementType type, int connectSize, bool interior, bool storeInterfaces, bool storeAdjacencies)
+{
+	Element::initialize(id, type, connectSize);
+
+	_initialize(interior, true, storeInterfaces, true, storeAdjacencies);
+}
+
+/*!
+	Initializes the data structures of the cell.
+
+	\param id is the id of the element
+	\param type is the type of the element
+	\param connectStorage is the storage the contains or will contain
+	the connectivity of the element
+	\param interior if true the cell is flagged as interior
+	\param storeInterfaces defines if the cell should initialize the storage
+	for storing interface information
+	\param storeAdjacencies defines if the cell should initialize the storage
+	for storing adjacency information
+*/
+void Cell::initialize(long id, ElementType type, std::unique_ptr<long[]> &&connectStorage, bool interior, bool storeInterfaces, bool storeAdjacencies)
+{
 	Element::initialize(id, type, std::move(connectStorage));
 
-	_initialize(interior, true, storeNeighbourhood);
+	_initialize(interior, true, storeInterfaces, true, storeAdjacencies);
 }
 
 /*!
 	Internal function to initialize the data structures of the cell.
 
 	\param interior if true the cell is flagged as interior
-	\param initializeNeighbourhood defines if neighbourhood information will
+	\param initializeInterfaces defines if interface information will
 	be initialized
-	\param storeNeighbourhood defines is the cell should store neighbourhood
-	information
+	\param storeInterfaces defines if the cell should initialize the storage
+	for storing interface information
+	\param initializeAdjacency defines if adjacency information will
+	be initialized
+	\param storeAdjacencies defines if the cell should initialize the storage
+	for storing adjacency information
 */
-void Cell::_initialize(bool interior, bool initializeNeighbourhood, bool storeNeighbourhood)
+void Cell::_initialize(bool interior, bool initializeInterfaces, bool storeInterfaces, bool initializeAdjacency, bool storeAdjacencies)
 {
 	setInterior(interior);
 
-	// Neighbourhood
-	if (initializeNeighbourhood) {
-		resetInterfaces(storeNeighbourhood);
-		resetAdjacencies(storeNeighbourhood);
+	// Interface information
+	if (initializeInterfaces) {
+		resetInterfaces(storeInterfaces);
+	}
+
+	// Interface information
+	if (initializeAdjacency) {
+		resetAdjacencies(storeAdjacencies);
 	}
 }
 
