@@ -1428,6 +1428,26 @@ const Vertex & PatchKernel::getVertex(long id) const
 }
 
 /*!
+	Gets a reference to the last internal vertex.
+
+	\return A reference to the last internal vertex.
+*/
+Vertex & PatchKernel::getLastInternalVertex()
+{
+	return m_vertices[m_lastInternalVertexId];
+}
+
+/*!
+	Gets a constant reference to the last internal vertex.
+
+	\return A constant reference to the last internal vertex.
+*/
+const Vertex & PatchKernel::getLastInternalVertex() const
+{
+	return m_vertices[m_lastInternalVertexId];
+}
+
+/*!
 	Returns an iterator pointing to the specified vertex.
 
 	\result An iterator to the specified vertex.
