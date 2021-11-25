@@ -49,7 +49,7 @@ int subtest_001(int rank, int nProcs)
 
     /**<Instantation and setup of a custom (named custom) logfile.*/
     log::manager().create("custom", false, nProcs, rank);
-    log::cout("custom") << fileVerbosity(log::NORMAL);
+    log::cout("custom") << fileVerbosity(log::INFO);
     log::cout("custom") << consoleVerbosity(log::QUIET);
 
     /**<Set coordinates of the origin and size of a 2D custom para_tree object.*/
@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
 
     // Initialize the logger
     log::manager().initialize(log::SEPARATE, false, nProcs, rank);
-    log::cout() << fileVerbosity(log::NORMAL);
+    log::cout() << fileVerbosity(log::INFO);
     log::cout() << consoleVerbosity(log::QUIET);
 
     // Run the subtests

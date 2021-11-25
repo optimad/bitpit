@@ -262,7 +262,7 @@ int main(int argc, char *argv[])
 
     // Initialize the logger
     log::manager().initialize(log::COMBINED, true, nProcs, rank);
-    log::cout().setVisibility(log::GLOBAL);
+    log::cout().setDefaultVisibility(log::GLOBAL);
 
     // Run the subtests
     log::cout() << "Testing parallel AMR with periodic boundary conditions." << std::endl;

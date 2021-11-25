@@ -220,6 +220,10 @@ int LoggerBuffer::flush(bool terminate)
 */
 void LoggerBuffer::setConsoleEnabled(bool enabled)
 {
+    if (m_consoleEnabled == enabled) {
+        return;
+    }
+
     flush(true);
 
     m_consoleEnabled = enabled;
@@ -302,6 +306,10 @@ std::string LoggerBuffer::getConsolePrefix() const
 */
 void LoggerBuffer::setFileEnabled(bool enabled)
 {
+    if (m_fileEnabled == enabled) {
+        return;
+    }
+
     flush(true);
 
     m_fileEnabled = enabled;
@@ -438,8 +446,9 @@ Logger::Logger(const std::string &name,
                int nProcessors, int rank)
     : std::ios(0), std::ostream(&m_buffer),
     m_name(name), m_nProcessors(nProcessors), m_rank(rank), m_buffer(256),
-    m_indentation(0), m_context(""), m_priority(log::NORMAL), m_visibility(log::MASTER),
-    m_consoleVerbosity(log::NORMAL), m_fileVerbosity(log::NORMAL)
+    m_indentation(0), m_context(""),
+    m_defaultSeverity(log::INFO), m_defaultVisibility(log::MASTER),
+    m_consoleVerbosityThreshold(log::INFO), m_fileVerbosityThreshold(log::INFO)
 {
     // Set buffer data
     setConsoleStream(consoleStream);
@@ -459,13 +468,9 @@ Logger::Logger(const std::string &name,
         m_buffer.setFilePrefix("");
     }
 
-    // Reset verbosity
-    setConsoleVerbosity(m_consoleVerbosity);
-    setFileVerbosity(m_fileVerbosity);
-
-    // Set logger data
-    setPriority(log::NORMAL);
-    setVisibility(log::MASTER);
+    // Set default logger properties
+    setConsoleEnabled(m_defaultSeverity, m_defaultVisibility);
+    setFileEnabled(m_defaultSeverity, m_defaultVisibility);
 }
 
 /*!
@@ -510,16 +515,38 @@ std::ofstream & Logger::getFileStream()
 }
 
 /*!
-    Sets the current priority of the messages.
+    Sets the default severity of the messages.
 
-    \param priority is the priority of the messags that will be printed
+    \param severity is the default severity of the messages
+*/
+void Logger::setDefaultSeverity(log::Level severity)
+{
+    // Set default severity
+    m_defaultSeverity = severity;
+
+    // Set default logger properties
+    setConsoleEnabled(m_defaultSeverity, m_defaultVisibility);
+    setFileEnabled(m_defaultSeverity, m_defaultVisibility);
+}
+
+/*!
+    Gets the default severity of the messages.
+
+    \result The gets the default severity of the messages.
+*/
+log::Level Logger::getDefaultSeverity()
+{
+    return m_defaultSeverity;
+}
+
+/*!
+    Sets the default priority of the messages.
+
+    \param priority is the default priority of the messages
 */
 void Logger::setPriority(log::Priority priority)
 {
-    m_priority = priority;
-
-    setConsoleVerbosity(m_consoleVerbosity);
-    setFileVerbosity(m_fileVerbosity);
+    setDefaultSeverity(priority);
 }
 
 /*!
@@ -529,20 +556,42 @@ void Logger::setPriority(log::Priority priority)
 */
 log::Priority Logger::getPriority()
 {
-    return m_priority;
+    return getDefaultSeverity();
+}
+
+/*!
+    Sets the default visibility of the messages.
+
+    \param visibility is the default visibility of the messages
+*/
+void Logger::setDefaultVisibility(log::Visibility visibility)
+{
+    // Set default visibility
+    m_defaultVisibility = visibility;
+
+    // Set default logger properties
+    setConsoleEnabled(m_defaultSeverity, m_defaultVisibility);
+    setFileEnabled(m_defaultSeverity, m_defaultVisibility);
+}
+
+/*!
+    Gets the default visibility of the messages.
+
+    \result The gets the visibility of the messages.
+*/
+log::Visibility Logger::getDefaultVisibility()
+{
+    return m_defaultVisibility;
 }
 
 /*!
     Sets the visibility of the messages.
 
-    \param visibility is the visibility of the messags that will be printed
+    \param visibility is the default visibility of the messages
 */
 void Logger::setVisibility(log::Visibility visibility)
 {
-    m_visibility = visibility;
-
-    setConsoleVerbosity(m_consoleVerbosity);
-    setFileVerbosity(m_fileVerbosity);
+    setDefaultVisibility(visibility);
 }
 
 /*!
@@ -552,19 +601,23 @@ void Logger::setVisibility(log::Visibility visibility)
 */
 log::Visibility Logger::getVisibility()
 {
-    return m_visibility;
+    return getDefaultVisibility();
 }
 
 /*!
-    Set the verbosity for the messages printed both on the console and on the
-    log file.
+    Sets the verbosity threshold for messages printed on the console and on
+    the log file.
 
-    \param verbosity is the verbosity for the messages
+    Logging messages which are less severe than the verbosity threshold
+    will be ignored; logging messages which have severity equal to the
+    verbosity threshold or higher will be printed.
+
+    \param threshold is the verbosity threshold
 */
-void Logger::setVerbosities(log::Verbosity verbosity)
+void Logger::setVerbosities(log::Level threshold)
 {
-    setConsoleVerbosity(verbosity);
-    setFileVerbosity(verbosity);
+    setConsoleVerbosity(threshold);
+    setFileVerbosity(threshold);
 }
 
 /*!
@@ -601,30 +654,54 @@ void Logger::setConsoleTimestampEnabled(bool enabled)
 }
 
 /*!
-    Sets the verbosity for the messages printed on the console.
+    Sets the verbosity threshold for messages printed on the console.
 
-    \param verbosity is the verbosity for the messages printed on the console
+    Logging messages which are less severe than the verbosity threshold
+    will be ignored; logging messages which have severity equal to the
+    verbosity threshold or higher will be printed.
+
+    \param threshold is the verbosity threshold
 */
-void Logger::setConsoleVerbosity(log::Verbosity verbosity)
+void Logger::setConsoleVerbosity(log::Level threshold)
 {
-    m_consoleVerbosity = verbosity;
-    if (m_consoleVerbosity == log::QUIET) {
-        m_buffer.setConsoleEnabled(false);
-    } else if (m_visibility == log::MASTER && (m_rank != 0)) {
-        m_buffer.setConsoleEnabled(false);
-    } else {
-        m_buffer.setConsoleEnabled(m_consoleVerbosity >= m_priority);
-    }
+    // Set verbosity threshold
+    m_consoleVerbosityThreshold = threshold;
+
+    // Set default logger properties
+    setConsoleEnabled(m_defaultSeverity, m_defaultVisibility);
 }
 
 /*!
-    Gets the verbosity for the messages printed on the console.
+    Enable or disable console logging.
+
+    \param severity is the severity of the message to be printed
+    \param visibility is the visibility of the message to be printed
+*/
+void Logger::setConsoleEnabled(log::Level severity, log::Visibility visibility)
+{
+    bool isConsoleEnabled = true;
+    if (m_consoleVerbosityThreshold == log::QUIET) {
+        isConsoleEnabled = false;
+    } else if (visibility == log::MASTER && (m_rank != 0)) {
+        isConsoleEnabled = false;
+    } else {
+        isConsoleEnabled = (severity >= m_consoleVerbosityThreshold);
+    }
+    m_buffer.setConsoleEnabled(isConsoleEnabled);
+}
+
+/*!
+    Gets the verbosity threshold for messages printed on the console.
+
+    Logging messages which are less severe than the verbosity threshold
+    will be ignored; logging messages which have severity equal to the
+    verbosity threshold or higher will be printed.
 
     \result The verbosity for the messages printed on the console.
 */
-log::Verbosity Logger::getConsoleVerbosity()
+log::Level Logger::getConsoleVerbosity()
 {
-    return m_consoleVerbosity;
+    return m_consoleVerbosityThreshold;
 }
 
 /*!
@@ -659,33 +736,52 @@ void Logger::setFileTimestampEnabled(bool enabled)
 }
 
 /*!
-    Sets the verbosity for the messages printed on the log file.
+    Sets the verbosity threshold for messages printed on the log file.
 
-    \param verbosity is the verbosity for the messages printed on the log file
+    Logging messages which are less severe than the verbosity threshold
+    will be ignored; logging messages which have severity equal to the
+    verbosity threshold or higher will be printed.
+
+    \param threshold is the verbosity threshold
 */
-void Logger::setFileVerbosity(log::Verbosity verbosity)
+void Logger::setFileVerbosity(log::Level threshold)
 {
-    m_fileVerbosity = verbosity;
+    // Set verbosity threshold
+    m_fileVerbosityThreshold = threshold;
 
-    bool isFileEnabled;
-    if (m_fileVerbosity == log::QUIET) {
-        isFileEnabled = false;
-    } else if (m_visibility == log::MASTER && (m_rank != 0)) {
-        isFileEnabled = false;
-    } else {
-        isFileEnabled = (m_fileVerbosity >= m_priority);
-    }
-    m_buffer.setFileEnabled(isFileEnabled);
+    // Set default logger properties
+    setConsoleEnabled(m_defaultSeverity, m_defaultVisibility);
 }
 
 /*!
-    Gets the verbosity for the messages printed on the log file.
+    Gets the verbosity threshold for messages printed on the log file.
 
-    \result The verbosity for the messages printed on the log file.
+    Logging messages which are less severe than the verbosity threshold
+    will be ignored; logging messages which have severity equal to the
+    verbosity threshold or higher will be printed.
 */
-log::Verbosity Logger::getFileVerbosity()
+log::Level Logger::getFileVerbosity()
 {
-    return m_fileVerbosity;
+    return m_fileVerbosityThreshold;
+}
+
+/*!
+    Enable or disable file logging.
+
+    \param severity is the severity of the message to be printed
+    \param visibility is the visibility of the message to be printed
+*/
+void Logger::setFileEnabled(log::Level severity, log::Visibility visibility)
+{
+    bool isFileEnabled = true;
+    if (m_fileVerbosityThreshold == log::QUIET) {
+        isFileEnabled = false;
+    } else if (visibility == log::MASTER && (m_rank != 0)) {
+        isFileEnabled = false;
+    } else {
+        isFileEnabled = (severity >= m_fileVerbosityThreshold);
+    }
+    m_buffer.setFileEnabled(isFileEnabled);
 }
 
 /*!
@@ -787,11 +883,11 @@ void Logger::println(const std::string &line)
     Prints a line in the log.
 
     \param line is the line to be printed
-    \param priority is the priority of the line that will be printed
+    \param severity is the severity of the line that will be printed
 */
-void Logger::println(const std::string &line, log::Priority priority)
+void Logger::println(const std::string &line, log::Level severity)
 {
-    print(line + '\n', priority);
+    print(line + '\n', severity);
 }
 
 /*!
@@ -809,12 +905,12 @@ void Logger::println(const std::string &line, log::Visibility visibility)
     Prints a line in the log.
 
     \param line is the line to be printed
-    \param priority is the priority of the line that will be printed
+    \param severity is the severity of the line that will be printed
     \param visibility is the visibility of the line that will be printed
 */
-void Logger::println(const std::string &line, log::Priority priority, log::Visibility visibility)
+void Logger::println(const std::string &line, log::Level severity, log::Visibility visibility)
 {
-    print(line + '\n', priority, visibility);
+    print(line + '\n', severity, visibility);
 }
 
 /*!
@@ -831,51 +927,46 @@ void Logger::print(const std::string &message)
     Prints a message in the log.
 
     \param message is the message to be printed
-    \param priority is the priority of the message that will be printed
+    \param severity is the severity of the line that will be printed
 */
-void Logger::print(const std::string &message, log::Priority priority)
+void Logger::print(const std::string &message, log::Level severity)
 {
-    print(message, priority, getVisibility());
+    print(message, severity, getDefaultVisibility());
 }
 
 /*!
     Prints a message in the log.
 
     \param message is the message to be printed
-    \param visibility is the visibility of the message that will be printed
+    \param visibility is the visibility of the line that will be printed
 */
 void Logger::print(const std::string &message, log::Visibility visibility)
 {
-    print(message, getPriority(), visibility);
+    print(message, getDefaultSeverity(), visibility);
 }
 
 /*!
     Prints a message in the log.
 
     \param message is the message to be printed
-    \param priority is the priority of the message to be printed
-    \param visibility is the visibility of the message that will be printed
+    \param severity is the severity of the line to be printed
+    \param visibility is the visibility of the line that will be printed
 */
-void Logger::print(const std::string &message, log::Priority priority, log::Visibility visibility)
+void Logger::print(const std::string &message, log::Level severity, log::Visibility visibility)
 {
-    log::Priority initialPriority = getPriority();
-    if (priority != initialPriority) {
-        setPriority(priority);
+    // Set logger properties for the message that need to be printed
+    if (severity != m_defaultSeverity || visibility != m_defaultVisibility) {
+        setConsoleEnabled(severity, visibility);
+        setFileEnabled(severity, visibility);
     }
 
-    log::Visibility initialVisibility = getVisibility();
-    if (visibility != initialVisibility) {
-        setVisibility(visibility);
-    }
-
+    // Print the line
     (*this) << message;
 
-    if (priority != initialPriority) {
-        setPriority(initialPriority);
-    }
-
-    if (visibility != initialVisibility) {
-        setVisibility(initialVisibility);
+    // Reset default logger properties
+    if (severity != m_defaultSeverity || visibility != m_defaultVisibility) {
+        setConsoleEnabled(m_defaultSeverity, m_defaultVisibility);
+        setFileEnabled(m_defaultSeverity, m_defaultVisibility);
     }
 }
 
@@ -1263,44 +1354,56 @@ void LoggerManager::_create(const std::string &name, Logger &master)
     logger.setConsoleVerbosity(master.getConsoleVerbosity());
     logger.setFileTimestampEnabled(master.isFileTimestampEnabled());
     logger.setFileVerbosity(master.getFileVerbosity());
-    logger.setVisibility(master.getVisibility());
-    logger.setPriority(master.getPriority());
+    logger.setDefaultSeverity(master.getDefaultSeverity());
+    logger.setDefaultVisibility(master.getDefaultVisibility());
 }
 
 /*!
-    Sets the verbosity for the messages printed both on the console and on the
-    log file.
+    Sets the verbosity threshold for messages printed on the console and on
+    the log file.
 
-    \param verbosity is the verbosity for the messages
+    Logging messages which are less severe than the verbosity threshold
+    will be ignored; logging messages which have severity equal to the
+    verbosity threshold or higher will be printed.
+
+    \param threshold is the verbosity threshold
 */
-void LoggerManager::setVerbosities(log::Verbosity verbosity)
+void LoggerManager::setVerbosities(log::Level threshold)
 {
     for (auto &entry : m_loggers) {
-        entry.second->setVerbosities(verbosity);
+        entry.second->setVerbosities(threshold);
     }
 }
 
 /*!
-    Sets the verbosity for the messages printed on the console.
+    Sets the verbosity threshold for messages printed on the console.
 
-    \param verbosity is the verbosity for the messages printed on the console
+    Logging messages which are less severe than the verbosity threshold
+    will be ignored; logging messages which have severity equal to the
+    verbosity threshold or higher will be printed.
+
+    \param threshold is the verbosity threshold
 */
-void LoggerManager::setConsoleVerbosity(log::Verbosity verbosity)
+void LoggerManager::setConsoleVerbosity(log::Level threshold)
 {
     for (auto &entry : m_loggers) {
-        entry.second->setConsoleVerbosity(verbosity);
+        entry.second->setConsoleVerbosity(threshold);
     }
 }
 
 /*!
-    Sets the verbosity for the messages printed on the file.
+    Sets the verbosity threshold for messages printed on the log file.
 
-    \param verbosity is the verbosity for the messages printed on the file
+    Logging messages which are less severe than the verbosity threshold
+    will be ignored; logging messages which have severity equal to the
+    verbosity threshold or higher will be printed.
+
+    \param threshold is the verbosity threshold
 */
-void LoggerManager::setFileVerbosity(log::Verbosity verbosity)
+void LoggerManager::setFileVerbosity(log::Level threshold)
 {
     for (auto &entry : m_loggers) {
-        entry.second->setFileVerbosity(verbosity);
+        entry.second->setFileVerbosity(threshold);
     }
 }
 
@@ -1328,26 +1431,54 @@ std::string LoggerManager::getDefaultDirectory() const
 namespace log {
 
     /*!
-        \enum Verbosity
+        \enum Level
 
-        The verbosity of the message logger.
+        Define the logging levels.
 
-        \var Verbosity QUIET
-        No messages wll be written to the output.
+        \var Level CRITICAL
+        This level identifies messages categorized as critical errors.
 
-        \var Verbosity NORMAL
-        Only messgaes with priority greater of equal "NORMAL" will be written
-        to the output.
+        \var Level ERROR
+        This level identifies messages categorized as errors.
 
-        \var Verbosity DEBUG
-        Only messgaes with priority greater of equal "DEBUG" will be written
-        to the output.
+        \var Level WARNING
+        This level identifies messages categorized as warnings.
+
+        \var Level INFO
+        This level identifies messages categorized as information.
+
+        \var Level NORMAL
+        This level identifies messages categorized as information. The usage of
+        this level is deprecated as it as been superseded by INFO.
+
+        \var Level DEBUG
+        This level identifies messages categorized as debug.
+
+        \var Level QUIET
+        This level identifies messages that will not be written.
+    */
+
+    /*!
+        \typedef Severity
+
+        Defines the severity levels that can be associated with a line.
+        Severity is defined as a typedef of Level.
     */
 
     /*!
         \typedef Priority
 
-        The priority of a message.
+        Defines the priority levels that can be associated with a line.
+        The usage of this enum is deprecated as it as been superseded by
+        Severity.
+    */
+
+    /*!
+        \typedef Verbosity
+
+        Defines the verbosity levels that can be associated with a logger.
+        The usage of this enum is deprecated as it as been superseded by
+        Level.
     */
 
     // Generic global functions
@@ -1413,6 +1544,33 @@ namespace log {
     }
 
     /*!
+        Set the default severity of the messageg for the specified logger.
+
+        \param logger is a reference pointing to the logger
+        \param severity is the default severity of the messages
+        \result A reference pointing to the logger received in input.
+    */
+    Logger& setDefaultSeverity(Logger& logger, const log::Level &severity)
+    {
+        logger.setDefaultSeverity(severity);
+
+        return logger;
+    }
+
+    /*!
+        Returns a logger manipulator that allows to change the default severity
+        of the messages.
+
+        \param severity is the default severity of the messages
+        \result A logger manipulator that allows to change the severity of the
+        output.
+    */
+    LoggerManipulator<log::Level> defaultSeverity(const log::Level &severity)
+    {
+        return LoggerManipulator<log::Level>(setDefaultSeverity, severity);
+    }
+
+    /*!
         Set the priority of the output for the specified logger.
 
         \param logger is a reference pointing to the logger
@@ -1421,7 +1579,7 @@ namespace log {
     */
     Logger& setPriority(Logger& logger, const log::Priority &priority)
     {
-        logger.setPriority(priority);
+        logger.setDefaultSeverity(priority);
 
         return logger;
     }
@@ -1436,7 +1594,34 @@ namespace log {
     */
     LoggerManipulator<log::Priority> priority(const log::Priority &priority)
     {
-        return LoggerManipulator<log::Priority>(setPriority, priority);
+        return LoggerManipulator<log::Priority>(setDefaultSeverity, priority);
+    }
+
+    /*!
+        Set the default visibility of the messages.
+
+        \param logger is a reference pointing to the logger
+        \param visibility is the default visibility of the messages
+        \result A reference pointing to the logger received in input.
+    */
+    Logger& setDefaultVisibility(Logger& logger, const log::Visibility &visibility)
+    {
+        logger.setDefaultVisibility(visibility);
+
+        return logger;
+    }
+
+    /*!
+        Returns a logger manipulator that allows to change the default
+        visibility of the messages.
+
+        \param visibility is the default visibility of the messages
+        \result A logger manipulator that allows to change the priority of the
+        output.
+    */
+    LoggerManipulator<log::Visibility> defaultVisibility(const log::Visibility &visibility)
+    {
+        return LoggerManipulator<log::Visibility>(setDefaultVisibility, visibility);
     }
 
     /*!
@@ -1448,7 +1633,7 @@ namespace log {
     */
     Logger& setVisibility(Logger& logger, const log::Visibility &visibility)
     {
-        logger.setVisibility(visibility);
+        logger.setDefaultVisibility(visibility);
 
         return logger;
     }
@@ -1463,93 +1648,90 @@ namespace log {
     */
     LoggerManipulator<log::Visibility> visibility(const log::Visibility &visibility)
     {
-        return LoggerManipulator<log::Visibility>(setVisibility, visibility);
+        return LoggerManipulator<log::Visibility>(setDefaultVisibility, visibility);
     }
 
     /*!
-        Sets the verbosity for the messages printed both on the console and on
-        the log file.
+        Sets the verbosity thresholds for the messages printed both on the
+        console and on the log file.
 
         \param logger is a reference pointing to the logger
-        \param verbosity is the verbosity for the messages
+        \param threshold is the verbosity threshold
         \result A reference pointing to the logger received in input.
     */
-    Logger& setVerbosities(Logger& logger, const log::Verbosity &verbosity)
+    Logger& setVerbosities(Logger& logger, const log::Level &threshold)
     {
-        logger.setVerbosities(verbosity);
+        logger.setVerbosities(threshold);
 
         return logger;
     }
 
     /*!
-        Returns a logger manipulator that allows to change the verbosity for
-        the messages printed both on the console and on the log file.
+        Returns a logger manipulator that allows to change the verbosity
+        threshold for the messages printed both on the console and on the
+        log file.
 
-        \param verbosity is the verbosity for the messages
+        \param threshold is the verbosity threshold
         \result A logger manipulator that allows to change the verbosity for
         the messages printed on the console.
     */
-    LoggerManipulator<log::Verbosity> verbosities(const log::Verbosity &verbosity)
+    LoggerManipulator<log::Level> verbosities(const log::Level &threshold)
     {
-        return LoggerManipulator<log::Verbosity>(setVerbosities, verbosity);
+        return LoggerManipulator<log::Level>(setVerbosities, threshold);
     }
 
     /*!
-        Sets the verbosity for the messages printed on the console.
+        Sets the verbosity threshold for the messages printed on the console.
 
         \param logger is a reference pointing to the logger
-        \param verbosity is the verbosity for the messages printed on the
-        console
+        \param threshold is the verbosity threshold
         \result A reference pointing to the logger received in input.
     */
-    Logger& setConsoleVerbosity(Logger& logger, const log::Verbosity &verbosity)
+    Logger& setConsoleVerbosity(Logger& logger, const log::Level &threshold)
     {
-        logger.setConsoleVerbosity(verbosity);
+        logger.setConsoleVerbosity(threshold);
 
         return logger;
     }
 
     /*!
-        Returns a logger manipulator that allows to change the verbosity for
-        the messages printed on the console.
+        Returns a logger manipulator that allows to change the verbosity
+        threshold for the messages printed on the console.
 
-        \param verbosity is the verbosity for the messages printed on the
-        console
+        \param threshold is the verbosity threshold
         \result A logger manipulator that allows to change the verbosity for
         the messages printed on the console.
     */
-    LoggerManipulator<log::Verbosity> consoleVerbosity(const log::Verbosity &verbosity)
+    LoggerManipulator<log::Level> consoleVerbosity(const log::Level &threshold)
     {
-        return LoggerManipulator<log::Verbosity>(setConsoleVerbosity, verbosity);
+        return LoggerManipulator<log::Level>(setConsoleVerbosity, threshold);
     }
 
     /*!
-        Sets the verbosity for the messages printed on the file.
+        Sets the verbosity threshold for the messages printed on the file.
 
         \param logger is a reference pointing to the logger
-        \param verbosity is the verbosity for the messages printed on the
-        file
+        \param threshold is the verbosity threshold
         \result A reference pointing to the logger received in input.
     */
-    Logger& setFileVerbosity(Logger& logger, const log::Verbosity &verbosity)
+    Logger& setFileVerbosity(Logger& logger, const log::Level &threshold)
     {
-        logger.setFileVerbosity(verbosity);
+        logger.setFileVerbosity(threshold);
 
         return logger;
     }
 
     /*!
-        Returns a logger manipulator that allows to change the verbosity for
-        the messages printed on the file.
+        Returns a logger manipulator that allows to change the verbosity
+        threshold for the messages printed on the file.
 
-        \param verbosity is the verbosity for the messages printed on the
-        file
+        \param threshold is the verbosity threshold
         \result A logger manipulator that allows to change the verbosity for
         the messages printed on the file.
     */
-    LoggerManipulator<log::Verbosity> fileVerbosity(const log::Verbosity &verbosity)
+    LoggerManipulator<log::Level> fileVerbosity(const log::Level &threshold)
     {
-        return LoggerManipulator<log::Verbosity>(setFileVerbosity, verbosity);
+        return LoggerManipulator<log::Level>(setFileVerbosity, threshold);
     }
 
     /*!

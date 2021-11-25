@@ -153,7 +153,7 @@ int main(int argc, char *argv[])
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
 	log::manager().initialize(log::COMBINED, true, nProcs, rank);
-	log::cout().setVisibility(log::GLOBAL);
+	log::cout().setDefaultVisibility(log::GLOBAL);
 
 	// Run the subtests
     log::cout() << "Testing parallel solution of transposed linear systems." << std::endl;

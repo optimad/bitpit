@@ -400,9 +400,9 @@ void read_podXML(const bitpit::Config::Section & slotXML, POD & podInst){
     }  
     podInst.setTargetErrorFields(tempsf,tempvf); 
 
-    log::cout().setPriority(bitpit::log::NORMAL);
+    log::cout().setDefaultSeverity(bitpit::log::INFO);
     log::cout()<< "Finished reading XML dictionary"<<std::endl;
-    log::cout().setPriority(bitpit::log::DEBUG);      
+    log::cout().setDefaultSeverity(bitpit::log::DEBUG);
 
     /*! Resume pod modes in logger */
     {
@@ -564,9 +564,9 @@ std::vector<bool> read_Dictionary(POD & podInst) {
     std::vector<bool> exeFlags;
     exeFlags.resize(3,false);
 
-    log::cout().setPriority(bitpit::log::NORMAL);
+    log::cout().setDefaultSeverity(bitpit::log::INFO);
     log::cout()<< "Currently reading XML dictionary"<<std::endl;
-    log::cout().setPriority(bitpit::log::DEBUG);
+    log::cout().setDefaultSeverity(bitpit::log::DEBUG);
 
     if(config::root.hasSection("POD")){
 
@@ -577,9 +577,9 @@ std::vector<bool> read_Dictionary(POD & podInst) {
         log::cout() << "...Instantiated pod: "<< podInst.getName() << std::endl;
 
     }else{
-        log::cout().setPriority(bitpit::log::NORMAL);
+        log::cout().setDefaultSeverity(bitpit::log::INFO);
         log::cout()<<"No POD section available in the XML dictionary"<<std::endl;
-        log::cout().setPriority(bitpit::log::DEBUG);
+        log::cout().setDefaultSeverity(bitpit::log::DEBUG);
     }
 
     /*! Snapshots database */
@@ -619,9 +619,9 @@ std::vector<bool> read_Dictionary(POD & podInst) {
         }
 
     }else{
-        log::cout().setPriority(bitpit::log::NORMAL);
+        log::cout().setDefaultSeverity(bitpit::log::INFO);
         log::cout()<<"No Database section available in the XML dictionary"<<std::endl;
-        log::cout().setPriority(bitpit::log::DEBUG);
+        log::cout().setDefaultSeverity(bitpit::log::DEBUG);
     }
 
     /*! Reconstruction database */
@@ -703,9 +703,9 @@ std::vector<bool> read_Dictionary(POD & podInst) {
     }else      
         exeFlags[0]=true;  
 
-    log::cout().setPriority(bitpit::log::NORMAL);
+    log::cout().setDefaultSeverity(bitpit::log::INFO);
     log::cout()<< "Finished reading XML dictionary"<<std::endl;
-    log::cout().setPriority(bitpit::log::DEBUG);
+    log::cout().setDefaultSeverity(bitpit::log::DEBUG);
 
     return exeFlags;
 
@@ -721,7 +721,7 @@ void podcore(const InfoBitpodPP & info) {
     bitpit::log::cout(log);
     switch(int(info.vconsole)){
     case 1 :
-        bitpit::log::setConsoleVerbosity(log::cout(), bitpit::log::Verbosity::NORMAL);
+        bitpit::log::setConsoleVerbosity(log::cout(), bitpit::log::Verbosity::INFO);
         break;
     case 2 :
         bitpit::log::setConsoleVerbosity(log::cout(), bitpit::log::Verbosity::DEBUG);
@@ -735,7 +735,7 @@ void podcore(const InfoBitpodPP & info) {
 
     switch(int(info.vlog)){
     case 1 :
-        bitpit::log::setFileVerbosity(log::cout(), bitpit::log::Verbosity::NORMAL);
+        bitpit::log::setFileVerbosity(log::cout(), bitpit::log::Verbosity::INFO);
         break;
     case 2 :
         bitpit::log::setFileVerbosity(log::cout(), bitpit::log::Verbosity::DEBUG);
@@ -749,7 +749,7 @@ void podcore(const InfoBitpodPP & info) {
     }
 
     /*! Print resume args info.*/
-    log::cout().setPriority(bitpit::log::NORMAL);
+    log::cout().setDefaultSeverity(bitpit::log::INFO);
     {
         std::vector<std::string> verb(3, "quiet");
         verb[1] = "normal";
@@ -762,7 +762,7 @@ void podcore(const InfoBitpodPP & info) {
         log::cout()<< " "<<std::endl;
         log::cout()<< " "<<std::endl;
     }
-    log::cout().setPriority(bitpit::log::DEBUG);
+    log::cout().setDefaultSeverity(bitpit::log::DEBUG);
 
     bitpit::config::reset("podXML", 1);
     bitpit::config::read(info.dictName);
@@ -774,9 +774,9 @@ void podcore(const InfoBitpodPP & info) {
     exes=read_Dictionary(podInst);
 
     /*! Execute */
-    log::cout().setPriority(bitpit::log::NORMAL);
+    log::cout().setDefaultSeverity(bitpit::log::INFO);
     log::cout()<<"Execution of pod... ";
-    log::cout().setPriority(bitpit::log::DEBUG);
+    log::cout().setDefaultSeverity(bitpit::log::DEBUG);
 
     /*! Execute*/
     if (exes[1])
@@ -788,10 +788,10 @@ void podcore(const InfoBitpodPP & info) {
     if (exes[0])
         podInst.run();
 
-    log::cout().setPriority(bitpit::log::NORMAL);
+    log::cout().setDefaultSeverity(bitpit::log::INFO);
     log::cout()<<"...execution of pod done"<<std::endl;
 
-    log::cout().setPriority(bitpit::log::DEBUG);
+    log::cout().setDefaultSeverity(bitpit::log::DEBUG);
 }
 
 //=================================================================================== //

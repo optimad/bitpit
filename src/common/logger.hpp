@@ -24,6 +24,8 @@
 #ifndef __BITPIT_LOGGER_HPP__
 #define __BITPIT_LOGGER_HPP__
 
+#include "compiler.hpp"
+
 #include <memory>
 #include <ostream>
 #include <unordered_map>
@@ -46,10 +48,14 @@ namespace log {
         SEPARATE
     };
 
-    enum Verbosity {
-        QUIET = 0,
-        NORMAL,
-        DEBUG
+    enum Level {
+        QUIET = 60,
+        CRITICAL = 50,
+        ERROR = 40,
+        WARNING = 30,
+        INFO = 20,
+        NORMAL = INFO,
+        DEBUG = 10
     };
 
     enum Visibility {
@@ -57,7 +63,9 @@ namespace log {
         GLOBAL
     };
 
-    typedef Verbosity Priority;
+    typedef Level Severity;
+    typedef Level Priority;
+    typedef Level Verbosity;
 }
 
 // Logger buffer
@@ -130,13 +138,19 @@ public:
     void setIndentation(int delta);
     int getIndentation();
 
-    void setPriority(log::Priority priority);
-    log::Priority getPriority();
+    void setDefaultSeverity(log::Level severity);
+    log::Level getDefaultSeverity();
 
-    void setVisibility(log::Visibility visibility);
-    log::Visibility getVisibility();
+    BITPIT_DEPRECATED(void setPriority(log::Priority priority));
+    BITPIT_DEPRECATED(log::Priority getPriority());
 
-    void setVerbosities(log::Verbosity verbosity);
+    void setDefaultVisibility(log::Visibility visibility);
+    log::Visibility getDefaultVisibility();
+
+    BITPIT_DEPRECATED(void setVisibility(log::Visibility visibility));
+    BITPIT_DEPRECATED(log::Visibility getVisibility());
+
+    void setVerbosities(log::Level threshold);
     void setTimestampEnabled(bool enabled);
 
     bool isConsoleTimestampEnabled() const;
@@ -144,28 +158,28 @@ public:
     void setConsoleStream(std::ostream *console);
     std::ostream & getConsoleStream();
     std::string getConsolePrefix();
-    void setConsoleVerbosity(log::Verbosity verbosity);
-    log::Verbosity getConsoleVerbosity();
+    void setConsoleVerbosity(log::Level threshold);
+    log::Level getConsoleVerbosity();
 
     bool isFileTimestampEnabled() const;
     void setFileTimestampEnabled(bool enabled);
     void setFileStream(std::ofstream *file);
     std::ofstream & getFileStream();
     std::string getFilePrefix();
-    void setFileVerbosity(log::Verbosity verbosity);
-    log::Verbosity getFileVerbosity();
+    void setFileVerbosity(log::Level threshold);
+    log::Level getFileVerbosity();
 
     std::string getName() const;
 
-    void println(const std::string &line);
-    void println(const std::string &line, log::Priority priority);
-    void println(const std::string &line, log::Visibility visibility);
-    void println(const std::string &line, const log::Priority priority, log::Visibility visibility);
+    void println(const std::string &message);
+    void println(const std::string &message, log::Level severity);
+    void println(const std::string &message, log::Visibility visibility);
+    void println(const std::string &message, const log::Level severity, log::Visibility visibility);
 
-    void print(const std::string &line);
-    void print(const std::string &line, log::Priority priority);
-    void print(const std::string &line, log::Visibility visibility);
-    void print(const std::string &line, log::Priority priority, log::Visibility visibility);
+    void print(const std::string &message);
+    void print(const std::string &message, log::Level severity);
+    void print(const std::string &message, log::Visibility visibility);
+    void print(const std::string &message, log::Level severity, log::Visibility visibility);
 
 private:
     std::string m_name;
@@ -175,14 +189,18 @@ private:
 
     int m_indentation;
     std::string m_context;
-    log::Priority m_priority;
-    log::Visibility m_visibility;
 
-    log::Verbosity m_consoleVerbosity;
-    log::Verbosity m_fileVerbosity;
+    log::Level m_defaultSeverity;
+    log::Visibility m_defaultVisibility;
+
+    log::Level m_consoleVerbosityThreshold;
+    log::Level m_fileVerbosityThreshold;
 
     Logger(Logger const&) = delete;
     Logger& operator=(Logger const&) = delete;
+
+    void setConsoleEnabled(log::Level severity, log::Visibility visibility);
+    void setFileEnabled(log::Level severity, log::Visibility visibility);
 
 };
 
@@ -227,9 +245,9 @@ public:
     bool setMode(log::Mode mode);
     log::Mode getMode() const;
 
-    void setVerbosities(log::Verbosity verbosity);
-    void setConsoleVerbosity(log::Verbosity verbosity);
-    void setFileVerbosity(log::Verbosity verbosity);
+    void setVerbosities(log::Level threshold);
+    void setConsoleVerbosity(log::Level threshold);
+    void setFileVerbosity(log::Level threshold);
 
     std::string getDefaultName() const;
     std::string getDefaultDirectory() const;
@@ -300,20 +318,26 @@ namespace log {
     Logger& setContext(Logger& logger, const std::string &context);
     LoggerManipulator<std::string> context(const std::string &context);
 
-    Logger& setPriority(Logger& logger, const log::Priority &priority);
-    LoggerManipulator<log::Priority> priority(const log::Priority &priority);
+    Logger& setDefaultSeverity(Logger& logger, const log::Level &severity);
+    LoggerManipulator<log::Level> defaultSeverity(const log::Level &severity);
 
-    Logger& setVisibility(Logger& logger, const log::Visibility &visibility);
-    LoggerManipulator<log::Visibility> visibility(const log::Visibility &visibility);
+    BITPIT_DEPRECATED(Logger& setPriority(Logger& logger, const log::Priority &priority));
+    BITPIT_DEPRECATED(LoggerManipulator<log::Level> priority(const log::Priority &priority));
 
-    Logger& setVerbosities(Logger& logger, const log::Verbosity &verbosity);
-    LoggerManipulator<log::Priority> verbosities(const log::Verbosity &verbosity);
+    BITPIT_DEPRECATED(Logger& setVisibility(Logger& logger, const log::Visibility &visibility));
+    BITPIT_DEPRECATED(LoggerManipulator<log::Visibility> visibility(const log::Visibility &visibility));
 
-    Logger& setConsoleVerbosity(Logger& logger, const log::Verbosity &verbosity);
-    LoggerManipulator<log::Priority> consoleVerbosity(const log::Verbosity &verbosity);
+    Logger& setDefaultVisibility(Logger& logger, const log::Visibility &visibility);
+    LoggerManipulator<log::Visibility> defaultVisibility(const log::Visibility &visibility);
 
-    Logger& setFileVerbosity(Logger& logger, const log::Verbosity &verbosity);
-    LoggerManipulator<log::Priority> fileVerbosity(const log::Verbosity &verbosity);
+    Logger& setVerbosities(Logger& logger, const log::Level &threshold);
+    LoggerManipulator<log::Level> verbosities(const log::Level &threshold);
+
+    Logger& setConsoleVerbosity(Logger& logger, const log::Level &threshold);
+    LoggerManipulator<log::Level> consoleVerbosity(const log::Level &threshold);
+
+    Logger& setFileVerbosity(Logger& logger, const log::Level &threshold);
+    LoggerManipulator<log::Level> fileVerbosity(const log::Level &threshold);
 
     Logger& setIndentation(Logger& logger, const int &delta);
     LoggerManipulator<int> indent(int delta);
