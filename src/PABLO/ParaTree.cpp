@@ -4085,13 +4085,13 @@ namespace bitpit {
                         uint8_t nlevel = noct->getLevel();
                         levelDiff = uint8_t(abs(int(nlevel)-int(level)));
                         if(levelDiff > 1){
-                            log::Visibility visi = m_log->getVisibility();
-                            m_log->setVisibility(log::GLOBAL);
+                            log::Visibility visi = m_log->getDefaultVisibility();
+                            m_log->setDefaultVisibility(log::GLOBAL);
                             (*m_log) << "---------------------------------------------" << std::endl;
                             (*m_log) << "LOCALLY 2:1 UNBALANCED OCTREE" << std::endl;
                             (*m_log) << "I'm " << getRank() << ": element " << i << " is not 2:1 balanced across " << int(f) << " subentity of codim " << int(c) << ", relative to " << (isghost[n] ? "ghost" : "internal") << "neighbour " << neighs[n] << std::endl;
                             (*m_log) << "---------------------------------------------" << std::endl;
-                            m_log->setVisibility(visi);
+                            m_log->setDefaultVisibility(visi);
                             balanced = false;
                             break;
                         }

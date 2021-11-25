@@ -212,7 +212,7 @@ int main(int argc, char *argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     bitpit::log::manager().initialize(bitpit::log::COMBINED, true, nProcs, rank);
-    bitpit::log::cout().setVisibility(bitpit::log::GLOBAL);
+    bitpit::log::cout().setDefaultVisibility(bitpit::log::GLOBAL);
 
     // Run the subtests
     bitpit::log::cout() << "Testing levelset parallel refinement." << std::endl;

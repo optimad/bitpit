@@ -54,25 +54,26 @@ int subtest_001()
 	// Default logger
 	log::manager().initialize(log::SEPARATE, false, nProcessors, rank);
 
-	log::cout() << consoleVerbosity(log::NORMAL);
-	log::cout() << fileVerbosity(log::NORMAL);
+	log::cout() << consoleVerbosity(log::INFO);
+	log::cout() << fileVerbosity(log::INFO);
 
-	log::cout() << log::priority(log::NORMAL);
+	log::cout() << log::defaultSeverity(log::INFO);
 	log::cout() << "1-1\n2--2\n" << std::endl << "3---3" << std::endl;
 	log::cout() << "4----4\n5-----5\n" << std::endl << "6--";
 	log::cout() << "----6\n7-------7";
 	log::cout() << std::endl;
-	log::cout() << log::priority(log::NORMAL);
+	log::cout() << log::defaultSeverity(log::INFO);
 	log::cout() << log::context("context-1");
 	log::cout() << "1-1\n2--2\n" << std::endl << "3---3" << std::endl;
 	log::cout() << "4----4\n5-----5\n" << std::endl << "6--";
 	log::cout() << "----6\n7-------7";
-	log::cout() << log::priority(log::NORMAL);
+	log::cout() << log::defaultSeverity(log::INFO);
 	log::cout() << log::context("context-2");
 	log::cout() << "1-1\n2--2\n" << std::endl << "3---3" << std::endl;
 	log::cout() << "4----4\n5-----5\n" << std::endl << "6--";
 	log::cout() << "----6\n7-------7";
 	log::cout() << std::endl;
+
 
 	BITPIT_DEBUG_COUT() << "Debug statement" << std::endl;
 
@@ -82,13 +83,13 @@ int subtest_001()
 	log::cout("logger1") << consoleVerbosity(log::DEBUG);
 	log::cout("logger1") << fileVerbosity(log::QUIET);
 
-	log::cout("logger1") << log::priority(log::DEBUG);
+	log::cout("logger1") << log::defaultSeverity(log::DEBUG);
 	log::cout("logger1") << log::context("logger1-A");
 	log::cout("logger1") << "1-1\n2--2\n" << std::endl << "3---3" << std::endl;
 	log::cout("logger1") << "4----4\n5-----5\n" << std::endl << "6--";
 	log::cout("logger1") << "----6\n7-------7";
 	log::cout("logger1") << std::endl;
-	log::cout("logger1") << log::priority(log::NORMAL);
+	log::cout("logger1") << log::defaultSeverity(log::INFO);
 	log::cout("logger1") << log::context("logger1-B");
 	log::cout("logger1") << "1-1\n2--2\n" << std::endl << "3---3" << std::endl;
 	log::cout("logger1") << "4----4\n5-----5\n" << std::endl << "6--";
@@ -100,16 +101,16 @@ int subtest_001()
 	// Log on console and also on file
 	log::manager().create("logger2", false, nProcessors, rank);
 
-	log::cout("logger2") << consoleVerbosity(log::NORMAL);
-	log::cout("logger2") << fileVerbosity(log::NORMAL);
+	log::cout("logger2") << consoleVerbosity(log::INFO);
+	log::cout("logger2") << fileVerbosity(log::INFO);
 
-	log::cout("logger2") << log::priority(log::DEBUG);
+	log::cout("logger2") << log::defaultSeverity(log::DEBUG);
 	log::cout("logger2") << log::context("logger2-A");
 	log::cout("logger2") << "1-1\n2--2\n" << std::endl << "3---3" << std::endl;
 	log::cout("logger2") << "4----4\n5-----5\n" << std::endl << "6--";
 	log::cout("logger2") << "----6\n7-------7";
 	log::cout("logger2") << std::endl;
-	log::cout("logger2") << log::priority(log::NORMAL);
+	log::cout("logger2") << log::defaultSeverity(log::INFO);
 	log::cout("logger2") << log::context("logger2-B");
 	log::cout("logger2") << "1-1\n2--2\n" << std::endl << "3---3" << std::endl;
 	log::cout("logger2") << "4----4\n5-----5\n" << std::endl << "6--";
@@ -121,16 +122,16 @@ int subtest_001()
 	// Log on console and also on file with different verbosities
 	log::manager().create("logger3", true, nProcessors, rank);
 
-	log::cout("logger3").setConsoleVerbosity(log::NORMAL);
+	log::cout("logger3").setConsoleVerbosity(log::INFO);
 	log::cout("logger3").setFileVerbosity(log::DEBUG);
 
-	log::cout("logger3") << log::priority(log::DEBUG);
+	log::cout("logger3") << log::defaultSeverity(log::DEBUG);
 	log::cout("logger3") << log::context("logger3-A");
 	log::cout("logger3") << "1-1\n2--2\n" << std::endl << "3---3" << std::endl;
 	log::cout("logger3") << "4----4\n5-----5\n" << std::endl << "6--";
 	log::cout("logger3") << "----6\n7-------7";
 	log::cout("logger3") << std::endl;
-	log::cout("logger3") << log::priority(log::NORMAL);
+	log::cout("logger3") << log::defaultSeverity(log::INFO);
 	log::cout("logger3") << log::context("logger3-B");
 	log::cout("logger3") << "1-1\n2--2\n" << std::endl << "3---3" << std::endl;
 	log::cout("logger3") << "4----4\n5-----5\n" << std::endl << "6--";
@@ -145,13 +146,13 @@ int subtest_001()
 	log::cout("logger4").setConsoleVerbosity(log::DEBUG);
 	log::cout("logger4").setFileVerbosity(log::DEBUG);
 
-	log::cout("logger4").setPriority(log::NORMAL);
+	log::cout("logger4").setDefaultSeverity(log::INFO);
 	log::cout("logger4").setContext("logger4-B");
 	log::cout("logger4").println("1-1\n2--2\n\n3---3");
 	log::cout("logger4").print("4----4\n5-----5\n\n6--");
 	log::cout("logger4").print("----6\n7-------7");
 	log::cout("logger4").println("");
-	log::cout("logger4").setPriority(log::NORMAL);
+	log::cout("logger4").setDefaultSeverity(log::INFO);
 	log::cout("logger4").setContext("logger4-B");
 	log::cout("logger4").println("1-1\n2--2\n\n3---3");
 	log::cout("logger4").print("4----4\n5-----5\n\n6--");
@@ -164,7 +165,7 @@ int subtest_001()
 	log::cout().setConsoleVerbosity(log::DEBUG);
 	log::cout().setFileVerbosity(log::DEBUG);
 
-	log::cout().setPriority(log::NORMAL);
+	log::cout().setDefaultSeverity(log::INFO);
 	log::cout().setContext("indent");
 
 	log::cout().println("012345678912345678901234567890123456789");

@@ -209,7 +209,7 @@ int main(int argc, char *argv[])
 
 	// Initialize the logger
 	log::manager().initialize(log::SEPARATE, false, nProcs, rank);
-	log::cout() << fileVerbosity(log::NORMAL);
+	log::cout() << fileVerbosity(log::INFO);
 	log::cout() << consoleVerbosity(log::QUIET);
 
 	// Run the example

@@ -215,7 +215,7 @@ int main(int argc, char *argv[])
 
     // Initialize the logger
     bitpit::log::manager().initialize(bitpit::log::SEPARATE, false, nProcs, rank);
-    bitpit::log::cout() << fileVerbosity(bitpit::log::NORMAL);
+    bitpit::log::cout() << fileVerbosity(bitpit::log::INFO);
     bitpit::log::cout() << consoleVerbosity(bitpit::log::QUIET);
 
     // Run the subtests
