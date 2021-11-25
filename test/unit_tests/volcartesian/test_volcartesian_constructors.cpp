@@ -147,3 +147,40 @@ BOOST_FIXTURE_TEST_CASE(constructor_8, NormalTestPatch)
         throw std::runtime_error("Function 'VolCartesian(std::istream &stream)' failed unit test.");
     }
 }
+
+BOOST_FIXTURE_TEST_CASE(constructor_9, TestPatchConstants)
+{
+    BITPIT_UNIT_TEST_DISPLAY_NAME(log::cout());
+
+    // Create original patch
+    int id = 0;
+    int dimension = DIMENSION;
+    std::array<double, 3> origin = {{ORIGIN_X, ORIGIN_Y, ORIGIN_Z}};
+    double length = LENGTH_X;
+    double dh = SPACING_X;
+    std::unique_ptr<VolCartesian> originalPatch = std::unique_ptr<VolCartesian>(new VolCartesian(id, dimension, origin, length, dh));
+
+    long originalCellCount = originalPatch->getCellCount();
+    log::cout() << " Cell count for the original patch: " << originalCellCount << std::endl;
+
+    long originalVertexCount = originalPatch->getVertexCount();
+    log::cout() << " Vertex count for the original patch: " << originalVertexCount << std::endl;
+
+    // Create
+    std::unique_ptr<VolCartesian> twinPatch = std::unique_ptr<VolCartesian>(new VolCartesian(std::move(*originalPatch)));
+    if (!twinPatch) {
+        throw std::runtime_error("Function 'VolCartesian(VolCartesian &&other)' failed unit test.");
+    }
+
+    long twinCellCount = twinPatch->getCellCount();
+    log::cout() << " Cell count for the twin patch: " << twinCellCount << std::endl;
+    if (twinCellCount != originalCellCount) {
+        throw std::runtime_error("Function 'VolCartesian(VolCartesian &&other)' failed unit test.");
+    }
+
+    long twinVertexCount = twinPatch->getVertexCount();
+    log::cout() << " Vertex count for the twin patch: " << twinVertexCount << std::endl;
+    if (twinVertexCount != originalVertexCount) {
+        throw std::runtime_error("Function 'VolCartesian(VolCartesian &&other)' failed unit test.");
+    }
+}
