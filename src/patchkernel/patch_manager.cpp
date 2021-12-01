@@ -91,7 +91,7 @@ int PatchManager::registerPatch(PatchKernel *patch, int id)
 		id = m_idGenerator.generate();
 	}
 
-	patch->setId(id);
+	patch->_setId(id);
 	m_patchIds[patch] = id;
 	m_patchOrder.push_back(patch);
 

@@ -1416,6 +1416,21 @@ bool PatchKernel::isExpert() const
 */
 void PatchKernel::setId(int id)
 {
+    if (id == m_id) {
+        return;
+    }
+
+    patch::manager().unregisterPatch(this);
+    patch::manager().registerPatch(this, id);
+}
+
+/*!
+	Internal function to set the id of the patch.
+
+	\param id the id of the patch
+*/
+void PatchKernel::_setId(int id)
+{
 	m_id = id;
 }
 
@@ -7879,8 +7894,7 @@ void PatchKernel::restore(std::istream &stream, bool reregister)
 	int id;
 	utils::binary::read(stream, id);
 	if (reregister) {
-		patch::manager().unregisterPatch(this);
-		patch::manager().registerPatch(this, id);
+		setId(id);
 	}
 
 	// Dimension
