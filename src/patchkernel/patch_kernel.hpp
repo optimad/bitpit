@@ -369,6 +369,8 @@ public:
 
 	virtual std::unique_ptr<PatchKernel> clone() const = 0;
 
+	void setId(int id);
+
 	virtual void reset();
 	virtual void resetVertices();
 	virtual void resetCells();
@@ -1026,7 +1028,7 @@ private:
 
 	InterfaceIterator buildCellInterface(Cell *cell_1, int face_1, Cell *cell_2, int face_2, long interfaceId = Element::NULL_ID);
 
-	void setId(int id);
+	void _setId(int id);
 
 	bool testElementAlterationFlags(long id, AlterationFlags flags, const AlterationFlagsStorage &flagsStorage) const;
 	AlterationFlags getElementAlterationFlags(long id, const AlterationFlagsStorage &flagsStorage) const;
