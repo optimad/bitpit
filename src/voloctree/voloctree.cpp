@@ -1149,6 +1149,9 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 		deletedOctants.reserve(nPreviousOctants + nPreviousGhosts);
 	}
 
+//     m_tree->computeConnectivity();
+//     m_tree->write("PABLO_TEST");
+
 	uint32_t treeId = 0;
 	std::vector<uint32_t> mapper_octantMap;
 	std::vector<bool> mapper_ghostFlag;
@@ -1161,6 +1164,7 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 		if (!importFromScratch) {
 			m_tree->getMapping(treeId, mapper_octantMap, mapper_ghostFlag, mapper_octantRank);
 		}
+
 
 		// Adaption type
 		adaption::Type adaptionType = adaption::TYPE_NONE;
@@ -1256,9 +1260,23 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 
 				// Mark previous octant for deletion
 				uint32_t previousTreeId = mapper_octantMap[k];
+
+
 				OctantInfo previousOctantInfo(previousTreeId, !mapper_ghostFlag[k]);
 				long cellId = getOctantId(previousOctantInfo);
 				deletedOctants.emplace_back(cellId, adaptionType);
+
+                if (cellId == 93262) {
+                    log::cout() << " REMOVING CELL " << std::endl;
+                    log::cout() << "  - treeId " << previousTreeId << std::endl;
+                    log::cout() << "  - cellId " << cellId << std::endl;
+
+                    log::cout() << "  - NEW CENTER " << m_tree->getCenter(treeId) << std::endl;
+                    log::cout() << "  - NRE R? " << m_tree->getIsNewR(treeId) << std::endl;
+                    log::cout() << "  - NEW C? " << m_tree->getIsNewC(treeId) << std::endl;
+
+
+                }
 
 				unmappedOctants[previousTreeId] = false;
 			}
@@ -1369,6 +1387,12 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 				long cellId = getOctantId(octantInfo);
 				deletedOctants.emplace_back(cellId, deletionType, rank);
 				unmappedOctants[treeId] = false;
+
+
+                if (cellId == 93262) {
+                     log::cout() << "BBBBBBBBBBBBBBB " << cellId << std::endl;
+                }
+
 			}
 		}
 
@@ -1378,6 +1402,10 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 				OctantInfo ghostOctantInfo(ghostTreeId, false);
 				long ghostCellId = getOctantId(ghostOctantInfo);
 				deletedOctants.emplace_back(ghostCellId, adaption::TYPE_DELETION);
+
+                if (ghostCellId == 93262) {
+                     log::cout() << "CCCCCCCCCCC " << ghostCellId << std::endl;
+                }
 			}
 		}
 #endif
@@ -1392,6 +1420,10 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 				OctantInfo octantInfo = OctantInfo(previousTreeId, true);
 				long cellId = getOctantId(octantInfo);
 				deletedOctants.emplace_back(cellId, adaption::TYPE_DELETION);
+
+                if (cellId == 93262) {
+                     log::cout() << "DDDDDDDDDD " << cellId << std::endl;
+                }
 			}
 		}
 	}
@@ -1895,6 +1927,13 @@ std::vector<long> VolOctree::importCells(const std::vector<OctantInfo> &octantIn
 			m_cellToGhost.insert({{cellId, octantInfo.id}});
 			m_ghostToCell.insert({{octantInfo.id, cellId}});
 		}
+
+		if (cellId == 93262) {
+            log::cout() << " ADDING CELL " << std::endl;
+            log::cout() << "  - treeId " << octantInfo.id << std::endl;
+            log::cout() << "  - cellId " << cellId << std::endl;
+            log::cout() << "  - ADDED CENTER " << m_tree->getCenter(octantInfo.id) << std::endl;
+        }
 
 		// Add the cell to the list of created cells
 		createdCells[i] = cellId;

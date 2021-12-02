@@ -6,8 +6,18 @@
 
 # If a different UseBITPIT.cmake was previoulsy loaded a reconfiguration
 # is needed
-if(NOT ("@BITPIT_CMAKE_CONFIG_DIR@" STREQUAL BITPIT_CMAKE_CONFIG_PATH_LAST))
+set(BITPIT_FORCE_RECONFIGURE 0 CACHE BOOL "If set, bitpit CMake configuration will be reloaded")
+mark_as_advanced(BITPIT_FORCE_RECONFIGURE)
+
+if(BITPIT_FORCE_RECONFIGURE)
     set(BITPIT_RECONFIGURE 1)
+elseif(NOT ("@BITPIT_CMAKE_CONFIG_DIR@" STREQUAL BITPIT_CMAKE_CONFIG_PATH_LAST))
+    set(BITPIT_RECONFIGURE 1)
+else()
+    set(BITPIT_RECONFIGURE 0)
+endif()
+
+if(BITPIT_RECONFIGURE)
     set(BITPIT_CMAKE_CONFIG_PATH_LAST "@BITPIT_CMAKE_CONFIG_DIR@" CACHE INTERNAL "Defines the last bitpit CMake configuration file loaded")
 endif()
 

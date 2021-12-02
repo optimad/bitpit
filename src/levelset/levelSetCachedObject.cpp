@@ -233,8 +233,18 @@ void LevelSetCachedObject::propagateSign() {
         externalSign = PROPAGATION_SIGN_DUMMY;
     }
 
+    std::cout << " nWaiting " << nWaiting << std::endl;
+    std::cout << " nExternal " << nExternal << std::endl;
+    std::cout << " externalSign " << externalSign << std::endl;
+
     // Use the seeds to propagate the sign
     propagateSeedSign(seeds, &propagationStatus, &nWaiting, &externalSign);
+
+
+    std::cout << " nWaiting " << nWaiting << std::endl;
+    std::cout << " nExternal " << nExternal << std::endl;
+    std::cout << " externalSign " << externalSign << std::endl;
+
 
 #if BITPIT_ENABLE_MPI
     // If there are cells with an unknown sign, data communication among
@@ -504,7 +514,11 @@ void LevelSetCachedObject::propagateSeedSign(const std::vector<long> &seeds,
                                              PiercedStorage<int, long> *statuses,
                                              long *nWaiting, int *externalSign) {
 
-    VolumeKernel const &mesh = *(m_kernelPtr->getMesh()) ;
+    VolumeKernel &mesh = *(m_kernelPtr->getMesh()) ;
+
+    static int counter = 0;
+    mesh.write("TEST_" + std::to_string(counter));
+    ++counter;
 
     std::vector<long> processList;
 

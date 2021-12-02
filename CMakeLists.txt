@@ -902,19 +902,19 @@ get_property(BITPIT_LANGUAGES GLOBAL PROPERTY ENABLED_LANGUAGES)
 add_subdirectory(src)
 
 # Docs
-add_subdirectory(doc)
+# add_subdirectory(doc)
 
 # CMake
 add_subdirectory(cmake)
 
 # Examples
-add_subdirectory(examples)
+# add_subdirectory(examples)
 
 # External
 add_subdirectory(external)
 
 # Tests
-if (BITPIT_ENABLE_UNIT_TESTS OR BITPIT_ENABLE_INTEGRATION_TESTS)
-    enable_testing()
-    add_subdirectory(test)
-endif()
+# if (BITPIT_ENABLE_UNIT_TESTS OR BITPIT_ENABLE_INTEGRATION_TESTS)
+#     enable_testing()
+#     add_subdirectory(test)
+# endif()
