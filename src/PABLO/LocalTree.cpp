@@ -239,11 +239,11 @@ namespace bitpit {
         if(m_sizeOctants){
             octvector::const_iterator lastOctant = m_octants.end() - 1;
             uint32_t x,y,z,delta;
-            delta = (uint32_t)(1<<((uint8_t)TreeConstants::MAX_LEVEL - lastOctant->m_level)) - 1;
+            delta = (uint32_t)(1<<((uint8_t)m_treeConstants->maxLevel - lastOctant->m_level)) - 1;
             x = lastOctant->getLogicalX() + delta;
             y = lastOctant->getLogicalY() + delta;
             z = lastOctant->getLogicalZ() + (m_dim-2)*delta;
-            Octant lastDesc = Octant(m_dim, TreeConstants::MAX_LEVEL,x,y,z);
+            Octant lastDesc = Octant(m_dim, m_treeConstants->maxLevel,x,y,z);
             m_lastDescMorton = lastDesc.getMorton();
         } else {
             m_lastDescMorton = 0;
@@ -454,7 +454,7 @@ namespace bitpit {
             }
 
             // Octants cannot be refined further than the maximum level
-            if(octant.getLevel()>=TreeConstants::MAX_LEVEL){
+            if(octant.getLevel()>=m_treeConstants->maxLevel){
                 octant.setMarker(0);
                 octant.m_info[Octant::INFO_AUX] = false;
                 continue;
@@ -650,7 +650,7 @@ namespace bitpit {
                 if (idx+offset < m_sizeOctants){
                     if (nidx < nfchild){
                         if (idx+offset == first_child_index[nidx]){
-                            markerfather = -TreeConstants::MAX_LEVEL;
+                            markerfather = -m_treeConstants->maxLevel;
                             father = m_octants[idx+offset].buildFather();
                             for (uint32_t iii=0; iii<Octant::INFO_ITEM_COUNT; iii++){
                                 father.m_info[iii] = false;
@@ -2137,7 +2137,7 @@ namespace bitpit {
                 }
 
                 if (balanceOctant){
-                    targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
+                    targetmarker = min(m_treeConstants->maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
 
                     //Balance through faces
                     for (iface=0; iface<m_treeConstants->nFaces; iface++){
@@ -2171,7 +2171,7 @@ namespace bitpit {
 								};
 							}
 						}
-						targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
+						targetmarker = min(m_treeConstants->maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
                     }
 
                     if (Bedge){
@@ -2205,7 +2205,7 @@ namespace bitpit {
 									}
 								}
 							}
-							targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
+							targetmarker = min(m_treeConstants->maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
                         }
                     }
 
@@ -2240,7 +2240,7 @@ namespace bitpit {
 									}
 								}
 							}
-							targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
+							targetmarker = min(m_treeConstants->maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
                         }
                     }
 
@@ -2262,7 +2262,7 @@ namespace bitpit {
                 }
 
                 if (balanceOctant){
-                    targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(it->getLevel()+it->getMarker()));
+                    targetmarker = min(m_treeConstants->maxLevel, int8_t(it->getLevel()+it->getMarker()));
 
                     //Balance through faces
                     for (iface=0; iface<m_treeConstants->nFaces; iface++){
@@ -2279,7 +2279,7 @@ namespace bitpit {
                                 }
                             }
                         }
-                        targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(it->getLevel()+it->getMarker()));
+                        targetmarker = min(m_treeConstants->maxLevel, int8_t(it->getLevel()+it->getMarker()));
                     }
 
                     if (Bedge){
@@ -2296,7 +2296,7 @@ namespace bitpit {
 									Bdone = true;
 								}
 							}
-							targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(it->getLevel()+it->getMarker()));
+							targetmarker = min(m_treeConstants->maxLevel, int8_t(it->getLevel()+it->getMarker()));
                         }
                     }
 
@@ -2314,7 +2314,7 @@ namespace bitpit {
 									Bdone = true;
 								}
 							}
-							targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(it->getLevel()+it->getMarker()));
+							targetmarker = min(m_treeConstants->maxLevel, int8_t(it->getLevel()+it->getMarker()));
                         }
                     }
 
@@ -2331,7 +2331,7 @@ namespace bitpit {
                 for (iit=ibegin; iit!=iend; ++iit){
                     idx = *iit;
                     if (m_octants[idx].getBalance()){
-                        targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
+                        targetmarker = min(m_treeConstants->maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
 
                         //Balance through faces
                         for (iface=0; iface<m_treeConstants->nFaces; iface++){
@@ -2357,7 +2357,7 @@ namespace bitpit {
                                     }
                                 }
                             }
-                            targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
+                            targetmarker = min(m_treeConstants->maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
                         }
 
                         if (Bedge){
@@ -2383,7 +2383,7 @@ namespace bitpit {
 										};
 									}
 								}
-								targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
+								targetmarker = min(m_treeConstants->maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
                             }
                         }
 
@@ -2410,7 +2410,7 @@ namespace bitpit {
 										};
 									}
 								}
-								targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
+								targetmarker = min(m_treeConstants->maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
                             }
                         }
 
@@ -2438,7 +2438,7 @@ namespace bitpit {
                 }
 
                 if (balanceOctant){
-                    targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(it->getLevel()+it->getMarker()));
+                    targetmarker = min(m_treeConstants->maxLevel, int8_t(it->getLevel()+it->getMarker()));
 
                     //Balance through faces
                     for (iface=0; iface<m_treeConstants->nFaces; iface++){
@@ -2455,7 +2455,7 @@ namespace bitpit {
                                 }
                             }
                         }
-                        targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(it->getLevel()+it->getMarker()));
+                        targetmarker = min(m_treeConstants->maxLevel, int8_t(it->getLevel()+it->getMarker()));
                     }
 
                     if (Bedge){
@@ -2472,7 +2472,7 @@ namespace bitpit {
 									Bdone = true;
 								}
 							}
-							targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(it->getLevel()+it->getMarker()));
+							targetmarker = min(m_treeConstants->maxLevel, int8_t(it->getLevel()+it->getMarker()));
                         }
                     }
 
@@ -2490,7 +2490,7 @@ namespace bitpit {
 									Bdone = true;
 								}
 							}
-							targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(it->getLevel()+it->getMarker()));
+							targetmarker = min(m_treeConstants->maxLevel, int8_t(it->getLevel()+it->getMarker()));
                         }
                     }
 
@@ -2507,7 +2507,7 @@ namespace bitpit {
                 for (iit=ibegin; iit!=iend; ++iit){
                     idx = *iit;
                     if (m_octants[idx].getBalance()){
-                        targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
+                        targetmarker = min(m_treeConstants->maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
 
                         //Balance through faces
                         for (iface=0; iface<m_treeConstants->nFaces; iface++){
@@ -2533,7 +2533,7 @@ namespace bitpit {
                                     }
                                 }
                             }
-                            targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
+                            targetmarker = min(m_treeConstants->maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
                         }
 
                         if (Bedge){
@@ -2559,7 +2559,7 @@ namespace bitpit {
 										};
 									}
 								}
-								targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
+								targetmarker = min(m_treeConstants->maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
                             }
                         }
 
@@ -2586,7 +2586,7 @@ namespace bitpit {
 										};
 									}
 								}
-								targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
+								targetmarker = min(m_treeConstants->maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
                             }
                         }
 
