@@ -91,9 +91,9 @@ public:
 
 	uint8_t  nodeFromCoordinates[2][2][2];    /**< nodeFromCoordinates[0:1][0:1][0:1] = Local node index from Local coordinates [x][y][z] */
 
-	std::array<uint32_t, MAX_LEVEL> lengths;   /**< Lengths associated to the levels */
-	std::array<uint64_t, MAX_LEVEL> areas;     /**< Areas associated to the levels */
-	std::array<uint64_t, MAX_LEVEL> volumes;   /**< Volumes associated to the levels */
+	std::array<uint32_t, MAX_LEVEL + 1> lengths;   /**< Lengths associated to the levels */
+	std::array<uint64_t, MAX_LEVEL + 1> areas;     /**< Areas associated to the levels */
+	std::array<uint64_t, MAX_LEVEL + 1> volumes;   /**< Volumes associated to the levels */
 
 private:
 	// =================================================================================== //
