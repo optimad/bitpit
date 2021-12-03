@@ -65,6 +65,7 @@ inline uint64_t splitBy3(uint32_t a)
 inline uint64_t splitBy2(uint32_t a)
 {
     uint64_t x = a;
+    x = (x | x << 32) & 0x00000000FFFFFFFF; // shift left 32 bits, OR with self, and 0000000000000000000000000000000011111111111111111111111111111111
     x = (x | x << 16) & 0x0000FFFF0000FFFF; // shift left 16 bits, OR with self, and 0000000000000000111111111111111100000000000000001111111111111111
     x = (x | x <<  8) & 0x00FF00FF00FF00FF; // shift left  8 bits, OR with self, and 0000000011111111000000001111111100000000111111110000000011111111
     x = (x | x <<  4) & 0x0F0F0F0F0F0F0F0F; // shift left  4 bits, OR with self, and 0000111100001111000011110000111100001111000011110000111100001111
@@ -105,10 +106,11 @@ inline uint32_t getThirdBits(uint64_t morton)
 inline uint32_t getSecondBits(uint64_t morton)
 {
     uint64_t x = morton & 0x5555555555555555;
-    x = (x ^ (x >>  2)) & 0x3333333333333333;
-    x = (x ^ (x >>  4)) & 0x0F0F0F0F0F0F0F0F;
-    x = (x ^ (x >>  8)) & 0x00FF00FF00FF00FF;
-    x = (x ^ (x >> 16)) & 0x0000FFFF0000FFFF;
+    x = (x ^ (x >>  1)) & 0x3333333333333333;
+    x = (x ^ (x >>  2)) & 0x0F0F0F0F0F0F0F0F;
+    x = (x ^ (x >>  4)) & 0x00FF00FF00FF00FF;
+    x = (x ^ (x >>  8)) & 0x0000FFFF0000FFFF;
+    x = (x ^ (x >> 16)) & 0x00000000FFFFFFFF;
 
     return static_cast<uint32_t>(x);
 }
