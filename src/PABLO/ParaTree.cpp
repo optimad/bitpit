@@ -3045,7 +3045,7 @@ namespace bitpit {
         if (x == maxLength) x = x - 1;
         if (y == maxLength) y = y - 1;
         if (z == maxLength) z = z - 1;
-        morton = PABLO::computeMorton(x,y,z);
+        morton = PABLO::computeMorton(m_dim,x,y,z);
 
 
         powner = 0;
@@ -3125,7 +3125,7 @@ namespace bitpit {
         if (x == maxLength) x = x - 1;
         if (y == maxLength) y = y - 1;
         if (z == maxLength) z = z - 1;
-        morton = PABLO::computeMorton(x,y,z);
+        morton = PABLO::computeMorton(m_dim,x,y,z);
 
 
         powner = 0;
@@ -3281,7 +3281,7 @@ namespace bitpit {
         if (z == maxLength)
             z = z - 1;
 
-        morton = PABLO::computeMorton(x, y, z);
+        morton = PABLO::computeMorton(m_dim, x, y, z);
 
         for (int p = 0; p < m_nproc; ++p){
             if (morton <= m_partitionLastDesc[p] && morton >= m_partitionFirstDesc[p])

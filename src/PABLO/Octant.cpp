@@ -152,7 +152,7 @@ Octant::Octant(uint8_t dim, uint8_t level, int32_t x, int32_t y, int32_t z){
 	initialize(dim, level, true);
 
 	// Set the morton
-	m_morton = PABLO::computeMorton(x, y, (m_dim-2) * z);
+	m_morton = PABLO::computeMorton(m_dim, x, y, z);
 
 };
 
@@ -169,7 +169,7 @@ Octant::Octant(bool bound, uint8_t dim, uint8_t level, int32_t x, int32_t y, int
 	initialize(dim, level, bound);
 
 	// Set the morton
-	m_morton = PABLO::computeMorton(x, y, (m_dim-2) * z);
+	m_morton = PABLO::computeMorton(m_dim, x, y, z);
 
 };
 
@@ -252,7 +252,7 @@ Octant::getLogicalCoordinates() const{
  */
 uint32_t
 Octant::getLogicalX() const{
-	return PABLO::computeCoordinate3D(m_morton, 0);
+	return PABLO::computeCoordinate(m_dim, m_morton, 0);
 };
 
 /*! Get the coordinates of an octant, i.e. the coordinates of its node 0.
@@ -260,7 +260,7 @@ Octant::getLogicalX() const{
  */
 uint32_t
 Octant::getLogicalY() const{
-	return PABLO::computeCoordinate3D(m_morton, 1);
+	return PABLO::computeCoordinate(m_dim, m_morton, 1);
 };
 
 /*! Get the coordinates of an octant, i.e. the coordinates of its node 0.
@@ -268,11 +268,7 @@ Octant::getLogicalY() const{
  */
 uint32_t
 Octant::getLogicalZ() const{
-	if (m_dim == 3) {
-		return PABLO::computeCoordinate3D(m_morton, 2);
-	} else {
-		return 0;
-	}
+	return PABLO::computeCoordinate(m_dim, m_morton, 2);
 };
 
 /*! Get the level of an octant.
@@ -617,7 +613,7 @@ uint64_t	Octant::getMorton() const{
  */
 uint64_t	Octant::computeLastDescMorton() const {
 	u32array3 lastDescCoordinates = computeLastDescCoordinates();
-	return PABLO::computeMorton(lastDescCoordinates[0], lastDescCoordinates[1], lastDescCoordinates[2]);
+	return PABLO::computeMorton(m_dim, lastDescCoordinates[0], lastDescCoordinates[1], lastDescCoordinates[2]);
 };
 
 /** Compute the coordinates (i.e. the coordinates of the node 0) of the last
@@ -639,7 +635,7 @@ u32array3	Octant::computeLastDescCoordinates() const {
  */
 uint64_t	Octant::computeFatherMorton() const {
 	u32array3 fatherCoordinates = computeFatherCoordinates();
-	return PABLO::computeMorton(fatherCoordinates[0], fatherCoordinates[1], fatherCoordinates[2]);
+	return PABLO::computeMorton(m_dim, fatherCoordinates[0], fatherCoordinates[1], fatherCoordinates[2]);
 };
 
 /** Compute the coordinates (i.e. the coordinates of the node 0) of the father
@@ -680,7 +676,7 @@ uint64_t	Octant::computeNodePersistentKey(uint8_t inode) const{
  */
 uint64_t	Octant::computeNodePersistentKey(const u32array3 &node) const{
 
-	return PABLO::computeXYZKey(node[0], node[1], node[2]);
+	return PABLO::computeXYZKey(m_dim, node[0], node[1], node[2]);
 };
 
 /** Get the size of the buffer required to communicate the octant.
@@ -873,7 +869,7 @@ void	Octant::buildChildren(Octant *children) const {
 		oct.setLevel(oct.m_level + 1);
 
 		uint32_t dh = oct.getLogicalSize();
-		oct.m_morton = PABLO::computeMorton(coords[0] + dh * dx, coords[1] + dh * dy, coords[2] + dh * dz);
+		oct.m_morton = PABLO::computeMorton(m_dim, coords[0] + dh * dx, coords[1] + dh * dy, coords[2] + dh * dz);
 
 		oct.m_info[OctantInfo::INFO_NEW4REFINEMENT] = true;
 
@@ -918,7 +914,7 @@ void Octant::computeHalfSizeMortons(uint8_t iface, uint32_t *nMortons, std::vect
 			uint32_t y = coords[1] + ((i == 1) || (i == 3)) * dh;
 			uint32_t z = coords[2] + ((m_dim  ==  3) && ((i == 2) || (i == 3))) * dh;
 
-			(*mortons)[i] = PABLO::computeMorton(x, y, z);
+			(*mortons)[i] = PABLO::computeMorton(m_dim, x, y, z);
 		}
 	}
 	break;
@@ -929,7 +925,7 @@ void Octant::computeHalfSizeMortons(uint8_t iface, uint32_t *nMortons, std::vect
 			uint32_t y = coords[1] + ((i == 1) || (i == 3)) * dh;
 			uint32_t z = coords[2] + ((m_dim  ==  3) && ((i == 2) || (i == 3))) * dh;
 
-			(*mortons)[i] = PABLO::computeMorton(x, y, z);
+			(*mortons)[i] = PABLO::computeMorton(m_dim, x, y, z);
 		}
 	}
 	break;
@@ -940,7 +936,7 @@ void Octant::computeHalfSizeMortons(uint8_t iface, uint32_t *nMortons, std::vect
 			uint32_t x = coords[0] + ((i == 1) || (i == 3)) * dh;
 			uint32_t z = coords[2] + ((m_dim  ==  3) && ((i == 2) || (i == 3))) * dh;
 
-			(*mortons)[i] = PABLO::computeMorton(x, y, z);
+			(*mortons)[i] = PABLO::computeMorton(m_dim, x, y, z);
 		}
 	}
 	break;
@@ -951,7 +947,7 @@ void Octant::computeHalfSizeMortons(uint8_t iface, uint32_t *nMortons, std::vect
 			uint32_t x = coords[0] + ((i == 1) || (i == 3)) * dh;
 			uint32_t z = coords[2] + ((m_dim  ==  3) && ((i == 2) || (i == 3))) * dh;
 
-			(*mortons)[i] = PABLO::computeMorton(x, y, z);
+			(*mortons)[i] = PABLO::computeMorton(m_dim, x, y, z);
 		}
 	}
 	break;
@@ -962,7 +958,7 @@ void Octant::computeHalfSizeMortons(uint8_t iface, uint32_t *nMortons, std::vect
 			uint32_t x = coords[0] + ((i == 1) || (i == 3)) * dh;
 			uint32_t y = coords[1] + ((i == 2) || (i == 3)) * dh;
 
-			(*mortons)[i] = PABLO::computeMorton(x, y, z);
+			(*mortons)[i] = PABLO::computeMorton(m_dim, x, y, z);
 		}
 	}
 	break;
@@ -973,7 +969,7 @@ void Octant::computeHalfSizeMortons(uint8_t iface, uint32_t *nMortons, std::vect
 			uint32_t x = coords[0] + ((i == 1) || (i == 3)) * dh;
 			uint32_t y = coords[1] + ((i == 2) || (i == 3)) * dh;
 
-			(*mortons)[i] = PABLO::computeMorton(x, y, z);
+			(*mortons)[i] = PABLO::computeMorton(m_dim, x, y, z);
 		}
 	}
 	break;
@@ -1012,7 +1008,7 @@ void Octant::computeMinSizeMortons(uint8_t iface, uint8_t maxdepth, uint32_t *nM
 			uint32_t y = coords[1] + ((m_dim == 2) * (i % nline) + (m_dim - 2) * (i / nline)) * dh;
 			uint32_t z = coords[2] + (m_dim - 2) * (i % nline) * dh;
 
-			(*mortons)[i] = PABLO::computeMorton(x, y, z);
+			(*mortons)[i] = PABLO::computeMorton(m_dim, x, y, z);
 		}
 	}
 	break;
@@ -1023,7 +1019,7 @@ void Octant::computeMinSizeMortons(uint8_t iface, uint8_t maxdepth, uint32_t *nM
 			uint32_t y = coords[1] + ((m_dim == 2) * (i % nline) + (m_dim - 2) * (i / nline)) * dh;
 			uint32_t z = coords[2] + (m_dim - 2) * (i % nline) * dh;
 
-			(*mortons)[i] = PABLO::computeMorton(x, y, z);
+			(*mortons)[i] = PABLO::computeMorton(m_dim, x, y, z);
 		}
 	}
 	break;
@@ -1034,7 +1030,7 @@ void Octant::computeMinSizeMortons(uint8_t iface, uint8_t maxdepth, uint32_t *nM
 			uint32_t x = coords[0] + ((m_dim == 2) * (i % nline) + (m_dim - 2) * (i / nline)) * dh;
 			uint32_t z = coords[2] + (m_dim - 2) * (i % nline) * dh;
 
-			(*mortons)[i] = PABLO::computeMorton(x, y, z);
+			(*mortons)[i] = PABLO::computeMorton(m_dim, x, y, z);
 		}
 	}
 	break;
@@ -1045,7 +1041,7 @@ void Octant::computeMinSizeMortons(uint8_t iface, uint8_t maxdepth, uint32_t *nM
 			uint32_t x = coords[0] + ((m_dim == 2) * (i%nline) + (m_dim - 2) * (i / nline)) * dh;
 			uint32_t z = coords[2] + (m_dim - 2) * (i%nline) * dh;
 
-			(*mortons)[i] = PABLO::computeMorton(x, y, z);
+			(*mortons)[i] = PABLO::computeMorton(m_dim, x, y, z);
 		}
 	}
 	break;
@@ -1056,7 +1052,7 @@ void Octant::computeMinSizeMortons(uint8_t iface, uint8_t maxdepth, uint32_t *nM
 			uint32_t x = coords[0] + (i / nline) * dh;
 			uint32_t y = coords[1] + (i % nline) * dh;
 
-			(*mortons)[i] = PABLO::computeMorton(x, y, z);
+			(*mortons)[i] = PABLO::computeMorton(m_dim, x, y, z);
 		}
 	}
 	break;
@@ -1067,7 +1063,7 @@ void Octant::computeMinSizeMortons(uint8_t iface, uint8_t maxdepth, uint32_t *nM
 			uint32_t x = coords[0] + (i / nline) * dh;
 			uint32_t y = coords[1] + (i % nline) * dh;
 
-			(*mortons)[i] = PABLO::computeMorton(x, y, z);
+			(*mortons)[i] = PABLO::computeMorton(m_dim, x, y, z);
 		}
 	}
 	break;
@@ -1126,7 +1122,7 @@ void Octant::computeEdgeHalfSizeMortons(uint8_t iedge, const uint8_t (&edgeface)
 		for (uint32_t i = 0; i < *nMortons; ++i) {
 			uint32_t y = coords[1] + (i == 1) * dh;
 
-			(*mortons)[i] = PABLO::computeMorton(x, y, z);
+			(*mortons)[i] = PABLO::computeMorton(m_dim, x, y, z);
 		}
 	}
 	break;
@@ -1137,7 +1133,7 @@ void Octant::computeEdgeHalfSizeMortons(uint8_t iedge, const uint8_t (&edgeface)
 		for (uint32_t i = 0; i < *nMortons; ++i) {
 			uint32_t y = coords[1] + (i == 1) * dh;
 
-			(*mortons)[i] = PABLO::computeMorton(x, y, z);
+			(*mortons)[i] = PABLO::computeMorton(m_dim, x, y, z);
 		}
 	}
 	break;
@@ -1148,7 +1144,7 @@ void Octant::computeEdgeHalfSizeMortons(uint8_t iedge, const uint8_t (&edgeface)
 		for (uint32_t i = 0; i < *nMortons; ++i) {
 			uint32_t x = coords[0] + (i == 1) * dh;
 
-			(*mortons)[i] = PABLO::computeMorton(x, y, z);
+			(*mortons)[i] = PABLO::computeMorton(m_dim, x, y, z);
 		}
 	}
 	break;
@@ -1159,7 +1155,7 @@ void Octant::computeEdgeHalfSizeMortons(uint8_t iedge, const uint8_t (&edgeface)
 		for (uint32_t i = 0; i < *nMortons; ++i) {
 			uint32_t x = coords[0] + (i == 1) * dh;
 
-			(*mortons)[i] = PABLO::computeMorton(x, y, z);
+			(*mortons)[i] = PABLO::computeMorton(m_dim, x, y, z);
 		}
 	}
 	break;
@@ -1170,7 +1166,7 @@ void Octant::computeEdgeHalfSizeMortons(uint8_t iedge, const uint8_t (&edgeface)
 		for (uint32_t i = 0; i < *nMortons; ++i) {
 			uint32_t z = coords[2] + (i == 1) * dh;
 
-			(*mortons)[i] = PABLO::computeMorton(x, y, z);
+			(*mortons)[i] = PABLO::computeMorton(m_dim, x, y, z);
 		}
 	}
 	break;
@@ -1181,7 +1177,7 @@ void Octant::computeEdgeHalfSizeMortons(uint8_t iedge, const uint8_t (&edgeface)
 		for (uint32_t i = 0; i < *nMortons; ++i) {
 			uint32_t z = coords[2] + (i == 1) * dh;
 
-			(*mortons)[i] = PABLO::computeMorton(x, y, z);
+			(*mortons)[i] = PABLO::computeMorton(m_dim, x, y, z);
 		}
 	}
 	break;
@@ -1192,7 +1188,7 @@ void Octant::computeEdgeHalfSizeMortons(uint8_t iedge, const uint8_t (&edgeface)
 		for (uint32_t i = 0; i < *nMortons; ++i) {
 			uint32_t z = coords[2] + (i == 1) * dh;
 
-			(*mortons)[i] = PABLO::computeMorton(x, y, z);
+			(*mortons)[i] = PABLO::computeMorton(m_dim, x, y, z);
 		}
 	}
 	break;
@@ -1203,7 +1199,7 @@ void Octant::computeEdgeHalfSizeMortons(uint8_t iedge, const uint8_t (&edgeface)
 		for (uint32_t i = 0; i < *nMortons; ++i) {
 			uint32_t z = coords[2] + (i == 1) * dh;
 
-			(*mortons)[i] = PABLO::computeMorton(x, y, z);
+			(*mortons)[i] = PABLO::computeMorton(m_dim, x, y, z);
 		}
 	}
 	break;
@@ -1214,7 +1210,7 @@ void Octant::computeEdgeHalfSizeMortons(uint8_t iedge, const uint8_t (&edgeface)
 		for (uint32_t i = 0; i < *nMortons; ++i) {
 			uint32_t y = coords[1] + (i == 1) * dh;
 
-			(*mortons)[i] = PABLO::computeMorton(x, y, z);
+			(*mortons)[i] = PABLO::computeMorton(m_dim, x, y, z);
 		}
 	}
 	break;
@@ -1225,7 +1221,7 @@ void Octant::computeEdgeHalfSizeMortons(uint8_t iedge, const uint8_t (&edgeface)
 		for (uint32_t i = 0; i < *nMortons; ++i) {
 			uint32_t y = coords[1] + (i == 1) * dh;
 
-			(*mortons)[i] = PABLO::computeMorton(x, y, z);
+			(*mortons)[i] = PABLO::computeMorton(m_dim, x, y, z);
 		}
 	}
 	break;
@@ -1236,7 +1232,7 @@ void Octant::computeEdgeHalfSizeMortons(uint8_t iedge, const uint8_t (&edgeface)
 		for (uint32_t i = 0; i < *nMortons; ++i) {
 			uint32_t x = coords[0] + (i == 1) * dh;
 
-			(*mortons)[i] = PABLO::computeMorton(x, y, z);
+			(*mortons)[i] = PABLO::computeMorton(m_dim, x, y, z);
 		}
 	}
 	break;
@@ -1247,7 +1243,7 @@ void Octant::computeEdgeHalfSizeMortons(uint8_t iedge, const uint8_t (&edgeface)
 		for (uint32_t i = 0; i < *nMortons; ++i) {
 			uint32_t x = coords[0] + (i == 1) *  dh;
 
-			(*mortons)[i] = PABLO::computeMorton(x, y, z);
+			(*mortons)[i] = PABLO::computeMorton(m_dim, x, y, z);
 		}
 	}
 	break;
@@ -1287,7 +1283,7 @@ void Octant::computeEdgeMinSizeMortons(uint8_t iedge, uint8_t maxdepth, const ui
 		uint32_t z = coords[2] - dh;
 		for (uint32_t i = 0; i < *nMortons; ++i) {
 			uint32_t y = coords[1] + i * dh;
-			(*mortons)[i] = PABLO::computeMorton(x, y, z);
+			(*mortons)[i] = PABLO::computeMorton(m_dim, x, y, z);
 		}
 	}
 	break;
@@ -1298,7 +1294,7 @@ void Octant::computeEdgeMinSizeMortons(uint8_t iedge, uint8_t maxdepth, const ui
 		for (uint32_t i = 0; i < *nMortons; ++i) {
 			uint32_t y = coords[1] + i * dh;
 
-			(*mortons)[i] = PABLO::computeMorton(x, y, z);
+			(*mortons)[i] = PABLO::computeMorton(m_dim, x, y, z);
 		}
 	}
 	break;
@@ -1309,7 +1305,7 @@ void Octant::computeEdgeMinSizeMortons(uint8_t iedge, uint8_t maxdepth, const ui
 		for (uint32_t i = 0; i < *nMortons; ++i) {
 			uint32_t x = coords[0] + i * dh;
 
-			(*mortons)[i] = PABLO::computeMorton(x, y, z);
+			(*mortons)[i] = PABLO::computeMorton(m_dim, x, y, z);
 		}
 	}
 	break;
@@ -1320,7 +1316,7 @@ void Octant::computeEdgeMinSizeMortons(uint8_t iedge, uint8_t maxdepth, const ui
 		for (uint32_t i = 0; i < *nMortons; ++i) {
 			uint32_t x = coords[0] + i * dh;
 
-			(*mortons)[i] = PABLO::computeMorton(x, y, z);
+			(*mortons)[i] = PABLO::computeMorton(m_dim, x, y, z);
 		}
 	}
 	break;
@@ -1331,7 +1327,7 @@ void Octant::computeEdgeMinSizeMortons(uint8_t iedge, uint8_t maxdepth, const ui
 		for (uint32_t i = 0; i < *nMortons; ++i) {
 			uint32_t z = coords[2] + i * dh;
 
-			(*mortons)[i] = PABLO::computeMorton(x, y, z);
+			(*mortons)[i] = PABLO::computeMorton(m_dim, x, y, z);
 		}
 	}
 	break;
@@ -1342,7 +1338,7 @@ void Octant::computeEdgeMinSizeMortons(uint8_t iedge, uint8_t maxdepth, const ui
 		for (uint32_t i = 0; i < *nMortons; ++i) {
 			uint32_t z = coords[2] + i * dh;
 
-			(*mortons)[i] = PABLO::computeMorton(x, y, z);
+			(*mortons)[i] = PABLO::computeMorton(m_dim, x, y, z);
 		}
 	}
 	break;
@@ -1353,7 +1349,7 @@ void Octant::computeEdgeMinSizeMortons(uint8_t iedge, uint8_t maxdepth, const ui
 		for (uint32_t i = 0; i < *nMortons; ++i) {
 			uint32_t z = coords[2] + i * dh;
 
-			(*mortons)[i] = PABLO::computeMorton(x, y, z);
+			(*mortons)[i] = PABLO::computeMorton(m_dim, x, y, z);
 		}
 	}
 	break;
@@ -1364,7 +1360,7 @@ void Octant::computeEdgeMinSizeMortons(uint8_t iedge, uint8_t maxdepth, const ui
 		for (uint32_t i = 0; i < *nMortons; ++i) {
 			uint32_t z = coords[2] + i * dh;
 
-			(*mortons)[i] = PABLO::computeMorton(x, y, z);
+			(*mortons)[i] = PABLO::computeMorton(m_dim, x, y, z);
 		}
 	}
 	break;
@@ -1375,7 +1371,7 @@ void Octant::computeEdgeMinSizeMortons(uint8_t iedge, uint8_t maxdepth, const ui
 		for (uint32_t i = 0; i < *nMortons; ++i) {
 			uint32_t y = coords[1] + i * dh;
 
-			(*mortons)[i] = PABLO::computeMorton(x, y, z);
+			(*mortons)[i] = PABLO::computeMorton(m_dim, x, y, z);
 		}
 	}
 	break;
@@ -1386,7 +1382,7 @@ void Octant::computeEdgeMinSizeMortons(uint8_t iedge, uint8_t maxdepth, const ui
 		for (uint32_t i = 0; i < *nMortons; ++i) {
 			uint32_t y = coords[1] + i * dh;
 
-			(*mortons)[i] = PABLO::computeMorton(x, y, z);
+			(*mortons)[i] = PABLO::computeMorton(m_dim, x, y, z);
 		}
 	}
 	break;
@@ -1397,7 +1393,7 @@ void Octant::computeEdgeMinSizeMortons(uint8_t iedge, uint8_t maxdepth, const ui
 		for (uint32_t i = 0; i < *nMortons; ++i) {
 			uint32_t x = coords[0] + i * dh;
 
-			(*mortons)[i] = PABLO::computeMorton(x, y, z);
+			(*mortons)[i] = PABLO::computeMorton(m_dim, x, y, z);
 		}
 	}
 	break;
@@ -1408,7 +1404,7 @@ void Octant::computeEdgeMinSizeMortons(uint8_t iedge, uint8_t maxdepth, const ui
 		for (uint32_t i = 0; i < *nMortons; ++i) {
 			uint32_t x = coords[0] + i * dh;
 
-			(*mortons)[i] = PABLO::computeMorton(x, y, z);
+			(*mortons)[i] = PABLO::computeMorton(m_dim, x, y, z);
 		}
 	}
 	break;
@@ -1469,7 +1465,7 @@ void Octant::computeNodeMinSizeMorton(uint8_t inode, uint8_t maxdepth, const uin
 		uint32_t y = coords[1] - dh;
 		uint32_t z = coords[2] - (m_dim - 2) * dh;
 
-		*morton = PABLO::computeMorton(x, y, z);
+		*morton = PABLO::computeMorton(m_dim, x, y, z);
 	}
 	break;
 	case 1 :
@@ -1478,7 +1474,7 @@ void Octant::computeNodeMinSizeMorton(uint8_t inode, uint8_t maxdepth, const uin
 		uint32_t y = coords[1] - dh;
 		uint32_t z = coords[2] - (m_dim - 2) * dh;
 
-		*morton = PABLO::computeMorton(x, y, z);
+		*morton = PABLO::computeMorton(m_dim, x, y, z);
 	}
 	break;
 	case 2 :
@@ -1487,7 +1483,7 @@ void Octant::computeNodeMinSizeMorton(uint8_t inode, uint8_t maxdepth, const uin
 		uint32_t y = coords[1] + dh2;
 		uint32_t z = coords[2] - (m_dim - 2) * dh;
 
-		*morton = PABLO::computeMorton(x, y, z);
+		*morton = PABLO::computeMorton(m_dim, x, y, z);
 	}
 	break;
 	case 3 :
@@ -1496,7 +1492,7 @@ void Octant::computeNodeMinSizeMorton(uint8_t inode, uint8_t maxdepth, const uin
 		uint32_t y = coords[1] + dh2;
 		uint32_t z = coords[2] - (m_dim - 2) * dh;
 
-		*morton = PABLO::computeMorton(x, y, z);
+		*morton = PABLO::computeMorton(m_dim, x, y, z);
 	}
 	break;
 	case 4 :
@@ -1505,7 +1501,7 @@ void Octant::computeNodeMinSizeMorton(uint8_t inode, uint8_t maxdepth, const uin
 		uint32_t y = coords[1] - dh;
 		uint32_t z = coords[2] + dh2;
 
-		*morton = PABLO::computeMorton(x, y, z);
+		*morton = PABLO::computeMorton(m_dim, x, y, z);
 	}
 	break;
 	case 5 :
@@ -1514,7 +1510,7 @@ void Octant::computeNodeMinSizeMorton(uint8_t inode, uint8_t maxdepth, const uin
 		uint32_t y = coords[1] - dh;
 		uint32_t z = coords[2] + dh2;
 
-		*morton = PABLO::computeMorton(x, y, z);
+		*morton = PABLO::computeMorton(m_dim, x, y, z);
 	}
 	break;
 	case 6 :
@@ -1523,7 +1519,7 @@ void Octant::computeNodeMinSizeMorton(uint8_t inode, uint8_t maxdepth, const uin
 		uint32_t y = coords[1] + dh2;
 		uint32_t z = coords[2] + dh2;
 
-		*morton = PABLO::computeMorton(x, y, z);
+		*morton = PABLO::computeMorton(m_dim, x, y, z);
 	}
 	break;
 	case 7 :
@@ -1532,7 +1528,7 @@ void Octant::computeNodeMinSizeMorton(uint8_t inode, uint8_t maxdepth, const uin
 		uint32_t y = coords[1] + dh2;
 		uint32_t z = coords[2] + dh2;
 
-		*morton = PABLO::computeMorton(x, y, z);
+		*morton = PABLO::computeMorton(m_dim, x, y, z);
 	}
 	break;
 	default:
@@ -1574,32 +1570,32 @@ uint64_t Octant::computePeriodicMorton(uint8_t iface) const {
 		switch (iface) {
 		case 0 :
 		{
-			Morton = PABLO::computeMorton(maxLength-dh,coords[1],coords[2]);
+			Morton = PABLO::computeMorton(m_dim,maxLength-dh,coords[1],coords[2]);
 		}
 		break;
 		case 1 :
 		{
-			Morton = PABLO::computeMorton(0,coords[1],coords[2]);
+			Morton = PABLO::computeMorton(m_dim,0,coords[1],coords[2]);
 		}
 		break;
 		case 2 :
 		{
-			Morton = PABLO::computeMorton(coords[0],maxLength-dh,coords[2]);
+			Morton = PABLO::computeMorton(m_dim,coords[0],maxLength-dh,coords[2]);
 		}
 		break;
 		case 3 :
 		{
-			Morton = PABLO::computeMorton(coords[0],0,coords[2]);
+			Morton = PABLO::computeMorton(m_dim,coords[0],0,coords[2]);
 		}
 		break;
 		case 4 :
 		{
-			Morton = PABLO::computeMorton(coords[0],coords[1],maxLength-dh);
+			Morton = PABLO::computeMorton(m_dim,coords[0],coords[1],maxLength-dh);
 		}
 		break;
 		case 5 :
 		{
-			Morton = PABLO::computeMorton(coords[0],coords[1],0);
+			Morton = PABLO::computeMorton(m_dim,coords[0],coords[1],0);
 		}
 		break;
 		default:
