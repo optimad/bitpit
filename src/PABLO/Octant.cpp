@@ -656,6 +656,10 @@ u32array3	Octant::computeFatherCoordinates() const {
 };
 
 /** Compute the persistent XYZ key of the given node (without level).
+ * The XYZ key combines the 32bit coordinates and generates a unique 64bit value
+ * (in two dimensions this is always possible, in three dimensions this is possible
+ * because with a 64bit wide Morton number not all 32 bits of the coordinates are
+ * used).
  * \param[in] inode Local index of the node
  * \return persistent XYZ key of the node.
  */
@@ -667,12 +671,16 @@ uint64_t	Octant::computeNodePersistentKey(uint8_t inode) const{
 };
 
 /** Compute the persistent XYZ key of the given node (without level).
+ * The XYZ key combines the 32bit coordinates and generates a unique 64bit value
+ * (in two dimensions this is always possible, in three dimensions this is possible
+ * because with a 64bit wide Morton number not all 32 bits of the coordinates are
+ * used).
  * \param[in] node Logical coordinates of the node
  * \return persistent XYZ key of the node.
  */
 uint64_t	Octant::computeNodePersistentKey(const u32array3 &node) const{
 
-	return PABLO::computeXYZKey(node[0], node[1], node[2], sm_treeConstants[m_dim].maxLevel);
+	return PABLO::computeXYZKey(node[0], node[1], node[2]);
 };
 
 /** Get the size of the buffer required to communicate the octant.
