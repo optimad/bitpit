@@ -1660,7 +1660,7 @@ Octant Octant::computePeriodicOctant(uint8_t iface) const {
  * \param[in] inode Local index of the node target.
  */
 Octant Octant::computeNodePeriodicOctant(uint8_t inode) const {
-    uint32_t maxLength = sm_treeConstants[m_dim].MAX_LENGTH;
+    uint32_t maxLength = sm_treeConstants[m_dim].lengths[0];
     uint32_t dh = this->getLogicalSize();
 
     uint8_t iface1 = sm_treeConstants[m_dim].nodeFace[inode][0];

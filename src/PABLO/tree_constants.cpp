@@ -36,7 +36,6 @@ namespace bitpit {
 // that you can take the address of a static member if (and only if) it has
 // an out-of-class definition.
 const int8_t TreeConstants::MAX_LEVEL;
-const uint32_t TreeConstants::MAX_LENGTH;
 
 // =================================================================================== //
 // CLASS IMPLEMENTATION                                                                    //

@@ -1016,7 +1016,7 @@ namespace bitpit {
      */
     uint32_t
     ParaTree::getMaxLength() const {
-        return TreeConstants::MAX_LENGTH;
+        return m_treeConstants->lengths[0];
     }
 
     /*! Get the number of nodes for each octant (4 for 2D case, 8 for 3D case)
@@ -3041,9 +3041,10 @@ namespace bitpit {
         y = m_trans.mapY(std::min(std::max(point[1], 0.0), 1.0));
         z = m_trans.mapZ(std::min(std::max(point[2], 0.0), 1.0));
 
-        if (x == TreeConstants::MAX_LENGTH) x = x - 1;
-        if (y == TreeConstants::MAX_LENGTH) y = y - 1;
-        if (z == TreeConstants::MAX_LENGTH) z = z - 1;
+        uint32_t maxLength = getMaxLength();
+        if (x == maxLength) x = x - 1;
+        if (y == maxLength) y = y - 1;
+        if (z == maxLength) z = z - 1;
         morton = PABLO::computeMorton(x,y,z);
 
 
@@ -3120,9 +3121,10 @@ namespace bitpit {
         y = m_trans.mapY(std::min(std::max(point[1], 0.0), 1.0));
         z = m_trans.mapZ(std::min(std::max(point[2], 0.0), 1.0));
 
-        if (x == TreeConstants::MAX_LENGTH) x = x - 1;
-        if (y == TreeConstants::MAX_LENGTH) y = y - 1;
-        if (z == TreeConstants::MAX_LENGTH) z = z - 1;
+        uint32_t maxLength = getMaxLength();
+        if (x == maxLength) x = x - 1;
+        if (y == maxLength) y = y - 1;
+        if (z == maxLength) z = z - 1;
         morton = PABLO::computeMorton(x,y,z);
 
 
@@ -3261,7 +3263,8 @@ namespace bitpit {
         y = m_trans.mapY(point[1]);
         z = m_trans.mapZ(point[2]);
 
-        if ((x > TreeConstants::MAX_LENGTH) || (y > TreeConstants::MAX_LENGTH) || (z > TreeConstants::MAX_LENGTH)
+        uint32_t maxLength = getMaxLength();
+        if ((x > maxLength) || (y > maxLength) || (z > maxLength)
             || (point[0] < m_trans.m_origin[0]) || (point[1] < m_trans.m_origin[1]) || (point[2] < m_trans.m_origin[2])){
             return -1;
         }
@@ -3269,13 +3272,13 @@ namespace bitpit {
         if (m_serial)
             return m_rank;
 
-        if (x == TreeConstants::MAX_LENGTH)
+        if (x == maxLength)
             x = x - 1;
 
-        if (y == TreeConstants::MAX_LENGTH)
+        if (y == maxLength)
             y = y - 1;
 
-        if (z == TreeConstants::MAX_LENGTH)
+        if (z == maxLength)
             z = z - 1;
 
         morton = PABLO::computeMorton(x, y, z);

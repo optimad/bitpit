@@ -59,7 +59,6 @@ public:
 	// STATIC MEMBERS
 	// =================================================================================== //
 	static const int8_t   MAX_LEVEL  = 20;                        /**< Maximum allowed refinement level of octree */
-	static const uint32_t MAX_LENGTH = uint32_t(1) << MAX_LEVEL;  /**< Length of the logical domain */
 
 	static const TreeConstants & instance(uint8_t dim);
 	static const Instances & instances();
