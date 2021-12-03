@@ -181,15 +181,20 @@ inline uint32_t computeCoordinate2D(uint64_t morton, int coord)
 /**
 * Compute the XYZ key of the given set of coordinates.
 *
+* The XYZ key combines three 32bit coordinates and generates a unique 64bit
+* value (this is possible because with a 64bit-wide Morton number not all
+* 32 bits of the coordinates are used).
+*
 * \param x is the integer x position
 * \param y is the integer y position
 * \param z is the integer z position
-* \param maxLevel is the Maximum allowed refinement level of octree
-* \result The Morton number.
+* \result The unique XYZ key of the coordinates.
 */
-inline uint64_t computeXYZKey(uint64_t x, uint64_t y, uint64_t z, int8_t maxLevel)
+inline uint64_t computeXYZKey(uint32_t x, uint32_t y, uint32_t z)
 {
-    uint64_t key = x | (y << (maxLevel+1)) | (z << 2*(maxLevel+1));
+    static const int SHIFT = (8 * sizeof(uint64_t)) / 3;
+
+    uint64_t key = x | (static_cast<uint_fast64_t>(y) << SHIFT) | (static_cast<uint_fast64_t>(z) << (2 * SHIFT));
 
     return key;
 }
@@ -197,14 +202,18 @@ inline uint64_t computeXYZKey(uint64_t x, uint64_t y, uint64_t z, int8_t maxLeve
 /**
 * Compute the XYZ key number of the given set of coordinates.
 *
+* The XYZ key combines two 32bit coordinates and generates a unique 64bit
+* value.
+*
 * \param x is the integer x position
 * \param y is the integer y position
-* \param maxLevel is the Maximum allowed refinement level of octree
-* \result The Morton number.
+* \result The unique XYZ key of the coordinates.
 */
-inline uint64_t computeXYZKey(uint64_t x, uint64_t y, int8_t maxLevel)
+inline uint64_t computeXYZKey(uint32_t x, uint32_t y)
 {
-    uint64_t key = x | (y << (maxLevel+1));
+    static const int SHIFT = (8 * sizeof(uint64_t)) / 2;
+
+    uint64_t key = x | (static_cast<uint_fast64_t>(y) << SHIFT);
 
     return key;
 }
