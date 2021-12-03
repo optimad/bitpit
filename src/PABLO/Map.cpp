@@ -59,12 +59,14 @@ void Map::initialize(uint8_t dim){
     m_L = 1.0;
 
     if (m_dim > 0) {
-        m_nnodes        = uint8_t(1)<<m_dim;
-        m_nnodesPerFace = uint8_t(1)<<(m_dim-1);
+        const TreeConstants &treeConstants = TreeConstants::instance(m_dim);
 
-        m_maxLength = TreeConstants::MAX_LENGTH;
-        m_maxArea   = uipow<uint64_t>(m_maxLength, m_dim - 1);
-        m_maxVolume = uipow<uint64_t>(m_maxLength, m_dim);
+        m_nnodes        = treeConstants.nNodes;
+        m_nnodesPerFace = treeConstants.nNodesPerFace;
+
+        m_maxLength = treeConstants.lengths[0];
+        m_maxArea   = treeConstants.areas[0];
+        m_maxVolume = treeConstants.volumes[0];
 
         m_maxLength_1 = 1. / double(m_maxLength);
         m_maxArea_1   = 1. / double(m_maxArea);
