@@ -29,15 +29,6 @@
 namespace bitpit {
 
 // =================================================================================== //
-// STATIC MEMBERS
-// =================================================================================== //
-
-// These members are initialized in the header, but the C++ standard states
-// that you can take the address of a static member if (and only if) it has
-// an out-of-class definition.
-const int8_t TreeConstants::MAX_LEVEL;
-
-// =================================================================================== //
 // CLASS IMPLEMENTATION                                                                    //
 // =================================================================================== //
 
@@ -78,6 +69,8 @@ TreeConstants::TreeConstants(uint8_t dim) {
  */
 void
 TreeConstants::initialize(uint8_t dim) {
+
+	maxLevel = 20;
 
 	nChildren 			= uint8_t(1)<<dim;
 	nFaces 				= 2*dim;
@@ -425,10 +418,13 @@ TreeConstants::initialize(uint8_t dim) {
 	nodeFromCoordinates[0][1][1] = 6;
 	nodeFromCoordinates[1][1][1] = 7;
 
-	for (int level = 0; level <= MAX_LEVEL; ++level) {
-		lengths[level] = uint32_t(1) << (MAX_LEVEL - level);
-		areas[level]   = uint64_t(1) << ((dim - 1) * (MAX_LEVEL - level));
-		volumes[level] = uint64_t(1) << (dim * (MAX_LEVEL - level));
+	lengths.resize(maxLevel + 1);
+	areas.resize(maxLevel + 1);
+	volumes.resize(maxLevel + 1);
+	for (int level = 0; level <= maxLevel; ++level) {
+		lengths[level] = uint32_t(1) << (maxLevel - level);
+		areas[level]   = uint64_t(1) << ((dim - 1) * (maxLevel - level));
+		volumes[level] = uint64_t(1) << (dim * (maxLevel - level));
 	}
 
 }

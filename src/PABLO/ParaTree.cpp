@@ -750,7 +750,7 @@ namespace bitpit {
         (*m_log) << "---------------------------------------------" << endl;
         (*m_log) << " Number of proc	:	" + to_string(static_cast<unsigned long long>(m_nproc)) << endl;
         (*m_log) << " Dimension		:	" + to_string(static_cast<unsigned long long>(m_dim)) << endl;
-        (*m_log) << " Max allowed level	:	" + to_string(static_cast<unsigned long long>(TreeConstants::MAX_LEVEL)) << endl;
+        (*m_log) << " Max allowed level	:	" + to_string(static_cast<unsigned long long>(m_treeConstants->maxLevel)) << endl;
         (*m_log) << " Number of octants	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)) << endl;
         (*m_log) << "---------------------------------------------" << endl;
         (*m_log) << " " << endl;
@@ -1008,7 +1008,7 @@ namespace bitpit {
      */
     int
     ParaTree::getMaxLevel() const {
-        return TreeConstants::MAX_LEVEL;
+        return m_treeConstants->maxLevel;
     };
 
     /*! Get the length of the domain in logical domain.
@@ -2134,7 +2134,7 @@ namespace bitpit {
      */
     double
     ParaTree::getLocalMinSize() const {
-        uint32_t size = uint32_t(1)<<(TreeConstants::MAX_LEVEL-m_octree.getLocalMaxDepth());
+        uint32_t size = uint32_t(1)<<(m_treeConstants->maxLevel-m_octree.getLocalMaxDepth());
         return m_trans.mapSize(size);
     };
 
@@ -4470,7 +4470,7 @@ namespace bitpit {
      */
     double
     ParaTree::levelToSize(uint8_t level) {
-        uint32_t size = uint32_t(1)<<(TreeConstants::MAX_LEVEL-level);
+        uint32_t size = uint32_t(1)<<(m_treeConstants->maxLevel-level);
         return m_trans.mapSize(size);
     }
 
@@ -4791,14 +4791,14 @@ namespace bitpit {
         // Partitioning is modified to guarantee that families of octants at
         // the desired level above the maximum depth reached in the tree
         // are retained compact on the same process.
-        uint8_t level = uint8_t(min(int(max(int(m_maxDepth) - int(level_), int(1))) , int(TreeConstants::MAX_LEVEL)));
+        uint8_t level = uint8_t(min(int(max(int(m_maxDepth) - int(level_), int(1))) , int(m_treeConstants->maxLevel)));
         uint8_t* new_boundary_owner = new uint8_t[m_nproc-1];
         uint8_t new_interfaces_count;
         uint8_t first_new_interface_rank_index;
         uint8_t* new_interfaces_count_per_rank = new uint8_t[m_nproc];
         uint8_t* first_new_interface_rank_index_per_rank = new uint8_t[m_nproc];
 
-        uint32_t Dh = uint32_t(pow(double(2),double(TreeConstants::MAX_LEVEL-level)));
+        uint32_t Dh = uint32_t(pow(double(2),double(m_treeConstants->maxLevel-level)));
         uint32_t istart, nocts, rest;
         uint32_t forw = 0, backw = 0;
         uint32_t i = 0, iproc, j;

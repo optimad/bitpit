@@ -31,6 +31,7 @@
 #include <stdint.h>
 
 #include <array>
+#include <vector>
 
 namespace bitpit {
 
@@ -58,14 +59,14 @@ public:
 	// =================================================================================== //
 	// STATIC MEMBERS
 	// =================================================================================== //
-	static const int8_t   MAX_LEVEL  = 20;                        /**< Maximum allowed refinement level of octree */
-
 	static const TreeConstants & instance(uint8_t dim);
 	static const Instances & instances();
 
 	// =================================================================================== //
 	// MEMBERS
 	// =================================================================================== //
+	int8_t   maxLevel;              /**< Maximum allowed refinement level of octree */
+
 	uint8_t  nChildren;             /**< Number of children of an octant */
 	uint8_t  nFaces;                /**< Number of faces of an octant */
 	uint8_t  nEdges;                /**< Number of edges of an octant */
@@ -89,9 +90,9 @@ public:
 
 	uint8_t  nodeFromCoordinates[2][2][2];    /**< nodeFromCoordinates[0:1][0:1][0:1] = Local node index from Local coordinates [x][y][z] */
 
-	std::array<uint32_t, MAX_LEVEL + 1> lengths;   /**< Lengths associated to the levels */
-	std::array<uint64_t, MAX_LEVEL + 1> areas;     /**< Areas associated to the levels */
-	std::array<uint64_t, MAX_LEVEL + 1> volumes;   /**< Volumes associated to the levels */
+	std::vector<uint32_t> lengths;   /**< Lengths associated to the levels */
+	std::vector<uint64_t> areas;     /**< Areas associated to the levels */
+	std::vector<uint64_t> volumes;   /**< Volumes associated to the levels */
 
 private:
 	// =================================================================================== //
