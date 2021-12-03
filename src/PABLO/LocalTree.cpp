@@ -429,7 +429,8 @@ namespace bitpit {
 
     /*! Refine local tree: refine one time octants with marker >0
      * \param[out] mapidx mapidx[i] = index in old octants vector of the new i-th octant (index of father if octant is new after refinement)
-     * \return	true if refinement done
+     * \return	true if additional refinement is needed in order to satisfy
+     * the specified markers
      */
     bool
     LocalTree::refine(u32vector & mapidx){
