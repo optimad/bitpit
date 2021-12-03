@@ -25,14 +25,56 @@
 #ifndef __BITPIT_PABLO_MORTON_HPP__
 #define __BITPIT_PABLO_MORTON_HPP__
 
+#include <algorithm>
 #include <cstdint>
 #include <limits>
+#include <stdexcept>
 
 namespace bitpit {
 
 namespace PABLO {
 
 const uint64_t INVALID_MORTON = std::numeric_limits<uint64_t>::max();
+
+/**
+* Compute the maximum allowed level.
+*
+* The maximum allowed level is evaluated taking into account the following
+* constrains:
+*  - the Morton number should be able to index all the possible octants
+*    of the tree, for a n-dimensional tree, the size, expressed in bytes,
+*    of the Morton number should be at least n time the maximum level;
+*  - the maximum logical length of the domain is stored in an uint32_t
+*    integer (32-bit), this means that the maximum level should be less
+*    that 32;
+*  - vertex coordinates are stored using uint32_t integers (32-bit), we
+*    want to combined them in an unit64_t integer (64-bit) to generate
+*    a unique key that identifies all the vertices inside the domain (from
+*    the lower front-left-corner to the back-upper-right corner). In order for
+*    this to be possible for all the vertices of a n-dimensional domain, the
+*    maximum number of usable bits in a coordinate is 64 divided by n, this
+*    means that the maximum level should be less 64 divided by n.
+*
+* \param dimension is the dimension of the space
+* \result The maximum allowed level.
+*/
+inline int8_t computeMaximumLevel(uint8_t dimension)
+{
+    if (dimension == 0) {
+        return 0;
+    }
+
+    // Evaluate the maximum level of the tree based on the available bits for storing the Morton
+    int8_t level = (8 * sizeof(uint64_t)) / dimension;
+
+    // Limit required for storing the length of the domain
+    level = std::min(static_cast<int8_t>((8 * sizeof(uint32_t)) - 1), level);
+
+    // Limit required for generating the XYZ key of all the vertices
+    level = std::min(static_cast<int8_t>((8 * sizeof(uint64_t)) / dimension - 1), level);
+
+    return level;
+}
 
 /**
 * Seperate bits from a given integer 3 positions apart.
@@ -126,7 +168,7 @@ inline uint32_t getSecondBits(uint64_t morton)
 * \param z is the integer z position
 * \result The Morton number.
 */
-inline uint64_t computeMorton(uint32_t x, uint32_t y, uint32_t z)
+inline uint64_t computeMorton3D(uint32_t x, uint32_t y, uint32_t z)
 {
     uint64_t morton = splitBy3(x) | (splitBy3(y) << 1) | (splitBy3(z) << 2);
 
@@ -143,11 +185,34 @@ inline uint64_t computeMorton(uint32_t x, uint32_t y, uint32_t z)
 * \param y is the integer y position
 * \result The Morton number.
 */
-inline uint64_t computeMorton(uint32_t x, uint32_t y)
+inline uint64_t computeMorton2D(uint32_t x, uint32_t y)
 {
     uint64_t morton = splitBy2(x) | (splitBy2(y) << 1);
 
     return morton;
+}
+
+/**
+* Compute the Morton number of the given set of coordinates.
+*
+* The function uses the "magic bits" algorithm of the libmorton library
+* (see https://github.com/Forceflow/libmorton).
+*
+* \param dimension is the dimension of the space
+* \param x is the integer x position
+* \param y is the integer y position
+* \param z is the integer z position
+* \result The Morton number.
+*/
+inline uint64_t computeMorton(uint8_t dimension, uint32_t x, uint32_t y, uint32_t z)
+{
+    if (dimension == 3) {
+        return computeMorton3D(x, y, z);
+    } else if (dimension == 2) {
+        return computeMorton2D(x, y);
+    } else {
+        throw std::runtime_error("Requested dimension is not supported");
+    }
 }
 
 /**
@@ -177,7 +242,33 @@ inline uint32_t computeCoordinate3D(uint64_t morton, int coord)
 */
 inline uint32_t computeCoordinate2D(uint64_t morton, int coord)
 {
-    return getSecondBits(morton >> coord);
+    if (coord < 2) {
+        return getSecondBits(morton >> coord);
+    } else {
+        return 0;
+    }
+}
+
+/**
+* Compute the specified coordinate value from the given Morton number.
+*
+* The function uses the "magic bits" algorithm of the libmorton library
+* (see https://github.com/Forceflow/libmorton).
+*
+* \param dimension is the dimension of the space
+* \param morton is the morton number
+* \param coord is the coordinate that will be computed
+* \result The coordinate value.
+*/
+inline uint32_t computeCoordinate(uint8_t dimension, uint64_t morton, int coord)
+{
+    if (dimension == 3) {
+        return computeCoordinate3D(morton, coord);
+    } else if (dimension == 2) {
+        return computeCoordinate2D(morton, coord);
+    } else {
+        throw std::runtime_error("Requested dimension is not supported");
+    }
 }
 
 /**
@@ -192,7 +283,7 @@ inline uint32_t computeCoordinate2D(uint64_t morton, int coord)
 * \param z is the integer z position
 * \result The unique XYZ key of the coordinates.
 */
-inline uint64_t computeXYZKey(uint32_t x, uint32_t y, uint32_t z)
+inline uint64_t computeXYZKey3D(uint32_t x, uint32_t y, uint32_t z)
 {
     static const int SHIFT = (8 * sizeof(uint64_t)) / 3;
 
@@ -207,17 +298,42 @@ inline uint64_t computeXYZKey(uint32_t x, uint32_t y, uint32_t z)
 * The XYZ key combines two 32bit coordinates and generates a unique 64bit
 * value.
 *
+* \param maxLevel is the maximum allowed refinement level of octree
 * \param x is the integer x position
 * \param y is the integer y position
 * \result The unique XYZ key of the coordinates.
 */
-inline uint64_t computeXYZKey(uint32_t x, uint32_t y)
+inline uint64_t computeXYZKey2D(uint32_t x, uint32_t y)
 {
     static const int SHIFT = (8 * sizeof(uint64_t)) / 2;
 
     uint64_t key = x | (static_cast<uint_fast64_t>(y) << SHIFT);
 
     return key;
+}
+
+/**
+* Compute the XYZ key of the given set of coordinates.
+*
+* The XYZ key combines three 32bit coordinates and generates a unique 64bit
+* value (in three dimensions this is possible because with a 64bit-wide
+* Morton number not all 32 bits of the coordinates are used).
+*
+* \param dimension is the dimension of the space
+* \param x is the integer x position
+* \param y is the integer y position
+* \param z is the integer z position
+* \result The unique XYZ key of the coordinates.
+*/
+inline uint64_t computeXYZKey(uint8_t dimension, uint32_t x, uint32_t y, uint32_t z)
+{
+    if (dimension == 3) {
+        return computeXYZKey3D(x, y, z);
+    } else if (dimension == 2) {
+        return computeXYZKey2D(x, y);
+    } else {
+        throw std::runtime_error("Requested dimension is not supported");
+    }
 }
 
 }

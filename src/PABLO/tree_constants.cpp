@@ -23,7 +23,9 @@
 \*---------------------------------------------------------------------------*/
 
 #include "tree_constants.hpp"
+#include "morton.hpp"
 
+#include <algorithm>
 #include <cassert>
 
 namespace bitpit {
@@ -70,7 +72,7 @@ TreeConstants::TreeConstants(uint8_t dim) {
 void
 TreeConstants::initialize(uint8_t dim) {
 
-	maxLevel = 20;
+	maxLevel = PABLO::computeMaximumLevel(dim);
 
 	nChildren 			= uint8_t(1)<<dim;
 	nFaces 				= 2*dim;
