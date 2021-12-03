@@ -23,7 +23,8 @@
 \*---------------------------------------------------------------------------*/
 
 #include "tree_constants.hpp"
-#include "Octant.hpp"
+
+#include <cassert>
 
 namespace bitpit {
 
