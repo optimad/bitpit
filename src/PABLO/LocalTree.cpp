@@ -434,84 +434,130 @@ namespace bitpit {
      */
     bool
     LocalTree::refine(u32vector & mapidx){
+        // Current number of octants
+        uint32_t nOctants = m_octants.size();
+        if (nOctants == 0) {
+            return false;
+        }
 
-        u32vector		last_child_index;
-        uint32_t 		idx, ilastch;
-        uint32_t 		offset = 0, blockidx;
-        uint32_t		mapsize = mapidx.size();
-        uint8_t 		nchm1 = m_treeConstants->nChildren-1, ich;
-        bool 			dorefine = false;
-
-        m_sizeOctants = m_octants.size();
-        for (idx=0; idx<m_sizeOctants; idx++){
-            if(m_octants[idx].getMarker() > 0 && m_octants[idx].getLevel() < TreeConstants::MAX_LEVEL){
-                last_child_index.push_back(idx+nchm1+offset);
-                offset += nchm1;
+        // Validate markers
+        //
+        // Not all octants marked for refinement can be really refined, for
+        // example octants cannot be refined further than the maximum level.
+        uint32_t firstRefinedIdx   = 0;
+        uint32_t nValidRefinements = 0;
+        for (uint32_t idx=0; idx<nOctants; idx++) {
+            // Skip octants not marked for refinement
+            Octant &octant = m_octants[idx];
+            if(octant.getMarker()<= 0){
+                continue;
             }
-            else{
-                if (m_octants[idx].m_marker > 0){
-                    m_octants[idx].m_marker = 0;
-                    m_octants[idx].m_info[Octant::INFO_AUX] = false;
-                }
+
+            // Octants cannot be refined further than the maximum level
+            if(octant.getLevel()>=TreeConstants::MAX_LEVEL){
+                octant.setMarker(0);
+                octant.m_info[Octant::INFO_AUX] = false;
+                continue;
+            }
+
+            // The octant will be refined
+            ++nValidRefinements;
+            if (nValidRefinements == 1) {
+                firstRefinedIdx = idx;
             }
         }
 
-        if (offset > 0){
-            uint8_t nChildren;
-            std::array<Octant, TreeConstants::MAX_CHILDREN> children;
+        // Early return if no octants need to be refined
+        if (nValidRefinements == 0) {
+            return false;
+        }
 
-            // Resize octant container
-            //
-            // We want to be sure the container capacity is equal to its size.
-            m_sizeOctants += offset;
-            m_octants.reserve(m_sizeOctants);
-            m_octants.resize(m_sizeOctants, Octant(m_dim));
-            m_octants.shrink_to_fit();
+        // Resize octant container
+        //
+        // We want to be sure the container capacity is equal to its size.
+        uint32_t nFutureOctants = nOctants + (m_treeConstants->nChildren - 1) * nValidRefinements;
 
-            // Create new octants
-            if(mapsize > 0){
-                mapidx.resize(m_sizeOctants);
-            }
-            blockidx = last_child_index[0]-nchm1;
-            idx = m_sizeOctants;
-            ilastch = last_child_index.size()-1;
+        m_octants.reserve(nFutureOctants);
+        m_octants.resize(nFutureOctants, Octant(m_dim));
+        m_octants.shrink_to_fit();
 
-            while (idx>blockidx){
-                idx--;
-                if(idx == last_child_index[ilastch]){
-                    m_octants[idx-offset].m_info[Octant::INFO_AUX] = false;
-                    // Create children
-                    nChildren = m_octants[idx-offset].countChildren();
-                    m_octants[idx-offset].buildChildren(children.data());
-                    //Update local max depth
-                    if (children[0].getLevel() > m_localMaxDepth){
-                        m_localMaxDepth = children[0].getLevel();
-                    }
-                    if (children[0].getMarker()){
-                        //More Refinement to do
-                        dorefine = true;
-                    }
-                    // Insert children in the tree
-                    for (ich=0; ich<nChildren; ich++){
-                        m_octants[idx-ich] = std::move(children[nchm1-ich]);
-                        if (mapsize>0) {
-                            mapidx[idx-ich] = mapidx[idx-offset];
-                        }
-                    }
-                    offset -= nchm1;
-                    idx -= nchm1;
-                    if (ilastch != 0){
-                        ilastch--;
+        // Initialize mapping
+        if(!mapidx.empty()){
+            mapidx.resize(nFutureOctants);
+        }
+
+        // Refine the octants
+        //
+        // We process the octants backwards (starting from the back of their
+        // container):
+        //  - if an octant doesn't need refinement, it will only be moved to
+        //    its new position;
+        //  - if an octant needs to be refined, it will be replaced with its
+        //    children.
+        bool refinementCompleted = true;
+
+        uint32_t futureIdx = nFutureOctants - 1;
+        for (uint32_t n=0; n<(nOctants - firstRefinedIdx); ++n) {
+            uint32_t idx = nOctants - n - 1;
+            Octant &octant = m_octants[idx];
+            if(octant.getMarker()<=0){
+                // The octant is not refiend, we need to move it to its new
+                // position in the container.
+                if (futureIdx != idx) {
+                    m_octants[futureIdx] = std::move(octant);
+                }
+
+                // Update the mapping
+                if(!mapidx.empty()){
+                    mapidx[futureIdx] = idx;
+                }
+
+                // Update future octant index
+                --futureIdx;
+            } else {
+                // Move original octant out of the container
+                Octant fatherOctant = std::move(octant);
+                fatherOctant.m_info[Octant::INFO_AUX] = false;
+
+                // Create children
+                uint8_t nChildren = fatherOctant.countChildren();
+                uint32_t firstChildIdx = futureIdx - (nChildren - 1);
+                fatherOctant.buildChildren(m_octants.data() + firstChildIdx);
+
+                // Update the mapping
+                if(!mapidx.empty()){
+                    for (uint8_t i=0; i<nChildren; i++){
+                        mapidx[firstChildIdx + i] = idx;
                     }
                 }
-                else {
-                    m_octants[idx] = m_octants[idx-offset];
-                    if(mapsize>0) mapidx[idx]  = mapidx[idx-offset];
+
+                // Check if more refinement is needed to satisfy the markers
+                if (refinementCompleted) {
+                    refinementCompleted = (m_octants[firstChildIdx].getMarker() <= 0);
                 }
+
+                // Update local max depth
+                uint8_t childrenLevel = m_octants[firstChildIdx].getLevel();
+                if (childrenLevel > m_localMaxDepth){
+                    m_localMaxDepth = childrenLevel;
+                }
+
+                // Update future octant index
+                futureIdx -= nChildren;
             }
         }
 
-        return dorefine;
+        // Update the mapping for cells that have not been modified
+        if(!mapidx.empty()){
+            for (uint32_t idx=0; idx<firstRefinedIdx; ++idx) {
+                mapidx[idx] = idx;
+            }
+        }
+
+        // Update the number of octants
+        m_sizeOctants = nFutureOctants;
+
+        return (!refinementCompleted);
 
     };
 
