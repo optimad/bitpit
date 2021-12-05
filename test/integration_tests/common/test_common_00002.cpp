@@ -208,11 +208,10 @@ int main(int argc, char *argv[])
 	BITPIT_UNUSED(argv);
 #endif
 
-	// Initialize the logger
-	log::manager().initialize(log::COMBINED);
+	std::cout << "Testing basic logger fatures" << "\n";
 
 	// Run the subtests
-	log::cout() << "Testing logger" << std::endl;
+	std::cout << "Testing logger" << std::endl;
 
 	int status;
 	try {
@@ -221,7 +220,7 @@ int main(int argc, char *argv[])
 			return status;
 		}
 	} catch (const std::exception &exception) {
-		log::cout() << exception.what();
+		std::cout << exception.what();
 		exit(1);
 	}
 
