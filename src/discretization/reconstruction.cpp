@@ -40,7 +40,7 @@ namespace bitpit {
  * \ingroup discretization
  *
  * \brief The ReconstructionPolynomial class allows to apply a reconstruction
- * polinoymial previously assembled.
+ * polynomial previously assembled.
  */
 
 /*!
@@ -332,7 +332,7 @@ void ReconstructionPolynomial::evalPointBasisDerivatives(uint8_t degree, uint8_t
  * \param dimensions is the number of space dimensions
  * \param cell is the cell
  * \param origin is the point chosen as origin of the reconstruction
- * \param vertexCoords are the vertecx coordinates
+ * \param vertexCoords are the vertices' coordinates
  * \param[out] csi on output will contain the coefficients of the
  * cell average reconstruction
  */
@@ -442,7 +442,7 @@ ReconstructionPolynomial::ReconstructionPolynomial(const ReconstructionPolynomia
 }
 
 /*!
-    Copy-assignament operator.
+    Copy-assignment operator.
 
     \param other is another reconstruction whose content is copied in this
     reconstruction
@@ -845,8 +845,8 @@ void ReconstructionPolynomial::computeValues(int degree, const std::array<double
 /*!
  * Computes the limited value of the polynomial at the specified point.
  *
- * It is necessary to provide one scale factor for each polinomaial degree
- * greater than zero (a reconstruction using 2nd degree polinomia will need
+ * It is necessary to provide one scale factor for each polynomial degree
+ * greater than zero (a reconstruction using 2nd degree polynomials will need
  * two scale factors, one for the 1st degree coefficients and one for the
  * 2nd degree coefficients).
  *
@@ -865,8 +865,8 @@ void ReconstructionPolynomial::computeValueLimited(const std::array<double, 3> &
 /*!
  * Computes the limited values of the polynomial at the specified point.
  *
- * It is necessary to provide one scale factor for each polinomaial degree
- * greater than zero (a reconstruction using 2nd degree polinomia will need
+ * It is necessary to provide one scale factor for each polynomial degree
+ * greater than zero (a reconstruction using 2nd degree polynomials will need
  * two scale factors, one for the 1st degree coefficients and one for the
  * 2nd degree coefficients).
  *
@@ -884,8 +884,8 @@ void ReconstructionPolynomial::computeValuesLimited(const std::array<double, 3> 
 /*!
  * Computes the limited values of the polynomial at the specified point.
  *
- * It is necessary to provide one scale factor for each polinomaial degree
- * greater than zero (a reconstruction using 2nd degree polinomia will need
+ * It is necessary to provide one scale factor for each polynomial degree
+ * greater than zero (a reconstruction using 2nd degree polynomials will need
  * two scale factors, one for the 1st degree coefficients and one for the
  * 2nd degree coefficients).
  *
@@ -904,8 +904,8 @@ void ReconstructionPolynomial::computeValuesLimited(const std::array<double, 3> 
 /*!
  * Computes the limited values of the polynomial at the specified point.
  *
- * It is necessary to provide one scale factor for each polinomaial degree
- * greater than zero (a reconstruction using 2nd degree polinomia will need
+ * It is necessary to provide one scale factor for each polynomial degree
+ * greater than zero (a reconstruction using 2nd degree polynomials will need
  * two scale factors, one for the 1st degree coefficients and one for the
  * 2nd degree coefficients).
  *
@@ -925,8 +925,8 @@ void ReconstructionPolynomial::computeValuesLimited(const std::array<double, 3> 
 /*!
  * Computes the limited value of the polynomial at the specified point.
  *
- * It is necessary to provide one scale factor for each polinomaial degree
- * greater than zero (a reconstruction using 2nd degree polinomia will need
+ * It is necessary to provide one scale factor for each polynomial degree
+ * greater than zero (a reconstruction using 2nd degree polynomials will need
  * two scale factors, one for the 1st degree coefficients and one for the
  * 2nd degree coefficients).
  *
@@ -946,8 +946,8 @@ void ReconstructionPolynomial::computeValueLimited(int degree, const std::array<
 /*!
  * Computes the limited values of the polynomial at the specified point.
  *
- * It is necessary to provide one scale factor for each polinomaial degree
- * greater than zero (a reconstruction using 2nd degree polinomia will need
+ * It is necessary to provide one scale factor for each polynomial degree
+ * greater than zero (a reconstruction using 2nd degree polynomials will need
  * two scale factors, one for the 1st degree coefficients and one for the
  * 2nd degree coefficients).
  *
@@ -966,8 +966,8 @@ void ReconstructionPolynomial::computeValuesLimited(int degree, const std::array
 /*!
  * Computes the limited values of the polynomial at the specified point.
  *
- * It is necessary to provide one scale factor for each polinomaial degree
- * greater than zero (a reconstruction using 2nd degree polinomia will need
+ * It is necessary to provide one scale factor for each polynomial degree
+ * greater than zero (a reconstruction using 2nd degree polynomials will need
  * two scale factors, one for the 1st degree coefficients and one for the
  * 2nd degree coefficients).
  *
@@ -987,8 +987,8 @@ void ReconstructionPolynomial::computeValuesLimited(int degree, const std::array
 /*!
  * Computes the limited values of the polynomial at the specified point.
  *
- * It is necessary to provide one scale factor for each polinomaial degree
- * greater than zero (a reconstruction using 2nd degree polinomia will need
+ * It is necessary to provide one scale factor for each polynomial degree
+ * greater than zero (a reconstruction using 2nd degree polynomials will need
  * two scale factors, one for the 1st degree coefficients and one for the
  * 2nd degree coefficients).
  *
@@ -1248,8 +1248,8 @@ void ReconstructionPolynomial::computeDerivatives(int degree, const std::array<d
 /*!
  * Computes the limited derivative of the polynomial at the specified point.
  *
- * It is necessary to provide one scale factor for each polinomaial degree
- * greater than zero (a reconstruction using 2nd degree polinomia will need
+ * It is necessary to provide one scale factor for each polynomial degree
+ * greater than zero (a reconstruction using 2nd degree polynomials will need
  * two scale factors, one for the 1st degree coefficients and one for the
  * 2nd degree coefficients).
  *
@@ -1270,8 +1270,8 @@ void ReconstructionPolynomial::computeDerivativeLimited(const std::array<double,
 /*!
  * Computes the limited derivatives of the polynomial at the specified point.
  *
- * It is necessary to provide one scale factor for each polinomaial degree
- * greater than zero (a reconstruction using 2nd degree polinomia will need
+ * It is necessary to provide one scale factor for each polynomial degree
+ * greater than zero (a reconstruction using 2nd degree polynomials will need
  * two scale factors, one for the 1st degree coefficients and one for the
  * 2nd degree coefficients).
  *
@@ -1291,8 +1291,8 @@ void ReconstructionPolynomial::computeDerivativesLimited(const std::array<double
 /*!
  * Computes the limited derivatives of the polynomial at the specified point.
  *
- * It is necessary to provide one scale factor for each polinomaial degree
- * greater than zero (a reconstruction using 2nd degree polinomia will need
+ * It is necessary to provide one scale factor for each polynomial degree
+ * greater than zero (a reconstruction using 2nd degree polynomials will need
  * two scale factors, one for the 1st degree coefficients and one for the
  * 2nd degree coefficients).
  *
@@ -1313,8 +1313,8 @@ void ReconstructionPolynomial::computeDerivativesLimited(const std::array<double
 /*!
  * Computes the limited derivatives of the polynomial at the specified point.
   *
- * It is necessary to provide one scale factor for each polinomaial degree
- * greater than zero (a reconstruction using 2nd degree polinomia will need
+ * It is necessary to provide one scale factor for each polynomial degree
+ * greater than zero (a reconstruction using 2nd degree polynomials will need
  * two scale factors, one for the 1st degree coefficients and one for the
  * 2nd degree coefficients).
  *
@@ -1336,8 +1336,8 @@ void ReconstructionPolynomial::computeDerivativesLimited(const std::array<double
 /*!
  * Computes the limited derivative of the polynomial at the specified point.
  *
- * It is necessary to provide one scale factor for each polinomaial degree
- * greater than zero (a reconstruction using 2nd degree polinomia will need
+ * It is necessary to provide one scale factor for each polynomial degree
+ * greater than zero (a reconstruction using 2nd degree polynomials will need
  * two scale factors, one for the 1st degree coefficients and one for the
  * 2nd degree coefficients).
  *
@@ -1359,8 +1359,8 @@ void ReconstructionPolynomial::computeDerivativeLimited(int degree, const std::a
 /*!
  * Computes the limited derivatives of the polynomial at the specified point.
  *
- * It is necessary to provide one scale factor for each polinomaial degree
- * greater than zero (a reconstruction using 2nd degree polinomia will need
+ * It is necessary to provide one scale factor for each polynomial degree
+ * greater than zero (a reconstruction using 2nd degree polynomials will need
  * two scale factors, one for the 1st degree coefficients and one for the
  * 2nd degree coefficients).
  *
@@ -1381,8 +1381,8 @@ void ReconstructionPolynomial::computeDerivativesLimited(int degree, const std::
 /*!
  * Computes the limited derivatives of the polynomial at the specified point.
  *
- * It is necessary to provide one scale factor for each polinomaial degree
- * greater than zero (a reconstruction using 2nd degree polinomia will need
+ * It is necessary to provide one scale factor for each polynomial degree
+ * greater than zero (a reconstruction using 2nd degree polynomials will need
  * two scale factors, one for the 1st degree coefficients and one for the
  * 2nd degree coefficients).
  *
@@ -1404,8 +1404,8 @@ void ReconstructionPolynomial::computeDerivativesLimited(int degree, const std::
 /*!
  * Computes the limited derivatives of the polynomial at the specified point.
  *
- * It is necessary to provide one scale factor for each polinomaial degree
- * greater than zero (a reconstruction using 2nd degree polinomia will need
+ * It is necessary to provide one scale factor for each polynomial degree
+ * greater than zero (a reconstruction using 2nd degree polynomials will need
  * two scale factors, one for the 1st degree coefficients and one for the
  * 2nd degree coefficients).
  *
@@ -1690,8 +1690,8 @@ void ReconstructionPolynomial::computeGradients(int degree, const std::array<dou
 /*!
  * Computes the limited gradient of the polynomial at the specified point.
  *
- * It is necessary to provide one scale factor for each polinomaial degree
- * greater than zero (a reconstruction using 2nd degree polinomia will need
+ * It is necessary to provide one scale factor for each polynomial degree
+ * greater than zero (a reconstruction using 2nd degree polynomials will need
  * two scale factors, one for the 1st degree coefficients and one for the
  * 2nd degree coefficients).
  *
@@ -1710,8 +1710,8 @@ void ReconstructionPolynomial::computeGradientLimited(const std::array<double, 3
 /*!
  * Computes the limited gradients of the polynomial at the specified point.
  *
- * It is necessary to provide one scale factor for each polinomaial degree
- * greater than zero (a reconstruction using 2nd degree polinomia will need
+ * It is necessary to provide one scale factor for each polynomial degree
+ * greater than zero (a reconstruction using 2nd degree polynomials will need
  * two scale factors, one for the 1st degree coefficients and one for the
  * 2nd degree coefficients).
  *
@@ -1729,8 +1729,8 @@ void ReconstructionPolynomial::computeGradientsLimited(const std::array<double, 
 /*!
  * Computes the limited gradients of the polynomial at the specified point.
  *
- * It is necessary to provide one scale factor for each polinomaial degree
- * greater than zero (a reconstruction using 2nd degree polinomia will need
+ * It is necessary to provide one scale factor for each polynomial degree
+ * greater than zero (a reconstruction using 2nd degree polynomials will need
  * two scale factors, one for the 1st degree coefficients and one for the
  * 2nd degree coefficients).
  *
@@ -1749,8 +1749,8 @@ void ReconstructionPolynomial::computeGradientsLimited(const std::array<double, 
 /*!
  * Computes the limited gradients of the polynomial at the specified point.
  *
- * It is necessary to provide one scale factor for each polinomaial degree
- * greater than zero (a reconstruction using 2nd degree polinomia will need
+ * It is necessary to provide one scale factor for each polynomial degree
+ * greater than zero (a reconstruction using 2nd degree polynomials will need
  * two scale factors, one for the 1st degree coefficients and one for the
  * 2nd degree coefficients).
  *
@@ -1770,8 +1770,8 @@ void ReconstructionPolynomial::computeGradientsLimited(const std::array<double, 
 /*!
  * Computes the limited gradient of the polynomial at the specified point.
  *
- * It is necessary to provide one scale factor for each polinomaial degree
- * greater than zero (a reconstruction using 2nd degree polinomia will need
+ * It is necessary to provide one scale factor for each polynomial degree
+ * greater than zero (a reconstruction using 2nd degree polynomials will need
  * two scale factors, one for the 1st degree coefficients and one for the
  * 2nd degree coefficients).
  *
@@ -1791,8 +1791,8 @@ void ReconstructionPolynomial::computeGradientLimited(int degree, const std::arr
 /*!
  * Computes the limited gradients of the polynomial at the specified point.
  *
- * It is necessary to provide one scale factor for each polinomaial degree
- * greater than zero (a reconstruction using 2nd degree polinomia will need
+ * It is necessary to provide one scale factor for each polynomial degree
+ * greater than zero (a reconstruction using 2nd degree polynomials will need
  * two scale factors, one for the 1st degree coefficients and one for the
  * 2nd degree coefficients).
  *
@@ -1811,8 +1811,8 @@ void ReconstructionPolynomial::computeGradientsLimited(int degree, const std::ar
 /*!
  * Computes the limited gradients of the polynomial at the specified point.
  *
- * It is necessary to provide one scale factor for each polinomaial degree
- * greater than zero (a reconstruction using 2nd degree polinomia will need
+ * It is necessary to provide one scale factor for each polynomial degree
+ * greater than zero (a reconstruction using 2nd degree polynomials will need
  * two scale factors, one for the 1st degree coefficients and one for the
  * 2nd degree coefficients).
  *
@@ -1832,8 +1832,8 @@ void ReconstructionPolynomial::computeGradientsLimited(int degree, const std::ar
 /*!
  * Computes the limited gradients of the polynomial at the specified point.
  *
- * It is necessary to provide one scale factor for each polinomaial degree
- * greater than zero (a reconstruction using 2nd degree polinomia will need
+ * It is necessary to provide one scale factor for each polynomial degree
+ * greater than zero (a reconstruction using 2nd degree polynomials will need
  * two scale factors, one for the 1st degree coefficients and one for the
  * 2nd degree coefficients).
  *
@@ -1980,7 +1980,7 @@ void ReconstructionPolynomial::display(std::ostream &out) const
  * \ingroup discretization
  *
  * \brief The ReconstructionKernel class allows to evaluate the weight of
- * a reconstruction polinoymial previously assembled.
+ * a reconstruction polynomial previously assembled.
  */
 
 /*!
@@ -2026,7 +2026,7 @@ ReconstructionKernel::ReconstructionKernel(const ReconstructionKernel &other)
 }
 
 /*!
-    Copy-assignament operator.
+    Copy-assignment operator.
 
     \param other is another reconstruction whose content is copied in this
     reconstruction
@@ -2396,9 +2396,9 @@ void ReconstructionKernel::updatePolynomial(uint8_t degree, int nFields, const d
  * Computes the weights for evaluating the value at a given point.
  *
  * In other words, when multiplying the values associated with the support
- * with their corrisponding weights, the value at point is retrieved.
+ * with their corresponding weights, the value at point is retrieved.
  *
- * Weigths are computed according the order in which the equations have been
+ * Weights are computed according the order in which the equations have been
  * added in the assembly step.
  *
  * \param origin is the point chosen as origin of the reconstruction
@@ -2416,9 +2416,9 @@ void ReconstructionKernel::computeValueWeights(const std::array<double, 3> &orig
  * Computes the weights for evaluating the value at a given point.
  *
  * In other words, when multiplying the values associated with the support
- * with their corrisponding weights, the value at point is retrieved.
+ * with their corresponding weights, the value at point is retrieved.
  *
- * Weigths are computed according the order in which the equations have been
+ * Weights are computed according the order in which the equations have been
  * added in the assembly step.
  *
  * The degree of the reconstruction has to be less than or equal to the
@@ -2440,15 +2440,15 @@ void ReconstructionKernel::computeValueWeights(uint8_t degree, const std::array<
  * Computes the weights for evaluating the limited value at a given point.
  *
  * In other words, when multiplying the values associated with the support
- * with their corrisponding weights, the value at point is retrieved.
+ * with their corresponding weights, the value at point is retrieved.
  *
- * Weigths are computed according the order in which the equations have been
+ * Weights are computed according the order in which the equations have been
  * added in the assembly step.
  *
  * If a valid pointer to the limiter scale factor is passed, a limited
  * reconstruction will be used. It is necessary to provide one scale factor
- * for each polinomaial degree greater than zero (a reconstruction using
- * 2nd degree polinomia will need two scale factors, one for the 1st degree
+ * for each polynomial degree greater than zero (a reconstruction using
+ * 2nd degree polynomials will need two scale factors, one for the 1st degree
  * coefficients and one for the 2nd degree coefficients).
  *
  * \param origin is the point chosen as origin of the reconstruction
@@ -2467,9 +2467,9 @@ void ReconstructionKernel::computeValueLimitedWeights(const std::array<double, 3
  * Computes the weights for evaluating the limited value at a given point.
  *
  * In other words, when multiplying the values associated with the support
- * with their corrisponding weights, the value at point is retrieved.
+ * with their corresponding weights, the value at point is retrieved.
  *
- * Weigths are computed according the order in which the equations have been
+ * Weights are computed according the order in which the equations have been
  * added in the assembly step.
  *
  * The degree of the reconstruction has to be less than or equal to the
@@ -2477,8 +2477,8 @@ void ReconstructionKernel::computeValueLimitedWeights(const std::array<double, 3
  *
  * If a valid pointer to the limiter scale factor is passed, a limited
  * reconstruction will be used. It is necessary to provide one scale factor
- * for each polinomaial degree greater than zero (a reconstruction using
- * 2nd degree polinomia will need two scale factors, one for the 1st degree
+ * for each polynomial degree greater than zero (a reconstruction using
+ * 2nd degree polynomials will need two scale factors, one for the 1st degree
  * coefficients and one for the 2nd degree coefficients).
  *
  * \param origin is the point chosen as origin of the reconstruction
@@ -2514,9 +2514,9 @@ void ReconstructionKernel::computeValueLimitedWeights(uint8_t degree, const std:
  * point.
  *
  * In other words, when multiplying the values associated with the support
- * with their corrisponding weights, the derivative at point is retrieved.
+ * with their corresponding weights, the derivative at point is retrieved.
  *
- * Weigths are computed according the order in which the equations have been
+ * Weights are computed according the order in which the equations have been
  * added in the assembly step.
  *
  * \param origin is the point chosen as origin of the reconstruction
@@ -2537,9 +2537,9 @@ void ReconstructionKernel::computeDerivativeWeights(const std::array<double, 3> 
  * point.
  *
  * In other words, when multiplying the values associated with the support
- * with their corrisponding weights, the derivative at point is retrieved.
+ * with their corresponding weights, the derivative at point is retrieved.
  *
- * Weigths are computed according the order in which the equations have been
+ * Weights are computed according the order in which the equations have been
  * added in the assembly step.
  *
  * The degree of the reconstruction has to be less than or equal to the
@@ -2565,15 +2565,15 @@ void ReconstructionKernel::computeDerivativeWeights(uint8_t degree, const std::a
  * at a given point.
  *
  * In other words, when multiplying the values associated with the support
- * with their corrisponding weights, the derivative at point is retrieved.
+ * with their corresponding weights, the derivative at point is retrieved.
  *
- * Weigths are computed according the order in which the equations have been
+ * Weights are computed according the order in which the equations have been
  * added in the assembly step.
  *
  * If a valid pointer to the limiter scale factor is passed, a limited
  * reconstruction will be used. It is necessary to provide one scale factor
- * for each polinomaial degree greater than zero (a reconstruction using
- * 2nd degree polinomia will need two scale factors, one for the 1st degree
+ * for each polynomial degree greater than zero (a reconstruction using
+ * 2nd degree polynomials will need two scale factors, one for the 1st degree
  * coefficients and one for the 2nd degree coefficients).
  *
  * \param origin is the point chosen as origin of the reconstruction
@@ -2596,9 +2596,9 @@ void ReconstructionKernel::computeDerivativeLimitedWeights(const std::array<doub
  * at a given point.
  *
  * In other words, when multiplying the values associated with the support
- * with their corrisponding weights, the derivative at point is retrieved.
+ * with their corresponding weights, the derivative at point is retrieved.
  *
- * Weigths are computed according the order in which the equations have been
+ * Weights are computed according the order in which the equations have been
  * added in the assembly step.
  *
  * The degree of the reconstruction has to be less than or equal to the
@@ -2606,8 +2606,8 @@ void ReconstructionKernel::computeDerivativeLimitedWeights(const std::array<doub
  *
  * If a valid pointer to the limiter scale factor is passed, a limited
  * reconstruction will be used. It is necessary to provide one scale factor
- * for each polinomaial degree greater than zero (a reconstruction using
- * 2nd degree polinomia will need two scale factors, one for the 1st degree
+ * for each polynomial degree greater than zero (a reconstruction using
+ * 2nd degree polynomials will need two scale factors, one for the 1st degree
  * coefficients and one for the 2nd degree coefficients).
  *
  * \param degree is the degree of the polynomial
@@ -2646,9 +2646,9 @@ void ReconstructionKernel::computeDerivativeLimitedWeights(uint8_t degree, const
  * Computes the weights for evaluating the gradient at a given point.
  *
  * In other words, when multiplying the values associated with the support
- * with their corrisponding weights, the derivative at point is retrieved.
+ * with their corresponding weights, the derivative at point is retrieved.
  *
- * Weigths are computed according the order in which the equations have been
+ * Weights are computed according the order in which the equations have been
  * added in the assembly step.
  *
  * \param origin is the point chosen as origin of the reconstruction
@@ -2667,9 +2667,9 @@ void ReconstructionKernel::computeGradientWeights(const std::array<double, 3> &o
  * Computes the weights for evaluating the gradient at a given point.
  *
  * In other words, when multiplying the values associated with the support
- * with their corrisponding weights, the derivative at point is retrieved.
+ * with their corresponding weights, the derivative at point is retrieved.
  *
- * Weigths are computed according the order in which the equations have been
+ * Weights are computed according the order in which the equations have been
  * added in the assembly step.
  *
  * The degree of the reconstruction has to be less than or equal to the
@@ -2692,15 +2692,15 @@ void ReconstructionKernel::computeGradientWeights(uint8_t degree, const std::arr
  * Computes the weights for evaluating the limited gradient at a given point.
  *
  * In other words, when multiplying the values associated with the support
- * with their corrisponding weights, the derivative at point is retrieved.
+ * with their corresponding weights, the derivative at point is retrieved.
  *
- * Weigths are computed according the order in which the equations have been
+ * Weights are computed according the order in which the equations have been
  * added in the assembly step.
  *
  * If a valid pointer to the limiter scale factor is passed, a limited
  * reconstruction will be used. It is necessary to provide one scale factor
- * for each polinomaial degree greater than zero (a reconstruction using
- * 2nd degree polinomia will need two scale factors, one for the 1st degree
+ * for each polynomial degree greater than zero (a reconstruction using
+ * 2nd degree polynomials will need two scale factors, one for the 1st degree
  * coefficients and one for the 2nd degree coefficients).
  *
  * \param origin is the point chosen as origin of the reconstruction
@@ -2719,9 +2719,9 @@ void ReconstructionKernel::computeGradientLimitedWeights(const std::array<double
  * Computes the weights for evaluating the limited gradient at a given point.
  *
  * In other words, when multiplying the values associated with the support
- * with their corrisponding weights, the derivative at point is retrieved.
+ * with their corresponding weights, the derivative at point is retrieved.
  *
- * Weigths are computed according the order in which the equations have been
+ * Weights are computed according the order in which the equations have been
  * added in the assembly step.
  *
  * The degree of the reconstruction has to be less than or equal to the
@@ -2729,8 +2729,8 @@ void ReconstructionKernel::computeGradientLimitedWeights(const std::array<double
  *
  * If a valid pointer to the limiter scale factor is passed, a limited
  * reconstruction will be used. It is necessary to provide one scale factor
- * for each polinomaial degree greater than zero (a reconstruction using
- * 2nd degree polinomia will need two scale factors, one for the 1st degree
+ * for each polynomial degree greater than zero (a reconstruction using
+ * 2nd degree polynomials will need two scale factors, one for the 1st degree
  * coefficients and one for the 2nd degree coefficients).
  *
  * \param degree is the degree of the polynomial
@@ -2786,8 +2786,8 @@ void ReconstructionKernel::computeGradientLimitedWeights(uint8_t degree, const s
 /*!
  * Apply the limiter to the given coefficients.
  *
- * It is necessary to provide one scale factor for each polinomaial degree
- * greater than zero (a reconstruction using 2nd degree polinomia will need
+ * It is necessary to provide one scale factor for each polynomial degree
+ * greater than zero (a reconstruction using 2nd degree polynomials will need
  * two scale factors, one for the 1st degree coefficients and one for the
  * 2nd degree coefficients).
  *
@@ -2846,7 +2846,7 @@ void ReconstructionKernel::display(std::ostream &out, double tolerance) const
  * \ingroup discretization
  *
  * \brief The ReconstructionAssembler class allows to define reconstruction
- * polinoymial.
+ * polynomial.
  */
 
 /*!
@@ -3066,7 +3066,7 @@ void ReconstructionAssembler::addPointDerivativeEquation(ReconstructionType type
  * \param type is the type of reconstruction associated to the equation
  * \param cell is the cell
  * \param origin is the point chosen as origin of the reconstruction
- * \param vertexCoords are the vertecx coordinates
+ * \param vertexCoords are the vertices' coordinates
  * \param scaleFactor the scale factor associated to the equation
  */
 void ReconstructionAssembler::addCellAverageEquation(ReconstructionType type,
@@ -3129,11 +3129,11 @@ double * ReconstructionAssembler::_addEquation(ReconstructionType type, double s
  * Before computing kernel weights, the kernel will be properly initialized
  * and possible unneeded memory hold by the kernel will be released.
  *
- * \param[out] kernel on output will contain the reconstrucion kernel
+ * \param[out] kernel on output will contain the reconstruction kernel
  */
 void ReconstructionAssembler::assembleKernel(ReconstructionKernel *kernel) const
 {
-    // Initialize reconstruciton kernel
+    // Initialize reconstruction kernel
     uint8_t degree     = getDegree();
     uint8_t dimensions = getDimensions();
 
@@ -3150,7 +3150,7 @@ void ReconstructionAssembler::assembleKernel(ReconstructionKernel *kernel) const
  *
  * Before computing kernel weights, the kernel will not be initialized.
  *
- * \param[out] kernel on output will contain the reconstrucion kernel
+ * \param[out] kernel on output will contain the reconstruction kernel
  */
 void ReconstructionAssembler::updateKernel(ReconstructionKernel *kernel) const
 {
@@ -3181,7 +3181,7 @@ void ReconstructionAssembler::updateKernel(ReconstructionKernel *kernel) const
     // | A^t A w  C^t | |x     | = |A^t w b|
     // | C        0   | |lambda|   |d      |
     //
-    // with A and C the least-squares and costraints equations respectively,
+    // with A and C the least-squares and constraints equations respectively,
     // and b and d their corresponding RHSs. x are the coefficients of
     // the polynomial and lambda the lagrange multipliers. w are the normalized
     // east square scale factors.
@@ -3241,7 +3241,7 @@ void ReconstructionAssembler::updateKernel(ReconstructionKernel *kernel) const
     // the first nCoeffs rows of the matrix S^-1 Q are computed. Those values
     // are the polynomial weights.
     //
-    // Weigths are stored according the order in which the equations have been
+    // Weights are stored according the order in which the equations have been
     // added.
     double *weights = kernel->getPolynomialWeights();
     for (int i = 0; i < nCoeffs; ++i) {
@@ -3277,9 +3277,9 @@ void ReconstructionAssembler::updateKernel(ReconstructionKernel *kernel) const
  *
  * \param m number of columns
  * \param n number of rows
- * \param zeroThreshold is the threshold below which a singuler value is
+ * \param zeroThreshold is the threshold below which a singular value is
  * considered zero
- * \param[in,out] A on input matrix in coumn-major ordering, on output its
+ * \param[in,out] A on input matrix in column-major ordering, on output its
  * pseudo-inverse
  */
 void ReconstructionAssembler::computePseudoInverse(int m, int n, double zeroThreshold, double *A) const
