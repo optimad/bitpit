@@ -307,7 +307,26 @@ void ReconstructionPolynomial::evalPointBasisDerivatives(uint8_t degree, uint8_t
 /*!
  * Evaluates the values of the basis for cell reconstruction.
  *
- * The method works only for ElementType::Voxel and ElementType::Pixel.
+ * Basis functions are evaluated as the volume average of the Taylor series
+ * expansion coefficients:
+ *
+ *              /
+ *      (1 / V) | (csi_0 * U_0 + csi_1 * U_1 + csi_2 * U_2 + ... ) dV
+ *              /
+ *
+ * where:
+ *
+ *   - csi_0 = 1;
+ *   - csi_1 = x;
+ *   - csi_2 = y;
+ *   - csi_3 = z;
+ *   - csi_4 = 0.5 * (x - x_0)^2;
+ *   - csi_5 = 0.5 * (y - y_0)^2;
+ *   - csi_6 = 0.5 * (z - z_0)^2;
+ *   - ...;
+ *
+ * Polynomials of degree 0 and 1 are supported on all type of cells, for pixels
+ * and voxels also degree 2 is supported.
  *
  * \param degree is the degree of the polynomial
  * \param dimensions is the number of space dimensions
@@ -322,13 +341,26 @@ void ReconstructionPolynomial::evalCellBasisValues(uint8_t degree, uint8_t dimen
                                                    double *csi)
 {
     // Check if cell type is supported
+    //
+    // Polynomials of degree 0 and 1 are supported on all type of cells, for
+    // pixels and voxels also degree 2 is supported.
+    //
+    // Coefficients are evaluated as the volume average of the Taylor series
+    // expansion coefficients. In order to support higher order degrees on
+    // all type of cells, we need to implement numerical integration of the
+    // expansions terms over the volume of the cell. This can be done using
+    // Gauss quadrature rules and evaluating the terms on the integration
+    // points using the function that evaluate the basis function on a
+    // specified point.
     ElementType cellType = cell.getType();
 
-    bool cellTypeSupported = false;
+    bool cellTypeSupported;
     if (cellType == ElementType::PIXEL) {
-        cellTypeSupported = true;
+        cellTypeSupported = (degree <= 2);
     } else if (cellType == ElementType::VOXEL) {
-        cellTypeSupported = true;
+        cellTypeSupported = (degree <= 2);
+    } else {
+        cellTypeSupported = (degree <= 1);
     }
 
     if (!cellTypeSupported) {
