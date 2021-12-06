@@ -650,6 +650,23 @@ ProxyVector<value_t, thread_safe>::ProxyVector(const ProxyVector &other)
 }
 
 /*!
+    Move constructor.
+
+    We need to explicitly implement the move constructor to workaround a bug
+    in gcc, see:
+
+        https://gcc.gnu.org/bugzilla/show_bug.cgi?id=60796
+        https://gcc.gnu.org/bugzilla/show_bug.cgi?id=57728
+
+    \param other is another container whose content is moved in this container
+*/
+template<typename value_t, bool thread_safe>
+ProxyVector<value_t, thread_safe>::ProxyVector(ProxyVector &&other)
+    : m_storage(std::move(other.m_storage)), m_size(std::move(other.m_size)), m_data(std::move(other.m_data))
+{
+}
+
+/*!
     Copy assignment operator.
 
     Assigns new contents to the container, replacing its current contents,
@@ -660,6 +677,31 @@ ProxyVector<value_t, thread_safe> & ProxyVector<value_t, thread_safe>::operator=
 {
     if (this != &other) {
         ProxyVector temporary(other);
+        temporary.swap(*this);
+    }
+
+    return *this;
+}
+
+/*!
+    Move assignment operator.
+
+    Assigns new contents to the container, replacing its current contents,
+    and modifying its size accordingly.
+
+    We need to explicitly implement the move assignment operator to workaround
+    a bug in gcc, see:
+
+        https://gcc.gnu.org/bugzilla/show_bug.cgi?id=60796
+        https://gcc.gnu.org/bugzilla/show_bug.cgi?id=57728
+
+    \param other is another container whose content is moved in this container
+*/
+template<typename value_t, bool thread_safe>
+ProxyVector<value_t, thread_safe> & ProxyVector<value_t, thread_safe>::operator=(ProxyVector &&other)
+{
+    if (this != &other) {
+        ProxyVector temporary(std::move(other));
         temporary.swap(*this);
     }
 
