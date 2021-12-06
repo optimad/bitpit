@@ -372,10 +372,10 @@ public:
     ProxyVector(__PXV_POINTER__ data, std::size_t size);
 
     ProxyVector(const ProxyVector &other);
-    ProxyVector(ProxyVector &&other) = default;
+    ProxyVector(ProxyVector &&other);
 
-    ProxyVector & operator=(ProxyVector &&other) = default;
     ProxyVector & operator=(const ProxyVector &other);
+    ProxyVector & operator=(ProxyVector &&other);
 
     void swap(ProxyVector &other);
 
