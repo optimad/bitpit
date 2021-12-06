@@ -642,6 +642,8 @@ ProxyVector<value_t, thread_safe>::ProxyVector(__PXV_POINTER__ data, std::size_t
 
 /*!
     Copy constructor.
+
+    \param other is another container whose content is copied in this container
 */
 template<typename value_t, bool thread_safe>
 ProxyVector<value_t, thread_safe>::ProxyVector(const ProxyVector &other)
@@ -671,6 +673,8 @@ ProxyVector<value_t, thread_safe>::ProxyVector(ProxyVector &&other)
 
     Assigns new contents to the container, replacing its current contents,
     and modifying its size accordingly.
+
+    \param other is another container whose content is copied in this container
 */
 template<typename value_t, bool thread_safe>
 ProxyVector<value_t, thread_safe> & ProxyVector<value_t, thread_safe>::operator=(const ProxyVector &other)
