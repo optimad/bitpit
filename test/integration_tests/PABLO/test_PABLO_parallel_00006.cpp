@@ -215,8 +215,8 @@ int main(int argc, char *argv[])
 
     // Initialize the logger
     bitpit::log::manager().initialize(bitpit::log::SEPARATE, false, nProcs, rank);
-    bitpit::log::cout() << fileVerbosity(bitpit::log::INFO);
-    bitpit::log::cout() << consoleVerbosity(bitpit::log::QUIET);
+    bitpit::log::cout() << log::fileVerbosity(bitpit::log::INFO);
+    bitpit::log::cout() << log::consoleVerbosity(bitpit::log::QUIET);
 
     // Run the subtests
     log::cout() << "Testing load balance with data" << std::endl;

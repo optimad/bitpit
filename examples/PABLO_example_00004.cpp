@@ -191,8 +191,8 @@ int main(int argc, char *argv[])
 
 	// Initialize the logger
 	log::manager().initialize(log::SEPARATE, false, nProcs, rank);
-	log::cout() << fileVerbosity(log::INFO);
-	log::cout() << consoleVerbosity(log::QUIET);
+	log::cout() << log::fileVerbosity(log::INFO);
+	log::cout() << log::consoleVerbosity(log::QUIET);
 
 	// Run the example
 	try {

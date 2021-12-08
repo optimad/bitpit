@@ -54,8 +54,8 @@ int subtest_001()
 	// Default logger
 	log::manager().initialize(log::SEPARATE, false, nProcessors, rank);
 
-	log::cout() << consoleVerbosity(log::INFO);
-	log::cout() << fileVerbosity(log::INFO);
+	log::cout() << log::consoleVerbosity(log::INFO);
+	log::cout() << log::fileVerbosity(log::INFO);
 
 	log::cout() << log::defaultSeverity(log::INFO);
 	log::cout() << "1-1\n2--2\n" << std::endl << "3---3" << std::endl;
@@ -80,8 +80,8 @@ int subtest_001()
 	// Log only on console
 	log::manager().create("logger1", false, nProcessors, rank);
 
-	log::cout("logger1") << consoleVerbosity(log::DEBUG);
-	log::cout("logger1") << fileVerbosity(log::QUIET);
+	log::cout("logger1") << log::consoleVerbosity(log::DEBUG);
+	log::cout("logger1") << log::fileVerbosity(log::QUIET);
 
 	log::cout("logger1") << log::defaultSeverity(log::DEBUG);
 	log::cout("logger1") << log::context("logger1-A");
@@ -101,8 +101,8 @@ int subtest_001()
 	// Log on console and also on file
 	log::manager().create("logger2", false, nProcessors, rank);
 
-	log::cout("logger2") << consoleVerbosity(log::INFO);
-	log::cout("logger2") << fileVerbosity(log::INFO);
+	log::cout("logger2") << log::consoleVerbosity(log::INFO);
+	log::cout("logger2") << log::fileVerbosity(log::INFO);
 
 	log::cout("logger2") << log::defaultSeverity(log::DEBUG);
 	log::cout("logger2") << log::context("logger2-A");

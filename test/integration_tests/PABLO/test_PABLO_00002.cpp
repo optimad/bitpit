@@ -162,8 +162,8 @@ int main(int argc, char *argv[])
 
     // Initialize the logger
     log::manager().initialize(log::SEPARATE, false, nProcs, rank);
-    log::cout() << fileVerbosity(log::INFO);
-    log::cout() << consoleVerbosity(log::INFO);
+    log::cout() << log::fileVerbosity(log::INFO);
+    log::cout() << log::consoleVerbosity(log::INFO);
 
     // Run the subtests
     log::cout() << "Testing refinement" << std::endl;
