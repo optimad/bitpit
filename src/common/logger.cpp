@@ -1256,9 +1256,15 @@ bool LoggerManager::isInitialized() const
 }
 
 /*!
-    Sets the policty for the loggers.
+    Set the operational mode of the logger manager.
 
-    The policy has to be set before creating the loggers.
+    There are two possible modes:
+     - when the manager operates in SEPARATE mode, each logger will write
+       the messages in its own file;
+     - when the manager operates in COMBINED mode, all the loggers will write
+       the messages on the same file.
+
+    The mode has to be set before creating the first logger.
 
     \param mode is the mode that will be set
     \result Returns true if the mode was successfully set, false otherwise.
@@ -1275,9 +1281,9 @@ bool LoggerManager::setMode(log::Mode mode)
 }
 
 /*!
-    Sets the policty for the loggers.
+    Get the operational mode of the logger manager.
 
-    \result The mode set for the loggers.
+    \result The operational mode of the logger manager.
 */
 log::Mode LoggerManager::getMode() const
 {
@@ -1429,6 +1435,17 @@ std::string LoggerManager::getDefaultDirectory() const
 
 // Logger global functions
 namespace log {
+    /*!
+        \enum Mode
+
+        Defines the operational mode of the logger manager.
+
+        \var Mode COMBINED
+        In this mode all the loggers will write the messages on the same file.
+
+        \var Mode SEPARATE
+        In this mode each logger will write the messages on its own file.
+    */
 
     /*!
         \enum Level
