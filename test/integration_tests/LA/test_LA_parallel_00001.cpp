@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
 	log::cout().setVisibility(log::GLOBAL);
 
 	// Run the subtests
-    log::cout() << "Testing basic features of parallel octree patches" << std::endl;
+    log::cout() << "Testing parallel solution of linear systems" << std::endl;
 
 	int status;
 	try {
