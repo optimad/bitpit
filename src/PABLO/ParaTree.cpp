@@ -210,8 +210,6 @@ namespace bitpit {
 #if BITPIT_ENABLE_MPI==1
         freeComm();
 #endif
-
-        printFooter();
     };
 
     // =============================================================================== //
@@ -756,16 +754,6 @@ namespace bitpit {
         (*m_log) << " Number of octants	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)) << endl;
         (*m_log) << "---------------------------------------------" << endl;
         (*m_log) << " " << endl;
-    }
-
-    /*! Print the final PABLO footer.
-     */
-    void
-    ParaTree::printFooter(){
-        (*m_log) << "---------------------------------------------" << endl;
-        (*m_log) << "--------------- R.I.P. PABLO ----------------" << endl;
-        (*m_log) << "---------------------------------------------" << endl;
-        (*m_log) << "---------------------------------------------" << endl;
     }
 
     // =================================================================================== //
