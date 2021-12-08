@@ -74,6 +74,32 @@ int subtest_001()
 	log::cout() << "----6\n7-------7";
 	log::cout() << std::endl;
 
+	log::cout() << log::defaultSeverity(log::INFO);
+	log::critical() << log::context("critical");
+	log::critical() << "1-1\n2--2\n" << std::endl << "3---3" << std::endl;
+	log::critical() << "4----4\n5-----5\n" << std::endl << "6--";
+	log::critical() << "----6\n7-------7";
+	log::critical() << std::endl;
+	log::error() << log::context("error");
+	log::error() << "1-1\n2--2\n" << std::endl << "3---3" << std::endl;
+	log::error() << "4----4\n5-----5\n" << std::endl << "6--";
+	log::error() << "----6\n7-------7";
+	log::error() << std::endl;
+	log::warning() << log::context("warning");
+	log::warning() << "1-1\n2--2\n" << std::endl << "3---3" << std::endl;
+	log::warning() << "4----4\n5-----5\n" << std::endl << "6--";
+	log::warning() << "----6\n7-------7";
+	log::warning() << std::endl;
+	log::info() << log::context("info");
+	log::info() << "1-1\n2--2\n" << std::endl << "3---3" << std::endl;
+	log::info() << "4----4\n5-----5\n" << std::endl << "6--";
+	log::info() << "----6\n7-------7";
+	log::info() << std::endl;
+	log::debug() << log::context("debug");
+	log::debug() << "1-1\n2--2\n" << std::endl << "3---3" << std::endl;
+	log::debug() << "4----4\n5-----5\n" << std::endl << "6--";
+	log::debug() << "----6\n7-------7";
+	log::debug() << std::endl;
 
 	BITPIT_DEBUG_COUT() << "Debug statement" << std::endl;
 

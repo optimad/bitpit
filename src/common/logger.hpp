@@ -231,8 +231,23 @@ public:
 
     ~LoggerManager();
 
-    Logger & cout();
-    Logger & cout(const std::string &name);
+    Logger & cout(log::Level defualtSeverity = log::Level::NOTSET);
+    Logger & cout(const std::string &name, log::Level defualtSeverity = log::Level::NOTSET);
+
+    Logger & critical();
+    Logger & critical(const std::string &name);
+
+    Logger & error();
+    Logger & error(const std::string &name);
+
+    Logger & warning();
+    Logger & warning(const std::string &name);
+
+    Logger & info();
+    Logger & info(const std::string &name);
+
+    Logger & debug();
+    Logger & debug(const std::string &name);
 
     void initialize(log::Mode mode, bool reset,
                     int nProcessors, int rank);
@@ -299,8 +314,24 @@ namespace log {
 
     // Generic global functions
     LoggerManager & manager();
-    Logger & cout();
-    Logger & cout(const std::string &name);
+
+    Logger & cout(log::Level defualtSeverity = log::Level::NOTSET);
+    Logger & cout(const std::string &name, log::Level defualtSeverity = log::Level::NOTSET);
+
+    Logger & critical();
+    Logger & critical(const std::string &name);
+
+    Logger & error();
+    Logger & error(const std::string &name);
+
+    Logger & warning();
+    Logger & warning(const std::string &name);
+
+    Logger & info();
+    Logger & info(const std::string &name);
+
+    Logger & debug();
+    Logger & debug(const std::string &name);
 
     // Manipulators global functions
 

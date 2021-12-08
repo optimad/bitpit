@@ -1129,11 +1129,17 @@ LoggerManager & LoggerManager::manager()
 /*!
     Returns an instance of default logger.
 
+    The default severity of the messages will be set to the specified level,
+    if no default severity is specified, the default sevirity will remain
+    unaltered.
+    unaltered.
+
+    \param defaultSeverity is the default severity of the messages.
     \result An instance of the default specified logger.
 */
-Logger & LoggerManager::cout()
+Logger & LoggerManager::cout(log::Level defaultSeverity)
 {
-    return cout(m_defaultName);
+    return cout(m_defaultName, defaultSeverity);
 }
 
 /*!
@@ -1142,12 +1148,18 @@ Logger & LoggerManager::cout()
     This function returns an instance of the specified logger. If the logger
     does not exists a new instance will be created.
 
+    The default severity of the messages will be set to the specified level,
+    if no default severity is specified, the default sevirity will remain
+    unaltered.
+    unaltered.
+
     \param name is the name of the logger
+    \param defaultSeverity is the default severity of the messages.
     \result An instance of the specified logger.
 */
-Logger & LoggerManager::cout(const std::string &name)
+Logger & LoggerManager::cout(const std::string &name, log::Level defaultSeverity)
 {
-    // The logger has to be created
+    // Get the logger
     if (m_loggers.count(name) == 0) {
         if (!isInitialized()) {
             setMode(log::MODE_SEPARATE);
@@ -1160,8 +1172,155 @@ Logger & LoggerManager::cout(const std::string &name)
         }
     }
 
+    Logger &logger = *(m_loggers.at(name));
+
+    // Set default properties
+    if (defaultSeverity != log::Level::NOTSET) {
+        logger.setDefaultSeverity(defaultSeverity);
+    }
+
     // Return the logger
-    return *(m_loggers.at(name));
+    return logger;
+}
+
+/*!
+    Returns an instance of default logger.
+
+    The default severity of the messages will be set to the CRITICAL level.
+
+    \result An instance of the default specified logger.
+*/
+Logger & LoggerManager::critical()
+{
+    return critical(m_defaultName);
+}
+
+/*!
+    Returns an instance of the specified logger.
+
+    This function returns an instance of the specified logger. If the logger
+    does not exists a new instance will be created.
+
+    The default severity of the messages will be set to the CRITICAL level.
+
+    \param name is the name of the logger
+    \result An instance of the specified logger.
+*/
+Logger & LoggerManager::critical(const std::string &name)
+{
+    return cout(name, log::Level::CRITICAL);
+}
+
+/*!
+    Returns an instance of default logger.
+
+    The default severity of the messages will be set to the ERROR level.
+
+    \result An instance of the default specified logger.
+*/
+Logger & LoggerManager::error()
+{
+    return error(m_defaultName);
+}
+
+/*!
+    Returns an instance of the specified logger.
+
+    This function returns an instance of the specified logger. If the logger
+    does not exists a new instance will be created.
+
+    The default severity of the messages will be set to the ERROR level.
+
+    \param name is the name of the logger
+    \result An instance of the specified logger.
+*/
+Logger & LoggerManager::error(const std::string &name)
+{
+    return cout(name, log::Level::ERROR);
+}
+
+/*!
+    Returns an instance of default logger.
+
+    The default severity of the messages will be set to the WARNING level.
+
+    \result An instance of the default specified logger.
+*/
+Logger & LoggerManager::warning()
+{
+    return warning(m_defaultName);
+}
+
+/*!
+    Returns an instance of the specified logger.
+
+    This function returns an instance of the specified logger. If the logger
+    does not exists a new instance will be created.
+
+    The default severity of the messages will be set to the WARNING level.
+
+    \param name is the name of the logger
+    \result An instance of the specified logger.
+*/
+Logger & LoggerManager::warning(const std::string &name)
+{
+    return cout(name, log::Level::WARNING);
+}
+
+/*!
+    Returns an instance of default logger.
+
+    The default severity of the messages will be set to the INFO level.
+
+    \result An instance of the default specified logger.
+*/
+Logger & LoggerManager::info()
+{
+    return info(m_defaultName);
+}
+
+/*!
+    Returns an instance of the specified logger.
+
+    This function returns an instance of the specified logger. If the logger
+    does not exists a new instance will be created.
+
+    The default severity of the messages will be set to the INFO level.
+
+    \param name is the name of the logger
+    \result An instance of the specified logger.
+*/
+Logger & LoggerManager::info(const std::string &name)
+{
+    return cout(name, log::Level::INFO);
+}
+
+/*!
+    Returns an instance of default logger.
+
+    The default severity of the messages will be set to the DEBUG level.
+
+    \result An instance of the default specified logger.
+*/
+Logger & LoggerManager::debug()
+{
+    return debug(m_defaultName);
+}
+
+/*!
+    Returns an instance of the specified logger.
+
+    This function returns an instance of the specified logger. If the logger
+    does not exists a new instance will be created.
+
+    The default severity of the messages will be set to the DEBUG level.
+
+    \param name is the name of the logger
+    \result An instance of the specified logger.
+*/
+Logger & LoggerManager::debug(const std::string &name)
+{
+    return cout(name, log::Level::DEBUG);
 }
 
 /*!
@@ -1593,22 +1752,157 @@ namespace log {
     /*!
         Returns an instance of the default logger.
 
+        The default severity of the messages will be set to the specified
+        level, if no default severity is specified, the default sevirity
+        will remain unaltered.
+
+        \param defaultSeverity is the default severity of the messages.
         \result An instance of the default logger.
     */
-    Logger & cout()
+    Logger & cout(log::Level defaultSeverity)
     {
-        return manager().cout();
+        return manager().cout(defaultSeverity);
     }
 
     /*!
         Returns an instance of the specified logger.
 
+        The default severity of the messages will be set to the specified
+        level, if no default severity is specified, the default sevirity
+        will remain unaltered.
+
+        \param name is the name of the logger
+        \param defaultSeverity is the default severity of the messages.
+        \result An instance of the specified logger.
+    */
+    Logger & cout(const std::string &name, log::Level defaultSeverity)
+    {
+        return manager().cout(name, defaultSeverity);
+    }
+
+    /*!
+        Returns an instance of the default logger.
+
+        The default severity of the messages will be set to the CRITICAL level.
+
+        \result An instance of the default logger.
+    */
+    Logger & critical()
+    {
+        return manager().critical();
+    }
+
+    /*!
+        Returns an instance of the specified logger.
+
+        The default severity of the messages will be set to the CRITICAL level.
+
         \param name is the name of the logger
         \result An instance of the specified logger.
     */
-    Logger & cout(const std::string &name)
+    Logger & critical(const std::string &name)
     {
-        return manager().cout(name);
+        return manager().critical(name);
+    }
+
+    /*!
+        Returns an instance of the default logger.
+
+        The default severity of the messages will be set to the ERROR level.
+
+        \result An instance of the default logger.
+    */
+    Logger & error()
+    {
+        return manager().error();
+    }
+
+    /*!
+        Returns an instance of the specified logger.
+
+        The default severity of the messages will be set to the ERROR level.
+
+        \param name is the name of the logger
+        \result An instance of the specified logger.
+    */
+    Logger & error(const std::string &name)
+    {
+        return manager().error(name);
+    }
+
+    /*!
+        Returns an instance of the default logger.
+
+        The default severity of the messages will be set to the WARNING level.
+
+        \result An instance of the default logger.
+    */
+    Logger & warning()
+    {
+        return manager().warning();
+    }
+
+    /*!
+        Returns an instance of the specified logger.
+
+        The default severity of the messages will be set to the WARNING level.
+
+        \param name is the name of the logger
+        \result An instance of the specified logger.
+    */
+    Logger & warning(const std::string &name)
+    {
+        return manager().warning(name);
+    }
+
+    /*!
+        Returns an instance of the default logger.
+
+        The default severity of the messages will be set to the INFO level.
+
+        \result An instance of the default logger.
+    */
+    Logger & info()
+    {
+        return manager().info();
+    }
+
+    /*!
+        Returns an instance of the specified logger.
+
+        The default severity of the messages will be set to the INFO level.
+
+        \param name is the name of the logger
+        \result An instance of the specified logger.
+    */
+    Logger & info(const std::string &name)
+    {
+        return manager().info(name);
+    }
+
+    /*!
+        Returns an instance of the default logger.
+
+        The default severity of the messages will be set to the DEBUG level.
+
+        \result An instance of the default logger.
+    */
+    Logger & debug()
+    {
+        return manager().debug();
+    }
+
+    /*!
+        Returns an instance of the specified logger.
+
+        The default severity of the messages will be set to the DEBUG level.
+
+        \param name is the name of the logger
+        \result An instance of the specified logger.
+    */
+    Logger & debug(const std::string &name)
+    {
+        return manager().debug(name);
     }
 
     // Manipulators global functions
