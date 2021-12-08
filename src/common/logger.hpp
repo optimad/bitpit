@@ -124,6 +124,8 @@ private:
 class Logger : public std::ostream
 {
 
+friend class LoggerManager;
+
 public:
     Logger(const std::string &name,
            std::ostream *consoleStream, std::ofstream *fileStream,

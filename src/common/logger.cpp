@@ -1363,23 +1363,8 @@ void LoggerManager::_create(const std::string &name, bool reset,
 */
 void LoggerManager::_create(const std::string &name, Logger &master)
 {
-    std::ostream &consoleStream = master.getConsoleStream();
-    std::ofstream &fileStream   = master.getFileStream();
-
-    int rank        = master.getRank();
-    int nProcessors = master.getProcessorCount();
-
-    m_loggers[name]     = std::unique_ptr<Logger>(new Logger(name, &consoleStream, &fileStream, nProcessors, rank));
+    m_loggers[name]     = std::unique_ptr<Logger>(new Logger(master));
     m_loggerUsers[name] = 1;
-
-    // Import logger settings
-    Logger &logger = *(m_loggers.at(name));
-    logger.setConsoleTimestampEnabled(master.isConsoleTimestampEnabled());
-    logger.setConsoleVerbosity(master.getConsoleVerbosity());
-    logger.setFileTimestampEnabled(master.isFileTimestampEnabled());
-    logger.setFileVerbosity(master.getFileVerbosity());
-    logger.setDefaultSeverity(master.getDefaultSeverity());
-    logger.setDefaultVisibility(master.getDefaultVisibility());
 }
 
 /*!
