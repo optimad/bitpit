@@ -55,7 +55,8 @@ namespace log {
         WARNING = 30,
         INFO = 20,
         NORMAL = INFO,
-        DEBUG = 10
+        DEBUG = 10,
+        NOTSET = 0
     };
 
     enum Visibility {
@@ -140,6 +141,10 @@ public:
     void setIndentation(int delta);
     int getIndentation();
 
+    void disable(log::Level = log::Level::CRITICAL);
+    void disableConsole(log::Level = log::Level::CRITICAL);
+    void disableFile(log::Level = log::Level::CRITICAL);
+
     void setDefaultSeverity(log::Level severity);
     log::Level getDefaultSeverity();
 
@@ -195,7 +200,10 @@ private:
     log::Level m_defaultSeverity;
     log::Visibility m_defaultVisibility;
 
+    log::Level m_consoleDisabledThreshold;
     log::Level m_consoleVerbosityThreshold;
+
+    log::Level m_fileDisabledThreshold;
     log::Level m_fileVerbosityThreshold;
 
     Logger(Logger const&);
@@ -339,6 +347,15 @@ namespace log {
 
     Logger& setFileVerbosity(Logger& logger, const log::Level &threshold);
     LoggerManipulator<log::Level> fileVerbosity(const log::Level &threshold);
+
+    Logger& disable(Logger& logger, const log::Level &verbosity = log::Level::CRITICAL);
+    LoggerManipulator<log::Level> disable(const log::Level &verbosity = log::Level::CRITICAL);
+
+    Logger& disableConsole(Logger& logger, const log::Level &verbosity = log::Level::CRITICAL);
+    LoggerManipulator<log::Level> disableConsole(const log::Level &verbosity = log::Level::CRITICAL);
+
+    Logger& disableFile(Logger& logger, const log::Level &verbosity = log::Level::CRITICAL);
+    LoggerManipulator<log::Level> disableFile(const log::Level &verbosity = log::Level::CRITICAL);
 
     Logger& setIndentation(Logger& logger, const int &delta);
     LoggerManipulator<int> indent(int delta);

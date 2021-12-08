@@ -50,7 +50,7 @@ int subtest_001(int rank, int nProcs)
     /**<Instantation and setup of a custom (named custom) logfile.*/
     log::manager().create("custom", false, nProcs, rank);
     log::cout("custom") << log::fileVerbosity(log::INFO);
-    log::cout("custom") << log::consoleVerbosity(log::QUIET);
+    log::cout("custom") << log::disableConsole();
 
     /**<Set coordinates of the origin and size of a 2D custom para_tree object.*/
     double X, Y, Z, L;
@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
     // Initialize the logger
     log::manager().initialize(log::SEPARATE, false, nProcs, rank);
     log::cout() << log::fileVerbosity(log::INFO);
-    log::cout() << log::consoleVerbosity(log::QUIET);
+    log::cout() << log::disableConsole();
 
     // Run the subtests
     log::cout() << "Testing basic octree features" << std::endl;
