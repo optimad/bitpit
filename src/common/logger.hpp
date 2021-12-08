@@ -196,8 +196,7 @@ private:
     log::Level m_consoleVerbosityThreshold;
     log::Level m_fileVerbosityThreshold;
 
-    Logger(Logger const&) = delete;
-    Logger& operator=(Logger const&) = delete;
+    Logger(Logger const&);
 
     void setConsoleEnabled(log::Level severity, log::Visibility visibility);
     void setFileEnabled(log::Level severity, log::Visibility visibility);

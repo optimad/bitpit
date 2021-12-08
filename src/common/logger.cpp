@@ -474,6 +474,24 @@ Logger::Logger(const std::string &name,
 }
 
 /*!
+    Copy constructor.
+
+    \param other is another logger, whose configuration will be used to
+    initialize the current logger
+*/
+Logger::Logger(const Logger &other)
+    : std::ios(nullptr), std::ostream(&m_buffer),
+      m_name(other.m_name),
+      m_nProcessors(other.m_nProcessors), m_rank(other.m_rank),
+      m_buffer(other.m_buffer),
+      m_indentation(other.m_indentation), m_context(other.m_context),
+      m_defaultSeverity(other.m_defaultSeverity), m_defaultVisibility(other.m_defaultVisibility),
+      m_consoleVerbosityThreshold(other.m_consoleVerbosityThreshold),
+      m_fileVerbosityThreshold(other.m_fileVerbosityThreshold)
+{
+}
+
+/*!
     Sets the stream to be used for the output on the console.
 
     \param console is the stream to be used for the output on the console
