@@ -444,7 +444,7 @@ const std::string LoggerBuffer::getTimestamp() const
 Logger::Logger(const std::string &name,
                std::ostream *consoleStream, std::ofstream *fileStream,
                int nProcessors, int rank)
-    : std::ios(0), std::ostream(&m_buffer),
+    : std::ios(nullptr), std::ostream(&m_buffer),
     m_name(name), m_nProcessors(nProcessors), m_rank(rank), m_buffer(256),
     m_indentation(0), m_context(""),
     m_defaultSeverity(log::INFO), m_defaultVisibility(log::MASTER),
