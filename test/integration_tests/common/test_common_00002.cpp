@@ -81,7 +81,7 @@ int subtest_001()
 	log::manager().create("logger1", false, nProcessors, rank);
 
 	log::cout("logger1") << log::consoleVerbosity(log::DEBUG);
-	log::cout("logger1") << log::fileVerbosity(log::QUIET);
+	log::cout("logger1") << log::disableFile();
 
 	log::cout("logger1") << log::defaultSeverity(log::DEBUG);
 	log::cout("logger1") << log::context("logger1-A");

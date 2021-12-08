@@ -448,7 +448,8 @@ Logger::Logger(const std::string &name,
     m_name(name), m_nProcessors(nProcessors), m_rank(rank), m_buffer(256),
     m_indentation(0), m_context(""),
     m_defaultSeverity(log::INFO), m_defaultVisibility(log::MASTER),
-    m_consoleVerbosityThreshold(log::INFO), m_fileVerbosityThreshold(log::INFO)
+    m_consoleDisabledThreshold(log::NOTSET), m_consoleVerbosityThreshold(log::INFO),
+    m_fileDisabledThreshold(log::NOTSET), m_fileVerbosityThreshold(log::INFO)
 {
     // Set buffer data
     setConsoleStream(consoleStream);
@@ -486,7 +487,9 @@ Logger::Logger(const Logger &other)
       m_buffer(other.m_buffer),
       m_indentation(other.m_indentation), m_context(other.m_context),
       m_defaultSeverity(other.m_defaultSeverity), m_defaultVisibility(other.m_defaultVisibility),
+      m_consoleDisabledThreshold(other.m_consoleDisabledThreshold),
       m_consoleVerbosityThreshold(other.m_consoleVerbosityThreshold),
+      m_fileDisabledThreshold(other.m_fileDisabledThreshold),
       m_fileVerbosityThreshold(other.m_fileVerbosityThreshold)
 {
 }
@@ -530,6 +533,73 @@ void Logger::setFileStream(std::ofstream *file)
 std::ofstream & Logger::getFileStream()
 {
     return m_buffer.getFileStream();
+}
+
+/*!
+    Provides an overriding verbosity level which takes precedence over the
+    logger’s own level.
+
+    When the need arises to temporarily throttle logging output down across
+    the whole application, this function can be useful. Its effect is to
+    disable all logging calls of severity level and below, so that if you
+    call it with a value of INFO, then all INFO and DEBUG events would be
+    discarded, whereas those of severity WARNING and above would be processed
+    according to the logger’s effective level.
+
+    If the a NOTSET level is specified, it effectively removes this overriding
+    level, so that logging output again depends on the effective verbosity
+    level of the logger.
+
+    \param level is the overriding verbosity level
+*/
+void Logger::disable(log::Level level)
+{
+    disableConsole(level);
+    disableFile(level);
+}
+
+/*!
+    Provides an overriding console verbosity level which takes precedence over
+    the logger’s own level.
+
+    When the need arises to temporarily throttle logging output down across
+    the whole application, this function can be useful. Its effect is to
+    disable all logging calls of severity level and below, so that if you
+    call it with a value of INFO, then all INFO and DEBUG events would be
+    discarded, whereas those of severity WARNING and above would be processed
+    according to the logger’s effective level.
+
+    If the NOTSET level is specified, it effectively removes this overriding
+    level, so that logging output again depends on the effective verbosity
+    level of the logger.
+
+    \param level is the overriding verbosity level
+*/
+void Logger::disableConsole(log::Level level)
+{
+    m_consoleDisabledThreshold = level;
+}
+
+/*!
+    Provides an overriding file verbosity level which takes precedence over
+    the logger’s own level.
+
+    When the need arises to temporarily throttle logging output down across
+    the whole application, this function can be useful. Its effect is to
+    disable all logging calls of severity level and below, so that if you
+    call it with a value of INFO, then all INFO and DEBUG events would be
+    discarded, whereas those of severity WARNING and above would be processed
+    according to the logger’s effective level.
+
+    If the NOTSET level is specified, it effectively removes this overriding
+    level, so that logging output again depends on the effective verbosity
+    level of the logger.
+
+    \param level is the overriding verbosity level
+*/
+void Logger::disableFile(log::Level level)
+{
+    m_fileDisabledThreshold = level;
 }
 
 /*!
@@ -698,7 +768,7 @@ void Logger::setConsoleVerbosity(log::Level threshold)
 void Logger::setConsoleEnabled(log::Level severity, log::Visibility visibility)
 {
     bool isConsoleEnabled = true;
-    if (m_consoleVerbosityThreshold == log::QUIET) {
+    if (severity <= m_consoleDisabledThreshold) {
         isConsoleEnabled = false;
     } else if (visibility == log::MASTER && (m_rank != 0)) {
         isConsoleEnabled = false;
@@ -792,7 +862,7 @@ log::Level Logger::getFileVerbosity()
 void Logger::setFileEnabled(log::Level severity, log::Visibility visibility)
 {
     bool isFileEnabled = true;
-    if (m_fileVerbosityThreshold == log::QUIET) {
+    if (severity <= m_fileDisabledThreshold) {
         isFileEnabled = false;
     } else if (visibility == log::MASTER && (m_rank != 0)) {
         isFileEnabled = false;
@@ -1475,7 +1545,12 @@ namespace log {
         This level identifies messages categorized as debug.
 
         \var Level QUIET
-        This level identifies messages that will not be written.
+        This level identifies messages that will not be written. The usage of
+        this level is deprecated, logging can be disabled using the functions
+        disable, disableConsole and disableFile.
+
+        \var Level NOTSET
+        The level specified an undefined level.
     */
 
     /*!
@@ -1752,6 +1827,99 @@ namespace log {
     LoggerManipulator<log::Level> fileVerbosity(const log::Level &threshold)
     {
         return LoggerManipulator<log::Level>(setFileVerbosity, threshold);
+    }
+
+    /*!
+        Provides an overriding verbosity level which takes precedence over
+        the logger’s own level. Its effect is to disable all logging calls
+        of severity level and below.
+
+        \param logger is a reference pointing to the logger
+        \param level is the overriding verbosity level
+        \result A reference pointing to the logger received in input.
+    */
+    Logger& disable(Logger& logger, const log::Level &level)
+    {
+        logger.disable(level);
+
+        return logger;
+    }
+
+    /*!
+        Returns a logger manipulator that allows to define an overriding
+        verbosity level which takes precedence over the logger’s own level.
+        The effect of this overriding verbosity level is to disable all
+        logging calls of severity level and below.
+
+        \param level is the overriding verbosity level
+        \result A logger manipulator that allows to change the verbosity for
+        the messages printed on the console.
+    */
+    LoggerManipulator<log::Level> disable(const log::Level &level)
+    {
+        return LoggerManipulator<log::Level>(disable, level);
+    }
+
+    /*!
+        Provides an overriding verbosity level which takes precedence over
+        the logger’s own console level. Its effect is to disable all logging
+        calls of severity level and below.
+
+        \param logger is a reference pointing to the logger
+        \param level is the overriding verbosity level
+        \result A reference pointing to the logger received in input.
+    */
+    Logger& disableConsole(Logger& logger, const log::Level &level)
+    {
+        logger.disableConsole(level);
+
+        return logger;
+    }
+
+    /*!
+        Returns a logger manipulator that allows to define an overriding
+        verbosity level which takes precedence over the logger’s own console
+        level. The effect of this overriding verbosity level is to disable
+        all logging calls of severity level and below.
+
+        \param level is the overriding verbosity level
+        \result A logger manipulator that allows to change the verbosity for
+        the messages printed on the console.
+    */
+    LoggerManipulator<log::Level> disableConsole(const log::Level &level)
+    {
+        return LoggerManipulator<log::Level>(disableConsole, level);
+    }
+
+    /*!
+        Provides an overriding verbosity level which takes precedence over
+        the logger’s own file level. Its effect is to disable all logging
+        calls of severity level and below.
+
+        \param logger is a reference pointing to the logger
+        \param level is the overriding verbosity level
+        \result A reference pointing to the logger received in input.
+    */
+    Logger& disableFile(Logger& logger, const log::Level &level)
+    {
+        logger.disableFile(level);
+
+        return logger;
+    }
+
+    /*!
+        Returns a logger manipulator that allows to define an overriding
+        verbosity level which takes precedence over the logger’s own file
+        level. The effect of this overriding verbosity level is to disable
+        all logging calls of severity level and below.
+
+        \param level is the overriding verbosity level
+        \result A logger manipulator that allows to change the verbosity for
+        the messages printed on the file.
+    */
+    LoggerManipulator<log::Level> disableFile(const log::Level &level)
+    {
+        return LoggerManipulator<log::Level>(disableFile, level);
     }
 
     /*!
