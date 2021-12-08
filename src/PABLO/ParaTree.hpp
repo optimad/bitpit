@@ -244,7 +244,6 @@ namespace bitpit {
         virtual void	restore(std::istream &stream);
 
         void	printHeader();
-        void	printFooter();
 
         // =================================================================================== //
         // BASIC GET/SET METHODS															   //
