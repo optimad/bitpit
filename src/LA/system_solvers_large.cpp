@@ -164,34 +164,38 @@ void SystemSparseMatrixAssembler::getRowValues(long rowIndex, ConstProxyVector<d
 }
 
 /*!
- * \class SystemSolver
+ * \class PetscManager
  * \ingroup system_solver_large
  *
- * \brief The SystemSolver class provides methods for building and solving
- * large linear systems.
+ * \brief The PetscManager class handles the interaction with PETSc library.
  */
 
-int SystemSolver::m_nInstances = 0;
-bool SystemSolver::m_optionsEditable = true;
-bool SystemSolver::m_logViewEnabled = false;
-std::vector<std::string> SystemSolver::m_options = std::vector<std::string>(1, "bitpit");
+/*!
+ * Display the log view.
+ *
+ * \returns The error code.
+ */
+PetscErrorCode PetscManager::displayLogView()
+{
+    return PetscLogView(PETSC_VIEWER_STDOUT_WORLD);
+}
 
 /*!
- * Add an initialization option
+ * Add an initialization option.
  *
  * \param option is the option that will be added
  */
-void SystemSolver::addInitOption(const std::string &option)
+void PetscManager::addInitOption(const std::string &option)
 {
-    if (!m_optionsEditable) {
-        throw std::runtime_error("Initialization opions can be set only before initializing the solver.");
+    if (!areOptionsEditable()) {
+        throw std::runtime_error("Initialization options can be set only before initializing the solver.");
     }
 
     m_options.push_back(option);
 }
 
 /*!
- * Add initialization options
+ * Add initialization options.
  *
  * \param argc is a non-negative value representing the number of arguments
  * passed to the program from the environment in which the program is run
@@ -204,10 +208,10 @@ void SystemSolver::addInitOption(const std::string &option)
  * The value of argv[0] is not propagated to the system solver, the solver
  * will see a dummy name.
  */
-void SystemSolver::addInitOptions(int argc, char **argv)
+void PetscManager::addInitOptions(int argc, char **argv)
 {
-    if (!m_optionsEditable) {
-        throw std::runtime_error("Initialization opions can be set only before initializing the solver.");
+    if (!areOptionsEditable()) {
+        throw std::runtime_error("Initialization options can be set only before initializing the solver.");
     }
 
     for (int i = 1; i < argc; ++i) {
@@ -216,14 +220,14 @@ void SystemSolver::addInitOptions(int argc, char **argv)
 }
 
 /*!
- * Add initialization options
+ * Add initialization options.
  *
  * \param options are the options that will be added
  */
-void SystemSolver::addInitOptions(const std::vector<std::string> &options)
+void PetscManager::addInitOptions(const std::vector<std::string> &options)
 {
-    if (!m_optionsEditable) {
-        throw std::runtime_error("Initialization opions can be set only before initializing the solver.");
+    if (!areOptionsEditable()) {
+        throw std::runtime_error("Initialization options can be set only before initializing the solver.");
     }
 
     for (const std::string &option : options) {
@@ -234,17 +238,17 @@ void SystemSolver::addInitOptions(const std::vector<std::string> &options)
 /*!
  * Clear initialization options
  */
-void SystemSolver::clearInitOptions()
+void PetscManager::clearInitOptions()
 {
     m_options.clear();
 }
 
 /*!
- * Displaye log view
+ * Enable visualization of the log view.
  *
  * \returns The error code.
  */
-void SystemSolver::enableLogView()
+void PetscManager::enableLogView()
 {
     if (m_logViewEnabled) {
         return;
@@ -255,22 +259,196 @@ void SystemSolver::enableLogView()
 #else
     PetscLogBegin();
 #endif
-    PetscRegisterFinalize(&(SystemSolver::displayLogView));
+    PetscRegisterFinalize(&(PetscManager::displayLogView));
     m_logViewEnabled = true;
 }
 
 /*!
- * Displaye log view
- *
- * \returns The error code.
+ * Constructor.
  */
-PetscErrorCode SystemSolver::displayLogView()
+PetscManager::PetscManager()
+    : m_externalMPIInitialization(true), m_externalPETScInitialization(true),
+      m_options(std::vector<std::string>(1, "bitpit")),  m_logViewEnabled(false)
 {
-    return PetscLogView(PETSC_VIEWER_STDOUT_WORLD);
+}
+
+/*!
+ * Destructor.
+ */
+PetscManager::~PetscManager()
+{
+    finalize(true);
+}
+
+/*!
+ * Check if initialization options are editable.
+ *
+ * \result Returns true if initialization options are editable, false otherwise.
+ */
+bool PetscManager::areOptionsEditable() const
+{
+    PetscBool isPetscInitialized;
+    PetscInitialized(&isPetscInitialized);
+
+    return (!isPetscInitialized);
 }
 
 /*!
  * Constuctor
+ * PETSc initialization.
+ *
+ * If PETSc is already initialized, this function is a no-op.
+ */
+#if BITPIT_ENABLE_MPI==1
+/*!
+ * If the MPI initialization has not be called yet, it will be called by
+ * this function.
+ */
+#endif
+/*!
+ * The function can be called more than once.
+ *
+ * \param debug if set to true, turns on logging of objects and events, once
+ * the logging is enabled it cannot be disabled
+ * \result Return true is PETSc hase been initialized by this function, false
+ * if PETSc was already initialized.
+ */
+bool PetscManager::initialize(bool debug)
+{
+    // Early return if PETSc is already initialized
+    PetscBool isPetscInitialized;
+    PetscInitialized(&isPetscInitialized);
+    if (isPetscInitialized) {
+        return false;
+    }
+
+#if BITPIT_ENABLE_MPI==1
+    // Early return if MPI is already finalized
+    int isMPIFinalized;
+    MPI_Finalized(&isMPIFinalized);
+    if (isMPIFinalized) {
+        throw std::runtime_error("PETSc finalization cannot be called after MPI finaliation.");
+    }
+#endif
+
+    // Generate command line arguments
+    //
+    // The first argument is the executable name and it is set to a
+    // dummy value.
+    std::string help        = "None";
+    std::string programName = "bitpit_petsc_manager";
+
+    int argc = 1 + m_options.size();
+    char **argv = new char*[argc + 1];
+    argv[0] = strdup(programName.data());
+    for (std::size_t i = 0; i < m_options.size(); i++) {
+        argv[1 + i] = strdup(m_options[i].data());
+    }
+    argv[argc] = nullptr;
+
+#if BITPIT_ENABLE_MPI==1
+    // Initialize MPI
+    int isMPIInitialized;
+    MPI_Initialized(&isMPIInitialized);
+    if (!isMPIInitialized) {
+        MPI_Init(&argc, &argv);
+        m_externalMPIInitialization = false;
+    }
+#endif
+
+    // Initialize PETSc
+    PetscInitialize(&argc, &argv, 0, help.data());
+    m_externalPETScInitialization = false;
+
+    // Enable log view
+    if (debug) {
+        enableLogView();
+    }
+
+    // Clean-up command line arguments
+    for (int i = 0; i < argc; ++i) {
+        free(argv[i]);
+    }
+
+    delete[] argv;
+
+    // Initialization completed
+    return true;
+}
+
+/*!
+ * PETSc finalization.
+ *
+ * If PETSc finalization was already called, it will not be called again.
+ */
+#if BITPIT_ENABLE_MPI==1
+/*!
+ * If MPI initialization has been performed by the PETSc manager and a
+ * permanent finalization is requested, this function will call MPI
+ * finalization.
+ */
+#else
+/*!
+ * If a permanent finalization is requested, it may not be possible to
+ * re-initialize PETSc after the finalization has been performed.
+ */
+#endif
+/*!
+ * \param permanent if set to true, the function will try to finalized
+ * both PETSc and its related libraries (e.g., MPI). If a permanent
+ * finalization is requested, it may not be possible to re-initialize
+ * PETSc after the finalization has been performed
+ * \result Return true is PETSc has been finalized by this function, false
+ * if PETSc was already finalized.
+ */
+bool PetscManager::finalize(bool permanent)
+{
+#if BITPIT_ENABLE_MPI==1
+    // Early return if MPI is already finalized
+    int isMPIFinalized;
+    MPI_Finalized(&isMPIFinalized);
+    if (isMPIFinalized) {
+        return false;
+    }
+#endif
+
+    // Early return if PETSc was initialized externally
+    if (m_externalPETScInitialization) {
+        return false;
+    }
+
+    // Finalize PETSc
+    PetscBool isPetscFinalized;
+    PetscFinalized(&isPetscFinalized);
+    if (!isPetscFinalized) {
+        PetscFinalize();
+    }
+
+#if BITPIT_ENABLE_MPI==1
+    // Finalize MPI
+    if (permanent) {
+        if (!m_externalMPIInitialization) {
+            MPI_Finalize();
+        }
+    }
+#endif
+
+    return (!isPetscFinalized);
+}
+
+/*!
+ * \class SystemSolver
+ * \ingroup system_solver_large
+ *
+ * \brief The SystemSolver class provides methods for building and solving
+ * large linear systems.
+ */
+
+PetscManager SystemSolver::m_petscManager = PetscManager();
+
+int SystemSolver::m_nInstances = 0;
+
+/*!
  *
  * \param debug if set to true, debug information will be printed
  */
@@ -296,38 +474,13 @@ SystemSolver::SystemSolver(const std::string &prefix, bool debug)
       m_rowPermutation(nullptr), m_colPermutation(nullptr),
       m_forceConsistency(false)
 {
-    // Initialize Petsc
+    // Initialize PETSc
     if (m_nInstances == 0) {
-        // Generate command line arguments
-        //
-        // The first argument is the executable name and it is set to a
-        // dummy value.
-        std::string help        = "None";
-        std::string programName = "bitpit_system_solver";
-
-        int argc = 1 + m_options.size();
-        char **argv = new char*[argc + 1];
-        argv[0] = strdup(programName.data());
-        for (std::size_t i = 0; i < m_options.size(); i++) {
-            argv[1 + i] = strdup(m_options[i].data());
-        }
-        argv[argc] = nullptr;
-
-        // Call initialization
-        PetscInitialize(&argc, &argv, 0, help.data());
-
-        // Clean-up
-        for (int i = 0; i < argc; ++i) {
-            free(argv[i]);
-        }
-
-        delete[] argv;
+        m_petscManager.initialize(debug);
     }
 
     // Set KSP debug options
     if (debug) {
-        enableLogView();
-
 #if (PETSC_VERSION_MAJOR >= 3 && PETSC_VERSION_MINOR >= 7)
             PetscOptionsSetValue(nullptr, ("-" + m_prefix + "ksp_monitor_true_residual").c_str(), "");
             PetscOptionsSetValue(nullptr, ("-" + m_prefix + "ksp_converged_reason").c_str(), "");
@@ -357,13 +510,9 @@ SystemSolver::~SystemSolver()
     // Decrease the number of instances
     --m_nInstances;
 
-    // Finalize petsc
+    // Finalize PETSc
     if (m_nInstances == 0) {
-        PetscBool isPetscFinalized;
-        PetscFinalized(&isPetscFinalized);
-        if (!isPetscFinalized) {
-            PetscFinalize();
-        }
+        m_petscManager.finalize(false);
     }
 }
 
@@ -389,10 +538,6 @@ void SystemSolver::clear()
 #endif
 
         m_assembled = false;
-    }
-
-    if (m_nInstances == 0) {
-        m_optionsEditable = true;
     }
 }
 
@@ -1375,7 +1520,6 @@ void SystemSolver::setUp()
     preKSPSetupActions();
 
     // Setup Krylov space
-    m_optionsEditable = false;
     KSPSetFromOptions(m_KSP);
     KSPSetUp(m_KSP);
 

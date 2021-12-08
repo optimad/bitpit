@@ -119,6 +119,38 @@ protected:
 
 };
 
+class PetscManager {
+
+public:
+    PetscManager();
+
+    virtual ~PetscManager();
+
+    bool areOptionsEditable() const;
+
+    bool initialize(bool debug);
+    bool finalize(bool permanent);
+
+    void addInitOption(const std::string &option);
+    void addInitOptions(int argc, char **args);
+    void addInitOptions(const std::vector<std::string> &options);
+    void clearInitOptions();
+
+private:
+    static PetscErrorCode displayLogView();
+
+    bool m_externalMPIInitialization;
+    bool m_externalPETScInitialization;
+
+    bool m_optionsEditable;
+    std::vector<std::string> m_options;
+
+    bool m_logViewEnabled;
+
+    void enableLogView();
+
+};
+
 class SystemSolver {
 
 public:
@@ -126,13 +158,6 @@ public:
         DUMP_BINARY,
         DUMP_ASCII
     };
-
-    static void addInitOption(const std::string &option);
-    static void addInitOptions(int argc, char **args);
-    static void addInitOptions(const std::vector<std::string> &options);
-    static void clearInitOptions();
-
-    static void enableLogView();
 
     SystemSolver(bool debug = false);
     SystemSolver(const std::string &prefix, bool debug = false);
@@ -225,12 +250,9 @@ protected:
 #endif
 
 private:
-    static int m_nInstances;
-    static bool m_optionsEditable;
-    static bool m_logViewEnabled;
-    static std::vector<std::string> m_options;
+    static PetscManager m_petscManager;
 
-    static PetscErrorCode displayLogView();
+    static int m_nInstances;
 
     std::string m_prefix;
 
