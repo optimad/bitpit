@@ -294,7 +294,6 @@ bool PetscManager::areOptionsEditable() const
 }
 
 /*!
- * Constuctor
  * PETSc initialization.
  *
  * If PETSc is already initialized, this function is a no-op.
@@ -449,6 +448,7 @@ PetscManager SystemSolver::m_petscManager = PetscManager();
 int SystemSolver::m_nInstances = 0;
 
 /*!
+ * Constructor.
  *
  * \param debug if set to true, debug information will be printed
  */
@@ -458,7 +458,7 @@ SystemSolver::SystemSolver(bool debug)
 }
 
 /*!
- * Constuctor
+ * Constructor.
  *
  * \param prefix is the prefix string to prepend to all option requests
  * \param debug if set to true, debug information will be printed
@@ -497,7 +497,7 @@ SystemSolver::SystemSolver(const std::string &prefix, bool debug)
 }
 
 /*!
- * Destructor
+ * Destructor.
  */
 SystemSolver::~SystemSolver()
 {
@@ -544,7 +544,7 @@ void SystemSolver::clear()
 /*!
  * Set the permutations that will use internally by the solver.
  *
- * Only local permutations are suppoerted.
+ * Only local permutations are supported.
  *
  * \param nRows are the rows of the matrix
  * \param rowRanks are the rank of the rows
@@ -1150,7 +1150,7 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrix
 }
 
 /*!
- * Create rhs and solution vectors.
+ * Create RHS and solution vectors.
  */
 void SystemSolver::vectorsCreate()
 {
