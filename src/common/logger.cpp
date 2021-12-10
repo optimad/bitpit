@@ -1016,7 +1016,7 @@ LoggerManager::~LoggerManager()
         loggerNames.push_back(entry.first);
     }
 
-    // Destry all the loggers
+    // Destroy all the loggers
     for (const std::string &name : loggerNames) {
         destroy(name, true);
     }
@@ -1037,7 +1037,7 @@ LoggerManager & LoggerManager::manager()
 }
 
 /*!
-    Returns an instance of defualt logger.
+    Returns an instance of default logger.
 
     \result An instance of the default specified logger.
 */
@@ -1093,7 +1093,7 @@ void LoggerManager::initialize(log::Mode mode, bool reset,
 
     \param mode is the mode that will be set
     \param reset if true the log files will be reset
-    \param directory is the defualt directory for saving the log files
+    \param directory is the default directory for saving the log files
     \param nProcessors is the total number of processes in the communicator
     \param rank is the parallel rank in the communicator
 */
@@ -1109,7 +1109,7 @@ void LoggerManager::initialize(log::Mode mode, bool reset, const std::string &di
     \param mode is the mode that will be set
     \param name is the name for the default logger
     \param reset if true the log files will be reset
-    \param directory is the defualt directory for saving the log files
+    \param directory is the default directory for saving the log files
     \param nProcessors is the total number of processes in the communicator
     \param rank is the parallel rank in the communicator
 */
@@ -1414,9 +1414,9 @@ void LoggerManager::setFileVerbosity(log::Level threshold)
 }
 
 /*!
-    Gets the defualt logger name.
+    Gets the default logger name.
 
-    \result The defualt logger name.
+    \result The default logger name.
 */
 std::string LoggerManager::getDefaultName() const
 {
@@ -1424,9 +1424,9 @@ std::string LoggerManager::getDefaultName() const
 }
 
 /*!
-    Gets the defualt logger directory.
+    Gets the default logger directory.
 
-    \result The defualt logger directory.
+    \result The default logger directory.
 */
 std::string LoggerManager::getDefaultDirectory() const
 {
