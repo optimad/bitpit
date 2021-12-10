@@ -1127,13 +1127,13 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::mo
     std::size_t posOld = action.info[PiercedSyncAction::INFO_POS_SECOND];
     switch (static_cast<typename MoveAction::MoveActionType>(action.type)) {
 
-    case MoveAction::TYPE_MOVE_OVERWRITE:
+    case MoveAction::TYPE_OVERWRITE:
     {
         PiercedVectorStorage<value_t, id_t>::rawSet(posNew, std::move(PiercedVectorStorage<value_t, id_t>::rawAt(posOld)));
         break;
     }
 
-    case MoveAction::TYPE_MOVE_INSERT:
+    case MoveAction::TYPE_INSERT:
     {
         // Since we are increasing the sotrage by an element at the time
         // calling a reserve will hurt performance badly because this will
@@ -1142,7 +1142,7 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::mo
         break;
     }
 
-    case MoveAction::TYPE_MOVE_APPEND:
+    case MoveAction::TYPE_APPEND:
     {
         // Since we are increasing the sotrage by an element at the time
         // calling a reserve will hurt performance badly because this will
