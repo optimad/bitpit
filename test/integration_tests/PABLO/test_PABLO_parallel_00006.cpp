@@ -214,7 +214,7 @@ int main(int argc, char *argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     // Initialize the logger
-    bitpit::log::manager().initialize(bitpit::log::SEPARATE, false, nProcs, rank);
+    bitpit::log::manager().initialize(bitpit::log::MODE_SEPARATE, false, nProcs, rank);
     bitpit::log::cout() << log::fileVerbosity(bitpit::log::INFO);
     bitpit::log::cout() << log::disableConsole();
 

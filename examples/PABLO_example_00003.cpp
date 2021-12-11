@@ -170,7 +170,7 @@ int main(int argc, char *argv[])
 #endif
 
 	// Initialize the logger
-	log::manager().initialize(log::SEPARATE, false, nProcs, rank);
+	log::manager().initialize(log::MODE_SEPARATE, false, nProcs, rank);
 	log::cout() << log::fileVerbosity(log::INFO);
 	log::cout() << log::disableConsole();
 

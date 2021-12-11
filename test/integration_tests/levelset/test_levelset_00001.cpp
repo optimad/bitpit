@@ -185,7 +185,7 @@ int main(int argc, char *argv[])
 #endif
 
 	// Initialize the logger
-	bitpit::log::manager().initialize(bitpit::log::COMBINED);
+	bitpit::log::manager().initialize(bitpit::log::MODE_COMBINE);
 
 	// Run the subtests
 	bitpit::log::cout() << "Testing basic levelset features" << std::endl;

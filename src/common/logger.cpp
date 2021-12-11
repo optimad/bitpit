@@ -447,7 +447,7 @@ Logger::Logger(const std::string &name,
     : std::ios(nullptr), std::ostream(&m_buffer),
     m_name(name), m_nProcessors(nProcessors), m_rank(rank), m_buffer(256),
     m_indentation(0), m_context(""),
-    m_defaultSeverity(log::INFO), m_defaultVisibility(log::MASTER),
+    m_defaultSeverity(log::INFO), m_defaultVisibility(log::VISIBILITY_MASTER),
     m_consoleDisabledThreshold(log::NOTSET), m_consoleVerbosityThreshold(log::INFO),
     m_fileDisabledThreshold(log::NOTSET), m_fileVerbosityThreshold(log::INFO)
 {
@@ -770,7 +770,7 @@ void Logger::setConsoleEnabled(log::Level severity, log::Visibility visibility)
     bool isConsoleEnabled = true;
     if (severity <= m_consoleDisabledThreshold) {
         isConsoleEnabled = false;
-    } else if (visibility == log::MASTER && (m_rank != 0)) {
+    } else if (visibility == log::VISIBILITY_MASTER && (m_rank != 0)) {
         isConsoleEnabled = false;
     } else {
         isConsoleEnabled = (severity >= m_consoleVerbosityThreshold);
@@ -864,7 +864,7 @@ void Logger::setFileEnabled(log::Level severity, log::Visibility visibility)
     bool isFileEnabled = true;
     if (severity <= m_fileDisabledThreshold) {
         isFileEnabled = false;
-    } else if (visibility == log::MASTER && (m_rank != 0)) {
+    } else if (visibility == log::VISIBILITY_MASTER && (m_rank != 0)) {
         isFileEnabled = false;
     } else {
         isFileEnabled = (severity >= m_fileVerbosityThreshold);
@@ -1087,7 +1087,7 @@ std::string LoggerManager::BITPIT_LOG_DIRECTORY = ".";
 */
 LoggerManager::LoggerManager()
     : m_defaultName(BITPIT_LOG_NAME), m_defaultDirectory(BITPIT_LOG_DIRECTORY),
-    m_mode(log::SEPARATE)
+    m_mode(log::MODE_SEPARATE)
 {
 
 }
@@ -1148,7 +1148,7 @@ Logger & LoggerManager::cout(const std::string &name)
     // The logger has to be created
     if (m_loggers.count(name) == 0) {
         if (!isInitialized()) {
-            setMode(log::SEPARATE);
+            setMode(log::MODE_SEPARATE);
         }
 
         if (name == m_defaultName) {
@@ -1267,7 +1267,7 @@ void LoggerManager::create(const std::string &name, bool reset,
     }
 
     // Create the logger
-    if (m_mode == log::SEPARATE) {
+    if (m_mode == log::MODE_SEPARATE) {
         _create(name, reset, directory, nProcessors, rank);
     } else {
         _create(name, cout(m_defaultName));

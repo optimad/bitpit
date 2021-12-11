@@ -44,8 +44,11 @@ namespace bitpit{
 
 namespace log {
     enum Mode {
-        COMBINED,
-        SEPARATE
+        MODE_UNDEFINED = -1,
+        MODE_SEPARATE = 0,
+        MODE_COMBINE,
+        COMBINED = MODE_COMBINE,
+        SEPARATE = MODE_SEPARATE
     };
 
     enum Level {
@@ -60,8 +63,11 @@ namespace log {
     };
 
     enum Visibility {
-        MASTER = 0,
-        GLOBAL
+        VISIBILITY_NOTSET = -1,
+        VISIBILITY_MASTER = 0,
+        VISIBILITY_GLOBAL,
+        MASTER = VISIBILITY_MASTER,
+        GLOBAL = VISIBILITY_GLOBAL,
     };
 
     typedef Level Severity;
