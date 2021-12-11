@@ -231,23 +231,23 @@ public:
 
     ~LoggerManager();
 
-    Logger & cout(log::Level defualtSeverity = log::Level::NOTSET);
-    Logger & cout(const std::string &name, log::Level defualtSeverity = log::Level::NOTSET);
+    Logger & cout(log::Level defualtSeverity = log::Level::NOTSET, log::Visibility defualtVisibility = log::VISIBILITY_NOTSET);
+    Logger & cout(const std::string &name, log::Level defualtSeverity = log::Level::NOTSET, log::Visibility defualtVisibility = log::VISIBILITY_NOTSET);
 
-    Logger & critical();
-    Logger & critical(const std::string &name);
+    Logger & critical(log::Visibility visibility = log::VISIBILITY_NOTSET);
+    Logger & critical(const std::string &name,log::Visibility visibility = log::VISIBILITY_NOTSET);
 
-    Logger & error();
-    Logger & error(const std::string &name);
+    Logger & error(log::Visibility visibility = log::VISIBILITY_NOTSET);
+    Logger & error(const std::string &name, log::Visibility visibility = log::VISIBILITY_NOTSET);
 
-    Logger & warning();
-    Logger & warning(const std::string &name);
+    Logger & warning(log::Visibility visibility = log::VISIBILITY_NOTSET);
+    Logger & warning(const std::string &name, log::Visibility visibility = log::VISIBILITY_NOTSET);
 
-    Logger & info();
-    Logger & info(const std::string &name);
+    Logger & info(log::Visibility visibility = log::VISIBILITY_NOTSET);
+    Logger & info(const std::string &name, log::Visibility visibility = log::VISIBILITY_NOTSET);
 
-    Logger & debug();
-    Logger & debug(const std::string &name);
+    Logger & debug(log::Visibility visibility = log::VISIBILITY_NOTSET);
+    Logger & debug(const std::string &name, log::Visibility visibility = log::VISIBILITY_NOTSET);
 
     void initialize(log::Mode mode, bool reset,
                     int nProcessors, int rank);
@@ -315,23 +315,23 @@ namespace log {
     // Generic global functions
     LoggerManager & manager();
 
-    Logger & cout(log::Level defualtSeverity = log::Level::NOTSET);
-    Logger & cout(const std::string &name, log::Level defualtSeverity = log::Level::NOTSET);
+    Logger & cout(log::Level defualtSeverity = log::Level::NOTSET, log::Visibility defualtVisibility = log::VISIBILITY_NOTSET);
+    Logger & cout(const std::string &name, log::Level defualtSeverity = log::Level::NOTSET, log::Visibility defualtVisibility = log::VISIBILITY_NOTSET);
 
-    Logger & critical();
-    Logger & critical(const std::string &name);
+    Logger & critical(log::Visibility visibility = log::VISIBILITY_NOTSET);
+    Logger & critical(const std::string &name, log::Visibility visibility = log::VISIBILITY_NOTSET);
 
-    Logger & error();
-    Logger & error(const std::string &name);
+    Logger & error(log::Visibility visibility = log::VISIBILITY_NOTSET);
+    Logger & error(const std::string &name, log::Visibility visibility = log::VISIBILITY_NOTSET);
 
-    Logger & warning();
-    Logger & warning(const std::string &name);
+    Logger & warning(log::Visibility visibility = log::VISIBILITY_NOTSET);
+    Logger & warning(const std::string &name, log::Visibility visibility = log::VISIBILITY_NOTSET);
 
-    Logger & info();
-    Logger & info(const std::string &name);
+    Logger & info(log::Visibility visibility = log::VISIBILITY_NOTSET);
+    Logger & info(const std::string &name, log::Visibility visibility = log::VISIBILITY_NOTSET);
 
-    Logger & debug();
-    Logger & debug(const std::string &name);
+    Logger & debug(log::Visibility visibility = log::VISIBILITY_NOTSET);
+    Logger & debug(const std::string &name, log::Visibility visibility = log::VISIBILITY_NOTSET);
 
     // Manipulators global functions
 

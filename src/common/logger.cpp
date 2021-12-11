@@ -1132,14 +1132,18 @@ LoggerManager & LoggerManager::manager()
     The default severity of the messages will be set to the specified level,
     if no default severity is specified, the default sevirity will remain
     unaltered.
+
+    The default visibility of the messages will be set to the specified level,
+    if no default visibility is specified, the default visibility will remain
     unaltered.
 
     \param defaultSeverity is the default severity of the messages.
+    \param defaultVisibility is the default visibility of the messages
     \result An instance of the default specified logger.
 */
-Logger & LoggerManager::cout(log::Level defaultSeverity)
+Logger & LoggerManager::cout(log::Level defaultSeverity, log::Visibility defaultVisibility)
 {
-    return cout(m_defaultName, defaultSeverity);
+    return cout(m_defaultName, defaultSeverity, defaultVisibility);
 }
 
 /*!
@@ -1151,13 +1155,17 @@ Logger & LoggerManager::cout(log::Level defaultSeverity)
     The default severity of the messages will be set to the specified level,
     if no default severity is specified, the default sevirity will remain
     unaltered.
+
+    The default visibility of the messages will be set to the specified level,
+    if no default visibility is specified, the default visibility will remain
     unaltered.
 
     \param name is the name of the logger
     \param defaultSeverity is the default severity of the messages.
+    \param defaultVisibility is the default visibility of the messages
     \result An instance of the specified logger.
 */
-Logger & LoggerManager::cout(const std::string &name, log::Level defaultSeverity)
+Logger & LoggerManager::cout(const std::string &name, log::Level defaultSeverity, log::Visibility defaultVisibility)
 {
     // Get the logger
     if (m_loggers.count(name) == 0) {
@@ -1179,6 +1187,10 @@ Logger & LoggerManager::cout(const std::string &name, log::Level defaultSeverity
         logger.setDefaultSeverity(defaultSeverity);
     }
 
+    if (defaultVisibility != log::VISIBILITY_NOTSET) {
+        logger.setDefaultVisibility(defaultVisibility);
+    }
+
     // Return the logger
     return logger;
 }
@@ -1188,11 +1200,16 @@ Logger & LoggerManager::cout(const std::string &name, log::Level defaultSeverity
 
     The default severity of the messages will be set to the CRITICAL level.
 
+    The default visibility of the messages will be set to the specified level,
+    if no default visibility is specified, the default visibility will remain
+    unaltered.
+
+    \param defaultVisibility is the default visibility of the messages
     \result An instance of the default specified logger.
 */
-Logger & LoggerManager::critical()
+Logger & LoggerManager::critical(log::Visibility defaultVisibility)
 {
-    return critical(m_defaultName);
+    return critical(m_defaultName, defaultVisibility);
 }
 
 /*!
@@ -1203,12 +1220,17 @@ Logger & LoggerManager::critical()
 
     The default severity of the messages will be set to the CRITICAL level.
 
+    The default visibility of the messages will be set to the specified level,
+    if no default visibility is specified, the default visibility will remain
+    unaltered.
+
     \param name is the name of the logger
+    \param defaultVisibility is the default visibility of the messages
     \result An instance of the specified logger.
 */
-Logger & LoggerManager::critical(const std::string &name)
+Logger & LoggerManager::critical(const std::string &name, log::Visibility defaultVisibility)
 {
-    return cout(name, log::Level::CRITICAL);
+    return cout(name, log::Level::CRITICAL, defaultVisibility);
 }
 
 /*!
@@ -1216,11 +1238,16 @@ Logger & LoggerManager::critical(const std::string &name)
 
     The default severity of the messages will be set to the ERROR level.
 
+    The default visibility of the messages will be set to the specified level,
+    if no default visibility is specified, the default visibility will remain
+    unaltered.
+
+    \param defaultVisibility is the default visibility of the messages
     \result An instance of the default specified logger.
 */
-Logger & LoggerManager::error()
+Logger & LoggerManager::error(log::Visibility defaultVisibility)
 {
-    return error(m_defaultName);
+    return error(m_defaultName, defaultVisibility);
 }
 
 /*!
@@ -1231,12 +1258,17 @@ Logger & LoggerManager::error()
 
     The default severity of the messages will be set to the ERROR level.
 
+    The default visibility of the messages will be set to the specified level,
+    if no default visibility is specified, the default visibility will remain
+    unaltered.
+
     \param name is the name of the logger
+    \param defaultVisibility is the default visibility of the messages
     \result An instance of the specified logger.
 */
-Logger & LoggerManager::error(const std::string &name)
+Logger & LoggerManager::error(const std::string &name, log::Visibility defaultVisibility)
 {
-    return cout(name, log::Level::ERROR);
+    return cout(name, log::Level::ERROR, defaultVisibility);
 }
 
 /*!
@@ -1244,11 +1276,16 @@ Logger & LoggerManager::error(const std::string &name)
 
     The default severity of the messages will be set to the WARNING level.
 
+    The default visibility of the messages will be set to the specified level,
+    if no default visibility is specified, the default visibility will remain
+    unaltered.
+
+    \param defaultVisibility is the default visibility of the messages
     \result An instance of the default specified logger.
 */
-Logger & LoggerManager::warning()
+Logger & LoggerManager::warning(log::Visibility defaultVisibility)
 {
-    return warning(m_defaultName);
+    return warning(m_defaultName, defaultVisibility);
 }
 
 /*!
@@ -1259,12 +1296,17 @@ Logger & LoggerManager::warning()
 
     The default severity of the messages will be set to the WARNING level.
 
+    The default visibility of the messages will be set to the specified level,
+    if no default visibility is specified, the default visibility will remain
+    unaltered.
+
     \param name is the name of the logger
+    \param defaultVisibility is the default visibility of the messages
     \result An instance of the specified logger.
 */
-Logger & LoggerManager::warning(const std::string &name)
+Logger & LoggerManager::warning(const std::string &name, log::Visibility defaultVisibility)
 {
-    return cout(name, log::Level::WARNING);
+    return cout(name, log::Level::WARNING, defaultVisibility);
 }
 
 /*!
@@ -1272,11 +1314,16 @@ Logger & LoggerManager::warning(const std::string &name)
 
     The default severity of the messages will be set to the INFO level.
 
+    The default visibility of the messages will be set to the specified level,
+    if no default visibility is specified, the default visibility will remain
+    unaltered.
+
+    \param defaultVisibility is the default visibility of the messages
     \result An instance of the default specified logger.
 */
-Logger & LoggerManager::info()
+Logger & LoggerManager::info(log::Visibility defaultVisibility)
 {
-    return info(m_defaultName);
+    return info(m_defaultName, defaultVisibility);
 }
 
 /*!
@@ -1287,12 +1334,17 @@ Logger & LoggerManager::info()
 
     The default severity of the messages will be set to the INFO level.
 
+    The default visibility of the messages will be set to the specified level,
+    if no default visibility is specified, the default visibility will remain
+    unaltered.
+
     \param name is the name of the logger
+    \param defaultVisibility is the default visibility of the messages
     \result An instance of the specified logger.
 */
-Logger & LoggerManager::info(const std::string &name)
+Logger & LoggerManager::info(const std::string &name, log::Visibility defaultVisibility)
 {
-    return cout(name, log::Level::INFO);
+    return cout(name, log::Level::INFO, defaultVisibility);
 }
 
 /*!
@@ -1300,11 +1352,16 @@ Logger & LoggerManager::info(const std::string &name)
 
     The default severity of the messages will be set to the DEBUG level.
 
+    The default visibility of the messages will be set to the specified level,
+    if no default visibility is specified, the default visibility will remain
+    unaltered.
+
+    \param defaultVisibility is the default visibility of the messages
     \result An instance of the default specified logger.
 */
-Logger & LoggerManager::debug()
+Logger & LoggerManager::debug(log::Visibility defaultVisibility)
 {
-    return debug(m_defaultName);
+    return debug(m_defaultName, defaultVisibility);
 }
 
 /*!
@@ -1315,12 +1372,17 @@ Logger & LoggerManager::debug()
 
     The default severity of the messages will be set to the DEBUG level.
 
+    The default visibility of the messages will be set to the specified level,
+    if no default visibility is specified, the default visibility will remain
+    unaltered.
+
     \param name is the name of the logger
+    \param defaultVisibility is the default visibility of the messages
     \result An instance of the specified logger.
 */
-Logger & LoggerManager::debug(const std::string &name)
+Logger & LoggerManager::debug(const std::string &name, log::Visibility defaultVisibility)
 {
-    return cout(name, log::Level::DEBUG);
+    return cout(name, log::Level::DEBUG, defaultVisibility);
 }
 
 /*!
@@ -1756,12 +1818,16 @@ namespace log {
         level, if no default severity is specified, the default sevirity
         will remain unaltered.
 
+        The default visibility of the messages will be set to the specified
+        level, if no default visibility is specified, the default visibility
+        will remain unaltered.
+
         \param defaultSeverity is the default severity of the messages.
         \result An instance of the default logger.
     */
-    Logger & cout(log::Level defaultSeverity)
+    Logger & cout(log::Level defaultSeverity, log::Visibility defaultVisibility)
     {
-        return manager().cout(defaultSeverity);
+        return manager().cout(defaultSeverity, defaultVisibility);
     }
 
     /*!
@@ -1771,13 +1837,18 @@ namespace log {
         level, if no default severity is specified, the default sevirity
         will remain unaltered.
 
+        The default visibility of the messages will be set to the specified
+        level, if no default visibility is specified, the default visibility
+        will remain unaltered.
+
         \param name is the name of the logger
         \param defaultSeverity is the default severity of the messages.
+        \param defaultVisibility is the default visibility of the messages
         \result An instance of the specified logger.
     */
-    Logger & cout(const std::string &name, log::Level defaultSeverity)
+    Logger & cout(const std::string &name, log::Level defaultSeverity, log::Visibility defaultVisibility)
     {
-        return manager().cout(name, defaultSeverity);
+        return manager().cout(name, defaultSeverity, defaultVisibility);
     }
 
     /*!
@@ -1785,11 +1856,15 @@ namespace log {
 
         The default severity of the messages will be set to the CRITICAL level.
 
+        The default visibility of the messages will be set to the specified
+        level, if no default visibility is specified, the default visibility
+        will remain unaltered.
+
         \result An instance of the default logger.
     */
-    Logger & critical()
+    Logger & critical(log::Visibility defaultVisibility)
     {
-        return manager().critical();
+        return manager().critical(defaultVisibility);
     }
 
     /*!
@@ -1797,12 +1872,17 @@ namespace log {
 
         The default severity of the messages will be set to the CRITICAL level.
 
+        The default visibility of the messages will be set to the specified
+        level, if no default visibility is specified, the default visibility
+        will remain unaltered.
+
         \param name is the name of the logger
+        \param defaultVisibility is the default visibility of the messages
         \result An instance of the specified logger.
     */
-    Logger & critical(const std::string &name)
+    Logger & critical(const std::string &name, log::Visibility defaultVisibility)
     {
-        return manager().critical(name);
+        return manager().critical(name, defaultVisibility);
     }
 
     /*!
@@ -1810,11 +1890,16 @@ namespace log {
 
         The default severity of the messages will be set to the ERROR level.
 
+        The default visibility of the messages will be set to the specified
+        level, if no default visibility is specified, the default visibility
+        will remain unaltered.
+
+        \param defaultVisibility is the default visibility of the messages
         \result An instance of the default logger.
     */
-    Logger & error()
+    Logger & error(log::Visibility defaultVisibility)
     {
-        return manager().error();
+        return manager().error(defaultVisibility);
     }
 
     /*!
@@ -1822,12 +1907,17 @@ namespace log {
 
         The default severity of the messages will be set to the ERROR level.
 
+        The default visibility of the messages will be set to the specified
+        level, if no default visibility is specified, the default visibility
+        will remain unaltered.
+
         \param name is the name of the logger
+        \param defaultVisibility is the default visibility of the messages
         \result An instance of the specified logger.
     */
-    Logger & error(const std::string &name)
+    Logger & error(const std::string &name, log::Visibility defaultVisibility)
     {
-        return manager().error(name);
+        return manager().error(name, defaultVisibility);
     }
 
     /*!
@@ -1835,11 +1925,16 @@ namespace log {
 
         The default severity of the messages will be set to the WARNING level.
 
+        The default visibility of the messages will be set to the specified
+        level, if no default visibility is specified, the default visibility
+        will remain unaltered.
+
+        \param defaultVisibility is the default visibility of the messages
         \result An instance of the default logger.
     */
-    Logger & warning()
+    Logger & warning(log::Visibility defaultVisibility)
     {
-        return manager().warning();
+        return manager().warning(defaultVisibility);
     }
 
     /*!
@@ -1847,12 +1942,17 @@ namespace log {
 
         The default severity of the messages will be set to the WARNING level.
 
+        The default visibility of the messages will be set to the specified
+        level, if no default visibility is specified, the default visibility
+        will remain unaltered.
+
         \param name is the name of the logger
+        \param defaultVisibility is the default visibility of the messages
         \result An instance of the specified logger.
     */
-    Logger & warning(const std::string &name)
+    Logger & warning(const std::string &name, log::Visibility defaultVisibility)
     {
-        return manager().warning(name);
+        return manager().warning(name, defaultVisibility);
     }
 
     /*!
@@ -1860,11 +1960,16 @@ namespace log {
 
         The default severity of the messages will be set to the INFO level.
 
+        The default visibility of the messages will be set to the specified
+        level, if no default visibility is specified, the default visibility
+        will remain unaltered.
+
+        \param defaultVisibility is the default visibility of the messages
         \result An instance of the default logger.
     */
-    Logger & info()
+    Logger & info(log::Visibility defaultVisibility)
     {
-        return manager().info();
+        return manager().info(defaultVisibility);
     }
 
     /*!
@@ -1872,12 +1977,17 @@ namespace log {
 
         The default severity of the messages will be set to the INFO level.
 
+        The default visibility of the messages will be set to the specified
+        level, if no default visibility is specified, the default visibility
+        will remain unaltered.
+
         \param name is the name of the logger
+        \param defaultVisibility is the default visibility of the messages
         \result An instance of the specified logger.
     */
-    Logger & info(const std::string &name)
+    Logger & info(const std::string &name, log::Visibility defaultVisibility)
     {
-        return manager().info(name);
+        return manager().info(name, defaultVisibility);
     }
 
     /*!
@@ -1885,11 +1995,16 @@ namespace log {
 
         The default severity of the messages will be set to the DEBUG level.
 
+        The default visibility of the messages will be set to the specified
+        level, if no default visibility is specified, the default visibility
+        will remain unaltered.
+
+        \param defaultVisibility is the default visibility of the messages
         \result An instance of the default logger.
     */
-    Logger & debug()
+    Logger & debug(log::Visibility defaultVisibility)
     {
-        return manager().debug();
+        return manager().debug(defaultVisibility);
     }
 
     /*!
@@ -1897,12 +2012,17 @@ namespace log {
 
         The default severity of the messages will be set to the DEBUG level.
 
+        The default visibility of the messages will be set to the specified
+        level, if no default visibility is specified, the default visibility
+        will remain unaltered.
+
         \param name is the name of the logger
+        \param defaultVisibility is the default visibility of the messages
         \result An instance of the specified logger.
     */
-    Logger & debug(const std::string &name)
+    Logger & debug(const std::string &name, log::Visibility defaultVisibility)
     {
-        return manager().debug(name);
+        return manager().debug(name, defaultVisibility);
     }
 
     // Manipulators global functions
