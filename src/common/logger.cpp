@@ -610,6 +610,7 @@ void Logger::disableFile(log::Level level)
 void Logger::setDefaultSeverity(log::Level severity)
 {
     // Set default severity
+    assert(severity != log::Level::NOTSET);
     m_defaultSeverity = severity;
 
     // Set default logger properties
@@ -655,6 +656,7 @@ log::Priority Logger::getPriority()
 void Logger::setDefaultVisibility(log::Visibility visibility)
 {
     // Set default visibility
+    assert(visibility != log::VISIBILITY_NOTSET);
     m_defaultVisibility = visibility;
 
     // Set default logger properties
