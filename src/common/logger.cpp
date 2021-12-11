@@ -53,8 +53,8 @@ namespace bitpit{
 */
 LoggerBuffer::LoggerBuffer(std::size_t bufferSize)
     : m_buffer(bufferSize + 1), m_context(""), m_padding(""),
-    m_consoleEnabled(false), m_consoleTimestampEnabled(false), m_console(&std::cout), m_consolePrefix(""),
-    m_fileEnabled(false), m_fileTimestampEnabled(true), m_file(nullptr), m_filePrefix("")
+      m_consoleEnabled(false), m_consoleTimestampEnabled(false), m_console(&std::cout), m_consolePrefix(""),
+      m_fileEnabled(false), m_fileTimestampEnabled(true), m_file(nullptr), m_filePrefix("")
 {
     // Set the buffer
     char *bufferBegin = &m_buffer.front();
@@ -445,11 +445,11 @@ Logger::Logger(const std::string &name,
                std::ostream *consoleStream, std::ofstream *fileStream,
                int nProcessors, int rank)
     : std::ios(nullptr), std::ostream(&m_buffer),
-    m_name(name), m_nProcessors(nProcessors), m_rank(rank), m_buffer(256),
-    m_indentation(0), m_context(""),
-    m_defaultSeverity(log::INFO), m_defaultVisibility(log::VISIBILITY_MASTER),
-    m_consoleDisabledThreshold(log::NOTSET), m_consoleVerbosityThreshold(log::INFO),
-    m_fileDisabledThreshold(log::NOTSET), m_fileVerbosityThreshold(log::INFO)
+      m_name(name), m_nProcessors(nProcessors), m_rank(rank), m_buffer(256),
+      m_indentation(0), m_context(""),
+      m_defaultSeverity(log::INFO), m_defaultVisibility(log::VISIBILITY_MASTER),
+      m_consoleDisabledThreshold(log::NOTSET), m_consoleVerbosityThreshold(log::INFO),
+      m_fileDisabledThreshold(log::NOTSET), m_fileVerbosityThreshold(log::INFO)
 {
     // Set buffer data
     setConsoleStream(consoleStream);
@@ -1232,7 +1232,7 @@ void LoggerManager::initialize(log::Mode mode, const std::string &name, bool res
     \param rank is the parallel rank in the communicator
 */
 void LoggerManager::create(const std::string &name, bool reset,
-                        int nProcessors, int rank)
+                           int nProcessors, int rank)
 {
     create(name, reset, m_defaultDirectory, nProcessors, rank);
 }
@@ -1247,8 +1247,8 @@ void LoggerManager::create(const std::string &name, bool reset,
     \param rank is the parallel rank in the communicator
 */
 void LoggerManager::create(const std::string &name, bool reset,
-                        const std::string &directory,
-                        int nProcessors, int rank)
+                           const std::string &directory,
+                           int nProcessors, int rank)
 {
     // Its not possible to create a log with the default name nor a log
     // with the same name of an existent logger nor a log with an empty
@@ -1620,7 +1620,7 @@ namespace log {
         \param context is the context of the output
         \result A reference pointing to the logger received in input.
     */
-    Logger& setContext(Logger& logger, const std::string &context)
+    Logger & setContext(Logger &logger, const std::string &context)
     {
         logger.setContext(context);
 
@@ -1647,7 +1647,7 @@ namespace log {
         \param severity is the default severity of the messages
         \result A reference pointing to the logger received in input.
     */
-    Logger& setDefaultSeverity(Logger& logger, const log::Level &severity)
+    Logger & setDefaultSeverity(Logger &logger, const log::Level &severity)
     {
         logger.setDefaultSeverity(severity);
 
@@ -1674,7 +1674,7 @@ namespace log {
         \param priority is the priority of the output
         \result A reference pointing to the logger received in input.
     */
-    Logger& setPriority(Logger& logger, const log::Priority &priority)
+    Logger & setPriority(Logger &logger, const log::Priority &priority)
     {
         logger.setDefaultSeverity(priority);
 
@@ -1701,7 +1701,7 @@ namespace log {
         \param visibility is the default visibility of the messages
         \result A reference pointing to the logger received in input.
     */
-    Logger& setDefaultVisibility(Logger& logger, const log::Visibility &visibility)
+    Logger & setDefaultVisibility(Logger &logger, const log::Visibility &visibility)
     {
         logger.setDefaultVisibility(visibility);
 
@@ -1728,7 +1728,7 @@ namespace log {
         \param visibility is the visibility of the messages
         \result A reference pointing to the logger received in input.
     */
-    Logger& setVisibility(Logger& logger, const log::Visibility &visibility)
+    Logger & setVisibility(Logger &logger, const log::Visibility &visibility)
     {
         logger.setDefaultVisibility(visibility);
 
@@ -1756,7 +1756,7 @@ namespace log {
         \param threshold is the verbosity threshold
         \result A reference pointing to the logger received in input.
     */
-    Logger& setVerbosities(Logger& logger, const log::Level &threshold)
+    Logger & setVerbosities(Logger &logger, const log::Level &threshold)
     {
         logger.setVerbosities(threshold);
 
@@ -1784,7 +1784,7 @@ namespace log {
         \param threshold is the verbosity threshold
         \result A reference pointing to the logger received in input.
     */
-    Logger& setConsoleVerbosity(Logger& logger, const log::Level &threshold)
+    Logger & setConsoleVerbosity(Logger &logger, const log::Level &threshold)
     {
         logger.setConsoleVerbosity(threshold);
 
@@ -1811,7 +1811,7 @@ namespace log {
         \param threshold is the verbosity threshold
         \result A reference pointing to the logger received in input.
     */
-    Logger& setFileVerbosity(Logger& logger, const log::Level &threshold)
+    Logger & setFileVerbosity(Logger &logger, const log::Level &threshold)
     {
         logger.setFileVerbosity(threshold);
 
@@ -1840,7 +1840,7 @@ namespace log {
         \param level is the overriding verbosity level
         \result A reference pointing to the logger received in input.
     */
-    Logger& disable(Logger& logger, const log::Level &level)
+    Logger & disable(Logger &logger, const log::Level &level)
     {
         logger.disable(level);
 
@@ -1871,7 +1871,7 @@ namespace log {
         \param level is the overriding verbosity level
         \result A reference pointing to the logger received in input.
     */
-    Logger& disableConsole(Logger& logger, const log::Level &level)
+    Logger & disableConsole(Logger &logger, const log::Level &level)
     {
         logger.disableConsole(level);
 
@@ -1902,7 +1902,7 @@ namespace log {
         \param level is the overriding verbosity level
         \result A reference pointing to the logger received in input.
     */
-    Logger& disableFile(Logger& logger, const log::Level &level)
+    Logger & disableFile(Logger &logger, const log::Level &level)
     {
         logger.disableFile(level);
 
@@ -1931,7 +1931,7 @@ namespace log {
         \param delta is the relative indentation level
         \result A reference pointing to the logger received in input.
     */
-    Logger& setIndentation(Logger& logger, const int &delta)
+    Logger & setIndentation(Logger &logger, const int &delta)
     {
         logger.setIndentation(delta);
 
