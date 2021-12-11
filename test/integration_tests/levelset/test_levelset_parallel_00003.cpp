@@ -166,8 +166,8 @@ int main(int argc, char *argv[])
     MPI_Comm_size(MPI_COMM_WORLD, &nProcs);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-    bitpit::log::manager().initialize(bitpit::log::COMBINED, true, nProcs, rank);
-    bitpit::log::cout().setDefaultVisibility(bitpit::log::GLOBAL);
+    bitpit::log::manager().initialize(bitpit::log::MODE_COMBINE, true, nProcs, rank);
+    bitpit::log::cout().setDefaultVisibility(bitpit::log::VISIBILITY_GLOBAL);
 
     // Run the subtests
     bitpit::log::cout() << "Testing creation of a levelset from an existing tree" << std::endl;

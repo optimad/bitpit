@@ -40,7 +40,7 @@ int subtest_001()
     std::array<double, 3> minPoint;
     std::array<double, 3> maxPoint;
 
-    log::manager().initialize(log::COMBINED);
+    log::manager().initialize(log::MODE_COMBINE);
     log::cout() << "Testing unstructured patches\n";
 
     log::cout() << "\n\n:: 2D unstructured patch ::\n";
@@ -499,7 +499,7 @@ int main(int argc, char *argv[])
 #endif
 
     // Initialize the logger
-    log::manager().initialize(log::COMBINED);
+    log::manager().initialize(log::MODE_COMBINE);
 
     // Run the subtests
     log::cout() << "Testing basic features of volunstructured patches" << std::endl;

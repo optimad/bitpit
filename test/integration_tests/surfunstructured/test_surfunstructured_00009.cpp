@@ -161,7 +161,7 @@ int main(int argc, char *argv[])
 #endif
 
     // Initialize the logger
-    log::manager().initialize(log::COMBINED);
+    log::manager().initialize(log::MODE_COMBINE);
 
     // Run the subtests
     int status = 0;

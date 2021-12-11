@@ -95,8 +95,8 @@ int main(int argc, char *argv[])
     MPI_Comm_size(MPI_COMM_WORLD, &nProcs);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-    log::manager().initialize(log::COMBINED, true, nProcs, rank);
-    log::cout().setDefaultVisibility(log::GLOBAL);
+    log::manager().initialize(log::MODE_COMBINE, true, nProcs, rank);
+    log::cout().setDefaultVisibility(log::VISIBILITY_GLOBAL);
 
     // Run the subtests
     log::cout() << "Testing parallel octree refinement" << std::endl;

@@ -175,8 +175,8 @@ int main(int argc, char *argv[])
     MPI_Comm_size(MPI_COMM_WORLD, &nProcs);
     MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
 
-    log::manager().initialize(log::COMBINED, true, nProcs, myRank);
-    log::cout().setDefaultVisibility(log::GLOBAL);
+    log::manager().initialize(log::MODE_COMBINE, true, nProcs, myRank);
+    log::cout().setDefaultVisibility(log::VISIBILITY_GLOBAL);
 
     // ====================================================================== //
     // VARIABLES DECLARATION                                                  //

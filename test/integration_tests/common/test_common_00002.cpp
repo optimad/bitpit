@@ -52,7 +52,7 @@ int subtest_001()
 	std::cout << "Testing basic logger fatures" << "\n";
 
 	// Default logger
-	log::manager().initialize(log::SEPARATE, false, nProcessors, rank);
+	log::manager().initialize(log::MODE_SEPARATE, false, nProcessors, rank);
 
 	log::cout() << log::consoleVerbosity(log::INFO);
 	log::cout() << log::fileVerbosity(log::INFO);
