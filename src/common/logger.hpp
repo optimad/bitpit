@@ -309,13 +309,13 @@ namespace log {
     */
     template<typename T>
     struct LoggerManipulator {
-        Logger& (*f) (Logger&, const T &);
+        Logger & (*f) (Logger &, const T &);
         T value;
 
         /*!
             Creates a new logger manipulator
         */
-        LoggerManipulator(Logger& (*ff)(Logger&, const T &), const T & ss)
+        LoggerManipulator(Logger & (*ff)(Logger &, const T &), const T & ss)
             : f(ff), value(ss) {
 
         }
@@ -325,45 +325,45 @@ namespace log {
         Applies a manipulator to a logger.
     */
     template<typename T>
-    Logger& operator<<(Logger& logger, LoggerManipulator<T>&& m)
+    Logger & operator<<(Logger &logger, LoggerManipulator<T>&& m)
     {
         return m.f(logger, m.value);
     }
 
-    Logger& setContext(Logger& logger, const std::string &context);
+    Logger & setContext(Logger &logger, const std::string &context);
     LoggerManipulator<std::string> context(const std::string &context);
 
-    Logger& setDefaultSeverity(Logger& logger, const log::Level &severity);
+    Logger & setDefaultSeverity(Logger &logger, const log::Level &severity);
     LoggerManipulator<log::Level> defaultSeverity(const log::Level &severity);
 
-    BITPIT_DEPRECATED(Logger& setPriority(Logger& logger, const log::Priority &priority));
+    BITPIT_DEPRECATED(Logger & setPriority(Logger &logger, const log::Priority &priority));
     BITPIT_DEPRECATED(LoggerManipulator<log::Level> priority(const log::Priority &priority));
 
-    BITPIT_DEPRECATED(Logger& setVisibility(Logger& logger, const log::Visibility &visibility));
+    BITPIT_DEPRECATED(Logger & setVisibility(Logger &logger, const log::Visibility &visibility));
     BITPIT_DEPRECATED(LoggerManipulator<log::Visibility> visibility(const log::Visibility &visibility));
 
-    Logger& setDefaultVisibility(Logger& logger, const log::Visibility &visibility);
+    Logger & setDefaultVisibility(Logger &logger, const log::Visibility &visibility);
     LoggerManipulator<log::Visibility> defaultVisibility(const log::Visibility &visibility);
 
-    Logger& setVerbosities(Logger& logger, const log::Level &threshold);
+    Logger & setVerbosities(Logger &logger, const log::Level &threshold);
     LoggerManipulator<log::Level> verbosities(const log::Level &threshold);
 
-    Logger& setConsoleVerbosity(Logger& logger, const log::Level &threshold);
+    Logger & setConsoleVerbosity(Logger &logger, const log::Level &threshold);
     LoggerManipulator<log::Level> consoleVerbosity(const log::Level &threshold);
 
-    Logger& setFileVerbosity(Logger& logger, const log::Level &threshold);
+    Logger & setFileVerbosity(Logger &logger, const log::Level &threshold);
     LoggerManipulator<log::Level> fileVerbosity(const log::Level &threshold);
 
-    Logger& disable(Logger& logger, const log::Level &verbosity = log::Level::CRITICAL);
+    Logger & disable(Logger &logger, const log::Level &verbosity = log::Level::CRITICAL);
     LoggerManipulator<log::Level> disable(const log::Level &verbosity = log::Level::CRITICAL);
 
-    Logger& disableConsole(Logger& logger, const log::Level &verbosity = log::Level::CRITICAL);
+    Logger & disableConsole(Logger &logger, const log::Level &verbosity = log::Level::CRITICAL);
     LoggerManipulator<log::Level> disableConsole(const log::Level &verbosity = log::Level::CRITICAL);
 
-    Logger& disableFile(Logger& logger, const log::Level &verbosity = log::Level::CRITICAL);
+    Logger & disableFile(Logger &logger, const log::Level &verbosity = log::Level::CRITICAL);
     LoggerManipulator<log::Level> disableFile(const log::Level &verbosity = log::Level::CRITICAL);
 
-    Logger& setIndentation(Logger& logger, const int &delta);
+    Logger & setIndentation(Logger &logger, const int &delta);
     LoggerManipulator<int> indent(int delta);
 
 }
