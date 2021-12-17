@@ -521,6 +521,57 @@ SystemSolver::SystemSolver(const std::string &prefix, bool transpose, bool debug
 }
 
 /*!
+ * Constructor
+ *
+ * Construct the system by reading the matrix from a file in PETSc native
+ * binary format.
+ */
+#if BITPIT_ENABLE_MPI==1
+/*!
+ * If the number of available processes in the communicator is greater
+ * than one, the system is assumed to be partitioned.
+ *
+ * \param communicator is the MPI communicator
+ */
+#endif
+/*!
+ * \param matrixPath is the path to the matrix file
+ * \param prefix is the prefix string to prepend to all option requests
+ * \param debug if set to true, debug information will be printed
+ */
+#if BITPIT_ENABLE_MPI==1
+SystemSolver::SystemSolver(MPI_Comm communicator, const std::string matrixPath, const std::string &prefix, bool debug)
+#else
+SystemSolver::SystemSolver(const std::string matrixPath, const std::string &prefix, bool debug)
+#endif
+     : SystemSolver("", debug)
+{
+
+#if BITPIT_ENABLE_MPI == 1
+    // Set the communicator
+    setCommunicator(communicator);
+
+    // Detect if the system is partitioned
+    //
+    // If the number of available processes in the communicator is greater
+    // than one, the system is assumed to be partitioned.
+    PetscInt nProcs;
+    MPI_Comm_size(m_communicator, &nProcs);
+
+    m_partitioned = (nProcs > 1);
+#endif
+
+    // Read the matrix
+    matrixRead(matrixPath);
+
+    // Initialize RHS and solution vectors
+    vectorsCreate();
+
+    // The system is now assembled
+    m_assembled = true;
+}
+
+/*!
  * Destructor.
  */
 SystemSolver::~SystemSolver()
@@ -1024,6 +1075,38 @@ void SystemSolver::matrixCreate(const SystemMatrixAssembler &assembler)
 }
 
 /*!
+ * Read the matrix from file
+ *
+ * Reads a matrix file in PETSc native binary format.
+ *
+ * \param matrixPath is the path to the matrix file
+ */
+void SystemSolver::matrixRead(const std::string &matrixPath)
+{
+    // Initialize PETSc viewer
+    PetscViewer viewer;
+#if BITPIT_ENABLE_MPI==1
+    PetscViewerCreate(m_communicator, &viewer);
+#else
+    PetscViewerCreate(PETSC_COMM_SELF, &viewer);
+#endif
+    PetscViewerSetType(viewer, PETSCVIEWERBINARY);
+    PetscViewerFileSetMode(viewer, FILE_MODE_READ);
+    PetscViewerFileSetName(viewer,matrixPath.c_str());
+
+    // Read the matrix
+#if BITPIT_ENABLE_MPI==1
+    MatCreate(m_communicator, &m_A);
+#else
+    MatCreate(PETSC_COMM_SELF, &m_A);
+#endif
+    MatLoad(m_A, viewer);
+
+    // Cleanup
+    PetscViewerDestroy(&viewer);
+}
+
+/*!
  * Fills the matrix.
  *
  * \param assembler is the matrix assembler
@@ -1178,7 +1261,7 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrix
 }
 
 /*!
- * Create RHS and solution vectors.
+ * Create rhs and solution vectors.
  */
 void SystemSolver::vectorsCreate()
 {

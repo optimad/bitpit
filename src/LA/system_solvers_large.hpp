@@ -163,6 +163,11 @@ public:
     SystemSolver(bool transpose, bool debug);
     SystemSolver(const std::string &prefix, bool debug = false);
     SystemSolver(const std::string &prefix, bool transpose, bool debug);
+#if BITPIT_ENABLE_MPI==1
+    SystemSolver(MPI_Comm communicator, const std::string matrixPath, const std::string &prefix, bool debug);
+#else
+    SystemSolver(const std::string matrixFilename, const std::string &prefix, bool debug);
+#endif
 
     virtual ~SystemSolver();
 
@@ -235,6 +240,7 @@ protected:
     KSPStatus m_KSPStatus;
 
     void matrixCreate(const SystemMatrixAssembler &assembler);
+    void matrixRead(const std::string &matrixPath);
     void matrixFill(const SystemMatrixAssembler &assembler);
     void matrixUpdate(long nRows, const long *rows, const SystemMatrixAssembler &assembler);
 
