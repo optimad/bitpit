@@ -142,6 +142,45 @@ PiercedStorageSyncSlave<id_t>::PiercedStorageSyncSlave(const PiercedStorageSyncS
 }
 
 /**
+* Constructor.
+*
+* \param x is another container of the same type (i.e., instantiated with
+* the same template parameters) whose content is moved in this container
+* \param kernel is the kernel that will be set
+* \param syncMode is the synchronization mode that will be used for the storage
+*/
+template<typename id_t>
+PiercedStorageSyncSlave<id_t>::PiercedStorageSyncSlave(PiercedStorageSyncSlave<id_t> &&x)
+    : PiercedStorageSyncSlave<id_t>()
+{
+    // Set kernel
+    KernelType kernelType = x.getKernelType();
+    switch (kernelType) {
+
+    case KERNEL_STATIC:
+    {
+        setStaticKernel(x.m_const_kernel);
+        break;
+    }
+
+    case KERNEL_DYNAMIC:
+    {
+        setDynamicKernel(x.m_kernel, x.getSyncMode());
+        break;
+    }
+
+    default:
+    {
+        break;
+    }
+
+    }
+
+    // Unset kernel of other storage slave
+    x.unsetKernel(true);
+}
+
+/**
 * Destructor
 */
 template<typename id_t>
@@ -415,6 +454,30 @@ PiercedStorage<value_t, id_t>::PiercedStorage(const PiercedStorage<value_t, id_t
 template<typename value_t, typename id_t>
 PiercedStorage<value_t, id_t>::PiercedStorage(const PiercedStorage<value_t, id_t> &x, PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode)
     : PiercedStorageSyncSlave<id_t>(x, kernel, syncMode), m_nFields(x.m_nFields), m_fields(x.m_fields)
+{
+    // Base class construcotr cannot call virtual functions
+    if (this->getKernel()) {
+        _postSetStaticKernel();
+
+        KernelType kernelType = this->getKernelType();
+        if (kernelType == this->KERNEL_DYNAMIC) {
+            _postSetDynamicKernel();
+        }
+    }
+}
+
+/**
+* Constructor.
+*
+* \param x is another container of the same type (i.e., instantiated with
+* the same template parameters) whose content is moved in this container
+* \param kernel is the kernel that will be set
+* \param syncMode is the synchronization mode that will be used for the storage
+*/
+template<typename value_t, typename id_t>
+PiercedStorage<value_t, id_t>::PiercedStorage(PiercedStorage<value_t, id_t> &&x)
+    : PiercedStorageSyncSlave<id_t>(std::move(x)),
+      m_nFields(std::move(x.m_nFields)), m_fields(std::move(x.m_fields))
 {
     // Base class construcotr cannot call virtual functions
     if (this->getKernel()) {
