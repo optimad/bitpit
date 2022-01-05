@@ -118,7 +118,7 @@ protected:
     PiercedStorageSyncSlave(const PiercedStorageSyncSlave<id_t> &x, const PiercedKernel<id_t> *kernel);
     PiercedStorageSyncSlave(const PiercedStorageSyncSlave<id_t> &x, PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode);
     PiercedStorageSyncSlave(const PiercedStorageSyncSlave<id_t> &x);
-    PiercedStorageSyncSlave(PiercedStorageSyncSlave<id_t> &&x) = default;
+    PiercedStorageSyncSlave(PiercedStorageSyncSlave<id_t> &&x);
 
     // Methods for synchronizing the storage
     virtual void _postSetStaticKernel();
@@ -338,7 +338,7 @@ public:
     PiercedStorage(const PiercedStorage<value_t, id_t> &x, const PiercedKernel<id_t> *kernel);
     PiercedStorage(const PiercedStorage<value_t, id_t> &x, PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode);
     PiercedStorage(const PiercedStorage<value_t, id_t> &x);
-    PiercedStorage(PiercedStorage<value_t, id_t> &&x) = default;
+    PiercedStorage(PiercedStorage<value_t, id_t> &&x);
 
     // Methods for accessing container properties
     std::size_t getFieldCount() const;
