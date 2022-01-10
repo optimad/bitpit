@@ -77,6 +77,13 @@ function(configureModule MODULE_NAME)
         set_target_properties(${UPPER_MODULE_NAME}_TARGET_OBJECT PROPERTIES CXX_STANDARD 11)
         set_target_properties(${UPPER_MODULE_NAME}_TARGET_OBJECT PROPERTIES CXX_STANDARD_REQUIRED ON)
         set_target_properties(${UPPER_MODULE_NAME}_TARGET_OBJECT PROPERTIES POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS})
+
+        # MSVC need to have global(static) data exported manually with declspec.
+        # So provide this not public preproc definition valid for the current target library.
+        if(MSVC AND BUILD_SHARED_LIBS)
+            set_target_properties(${UPPER_MODULE_NAME}_TARGET_OBJECT PROPERTIES COMPILE_DEFINITIONS BITPIT_DLLGLOBALDATA_EXPORT)
+        endif()
+
         set_lto_property(${UPPER_MODULE_NAME}_TARGET_OBJECT)
         addModuleIncludeDirectories(${UPPER_MODULE_NAME}_TARGET_OBJECT ${MODULE_NAME})
 

@@ -74,6 +74,17 @@
 #include <bitset>
 #include <algorithm>
 
+#if defined(_MSC_VER)
+    #if defined(BITPIT_DLLGLOBALDATA_EXPORT)
+        #define BITPIT_API  __declspec(dllexport)
+    #else 
+        #define BITPIT_API  __declspec(dllimport)
+    #endif 
+#else 
+    #define BITPIT_API  
+#endif      
+
+
 namespace bitpit {
 
     // =================================================================================== //
@@ -114,7 +125,7 @@ namespace bitpit {
         // MEMBERS																			   //
         // =================================================================================== //
     public:
-        static const std::string	DEFAULT_LOG_FILE;			/**<Default name of logger file.*/
+        static BITPIT_API const std::string	DEFAULT_LOG_FILE;			/**<Default name of logger file.*/
 
         typedef std::unordered_map<int, std::array<uint32_t, 2>> ExchangeRanges;
 

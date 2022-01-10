@@ -34,9 +34,9 @@ class SurfaceKernel : public PatchKernel {
 
 public:
     // Static constant
-    static const unsigned short SELECT_TRIANGLE;
-    static const unsigned short SELECT_QUAD;
-    static const unsigned short SELECT_ALL;
+    static BITPIT_API const unsigned short SELECT_TRIANGLE;
+    static BITPIT_API const unsigned short SELECT_QUAD;
+    static BITPIT_API const unsigned short SELECT_ALL;
 
     // Types definitions
     typedef double (SurfaceKernel::*eval_f_)(long, int &) const;
