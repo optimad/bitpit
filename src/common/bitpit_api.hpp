@@ -22,30 +22,20 @@
  *
  \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_MODULE_COMMON_HPP__
-#define __BITPIT_MODULE_COMMON_HPP__
-#include "moduleBegin.hpp"
+#ifndef __BITPIT_API_HPP__
+#define __BITPIT_API_HPP__
 
-/*!
- * @defgroup common Common
- * @{
- * @defgroup common_strings String manipulation
- * @defgroup common_binary Binary streams
- * @defgroup common_hashing Hashing
- * @defgroup common_logger Logger
- * @defgroup common_misc Miscellaneous
- * @defgroup common_macro Macros
- * @defgroup common_constants Constants
- * @}
- *
- */
+/* API keyword definition for bitpit lib import/export */
 
-#include "compiler.hpp"
-#include "constants.hpp"
-#include "fileHandler.hpp"
-#include "logger.hpp"
-#include "utils.hpp"
-#include "bitpit_api.hpp"
+#if defined(_MSC_VER)
+    #if defined(BITPIT_DLLGLOBALDATA_EXPORT)
+        #define BITPIT_API  __declspec(dllexport)
+    #else 
+        #define BITPIT_API  __declspec(dllimport)
+    #endif 
+#else 
+    #define BITPIT_API  
+#endif      
 
-#include "moduleEnd.hpp"
+
 #endif

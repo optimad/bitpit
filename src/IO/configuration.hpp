@@ -27,6 +27,7 @@
 #include <memory>
 #include <unordered_map>
 
+#include "bitpit_api.hpp"
 #include "configuration_config.hpp"
 
 namespace bitpit {
@@ -90,7 +91,7 @@ private:
 */
 namespace config {
 
-    extern GlobalConfigParser & root;
+    extern BITPIT_API GlobalConfigParser & root;
 
     void reset();
     void reset(const std::string &name);

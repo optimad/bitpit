@@ -37,9 +37,9 @@ namespace bitpit {
 class ReferenceElementInfo {
 
 public:
-    static const int MAX_ELEM_VERTICES = 8;
-    static const int MAX_ELEM_FACES    = 6;
-    static const int MAX_ELEM_EDGES    = 12;
+    static BITPIT_API const int MAX_ELEM_VERTICES = 8;
+    static BITPIT_API const int MAX_ELEM_FACES    = 6;
+    static BITPIT_API const int MAX_ELEM_EDGES    = 12;
 
     static bool hasInfo(ElementType type);
     static const ReferenceElementInfo & getInfo(ElementType type);
@@ -99,7 +99,7 @@ public:
 
     double evalVolume(const std::array<double, 3> *vertexCoords) const override;
 
-    const static ReferenceTetraInfo info;
+    const static BITPIT_API ReferenceTetraInfo info;
 
 protected:
     ReferenceTetraInfo();
@@ -118,7 +118,7 @@ public:
 
     double evalVolume(const std::array<double, 3> *vertexCoords) const override;
 
-    const static ReferenceVoxelInfo info;
+    const static BITPIT_API ReferenceVoxelInfo info;
 
 protected:
     ReferenceVoxelInfo();
@@ -137,7 +137,7 @@ public:
 
     double evalVolume(const std::array<double, 3> *vertexCoords) const override;
 
-    const static ReferenceHexahedronInfo info;
+    const static BITPIT_API ReferenceHexahedronInfo info;
 
 protected:
     ReferenceHexahedronInfo();
@@ -156,7 +156,7 @@ public:
 
     double evalVolume(const std::array<double, 3> *vertexCoords) const override;
 
-    const static ReferencePyramidInfo info;
+    const static BITPIT_API ReferencePyramidInfo info;
 
 protected:
     ReferencePyramidInfo();
@@ -175,7 +175,7 @@ public:
 
     double evalVolume(const std::array<double, 3> *vertexCoords) const override;
 
-    const static ReferenceWedgeInfo info;
+    const static BITPIT_API ReferenceWedgeInfo info;
 
 protected:
     ReferenceWedgeInfo();
@@ -220,7 +220,7 @@ public:
     void evalPointProjection(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords, std::array<double, 3> *projection, double *distance) const override;
     double evalPointDistance(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords) const override;
 
-    const static ReferenceTriangleInfo info;
+    const static BITPIT_API ReferenceTriangleInfo info;
 
 protected:
     ReferenceTriangleInfo();
@@ -242,7 +242,7 @@ public:
 
     std::array<double, 3> evalNormal(const std::array<double, 3> *vertexCoords, const std::array<double, 3> &point = {{0.5, 0.5, 0.5}}) const override;
 
-    const static ReferencePixelInfo info;
+    const static BITPIT_API ReferencePixelInfo info;
 
 protected:
     ReferencePixelInfo();
@@ -268,7 +268,7 @@ public:
 
     std::array<double, 3> evalNormal(const std::array<double, 3> *vertexCoords, const std::array<double, 3> &point = {{0.5, 0.5, 0.5}}) const override;
 
-    const static ReferenceQuadInfo info;
+    const static BITPIT_API ReferenceQuadInfo info;
 
 protected:
     ReferenceQuadInfo();
@@ -312,7 +312,7 @@ public:
     void evalPointProjection(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords, std::array<double, 3> *projection, double *distance) const override;
     double evalPointDistance(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords) const override;
 
-    const static ReferenceLineInfo info;
+    const static BITPIT_API ReferenceLineInfo info;
 
 protected:
     ReferenceLineInfo();
@@ -348,7 +348,7 @@ public:
     void evalPointProjection(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords, std::array<double, 3> *projection, double *distance) const override;
     double evalPointDistance(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords) const override;
 
-    const static ReferenceVertexInfo info;
+    const static BITPIT_API ReferenceVertexInfo info;
 
 protected:
     ReferenceVertexInfo();

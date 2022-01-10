@@ -29,6 +29,7 @@
 #include <memory>
 
 #include "bitpit_containers.hpp"
+#include "bitpit_api.hpp"
 
 namespace bitpit {
 
@@ -117,7 +118,7 @@ public:
 	void scale(const std::array<double, 3> &scaling, const std::array<double, 3> &center);
 	void scale(double sx, double sy, double sz, double cx, double cy, double cz);
 
-	static const long NULL_ID;
+	static BITPIT_API const long NULL_ID;
 
 	unsigned int getBinarySize() const;
 
