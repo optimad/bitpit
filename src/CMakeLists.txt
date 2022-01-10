@@ -159,9 +159,11 @@ set_target_properties(${BITPIT_LIBRARY} PROPERTIES POSITION_INDEPENDENT_CODE ${P
 set_target_properties(${BITPIT_LIBRARY} PROPERTIES VERSION "${BITPIT_MAJOR_VERSION}.${BITPIT_MINOR_VERSION}.${BITPIT_PATCH_VERSION}"
                                                  SOVERSION "${BITPIT_MAJOR_VERSION}")
 
+
+
 # Windows shared libraries have to be linked against their dependencies.
-if (MINGW AND BITPIT_BUILD_SHARED_LIBS)
-    target_link_libraries(${BITPIT_LIBRARY} ${BITPIT_EXTERNAL_LIBRARIES})
+if ((MSVC OR MINGW) AND BITPIT_BUILD_SHARED_LIBS)
+	target_link_libraries(${BITPIT_LIBRARY} ${BITPIT_EXTERNAL_LIBRARIES})
 endif()
 
 # Install target

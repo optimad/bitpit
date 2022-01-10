@@ -46,6 +46,14 @@ if(${CMAKE_VERSION} VERSION_EQUAL "3.9.0" OR ${CMAKE_VERSION} VERSION_GREATER "3
     set_property(CACHE BITPIT_LTO_STRATEGY PROPERTY STRINGS "Auto" "Enabled" "Disabled")
 endif()
 
+
+if(MSVC)
+    #export bitpit all symbols definition in a *.def file when create the *.dll dynamic library 
+    #and its import lib for target linking (dynamic *.lib). Def file will be needed when an external 
+    #project (library or executable) will need bitpit.
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+endif()
+
 #------------------------------------------------------------------------------------#
 # Internal variables
 #------------------------------------------------------------------------------------#
@@ -413,7 +421,7 @@ if(DEFINED BITPIT_LTO_STRATEGY)
             check_ipo_supported()
             set(ENABLE_LTO TRUE)
         elseif ("${BITPIT_LTO_STRATEGY}" STREQUAL "Auto")
-            if (NOT MSYS AND NOT MINGW)
+            if (NOT MSYS AND NOT MINGW AND NOT MSVC)
                 if (BITPIT_BUILD_SHARED_LIBS)
                     check_ipo_supported(RESULT LTO_SUPPORTED)
                     if (${LTO_SUPPORTED} AND "${CMAKE_BUILD_TYPE}" STREQUAL "Release")
