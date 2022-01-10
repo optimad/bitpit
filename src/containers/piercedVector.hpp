@@ -64,6 +64,28 @@ class PiercedVector : public BasePiercedVector,
                       public PiercedVectorKernel<id_t>,
                       public PiercedVectorStorage<value_t, id_t> {
 
+protected:
+    // According to Visual Studio 2022 documentation (see Compiler Error C2668), "if, in the
+    // same class, you have a regular member function and a templated member function with
+    // the same signature, the templated one must come first. This limitation remains in the
+    // current implementation of Visual C++."
+    using PiercedVectorKernel<id_t>::clear;
+    using PiercedVectorKernel<id_t>::reserve;
+    using PiercedVectorKernel<id_t>::resize;
+    using PiercedVectorKernel<id_t>::sort;
+    using PiercedVectorKernel<id_t>::sortAfter;
+    using PiercedVectorKernel<id_t>::sortBefore;
+    using PiercedVectorKernel<id_t>::squeeze;
+    using PiercedVectorKernel<id_t>::shrinkToFit;
+    using PiercedVectorKernel<id_t>::swap;
+
+    using PiercedVectorStorage<value_t, id_t>::setStaticKernel;
+    using PiercedVectorStorage<value_t, id_t>::setDynamicKernel;
+    using PiercedVectorStorage<value_t, id_t>::unsetKernel;
+    using PiercedVectorStorage<value_t, id_t>::getKernel;
+    using PiercedVectorStorage<value_t, id_t>::getKernelType;
+    using PiercedVectorStorage<value_t, id_t>::getSyncMode;
+
 public:
     // Typedefs
 
@@ -214,24 +236,6 @@ public:
     void restoreKernel(std::istream &stream);
 
     void dumpKernel(std::ostream &stream) const;
-
-protected:
-    using PiercedVectorKernel<id_t>::clear;
-    using PiercedVectorKernel<id_t>::reserve;
-    using PiercedVectorKernel<id_t>::resize;
-    using PiercedVectorKernel<id_t>::sort;
-    using PiercedVectorKernel<id_t>::sortAfter;
-    using PiercedVectorKernel<id_t>::sortBefore;
-    using PiercedVectorKernel<id_t>::squeeze;
-    using PiercedVectorKernel<id_t>::shrinkToFit;
-    using PiercedVectorKernel<id_t>::swap;
-
-    using PiercedVectorStorage<value_t, id_t>::setStaticKernel;
-    using PiercedVectorStorage<value_t, id_t>::setDynamicKernel;
-    using PiercedVectorStorage<value_t, id_t>::unsetKernel;
-    using PiercedVectorStorage<value_t, id_t>::getKernel;
-    using PiercedVectorStorage<value_t, id_t>::getKernelType;
-    using PiercedVectorStorage<value_t, id_t>::getSyncMode;
 
 private:
     typedef typename PiercedVectorKernel<id_t>::FillAction FillAction;
