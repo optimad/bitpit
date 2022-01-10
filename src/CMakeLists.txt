@@ -1,30 +1,30 @@
-#---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 #
-#  bitpit
+# bitpit
 #
-#  Copyright (C) 2015-2021 OPTIMAD engineering Srl
+# Copyright (C) 2015-2021 OPTIMAD engineering Srl
 #
-#  -------------------------------------------------------------------------
-#  License
-#  This file is part of bitpit.
+# -------------------------------------------------------------------------
+# License
+# This file is part of bitpit.
 #
-#  bitpit is free software: you can redistribute it and/or modify it
-#  under the terms of the GNU Lesser General Public License v3 (LGPL)
-#  as published by the Free Software Foundation.
+# bitpit is free software: you can redistribute it and/or modify it
+# under the terms of the GNU Lesser General Public License v3 (LGPL)
+# as published by the Free Software Foundation.
 #
-#  bitpit is distributed in the hope that it will be useful, but WITHOUT
-#  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
-#  License for more details.
+# bitpit is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+# License for more details.
 #
-#  You should have received a copy of the GNU Lesser General Public License
-#  along with bitpit. If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Lesser General Public License
+# along with bitpit. If not, see <http://www.gnu.org/licenses/>.
 #
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 
-#------------------------------------------------------------------------------------#
+# ------------------------------------------------------------------------------------#
 # Functions
-#------------------------------------------------------------------------------------#
+# ------------------------------------------------------------------------------------#
 
 # Add a module to the project
 #
@@ -45,6 +45,7 @@ function(configureModule MODULE_NAME)
 
     # Configure headers
     file(GLOB CONFIGURABLE_HEADER_FILES "*.hpp.in" "*.tpp.in")
+
     foreach(CONFIGURABLE_HEADER_FILE IN LISTS CONFIGURABLE_HEADER_FILES)
         get_filename_component(CONFIGURED_HEADER_FILE ${CONFIGURABLE_HEADER_FILE} NAME)
         string(REGEX REPLACE "\\.[^.]*$" "" CONFIGURED_HEADER_FILE ${CONFIGURED_HEADER_FILE})
@@ -68,7 +69,7 @@ function(configureModule MODULE_NAME)
     #
     # For header-only no target is created, the headers are simply added to the list of bitpit
     # public headers.
-    if (NOT "${${UPPER_MODULE_NAME}_SOURCES}" STREQUAL "")
+    if(NOT "${${UPPER_MODULE_NAME}_SOURCES}" STREQUAL "")
         add_library(${UPPER_MODULE_NAME}_TARGET_OBJECT OBJECT)
         target_sources(${UPPER_MODULE_NAME}_TARGET_OBJECT PRIVATE ${${UPPER_MODULE_NAME}_SOURCES})
 
@@ -83,48 +84,50 @@ function(configureModule MODULE_NAME)
         target_compile_definitions(${UPPER_MODULE_NAME}_TARGET_OBJECT PUBLIC ${BITPIT_COMPILE_DEFINITIONS})
 
         target_sources(${BITPIT_LIBRARY} PRIVATE $<TARGET_OBJECTS:${UPPER_MODULE_NAME}_TARGET_OBJECT>)
-    endif ()
+    endif()
 
-    if (NOT "${${UPPER_MODULE_NAME}_HEADERS}" STREQUAL "")
-        if (NOT "${${UPPER_MODULE_NAME}_SOURCES}" STREQUAL "")
+    if(NOT "${${UPPER_MODULE_NAME}_HEADERS}" STREQUAL "")
+        if(NOT "${${UPPER_MODULE_NAME}_SOURCES}" STREQUAL "")
             target_sources(${UPPER_MODULE_NAME}_TARGET_OBJECT PRIVATE ${${UPPER_MODULE_NAME}_HEADERS})
             set_target_properties(${UPPER_MODULE_NAME}_TARGET_OBJECT PROPERTIES PUBLIC_HEADER "${${UPPER_MODULE_NAME}_HEADERS}")
-        endif ()
+        endif()
 
         get_target_property(BITPIT_PUBLIC_HEADERS ${BITPIT_LIBRARY} PUBLIC_HEADER)
-        if (NOT "${BITPIT_PUBLIC_HEADERS}" STREQUAL "" AND NOT "${BITPIT_PUBLIC_HEADERS}" STREQUAL "BITPIT_PUBLIC_HEADERS-NOTFOUND")
+
+        if(NOT "${BITPIT_PUBLIC_HEADERS}" STREQUAL "" AND NOT "${BITPIT_PUBLIC_HEADERS}" STREQUAL "BITPIT_PUBLIC_HEADERS-NOTFOUND")
             set(BITPIT_PUBLIC_HEADERS "${BITPIT_PUBLIC_HEADERS};${${UPPER_MODULE_NAME}_HEADERS}")
-        else ()
+        else()
             set(BITPIT_PUBLIC_HEADERS "${${UPPER_MODULE_NAME}_HEADERS}")
-        endif ()
+        endif()
+
         set_target_properties(${BITPIT_LIBRARY} PROPERTIES PUBLIC_HEADER "${BITPIT_PUBLIC_HEADERS}")
-    endif ()
+    endif()
 
     # Configure source formatting
-    if (CLANG_FORMAT_EXECUTABLE)
+    if(CLANG_FORMAT_EXECUTABLE)
         set(MODULE_CLANG_FORMAT_TARGET "clang-format-${MODULE_NAME}")
         ClangFormatAddTarget("${MODULE_CLANG_FORMAT_TARGET}")
         ClangFormatTargetSources("${MODULE_CLANG_FORMAT_TARGET}" "${${UPPER_MODULE_NAME}_SOURCES}")
         ClangFormatTargetSources("${MODULE_CLANG_FORMAT_TARGET}" "${${UPPER_MODULE_NAME}_HEADERS}")
         add_dependencies(${CLANG_FORMAT_TARGET} "${MODULE_CLANG_FORMAT_TARGET}")
     endif()
-
 endfunction()
 
-#------------------------------------------------------------------------------------#
+# ------------------------------------------------------------------------------------#
 # Subdirectories
-#------------------------------------------------------------------------------------#
+# ------------------------------------------------------------------------------------#
 
 # Modules
 foreach(MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
     isModuleEnabled(${MODULE_NAME} MODULE_ENABLED)
-    if (MODULE_ENABLED)
+
+    if(MODULE_ENABLED)
         add_subdirectory(${MODULE_NAME})
-    endif ()
+    endif()
 endforeach()
 
-#------------------------------------------------------------------------------------#
+# ------------------------------------------------------------------------------------#
 # Targets
-#------------------------------------------------------------------------------------#
+# ------------------------------------------------------------------------------------#
 add_custom_target(library DEPENDS ${BASE_LIBRARY})
 add_custom_target(clean-library COMMAND ${CMAKE_MAKE_PROGRAM} clean WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})

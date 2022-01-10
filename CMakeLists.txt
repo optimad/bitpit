@@ -65,6 +65,13 @@ set_property(CACHE BITPIT_LTO_STRATEGY PROPERTY STRINGS "Auto" "Enabled" "Disabl
 set(BITPIT_VERSION "1.9.0-devel" CACHE INTERNAL "Version number")
 set(BITPIT_INSTALL_CMAKEDIR "${CMAKE_INSTALL_DATAROOTDIR}/${CMAKE_PROJECT_NAME}/cmake" CACHE INTERNAL "Directory in which cmake modules will be installed")
 
+if(MSVC)
+    # export bitpit all symbols definition in a *.def file when create the *.dll dynamic library
+    # and its import lib for target linking (dynamic *.lib). Def file will be needed when an external
+    # project (library or executable) will need bitpit.
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+endif()
+
 # ------------------------------------------------------------------------------------#
 # Functions
 # ------------------------------------------------------------------------------------#
@@ -423,7 +430,7 @@ if(DEFINED BITPIT_LTO_STRATEGY)
             check_ipo_supported()
             set(ENABLE_LTO TRUE)
         elseif("${BITPIT_LTO_STRATEGY}" STREQUAL "Auto")
-            if(NOT MSYS AND NOT MINGW)
+            if(NOT MSYS AND NOT MINGW AND NOT MSVC)
                 if(BUILD_SHARED_LIBS)
                     check_ipo_supported(RESULT LTO_SUPPORTED)
 
@@ -1019,7 +1026,7 @@ foreach(VARIABLE_NAME IN LISTS BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS)
 endforeach()
 
 # Windows shared libraries have to be linked against their dependencies.
-if(MINGW AND BUILD_SHARED_LIBS)
+if((MSVC OR MINGW) AND BUILD_SHARED_LIBS)
     target_link_libraries(${BITPIT_LIBRARY} ${BITPIT_EXTERNAL_LIBRARIES})
 endif()
 
