@@ -5239,7 +5239,7 @@ namespace bitpit {
     void
     ParaTree::initializeGhostHaloAccretions(std::vector<AccretionData> *accretions) {
 
-        const std::size_t FIRST_LAYER = 0;
+        const int FIRST_LAYER = 0;
 
         accretions->reserve(m_bordersPerProc.size());
         for(const auto &bordersPerProcEntry : m_bordersPerProc){
