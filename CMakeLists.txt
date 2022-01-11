@@ -864,11 +864,16 @@ if(MSVC)
         PACKAGE libiconv VERSION 1.14.0.11 CMAKE_PREFIX_PATHS build/native
         PACKAGE zlib_native.redist VERSION 1.2.11 CMAKE_PREFIX_PATHS build/native
         PACKAGE tencent.rapidjson VERSION 1.1.1 CMAKE_PREFIX_PATHS lib/native
-
-        # PACKAGE intelmkl.devel.win-x64 VERSION 2022.0.0.115 CMAKE_PREFIX_PATHS installed/x64-windows
+        PACKAGE intelmkl.devel.win-x64 VERSION 2022.0.0.115 CMAKE_PREFIX_PATHS lib/native;lib/native/win-x64
     )
 
+    # # add C library missing GNU libiconv header
+    include_directories("${NUGET_PACKAGES_DIR}/libiconv/build/native/include")
+
     # #TEMPORARY
+    # # set temporary exception to include intelmkl include dirs
+    set(INTELMKL_INCLUDE_DIRS "${NUGET_PACKAGES_DIR}/intelmkl.devel.win-x64/lib/native/include")
+
     # create ad-hoc CMakeConfig for tencent.rapidjson (they do not provide it in nuget package)
     set(CONFIGCMAKEFILENAME "${NUGET_PACKAGES_DIR}/tencent.rapidjson/lib/native/RapidJSONConfig.cmake")
     file(WRITE ${CONFIGCMAKEFILENAME} "get_filename_component(RAPIDJSON_CMAKE_DIR \"\${CMAKE_CURRENT_LIST_FILE}\" PATH)\n")
@@ -889,82 +894,112 @@ if(MSVC)
     list(APPEND CMAKE_MODULE_PATH "${NUGET_PACKAGES_DIR}/tencent.rapidjson/lib/native/")
 endif()
 
-# # add C library missing GNU libiconv header
-include_directories("${NUGET_PACKAGES_DIR}/libiconv/build/native/include")
+list(FIND EXTERNAL_DEPS "BLAS" _BLAS_index)
 
-# #TEMPORARY
-# create ad-hoc CMakeConfig for tencent.rapidjson (they do not provide it in nuget package)
-set(CONFIGCMAKEFILENAME "${NUGET_PACKAGES_DIR}/tencent.rapidjson/lib/native/RapidJSONConfig.cmake")
-file(WRITE ${CONFIGCMAKEFILENAME} "get_filename_component(RAPIDJSON_CMAKE_DIR \"\${CMAKE_CURRENT_LIST_FILE}\" PATH)\n")
-file(APPEND ${CONFIGCMAKEFILENAME} "set(RAPIDJSON_INCLUDE_DIRS \"\${RAPIDJSON_CMAKE_DIR}/include\")\n")
-file(APPEND ${CONFIGCMAKEFILENAME} "message(STATUS \"RapidJSON found. Headers: \${RAPIDJSON_INCLUDE_DIRS}\")")
+if(${_BLAS_index} GREATER -1)
+    set(BLAS_VENDOR "All" CACHE STRING "If set, checks only the specified vendor. If not set, checks all the possibilities")
+    mark_as_advanced(BLAS_VENDOR)
+    set(BLA_VENDOR "${BLAS_VENDOR}")
 
-set(CONFIGCMAKEFILEVERSIONNAME "${NUGET_PACKAGES_DIR}/tencent.rapidjson/lib/native/RapidJSONConfigVersion.cmake")
-file(WRITE ${CONFIGCMAKEFILEVERSIONNAME} "SET(PACKAGE_VERSION \"1.1.0\")\n\n")
-file(APPEND ${CONFIGCMAKEFILEVERSIONNAME} "IF (PACKAGE_FIND_VERSION VERSION_EQUAL PACKAGE_VERSION)\n")
-file(APPEND ${CONFIGCMAKEFILEVERSIONNAME} "    SET(PACKAGE_VERSION_EXACT \"true\")\n")
-file(APPEND ${CONFIGCMAKEFILEVERSIONNAME} "ENDIF (PACKAGE_FIND_VERSION VERSION_EQUAL PACKAGE_VERSION)\n")
-file(APPEND ${CONFIGCMAKEFILEVERSIONNAME} "IF (NOT PACKAGE_FIND_VERSION VERSION_GREATER PACKAGE_VERSION)\n")
-file(APPEND ${CONFIGCMAKEFILEVERSIONNAME} "    SET(PACKAGE_VERSION_COMPATIBLE \"true\")\n")
-file(APPEND ${CONFIGCMAKEFILEVERSIONNAME} "ELSE (NOT PACKAGE_FIND_VERSION VERSION_GREATER PACKAGE_VERSION)\n")
-file(APPEND ${CONFIGCMAKEFILEVERSIONNAME} "    SET(PACKAGE_VERSION_UNSUITABLE \"true\")\n")
-file(APPEND ${CONFIGCMAKEFILEVERSIONNAME} "ENDIF (NOT PACKAGE_FIND_VERSION VERSION_GREATER PACKAGE_VERSION)")
+    find_package(BLAS REQUIRED)
 
-list(APPEND CMAKE_MODULE_PATH "${NUGET_PACKAGES_DIR}/tencent.rapidjson/lib/native/")
+    list(INSERT BITPIT_EXTERNAL_DEPENDENCIES 0 "BLAS")
+    list(INSERT BITPIT_EXTERNAL_VARIABLES_LIBRARIES 0 "BLAS_LIBRARIES")
+
+    if(MSVC)
+        list(FIND BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS "INTELMKL_INCLUDE_DIRS" _Intelmkl_index)
+
+        if(${_Intelmkl_index} EQUAL -1)
+            list(INSERT BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS 0 "INTELMKL_INCLUDE_DIRS")
+        endif()
+
+        unset(_Intelmkl_index)
+    else()
+        list(INSERT BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS 0 "BLAS_INCLUDE_DIRS")
+    endif()
 endif()
 
-# list(FIND EXTERNAL_DEPS "BLAS" _BLAS_index)
-# if (${_BLAS_index} GREATER -1)
-# set(BLAS_VENDOR "All" CACHE STRING "If set, checks only the specified vendor. If not set, checks all the possibilities")
-# mark_as_advanced(BLAS_VENDOR)
-# set(BLA_VENDOR "${BLAS_VENDOR}")
+unset(_BLAS_index)
 
-# find_package(BLAS REQUIRED)
+list(FIND EXTERNAL_DEPS "CBLAS" _CBLAS_index)
 
-# list (INSERT BITPIT_EXTERNAL_DEPENDENCIES 0 "BLAS")
-# list (INSERT BITPIT_EXTERNAL_VARIABLES_LIBRARIES 0 "BLAS_LIBRARIES")
-# list (INSERT BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS 0 "BLAS_INCLUDE_DIRS")
-# endif()
-# unset(_BLAS_index)
+if(${_CBLAS_index} GREATER -1)
+    list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/external/CBLAS/cmake")
 
-# list(FIND EXTERNAL_DEPS "CBLAS" _CBLAS_index)
-# if (${_CBLAS_index} GREATER -1)
-# list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/external/CBLAS/cmake")
+    find_package(CBLAS REQUIRED)
 
-# find_package(CBLAS REQUIRED)
+    list(INSERT BITPIT_EXTERNAL_DEPENDENCIES 0 "CBLAS")
+    list(INSERT BITPIT_EXTERNAL_VARIABLES_LIBRARIES 0 "CBLAS_LIBRARIES")
 
-# list (INSERT BITPIT_EXTERNAL_DEPENDENCIES 0 "CBLAS")
-# list (INSERT BITPIT_EXTERNAL_VARIABLES_LIBRARIES 0 "CBLAS_LIBRARIES")
-# list (INSERT BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS 0 "CBLAS_INCLUDE_DIRS")
-# endif()
-# unset(_CBLAS_index)
+    if(MSVC)
+        list(FIND BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS "INTELMKL_INCLUDE_DIRS" _Intelmkl_index)
 
-# list(FIND EXTERNAL_DEPS "LAPACK" _LAPACK_index)
-# if (${_LAPACK_index} GREATER -1)
-# find_package(LAPACK REQUIRED)
+        if(${_Intelmkl_index} EQUAL -1)
+            list(INSERT BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS 0 "INTELMKL_INCLUDE_DIRS")
+        endif()
 
-# list (INSERT BITPIT_EXTERNAL_DEPENDENCIES 0 "LAPACK")
-# list (INSERT BITPIT_EXTERNAL_VARIABLES_LIBRARIES 0 "LAPACK_LIBRARIES")
-# list (INSERT BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS 0 "LAPACK_INCLUDE_DIRS")
-# endif()
-# unset(_LAPACK_index)
+        unset(_Intelmkl_index)
+    else()
+        list(INSERT BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS 0 "CBLAS_INCLUDE_DIRS")
+    endif()
+endif()
 
-# list(FIND EXTERNAL_DEPS "LAPACKE" _LAPACKE_index)
-# if (${_LAPACKE_index} GREATER -1)
-# set(LAPACKE_STATIC 0 CACHE BOOL "Require LAPACKE static libraries")
-# mark_as_advanced(LAPACKE_STATIC)
+unset(_CBLAS_index)
 
-# list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/external/LAPACKE/cmake")
+list(FIND EXTERNAL_DEPS "LAPACK" _LAPACK_index)
 
-# find_package(LAPACKE REQUIRED)
+if(${_LAPACK_index} GREATER -1)
+    find_package(LAPACK REQUIRED)
 
-# set(LAPACKE_PRIVATE_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/external/LAPACKE/include")
+    list(INSERT BITPIT_EXTERNAL_DEPENDENCIES 0 "LAPACK")
+    list(INSERT BITPIT_EXTERNAL_VARIABLES_LIBRARIES 0 "LAPACK_LIBRARIES")
 
-# list (INSERT BITPIT_EXTERNAL_DEPENDENCIES 0 "LAPACKE")
-# list (INSERT BITPIT_EXTERNAL_VARIABLES_LIBRARIES 0 "LAPACKE_LIBRARIES")
-# list (INSERT BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS 0 "LAPACKE_PRIVATE_INCLUDE_DIR" "LAPACKE_INCLUDE_DIRS")
-# endif()
-# unset(_LAPACKE_index)
+    if(MSVC)
+        list(FIND BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS "INTELMKL_INCLUDE_DIRS" _Intelmkl_index)
+
+        if(${_Intelmkl_index} EQUAL -1)
+            list(INSERT BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS 0 "INTELMKL_INCLUDE_DIRS")
+        endif()
+
+        unset(_Intelmkl_index)
+    else()
+        list(INSERT BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS 0 "LAPACK_INCLUDE_DIRS")
+    endif()
+endif()
+
+unset(_LAPACK_index)
+
+list(FIND EXTERNAL_DEPS "LAPACKE" _LAPACKE_index)
+
+if(${_LAPACKE_index} GREATER -1)
+    set(LAPACKE_STATIC 0 CACHE BOOL "Require LAPACKE static libraries")
+    mark_as_advanced(LAPACKE_STATIC)
+
+    list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/external/LAPACKE/cmake")
+
+    find_package(LAPACKE REQUIRED)
+
+    set(LAPACKE_PRIVATE_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/external/LAPACKE/include")
+
+    list(INSERT BITPIT_EXTERNAL_DEPENDENCIES 0 "LAPACKE")
+    list(INSERT BITPIT_EXTERNAL_VARIABLES_LIBRARIES 0 "LAPACKE_LIBRARIES")
+    list(INSERT BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS 0 "LAPACKE_PRIVATE_INCLUDE_DIR")
+
+    if(MSVC)
+        list(FIND BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS "INTELMKL_INCLUDE_DIRS" _Intelmkl_index)
+
+        if(${_Intelmkl_index} EQUAL -1)
+            list(INSERT BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS 0 "INTELMKL_INCLUDE_DIRS")
+        endif()
+
+        unset(_Intelmkl_index)
+    else()
+        list(INSERT BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS 0 "LAPACKE_INCLUDE_DIRS")
+    endif()
+endif()
+
+unset(_LAPACKE_index)
+
 list(FIND EXTERNAL_DEPS "LibXml2" _LibXml2_index)
 
 if(${_LibXml2_index} GREATER -1)
