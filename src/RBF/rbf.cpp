@@ -644,7 +644,8 @@ int RBFKernel::solve()
     int lda     = nS;
     int ldb     = nS;
     int info;
-    int ipiv[nS];
+
+    std::vector<int> ipiv(nS);
 
     std::vector<int> activeSet( getActiveSet() );
 
@@ -669,7 +670,7 @@ int RBFKernel::solve()
         }
     }
 
-    info = LAPACKE_dgesv( LAPACK_COL_MAJOR, nS, nrhs, A.data(), lda, ipiv, b.data(), ldb );
+    info = LAPACKE_dgesv( LAPACK_COL_MAJOR, nS, nrhs, A.data(), lda, ipiv.data(), b.data(), ldb );
 
     if( info > 0 ) {
         printf( "The diagonal element of the triangular factor of the linear system matrix \n" );
