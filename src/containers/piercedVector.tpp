@@ -370,7 +370,7 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::pu
 * \result An iterator that points to the the newly inserted element.
 */
 template<typename value_t, typename id_t>
-template<typename... Args, typename std::enable_if<PiercedVectorStorage<value_t, id_t>::template has_initialize<Args...>()>::type *>
+template<typename... Args, typename PiercedStorage<value_t, id_t>::template EnableIfHasInitialize<Args...> * >
 typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::emreclaim(id_t id, Args&&... args)
 {
     // Fill a position
@@ -398,7 +398,7 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::em
 * \result An iterator that points to the newly inserted element.
 */
 template<typename value_t, typename id_t>
-template<typename... Args, typename std::enable_if<PiercedVectorStorage<value_t, id_t>::template has_initialize<Args...>()>::type *>
+template<typename... Args, typename PiercedStorage<value_t, id_t>::template EnableIfHasInitialize<Args...> * >
 typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::emreclaimAfter(const id_t &referenceId, id_t id, Args&&... args)
 {
     // Fill a position
@@ -422,7 +422,7 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::em
 * \param args are the arguments forwarded to construct the new element
 */
 template<typename value_t, typename id_t>
-template<typename... Args, typename std::enable_if<PiercedVectorStorage<value_t, id_t>::template has_initialize<Args...>()>::type *>
+template<typename... Args, typename PiercedStorage<value_t, id_t>::template EnableIfHasInitialize<Args...> * >
 void PiercedVector<value_t, id_t>::emreclaimBack(id_t id, Args&&... args)
 {
     // Fill a position
@@ -450,7 +450,7 @@ void PiercedVector<value_t, id_t>::emreclaimBack(id_t id, Args&&... args)
 * \result An iterator that points to the newly inserted element.
 */
 template<typename value_t, typename id_t>
-template<typename... Args, typename std::enable_if<PiercedVectorStorage<value_t, id_t>::template has_initialize<Args...>()>::type *>
+template<typename... Args, typename PiercedStorage<value_t, id_t>::template EnableIfHasInitialize<Args...> * >
 typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::emreclaimBefore(const id_t &referenceId, id_t id, Args&&... args)
 {
     // Fill a position
@@ -1020,7 +1020,7 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::in
 * synchronizing the action
 */
 template<typename value_t, typename id_t>
-template<typename... Args, typename std::enable_if<PiercedVectorStorage<value_t, id_t>::template has_initialize<Args...>()>::type *>
+template<typename... Args, typename PiercedStorage<value_t, id_t>::template EnableIfHasInitialize<Args...> * >
 typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::emreclaimValue(const FillAction &action, Args&&... args)
 {
     std::size_t pos = action.info[PiercedSyncAction::INFO_POS];

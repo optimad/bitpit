@@ -844,7 +844,7 @@ void PiercedStorage<value_t, id_t>::rawResize(std::size_t n, const value_t &valu
 * \param args are the arguments forwarded to initialize the new element
 */
 template<typename value_t, typename id_t>
-template<typename... Args, typename std::enable_if<PiercedStorage<value_t>::template has_initialize<Args...>()>::type *>
+template<typename... Args, typename PiercedStorage<value_t>::template EnableIfHasInitialize<Args...> * >
 void PiercedStorage<value_t, id_t>::rawInitialize(std::size_t pos, Args&&... args)
 {
     for (std::size_t k = 0; k < m_nFields; ++k) {
@@ -860,7 +860,7 @@ void PiercedStorage<value_t, id_t>::rawInitialize(std::size_t pos, Args&&... arg
 * \param args are the arguments forwarded to initialize the new element
 */
 template<typename value_t, typename id_t>
-template<typename... Args, typename std::enable_if<PiercedStorage<value_t>::template has_initialize<Args...>()>::type *>
+template<typename... Args, typename PiercedStorage<value_t>::template EnableIfHasInitialize<Args...> * >
 void PiercedStorage<value_t, id_t>::rawInitialize(std::size_t pos, std::size_t k, Args&&... args)
 {
     rawAt(pos, k).initialize(std::forward<Args>(args)...);

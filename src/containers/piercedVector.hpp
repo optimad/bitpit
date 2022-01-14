@@ -138,13 +138,13 @@ public:
 
     iterator pushBack(id_t id, const value_t &value);
 
-    template<typename... Args, typename std::enable_if<PiercedVectorStorage<value_t, id_t>::template has_initialize<Args...>()>::type * = nullptr>
+    template<typename... Args, typename PiercedStorage<value_t,id_t>::template EnableIfHasInitialize<Args...> * = nullptr>
     iterator emreclaim(id_t id, Args&&... args);
-    template<typename... Args, typename std::enable_if<PiercedVectorStorage<value_t, id_t>::template has_initialize<Args...>()>::type * = nullptr>
+    template<typename... Args, typename PiercedStorage<value_t,id_t>::template EnableIfHasInitialize<Args...> * = nullptr>
     iterator emreclaimAfter(const id_t &referenceId, id_t id, Args&&... args);
-    template<typename... Args, typename std::enable_if<PiercedVectorStorage<value_t, id_t>::template has_initialize<Args...>()>::type * = nullptr>
+    template<typename... Args, typename PiercedStorage<value_t,id_t>::template EnableIfHasInitialize<Args...> * = nullptr>
     void emreclaimBack(id_t id, Args&&... args);
-    template<typename... Args, typename std::enable_if<PiercedVectorStorage<value_t, id_t>::template has_initialize<Args...>()>::type * = nullptr>
+    template<typename... Args, typename PiercedStorage<value_t,id_t>::template EnableIfHasInitialize<Args...> * = nullptr>
     iterator emreclaimBefore(const id_t &referenceId, id_t id, Args&&... args);
 
     template<typename... Args>
@@ -247,7 +247,7 @@ private:
 
     iterator reclaimValue(const FillAction &action);
     iterator insertValue(const FillAction &action, const value_t &value);
-    template<typename... Args, typename std::enable_if<PiercedVectorStorage<value_t, id_t>::template has_initialize<Args...>()>::type * = nullptr>
+    template<typename... Args, typename PiercedStorage<value_t,id_t>::template EnableIfHasInitialize<Args...> * = nullptr>
     iterator emreclaimValue(const FillAction &action, Args&&... args);
     template<typename... Args>
     iterator emplaceValue(const FillAction &action, Args&&... args);

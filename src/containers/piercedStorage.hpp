@@ -330,6 +330,14 @@ public:
         return check_initialize<value_t, void, Args...>::value;
     }
 
+    /**
+    * Use SFINAE to enable a method only if the storage has the 'initialize' capability.
+    *
+    * This is needed for being compliant with MSVC.
+    */
+    template <typename... Args>
+    using EnableIfHasInitialize = typename std::enable_if<PiercedStorage<value_t, id_t>::template has_initialize<Args...>()>::type;
+
     // Constructors and initialization
     PiercedStorage();
     PiercedStorage(std::size_t nFields);
@@ -445,9 +453,9 @@ protected:
 
     void rawResize(std::size_t n, const value_t &value = value_t());
 
-    template<typename... Args, typename std::enable_if<PiercedStorage<value_t>::template has_initialize<Args...>()>::type * = nullptr>
+    template<typename... Args, typename PiercedStorage<value_t>::template EnableIfHasInitialize<Args...> * = nullptr>
     void rawInitialize(std::size_t pos, Args&&... args);
-    template<typename... Args, typename std::enable_if<PiercedStorage<value_t>::template has_initialize<Args...>()>::type * = nullptr>
+    template<typename... Args, typename PiercedStorage<value_t>::template EnableIfHasInitialize<Args...> * = nullptr>
     void rawInitialize(std::size_t pos, std::size_t k, Args&&... args);
 
     void rawInsert(std::size_t pos, std::size_t n, const value_t &value);
