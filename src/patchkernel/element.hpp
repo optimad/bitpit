@@ -202,11 +202,11 @@ private:
 	static int countPolygonFaces(const long *connectivity);
 	static int countPolyhedronFaces(const long *connectivity);
 
-	long m_id;
+	long m_id; //!< Is the id that identifies the element
 
 	ElementType m_type;
 
-	int m_pid;
+	int m_pid; //!< Is the part id associated with the element
 
 	std::unique_ptr<long[]> m_connect;
 
