@@ -488,9 +488,12 @@ void Element::_initialize(long id, ElementType type, std::unique_ptr<long[]> &&c
 }
 
 /*!
-	Sets the ID of the element.
+	Sets the id that identifies the element.
 
-	\param id the ID of the element
+	This is the id that will be used by the PatchKernel class to identify the element. It's up to
+	the caller to guarantee that the provided id uniquely identifes the element.
+
+	\param id the id that identifies the element
 */
 void Element::setId(long id)
 {
@@ -498,9 +501,11 @@ void Element::setId(long id)
 }
 
 /*!
-	Gets the ID of the element.
+	Gets the id that identifies the element.
 
-	\return The ID of the element
+	This is the id that will be used by the PatchKernel class to identify the element.
+
+	\return The id that identifies the element.
 */
 long Element::getId() const
 {
@@ -549,9 +554,14 @@ ElementType Element::getType() const
 }
 
 /*!
-	Sets the PID associated to the element.
+	Sets the part id associated to the element.
 
-	\param pid is the PID associated to the element.
+	The part id is an arbitrary id that can be associated with the element. The part id value is
+	not used by the Element class nor by the PatchKernel class, its purpose is to provide a way
+	to group elements into categories. For example, part id can be used to associate a boundary
+	condition to a boundary element.
+
+	\param pid is the part id associated to the element.
 */
 void Element::setPID(int pid)
 {
@@ -559,9 +569,14 @@ void Element::setPID(int pid)
 }
 
 /*!
-	Gets the PID associated to the element.
+	Gets the part id associated with the element.
 
-	\result The PID associated to the element.
+	The part id is an arbitrary id that can be associated with the element. The part id value is
+	not used by the Element class nor by the PatchKernel class, its purpose is to provide a way
+	to group elements into categories. For example, part id can be used to associate a boundary
+	condition to a boundary element.
+
+	\result The part id associated with the element.
 */
 int Element::getPID() const
 {
