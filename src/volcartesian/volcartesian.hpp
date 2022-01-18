@@ -169,7 +169,7 @@ private:
 	std::array<double, 3> m_minCoords;
 	std::array<double, 3> m_maxCoords;
 
-	std::array<double, 3> m_directionOrdering;
+	std::array<int, 3> m_directionOrdering;
 
 	std::array<std::vector<double>, 3> m_vertexCoords;
 	std::array<std::vector<double>, 3> m_cellCenters;
