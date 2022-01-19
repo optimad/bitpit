@@ -1047,6 +1047,12 @@ private:
 	void setAddedInterfaceAlterationFlags(long id);
 	void setDeletedInterfaceAlterationFlags(long id);
 
+	void createVertexIndexGenerator();
+
+	void createCellIndexGenerator();
+
+	void createInterfaceIndexGenerator();
+
 	VertexIterator _addInternalVertex(const std::array<double, 3> &coords, long id);
 
 	void _restoreInternalVertex(const VertexIterator &iterator, const std::array<double, 3> &coords);

@@ -1512,15 +1512,29 @@ void PatchKernel::setVertexAutoIndexing(bool enabled)
 	}
 
 	if (enabled) {
+		createVertexIndexGenerator();
+
 		VertexConstIterator beginItr = m_vertices.cbegin();
 		VertexConstIterator endItr   = m_vertices.cend();
-
-		m_vertexIdGenerator = std::unique_ptr<IndexGenerator<long>>(new IndexGenerator<long>());
 		for (VertexConstIterator itr = beginItr; itr != endItr; ++itr) {
 			m_vertexIdGenerator->setAssigned(itr.getId());
 		}
 	} else {
 		m_vertexIdGenerator.reset();
+	}
+}
+
+/*!
+	Create the vertex index generator.
+
+	If the index generator is already created, the existing index generator will be reset.
+*/
+void PatchKernel::createVertexIndexGenerator()
+{
+	if (!m_vertexIdGenerator) {
+		m_vertexIdGenerator = std::unique_ptr<IndexGenerator<long>>(new IndexGenerator<long>());
+	} else {
+		m_vertexIdGenerator->reset();
 	}
 }
 
@@ -2336,15 +2350,29 @@ void PatchKernel::setCellAutoIndexing(bool enabled)
 	}
 
 	if (enabled) {
+		createCellIndexGenerator();
+
 		CellConstIterator beginItr = m_cells.cbegin();
 		CellConstIterator endItr   = m_cells.cend();
-
-		m_cellIdGenerator = std::unique_ptr<IndexGenerator<long>>(new IndexGenerator<long>());
 		for (CellConstIterator itr = beginItr; itr != endItr; ++itr) {
 			m_cellIdGenerator->setAssigned(itr.getId());
 		}
 	} else {
 		m_cellIdGenerator.reset();
+	}
+}
+
+/*!
+	Create the cell index generator.
+
+	If the index generator is already created, the existing index generator will be reset.
+*/
+void PatchKernel::createCellIndexGenerator()
+{
+	if (!m_cellIdGenerator) {
+		m_cellIdGenerator = std::unique_ptr<IndexGenerator<long>>(new IndexGenerator<long>());
+	} else {
+		m_cellIdGenerator->reset();
 	}
 }
 
@@ -3945,10 +3973,10 @@ void PatchKernel::setInterfaceAutoIndexing(bool enabled)
 	}
 
 	if (enabled) {
+		createInterfaceIndexGenerator();
+
 		InterfaceConstIterator beginItr = m_interfaces.cbegin();
 		InterfaceConstIterator endItr   = m_interfaces.cend();
-
-		m_interfaceIdGenerator = std::unique_ptr<IndexGenerator<long>>(new IndexGenerator<long>());
 		for (InterfaceConstIterator itr = beginItr; itr != endItr; ++itr) {
 			m_interfaceIdGenerator->setAssigned(itr.getId());
 		}
@@ -3958,6 +3986,20 @@ void PatchKernel::setInterfaceAutoIndexing(bool enabled)
 		}
 
 		m_interfaceIdGenerator.reset();
+	}
+}
+
+/*!
+	Create the interface index generator.
+
+	If the index generator is already created, the existing index generator will be reset.
+*/
+void PatchKernel::createInterfaceIndexGenerator()
+{
+	if (!m_interfaceIdGenerator) {
+		m_interfaceIdGenerator = std::unique_ptr<IndexGenerator<long>>(new IndexGenerator<long>());
+	} else {
+		m_interfaceIdGenerator->reset();
 	}
 }
 
