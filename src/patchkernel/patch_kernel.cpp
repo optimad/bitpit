@@ -252,17 +252,9 @@ PatchKernel::PatchKernel(const PatchKernel &other)
 #endif
 {
 	// Create index generators
-	if (other.m_vertexIdGenerator) {
-		m_vertexIdGenerator = std::unique_ptr<IndexGenerator<long>>(new IndexGenerator<long>(*(other.m_vertexIdGenerator)));
-	}
-
-	if (other.m_interfaceIdGenerator) {
-		m_interfaceIdGenerator = std::unique_ptr<IndexGenerator<long>>(new IndexGenerator<long>(*(other.m_interfaceIdGenerator)));
-	}
-
-	if (other.m_cellIdGenerator) {
-		m_cellIdGenerator = std::unique_ptr<IndexGenerator<long>>(new IndexGenerator<long>(*(other.m_cellIdGenerator)));
-	}
+	importVertexIndexGenerator(other);
+	importInterfaceIndexGenerator(other);
+	importCellIndexGenerator(other);
 
 	// Register the patch
 	patch::manager().registerPatch(this);
@@ -1539,6 +1531,23 @@ void PatchKernel::createVertexIndexGenerator()
 }
 
 /*!
+	Import the vertex index generator form the specified source patch.
+
+	If the source patch doesn't define an index generator, the intexe generator of the current
+	patch will be deleted.
+
+	\param source is the patch from with the index generator will be imported from
+*/
+void PatchKernel::importVertexIndexGenerator(const PatchKernel &source)
+{
+	if (source.m_vertexIdGenerator) {
+		m_vertexIdGenerator = std::unique_ptr<IndexGenerator<long>>(new IndexGenerator<long>(*(source.m_vertexIdGenerator)));
+	} else {
+		m_vertexIdGenerator.reset();
+	}
+}
+
+/*!
 	Gets the number of vertices in the patch.
 
 	\return The number of vertices in the patch
@@ -2373,6 +2382,23 @@ void PatchKernel::createCellIndexGenerator()
 		m_cellIdGenerator = std::unique_ptr<IndexGenerator<long>>(new IndexGenerator<long>());
 	} else {
 		m_cellIdGenerator->reset();
+	}
+}
+
+/*!
+	Import the cell index generator form the specified source patch.
+
+	If the source patch doesn't define an index generator, the intexe generator of the current
+	patch will be deleted.
+
+	\param source is the patch from with the index generator will be imported from
+*/
+void PatchKernel::importCellIndexGenerator(const PatchKernel &source)
+{
+	if (source.m_cellIdGenerator) {
+		m_cellIdGenerator = std::unique_ptr<IndexGenerator<long>>(new IndexGenerator<long>(*(source.m_cellIdGenerator)));
+	} else {
+		m_cellIdGenerator.reset();
 	}
 }
 
@@ -4000,6 +4026,23 @@ void PatchKernel::createInterfaceIndexGenerator()
 		m_interfaceIdGenerator = std::unique_ptr<IndexGenerator<long>>(new IndexGenerator<long>());
 	} else {
 		m_interfaceIdGenerator->reset();
+	}
+}
+
+/*!
+	Import the interface index generator form the specified source patch.
+
+	If the source patch doesn't define an index generator, the intexe generator of the current
+	patch will be deleted.
+
+	\param source is the patch from with the index generator will be imported from
+*/
+void PatchKernel::importInterfaceIndexGenerator(const PatchKernel &source)
+{
+	if (source.m_interfaceIdGenerator) {
+		m_interfaceIdGenerator = std::unique_ptr<IndexGenerator<long>>(new IndexGenerator<long>(*(source.m_interfaceIdGenerator)));
+	} else {
+		m_interfaceIdGenerator.reset();
 	}
 }
 
