@@ -1517,6 +1517,27 @@ void PatchKernel::setVertexAutoIndexing(bool enabled)
 }
 
 /*!
+	Dump vertex auto indexing.
+
+ *  \param stream is the stream to write to
+*/
+void PatchKernel::dumpVertexAutoIndexing(std::ostream &stream) const
+{
+	m_vertexIdGenerator->dump(stream);
+}
+
+/*!
+	Restores vertex auto indexing.
+
+	\param stream is the stream to read from
+*/
+void PatchKernel::restoreVertexAutoIndexing(std::istream &stream)
+{
+	createVertexIndexGenerator();
+	m_vertexIdGenerator->restore(stream);
+}
+
+/*!
 	Create the vertex index generator.
 
 	If the index generator is already created, the existing index generator will be reset.
@@ -2373,6 +2394,27 @@ void PatchKernel::setCellAutoIndexing(bool enabled)
 	} else {
 		m_cellIdGenerator.reset();
 	}
+}
+
+/*!
+	Dump cell auto indexing.
+
+ *  \param stream is the stream to write to
+*/
+void PatchKernel::dumpCellAutoIndexing(std::ostream &stream) const
+{
+	m_cellIdGenerator->dump(stream);
+}
+
+/*!
+	Restores cell auto indexing.
+
+	\param stream is the stream to read from
+*/
+void PatchKernel::restoreCellAutoIndexing(std::istream &stream)
+{
+	createCellIndexGenerator();
+	m_cellIdGenerator->restore(stream);
 }
 
 /*!
@@ -4017,6 +4059,27 @@ void PatchKernel::setInterfaceAutoIndexing(bool enabled)
 
 		m_interfaceIdGenerator.reset();
 	}
+}
+
+/*!
+	Dump interface auto indexing.
+
+ *  \param stream is the stream to write to
+*/
+void PatchKernel::dumpInterfaceAutoIndexing(std::ostream &stream) const
+{
+	m_interfaceIdGenerator->dump(stream);
+}
+
+/*!
+	Restores interface auto indexing.
+
+	\param stream is the stream to read from
+*/
+void PatchKernel::restoreInterfaceAutoIndexing(std::istream &stream)
+{
+	createInterfaceIndexGenerator();
+	m_interfaceIdGenerator->restore(stream);
 }
 
 /*!
@@ -7941,19 +8004,22 @@ bool PatchKernel::dump(std::ostream &stream) const
 	}
 
 	// Index generators
-	utils::binary::write(stream, (bool) m_vertexIdGenerator);
-	if (m_vertexIdGenerator) {
-		m_vertexIdGenerator->dump(stream);
+	bool hasVertexAutoIndexing = isVertexAutoIndexingEnabled();
+	utils::binary::write(stream, hasVertexAutoIndexing);
+	if (hasVertexAutoIndexing) {
+		dumpVertexAutoIndexing(stream);
 	}
 
-	utils::binary::write(stream, (bool) m_interfaceIdGenerator);
-	if (m_interfaceIdGenerator) {
-		m_interfaceIdGenerator->dump(stream);
+	bool hasInterfaceAutoIndexing = isInterfaceAutoIndexingEnabled();
+	utils::binary::write(stream, hasInterfaceAutoIndexing);
+	if (hasInterfaceAutoIndexing) {
+		dumpInterfaceAutoIndexing(stream);
 	}
 
-	utils::binary::write(stream, (bool) m_cellIdGenerator);
-	if (m_cellIdGenerator) {
-		m_cellIdGenerator->dump(stream);
+	bool hasCellAutoIndexing = isCellAutoIndexingEnabled();
+	utils::binary::write(stream, hasCellAutoIndexing);
+	if (hasCellAutoIndexing) {
+		dumpCellAutoIndexing(stream);
 	}
 
 	// The patch has been dumped successfully
@@ -8049,22 +8115,28 @@ void PatchKernel::restore(std::istream &stream, bool reregister)
 	}
 
 	// Index generators
-	bool hasVertexIdGenerator;
-	utils::binary::read(stream, hasVertexIdGenerator);
-	if (hasVertexIdGenerator) {
-		m_vertexIdGenerator->restore(stream);
+	bool hasVertexAutoIndexing;
+	utils::binary::read(stream, hasVertexAutoIndexing);
+	if (hasVertexAutoIndexing) {
+		restoreVertexAutoIndexing(stream);
+	} else {
+		setVertexAutoIndexing(false);
 	}
 
-	bool hasInterfaceIdGenerator;
-	utils::binary::read(stream, hasInterfaceIdGenerator);
-	if (hasInterfaceIdGenerator) {
-		m_interfaceIdGenerator->restore(stream);
+	bool hasInterfaceAutoIndexing;
+	utils::binary::read(stream, hasInterfaceAutoIndexing);
+	if (hasInterfaceAutoIndexing) {
+		restoreInterfaceAutoIndexing(stream);
+	} else {
+		setInterfaceAutoIndexing(false);
 	}
 
-	bool hasCellIdGenerator;
-	utils::binary::read(stream, hasCellIdGenerator);
-	if (hasCellIdGenerator) {
-		m_cellIdGenerator->restore(stream);
+	bool hasCellAutoIndexing;
+	utils::binary::read(stream, hasCellAutoIndexing);
+	if (hasCellAutoIndexing) {
+		restoreCellAutoIndexing(stream);
+	} else {
+		setCellAutoIndexing(false);
 	}
 }
 

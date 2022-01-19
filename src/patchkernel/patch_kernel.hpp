@@ -1047,12 +1047,18 @@ private:
 	void setAddedInterfaceAlterationFlags(long id);
 	void setDeletedInterfaceAlterationFlags(long id);
 
+	void dumpVertexAutoIndexing(std::ostream &stream) const;
+	void restoreVertexAutoIndexing(std::istream &stream);
 	void createVertexIndexGenerator();
 	void importVertexIndexGenerator(const PatchKernel &source);
 
+	void dumpCellAutoIndexing(std::ostream &stream) const;
+	void restoreCellAutoIndexing(std::istream &stream);
 	void createCellIndexGenerator();
 	void importCellIndexGenerator(const PatchKernel &source);
 
+	void dumpInterfaceAutoIndexing(std::ostream &stream) const;
+	void restoreInterfaceAutoIndexing(std::istream &stream);
 	void createInterfaceIndexGenerator();
 	void importInterfaceIndexGenerator(const PatchKernel &source);
 
