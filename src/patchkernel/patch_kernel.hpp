@@ -1048,10 +1048,13 @@ private:
 	void setDeletedInterfaceAlterationFlags(long id);
 
 	void createVertexIndexGenerator();
+	void importVertexIndexGenerator(const PatchKernel &source);
 
 	void createCellIndexGenerator();
+	void importCellIndexGenerator(const PatchKernel &source);
 
 	void createInterfaceIndexGenerator();
+	void importInterfaceIndexGenerator(const PatchKernel &source);
 
 	VertexIterator _addInternalVertex(const std::array<double, 3> &coords, long id);
 
