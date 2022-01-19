@@ -478,18 +478,18 @@ private:
     void restoreField(std::istream &stream, std::vector<bool>::reference value);
 
     template<typename T = value_t, typename std::enable_if<!PiercedStorage<T, id_t>::has_restore()>::type * = nullptr>
-    void restoreField(std::istream &stream, T &value);
+    void restoreField(std::istream &stream, value_t &value);
 
     template<typename T = value_t, typename std::enable_if<PiercedStorage<T, id_t>::has_restore()>::type * = nullptr>
-    void restoreField(std::istream &stream, T &object);
+    void restoreField(std::istream &stream, value_t &object);
 
     void dumpField(std::ostream &stream, std::vector<bool>::const_reference value) const;
 
     template<typename T = value_t, typename std::enable_if<!PiercedStorage<T, id_t>::has_dump()>::type * = nullptr>
-    void dumpField(std::ostream &stream, const T &value) const;
+    void dumpField(std::ostream &stream, const value_t &value) const;
 
     template<typename T = value_t, typename std::enable_if<PiercedStorage<T, id_t>::has_dump()>::type * = nullptr>
-    void dumpField(std::ostream &stream, const T &object) const;
+    void dumpField(std::ostream &stream, const value_t &object) const;
 
 };
 

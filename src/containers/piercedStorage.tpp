@@ -1665,7 +1665,7 @@ void PiercedStorage<value_t, id_t>::restoreField(std::istream &stream, std::vect
 */
 template<typename value_t, typename id_t>
 template<typename T, typename std::enable_if<!PiercedStorage<T, id_t>::has_restore()>::type *>
-void PiercedStorage<value_t, id_t>::restoreField(std::istream &stream, T &value)
+void PiercedStorage<value_t, id_t>::restoreField(std::istream &stream, value_t &value)
 {
     utils::binary::read(stream, value);
 }
@@ -1679,7 +1679,7 @@ void PiercedStorage<value_t, id_t>::restoreField(std::istream &stream, T &value)
 */
 template<typename value_t, typename id_t>
 template<typename T, typename std::enable_if<PiercedStorage<T, id_t>::has_restore()>::type *>
-void PiercedStorage<value_t, id_t>::restoreField(std::istream &stream, T &object)
+void PiercedStorage<value_t, id_t>::restoreField(std::istream &stream, value_t &object)
 {
     object.restore(stream);
 }
@@ -1723,7 +1723,7 @@ void PiercedStorage<value_t, id_t>::dumpField(std::ostream &stream, std::vector<
 */
 template<typename value_t, typename id_t>
 template<typename T, typename std::enable_if<!PiercedStorage<T, id_t>::has_dump()>::type *>
-void PiercedStorage<value_t, id_t>::dumpField(std::ostream &stream, const T &value) const
+void PiercedStorage<value_t, id_t>::dumpField(std::ostream &stream, const value_t &value) const
 {
     utils::binary::write(stream, value);
 }
@@ -1736,7 +1736,7 @@ void PiercedStorage<value_t, id_t>::dumpField(std::ostream &stream, const T &val
 */
 template<typename value_t, typename id_t>
 template<typename T, typename std::enable_if<PiercedStorage<T, id_t>::has_dump()>::type *>
-void PiercedStorage<value_t, id_t>::dumpField(std::ostream &stream, const T &object) const
+void PiercedStorage<value_t, id_t>::dumpField(std::ostream &stream, const value_t &object) const
 {
     object.dump(stream);
 }
