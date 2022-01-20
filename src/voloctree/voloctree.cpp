@@ -1955,8 +1955,7 @@ void VolOctree::_updateAdjacencies()
 
 	// Face information
 	int nCellFaces = m_cellTypeInfo->nFaces;
-	uint8_t oppositeFace[nCellFaces];
-	m_tree->getOppface(oppositeFace);
+	const uint8_t *oppositeFace = m_tree->getOppface();
 
 	// Count cells with dirty adjacencies
 	long nDirtyAdjacenciesCells = 0;
