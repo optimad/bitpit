@@ -75,7 +75,7 @@ class LevelSetObject : public VTKBaseStreamer, public virtual LevelSetObjectInte
 
     std::size_t                                 m_nReferences;
 
-    std::unordered_set<LevelSetWriteField, utils::hashing::hash<LevelSetWriteField>> m_enabledVTKOutputs;
+    std::unordered_set<LevelSetWriteField, LevelSetWriteFieldHasher> m_enabledVTKOutputs;
 
     void                                        setId(int id);
 

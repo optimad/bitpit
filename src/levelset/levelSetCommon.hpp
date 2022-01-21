@@ -110,6 +110,17 @@ enum class LevelSetStorageType{
     DENSE=1,                        /**< Dense storage, to be used when almost all the domain is inside the narrow band */
 };
 
+/*!
+ * Hasher for the LevelSetWriteField enum.
+ */
+struct LevelSetWriteFieldHasher
+{
+    std::size_t operator()(const LevelSetWriteField &field) const
+    {
+        return static_cast<int>(field);
+    }
+};
+
 }
 
 #endif
