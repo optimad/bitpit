@@ -751,6 +751,12 @@ endif()
 
 set(EXTERNAL_DEPS_PROCESS_LIST "")
 
+if(NOT MSVC)
+    LIST(APPEND EXTERNAL_DEPS_PROCESS_LIST "BoostTest")
+else()
+    message(WARNING "Unit Tests are disabled until compliancy with Visual Studio Boost.Test is verified")
+endif()
+
 foreach(MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
     isModuleEnabled(${MODULE_NAME} MODULE_ENABLED)
 
@@ -1067,25 +1073,26 @@ endif()
 
 unset(_PETSc_index)
 
-# list(FIND EXTERNAL_DEPS "BoostTest" _BoostTest_index)
+list(FIND EXTERNAL_DEPS "BoostTest" _BoostTest_index)
 
-# if(${_BoostTest_index} GREATER -1)
-# set(BOOST_COMPONENTS "")
+if(${_BoostTest_index} GREATER -1)
+    set(BOOST_COMPONENTS "")
 
-# if(${_BoostTest_index} GREATER -1)
-# LIST(APPEND BOOST_COMPONENTS "unit_test_framework")
-# endif()
+    if(${_BoostTest_index} GREATER -1)
+        LIST(APPEND BOOST_COMPONENTS "unit_test_framework")
+    endif()
 
-# string(REPLACE ";" " " BOOST_COMPONENTS_STRING "${BOOST_COMPONENTS}")
+    string(REPLACE ";" " " BOOST_COMPONENTS_STRING "${BOOST_COMPONENTS}")
 
-# FIND_PACKAGE(Boost 1.40 COMPONENTS "${BOOST_COMPONENTS_STRING}" REQUIRED)
+    FIND_PACKAGE(Boost 1.40 COMPONENTS "${BOOST_COMPONENTS_STRING}" REQUIRED)
 
-# list(INSERT BITPIT_EXTERNAL_DEPENDENCIES 0 "Boost")
-# list(INSERT BITPIT_EXTERNAL_VARIABLES_LIBRARIES 0 "Boost_LIBRARIES")
-# list(INSERT BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS 0 "Boost_INCLUDE_DIR")
-# endif()
+    list(INSERT BITPIT_EXTERNAL_DEPENDENCIES 0 "Boost")
+    list(INSERT BITPIT_EXTERNAL_VARIABLES_LIBRARIES 0 "Boost_LIBRARIES")
+    list(INSERT BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS 0 "Boost_INCLUDE_DIR")
+endif()
 
-# unset(_BoostTest_index)
+unset(_BoostTest_index)
+
 list(FIND EXTERNAL_DEPS "METIS" _METIS_index)
 
 if(${_METIS_index} GREATER -1)
