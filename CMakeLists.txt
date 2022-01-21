@@ -718,7 +718,11 @@ endif()
 set(EXTERNAL_DEPS_PROCESS_LIST "")
 
 if(BITPIT_ENABLE_UNIT_TESTS)
-    LIST(APPEND EXTERNAL_DEPS_PROCESS_LIST "BoostTest")
+    if (NOT MSVC)
+        LIST(APPEND EXTERNAL_DEPS_PROCESS_LIST "BoostTest")
+    else()
+        message(WARNING "Unit Tests are disabled until compliancy with Visual Studio Boost.Test is verified")
+    endif()
 endif()
 
 foreach(MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
@@ -818,9 +822,9 @@ if(MSVC)
         PACKAGE zlib_native.redist VERSION 1.2.11 CMAKE_PREFIX_PATHS build/native
         PACKAGE tencent.rapidjson VERSION 1.1.1 CMAKE_PREFIX_PATHS lib/native
         PACKAGE intelmkl.devel.win-x64 VERSION 2022.0.0.115 CMAKE_PREFIX_PATHS lib/native;lib/native/win-x64
-    )
+        )
 
-    ## add C library missing GNU libiconv header
+        ## add C library missing GNU libiconv header
     include_directories("${NUGET_PACKAGES_DIR}/libiconv/build/native/include")
 
     ##TEMPORARY
@@ -995,21 +999,21 @@ if (${_PETSc_index} GREATER -1)
 endif()
 unset(_PETSc_index)
 
-# list(FIND EXTERNAL_DEPS "BoostTest" _BoostTest_index)
-# if (${_BoostTest_index} GREATER -1)
-#     set(BOOST_COMPONENTS "")
-#     if(${_BoostTest_index} GREATER -1)
-#         LIST(APPEND BOOST_COMPONENTS "unit_test_framework")
-#     endif()
-#     string (REPLACE ";" " " BOOST_COMPONENTS_STRING "${BOOST_COMPONENTS}")
+list(FIND EXTERNAL_DEPS "BoostTest" _BoostTest_index)
+if (${_BoostTest_index} GREATER -1)
+    set(BOOST_COMPONENTS "")
+    if(${_BoostTest_index} GREATER -1)
+        LIST(APPEND BOOST_COMPONENTS "unit_test_framework")
+    endif()
+    string (REPLACE ";" " " BOOST_COMPONENTS_STRING "${BOOST_COMPONENTS}")
 
-#     FIND_PACKAGE(Boost 1.40 COMPONENTS "${BOOST_COMPONENTS_STRING}" REQUIRED)
+    FIND_PACKAGE(Boost 1.40 COMPONENTS "${BOOST_COMPONENTS_STRING}" REQUIRED)
 
-#     list (INSERT BITPIT_EXTERNAL_DEPENDENCIES 0 "Boost")
-#     list (INSERT BITPIT_EXTERNAL_VARIABLES_LIBRARIES 0 "Boost_LIBRARIES")
-#     list (INSERT BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS 0 "Boost_INCLUDE_DIR")
-# endif()
-# unset(_BoostTest_index)
+    list (INSERT BITPIT_EXTERNAL_DEPENDENCIES 0 "Boost")
+    list (INSERT BITPIT_EXTERNAL_VARIABLES_LIBRARIES 0 "Boost_LIBRARIES")
+    list (INSERT BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS 0 "Boost_INCLUDE_DIR")
+endif()
+unset(_BoostTest_index)
 
 list(FIND EXTERNAL_DEPS "METIS" _METIS_index)
 if (${_METIS_index} GREATER -1)
