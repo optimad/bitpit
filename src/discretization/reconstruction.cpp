@@ -24,8 +24,11 @@
 
 #include <cassert>
 #include <limits>
-#include <cblas.h>
-
+#if defined(_MSC_VER)
+    #include<mkl_cblas.h> 
+#else    
+    #include <cblas.h>
+#endif
 #include "bitpit_LA.hpp"
 #include "bitpit_operators.hpp"
 
