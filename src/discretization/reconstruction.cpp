@@ -3300,16 +3300,16 @@ void ReconstructionAssembler::computePseudoInverse(int m, int n, double zeroThre
 
     int info;
 
-    LAPACK_dgesvd(&jobU, &jobVT, &m, &n, A, &m, m_sigma.data(), m_U.data(), &m, m_Vt.data(), &k,
-                  m_SVDWorkspace.data(), &workspaceSize, &info);
+    info = LAPACKE_dgesvd_work(LAPACK_COL_MAJOR, jobU, jobVT, m, n, A, m, m_sigma.data(), m_U.data(), m, m_Vt.data(), k,
+                  m_SVDWorkspace.data(), workspaceSize);
 
     workspaceSize = m_SVDWorkspace[0];
     if (workspaceSize > (int) m_SVDWorkspace.size()) {
         m_SVDWorkspace.resize(workspaceSize);
     }
 
-    LAPACK_dgesvd(&jobU, &jobVT, &m, &n, A, &m, m_sigma.data(), m_U.data(), &m, m_Vt.data(), &k,
-                  m_SVDWorkspace.data(), &workspaceSize, &info);
+    info = LAPACKE_dgesvd_work(LAPACK_COL_MAJOR, jobU, jobVT, m, n, A, m, m_sigma.data(), m_U.data(), m, m_Vt.data(), k,
+                  m_SVDWorkspace.data(), workspaceSize);
 
     if (info > 0) {
         log::cout() << "SVD failed in ReconstructionAssembler::computePseudoInverse()" <<std::endl;
