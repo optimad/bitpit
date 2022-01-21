@@ -664,7 +664,7 @@ void * LevelSetStorageManager<kernel_t, kernel_iterator_t>::addStorage(int id, s
         throw std::runtime_error("The manager already contains a storage with the specified id.");
     }
 
-    m_storages.insert({id, std::move(storage)});
+    m_storages.emplace(std::piecewise_construct, std::forward_as_tuple(id), std::forward_as_tuple(std::move(storage)));
 
     return getContainer(id);
 }
