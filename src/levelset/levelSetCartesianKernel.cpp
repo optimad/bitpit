@@ -39,8 +39,7 @@ namespace bitpit {
 /*!
  * Constructor
  */
-LevelSetCartesianKernel::LevelSetCartesianKernel(VolCartesian &patch ): LevelSetKernel( (static_cast<VolumeKernel*>(&patch)) ){
-
+LevelSetCartesianKernel::LevelSetCartesianKernel(VolCartesian &patch ): LevelSetKernel( &patch ){
     clearCellCirclesCache();
     updateCellCirclesCache();
 }
