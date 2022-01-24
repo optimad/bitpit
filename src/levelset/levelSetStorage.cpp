@@ -78,7 +78,8 @@ void LevelSetContainerWrapper::swap(LevelSetContainerWrapper &other) noexcept
  * \ingroup levelset
  * \interface LevelSetExternalPiercedStorageManager
  * \brief Is the template class for defining levelset storages managers
- * whose kernel is an external PiercedKernel.
+ * whose kernel is an external PiercedKernel (where external means that
+ * the kernel is defined outside the manager).
  */
 
 /*!
@@ -244,7 +245,8 @@ void LevelSetExternalPiercedStorageManager::swap(LevelSetExternalPiercedStorageM
  * \ingroup levelset
  * \interface LevelSetInternalPiercedStorageManager
  * \brief Is the template class for defining levelset storages managers
- * whose kernel is an PiercedKernel owned by the manager.
+ * whose kernel is an internal PiercedKernel (where internal means that
+ * the kernel is owned by the manager).
  */
 
 /*!
