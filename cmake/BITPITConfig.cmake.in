@@ -157,6 +157,13 @@ set(_EXTERNAL_DEPENDENCIES "@BITPIT_EXTERNAL_DEPENDENCIES@")
 set(_EXTERNAL_VARIABLES_LIBRARIES "@BITPIT_EXTERNAL_VARIABLES_LIBRARIES@")
 set(_EXTERNAL_VARIABLES_INCLUDE_DIRS "@BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS@")
 
+if(MSVC)
+    # download directly libxml2, rapidjson, mkl blas, mkl lapack and mkl lapacke 
+    # through nuget system and attach it to current VS project
+    include(bitpitNuGet)
+    bitpitNuGet()
+endif()
+
 # Setp up variables needed by external dependencies
 list(FIND _EXTERNAL_DEPENDENCIES "PETSc" _PETSc_index)
 if (${_PETSc_index} GREATER -1)
