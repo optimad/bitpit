@@ -38,8 +38,7 @@ namespace bitpit {
 /*!
  * Constructor
  */
-LevelSetOctreeKernel::LevelSetOctreeKernel(VolOctree & patch ): LevelSetKernel( (static_cast<VolumeKernel*>(&patch)) ){
-
+LevelSetOctreeKernel::LevelSetOctreeKernel(VolOctree & patch ): LevelSetKernel( &patch ){
     clearCellCirclesCache();
     updateCellCirclesCache();
 }
