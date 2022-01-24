@@ -572,6 +572,67 @@ SystemSolver::SystemSolver(const std::string matrixPath, const std::string &pref
 }
 
 /*!
+ * Constructor
+ *
+ * Construct the system by reading the matrix, the solution and the rhs vectors from file in PETSc native
+ * binary format.
+ */
+#if BITPIT_ENABLE_MPI==1
+/*!
+ * If the number of available processes in the communicator is greater
+ * than one, the system is assumed to be partitioned.
+ *
+ * \param communicator is the MPI communicator
+ */
+#endif
+/*!
+ * \param matrixPath is the path to the matrix file
+ * \param prefix is the prefix string to prepend to all option requests
+ * \param debug if set to true, debug information will be printed
+ */
+#if BITPIT_ENABLE_MPI==1
+SystemSolver::SystemSolver(MPI_Comm communicator, const std::string matrixPath, const std::string solutionPath,
+        const std::string rhsPath, const std::string &prefix, bool debug)
+#else
+SystemSolver::SystemSolver(const std::string matrixPath, const std::string solutionPath,
+        const std::string rhsPath, const std::string &prefix, bool debug)
+#endif
+     : SystemSolver("", debug)
+{
+
+#if BITPIT_ENABLE_MPI == 1
+    // Set the communicator
+    setCommunicator(communicator);
+
+    // Detect if the system is partitioned
+    //
+    // If the number of available processes in the communicator is greater
+    // than one, the system is assumed to be partitioned.
+    PetscInt nProcs;
+    MPI_Comm_size(m_communicator, &nProcs);
+
+    m_partitioned = (nProcs > 1);
+#endif
+
+    // Read the matrix
+    if(matrixPath != "") {
+        matrixRead(matrixPath);
+    } else {
+        throw std::runtime_error("Path to matrix is empty. A valid path is mandatory.");
+    }
+
+    // Read/Initialize RHS and solution vectors
+    if (solutionPath == "" || rhsPath == "") {
+        vectorsCreate();
+    } else {
+        vectorsRead(solutionPath, rhsPath);
+    }
+
+    // The system is now assembled
+    m_assembled = true;
+}
+
+/*!
  * Destructor.
  */
 SystemSolver::~SystemSolver()
@@ -1307,6 +1368,29 @@ void SystemSolver::vectorsCreate()
 }
 
 /*!
+ * Read rhs and solution vectors.
+ *
+ * \param[in] solutionPath the path to the solution file in PETSc format
+ * \param[in] rhsPath the path to the solution file in PETSc format
+ * TODO binary ascii choice
+ */
+void SystemSolver::vectorsRead(const std::string &solutionPath, const std::string &rhsPath)
+{
+    // check if path string is empty. Existence of file could be checked
+    if(solutionPath != "") {
+        vectorRead(solutionPath, &m_solution);
+    } else {
+        throw std::runtime_error("Path to solution vector is empty.");
+    }
+
+    if(rhsPath != "") {
+        vectorRead(rhsPath, &m_rhs);
+    } else {
+        throw std::runtime_error("Path to rhs vector is empty.");
+    }
+}
+
+/*!
  * Apply permutations to RHS and solution vectors.
  *
  * \param invert is a flag for inverting the permutation
@@ -1376,6 +1460,38 @@ void SystemSolver::vectorsExport(std::vector<double> *solution)
         (*solution)[i] = raw_solution[i];
     }
     VecRestoreArrayRead(m_solution, &raw_solution);
+}
+
+/*!
+ * Read a PETSc vector from file
+ *
+ * \param[in] vectorPath the path to the vector file in PETSc format
+ * \param[in] vector a pointer to the PETSc Vec where the read vector is stored
+ * TODO allow to choose the type of viewer (only PETSCVIEWERBINARY at the moment)
+ */
+void SystemSolver::vectorRead(const std::string &vectorPath, Vec *vector)
+{
+    // Initialize PETSc viewer
+    PetscViewer viewer;
+#if BITPIT_ENABLE_MPI==1
+    PetscViewerCreate(m_communicator, &viewer);
+#else
+    PetscViewerCreate(PETSC_COMM_SELF, &viewer);
+#endif
+    PetscViewerSetType(viewer, PETSCVIEWERBINARY);
+    PetscViewerFileSetMode(viewer, FILE_MODE_READ);
+    PetscViewerFileSetName(viewer,vectorPath.c_str());
+
+    // Read the matrix
+#if BITPIT_ENABLE_MPI==1
+    VecCreate(m_communicator, vector);
+#else
+    VecCreate(PETSC_COMM_SELF, vector);
+#endif
+    VecLoad(*vector, viewer);
+
+    // Cleanup
+    PetscViewerDestroy(&viewer);
 }
 
 /*!

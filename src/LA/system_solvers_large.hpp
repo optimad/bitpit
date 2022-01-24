@@ -165,10 +165,13 @@ public:
     SystemSolver(const std::string &prefix, bool transpose, bool debug);
 #if BITPIT_ENABLE_MPI==1
     SystemSolver(MPI_Comm communicator, const std::string matrixPath, const std::string &prefix, bool debug);
+    SystemSolver(MPI_Comm communicator, const std::string matrixPath, const std::string solutionPath,
+            const std::string rhsPath, const std::string &prefix, bool debug);
 #else
     SystemSolver(const std::string matrixFilename, const std::string &prefix, bool debug);
+    SystemSolver(const std::string matrixPath, const std::string solutionPath,
+            const std::string rhsPath, const std::string &prefix, bool debug)
 #endif
-
     virtual ~SystemSolver();
 
     void clear();
@@ -245,9 +248,11 @@ protected:
     void matrixUpdate(long nRows, const long *rows, const SystemMatrixAssembler &assembler);
 
     void vectorsCreate();
+    void vectorsRead(const std::string &solutionPath, const std::string &rhsPath);
     void vectorsPermute(bool invert);
     void vectorsFill(const std::vector<double> &rhs, std::vector<double> *solution);
     void vectorsExport(std::vector<double> *solution);
+    void vectorRead(const std::string &vectorPath, Vec *vector);
 
     virtual void preKSPSetupActions();
     virtual void postKSPSetupActions();
