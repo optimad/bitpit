@@ -4483,7 +4483,7 @@ namespace bitpit {
      * \return Size of an octant of input level.
      */
     double
-    ParaTree::levelToSize(uint8_t level) {
+    ParaTree::levelToSize(uint8_t level) const {
         uint32_t size = uint32_t(1)<<(m_treeConstants->maxLevel-level);
         return m_trans.mapSize(size);
     }

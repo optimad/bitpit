@@ -230,7 +230,7 @@ namespace bitpit {
      * \return Size of an octant of input level.
      */
     double
-    PabloUniform::levelToSize(uint8_t level) {
+    PabloUniform::levelToSize(uint8_t level) const {
         double size = ParaTree::levelToSize(level);
         return m_L *size;
     }
