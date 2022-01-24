@@ -546,7 +546,7 @@ namespace bitpit {
         PartitionIntersections evalPartitionIntersections(const uint32_t *schema_A, int rank_A, const uint32_t *schema_B);
 #endif
     public:
-        double		levelToSize(uint8_t level);
+        double		levelToSize(uint8_t level) const;
 
         // =================================================================================== //
         // OTHER INTERSECTION BASED METHODS										     		   //

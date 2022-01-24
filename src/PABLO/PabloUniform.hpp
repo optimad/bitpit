@@ -107,7 +107,7 @@ namespace bitpit {
         double		getL() const;
         void		setL(double L);
         void		setOrigin(const darray3 &origin);
-        double		levelToSize( uint8_t level);
+        double		levelToSize( uint8_t level) const;
 
         // =================================================================================== //
         // INDEX BASED METHODS																   //
