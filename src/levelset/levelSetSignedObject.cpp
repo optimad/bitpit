@@ -199,8 +199,9 @@ void LevelSetSignedObjectInterface::clearSignStorage()
  */
 void LevelSetSignedObjectInterface::dumpSignStorage(std::ostream &stream)
 {
-    // Stored sign
-    if (m_signStorage) {
+    bool hasSignStorage = static_cast<bool>(m_signStorage);
+    utils::binary::write(stream, hasSignStorage);
+    if (hasSignStorage) {
         m_signStorage->dump( stream );
     }
 }
@@ -212,8 +213,10 @@ void LevelSetSignedObjectInterface::dumpSignStorage(std::ostream &stream)
  */
 void LevelSetSignedObjectInterface::restoreSignStorage(std::istream &stream)
 {
-    // Stored sign
-    if (m_signStorage) {
+    bool hasSignStorage;
+    utils::binary::read(stream, hasSignStorage);
+    if (hasSignStorage) {
+        initializeSignStorage();
         m_signStorage->restore( stream );
     }
 }
