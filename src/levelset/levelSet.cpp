@@ -853,6 +853,8 @@ void LevelSet::update( const std::vector<adaption::Info> &adaptionData, const st
         } else if( adaptionInfo.type == adaption::Type::TYPE_PARTITION_RECV){
             partitioningRecvList.insert({{adaptionInfo.rank,adaptionInfo.current}}) ;
             updatePartitioning = true;
+        } else if (adaptionInfo.type == adaption::Type::TYPE_DELETION) {
+            updateNarrowBand = true;
         } else {
             if (!updateNarrowBand) {
                 for (long cellId : adaptionInfo.current) {
