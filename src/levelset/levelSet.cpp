@@ -875,6 +875,11 @@ void LevelSet::update( const std::vector<adaption::Info> &adaptionData, const st
     }
 #endif
 
+    // Early return if no update is needed
+    if (!updateNarrowBand && !updatePartitioning) {
+        return;
+    }
+
 #if BITPIT_ENABLE_MPI
     // Get data communicator for updating partitioning
     std::unique_ptr<DataCommunicator> dataCommunicator;
