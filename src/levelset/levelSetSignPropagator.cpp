@@ -110,8 +110,12 @@ void LevelSetSignPropagator::execute(const std::vector<adaption::Info> &adaption
         return;
     }
 
-    // Initialize stored sign of new cells
-    bool propagationNeeded = false;
+    // Initialize sign propagation
+    //
+    // We need to check if propagation is really needed and initialize stored sign of new cells.
+    // Propagation is needed if the stored sign is marked as dirty or if cells has been modified
+    // by mesh adaption.
+    bool propagationNeeded = storage->isDirty();
     for (const adaption::Info &adaptionInfo : adaptionData) {
         if (adaptionInfo.entity != adaption::Entity::ENTITY_CELL) {
             continue;
