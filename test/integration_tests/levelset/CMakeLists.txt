@@ -38,9 +38,9 @@ list(APPEND TESTS "test_levelset_00005")
 list(APPEND TESTS "test_levelset_00006")
 list(APPEND TESTS "test_levelset_00007")
 if (BITPIT_ENABLE_MPI)
-	list(APPEND TESTS "test_levelset_parallel_00001:3")
-	list(APPEND TESTS "test_levelset_parallel_00002:3")
-	list(APPEND TESTS "test_levelset_parallel_00003:3")
+    list(APPEND TESTS "test_levelset_parallel_00001:3")
+    list(APPEND TESTS "test_levelset_parallel_00002:3")
+    list(APPEND TESTS "test_levelset_parallel_00003:3")
 endif()
 
 # Test extra libraries
@@ -64,13 +64,13 @@ add_custom_command(
 )
 
 if (BITPIT_ENABLE_MPI)
-	add_custom_command(
-		TARGET "integration_test_levelset_parallel_00001" PRE_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/cube.stl" "${CMAKE_CURRENT_BINARY_DIR}/data/cube.stl"
-	)
-	add_custom_command(
-		TARGET "integration_test_levelset_parallel_00002" PRE_BUILD
+    add_custom_command(
+        TARGET "integration_test_levelset_parallel_00001" PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/cube.stl" "${CMAKE_CURRENT_BINARY_DIR}/data/cube.stl"
+    )
+    add_custom_command(
+        TARGET "integration_test_levelset_parallel_00002" PRE_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/naca0012.dgf" "${CMAKE_CURRENT_BINARY_DIR}/data/naca0012.dgf"
         COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/square.dgf" "${CMAKE_CURRENT_BINARY_DIR}/data/square.dgf"
-	)
+    )
 endif ()

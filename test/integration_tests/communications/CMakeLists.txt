@@ -31,8 +31,8 @@ get_filename_component(MODULE_NAME ${CMAKE_CURRENT_LIST_DIR} NAME)
 # List of tests
 set(TESTS "")
 if (BITPIT_ENABLE_MPI)
-	list(APPEND TESTS "test_communications_parallel_00001")
-	list(APPEND TESTS "test_communications_parallel_00002:3")
+    list(APPEND TESTS "test_communications_parallel_00001")
+    list(APPEND TESTS "test_communications_parallel_00002:3")
 endif ()
 
 # Test extra libraries

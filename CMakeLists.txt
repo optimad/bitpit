@@ -61,55 +61,55 @@ include(GetGitRevisionDescription)
 # Functions
 #------------------------------------------------------------------------------------#
 function(getModuleEnableName MODULE_NAME FLAG_NAME)
-	string(TOUPPER ${MODULE_NAME} UPPER_MODULE_NAME)
-	set(${FLAG_NAME} "BITPIT_MODULE_${UPPER_MODULE_NAME}" PARENT_SCOPE)
+    string(TOUPPER ${MODULE_NAME} UPPER_MODULE_NAME)
+    set(${FLAG_NAME} "BITPIT_MODULE_${UPPER_MODULE_NAME}" PARENT_SCOPE)
 endfunction()
 
 function(isModuleEnabled MODULE_NAME ENABLED)
-	getModuleEnableName(${MODULE_NAME} ENABLED_VARIABLE)
-	if (DEFINED ${ENABLED_VARIABLE})
-		set(${ENABLED} ${${ENABLED_VARIABLE}} PARENT_SCOPE)
-	else ()
-		set(${ENABLED} "FALSE" PARENT_SCOPE)
-	endif ()
+    getModuleEnableName(${MODULE_NAME} ENABLED_VARIABLE)
+    if (DEFINED ${ENABLED_VARIABLE})
+        set(${ENABLED} ${${ENABLED_VARIABLE}} PARENT_SCOPE)
+    else ()
+        set(${ENABLED} "FALSE" PARENT_SCOPE)
+    endif ()
 endfunction()
 
 function(areModulesEnabled MODULE_LIST ENABLED)
-	foreach (MODULE_NAME IN LISTS MODULE_LIST)
-		isModuleEnabled(${MODULE_NAME} MODULE_ENABLED)
-		if (NOT MODULE_ENABLED)
-			set(${ENABLED} "FALSE" PARENT_SCOPE)
-			return()
-		endif()
-	endforeach ()
+    foreach (MODULE_NAME IN LISTS MODULE_LIST)
+        isModuleEnabled(${MODULE_NAME} MODULE_ENABLED)
+        if (NOT MODULE_ENABLED)
+            set(${ENABLED} "FALSE" PARENT_SCOPE)
+            return()
+        endif()
+    endforeach ()
 
-	set(${ENABLED} "TRUE" PARENT_SCOPE)
+    set(${ENABLED} "TRUE" PARENT_SCOPE)
 endfunction()
 
 function(enableModule MODULE_NAME ENABLED)
-	set (EXTRA_ARGUMENTS ${ARGN})
-	list(LENGTH EXTRA_ARGUMENTS EXTRA_ARGUMENT_COUNT)
-	if (${EXTRA_ARGUMENT_COUNT} GREATER 0)
-		list(GET EXTRA_ARGUMENTS 0 FORCED)
-		if (FORCED)
-			set(FORCE_FLAG "FORCE")
-		endif()
-	endif ()
+    set (EXTRA_ARGUMENTS ${ARGN})
+    list(LENGTH EXTRA_ARGUMENTS EXTRA_ARGUMENT_COUNT)
+    if (${EXTRA_ARGUMENT_COUNT} GREATER 0)
+        list(GET EXTRA_ARGUMENTS 0 FORCED)
+        if (FORCED)
+            set(FORCE_FLAG "FORCE")
+        endif()
+    endif ()
 
-	if (NOT DEFINED FORCE_FLAG)
-		set(FORCE_FLAG "")
-	endif ()
+    if (NOT DEFINED FORCE_FLAG)
+        set(FORCE_FLAG "")
+    endif ()
 
-	getModuleEnableName(${MODULE_NAME} MODULE_ENABLE_FLAG)
-	set(${MODULE_ENABLE_FLAG} ${ENABLED} CACHE BOOL "Request building ${MODULE_NAME} module" ${FORCE_FLAG})
-	mark_as_advanced(${MODULE_ENABLE_FLAG})
+    getModuleEnableName(${MODULE_NAME} MODULE_ENABLE_FLAG)
+    set(${MODULE_ENABLE_FLAG} ${ENABLED} CACHE BOOL "Request building ${MODULE_NAME} module" ${FORCE_FLAG})
+    mark_as_advanced(${MODULE_ENABLE_FLAG})
 endfunction()
 
 function(hideModule MODULE_NAME)
-	getModuleEnableName(${MODULE_NAME} MODULE_ENABLE_FLAG)
-	if (DEFINED ${MODULE_ENABLE_FLAG})
-		unset(${MODULE_ENABLE_FLAG} CACHE)
-	endif ()
+    getModuleEnableName(${MODULE_NAME} MODULE_ENABLE_FLAG)
+    if (DEFINED ${MODULE_ENABLE_FLAG})
+        unset(${MODULE_ENABLE_FLAG} CACHE)
+    endif ()
 endfunction()
 
 function(addModuleIncludeDirectories MODULE_NAME)
@@ -318,9 +318,9 @@ function(addCoverageAnalysis GENERATE_GCOVR_REPORTS GENERATE_LCOV_REPORTS EXCLUD
         set(LCOV_CASE_NAME  "coverage")
 
         # Find needed executables
-        find_program(GCOV_PATH REQUIRED gcov)
-        find_program(LCOV_PATH REQUIRED NAMES lcov lcov.bat lcov.exe lcov.perl)
-        find_program(GENHTML_PATH REQUIRED NAMES genhtml genhtml.perl genhtml.bat)
+        find_program(GCOV_PATH gcov REQUIRED)
+        find_program(LCOV_PATH NAMES lcov lcov.bat lcov.exe lcov.perl REQUIRED )
+        find_program(GENHTML_PATH NAMES genhtml genhtml.perl genhtml.bat REQUIRED)
         find_program(CPPFILT_PATH NAMES c++filt)
 
         # lcov arguments
@@ -451,14 +451,14 @@ endfunction()
 
 # Set build type variable
 if(NOT CMAKE_BUILD_TYPE)
-	set(SUPPORTED_BUILD_TYPE "Coverage" "Debug" "Release" "RelWithDebInfo" "MinSizeRel" "GNUProfiling" "ScalascaProfiling")
+    set(SUPPORTED_BUILD_TYPE "Coverage" "Debug" "Release" "RelWithDebInfo" "MinSizeRel" "GNUProfiling" "ScalascaProfiling")
 
-	# Set default build type to Debug
-	string(REPLACE ";" " " SUPPORTED_BUILD_TYPE_STRING "${SUPPORTED_BUILD_TYPE}")
-	set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose the type of build, options are: ${SUPPORTED_BUILD_TYPE_STRING}." FORCE)
+    # Set default build type to Debug
+    string(REPLACE ";" " " SUPPORTED_BUILD_TYPE_STRING "${SUPPORTED_BUILD_TYPE}")
+    set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose the type of build, options are: ${SUPPORTED_BUILD_TYPE_STRING}." FORCE)
 
-	# Set the possible values of build type for the GUI
-	set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS ${SUPPORTED_BUILD_TYPE})
+    # Set the possible values of build type for the GUI
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS ${SUPPORTED_BUILD_TYPE})
 endif()
 
 #------------------------------------------------------------------------------------#
@@ -635,31 +635,31 @@ endif()
 
 # Initialize module state
 foreach (MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
-	if ((NOT BITPIT_ENABLE_MPI) AND (";${MPI_ONLY_MODULE_LIST};" MATCHES ";${MODULE_NAME};"))
-		hideModule(${MODULE_NAME})
-	else ()
-		enableModule(${MODULE_NAME} TRUE FALSE)
-	endif()
+    if ((NOT BITPIT_ENABLE_MPI) AND (";${MPI_ONLY_MODULE_LIST};" MATCHES ";${MODULE_NAME};"))
+        hideModule(${MODULE_NAME})
+    else ()
+        enableModule(${MODULE_NAME} TRUE FALSE)
+    endif()
 endforeach ()
 
 set(CHECK_DEPS 1)
 while (${CHECK_DEPS} EQUAL 1)
-	set(CHECK_DEPS 0)
-	foreach (MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
-		isModuleEnabled(${MODULE_NAME} MODULE_ENABLED)
-		if (MODULE_ENABLED)
-			string(TOUPPER ${MODULE_NAME} UPPER_MODULE_NAME)
-			foreach (DEPENDENCY_NAME IN LISTS ${UPPER_MODULE_NAME}_DEPS)
-				isModuleEnabled(${DEPENDENCY_NAME} DEPENDENCY_ENABLED)
-				if (NOT DEPENDENCY_ENABLED)
-					set(CHECK_DEPS 1)
-					enableModule(${DEPENDENCY_NAME} TRUE TRUE)
-					message("Module '${DEPENDENCY_NAME}' has been enabled because it's needed by module '${MODULE_NAME}'")
-				endif ()
-			endforeach ()
-		endif ()
-		unset(MODULE_ENABLE_FLAG)
-	endforeach ()
+    set(CHECK_DEPS 0)
+    foreach (MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
+        isModuleEnabled(${MODULE_NAME} MODULE_ENABLED)
+        if (MODULE_ENABLED)
+            string(TOUPPER ${MODULE_NAME} UPPER_MODULE_NAME)
+            foreach (DEPENDENCY_NAME IN LISTS ${UPPER_MODULE_NAME}_DEPS)
+                isModuleEnabled(${DEPENDENCY_NAME} DEPENDENCY_ENABLED)
+                if (NOT DEPENDENCY_ENABLED)
+                    set(CHECK_DEPS 1)
+                    enableModule(${DEPENDENCY_NAME} TRUE TRUE)
+                    message("Module '${DEPENDENCY_NAME}' has been enabled because it's needed by module '${MODULE_NAME}'")
+                endif ()
+            endforeach ()
+        endif ()
+        unset(MODULE_ENABLE_FLAG)
+    endforeach ()
 endwhile()
 unset(CHECK_DEPS)
 
@@ -914,13 +914,13 @@ string(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWER)
 
 set (ENABLE_WARNINGS ${BITPIT_VERBOSE_MAKE})
 if (BITPIT_VERBOSE_MAKE)
-	set(CMAKE_VERBOSE_MAKEFILE ON)
+    set(CMAKE_VERBOSE_MAKEFILE ON)
 endif()
 
 if (BITPIT_ENABLE_MPI)
-	addPublicDefinitions("BITPIT_ENABLE_MPI=1")
+    addPublicDefinitions("BITPIT_ENABLE_MPI=1")
 else ()
-	addPublicDefinitions("BITPIT_ENABLE_MPI=0")
+    addPublicDefinitions("BITPIT_ENABLE_MPI=0")
 endif()
 
 # GNU profiling build type
@@ -974,9 +974,9 @@ if (ENABLE_WARNINGS)
 endif()
 
 if (NOT ("${CMAKE_VERSION}" VERSION_LESS "2.8.12"))
-	add_compile_options("-std=c++11")
+    add_compile_options("-std=c++11")
 else ()
-	add_definitions("-std=c++11")
+    add_definitions("-std=c++11")
 endif ()
 
 # Coverage build type
@@ -1019,44 +1019,44 @@ endif()
 
 # Define a preprocessor macro to recognize debug builds
 IF(CMAKE_BUILD_TYPE_LOWER MATCHES "debug" OR CMAKE_BUILD_TYPE_LOWER MATCHES "debinfo")
-	addPrivateDefinitions("BITPIT_ENABLE_DEBUG=1")
+    addPrivateDefinitions("BITPIT_ENABLE_DEBUG=1")
 else ()
-	addPrivateDefinitions("BITPIT_ENABLE_DEBUG=0")
+    addPrivateDefinitions("BITPIT_ENABLE_DEBUG=0")
 endif ()
 
 IF(NOT CMAKE_BUILD_TYPE_LOWER MATCHES "debug")
-	addPrivateDefinitions("NDEBUG")
+    addPrivateDefinitions("NDEBUG")
 endif ()
 
 # Define an alias for building with scalasca
 if (BITPIT_ENABLE_MPI)
-	SET(C_FLAGS_INSTRUMENT   "-instrument mpicxx")
-	SET(CXX_FLAGS_INSTRUMENT "-instrument mpic")
+    SET(C_FLAGS_INSTRUMENT   "-instrument mpicxx")
+    SET(CXX_FLAGS_INSTRUMENT "-instrument mpic")
 else ()
-	SET(C_FLAGS_INSTRUMENT   "")
-	SET(CXX_FLAGS_INSTRUMENT "")
+    SET(C_FLAGS_INSTRUMENT   "")
+    SET(CXX_FLAGS_INSTRUMENT "")
 endif ()
 
 if (CMAKE_BUILD_TYPE_LOWER MATCHES "scalasca")
-	file(WRITE scalasca_c_compiler
+    file(WRITE scalasca_c_compiler
 "#!/bin/bash
 scalasca ${C_FLAGS_INSTRUMENT} \"$@\"
 "
-	)
+    )
 
-	file(WRITE scalasca_cxx_compiler
+    file(WRITE scalasca_cxx_compiler
 "#!/bin/bash
 scalasca ${C_FLAGS_INSTRUMENT} \"$@\"
 "
-	)
+    )
 
-	file(INSTALL scalasca_cxx_compiler DESTINATION ${PROJECT_BINARY_DIR} PERMISSIONS OWNER_READ OWNER_EXECUTE )
-	file(INSTALL scalasca_c_compiler   DESTINATION ${PROJECT_BINARY_DIR} PERMISSIONS OWNER_READ OWNER_EXECUTE )
-	file(REMOVE  scalasca_cxx_compiler)
-	file(REMOVE  scalasca_c_compiler)
+    file(INSTALL scalasca_cxx_compiler DESTINATION ${PROJECT_BINARY_DIR} PERMISSIONS OWNER_READ OWNER_EXECUTE )
+    file(INSTALL scalasca_c_compiler   DESTINATION ${PROJECT_BINARY_DIR} PERMISSIONS OWNER_READ OWNER_EXECUTE )
+    file(REMOVE  scalasca_cxx_compiler)
+    file(REMOVE  scalasca_c_compiler)
 
-	set(CMAKE_CXX_COMPILER "${PROJECT_BINARY_DIR}/scalasca_cxx_compiler")
-	set(CMAKE_C_COMPILER   "${PROJECT_BINARY_DIR}/scalasca_c_compiler")
+    set(CMAKE_CXX_COMPILER "${PROJECT_BINARY_DIR}/scalasca_cxx_compiler")
+    set(CMAKE_C_COMPILER   "${PROJECT_BINARY_DIR}/scalasca_c_compiler")
 endif ()
 
 # Check the features supported by the compiler
