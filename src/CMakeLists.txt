@@ -92,11 +92,11 @@ endfunction()
 
 # Library type
 if (BITPIT_BUILD_SHARED_LIBS)
-	set(LIBRARY_TYPE "SHARED")
-	set(PIC_FLAG TRUE)
+    set(LIBRARY_TYPE "SHARED")
+    set(PIC_FLAG TRUE)
 else()
-	set(LIBRARY_TYPE "STATIC")
-	set(PIC_FLAG FALSE)
+    set(LIBRARY_TYPE "STATIC")
+    set(PIC_FLAG FALSE)
 endif()
 
 #------------------------------------------------------------------------------------#
@@ -104,24 +104,24 @@ endif()
 #------------------------------------------------------------------------------------#
 
 if (DEFINED MODULE_SOURCES)
-	unset(${MODULE_SOURCES})
-	unset(${MODULE_DEFINITIONS})
+    unset(${MODULE_SOURCES})
+    unset(${MODULE_DEFINITIONS})
 endif ()
 
 # Modules
 foreach(MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
-	isModuleEnabled(${MODULE_NAME} MODULE_ENABLED)
-	if (MODULE_ENABLED)
-		string(TOUPPER ${MODULE_NAME} UPPERCASE_MODULE_NAME)
-		add_subdirectory(${MODULE_NAME})
-		if (TARGET ${UPPERCASE_MODULE_NAME}_TARGET_OBJECT)
-			set(MODULE_SOURCES ${MODULE_SOURCES} $<TARGET_OBJECTS:${UPPERCASE_MODULE_NAME}_TARGET_OBJECT>)
-			set_target_properties(${UPPERCASE_MODULE_NAME}_TARGET_OBJECT PROPERTIES POSITION_INDEPENDENT_CODE ${PIC_FLAG})
-		endif ()
-		if (DEFINED ${UPPERCASE_MODULE_NAME}_DEFINITIONS)
-			set(MODULE_DEFINITIONS ${MODULE_DEFINITIONS} ${${UPPERCASE_MODULE_NAME}_DEFINITIONS})
-		endif ()
-	endif ()
+    isModuleEnabled(${MODULE_NAME} MODULE_ENABLED)
+    if (MODULE_ENABLED)
+        string(TOUPPER ${MODULE_NAME} UPPERCASE_MODULE_NAME)
+        add_subdirectory(${MODULE_NAME})
+        if (TARGET ${UPPERCASE_MODULE_NAME}_TARGET_OBJECT)
+            set(MODULE_SOURCES ${MODULE_SOURCES} $<TARGET_OBJECTS:${UPPERCASE_MODULE_NAME}_TARGET_OBJECT>)
+            set_target_properties(${UPPERCASE_MODULE_NAME}_TARGET_OBJECT PROPERTIES POSITION_INDEPENDENT_CODE ${PIC_FLAG})
+        endif ()
+        if (DEFINED ${UPPERCASE_MODULE_NAME}_DEFINITIONS)
+            set(MODULE_DEFINITIONS ${MODULE_DEFINITIONS} ${${UPPERCASE_MODULE_NAME}_DEFINITIONS})
+        endif ()
+    endif ()
 endforeach()
 
 #------------------------------------------------------------------------------------#
@@ -137,12 +137,12 @@ add_library(${BITPIT_LIBRARY} ${LIBRARY_TYPE} ${MODULE_SOURCES})
 set_lto_property(${BITPIT_LIBRARY})
 
 if (BITPIT_ENABLE_MPI)
-	set_target_properties(${BITPIT_LIBRARY} PROPERTIES DEBUG_POSTFIX "_MPI_D")
-	set_target_properties(${BITPIT_LIBRARY} PROPERTIES RELWITHDEBINFO_POSTFIX "_MPI_D")
-	set_target_properties(${BITPIT_LIBRARY} PROPERTIES RELEASE_POSTFIX "_MPI")
+    set_target_properties(${BITPIT_LIBRARY} PROPERTIES DEBUG_POSTFIX "_MPI_D")
+    set_target_properties(${BITPIT_LIBRARY} PROPERTIES RELWITHDEBINFO_POSTFIX "_MPI_D")
+    set_target_properties(${BITPIT_LIBRARY} PROPERTIES RELEASE_POSTFIX "_MPI")
 else()
-	set_target_properties(${BITPIT_LIBRARY} PROPERTIES DEBUG_POSTFIX "_D")
-	set_target_properties(${BITPIT_LIBRARY} PROPERTIES RELWITHDEBINFO_POSTFIX "_D")
+    set_target_properties(${BITPIT_LIBRARY} PROPERTIES DEBUG_POSTFIX "_D")
+    set_target_properties(${BITPIT_LIBRARY} PROPERTIES RELWITHDEBINFO_POSTFIX "_D")
 endif()
 
 set_target_properties(${BITPIT_LIBRARY} PROPERTIES POSITION_INDEPENDENT_CODE ${PIC_FLAG})
@@ -151,16 +151,16 @@ set_target_properties(${BITPIT_LIBRARY} PROPERTIES VERSION "${BITPIT_MAJOR_VERSI
 
 # Windows shared libraries have to be linked against their dependencies.
 if (MINGW AND BITPIT_BUILD_SHARED_LIBS)
-	target_link_libraries(${BITPIT_LIBRARY} ${BITPIT_EXTERNAL_LIBRARIES})
+    target_link_libraries(${BITPIT_LIBRARY} ${BITPIT_EXTERNAL_LIBRARIES})
 endif()
 
 # Install target
 #
 # On Windows, shared libraries have to be installed in the binary directory.
 if (WIN32)
-	install(TARGETS ${BITPIT_LIBRARY} ARCHIVE DESTINATION lib LIBRARY DESTINATION lib RUNTIME DESTINATION bin)
+    install(TARGETS ${BITPIT_LIBRARY} ARCHIVE DESTINATION lib LIBRARY DESTINATION lib RUNTIME DESTINATION bin)
 else()
-	install(TARGETS ${BITPIT_LIBRARY} DESTINATION lib)
+    install(TARGETS ${BITPIT_LIBRARY} DESTINATION lib)
 endif()
 
 # Definitions

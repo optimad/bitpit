@@ -40,14 +40,14 @@ list(APPEND TESTS "test_surfunstructured_00007")
 list(APPEND TESTS "test_surfunstructured_00008")
 list(APPEND TESTS "test_surfunstructured_00009")
 if (BITPIT_ENABLE_MPI)
-	list(APPEND TESTS "test_surfunstructured_parallel_00001:4")
-	list(APPEND TESTS "test_surfunstructured_parallel_00002:2")
-	list(APPEND TESTS "test_surfunstructured_parallel_00003:4")
-	list(APPEND TESTS "test_surfunstructured_parallel_00004:4")
-	list(APPEND TESTS "test_surfunstructured_parallel_00005:3")
-	list(APPEND TESTS "test_surfunstructured_parallel_00006:2")
-	list(APPEND TESTS "test_surfunstructured_parallel_00007:4")
-	list(APPEND TESTS "test_surfunstructured_parallel_00008:3")
+    list(APPEND TESTS "test_surfunstructured_parallel_00001:4")
+    list(APPEND TESTS "test_surfunstructured_parallel_00002:2")
+    list(APPEND TESTS "test_surfunstructured_parallel_00003:4")
+    list(APPEND TESTS "test_surfunstructured_parallel_00004:4")
+    list(APPEND TESTS "test_surfunstructured_parallel_00005:3")
+    list(APPEND TESTS "test_surfunstructured_parallel_00006:2")
+    list(APPEND TESTS "test_surfunstructured_parallel_00007:4")
+    list(APPEND TESTS "test_surfunstructured_parallel_00008:3")
 endif ()
 
 # Test extra libraries
@@ -81,20 +81,20 @@ add_custom_command(
     )
 
 if (BITPIT_ENABLE_MPI)
-	add_custom_command(
-		TARGET "integration_test_surfunstructured_parallel_00002" PRE_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/buddha.stl" "${CMAKE_CURRENT_BINARY_DIR}/data/buddha.stl"
-	)
+    add_custom_command(
+        TARGET "integration_test_surfunstructured_parallel_00002" PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/buddha.stl" "${CMAKE_CURRENT_BINARY_DIR}/data/buddha.stl"
+    )
 
-	add_custom_command(
-		TARGET "integration_test_surfunstructured_parallel_00003" PRE_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/buddha.stl" "${CMAKE_CURRENT_BINARY_DIR}/data/buddha.stl"
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/disc.stl" "${CMAKE_CURRENT_BINARY_DIR}/data/disc.stl"
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/circle.dgf" "${CMAKE_CURRENT_BINARY_DIR}/data/circle.dgf"
-	)
+    add_custom_command(
+        TARGET "integration_test_surfunstructured_parallel_00003" PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/buddha.stl" "${CMAKE_CURRENT_BINARY_DIR}/data/buddha.stl"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/disc.stl" "${CMAKE_CURRENT_BINARY_DIR}/data/disc.stl"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/circle.dgf" "${CMAKE_CURRENT_BINARY_DIR}/data/circle.dgf"
+    )
 
-	add_custom_command(
-		TARGET "integration_test_surfunstructured_parallel_00005" PRE_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/sphere.stl" "${CMAKE_CURRENT_BINARY_DIR}/data/sphere.stl"
-	)
+    add_custom_command(
+        TARGET "integration_test_surfunstructured_parallel_00005" PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/sphere.stl" "${CMAKE_CURRENT_BINARY_DIR}/data/sphere.stl"
+    )
 endif ()
