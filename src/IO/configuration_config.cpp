@@ -133,6 +133,130 @@ const Config::Options & Config::getOptions() const
 }
 
 /*!
+    Gets a reference to the specified option.
+
+    \param key is the name of the option
+    \result A reference to the specified option.
+*/
+Config::Option & Config::getOption(const std::string &key)
+{
+    return const_cast<Option &>(static_cast<const Config &>(*this).getOption(key));
+}
+
+/*!
+    Gets a constant reference to the specified option.
+
+    \param key is the name of the option
+    \result A constant reference to the specified option.
+*/
+const Config::Option & Config::getOption(const std::string &key) const
+{
+    return (*m_options).at(key);
+}
+
+/*!
+    Gets the value of the specified option.
+
+    If the option does not exists an exception is thrown.
+
+    \param key is the name of the option
+    \result The value of the specified option.
+*/
+const std::string & Config::get(const std::string &key) const
+{
+    return getOption(key).value;
+}
+
+/*!
+    Gets the value of the specified option.
+
+    If the option does not exists the fallback value is returned.
+
+    \param key is the name of the option
+    \param fallback is the value that will be returned if the specified
+    options does not exist
+    \result The value of the specified option or the fallback value if the
+    options does not exist.
+*/
+std::string Config::get(const std::string &key, const std::string &fallback) const
+{
+    if (hasOption(key)) {
+        return getOption(key).value;
+    } else {
+        return fallback;
+    }
+}
+
+/*!
+    Set the value of the specified option.
+
+    If the option does not exists, a new option will be added.
+
+    \param key is the name of the option
+    \param value is the value of the option
+*/
+void Config::set(const std::string &key, const std::string &value)
+{
+    if (hasOption(key)) {
+        getOption(key).value = value;
+    } else {
+        addOption(key, value);
+    }
+}
+
+/*!
+    Gets the value of the specified option attribute.
+
+    If the option or the attribute does not exists, an exception is thrown.
+
+    \param key is the name of the option
+    \param name is the name of the attribute
+    \result The value of the specified attribute.
+*/
+std::string Config::getAttribute(const std::string &key, const std::string &name) const
+{
+    return getOption(key).attributes.at(name);
+}
+
+/*!
+    Gets the value of the specified option attribute.
+
+    If the option does not exists, an exception will be thrown. However, if
+    the attribute do not exists, the fallback walue will be returned
+
+    \param key is the name of the option
+    \param name is the name of the attribute
+    \param fallback is the value that will be returned if the specified
+    attribute does not exist
+    \result The value of the specified attribute or the fallback value if
+    the options or the attribute does not exist.
+*/
+std::string Config::getAttribute(const std::string &key, const std::string &name, const std::string &fallback) const
+{
+    const Option &option = getOption(key);
+    if (option.attributes.count(name) > 0) {
+        return option.attributes.at(name);
+    }
+
+    return fallback;
+}
+
+/*!
+    Set the value of the specified option attribute.
+
+    If the option does not exists, an exception will be thrown. However,
+    if the attribute does not exists, a new attribute will be added.
+
+    \param key is the name of the option
+    \param name is the name of the attribute
+    \param value is the value of the attribute
+*/
+void Config::setAttribute(const std::string &key, const std::string &name, const std::string &value)
+{
+    getOption(key).attributes[name] = value;
+}
+
+/*!
     Checks if the specified option exists.
 
     \param key is the name of the option
@@ -144,47 +268,91 @@ bool Config::hasOption(const std::string &key) const
 }
 
 /*!
-    Gets the specified option.
+    Add an option to the configuration storage.
 
-    If the option does not exists an exception is thrown.
+    If an option with the same key already exists, it will be overwritten.
 
     \param key is the name of the option
-    \result The specified option.
+    \param option is the option that will be added
 */
-const std::string & Config::get(const std::string &key) const
+void Config::addOption(const std::string &key, const Option &option)
 {
-    return m_options->at(key);
+    (*m_options)[key] = option;
 }
 
 /*!
-    Gets the specified option.
+    Add an option to the configuration storage.
 
-    If the option does not exists the fallback value is returned.
+    If an option with the same key already exists, it will be overwritten.
 
     \param key is the name of the option
-    \param fallback is the value that will be returned if the specified
-    options does not exist
-    \result The specified option or the fallback value if the specified
-    options does not exist.
+    \param option is the option that will be added
 */
-std::string Config::get(const std::string &key, const std::string &fallback) const
+void Config::addOption(const std::string &key, Option &&option)
 {
-    if (hasOption(key)) {
-        return get(key);
-    } else {
-        return fallback;
-    }
+    (*m_options)[key] = std::move(option);
 }
 
 /*!
-    Set the given option to the specified value
+    Add an option to the configuration storage.
+
+    If an option with the same key already exists, it will be overwritten.
 
     \param key is the name of the option
     \param value is the value of the option
 */
-void Config::set(const std::string &key, const std::string &value)
+void Config::addOption(const std::string &key, const std::string &value)
 {
-    (*m_options)[key] = value;
+    addOption(key, std::string(value), Attributes());
+}
+
+/*!
+    Add an option to the configuration storage.
+
+    If an option with the same key already exists, it will be overwritten.
+
+    \param key is the name of the option
+    \param value is the value of the option
+*/
+void Config::addOption(const std::string &key, std::string &&value)
+{
+    addOption(key, std::move(value), Attributes());
+}
+
+/*!
+    Add an option to the configuration storage.
+
+    If an option with the same key already exists, it will be overwritten.
+
+    \param key is the name of the option
+    \param value is the value of the option
+    \param attributes are the attributes of the option
+*/
+void Config::addOption(const std::string &key, const std::string &value, const Attributes &attributes)
+{
+    Option option;
+    option.value = value;
+    option.attributes = attributes;
+
+    addOption(key, std::move(option));
+}
+
+/*!
+    Add an option to the configuration storage.
+
+    If an option with the same key already exists, it will be overwritten.
+
+    \param key is the name of the option
+    \param value is the value of the option
+    \param attributes are the attributes of the option
+*/
+void Config::addOption(const std::string &key, std::string &&value, Attributes &&attributes)
+{
+    Option option;
+    option.value = std::move(value);
+    option.attributes = std::move(attributes);
+
+    addOption(key, std::move(option));
 }
 
 /*!
@@ -402,7 +570,23 @@ void Config::dump(std::ostream &out, int indentLevel) const
     out << indent << "Options..." << std::endl;
     if (getOptionCount() > 0) {
         for (const auto &entry : getOptions()) {
-            out << indent << padding << entry.first << " = " << entry.second << std::endl;
+            const std::string &key = entry.first;
+            const Option &option = entry.second;
+
+            // Option value
+            out << indent << padding << key << " = " << option.value << std::endl;
+
+            // Option attributes
+            if (!option.attributes.empty()) {
+                for (const auto &attributeEntry : option.attributes) {
+                    const std::string &name = attributeEntry.first;
+                    const std::string &value = attributeEntry.second;
+
+                    out << indent << padding << padding << "Attribute: " << name << " = " << value << std::endl;
+                }
+            } else {
+                out << indent << padding << padding << "Option has not attributes." << std::endl;
+            }
         }
     } else {
         out << indent << padding << "No options." << std::endl;
