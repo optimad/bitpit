@@ -263,7 +263,7 @@ void writeConfiguration(const std::string &filename, const Config *rootConfig, b
 void writeNode(const Config *config, rapidjson::Value &rootJSONData, rapidjson::Document::AllocatorType &allocator)
 {
     // Write the options
-    for (auto &entry : config->getOptions()) {
+    for (const auto &entry : config->getOptions()) {
         const std::string &configKey   = entry.first;
         const std::string &configValue = entry.second;
 

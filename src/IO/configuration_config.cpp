@@ -408,7 +408,7 @@ void Config::dump(std::ostream &out, int indentLevel) const
     out << std::endl;
     out << indent << "Options..." << std::endl;
     if (getOptionCount() > 0) {
-        for (auto &entry : getOptions()) {
+        for (const auto &entry : getOptions()) {
             out << indent << padding << entry.first << " = " << entry.second << std::endl;
         }
     } else {
@@ -416,7 +416,7 @@ void Config::dump(std::ostream &out, int indentLevel) const
     }
 
     ++indentLevel;
-    for (auto &entry : getSections()) {
+    for (const auto &entry : getSections()) {
         out << std::endl;
         out << indent << padding << "::: Section " << entry.first << " :::" << std::endl;
         entry.second->dump(out, indentLevel);
