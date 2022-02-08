@@ -83,6 +83,8 @@ void readNode(xmlNodePtr root, Config *config)
 */
 void writeNode(xmlTextWriterPtr writer, const Config *config, const std::string &encoding)
 {
+    int status;
+
     // Write the options
     for (const auto &entry : config->getOptions()) {
         const std::string &key   = entry.first;
@@ -91,6 +93,12 @@ void writeNode(xmlTextWriterPtr writer, const Config *config, const std::string 
         xmlChar *elementName = encodeString(key, encoding);
         xmlChar *elementText = encodeString(value, encoding);
         int status = xmlTextWriterWriteFormatElement(writer, BAD_CAST elementName, "%s", elementText);
+        if (elementText) {
+            xmlFree(elementText);
+        }
+        if (elementName) {
+            xmlFree(elementName);
+        }
         if (status < 0) {
             throw std::runtime_error("Error at xmlTextWriterWriteFormatElement");
         }
@@ -103,7 +111,10 @@ void writeNode(xmlTextWriterPtr writer, const Config *config, const std::string 
 
         // Start the section
         xmlChar *elementName = encodeString(key, encoding);
-        int status = xmlTextWriterStartElement(writer, BAD_CAST elementName);
+        status = xmlTextWriterStartElement(writer, BAD_CAST elementName);
+        if (elementName) {
+            xmlFree(elementName);
+        }
         if (status < 0) {
             throw std::runtime_error("Error at xmlTextWriterStartElement");
         }
@@ -250,6 +261,9 @@ void writeConfiguration(const std::string &filename, const std::string &rootname
     // Start the root element
     xmlChar *elementName = encodeString(rootname, DEFAULT_ENCODING);
     status = xmlTextWriterStartElement(writer, BAD_CAST elementName);
+    if (elementName) {
+        xmlFree(elementName);
+    }
     if (status < 0) {
         throw std::runtime_error("Error at xmlTextWriterStartElement");
     }
@@ -260,6 +274,9 @@ void writeConfiguration(const std::string &filename, const std::string &rootname
 
     xmlChar *versionAttr = encodeString(versionStream.str(), DEFAULT_ENCODING);
     status = xmlTextWriterWriteAttribute(writer, BAD_CAST "version", BAD_CAST versionAttr);
+    if (versionAttr) {
+        xmlFree(versionAttr);
+    }
     if (status < 0) {
         throw std::runtime_error("Error at xmlTextWriterWriteAttribute");
     }
