@@ -1657,13 +1657,13 @@ void POD::solveMinimization(std::vector<std::vector<double> > & rhs)
 
     if (runSolver) {
         for (std::size_t i = 0; i < m_nFields; ++i) {
-            double A[m_nModes * m_nModes];
-            int ipiv[m_nModes];
+            std::vector<double> A(m_nModes * m_nModes);
+            std::vector<int> ipiv(m_nModes);
 
             for (std::size_t j = 0; j < m_nModes*m_nModes; ++j)
                 A[j] = m_minimizationMatrices[i][j];
 
-            lapack_int info = LAPACKE_dgesv(LAPACK_COL_MAJOR, m_nModes, 1, A, m_nModes, ipiv, rhs[i].data(), m_nModes); //lapacke
+            lapack_int info = LAPACKE_dgesv(LAPACK_COL_MAJOR, m_nModes, 1, A.data(), m_nModes, ipiv.data(), rhs[i].data(), m_nModes); //lapacke
             if (info != 0) {
                 log::cout() << "WARNING!    algorithm convergence info " << info << std::endl;
                 throw std::runtime_error("Unable to solve minimization problem.");
@@ -1698,19 +1698,19 @@ void POD::evalEigen()
     if (runSolver) {
         int N = m_nSnapshots*m_nSnapshots;
         for (std::size_t i = 0; i < m_nFields; ++i) {
-            double Marr[N];
-            double alambda[m_nSnapshots];
+            std::vector<double> Marr(N);
+            std::vector<double> alambda(m_nSnapshots);
             for (std::size_t j = 0; j < m_nSnapshots*m_nSnapshots; ++j)
                 Marr[j/m_nSnapshots+j%m_nSnapshots*m_nSnapshots] = m_correlationMatrices[i][j];
 
-            lapack_int info = LAPACKE_dsyev(LAPACK_COL_MAJOR, 'V', 'U', m_nSnapshots, Marr, m_nSnapshots, alambda); //lapacke
+            lapack_int info = LAPACKE_dsyev(LAPACK_COL_MAJOR, 'V', 'U', m_nSnapshots, Marr.data(), m_nSnapshots, alambda.data()); //lapacke
             if (info != 0) {
                 log::cout() << "WARNING!    algorithm convergence info " << info << std::endl;
                 throw std::runtime_error("Unable to solve minimization problem.");
             }
 
             // Check number of modes with energy level
-            checkModeCount(alambda, i);
+            checkModeCount(alambda.data(), i);
 
             for (std::size_t n = 0; n < m_nSnapshots; ++n)
                 m_lambda[i][n] = alambda[m_nSnapshots - n - 1];
