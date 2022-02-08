@@ -100,9 +100,21 @@ void exportTree(const Config &config, bool areArraysAllowed, boost::property_tre
 {
     // Write the options
     for (const auto &entry : config.getOptions()) {
-        const std::string &key   = entry.first;
-        const std::string &value = entry.second;
-        root->add(key, value);
+        const std::string &key       = entry.first;
+        const Config::Option &option = entry.second;
+
+        // Add value
+        root->push_back(boost::property_tree::ptree::value_type(key, option.value));
+        auto &optionChild = root->back();
+        auto &optionRoot = optionChild.second;
+
+        // Add attributes
+        optionRoot.push_back(boost::property_tree::ptree::value_type("<xmlattr>", boost::property_tree::ptree()));
+        auto &attributeChild = optionRoot.back();
+        auto &attributeRoot = attributeChild.second;
+        for (const auto &attributeEntry : option.attributes) {
+            attributeRoot.add(attributeEntry.first, attributeEntry.second);
+        }
     }
 
     // Write the sections

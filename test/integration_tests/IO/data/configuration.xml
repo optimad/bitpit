@@ -2,19 +2,19 @@
 <bitpit version="1">
     <first>
         <color>blue</color>
-        <distance>11543</distance>
+        <distance unit="km" type="offroad">11543</distance>
         <exists>1</exists>
         <data>
-            <x>64.12345679</x>
+            <x min="0" max="100">64.12345679</x>
         </data>
         <dummy></dummy>
     </first>
     <second>
         <color>redButnotreallyREDsomething similar + to red</color>
-        <distance>-22876587866878888</distance>
+        <distance unit="mi" type="urban">22876587866878888</distance>
         <exists>0</exists>
         <data>
-            <y>-32.6789E-21</y>
+            <y min="20" max="200">-32.6789E-21</y>
         </data>
     </second>
     <ObjArray>

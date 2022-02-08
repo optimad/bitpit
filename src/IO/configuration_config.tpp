@@ -30,7 +30,49 @@
 namespace bitpit {
 
 /*!
-    Gets the specified option.
+    Add an option to the configuration storage.
+
+    If an option with the same key already exists, it will be overwritten.
+
+    \param key is the name of the option
+    \param option is the option that will be added
+*/
+template<typename T>
+void Config::addOption(const std::string &key, const T &value)
+{
+    if (hasOption(key)) {
+        updateOption(key, value);
+    } else {
+        std::ostringstream valueStream;
+        if (valueStream << value) {
+            addOption(key, valueStream.str());
+        } else {
+            throw std::runtime_error("Unable to convert the option \"" + key + "\"");
+        }
+    }
+}
+
+/*!
+    Update the value of specified options.
+
+    If the option doesn't exists, an exception is thrown.
+
+    \param key is the name of the option
+    \param value is the updated value for the option
+*/
+template<typename T>
+void Config::updateOption(const std::string &key, const T &value)
+{
+    std::ostringstream valueStream;
+    if (valueStream << value) {
+        updateOption(key, valueStream.str());
+    } else {
+        throw std::runtime_error("Unable to convert the option \"" + key + "\"");
+    }
+}
+
+/*!
+    Gets the value associated with the specified option.
 
     If the option does not exists an exception is thrown.
 
@@ -41,7 +83,7 @@ template<typename T>
 T Config::get(const std::string &key) const
 {
     T value;
-    if (std::istringstream(get(key)) >> value) {
+    if (std::istringstream(getOption(key).value) >> value) {
         return value;
     } else {
         throw std::runtime_error("Unable to convert the option \"" + key + "\"");
@@ -49,7 +91,7 @@ T Config::get(const std::string &key) const
 }
 
 /*!
-    Gets the specified option.
+    Gets the value associated with the specified option.
 
     If the option does not exists the fallback value is returned.
 
@@ -70,7 +112,10 @@ T Config::get(const std::string &key, const T &fallback) const
 }
 
 /*!
-    Set the given option to the specified value
+    Set the value of the specified options.
+
+    If an option with the same key already exists, it will be updated. If the option
+    does not exists, it will be added.
 
     \param key is the name of the option
     \param value is the value of the option
@@ -78,9 +123,69 @@ T Config::get(const std::string &key, const T &fallback) const
 template<typename T>
 void Config::set(const std::string &key, const T &value)
 {
+    addOption(key, value);
+}
+
+/*!
+    Gets the value of the specified option attribute.
+
+    If the option or the attribute does not exists, an exception is thrown.
+
+    \param key is the name of the option
+    \param name is the name of the attribute
+    \result The value of the specified attribute.
+*/
+template<typename T>
+T Config::getAttribute(const std::string &key, const std::string &name) const
+{
+    T value;
+    if (std::istringstream(getOption(key).attributes.at(name)) >> value) {
+        return value;
+    } else {
+        throw std::runtime_error("Unable to convert the option \"" + key + "\"");
+    }
+}
+
+/*!
+    Gets the value of the specified option attribute.
+
+    If the option does not exists, an exception will be thrown. However, if
+    the attribute do not exists, the fallback value will be returned
+
+    \param key is the name of the option
+    \param name is the name of the attribute
+    \param fallback is the value that will be returned if the specified
+    attribute does not exist
+    \result The value of the specified attribute or the fallback value if
+    the options or the attribute does not exist.
+*/
+template<typename T>
+T Config::getAttribute(const std::string &key, const std::string &name, const T &fallback) const
+{
+    const Option &option = getOption(key);
+    if (option.attributes.count(name) > 0) {
+        return getAttribute<T>(key);
+    }
+
+    return fallback;
+}
+
+/*!
+    Set the value of the specified option attribute.
+
+    If the option does not exists, an exception will be thrown. However,
+    if the attribute does not exists, a new attribute will be added.
+
+    \param key is the name of the option
+    \param name is the name of the attribute
+    \param value is the value of the attribute
+*/
+template<typename T>
+void Config::setAttribute(const std::string &key, const std::string &name, const T &value)
+{
     std::ostringstream valueStream;
     if (valueStream << value) {
-        set(key, valueStream.str());
+        getOption(key).attributes[name] = valueStream.str();
     } else {
         throw std::runtime_error("Unable to convert the option \"" + key + "\"");
     }
