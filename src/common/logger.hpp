@@ -81,6 +81,7 @@ class LoggerBuffer : public std::streambuf
 
 public:
     LoggerBuffer(std::size_t bufferSize = 256);
+    LoggerBuffer(LoggerBuffer const &other);
     ~LoggerBuffer();
 
     bool isConsoleTimestampEnabled() const;
