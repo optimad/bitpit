@@ -79,13 +79,6 @@ Config & Config::operator=(Config other)
 }
 
 /*!
-    Destructor.
-*/
-Config::~Config()
-{
-}
-
-/*!
     Swap operator.
 
     \param other is another config whose content is swapped with that of

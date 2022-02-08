@@ -48,7 +48,7 @@ public:
     Config & operator=(Config other);
     Config & operator=(Config &&other) = default;
 
-    virtual ~Config();
+    virtual ~Config() = default;
 
     void swap(Config &other);
 
