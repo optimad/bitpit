@@ -68,6 +68,31 @@ LoggerBuffer::LoggerBuffer(std::size_t bufferSize)
 }
 
 /*!
+    Copy constructor.
+
+    \param other is another logger buffer, whose contents will be used to
+    initialize the current logger buffer
+*/
+LoggerBuffer::LoggerBuffer(const LoggerBuffer &other)
+    : std::streambuf(),
+      m_buffer(other.m_buffer),
+      m_context(other.m_context),
+      m_padding(other.m_padding),
+      m_consoleEnabled(other.m_consoleEnabled),
+      m_consoleTimestampEnabled(other.m_consoleTimestampEnabled),
+      m_console(other.m_console),
+      m_consolePrefix(other.m_consolePrefix),
+      m_fileEnabled(other.m_fileEnabled),
+      m_fileTimestampEnabled(other.m_fileTimestampEnabled),
+      m_file(other.m_file),
+      m_filePrefix(other.m_filePrefix)
+{
+    // Set the buffer
+    char *bufferBegin = &m_buffer.front();
+    setp(bufferBegin, bufferBegin + m_buffer.size() - 1);
+}
+
+/*!
     Destructor
 */
 LoggerBuffer::~LoggerBuffer()
