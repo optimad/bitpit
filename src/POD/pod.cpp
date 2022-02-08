@@ -1656,10 +1656,9 @@ void POD::solveMinimization(std::vector<std::vector<double> > & rhs)
 #endif
 
     if (runSolver) {
+        std::vector<double> A(m_nModes * m_nModes);
+        std::vector<int> ipiv(m_nModes);
         for (std::size_t i = 0; i < m_nFields; ++i) {
-            std::vector<double> A(m_nModes * m_nModes);
-            std::vector<int> ipiv(m_nModes);
-
             for (std::size_t j = 0; j < m_nModes*m_nModes; ++j)
                 A[j] = m_minimizationMatrices[i][j];
 
@@ -1697,9 +1696,9 @@ void POD::evalEigen()
 
     if (runSolver) {
         int N = m_nSnapshots*m_nSnapshots;
+        std::vector<double> Marr(N);
+        std::vector<double> alambda(m_nSnapshots);
         for (std::size_t i = 0; i < m_nFields; ++i) {
-            std::vector<double> Marr(N);
-            std::vector<double> alambda(m_nSnapshots);
             for (std::size_t j = 0; j < m_nSnapshots*m_nSnapshots; ++j)
                 Marr[j/m_nSnapshots+j%m_nSnapshots*m_nSnapshots] = m_correlationMatrices[i][j];
 
