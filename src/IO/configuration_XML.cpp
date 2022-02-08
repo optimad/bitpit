@@ -84,7 +84,7 @@ void readNode(xmlNodePtr root, Config *config)
 void writeNode(xmlTextWriterPtr writer, const Config *config, const std::string &encoding)
 {
     // Write the options
-    for (auto &entry : config->getOptions()) {
+    for (const auto &entry : config->getOptions()) {
         const std::string &key   = entry.first;
         const std::string &value = entry.second;
 
