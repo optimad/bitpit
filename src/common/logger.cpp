@@ -517,6 +517,11 @@ Logger::Logger(const Logger &other)
       m_fileDisabledThreshold(other.m_fileDisabledThreshold),
       m_fileVerbosityThreshold(other.m_fileVerbosityThreshold)
 {
+    // Copy buffer properties
+    copyfmt(other);
+    exceptions(other.exceptions());
+    clear(other.rdstate());
+    basic_ios<char>::rdbuf(other.rdbuf());
 }
 
 /*!
