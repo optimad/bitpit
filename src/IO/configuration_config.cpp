@@ -213,7 +213,7 @@ void Config::set(const std::string &key, const std::string &value)
     \param name is the name of the attribute
     \result The value of the specified attribute.
 */
-std::string Config::getAttribute(const std::string &key, const std::string &name) const
+const std::string & Config::getAttribute(const std::string &key, const std::string &name) const
 {
     return getOption(key).attributes.at(name);
 }

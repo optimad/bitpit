@@ -67,7 +67,7 @@ public:
     std::string get(const std::string &key, const std::string &fallback) const;
     void set(const std::string &key, const std::string &value);
 
-    std::string getAttribute(const std::string &key, const std::string &name) const;
+    const std::string & getAttribute(const std::string &key, const std::string &name) const;
     std::string getAttribute(const std::string &key, const std::string &name, const std::string &fallback) const;
     void setAttribute(const std::string &key, const std::string &name, const std::string &value);
 
