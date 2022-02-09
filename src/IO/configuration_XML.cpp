@@ -205,8 +205,7 @@ void readConfiguration(const std::string &filename, const std::string &rootname,
     }
 
     // Check if the version is supported
-    const xmlChar *versionAttributeName =
-        reinterpret_cast<const xmlChar *>("version");
+    const xmlChar *versionAttributeName = reinterpret_cast<const xmlChar *>("version");
     if (checkVersion && xmlHasProp(rootElement, versionAttributeName)) {
         xmlChar *versionValue = xmlGetProp(rootElement, versionAttributeName);
         std::string versionString((char *) versionValue);
