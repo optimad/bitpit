@@ -43,9 +43,18 @@
 # include "multiplication.hpp"
 # include "system_solvers_small.hpp"
 
+# include "bitpit_private_lapacke.hpp"
+
 namespace bitpit{
 
 namespace linearalgebra{
+
+namespace constants{
+
+const int ROW_MAJOR = LAPACK_ROW_MAJOR;
+const int COL_MAJOR = LAPACK_COL_MAJOR;
+
+}
 
 /*!
  * @ingroup system_solver_small
@@ -352,6 +361,72 @@ forwardSubstitution(L, C, z);
 backwardSubstitution(U, z, x);
 
 return; };
+
+// -------------------------------------------------------------------------- //
+/*!
+    Solve a linear system using partial pivoting and LU factorization (the
+    LAPACK function Lapacke_dgesv is used).
+
+    This routine works on the entire matrix, the number of considered equations
+    is equal to the leading dimension of the matrix, the same is for the r.h.s.
+    Multiple r.h.s. are not allowed. Containers MUST be correctly sized.
+    Permutation matrix not provided.
+
+    This function is intended for solution computation ONLY.
+
+    \param[in] layout matrix layout (possible values are ROW_MAJOR and COL_MAJOR)
+    \param[in,out] A in input the coefficients of square matrix (linear), the
+    solver will the use the matrix as a storage for temporary data needed during
+    the solution of the system, hence on output the matrix coefficients will be
+    overwritten and the original matrix coefficients cannot be recovered
+    \param[in,out] B in input r.h.s. of the linear system, in output the solution.
+    \return information on the execution of LAPACKE_dgesv, see LAPACK  documentation
+*/
+int solveLU(
+    int                              layout,
+    std::vector<double>                  &A,
+    std::vector<double>                  &B
+) {
+
+    std::vector<int> ipiv(B.size());
+    int info = solveLU(layout, B.size(), A.data(), B.data(),ipiv.data());
+    return info;
+
+};
+
+// -------------------------------------------------------------------------- //
+/*!
+    Solve a linear system using partial pivoting and LU factorization (the
+    LAPACK function Lapacke_dgesv is used).
+
+    This routine works on the entire matrix, the number of considered equations
+    is equal to the leading dimension of the matrix, the same is for the r.h.s.
+    Multiple r.h.s. are not allowed. Containers MUST be correctly sized.
+
+    This function is intended for both solution and factorization computation.
+
+    \param[in] layout matrix layout (possible values are ROW_MAJOR and COL_MAJOR).
+    \param[in] matrixOrder number of equations in linear system.
+    \param[in,out] A in input the coefficients of square matrix (linear), in output the
+    factors L and U, A = P * L * U.
+    \param[in,out] B in input r.h.s. of the linear system, in output the solution.
+    \param[out] ipiv the pivot indices that define the permutation matrix P, see LAPACK
+    documentation.
+    \return information on the execution of LAPACKE_dgesv, see LAPACK documentation
+*/
+int solveLU(
+    int                              layout,
+    int                         matrixOrder,
+    double                               *A,
+    double                               *B,
+    int                               *ipiv
+) {
+
+    int ldb = (layout == constants::ROW_MAJOR ? 1 : matrixOrder);
+    int info = LAPACKE_dgesv(layout, matrixOrder, 1, A, matrixOrder, ipiv, B, ldb);
+    return info;
+
+};
 
 /*!
  * @}

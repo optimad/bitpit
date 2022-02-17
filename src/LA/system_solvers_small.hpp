@@ -57,6 +57,13 @@ namespace bitpit{
  */
 namespace linearalgebra{
 
+namespace constants{
+
+extern const int ROW_MAJOR;
+extern const int COL_MAJOR;
+
+}
+
 template <class T>
 void cramer(                                                                  // Solve linear system using Cramer's rule
     std::vector< std::vector < T > >            &,                            // (input) coeff. matrix
@@ -123,6 +130,20 @@ void solveLU(                                                                 //
     std::array<std::array<double, m>, m>        &,                            // (input) Input coeffs. matrix
     std::array<double, m>                       &,                            // (input) Source term
     std::array<double, m>                       &                             // (input/output) Solution
+);
+
+int solveLU(                                                                  // Solve linear system using Lapack DGESV
+    int                                          ,                            // (input) Matrix layout
+    std::vector<double>                         &,                            // (input) Input coeffs. matrix (linear)
+    std::vector<double>                         &                             // (input/output) Source term / Solution
+);
+
+int solveLU(                                                                  // Solve linear system using Lapack DGESV
+    int                                          ,                            // (input) Matrix layout
+    int                                          ,                            // (input) Matrix order
+    double                                      *,                            // (input) Pointer to input coeffs. matrix (linear)
+    double                                      *,                            // (input/output) Pointer to source term / solution
+    int                                         *                             // (output) Pivot indeces of the permutation matrix
 );
 
 }
