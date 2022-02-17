@@ -78,7 +78,7 @@ if (l != m) {
 
 // Solvability condition
 dA = det(A);
-if (dA < 1.0e-14) {
+if (std::abs(dA) < 1.0e-14) {
     return;
 }
 
@@ -139,7 +139,7 @@ if (m != n) {
 
 // Solvability condition
 dA = det(A);
-if (dA < 1.0e-14) {
+if (std::abs(dA) < 1.0e-14) {
     return;
 }
 
