@@ -261,7 +261,6 @@ m = A.size();
 if (m == 0) { return; }
 n = A[0].size();
 if (n == 0) { return; }
-i--; j--;
 if ((i >= m) || (i < 0)) {
     return;
 }
@@ -275,9 +274,9 @@ if ((j >= n) || (j < 0)) {
 
 // Resize output variables
 B.resize(m-1);
-for (i = 0; i < m-1; ++i) {
-    B[i].resize(n-1, 0.0);
-} //next i
+for (int p = 0; p < m-1; ++p) {
+    B[p].resize(n-1, 0.0);
+} //next p
 
 // Extract complement
 for (l = 0; l < i; l++) {
@@ -332,7 +331,6 @@ int            l, k;
 // ========================================================================== //
 if (m == 0) { return; }
 if (n == 0) { return; }
-i--; j--;
 if ((i >= (long) m) || (i < 0)) {
     return;
 }
@@ -692,9 +690,6 @@ int                     m, n;
 T                       d = (T) 1.0e+18;
 std::vector< std::vector < T > >  C;
 
-// Counters
-int                     i;
-
 // ========================================================================== //
 // CHECK INPUT                                                                //
 // ========================================================================== //
@@ -722,9 +717,9 @@ else if (m == 3) {
 }
 else {
     d = (T) 0.0;
-    for (i = 0; i < m; i++) {
-        complement(1, i+1, A, C);
-        d += pow(-1.0, i+2) * A[0][i] * det(C);
+    for (int i = 0; i < m; i++) {
+        complement(0, i, A, C);
+        d += pow(-1.0, i) * A[0][i] * det(C);
     } //next i
 }
 
@@ -781,8 +776,8 @@ else if (m == 3) {
 else {
     std::array< std::array < double, m-1 >, m-1 >     C;
     for (i = 0; i < m; i++) {
-        complement(1, i+1, A, C);
-        d += pow(-1.0, i+2) * A[0][i] * det(C);
+        complement(0, i, A, C);
+        d += pow(-1.0, i) * A[0][i] * det(C);
     } //next i
 }
 
