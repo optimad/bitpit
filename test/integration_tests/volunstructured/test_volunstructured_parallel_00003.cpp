@@ -39,7 +39,9 @@ using namespace bitpit;
 */
 int subtest_001(int rank)
 {
+    //
     // Create the patch
+    //
     std::unique_ptr<VolUnstructured> patch = std::unique_ptr<VolUnstructured>(new VolUnstructured(3, MPI_COMM_WORLD));
     patch->getVTK().setName("test_00003_partitioned_mesh");
     patch->setVertexAutoIndexing(false);
@@ -270,7 +272,6 @@ int subtest_001(int rank)
         }
 
         cellDataCommunicator.startSend(rank);
-
     }
 
     // Receive data
