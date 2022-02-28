@@ -891,6 +891,7 @@ protected:
 	void setPartitioned(bool partitioned);
 	void setPartitioningStatus(PartitioningStatus status);
 	virtual std::vector<adaption::Info> _partitioningPrepare(const std::unordered_map<long, double> &cellWeights, double defaultWeight, bool trackPartitioning);
+	virtual std::vector<adaption::Info> _partitioningPrepare(const std::unordered_map<long, int> &cellRanks, bool trackPartitioning);
 	virtual std::vector<adaption::Info> _partitioningAlter(bool trackPartitioning);
 	virtual void _partitioningCleanup();
 
