@@ -1363,116 +1363,7 @@ std::vector<adaption::Info> PatchKernel::partitioningPrepare(const std::unordere
 		throw std::runtime_error ("A partitioning is already in progress.");
 	}
 
-	// Fill partitioning ranks
-	int patchRank = getRank();
-
-	std::set<int> recvRanks;
-	m_partitioningOutgoings.clear();
-	for (auto &entry : cellRanks) {
-		int recvRank = entry.second;
-		if (recvRank == patchRank) {
-			continue;
-		}
-
-		long cellId = entry.first;
-		if (m_ghostCellOwners.count(cellId) > 0) {
-			continue;
-		}
-
-		m_partitioningOutgoings.insert(entry);
-		recvRanks.insert(recvRank);
-	}
-
-	// Identify exchange entries
-	int nRanks = getProcessorCount();
-
-	int nExchanges = recvRanks.size();
-	std::vector<std::pair<int, int>> exchanges;
-	exchanges.reserve(nExchanges);
-	for (int recvRank : recvRanks) {
-		exchanges.emplace_back(patchRank, recvRank);
-	}
-
-	int exchangesGatherCount = 2 * nExchanges;
-	std::vector<int> exchangeGatherCount(nRanks);
-	MPI_Allgather(&exchangesGatherCount, 1, MPI_INT, exchangeGatherCount.data(), 1, MPI_INT, m_communicator);
-
-	std::vector<int> exchangesGatherDispls(nRanks, 0);
-	for (int i = 1; i < nRanks; ++i) {
-		exchangesGatherDispls[i] = exchangesGatherDispls[i - 1] + exchangeGatherCount[i - 1];
-	}
-
-	int nGlobalExchanges = nExchanges;
-	MPI_Allreduce(MPI_IN_PLACE, &nGlobalExchanges, 1, MPI_INT, MPI_SUM, m_communicator);
-
-	m_partitioningGlobalExchanges.resize(nGlobalExchanges);
-	MPI_Allgatherv(exchanges.data(), exchangesGatherCount, MPI_INT, m_partitioningGlobalExchanges.data(),
-	               exchangeGatherCount.data(), exchangesGatherDispls.data(), MPI_INT, m_communicator);
-
-	std::sort(m_partitioningGlobalExchanges.begin(), m_partitioningGlobalExchanges.end(), greater<std::pair<int,int>>());
-
-	// Get global list of ranks that will send data
-	std::unordered_set<int> globalSendRanks;
-	for (const std::pair<int, int> &entry : m_partitioningGlobalExchanges) {
-		globalSendRanks.insert(entry.first);
-	}
-
-	// Get global list of ranks that will receive data
-	std::unordered_set<int> globalRecvRanks;
-	for (const std::pair<int, int> &entry : m_partitioningGlobalExchanges) {
-		globalRecvRanks.insert(entry.second);
-	}
-
-	// Identify if this is a serialization or a normal partitioning
-	//
-	// We are serializing the patch if all the processes are sending all
-	// their cells to the same rank.
-	m_partitioningSerialization = (globalRecvRanks.size() == 1);
-	if (m_partitioningSerialization) {
-		int receiverRank = *(globalRecvRanks.begin());
-		if (patchRank != receiverRank) {
-			if (m_partitioningOutgoings.size() != (std::size_t) getInternalCellCount()) {
-				m_partitioningSerialization = false;
-			}
-		}
-
-		MPI_Allreduce(MPI_IN_PLACE, &m_partitioningSerialization, 1, MPI_C_BOOL, MPI_LAND, m_communicator);
-	}
-
-	// Build the information on the cells that will be sent
-	//
-	// Only internal cells are tracked.
-	std::vector<adaption::Info> partitioningData;
-	if (trackPartitioning) {
-		for (const std::pair<int, int> &entry : m_partitioningGlobalExchanges) {
-			int sendRank = entry.first;
-			if (sendRank != patchRank) {
-				continue;
-			}
-
-			int recvRank = entry.second;
-
-			std::vector<long> previous;
-			for (const auto &entry : m_partitioningOutgoings) {
-				int cellRank = entry.second;
-				if (cellRank != recvRank) {
-					continue;
-				}
-
-				long cellId = entry.first;
-				previous.push_back(cellId);
-			}
-
-			if (!previous.empty()) {
-				partitioningData.emplace_back();
-				adaption::Info &partitioningInfo = partitioningData.back();
-				partitioningInfo.entity   = adaption::ENTITY_CELL;
-				partitioningInfo.type     = adaption::TYPE_PARTITION_SEND;
-				partitioningInfo.rank     = recvRank;
-				partitioningInfo.previous = std::move(previous);
-			}
-		}
-	}
+	std::vector<adaption::Info> partitioningData = _partitioningPrepare(cellRanks, trackPartitioning);
 
 	// Update the status
 	setPartitioningStatus(PARTITIONING_PREPARED);
@@ -1803,6 +1694,132 @@ std::vector<adaption::Info> PatchKernel::_partitioningPrepare(const std::unorder
 	}
 
 	return std::vector<adaption::Info>();
+}
+
+/*!
+	Partitions the patch among the processes. Each cell will be assigned
+	to a specific process according to the specified input.
+
+	\param cellRanks are the ranks of the cells after the partitioning
+	\param trackPartitioning if set to true, the changes to the patch will be
+	tracked
+	\result Returns a vector of adaption::Info that can be used to track
+	the changes done during the partitioning.
+*/
+std::vector<adaption::Info> PatchKernel::_partitioningPrepare(const std::unordered_map<long, int> &cellRanks, bool trackPartitioning)
+{
+	// Fill partitioning ranks
+	int patchRank = getRank();
+
+	std::set<int> recvRanks;
+	m_partitioningOutgoings.clear();
+	for (auto &entry : cellRanks) {
+		int recvRank = entry.second;
+		if (recvRank == patchRank) {
+			continue;
+		}
+
+		long cellId = entry.first;
+		if (m_ghostCellOwners.count(cellId) > 0) {
+			continue;
+		}
+
+		m_partitioningOutgoings.insert(entry);
+		recvRanks.insert(recvRank);
+	}
+
+	// Identify exchange entries
+	int nRanks = getProcessorCount();
+
+	int nExchanges = recvRanks.size();
+	std::vector<std::pair<int, int>> exchanges;
+	exchanges.reserve(nExchanges);
+	for (int recvRank : recvRanks) {
+		exchanges.emplace_back(patchRank, recvRank);
+	}
+
+	int exchangesGatherCount = 2 * nExchanges;
+	std::vector<int> exchangeGatherCount(nRanks);
+	MPI_Allgather(&exchangesGatherCount, 1, MPI_INT, exchangeGatherCount.data(), 1, MPI_INT, m_communicator);
+
+	std::vector<int> exchangesGatherDispls(nRanks, 0);
+	for (int i = 1; i < nRanks; ++i) {
+		exchangesGatherDispls[i] = exchangesGatherDispls[i - 1] + exchangeGatherCount[i - 1];
+	}
+
+	int nGlobalExchanges = nExchanges;
+	MPI_Allreduce(MPI_IN_PLACE, &nGlobalExchanges, 1, MPI_INT, MPI_SUM, m_communicator);
+
+	m_partitioningGlobalExchanges.resize(nGlobalExchanges);
+	MPI_Allgatherv(exchanges.data(), exchangesGatherCount, MPI_INT, m_partitioningGlobalExchanges.data(),
+	               exchangeGatherCount.data(), exchangesGatherDispls.data(), MPI_INT, m_communicator);
+
+	std::sort(m_partitioningGlobalExchanges.begin(), m_partitioningGlobalExchanges.end(), greater<std::pair<int,int>>());
+
+	// Get global list of ranks that will send data
+	std::unordered_set<int> globalSendRanks;
+	for (const std::pair<int, int> &entry : m_partitioningGlobalExchanges) {
+		globalSendRanks.insert(entry.first);
+	}
+
+	// Get global list of ranks that will receive data
+	std::unordered_set<int> globalRecvRanks;
+	for (const std::pair<int, int> &entry : m_partitioningGlobalExchanges) {
+		globalRecvRanks.insert(entry.second);
+	}
+
+	// Identify if this is a serialization or a normal partitioning
+	//
+	// We are serializing the patch if all the processes are sending all
+	// their cells to the same rank.
+	m_partitioningSerialization = (globalRecvRanks.size() == 1);
+	if (m_partitioningSerialization) {
+		int receiverRank = *(globalRecvRanks.begin());
+		if (patchRank != receiverRank) {
+			if (m_partitioningOutgoings.size() != (std::size_t) getInternalCellCount()) {
+				m_partitioningSerialization = false;
+			}
+		}
+
+		MPI_Allreduce(MPI_IN_PLACE, &m_partitioningSerialization, 1, MPI_C_BOOL, MPI_LAND, m_communicator);
+	}
+
+	// Build the information on the cells that will be sent
+	//
+	// Only internal cells are tracked.
+	std::vector<adaption::Info> partitioningData;
+	if (trackPartitioning) {
+		for (const std::pair<int, int> &entry : m_partitioningGlobalExchanges) {
+			int sendRank = entry.first;
+			if (sendRank != patchRank) {
+				continue;
+			}
+
+			int recvRank = entry.second;
+
+			std::vector<long> previous;
+			for (const auto &entry : m_partitioningOutgoings) {
+				int cellRank = entry.second;
+				if (cellRank != recvRank) {
+					continue;
+				}
+
+				long cellId = entry.first;
+				previous.push_back(cellId);
+			}
+
+			if (!previous.empty()) {
+				partitioningData.emplace_back();
+				adaption::Info &partitioningInfo = partitioningData.back();
+				partitioningInfo.entity   = adaption::ENTITY_CELL;
+				partitioningInfo.type     = adaption::TYPE_PARTITION_SEND;
+				partitioningInfo.rank     = recvRank;
+				partitioningInfo.previous = std::move(previous);
+			}
+		}
+	}
+
+	return partitioningData;
 }
 
 /*!
