@@ -1643,13 +1643,28 @@ std::vector<adaption::Info> PatchKernel::_partitioningPrepare(const std::unorder
 {
 	BITPIT_UNUSED(cellWeights);
 	BITPIT_UNUSED(defaultWeight);
-	BITPIT_UNUSED(trackPartitioning);
+	//BITPIT_UNUSED(trackPartitioning);
 
-	if (m_nInternalCells > 0) {
-		throw std::runtime_error ("For this patch automatic partitioning can be used only to initialize partitioning on an empty patch.");
+	//if (m_nInternalCells > 0) {
+	//	throw std::runtime_error ("For this patch automatic partitioning can be used only to initialize partitioning on an empty patch.");
+	//}
+	std::unordered_map<long, int> cellRanks;
+	//long id;
+	//std::array<double, 3> centroid;
+	for (const Cell &cell : m_cells) {
+		long id  = cell.getId();
+		std::array<double, 3> centroid = evalCellCentroid(id);
+		if(centroid[0] < 0.0) {
+			cellRanks[id] = 0;
+		}
+		else {
+			cellRanks[id] = 1;
+		}
+
 	}
 
-	return std::vector<adaption::Info>();
+	//return std::vector<adaption::Info>();
+	return _partitioningPrepare(cellRanks, trackPartitioning);
 }
 
 /*!
