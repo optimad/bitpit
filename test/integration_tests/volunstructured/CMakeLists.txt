@@ -36,6 +36,7 @@ if (BITPIT_ENABLE_MPI)
     list(APPEND TESTS "test_volunstructured_parallel_00001:3")
     list(APPEND TESTS "test_volunstructured_parallel_00002:4")
     list(APPEND TESTS "test_volunstructured_parallel_00003:4")
+    list(APPEND TESTS "test_volunstructured_parallel_00004:2")
 endif ()
 
 # Test extra libraries
