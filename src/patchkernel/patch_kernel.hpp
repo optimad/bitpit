@@ -48,6 +48,8 @@
 #include "interface.hpp"
 #include "vertex.hpp"
 
+#include<metis.h>
+
 namespace bitpit {
 
 class PatchKernel : public VTKBaseStreamer {

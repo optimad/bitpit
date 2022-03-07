@@ -1643,27 +1643,66 @@ std::vector<adaption::Info> PatchKernel::_partitioningPrepare(const std::unorder
 {
 	BITPIT_UNUSED(cellWeights);
 	BITPIT_UNUSED(defaultWeight);
-	//BITPIT_UNUSED(trackPartitioning);
 
-	//if (m_nInternalCells > 0) {
-	//	throw std::runtime_error ("For this patch automatic partitioning can be used only to initialize partitioning on an empty patch.");
-	//}
 	std::unordered_map<long, int> cellRanks;
-	//long id;
-	//std::array<double, 3> centroid;
-	for (const Cell &cell : m_cells) {
-		long id  = cell.getId();
-		std::array<double, 3> centroid = evalCellCentroid(id);
-		if(centroid[0] < 0.0) {
-			cellRanks[id] = 0;
-		}
-		else {
-			cellRanks[id] = 1;
-		}
 
+	//If the number of processes is equal one there is no need to call METIS
+	if(getProcessorCount() == 1) {
+		return _partitioningPrepare(cellRanks, trackPartitioning);
 	}
 
-	//return std::vector<adaption::Info>();
+	if(getRank() == 0) {
+
+		//Initialize the number of elements and nodes in the mesh
+		idx_t ne   = getInternalCellCount();
+		idx_t nn   = getInternalVertexCount();
+
+		idx_t i    = 0;
+		idx_t j    = 0;
+		idx_t nsum = 0;
+
+		for (const Cell &cell : m_cells){
+			nsum += idx_t(cell.getVertexCount());
+		}
+
+		//Initialize the vectors storing the mesh
+		std::vector<idx_t> eptr(ne + 1);
+		std::vector<idx_t> eind(nsum);
+
+    	eptr[0] = 0;
+		for (const Cell &cell : m_cells) {
+			for (long vertex : cell.getVertexIds()) {
+				eind[j] = idx_t(vertex);
+				j++;
+			}
+			eptr[i+1] = j;
+			i++;
+		}
+
+		idx_t objval;
+
+		//Get the number of common nodes and the numbers of parts to partition the mesh
+		idx_t ncommon = getDimension();
+		idx_t nparts  = getProcessorCount();
+
+		//Initialize the partition vector for the elements of the mesh and the partition vector of the nodes of the mesh
+		std::vector<idx_t> epart(ne);
+		std::vector<idx_t> npart(nn);
+
+		int ret = METIS_PartMeshDual(&ne, &nn, eptr.data(), eind.data(), nullptr, nullptr, &ncommon, &nparts, nullptr,
+								 nullptr, &objval, epart.data(), npart.data());
+
+		//Fill the cellRanks map
+		int metisId = 0;
+		for (const Cell &cell : m_cells) {
+			int metisRank = epart[metisId];
+			if(metisRank != getRank()) {
+				cellRanks[cell.getId()] = epart[metisId];
+			}
+			++metisId;
+		}
+   }
+
 	return _partitioningPrepare(cellRanks, trackPartitioning);
 }
 
