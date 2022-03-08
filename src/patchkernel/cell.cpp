@@ -634,13 +634,16 @@ long * Cell::getInterfaces(int face)
 */
 int Cell::findInterface(int face, int interface)
 {
-	long *faceInterfaces = getInterfaces(face);
-	int nFaceInterfaces = getInterfaceCount(face);
-	for (int i = 0; i < nFaceInterfaces; i++) {
-		if (faceInterfaces[i] == interface) {
-			return i;
-		}
-	}
+    int nFaceInterfaces = getInterfaceCount(face);
+    if (nFaceInterfaces > 0) {
+        long *faceInterfaces = getInterfaces(face);
+
+        for (int i = 0; i < nFaceInterfaces; i++) {
+            if (faceInterfaces[i] == interface) {
+                return i;
+            }
+        }
+    }
 
 	return -1;
 }
@@ -904,13 +907,16 @@ long * Cell::getAdjacencies(int face)
 */
 int Cell::findAdjacency(int face, int adjacency)
 {
-	long *faceAdjacencies = getAdjacencies(face);
-	int nFaceAdjacencies = getAdjacencyCount(face);
-	for (int i = 0; i < nFaceAdjacencies; i++) {
-		if (faceAdjacencies[i] == adjacency) {
-			return i;
-		}
-	}
+    int nFaceAdjacencies = getAdjacencyCount(face);
+    if (nFaceAdjacencies > 0) {
+        long *faceAdjacencies = getAdjacencies(face);
+
+        for (int i = 0; i < nFaceAdjacencies; i++) {
+            if (faceAdjacencies[i] == adjacency) {
+                return i;
+            }
+        }
+    }
 
 	return -1;
 }
