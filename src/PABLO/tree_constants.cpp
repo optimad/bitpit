@@ -56,8 +56,8 @@ TreeConstants::instance(uint8_t dim) {
 const TreeConstants::Instances &
 TreeConstants::instances() {
 	static TreeConstants::Instances instances = {{
-		TreeConstants(0),
-		TreeConstants(0),
+		TreeConstants(2),
+		TreeConstants(2),
 		TreeConstants(2),
 		TreeConstants(3)
 	}};
