@@ -327,7 +327,7 @@ long VolUnstructured::locatePoint(const std::array<double, 3> &point) const
 {
 	BITPIT_UNUSED(point);
 
-	return false;
+	return Cell::NULL_ID;
 }
 
 }
