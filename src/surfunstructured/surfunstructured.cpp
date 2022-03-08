@@ -244,7 +244,7 @@ long SurfUnstructured::locatePoint(const std::array<double, 3> &point) const
 
 	throw std::runtime_error ("The function 'locatePoint' is not implemented yet");
 
-	return false;
+	return Cell::NULL_ID;
 }
 
 //TODO: Aggiungere un metodo in SurfUnstructured per aggiungere più vertici.
