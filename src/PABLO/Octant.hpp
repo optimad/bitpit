@@ -203,9 +203,9 @@ public:
     bool        getIsGhost() const;
     int         getGhostLayer() const;
     bool        getBalance() const;
+    void        setMarker(int8_t marker);
 protected:
     void        setBound(uint8_t face);
-    void        setMarker(int8_t marker);
     void        setBalance(bool balance);
     void        setLevel(uint8_t level);
     void        setPbound(uint8_t face, bool flag);
