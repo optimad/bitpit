@@ -5683,7 +5683,7 @@ namespace bitpit {
             for(std::size_t i = 0; i < nRankBorders; ++i){
                 const Octant &octant = m_octree.m_octants[rankBordersPerProc[i]];
                 sendBuffer << octant.getMarker();
-                sendBuffer << octant.m_info[Octant::INFO_AUX];
+                sendBuffer << bool(octant.m_info[Octant::INFO_AUX]);
             }
         }
 
