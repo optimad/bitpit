@@ -48,10 +48,10 @@ void matmul(
 // ========================================================================== //
 
 // Local variables
-int          m, n;
+std::size_t          m, n;
 
 // Counters
-int          i, j;
+std::size_t          i, j;
 
 // ========================================================================== //
 // CHECK INPUT                                                                //
@@ -153,7 +153,7 @@ void matmul(
 // ========================================================================== //
 
 // Local variables
-int          m, n;
+std::size_t          m, n;
 
 // Counters
 // none
@@ -244,10 +244,10 @@ void matmul(
 // ========================================================================== //
 
 // Local variables
-int           l, m, n;
+std::size_t           l, m, n;
 
 // Counters
-int           i, j;
+std::size_t           i, j;
 
 // ========================================================================== //
 // CHECK INPUT                                                                //
@@ -361,10 +361,10 @@ void matmul(
 // ========================================================================== //
 
 // Local variables
-int           l, m, n;
+std::size_t           l, m, n;
 
 // Counters
-int           i, j;
+std::size_t           i, j;
 
 // ========================================================================== //
 // CHECK INPUT                                                                //
@@ -478,10 +478,10 @@ void matmul(
 // ========================================================================== //
 
 // Local variables
-int          m1, n1, n2, m2;
+std::size_t          m1, n1, n2, m2;
 
 // Counters
-int          i, j, k;
+std::size_t          i, j, k;
 
 // ========================================================================== //
 // CHECK INPUT                                                                //
@@ -605,13 +605,13 @@ std::vector< std::vector<T> > matmul(
 
     std::vector< std::vector<T> > Tr = transpose(N);
 
-    int d1= M.size();
-    int d2= Tr.size();
+    std::size_t d1= M.size();
+    std::size_t d2= Tr.size();
 
     std::vector< std::vector<T> > Q(d1, std::vector<T> (d2, T()) );
 
-    for( int i=0; i<d1; i++){
-        for( int j=0; j<d2; j++){
+    for( std::size_t i=0; i<d1; i++){
+        for( std::size_t j=0; j<d2; j++){
             Q[i][j]= dotProduct( M[i], Tr[j] );
         };
     };
@@ -632,7 +632,7 @@ std::array< std::array<T, d2> , d1> matmul(
     const std::array< std::array<T, d3>, d1>    &M,
     const std::array<std::array<T, d2>, d3>     &N
 ){
-    int i, j;
+    std::size_t i, j;
 
     std::array< std::array<T, d2> , d1> Q;
     std::array< std::array<T, d3> , d2> Tr;
@@ -663,10 +663,10 @@ std::vector< std::vector<T> > matmulDiag(
     const std::vector<std::vector<T> >          &N
 ) {
 
-    int d1= M.size();
+    std::size_t d1= M.size();
     std::vector< std::vector<T> > Q( N );
 
-    for( int i=0; i<d1; i++){
+    for( std::size_t i=0; i<d1; i++){
         Q[i] *= M[i] ;
     };
 
@@ -690,9 +690,9 @@ std::vector< std::vector<T> > matmulDiag(
 
     std::vector< std::vector<T> > Q( M );
 
-    int d1= M.size() ;
+    std::size_t d1= M.size() ;
 
-    for( int i=0; i<d1; i++ ){
+    for( std::size_t i=0; i<d1; i++ ){
         Q[i] = M[i] * N ;
     };
 
@@ -715,7 +715,7 @@ std::array< std::array<T, d2> , d1> matmulDiag(
     const std::array<std::array<T, d2>, d1>     &N
 ){
 
-    int i;
+    std::size_t i;
     std::array< std::array<T, d2> , d1> Q(N);
 
     for( i=0; i<d1; i++){
@@ -740,7 +740,7 @@ std::array< std::array<T, d2> , d1> matmulDiag(
     const std::array< T, d2>                    &N
 ) {
 
-    int i;
+    std::size_t i;
     std::array< std::array<T, d2> , d1> Q;
 
     for( i=0; i<d1; i++){
@@ -767,11 +767,11 @@ std::vector<T> matmul(
     const std::vector<T>                        &x
 ) {
 
-    int d1 = M.size();
+    std::size_t d1 = M.size();
 
     std::vector<T>      z(d1,0.0);
 
-    for( int i=0; i<d1; i++){
+    for( std::size_t i=0; i<d1; i++){
         z[i]= dotProduct( M[i], x );
     }
 
@@ -817,9 +817,9 @@ std::vector<std::vector<T>> tensorProduct(
     const std::vector<T>                        &y
 ) {
 
-    int  i, j;
-    int  n = x.size(); 
-    int  m = y.size(); 
+    std::size_t  i, j;
+    std::size_t  n = x.size();
+    std::size_t  m = y.size();
     std::vector<T>      row(m,0.0);
     std::vector<std::vector<T>> z(n,row) ;
 
@@ -845,7 +845,7 @@ std::array<std::array<T,m>,n> tensorProduct(
     const std::array<T,n>                       &x,
     const std::array<T,m>                       &y
 ) {
-    int  i, j;
+    std::size_t  i, j;
     std::array<std::array<T,m>,n> z ;
 
     for( i=0; i<n; i++){
