@@ -93,7 +93,7 @@ return; };
     \param[in] B input matrix
     \param[in,out] C product between A and B
 */
-template <class T, size_t m, size_t n>
+template <class T, std::size_t m, std::size_t n>
 void matmul(
     T                                            A,
     const std::array< std::array< T, n >, m >   &B,
@@ -108,7 +108,7 @@ void matmul(
 // none
 
 // Counters
-size_t       i, j;
+std::size_t       i, j;
 
 // ========================================================================== //
 // CHECK INPUT                                                                //
@@ -188,7 +188,7 @@ return; };
     \param[in] B input scalar
     \param[in,out] C product between A and B
 */
-template <class T, size_t m, size_t n>
+template <class T, std::size_t m, std::size_t n>
 void matmul(
     const std::array< std::array< T, n >, m >   &B,
     T                                            A,
@@ -300,7 +300,7 @@ return; }
     \param[in] B input matrix
     \param[in,out] C product between A and B
 */
-template <class T, size_t m, size_t n>
+template <class T, std::size_t m, std::size_t n>
 void matmul(
     const std::array< T, m >                    &A,
     const std::array< std::array < T, n >, m >  &B,
@@ -315,7 +315,7 @@ void matmul(
 // none
 
 // Counters
-size_t        i, j;
+std::size_t        i, j;
 
 // ========================================================================== //
 // CHECK INPUT                                                                //
@@ -417,7 +417,7 @@ return; }
     \param[in] B input vector
     \param[in,out] C product between A and B
 */
-template <class T, size_t m, size_t n>
+template <class T, std::size_t m, std::size_t n>
 void matmul(
     const std::array< std::array < T, n >, m >  &A,
     const std::array< T, n >                    &B,
@@ -432,7 +432,7 @@ void matmul(
 // none
 
 // Counters
-size_t        i, j;
+std::size_t        i, j;
 
 // ========================================================================== //
 // CHECK INPUT                                                                //
@@ -540,7 +540,7 @@ return; };
     \param[in] B input matrix
     \param[in,out] C product between A and B
 */
-template <class T, size_t m, size_t n, size_t l>
+template <class T, std::size_t m, std::size_t n, std::size_t l>
 void matmul(
     const std::array< std::array< T, n >, m >   &A,
     const std::array< std::array< T, l >, n >   &B,
@@ -555,7 +555,7 @@ void matmul(
 // none
 
 // Counters
-size_t       i, j, k;
+std::size_t       i, j, k;
 
 // ========================================================================== //
 // CHECK INPUT                                                                //
@@ -627,7 +627,7 @@ std::vector< std::vector<T> > matmul(
 
     \result product of M and N.
 */
-template <class T, size_t d1, size_t d2, size_t d3>
+template <class T, std::size_t d1, std::size_t d2, std::size_t d3>
 std::array< std::array<T, d2> , d1> matmul(
     const std::array< std::array<T, d3>, d1>    &M,
     const std::array<std::array<T, d2>, d3>     &N
@@ -709,7 +709,7 @@ std::vector< std::vector<T> > matmulDiag(
 
     \result diadic product between M and N.
 */
-template <class T, size_t d1, size_t d2>
+template <class T, std::size_t d1, std::size_t d2>
 std::array< std::array<T, d2> , d1> matmulDiag(
     const std::array< T, d1>                    &M,
     const std::array<std::array<T, d2>, d1>     &N
@@ -734,7 +734,7 @@ std::array< std::array<T, d2> , d1> matmulDiag(
 
     \result diadic product between M and N.
 */
-template <class T, size_t d1, size_t d2>
+template <class T, std::size_t d1, std::size_t d2>
 std::array< std::array<T, d2> , d1> matmulDiag(
     const std::array<std::array<T, d2>, d1>     &M,
     const std::array< T, d2>                    &N
@@ -787,7 +787,7 @@ std::vector<T> matmul(
 
     \result product between M and x
 */
-template <class T, size_t d1, size_t d2>
+template <class T, std::size_t d1, std::size_t d2>
 std::array<T, d1> matmul(
     const std::array< std::array<T, d2>, d1>    &M,
     const std::array<T, d2>                     &x
@@ -795,7 +795,7 @@ std::array<T, d1> matmul(
 
     std::array<T, d1>      z;
 
-    for( size_t i=0; i<d1; i++){
+    for( std::size_t i=0; i<d1; i++){
         z[i]= dotProduct( M[i], x);
     }
 
@@ -817,14 +817,13 @@ std::vector<std::vector<T>> tensorProduct(
     const std::vector<T>                        &y
 ) {
 
-    std::size_t  i, j;
     std::size_t  n = x.size();
     std::size_t  m = y.size();
     std::vector<T>      row(m,0.0);
     std::vector<std::vector<T>> z(n,row) ;
 
-    for( i=0; i<n; i++){
-        for( j=0; j<m; j++){
+    for( std::size_t i=0; i<n; i++){
+        for( std::size_t j=0; j<m; j++){
             z[i][j] = x[i] *y[j] ;
         };
     };
@@ -840,16 +839,15 @@ return (z);}
 
     \result tensor product between x and y
 */
-template <class T, size_t n, size_t m>
+template <class T, std::size_t n, std::size_t m>
 std::array<std::array<T,m>,n> tensorProduct(
     const std::array<T,n>                       &x,
     const std::array<T,m>                       &y
 ) {
-    std::size_t  i, j;
     std::array<std::array<T,m>,n> z ;
 
-    for( i=0; i<n; i++){
-        for( j=0; j<m; j++){
+    for( std::size_t i=0; i<n; i++){
+        for( std::size_t j=0; j<m; j++){
             z[i][j] = x[i] *y[j] ;
         };
     };
