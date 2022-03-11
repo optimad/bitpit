@@ -50,9 +50,6 @@ void matmul(
 // Local variables
 std::size_t          m, n;
 
-// Counters
-std::size_t          i, j;
-
 // ========================================================================== //
 // CHECK INPUT                                                                //
 // ========================================================================== //
@@ -75,9 +72,9 @@ if (n == 0) {
 C.resize(m);
 
 // Perform product
-for (i = 0; i < m; i++) {
+for (std::size_t i = 0; i < m; i++) {
     C[i].resize(n, (T) 0.0);
-    for (j = 0; j < n; j++) {
+    for (std::size_t j = 0; j < n; j++) {
         C[i][j] = A * B[i][j];
     } //next j
 } //next i
@@ -107,9 +104,6 @@ void matmul(
 // Local variables
 // none
 
-// Counters
-std::size_t       i, j;
-
 // ========================================================================== //
 // CHECK INPUT                                                                //
 // ========================================================================== //
@@ -125,8 +119,8 @@ if (n == 0) {
 // ========================================================================== //
 // PERFORM PRODUCT                                                            //
 // ========================================================================== //
-for (i = 0; i < m; i++) {
-    for (j = 0; j < n; j++) {
+for (std::size_t i = 0; i < m; i++) {
+    for (std::size_t j = 0; j < n; j++) {
         C[i][j] = A * B[i][j];
     } //next j
 } //next i
@@ -246,9 +240,6 @@ void matmul(
 // Local variables
 std::size_t           l, m, n;
 
-// Counters
-std::size_t           i, j;
-
 // ========================================================================== //
 // CHECK INPUT                                                                //
 // ========================================================================== //
@@ -282,9 +273,9 @@ if (l != m) {
 C.resize(n, 0.0);
 
 // Compute matrix product
-for (i = 0; i < n; i++) {
+for (std::size_t i = 0; i < n; i++) {
     C[i] = 0.0;
-    for (j = 0; j < m; j++) {
+    for (std::size_t j = 0; j < m; j++) {
         C[i] += A[j]*B[j][i];
     } //next j
 } //next i
@@ -314,9 +305,6 @@ void matmul(
 // Local variables
 // none
 
-// Counters
-std::size_t        i, j;
-
 // ========================================================================== //
 // CHECK INPUT                                                                //
 // ========================================================================== //
@@ -332,9 +320,9 @@ if (n == 0) {
 // ========================================================================== //
 // COMPUTE THE MATRIX PRODUCT                                                 //
 // ========================================================================== //
-for (i = 0; i < n; i++) {
+for (std::size_t i = 0; i < n; i++) {
     C[i] = 0.0;
-    for (j = 0; j < m; j++) {
+    for (std::size_t j = 0; j < m; j++) {
         C[i] += A[j]*B[j][i];
     } //next j
 } //next i
@@ -362,9 +350,6 @@ void matmul(
 
 // Local variables
 std::size_t           l, m, n;
-
-// Counters
-std::size_t           i, j;
 
 // ========================================================================== //
 // CHECK INPUT                                                                //
@@ -399,9 +384,9 @@ if (l != n) {
 C.resize(m, 0.0);
 
 // Compute matrix product
-for (i = 0; i < m; i++) {
+for (std::size_t i = 0; i < m; i++) {
     C[i] = 0.0;
-    for (j = 0; j < n; j++) {
+    for (std::size_t j = 0; j < n; j++) {
         C[i] += B[j]*A[i][j];
     } //next j
 } //next i
@@ -431,9 +416,6 @@ void matmul(
 // Local variables
 // none
 
-// Counters
-std::size_t        i, j;
-
 // ========================================================================== //
 // CHECK INPUT                                                                //
 // ========================================================================== //
@@ -449,9 +431,9 @@ if (n == 0) {
 // ========================================================================== //
 // COMPUTE THE MATRIX PRODUCT                                                 //
 // ========================================================================== //
-for (i = 0; i < m; i++) {
+for (std::size_t i = 0; i < m; i++) {
     C[i] = 0.0;
-    for (j = 0; j < n; j++) {
+    for (std::size_t j = 0; j < n; j++) {
         C[i] += B[j]*A[i][j];
     } //next j
 } //next i
@@ -479,9 +461,6 @@ void matmul(
 
 // Local variables
 std::size_t          m1, n1, n2, m2;
-
-// Counters
-std::size_t          i, j, k;
 
 // ========================================================================== //
 // CHECK INPUT                                                                //
@@ -519,11 +498,11 @@ if (n1 != m2) {
 // Resiz output variable
 C.resize(m1);
 
-for (i = 0; i < m1; i++) {
+for (std::size_t i = 0; i < m1; i++) {
     C[i].resize(n2, (T) 0.0);
-    for (j = 0; j < n2; j++) {
+    for (std::size_t j = 0; j < n2; j++) {
         C[i][j] = (T) 0.0;
-        for (k = 0; k < n1; k++) {
+        for (std::size_t k = 0; k < n1; k++) {
             C[i][j] += A[i][k] * B[k][j];
         } //next k
     } //next j
@@ -554,9 +533,6 @@ void matmul(
 // Local variables
 // none
 
-// Counters
-std::size_t       i, j, k;
-
 // ========================================================================== //
 // CHECK INPUT                                                                //
 // ========================================================================== //
@@ -577,10 +553,10 @@ if (l == 0) {
 // ========================================================================== //
 // PERFORM PRODUCT                                                            //
 // ========================================================================== //
-for (i = 0; i < m; i++) {
-    for (j = 0; j < l; j++) {
+for (std::size_t i = 0; i < m; i++) {
+    for (std::size_t j = 0; j < l; j++) {
         C[i][j] = (T) 0.0;
-        for (k = 0; k < n; k++) {
+        for (std::size_t k = 0; k < n; k++) {
             C[i][j] += A[i][k] * B[k][j];
         } //next k
     } //next j
@@ -632,15 +608,13 @@ std::array< std::array<T, d2> , d1> matmul(
     const std::array< std::array<T, d3>, d1>    &M,
     const std::array<std::array<T, d2>, d3>     &N
 ){
-    std::size_t i, j;
-
     std::array< std::array<T, d2> , d1> Q;
     std::array< std::array<T, d3> , d2> Tr;
 
     Tr = transpose( N ) ;
 
-    for( i=0; i<d1; i++){
-        for( j=0; j<d2; j++){
+    for( std::size_t i=0; i<d1; i++){
+        for( std::size_t j=0; j<d2; j++){
             Q[i][j]= dotProduct( M[i], Tr[j] );
         };
     };
