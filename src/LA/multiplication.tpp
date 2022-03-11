@@ -39,7 +39,7 @@ namespace linearalgebra{
 template <class T>
 void matmul(
     T                                            A,
-    std::vector< std::vector< T > >             &B,
+    const  std::vector< std::vector< T > >      &B,
     std::vector< std::vector< T > >             &C
 ) {
 
@@ -96,7 +96,7 @@ return; };
 template <class T, size_t m, size_t n>
 void matmul(
     T                                            A,
-    std::array< std::array< T, n >, m >         &B,
+    const std::array< std::array< T, n >, m >   &B,
     std::array< std::array< T, n >, m >         &C
 ) {
 
@@ -143,7 +143,7 @@ return; };
 */
 template <class T>
 void matmul(
-    std::vector< std::vector< T > >             &B,
+    const std::vector< std::vector< T > >       &B,
     T                                            A,
     std::vector< std::vector< T > >             &C
 ) {
@@ -190,7 +190,7 @@ return; };
 */
 template <class T, size_t m, size_t n>
 void matmul(
-    std::array< std::array< T, n >, m >         &B,
+    const std::array< std::array< T, n >, m >   &B,
     T                                            A,
     std::array< std::array< T, n >, m >         &C
 ) {
@@ -234,8 +234,8 @@ return; };
 */
 template <class T>
 void matmul(
-    std::vector< T >                            &A,
-    std::vector< std::vector < T > >            &B,
+    const std::vector< T >                      &A,
+    const std::vector< std::vector < T > >      &B,
     std::vector< T >                            &C
 ) {
 
@@ -302,8 +302,8 @@ return; }
 */
 template <class T, size_t m, size_t n>
 void matmul(
-    std::array< T, m >                          &A,
-    std::array< std::array < T, n >, m >        &B,
+    const std::array< T, m >                    &A,
+    const std::array< std::array < T, n >, m >  &B,
     std::array< T, n >                          &C
 ) {
 
@@ -351,8 +351,8 @@ return; }
 */
 template <class T>
 void matmul(
-    std::vector< std::vector < T > >            &A,
-    std::vector< T >                            &B,
+    const std::vector< std::vector < T > >      &A,
+    const std::vector< T >                      &B,
     std::vector< T >                            &C
 ) {
 
@@ -419,8 +419,8 @@ return; }
 */
 template <class T, size_t m, size_t n>
 void matmul(
-    std::array< std::array < T, n >, m >        &A,
-    std::array< T, n >                          &B,
+    const std::array< std::array < T, n >, m >  &A,
+    const std::array< T, n >                    &B,
     std::array< T, m >                          &C
 ) {
 
@@ -468,8 +468,8 @@ return; }
 */
 template <class T>
 void matmul(
-    std::vector< std::vector< T > >             &A,
-    std::vector< std::vector< T > >             &B,
+    const std::vector< std::vector< T > >       &A,
+    const std::vector< std::vector< T > >       &B,
     std::vector< std::vector< T > >             &C
 ) {
 
@@ -542,8 +542,8 @@ return; };
 */
 template <class T, size_t m, size_t n, size_t l>
 void matmul(
-    std::array< std::array< T, n >, m >         &A,
-    std::array< std::array< T, l >, n >         &B,
+    const std::array< std::array< T, n >, m >   &A,
+    const std::array< std::array< T, l >, n >   &B,
     std::array< std::array< T, l >, m >         &C
 ) {
 

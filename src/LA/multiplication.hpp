@@ -62,70 +62,70 @@ namespace linearalgebra{
 template <class T>
 void matmul(                                                                  // Matrix multiplication with a constant
     T                            ,                                            // (input) 1st input scalar
-    std::vector< std::vector< T > >             &,                            // (input) 2nd input matrix
+    const std::vector< std::vector< T > >       &,                            // (input) 2nd input matrix
     std::vector< std::vector< T > >             &                             // (input/output) output matrix
 );
 
 template <class T, size_t m, size_t n>
 void matmul(                                                                  // Matrix multiplication with a constant
     T                            ,                                            // (input) 1st input scalar
-    std::array< std::array< T, n >, m >         &,                            // (input) 2nd input matrix
+    const  std::array< std::array< T, n >, m >  &,                            // (input) 2nd input matrix
     std::array< std::array< T, n >, m >         &                             // (input/output) output matrix
 );
 
 template <class T>
 void matmul(                                                                  // Matrix multiplication with a constant
-    std::vector< std::vector< T > >             &,                            // (input) 1st input matrix
+    const  std::vector< std::vector< T > >      &,                            // (input) 1st input matrix
     T                                            ,                            // (input) 2nd input scalar
     std::vector< std::vector< T > >             &                             // (input/output) output matrix
 );
 
 template <class T, size_t m, size_t n>
 void matmul(                                                                  // Matrix multiplication with a constant
-    std::array< std::array< T, n >, m >         &,                            // (input) 1st input matrix
+    const  std::array< std::array< T, n >, m >  &,                            // (input) 1st input matrix
     T                                            ,                            // (input) 2nd input scalar
     std::array< std::array< T, n >, m >         &                             // (input/output) output matrix
 );
 
 template <class T>
 void matmul(                                                                  // Matrix multiplication with a vector
-    std::vector< T >                            &,                            // (input) 1st input vector
-    std::vector< std::vector< T > >             &,                            // (input) 2nd input matrix
+    const std::vector< T >                      &,                            // (input) 1st input vector
+    const std::vector< std::vector< T > >       &,                            // (input) 2nd input matrix
     std::vector< T >                            &                             // (input/output) output vector
 );
 
 template <class T, size_t m, size_t n>
 void matmul(                                                                  // Matrix multiplication with a vector
-    std::array< T, m >                          &,                            // (input) 1st input vector
-    std::array< std::array < T, n >, m >        &,                            // (input) 2nd input matrix
+    const std::array< T, m >                    &,                            // (input) 1st input vector
+    const std::array< std::array < T, n >, m >  &,                            // (input) 2nd input matrix
     std::array< T, n >                          &                             // (input/output) output vector
 );
 
 template <class T>
 void matmul(                                                                  // Matrix multiplication with a vector
-    std::vector< std::vector< T > >             &,                            // (input) 1st input matrix
-    std::vector< T >                            &,                            // (input) 2nd input vector
+    const std::vector< std::vector< T > >       &,                            // (input) 1st input matrix
+    const std::vector< T >                      &,                            // (input) 2nd input vector
     std::vector< T >                            &                             // (input/output) output vector
 );
 
 template <class T, size_t m, size_t n>
 void matmul(                                                                  // Matrix multiplication with a vector
-    std::array< std::array < T, n >, m >        &,                            // (input) 1st input matrix
-    std::array< T, n >                          &,                            // (input) 2nd input vector
+    const std::array< std::array < T, n >, m >  &,                            // (input) 1st input matrix
+    const std::array< T, n >                    &,                            // (input) 2nd input vector
     std::array< T, m >                          &                             // (input/output) output vector
 );
 
 template <class T>
 void matmul(                                                                  // Matrix multiplication
-    std::vector< std::vector< T > >             &,                            // (input) 1st input matrix
-    std::vector< std::vector< T > >             &,                            // (input) 2nd input matrix
+    const std::vector< std::vector< T > >       &,                            // (input) 1st input matrix
+    const std::vector< std::vector< T > >       &,                            // (input) 2nd input matrix
     std::vector< std::vector< T > >             &                             // (input/output) output matrix
 );
 
 template <class T, size_t m, size_t n, size_t l> 
 void matmul(                                                                  // Matrix multiplication
-    std::array< std::array< T, n >, m >         &,                            // (input) 1st input matrix
-    std::array< std::array< T, l >, n >         &,                            // (input) 2nd input matrix
+    const std::array< std::array< T, n >, m >   &,                            // (input) 1st input matrix
+    const std::array< std::array< T, l >, n >   &,                            // (input) 2nd input matrix
     std::array< std::array< T, l >, m >         &                             // (input/output) output matrix
 );
 
