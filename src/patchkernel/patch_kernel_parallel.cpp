@@ -1665,6 +1665,14 @@ std::vector<adaption::Info> PatchKernel::_partitioningPrepare(const std::unorder
 			nsum += idx_t(cell.getVertexCount());
 		}
 
+		// Renumbering the vertices ids contiguously starting from zero
+		std::unordered_map<long, idx_t> nodeVertexId;
+		idx_t vertexContiguousId = 0;
+	    for (const Vertex &vertex : m_vertices) {
+			nodeVertexId[vertex.getId()] = vertexContiguousId;
+			++vertexContiguousId;
+		}
+
 		//Initialize the vectors storing the mesh
 		std::vector<idx_t> eptr(ne + 1);
 		std::vector<idx_t> eind(nsum);
@@ -1672,7 +1680,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningPrepare(const std::unorder
     	eptr[0] = 0;
 		for (const Cell &cell : m_cells) {
 			for (long vertex : cell.getVertexIds()) {
-				eind[j] = idx_t(vertex);
+				eind[j] = nodeVertexId[vertex];
 				j++;
 			}
 			eptr[i+1] = j;
