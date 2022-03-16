@@ -198,6 +198,8 @@ int subtest_001(int rank)
 
     std::unordered_map<long, int> cellRanks;
     if (rank == 0) {
+
+        /*
         int nProcs;
         MPI_Comm_size(patch->getCommunicator(), &nProcs);
         std::size_t nMaxCellsPerProc = std::ceil((double) patch->getInternalCellCount() / nProcs);
@@ -209,6 +211,91 @@ int subtest_001(int rank)
 
             cellRanks[itr.getId()] = rank;
         }
+        */
+
+        // Fill the cellRanks with the info from METIS with nProcs = 4
+        // Rank 0
+        cellRanks[0] = 0;
+        cellRanks[4] = 0;
+        cellRanks[5] = 0;
+        cellRanks[12] = 0;
+        cellRanks[15] = 0;
+        cellRanks[19] = 0;
+        cellRanks[20] = 0;
+        cellRanks[21] = 0;
+        cellRanks[26] = 0;
+        cellRanks[30] = 0;
+        cellRanks[31] = 0;
+        cellRanks[32] = 0;
+        cellRanks[33] = 0;
+        cellRanks[34] = 0;
+        cellRanks[35] = 0;
+        cellRanks[36] = 0;
+        cellRanks[37] = 0;
+        cellRanks[47] = 0;
+        cellRanks[49] = 0;
+
+        //Rank 1
+        cellRanks[2] = 1;
+        cellRanks[3] = 1;
+        cellRanks[6] = 1;
+        cellRanks[7] = 1;
+        cellRanks[11] = 1;
+        cellRanks[13] = 1;
+        cellRanks[18] = 1;
+        cellRanks[22] = 1;
+        cellRanks[25] = 1;
+        cellRanks[45] = 1;
+        cellRanks[53] = 1;
+        cellRanks[60] = 1;
+        cellRanks[61] = 1;
+        cellRanks[62] = 1;
+        cellRanks[63] = 1;
+        cellRanks[64] = 1;
+        cellRanks[65] = 1;
+        cellRanks[66] = 1;
+        cellRanks[67] = 1;
+
+        // Rank 2
+        cellRanks[1] = 2;
+        cellRanks[14] = 2;
+        cellRanks[16] = 2;
+        cellRanks[23] = 2;
+        cellRanks[28] = 2;
+        cellRanks[29] = 2;
+        cellRanks[38] = 2;
+        cellRanks[40] = 2;
+        cellRanks[41] = 2;
+        cellRanks[43] = 2;
+        cellRanks[46] = 2;
+        cellRanks[51] = 2;
+        cellRanks[68] = 2;
+        cellRanks[69] = 2;
+        cellRanks[70] = 2;
+        cellRanks[71] = 2;
+        cellRanks[72] = 2;
+        cellRanks[73] = 2;
+        cellRanks[74] = 2;
+
+        // Rank 3
+        cellRanks[8] = 3;
+        cellRanks[9] = 3;
+        cellRanks[10] = 3;
+        cellRanks[17] = 3;
+        cellRanks[24] = 3;
+        cellRanks[27] = 3;
+        cellRanks[39] = 3;
+        cellRanks[42] = 3;
+        cellRanks[44] = 3;
+        cellRanks[48] = 3;
+        cellRanks[50] = 3;
+        cellRanks[52] = 3;
+        cellRanks[54] = 3;
+        cellRanks[55] = 3;
+        cellRanks[56] = 3;
+        cellRanks[57] = 3;
+        cellRanks[58] = 3;
+        cellRanks[59] = 3;
     }
 
     // Partition
