@@ -1641,19 +1641,16 @@ double PatchKernel::evalPartitioningUnbalance(const std::unordered_map<long, dou
 */
 std::vector<adaption::Info> PatchKernel::_partitioningPrepare(const std::unordered_map<long, double> &cellWeights, double defaultWeight, bool trackPartitioning)
 {
-	BITPIT_UNUSED(cellWeights);
-	BITPIT_UNUSED(defaultWeight);
-
 	std::unordered_map<long, int> cellRanks;
 
-	//If the number of processes is equal one there is no need to call METIS
+	// If the number of processes is equal one there is no need to call METIS
 	if(getProcessorCount() == 1) {
 		return _partitioningPrepare(cellRanks, trackPartitioning);
 	}
 
 	if(getRank() == 0) {
 
-		//Initialize the number of elements and nodes in the mesh
+		// Initialize the number of elements and nodes in the mesh
 		idx_t ne   = getInternalCellCount();
 		idx_t nn   = getInternalVertexCount();
 
@@ -1673,7 +1670,10 @@ std::vector<adaption::Info> PatchKernel::_partitioningPrepare(const std::unorder
 			++vertexContiguousId;
 		}
 
-		//Initialize the vectors storing the mesh
+		// Initialize the vector specifying the weights of the elements
+		std::vector<idx_t> vwgt(ne, idx_t(defaultWeight));
+
+		// Initialize the vectors storing the mesh
 		std::vector<idx_t> eptr(ne + 1);
 		std::vector<idx_t> eind(nsum);
 
@@ -1683,24 +1683,30 @@ std::vector<adaption::Info> PatchKernel::_partitioningPrepare(const std::unorder
 				eind[j] = nodeVertexId[vertex];
 				j++;
 			}
+
+			auto weightItr = cellWeights.find(cell.getId());
+			if (weightItr != cellWeights.end()) {
+				vwgt[i] = std::max(idx_t(weightItr->second), idx_t(1));
+			}
 			eptr[i+1] = j;
 			i++;
 		}
 
 		idx_t objval;
 
-		//Get the number of common nodes and the numbers of parts to partition the mesh
+		// Get the number of common nodes and the numbers of parts to partition the mesh
 		idx_t ncommon = getDimension();
 		idx_t nparts  = getProcessorCount();
 
-		//Initialize the partition vector for the elements of the mesh and the partition vector of the nodes of the mesh
+		// Initialize the partition vector for the elements of the mesh and the partition vector of the nodes of the mesh
 		std::vector<idx_t> epart(ne);
 		std::vector<idx_t> npart(nn);
 
-		int ret = METIS_PartMeshDual(&ne, &nn, eptr.data(), eind.data(), nullptr, nullptr, &ncommon, &nparts, nullptr,
+		int ret = METIS_PartMeshDual(&ne, &nn, eptr.data(), eind.data(), vwgt.data(), nullptr, &ncommon, &nparts, nullptr,
 								 nullptr, &objval, epart.data(), npart.data());
+		BITPIT_UNUSED(ret);
 
-		//Fill the cellRanks map
+		// Fill the cellRanks map
 		int metisId = 0;
 		for (const Cell &cell : m_cells) {
 			int metisRank = epart[metisId];
