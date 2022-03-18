@@ -1701,6 +1701,7 @@ std::array<double, 3> Element::evalNormal(const std::array<double, 3> *coordinat
 			const Reference2DElementInfo &referenceInfo = static_cast<const Reference2DElementInfo &>(ReferenceElementInfo::getInfo(tileType));
 
 			double tileArea = referenceInfo.evalArea(tileCoordinates.data());
+			if(tileArea == 0) continue;
 			std::array<double, 3> tileNormal = {{0., 0., 0.,}};
 			if (dimension == 2) {
 				tileNormal = referenceInfo.evalNormal(tileCoordinates.data(), point);
