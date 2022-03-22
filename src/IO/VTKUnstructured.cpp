@@ -674,7 +674,7 @@ uint64_t VTKUnstructuredGrid::calcFieldSize( const VTKField &field ){
 uint64_t VTKUnstructuredGrid::calcFieldEntries( const VTKField &field ){
 
     uint64_t entries(0) ;
-    std::string name( field.getName() ) ;
+    const std::string &name = field.getName() ;
 
     if( name == "Points" ){
         entries = m_points *static_cast<int>(VTKFieldType::VECTOR) ; 
@@ -726,7 +726,7 @@ uint64_t VTKUnstructuredGrid::calcFieldEntries( const VTKField &field ){
 uint8_t VTKUnstructuredGrid::calcFieldComponents( const VTKField &field ){
 
     uint8_t comp ;
-    std::string name( field.getName() ) ;
+    const std::string &name = field.getName() ;
 
     if( name == "Points" ){
         comp = static_cast<int>(VTKFieldType::VECTOR) ; 

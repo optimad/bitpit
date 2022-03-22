@@ -510,7 +510,7 @@ uint64_t VTKRectilinearGrid::calcFieldSize( const VTKField &field ){
 uint64_t VTKRectilinearGrid::calcFieldEntries( const VTKField &field ){
 
     uint64_t entries(0) ;
-    std::string name( field.getName() ) ;
+    const std::string &name = field.getName() ;
 
     if( name == "x_Coord" ){
         entries = m_localIndex[0][1] -m_localIndex[0][0] +1 ;
@@ -553,7 +553,7 @@ uint64_t VTKRectilinearGrid::calcFieldEntries( const VTKField &field ){
 uint8_t VTKRectilinearGrid::calcFieldComponents( const VTKField &field ){
 
     uint8_t comp ;
-    std::string name( field.getName() ) ;
+    const std::string &name = field.getName() ;
 
     if( name == "x_Coord" || name == "y_Cooord" || name == "z_Coord" ){
         comp = 1 ;
