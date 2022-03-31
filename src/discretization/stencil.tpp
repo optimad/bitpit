@@ -676,8 +676,7 @@ void DiscreteStencil<weight_t>::zero()
 {
     const std::size_t nItems = size();
     for (std::size_t n = 0; n < nItems; ++n) {
-        weight_t &weight = m_weights[n];
-        rawCopyValue(m_zero, &weight);
+        rawCopyValue(m_zero, m_weights.data() + n);
     }
 
     setConstant(m_zero);
