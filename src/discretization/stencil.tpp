@@ -705,10 +705,11 @@ bool DiscreteStencil<weight_t>::optimizeWeight(std::size_t pos, double tolerance
 template<typename weight_t>
 weight_t * DiscreteStencil<weight_t>::findWeight(long id)
 {
-    const std::size_t nItems = size();
-    for (std::size_t n = 0; n < nItems; ++n) {
-        if (m_pattern[n] == id) {
-            return (m_weights.data() + n);
+    auto patternBegin = m_pattern.cbegin();
+    auto patternEnd   = m_pattern.cend();
+    for (auto itr = patternBegin; itr != patternEnd; ++itr) {
+        if (*itr == id) {
+            return (m_weights.data() + std::distance(patternBegin, itr));
         }
     }
 
@@ -725,10 +726,11 @@ weight_t * DiscreteStencil<weight_t>::findWeight(long id)
 template<typename weight_t>
 const weight_t * DiscreteStencil<weight_t>::findWeight(long id) const
 {
-    const std::size_t nItems = size();
-    for (std::size_t n = 0; n < nItems; ++n) {
-        if (m_pattern[n] == id) {
-            return (m_weights.data() + n);
+    auto patternBegin = m_pattern.cbegin();
+    auto patternEnd   = m_pattern.cend();
+    for (auto itr = patternBegin; itr != patternEnd; ++itr) {
+        if (*itr == id) {
+            return (m_weights.data() + std::distance(patternBegin, itr));
         }
     }
 
