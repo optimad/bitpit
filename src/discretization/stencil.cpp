@@ -100,7 +100,9 @@ void DiscreteStencil<std::array<double, 3>>::rawCopyValue(const std::array<doubl
 }
 
 /**
- * Set the source value into the target.
+ * Copy the source value into the target.
+ *
+ * The target will be resized to match the size of the source.
  *
  * \param source is the value that will be set
  * \param[out] target on output will contain the source value
@@ -108,10 +110,16 @@ void DiscreteStencil<std::array<double, 3>>::rawCopyValue(const std::array<doubl
 template<>
 void DiscreteStencil<std::vector<double>>::rawCopyValue(const std::vector<double> &source, std::vector<double> *target)
 {
-    if (source.size() == target->size()) {
-        std::copy_n(source.data(), source.size(), target->data());
-    } else {
-        target->assign(source.begin(), source.end());
+    std::size_t sourceSize = source.size();
+    std::size_t targetSize = target->size();
+    std::size_t commonSize = std::min(sourceSize, targetSize);
+
+    std::copy_n(source.data(), commonSize, target->data());
+
+    if (sourceSize < targetSize) {
+        target->resize(sourceSize);
+    } else if (sourceSize > targetSize) {
+        target->insert(target->end(), source.begin() + commonSize, source.end());
     }
 }
 
