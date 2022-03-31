@@ -149,10 +149,14 @@ void DiscreteStencil<weight_t>::initialize(std::size_t size, const weight_t &zer
 {
     rawCopyValue(zero, &m_zero);
 
-    resize(size);
-    for (std::size_t n = 0; n < size; ++n) {
+    std::size_t previousSize = this->size();
+    std::size_t commonSize   = std::min(previousSize, size);
+    for (std::size_t n = 0; n < commonSize; ++n) {
         m_pattern[n] = -1;
         rawCopyValue(m_zero, m_weights.data() + n);
+    }
+    if (previousSize != size) {
+        resize(size);
     }
 
     zeroConstant();
@@ -170,10 +174,17 @@ void DiscreteStencil<weight_t>::initialize(std::size_t size, const long *pattern
 {
     rawCopyValue(zero, &m_zero);
 
-    resize(size);
-    for (std::size_t n = 0; n < size; ++n) {
+    std::size_t previousSize = this->size();
+    std::size_t commonSize   = std::min(previousSize, size);
+    for (std::size_t n = 0; n < commonSize; ++n) {
         m_pattern[n] = pattern[n];
         rawCopyValue(m_zero, m_weights.data() + n);
+    }
+    if (previousSize != size) {
+        resize(size);
+        for (std::size_t n = previousSize; n < size; ++n) {
+            m_pattern[n] = pattern[n];
+        }
     }
 
     zeroConstant();
@@ -192,10 +203,19 @@ void DiscreteStencil<weight_t>::initialize(std::size_t size, const long *pattern
 {
     rawCopyValue(zero, &m_zero);
 
-    resize(size);
-    for (std::size_t n = 0; n < size; ++n) {
+    std::size_t previousSize = this->size();
+    std::size_t commonSize   = std::min(previousSize, size);
+    for (std::size_t n = 0; n < commonSize; ++n) {
         m_pattern[n] = pattern[n];
         rawCopyValue(weights[n], m_weights.data() + n);
+    }
+    if (size > previousSize) {
+        reserve(size);
+        for (std::size_t n = previousSize; n < size; ++n) {
+            appendItem(pattern[n], weights[n]);
+        }
+    } else if (size < previousSize) {
+        resize(size);
     }
 
     zeroConstant();
@@ -210,16 +230,7 @@ void DiscreteStencil<weight_t>::initialize(std::size_t size, const long *pattern
 template<typename weight_t>
 void DiscreteStencil<weight_t>::initialize(const DiscreteStencil<weight_t> &other)
 {
-    rawCopyValue(other.m_zero, &m_zero);
-
-    std::size_t nItems = other.size();
-    resize(nItems);
-    for (std::size_t n = 0; n < nItems; ++n) {
-        m_pattern[n] = other.m_pattern[n];
-        rawCopyValue(other.m_weights[n], m_weights.data() + n);
-    }
-
-    setConstant(other.m_constant);
+    initialize(other.size(), other.m_pattern.data(), other.m_weights.data(), other.m_zero);
 }
 
 /*!
