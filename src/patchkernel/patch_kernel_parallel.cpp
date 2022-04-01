@@ -231,15 +231,15 @@ int PatchKernel::evalOwner() const
 		MPI_Allreduce(MPI_IN_PLACE, &nGlobalInternalCells, 1, MPI_LONG, MPI_SUM, getCommunicator());
 	}
 
-	int owner;
-	if (nInternalCells == nGlobalInternalCells) {
-		owner = getRank();
-	} else {
-		owner = -1;
-	}
+	int owner = -1;
+	if (nGlobalInternalCells > 0) {
+		if (nInternalCells == nGlobalInternalCells) {
+			owner = getRank();
+		}
 
-	if (isPartitioned()) {
-		MPI_Allreduce(MPI_IN_PLACE, &owner, 1, MPI_INT, MPI_MAX, getCommunicator());
+		if (isPartitioned()) {
+			MPI_Allreduce(MPI_IN_PLACE, &owner, 1, MPI_INT, MPI_MAX, getCommunicator());
+		}
 	}
 
 	return owner;
