@@ -190,6 +190,7 @@ int subtest_001(int rank)
 
     patch->initializeAdjacencies();
     patch->initializeInterfaces();
+    patch->update();
 
     //
     // Partition the patch
