@@ -29,6 +29,9 @@
 #include <mpi.h>
 #include <chrono>
 #include <unordered_set>
+#if BITPIT_ENABLE_METIS==1
+#include <metis.h>
+#endif
 
 #include "bitpit_communications.hpp"
 
@@ -1625,10 +1628,22 @@ double PatchKernel::evalPartitioningUnbalance(const std::unordered_map<long, dou
 
 /*!
 	Prepares the patch for performing the partitioning.
+*/
+#if BITPIT_ENABLE_METIS==1
+/*!
+	This function uses METIS to evaluate patch partitioning, hence it can only be
+	used when the patch is all on a single process.
 
-	Default implementation is a no-op function and can only be used to
-	partition an empty patch.
-
+	METIS expects weights to be integer numbers, non-integer weights are rounded to
+	the nearest integer and weights less than 1 are set to 1.
+*/
+#else
+/*!
+	Default implementation is a no-op function and can only be used if the patch is
+	empty or if the patch is not distributed and a single partition is requested.
+*/
+#endif
+/*!
 	\param cellWeights are the weights of the cells, the weight represents the
 	relative computational cost associated with a specified cell. If no weight
 	is specified for a cell, the default weight will be used
@@ -1642,15 +1657,105 @@ double PatchKernel::evalPartitioningUnbalance(const std::unordered_map<long, dou
 */
 std::vector<adaption::Info> PatchKernel::_partitioningPrepare(const std::unordered_map<long, double> &cellWeights, double defaultWeight, bool trackPartitioning)
 {
-	BITPIT_UNUSED(cellWeights);
-	BITPIT_UNUSED(defaultWeight);
-	BITPIT_UNUSED(trackPartitioning);
-
-	if (m_nInternalCells > 0) {
-		throw std::runtime_error ("For this patch automatic partitioning can be used only to initialize partitioning on an empty patch.");
+	// Default partitioning can only be used when the patch is all on a single process
+	if (isDistributed()) {
+		throw std::runtime_error("Default partitioning can only be used when the patch is all on a single process");
 	}
 
-	return std::vector<adaption::Info>();
+	// Early return if the mesh is empty
+	if (empty(true)) {
+		return std::vector<adaption::Info>();
+	}
+
+	// Early return if there is a single partition
+	if (getProcessorCount() == 1) {
+		return std::vector<adaption::Info>();
+	}
+
+	// Evaluate partitioning
+#if BITPIT_ENABLE_METIS==1
+	std::unordered_map<long, int> cellRanks;
+	if (getRank() == getOwner()) {
+		// Initialize map between patch vertices and METIS nodes
+		//
+		// METIS node numbering needs to be contiguous and needs to start from zero.
+		std::unordered_map<long, idx_t> vertexToNodeMap;
+
+		idx_t nodeId = 0;
+		for (const Vertex &vertex : m_vertices) {
+			vertexToNodeMap[vertex.getId()] = nodeId;
+			++nodeId;
+		}
+
+		// Create METIS mesh
+		idx_t nElements = getInternalCellCount();
+		idx_t nNodes = getInternalVertexCount();
+
+		idx_t connectSize = 0;
+		for (const Cell &cell : m_cells){
+			connectSize += static_cast<idx_t>(cell.getVertexCount());
+		}
+
+		std::vector<idx_t> connectStorage(connectSize);
+		std::vector<idx_t> connectRanges(nElements + 1);
+		std::vector<idx_t> elementWeights(nElements, static_cast<idx_t>(std::max(defaultWeight, 1.)));
+
+		idx_t i = 0;
+		idx_t j = 0;
+		connectRanges[0] = 0;
+		for (const Cell &cell : m_cells) {
+			// Element connectivity
+			for (long vertex : cell.getVertexIds()) {
+				connectStorage[j] = vertexToNodeMap[vertex];
+				++j;
+			}
+			connectRanges[i + 1] = j;
+
+			// Element weight
+			auto weightItr = cellWeights.find(cell.getId());
+			if (weightItr != cellWeights.end()) {
+				elementWeights[i] = static_cast<idx_t>(std::max(std::round(weightItr->second), 1.));
+			}
+
+			// Increase counters
+			i++;
+		}
+
+		// Get the number of common nodes two elements should share to be considered neighbours
+		idx_t nCommonNodes = getDimension();
+
+		// Get the number of partitions the mesh should be split into
+		idx_t nPartitions = getProcessorCount();
+
+		// Evaluate partitioning
+		idx_t objectiveValue;
+
+		std::vector<idx_t> elementRanks(nElements);
+		std::vector<idx_t> nodeRanks(nNodes);
+
+		int status = METIS_PartMeshDual(&nElements, &nNodes, connectRanges.data(), connectStorage.data(),
+										elementWeights.data(), nullptr, &nCommonNodes, &nPartitions, nullptr,
+										nullptr, &objectiveValue, elementRanks.data(), nodeRanks.data());
+
+		if (status != METIS_OK) {
+			throw std::runtime_error("Error during partitioning (METIS error " + std::to_string(status) + ")");
+		}
+
+		// Fill the cell ranks
+		int metisId = 0;
+		for (const Cell &cell : m_cells) {
+			int metisRank = elementRanks[metisId];
+			if (metisRank != getRank()) {
+				cellRanks[cell.getId()] = elementRanks[metisId];
+			}
+			++metisId;
+		}
+	}
+
+	return _partitioningPrepare(cellRanks, trackPartitioning);
+#else
+	throw std::runtime_error("METIS library is required for automatic patch partitioning.");
+#endif
 }
 
 /*!
