@@ -202,14 +202,15 @@ void PatchKernel::updateOwner()
 		MPI_Allreduce(MPI_IN_PLACE, &nGlobalInternalCells, 1, MPI_LONG, MPI_SUM, getCommunicator());
 	}
 
-	if (nInternalCells == nGlobalInternalCells) {
-		m_owner = getRank();
-	} else {
-		m_owner = -1;
-	}
+	m_owner = -1;
+	if (nGlobalInternalCells > 0) {
+		if (nInternalCells == nGlobalInternalCells) {
+			m_owner = getRank();
+		}
 
-	if (isPartitioned()) {
-		MPI_Allreduce(MPI_IN_PLACE, &m_owner, 1, MPI_INT, MPI_MAX, getCommunicator());
+		if (isPartitioned()) {
+			MPI_Allreduce(MPI_IN_PLACE, &m_owner, 1, MPI_INT, MPI_MAX, getCommunicator());
+		}
 	}
 }
 
