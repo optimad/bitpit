@@ -818,9 +818,8 @@ size_t DiscreteStencil<weight_t>::getBinarySize() const
 template<typename weight_t>
 DiscreteStencil<weight_t> & DiscreteStencil<weight_t>::operator*=(double factor)
 {
-    const std::size_t nItems = size();
-    for (std::size_t n = 0; n < nItems; ++n) {
-        m_weights[n] *= factor;
+    for (weight_t &weight : m_weights) {
+        weight *= factor;
     }
     m_constant *= factor;
 
@@ -836,9 +835,8 @@ DiscreteStencil<weight_t> & DiscreteStencil<weight_t>::operator*=(double factor)
 template<typename weight_t>
 DiscreteStencil<weight_t> & DiscreteStencil<weight_t>::operator/=(double factor)
 {
-    const std::size_t nItems = size();
-    for (std::size_t n = 0; n < nItems; ++n) {
-        m_weights[n] /= factor;
+    for (weight_t &weight : m_weights) {
+        weight /= factor;
     }
     m_constant /= factor;
 
