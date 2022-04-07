@@ -210,7 +210,7 @@ void PiercedStorageSyncSlave<id_t>::setStaticKernel(const PiercedKernel<id_t> *k
     m_kernel       = nullptr;
     m_const_kernel = kernel;
 
-    // Action to be performed afetr setting the kernel
+    // Action to be performed after setting the kernel
     _postSetStaticKernel();
 }
 
@@ -246,7 +246,7 @@ void PiercedStorageSyncSlave<id_t>::setDynamicKernel(PiercedKernel<id_t> *kernel
     m_kernel = kernel;
     m_kernel->registerSlave(this, syncMode);
 
-    // Action to be performed afetr setting the kernel
+    // Action to be performed after setting the kernel
     _postSetDynamicKernel();
 }
 
@@ -274,7 +274,7 @@ void PiercedStorageSyncSlave<id_t>::unsetKernel(bool release)
     // Detach the kernel
     detachKernel();
 
-    // Action to be performed afetr unsetting the kernel
+    // Action to be performed after unsetting the kernel
     _postUnsetKernel(release);
 }
 
@@ -406,7 +406,7 @@ template<typename value_t, typename id_t>
 PiercedStorage<value_t, id_t>::PiercedStorage(std::size_t nFields, const PiercedKernel<id_t> *kernel)
     : PiercedStorageSyncSlave<id_t>(kernel), m_nFields(nFields)
 {
-    // Base class construcotr cannot call virtual functions
+    // Base class constructor cannot call virtual functions
     _postSetStaticKernel();
 }
 
@@ -421,7 +421,7 @@ template<typename value_t, typename id_t>
 PiercedStorage<value_t, id_t>::PiercedStorage(std::size_t nFields, PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode)
     : PiercedStorageSyncSlave<id_t>(kernel, syncMode), m_nFields(nFields)
 {
-    // Base class construcotr cannot call virtual functions
+    // Base class constructor cannot call virtual functions
     _postSetStaticKernel();
     _postSetDynamicKernel();
 }
@@ -437,7 +437,7 @@ template<typename value_t, typename id_t>
 PiercedStorage<value_t, id_t>::PiercedStorage(const PiercedStorage<value_t, id_t> &other, const PiercedKernel<id_t> *kernel)
     : PiercedStorageSyncSlave<id_t>(other, kernel), m_nFields(other.m_nFields), m_fields(other.m_fields)
 {
-    // Base class construcotr cannot call virtual functions
+    // Base class constructor cannot call virtual functions
     if (this->getKernel()) {
         _postSetStaticKernel();
     }
@@ -455,7 +455,7 @@ template<typename value_t, typename id_t>
 PiercedStorage<value_t, id_t>::PiercedStorage(const PiercedStorage<value_t, id_t> &other, PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode)
     : PiercedStorageSyncSlave<id_t>(other, kernel, syncMode), m_nFields(other.m_nFields), m_fields(other.m_fields)
 {
-    // Base class construcotr cannot call virtual functions
+    // Base class constructor cannot call virtual functions
     if (this->getKernel()) {
         _postSetStaticKernel();
 
@@ -479,7 +479,7 @@ PiercedStorage<value_t, id_t>::PiercedStorage(PiercedStorage<value_t, id_t> &&ot
     : PiercedStorageSyncSlave<id_t>(std::move(other)),
       m_nFields(std::move(other.m_nFields)), m_fields(std::move(other.m_fields))
 {
-    // Base class construcotr cannot call virtual functions
+    // Base class constructor cannot call virtual functions
     if (this->getKernel()) {
         _postSetStaticKernel();
 
