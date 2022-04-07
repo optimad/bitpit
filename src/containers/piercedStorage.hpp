@@ -115,9 +115,8 @@ protected:
     PiercedStorageSyncSlave();
     PiercedStorageSyncSlave(const PiercedKernel<id_t> *kernel);
     PiercedStorageSyncSlave(PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode);
-    PiercedStorageSyncSlave(const PiercedStorageSyncSlave<id_t> &other, const PiercedKernel<id_t> *kernel);
+    PiercedStorageSyncSlave(const PiercedStorageSyncSlave<id_t> &other, const PiercedKernel<id_t> *kernel = nullptr);
     PiercedStorageSyncSlave(const PiercedStorageSyncSlave<id_t> &other, PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode);
-    PiercedStorageSyncSlave(const PiercedStorageSyncSlave<id_t> &other);
     PiercedStorageSyncSlave(PiercedStorageSyncSlave<id_t> &&other);
 
     // Methods for synchronizing the storage
