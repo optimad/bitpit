@@ -33,12 +33,4 @@ namespace bitpit {
 * \brief Base class for the pierced kernel.
 */
 
-/**
-* Constructs an empty base pierced kernel.
-*/
-BasePiercedKernel::BasePiercedKernel()
-    : PiercedSyncMaster()
-{
-}
-
 }
