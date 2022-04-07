@@ -49,7 +49,7 @@ public:
     virtual ~BasePiercedKernel() = default;
 
 protected:
-    BasePiercedKernel();
+    BasePiercedKernel() = default;
 
 };
 
