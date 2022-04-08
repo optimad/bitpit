@@ -485,7 +485,8 @@ PiercedStorage<value_t, id_t>::PiercedStorage(std::size_t nFields, PiercedKernel
 */
 template<typename value_t, typename id_t>
 PiercedStorage<value_t, id_t>::PiercedStorage(const PiercedStorage<value_t, id_t> &other, const PiercedKernel<id_t> *kernel)
-    : PiercedStorageSyncSlave<id_t>(other, kernel), m_nFields(other.m_nFields), m_fields(other.m_fields)
+    : PiercedStorageSyncSlave<id_t>(other, kernel),
+      m_nFields(other.m_nFields), m_fields(other.m_fields)
 {
     // Base class constructor cannot call virtual functions
     if (this->getKernel()) {
@@ -503,7 +504,8 @@ PiercedStorage<value_t, id_t>::PiercedStorage(const PiercedStorage<value_t, id_t
 */
 template<typename value_t, typename id_t>
 PiercedStorage<value_t, id_t>::PiercedStorage(const PiercedStorage<value_t, id_t> &other, PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode)
-    : PiercedStorageSyncSlave<id_t>(other, kernel, syncMode), m_nFields(other.m_nFields), m_fields(other.m_fields)
+    : PiercedStorageSyncSlave<id_t>(other, kernel, syncMode),
+      m_nFields(other.m_nFields), m_fields(other.m_fields)
 {
     // Base class constructor cannot call virtual functions
     if (this->getKernel()) {
