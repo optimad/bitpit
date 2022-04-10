@@ -142,7 +142,7 @@ long SystemSparseMatrixAssembler::getMaxRowNZCount() const
 }
 
 /*!
- * Get the values of the specified row.
+ * Get the pattern of the specified row.
  *
  * \param rowIndex is the index of the row in the assembler
  * \param pattern on output will contain the values of the specified row
