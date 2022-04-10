@@ -230,6 +230,8 @@ public:
     void update(const std::vector<long> &rows, const stencil_container_t &stencils);
     template<typename stencil_container_t = std::vector<stencil_t>>
     void update(std::size_t nRows, const long *rows, const stencil_container_t &stencils);
+    void update(std::size_t nRows, const long *rows, const StencilSolverAssembler &assembler);
+    void update(std::size_t nRows, const long *rows, const DiscretizationStencilSolverAssembler<stencil_t> &assembler);
 
     void solve();
 
