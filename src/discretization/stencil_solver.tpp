@@ -849,7 +849,7 @@ void DiscretizationStencilSolver<stencil_t>::assembly(const DiscretizationStenci
 }
 
 /*!
-* Initialize the stencil solver.
+* Assembly the stencil solver.
 *
 * \param partitioned controls if the matrix is partitioned
 * \param communicator is the MPI communicator
@@ -862,7 +862,7 @@ void DiscretizationStencilSolver<stencil_t>::assembly(MPI_Comm communicator, boo
 }
 #else
 /*!
-* Initialize the stencil solver.
+* Assembly the stencil solver.
 *
 * \param assembler is the solver assembler
 */
@@ -886,7 +886,7 @@ void DiscretizationStencilSolver<stencil_t>::assembly(const StencilSolverAssembl
 }
 
 /*!
-* Initialize the stencil solver.
+* Assembly the stencil solver.
 *
 * \param partitioned controls if the matrix is partitioned
 * \param communicator is the MPI communicator
@@ -896,7 +896,7 @@ template<typename stencil_t>
 void DiscretizationStencilSolver<stencil_t>::assembly(MPI_Comm communicator, bool partitioned, const StencilSolverAssembler &assembler)
 #else
 /*!
-* Initialize the stencil solver.
+* Assembly the stencil solver.
 *
 * \param assembler is the solver assembler
 */
