@@ -277,7 +277,7 @@ void LevelSetSignPropagator::propagate(const LevelSetObjectInterface *object, Le
                         setSign(cellRawId, exchangedSign, storage);
                         rawSeeds.push_back(cellRawId);
                     } else if (cellPropagationState == STATE_REACHED) {
-                        assert(object->getSign(cellId) == exchangedSign);
+                        assert(storage->at(storage->find(cellId)) == exchangedSign);
                     }
                 }
 
