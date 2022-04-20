@@ -542,15 +542,18 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
 template<typename narrow_band_cache_t>
 void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSetOctreeKernel *levelsetKernel, bool signd){
 
+    // Get mesh information
     VolumeKernel &mesh = *(levelsetKernel->getMesh()) ;
 
-    std::unordered_set<long> intersectedCells;
-
-    // Evaluate levelset information
+    // Get narrowband information
     narrow_band_cache_t *narrowBandCache = this->getNarrowBandCache();
 
-    for( const Cell &cell : mesh.getCells() ){
+    // Evaluate levelset information for intersected cells
+    VolumeKernel::CellConstIterator cellBegin = mesh.cellConstBegin();
+    VolumeKernel::CellConstIterator cellEnd   = mesh.cellConstEnd();
 
+    std::unordered_set<std::size_t> intersectedRawCellIds;
+    for (VolumeKernel::CellConstIterator cellItr = cellBegin; cellItr != cellEnd; ++cellItr) {
         // Identify the segment associated with the cell
         //
         // The search radius is evaluated as the maximum value between the
@@ -561,7 +564,7 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
         // explicitly set by the user.
         //
         // If no segment is identified the cell is not processed.
-        long cellId = cell.getId();
+        long cellId = cellItr.getId();
         const std::array<double,3> &cellCentroid = levelsetKernel->computeCellCentroid(cellId);
         double cellCircumcircle = levelsetKernel->computeCellCircumcircle(cellId);
 
@@ -592,7 +595,8 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
         // are considered, otherwise we need to check if the absolute distance
         // associated with the cell is lower than the intersection distance.
         if (this->m_narrowBandSize < 0 || cellCircumcircle < std::abs(distance)) {
-            intersectedCells.insert(cellId);
+            std::size_t cellRawId = cellItr.getRawIndex();
+            intersectedRawCellIds.insert(cellRawId);
         }
 
     }
@@ -601,14 +605,14 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
     //
     // If a cell intersects the surface, we need to evaluate the levelset
     // of all its neigbours.
-    for( long cellId : intersectedCells){
+    for (std::size_t cellRawId : intersectedRawCellIds) {
+        // Compute cell projection point
+        VolumeKernel::CellConstIterator cellItr = mesh.getCells().rawFind(cellRawId);
+        std::array<double,3> cellProjectionPoint = this->computeProjectionPoint(cellItr.getId());
 
-        Cell const &cell = mesh.getCell(cellId);
-
-        std::array<double,3> cellProjectionPoint = this->computeProjectionPoint(cellId);
-
-        const long *neighbours = cell.getAdjacencies() ;
-        int nNeighbours = cell.getAdjacencyCount() ;
+        // Process cell adjacencies
+        const long *neighbours = cellItr->getAdjacencies() ;
+        int nNeighbours = cellItr->getAdjacencyCount() ;
         for (int n = 0; n < nNeighbours; ++n) {
             // Skip the neighbour if it has already been processed
             //
