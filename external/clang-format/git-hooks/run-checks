@@ -1,0 +1,29 @@
+#! /bin/bash
+
+# Fail if any test fails.
+set -e
+
+echo "== RUNNING TESTS =="
+./tests/run.py
+echo
+
+echo "== RUNNING PYLINT =="
+readonly venv_activate=./venv-for-travis/bin/activate
+if [ -e "$venv_activate" ]; then
+    echo "Using virtualenv: $venv_activate"
+    # shellcheck disable=SC1090
+    . "$venv_activate"
+else
+    echo "No virtualenv"
+fi
+
+./tests/run-pylint
+
+if [ -e "$venv_activate" ]; then
+    deactivate
+fi
+echo
+
+echo "== RUNNING SHELLCHECK =="
+shellcheck apply-format git-pre-commit-format run-checks
+echo
