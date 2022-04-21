@@ -522,7 +522,7 @@ bool RBFKernel::removeData(std::vector<int> & list)
 
     int extracted = 0;
     for(auto && id : setList) {
-        if(id>=0 && id <m_fields){;
+        if(id>=0 && id <m_fields){
             m_fields--;
             int index = id-extracted;
             assert(index >= 0);
@@ -1085,7 +1085,7 @@ bool RBF::removeNode(std::vector<int> & list)
 
     int extracted = 0;
     for(auto && id : setList) {
-        if(id>=0 && id <m_nodes){;
+        if(id>=0 && id <m_nodes){
             m_nodes--;
             int index = id-extracted;
             assert(index >= 0);
