@@ -138,7 +138,7 @@ std::size_t InfoCollection::create(Type type, Entity entity, int rank)
 	bool useCache = (m_cachedTypes.count(type) > 0);
 
 	if (useCache) {
-		if (m_cache.count(infoData) > 0) {;
+		if (m_cache.count(infoData) > 0) {
 			return m_cache.at(infoData);
 		}
 	}
