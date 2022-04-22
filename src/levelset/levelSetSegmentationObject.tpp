@@ -543,7 +543,7 @@ template<typename narrow_band_cache_t>
 void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSetOctreeKernel *levelsetKernel, bool signd){
 
     // Get mesh information
-    VolumeKernel &mesh = *(levelsetKernel->getMesh()) ;
+    const VolumeKernel &mesh = *(levelsetKernel->getMesh()) ;
 
     // Get narrowband information
     narrow_band_cache_t *narrowBandCache = this->getNarrowBandCache();
