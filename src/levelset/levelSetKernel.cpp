@@ -209,6 +209,24 @@ double LevelSetKernel::computeCellCircumcircle( long id ) const {
 }
 
 /*!
+ * Checks if a plane intersects the cell
+ * @param[in] id is the index of cell
+ * @param[in] root is a point on the plane
+ * @param[in] normal is the normal of the plane
+ * @param[in] tolerance is the tolerance used for distance comparisons
+ * @return true if intersect
+ */
+bool LevelSetKernel::intersectCellPlane( long id, const std::array<double,3> &root, const std::array<double,3> &normal, double tolerance ) {
+
+    std::array<double,3> minPoint;
+    std::array<double,3> maxPoint;
+    m_mesh->evalCellBoundingBox(id, &minPoint, &maxPoint);
+
+    int dim = m_mesh->getDimension();
+    return CGElem::intersectPlaneBox( root, normal, minPoint, maxPoint, dim, tolerance);
+}
+
+/*!
  * Check if a point lies within the cell
  * @param[in] id is the cell index
  * @param[in] pointCoords are the point coordinates

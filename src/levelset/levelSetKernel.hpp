@@ -73,7 +73,7 @@ class LevelSetKernel{
     virtual void                                clearGeometryCache();
     virtual void                                updateGeometryCache(const std::vector<adaption::Info> &);
 
-    virtual bool                                intersectCellPlane(long, const std::array<double,3> &, const std::array<double,3> &, double) =0;
+    virtual bool                                intersectCellPlane(long, const std::array<double,3> &, const std::array<double,3> &, double);
 
     BITPIT_DEPRECATED(bool                      isPointInCell(long, const std::array<double,3> &) const);
     BITPIT_DEPRECATED(double                    isCellInsideBoundingBox(long, const std::array<double,3> &, const std::array<double,3> & ) const);

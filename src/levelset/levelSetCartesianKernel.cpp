@@ -95,24 +95,6 @@ double LevelSetCartesianKernel::computeCellCircumcircle( long id ) const {
 }
 
 /*!
- * Checks if a plane intersects the cell
- * @param[in] id is the index of cell
- * @param[in] root is a point on the plane
- * @param[in] normal is the normal of the plane
- * @param[in] tolerance is the tolerance used for distance comparisons
- * @return true if intersect
- */
-bool LevelSetCartesianKernel::intersectCellPlane( long id, const std::array<double,3> &root, const std::array<double,3> &normal, double tolerance ) {
-
-    std::array<double,3> minPoint;
-    std::array<double,3> maxPoint;
-    m_cartesian->evalCellBoundingBox(id, &minPoint, &maxPoint);
-
-    int dim = m_cartesian->getDimension();
-    return CGElem::intersectPlaneBox( root, normal, minPoint, maxPoint, dim, tolerance);
-}
-
-/*!
  * Clears the geometry cache.
  */
 void LevelSetCartesianKernel::clearGeometryCache(  ) {
