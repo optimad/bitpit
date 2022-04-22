@@ -31,11 +31,17 @@
 # include <vector>
 # include <unordered_map>
 
+# include "bitpit_CG.hpp"
 # if BITPIT_ENABLE_MPI
 # include <mpi.h>
 # include "bitpit_communications.hpp"
 # endif
 # include "bitpit_common.hpp"
+# include "bitpit_operators.hpp"
+# include "bitpit_patchkernel.hpp"
+
+# include "levelSetObject.hpp"
+# include "levelSetSignPropagator.hpp"
 
 namespace bitpit{
 
@@ -48,10 +54,7 @@ class VolumeKernel ;
 class LevelSetObject ;
 class LevelSetSignPropagator;
 
-class LevelSetKernel{
-
-    private:
-    mutable std::unordered_map<long, std::array<double,3>> m_cellCentroids; /**< Cached cell center coordinates*/
+class LevelSetKernel {
 
     protected:
     VolumeKernel*                               m_mesh;        /**< Pointer to underlying mesh*/
@@ -66,12 +69,11 @@ class LevelSetKernel{
 
     virtual VolumeKernel *                      getMesh() const;
 
-    const std::array<double,3> &                computeCellCentroid(long) const;
-    virtual double                              computeCellIncircle(long) const;
-    virtual double                              computeCellCircumcircle(long) const;
+    virtual std::array<double, 3>               computeCellCentroid(long) const = 0;
+    virtual double                              computeCellTangentRadius(long) const = 0;
+    virtual double                              computeCellBoundingRadius(long) const = 0;
 
-    virtual void                                clearGeometryCache();
-    virtual void                                updateGeometryCache(const std::vector<adaption::Info> &);
+    virtual void                                update(const std::vector<adaption::Info> &);
 
     virtual bool                                intersectCellPlane(long, const std::array<double,3> &, const std::array<double,3> &, double);
 
@@ -91,6 +93,28 @@ class LevelSetKernel{
 
 };
 
+template<typename CellCacheEntry>
+class LevelSetCachedKernel : public LevelSetKernel {
+
+    private:
+    mutable std::unordered_map<long, CellCacheEntry>  m_cellCache;  /**< Cell cache */
+
+    protected:
+    const CellCacheEntry &                      computeCellCacheEntry( long id ) const;
+
+    virtual void                                pruneCellCache(const std::vector<adaption::Info> &);
+
+    public:
+    LevelSetCachedKernel() ;
+    LevelSetCachedKernel( VolumeKernel *) ;
+
+    void                                        update(const std::vector<adaption::Info> &) override;
+
+};
+
 }
+
+// Include template implementations
+#include "levelSetKernel.tpp"
 
 #endif

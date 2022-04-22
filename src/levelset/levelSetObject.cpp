@@ -274,17 +274,17 @@ void LevelSetObject::setSizeNarrowBand(double r){
  * Check if cell intersects the surface
  *
  * If mode==LevelSetIntersectionMode::FAST_FUZZY the method will compare the levelset 
- * value to the cell incircle and circumcircle. If the value is smaler than the 
- * incircle LevelSetIntersectionStatus::TRUE is returned, if it is larger than the
- * circumcircle LevelSetIntersectionStatus::FALSE is returned. If it is inbetwee
+ * value to tangent and bounding radius of a cell. If the value is smaler than the
+ * tangent radius LevelSetIntersectionStatus::TRUE is returned, if it is larger than the
+ * bounding radius LevelSetIntersectionStatus::FALSE is returned. If it is inbetwee
  * LevelSetIntersectionStatus::CLOSE is returned.
  *
  * If mode==LevelSetIntersectionMode::FAST_GUARANTEE_TRUE and the levelset value is 
- * smaller than the incircle LevelSetIntersectionStatus::TRUE is retuned, 
+ * smaller than the rangent radius LevelSetIntersectionStatus::TRUE is retuned,
  * otherwise LevelSetIntersectionStatus::FALSE.
  *
  * If mode==LevelSetIntersectionMode::FAST_GURANTEE_FALSE and the levelset value is 
- * larger than the circumcircle LevelSetIntersectionStatus::FALSE is retuned, 
+ * larger than the bounding radius LevelSetIntersectionStatus::FALSE is retuned,
  * otherwise LevelSetIntersectionStatus::TRUE.
  *
  * If mode==LevelSetIntersectionMode::ACCURATE, if LevelSetIntersectionMode::FUZZY 
@@ -293,13 +293,17 @@ void LevelSetObject::setSizeNarrowBand(double r){
  * LevelSetIntersectionStatus::TRUE/::FALSE is returned accordingly. 
  * Errors of the method are related to the ratio of surface curvature over cell size.
  *
+ * The bounding sphere is the sphere with the minimum radius that contains all the
+ * cell vertices and has the center in the cell centroid.
+ *
+ * The tangent sphere is a sphere having the center in the level centroid and tangent
+ * to the cell.
+ *
  * @param[in] id cell id
  * @param[in] mode describes the types of check that should be performed
  * @return indicator regarding intersection
  */
 LevelSetIntersectionStatus LevelSetObject::intersectSurface(long id, LevelSetIntersectionMode mode) const{
-
-    double incircle, circumcircle;
 
     double absoluteDistance  = std::abs(getValue(id));
     double distanceTolerance = m_kernel->getMesh()->getTol();
@@ -307,8 +311,8 @@ LevelSetIntersectionStatus LevelSetObject::intersectSurface(long id, LevelSetInt
     switch(mode){
         case LevelSetIntersectionMode::FAST_GUARANTEE_TRUE:
         {
-            incircle = m_kernel->computeCellIncircle(id) ;
-            if(utils::DoubleFloatingLessEqual()(absoluteDistance, incircle, distanceTolerance, distanceTolerance)){
+            double tangentSphere = m_kernel->computeCellTangentRadius(id) ;
+            if(utils::DoubleFloatingLessEqual()(absoluteDistance, tangentSphere, distanceTolerance, distanceTolerance)){
                 return LevelSetIntersectionStatus::TRUE;
             } else {
                 return LevelSetIntersectionStatus::FALSE;
@@ -319,8 +323,8 @@ LevelSetIntersectionStatus LevelSetObject::intersectSurface(long id, LevelSetInt
 
         case LevelSetIntersectionMode::FAST_GUARANTEE_FALSE:
         {
-            circumcircle = m_kernel->computeCellCircumcircle(id) ;
-            if(utils::DoubleFloatingGreater()(absoluteDistance, circumcircle, distanceTolerance, distanceTolerance)){
+            double boundingSphere = m_kernel->computeCellBoundingRadius(id) ;
+            if(utils::DoubleFloatingGreater()(absoluteDistance, boundingSphere, distanceTolerance, distanceTolerance)){
                 return LevelSetIntersectionStatus::FALSE;
             } else {
                 return LevelSetIntersectionStatus::TRUE;
@@ -331,13 +335,13 @@ LevelSetIntersectionStatus LevelSetObject::intersectSurface(long id, LevelSetInt
 
         case LevelSetIntersectionMode::FAST_FUZZY:
         {
-            circumcircle = m_kernel->computeCellCircumcircle(id) ;
-            if(utils::DoubleFloatingGreater()(absoluteDistance, circumcircle, distanceTolerance, distanceTolerance)){
+            double boundingSphere = m_kernel->computeCellBoundingRadius(id) ;
+            if(utils::DoubleFloatingGreater()(absoluteDistance, boundingSphere, distanceTolerance, distanceTolerance)){
                 return LevelSetIntersectionStatus::FALSE;
             }
 
-            incircle = m_kernel->computeCellIncircle(id) ;
-            if(utils::DoubleFloatingLessEqual()(absoluteDistance, incircle, distanceTolerance, distanceTolerance)){
+            double tangentSphere = m_kernel->computeCellTangentRadius(id) ;
+            if(utils::DoubleFloatingLessEqual()(absoluteDistance, tangentSphere, distanceTolerance, distanceTolerance)){
                 return LevelSetIntersectionStatus::TRUE;
             }
 
@@ -348,13 +352,13 @@ LevelSetIntersectionStatus LevelSetObject::intersectSurface(long id, LevelSetInt
 
         case LevelSetIntersectionMode::ACCURATE:
         {
-            circumcircle = m_kernel->computeCellCircumcircle(id) ;
-            if(utils::DoubleFloatingGreater()(absoluteDistance, circumcircle, distanceTolerance, distanceTolerance)){
+            double boundingSphere = m_kernel->computeCellBoundingRadius(id) ;
+            if(utils::DoubleFloatingGreater()(absoluteDistance, boundingSphere, distanceTolerance, distanceTolerance)){
                 return LevelSetIntersectionStatus::FALSE;
             }
 
-            incircle = m_kernel->computeCellIncircle(id) ;
-            if(utils::DoubleFloatingLessEqual()(absoluteDistance, incircle, distanceTolerance, distanceTolerance)){
+            double tangentSphere = m_kernel->computeCellTangentRadius(id) ;
+            if(utils::DoubleFloatingLessEqual()(absoluteDistance, tangentSphere, distanceTolerance, distanceTolerance)){
                 return LevelSetIntersectionStatus::TRUE;
             }
 

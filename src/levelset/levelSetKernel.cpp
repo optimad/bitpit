@@ -22,14 +22,7 @@
  *
 \*---------------------------------------------------------------------------*/
 
-
-# include "bitpit_operators.hpp"
-# include "bitpit_CG.hpp"
-# include "bitpit_patchkernel.hpp"
-
-# include "levelSetObject.hpp"
 # include "levelSetKernel.hpp"
-# include "levelSetSignPropagator.hpp"
 
 namespace bitpit {
 
@@ -37,7 +30,6 @@ namespace bitpit {
     @interface  LevelSetKernel
     @ingroup levelset
     @brief  Mesh specific implementation to calculate the levelset function
-
 */
 
 /*!
@@ -78,132 +70,18 @@ LevelSetKernel::~LevelSetKernel(){
 */
 VolumeKernel * LevelSetKernel::getMesh() const{
     return m_mesh ;
-} 
-
-/*!
- * Clears the geometry cache.
- */
-void LevelSetKernel::clearGeometryCache(  ) {
-
-    std::unordered_map<long, std::array<double,3>>().swap( m_cellCentroids ) ;
-
 }
 
 /*!
- * Updates the geometry cache after an adaption.
+ * Updates the kernel after an adaption.
  *
  * @param[in] adaptionData are the information about the adaption
  */
-void LevelSetKernel::updateGeometryCache( const std::vector<adaption::Info> &adaptionData ) {
+void LevelSetKernel::update( const std::vector<adaption::Info> &adaptionData ) {
 
-    // If there are no cells in the mesh we can just delete all the cache
-    if ( m_mesh->getCellCount() == 0) {
-        clearGeometryCache();
-        return;
-    }
+    BITPIT_UNUSED( adaptionData );
 
-    // Remove the previous cells from the cache
-    for ( const adaption::Info &adaptionInfo : adaptionData ){
-        if( adaptionInfo.entity != adaption::Entity::ENTITY_CELL ){
-            continue;
-        }
-
-        for ( auto & previousId : adaptionInfo.previous){
-            auto centroidItr = m_cellCentroids.find( previousId ) ;
-            if ( centroidItr == m_cellCentroids.end() ) {
-                continue ;
-            }
-
-            m_cellCentroids.erase( previousId ) ;
-        }
-    }
-
-}
-
-/*!
- * Computes the centroid of the specfified cell.
- *
- * If the centroid of the cell has been already evaluated, the cached value is
- * returned. Otherwise the cell centroid is evaluated and stored in the cache.
- *
- * @param[in] id is the index of cell
- * @return The centroid of the cell.
- */
-const std::array<double,3> & LevelSetKernel::computeCellCentroid( long id ) const {
-
-    auto centroidItr = m_cellCentroids.find( id ) ;
-    if ( centroidItr == m_cellCentroids.end() ) {
-        centroidItr = m_cellCentroids.insert( { id, m_mesh->evalCellCentroid( id ) } ).first ;
-    }
-
-    return centroidItr->second;
-
-}
-
-/*!
- * Computes the radius of the incircle of the specfified cell.
- * @param[in] id is the index of cell
- * @return radius of incircle
- */
-double LevelSetKernel::computeCellIncircle( long id ) const {
-
-    const Cell &cell = m_mesh->getCell(id);
-
-    const long* interfaceIds = cell.getInterfaces();
-    int interfaceCount = cell.getInterfaceCount();
-    
-    const std::array<double,3> &cellCenter = computeCellCentroid(id);
-
-    double radius = std::numeric_limits<double>::max() ;
-    for (int k = 0; k < interfaceCount; ++k) {
-        long interfaceId = interfaceIds[k];
-        double r = norm2(cellCenter - m_mesh->evalInterfaceCentroid(interfaceId));
-        radius = std::min(radius, r);
-    }
-
-    ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
-    int nCellVertices = cellVertexIds.size();
-    for (int k = 0; k < nCellVertices; ++k) {
-        long vertexId = cellVertexIds[k];
-        double r = norm2(cellCenter - m_mesh->getVertexCoords(vertexId));
-        radius = std::min(radius, r);
-    }
-
-    return radius;
-
-}
-
-/*!
- * Computes the radius of the circumcircle of the specfified cell.
- * @param[in] id is the index of cell
- * @return radius of incircle
- */
-double LevelSetKernel::computeCellCircumcircle( long id ) const {
-
-    const Cell &cell = m_mesh->getCell(id);
-
-    const long* interfaceIds = cell.getInterfaces();
-    int interfaceCount = cell.getInterfaceCount();
-
-    const std::array<double,3> &cellCenter = computeCellCentroid(id);
-
-    double radius = -std::numeric_limits<double>::max() ;
-    for (int k = 0; k < interfaceCount; ++k) {
-        long interfaceId = interfaceIds[k];
-        double r = norm2(cellCenter - m_mesh->evalInterfaceCentroid(interfaceId));
-        radius = std::max(radius, r);
-    }
-
-    ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
-    int nCellVertices = cellVertexIds.size();
-    for (int k = 0; k < nCellVertices; ++k) {
-        long vertexId = cellVertexIds[k];
-        double r = norm2(cellCenter - m_mesh->getVertexCoords(vertexId));
-        radius = std::max(radius, r);
-    }
-
-    return radius;
-
+    // Nothing to do
 }
 
 /*!

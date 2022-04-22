@@ -889,7 +889,7 @@ void LevelSet::update( const std::vector<adaption::Info> &adaptionData, const st
 #endif
 
     // Update kernel
-    m_kernel->updateGeometryCache( adaptionData ) ;
+    m_kernel->update( adaptionData ) ;
 
     // Create sign propagator
     std::unique_ptr<LevelSetSignPropagator> signPropagator ;

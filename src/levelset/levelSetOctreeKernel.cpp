@@ -31,6 +31,30 @@ namespace bitpit {
 
 /*!
  *  @ingroup    levelset
+ *  @class      LevelSetOctreeCellCacheEntry
+ *  @brief      Cache entry associated with cells of octree patches, the entry will
+ *              store cell information needed to evaluate the levelset.
+ */
+
+/*!
+ * Constructor
+ *
+ * @param[in] patch is the patch the cell belongs to
+ * @param[in] cellId is the id of the cell
+ */
+LevelSetOctreeCellCacheEntry::LevelSetOctreeCellCacheEntry(const VolumeKernel &patch, long cellId) {
+
+    // Get mesh information
+    assert(dynamic_cast<const VolOctree *>(&patch)) ;
+    const VolOctree &octreePatch = static_cast<const VolOctree &>(patch) ;
+
+    // Evaluate cell centroid
+    centroid = octreePatch.evalCellCentroid(cellId) ;
+
+}
+
+/*!
+ *  @ingroup    levelset
  *  @class      LevelSetOctreeKernel
  *  @brief      Implements LevelSetKernel for octree meshes
  */
@@ -38,9 +62,23 @@ namespace bitpit {
 /*!
  * Constructor
  */
-LevelSetOctreeKernel::LevelSetOctreeKernel(VolOctree & patch ): LevelSetKernel( &patch ){
-    clearCellCirclesCache();
-    updateCellCirclesCache();
+LevelSetOctreeKernel::LevelSetOctreeKernel(VolOctree & patch ): LevelSetCachedKernel<LevelSetOctreeCellCacheEntry>( &patch ){
+
+    // Mesh information
+    VolOctree *mesh = getMesh();
+    int dimension = mesh->getDimension();
+    int maxLevel  = TreeConstants::instance(dimension).maxLevel;
+
+    // Initialize bounding and tangent radii
+    m_octantTangentRadii.resize(maxLevel + 1);
+    m_octantBoundingRadii.resize(maxLevel + 1);
+    for (int level = 0; level <= maxLevel; ++level) {
+        double levelSize = mesh->getTree().levelToSize(level);
+
+        m_octantTangentRadii[level]  = 0.5 * levelSize;
+        m_octantBoundingRadii[level] = 0.5 * std::sqrt(dimension) * levelSize;
+    }
+
 }
 
 /*!
@@ -52,76 +90,83 @@ VolOctree * LevelSetOctreeKernel::getMesh() const{
 }
 
 /*!
- * Computes the radius of the incircle of the specfified cell.
- * @param[in] id is the index of cell
- * @return radius of incircle
+ * Computes the radius of the tangent sphere associated with the specified level.
+ *
+ * The tangent sphere is a sphere having the center in the level centroid and tangent
+ * to the cell.
+ *
+ * @param[in] level is the level of the octant
+ * @return The radius of the tangent sphere.
  */
-double LevelSetOctreeKernel::computeCellIncircle(long id) const {
+double LevelSetOctreeKernel::getOctantTangentRadius( int level ) const {
+
+    return m_octantTangentRadii[level];
+
+}
+
+/*!
+ * Computes the radius of the bounding sphere associated with the specified level.
+ *
+ * The bounding sphere is the sphere with the minimum radius that contains all the
+ * level vertices and has the center in the level centroid.
+ *
+ * @param[in] level is the level of the octant
+ * @return The radius of the bounding sphere.
+ */
+double LevelSetOctreeKernel::getOctantBoundingRadius( int level ) const {
+
+    return m_octantBoundingRadii[level];
+
+}
+
+/*!
+ * Computes the centroid of the specfified cell.
+ *
+ * @param[in] id is the id of cell
+ * @return The centroid of the cell.
+ */
+std::array<double, 3> LevelSetOctreeKernel::computeCellCentroid( long id ) const {
+
+    const LevelSetOctreeCellCacheEntry &cellCacheEntry = computeCellCacheEntry( id );
+
+    return cellCacheEntry.centroid;
+
+}
+
+/*!
+ * Computes the radius of the tangent sphere associated with the specified cell.
+ *
+ * The tangent sphere is a sphere having the center in the cell centroid and tangent
+ * to the cell.
+ *
+ * @param[in] id is the id of cell
+ * @return The radius of the tangent sphere.
+ */
+double LevelSetOctreeKernel::computeCellTangentRadius( long id ) const {
+
     const VolOctree *mesh = getMesh();
     int cellLevel = mesh->getCellLevel(id);
-    return m_levelToCellIncircle[cellLevel];
+
+    return getOctantTangentRadius(cellLevel);
+
 }
 
 /*!
- * Computes the radius of the circumcircle of the specfified cell.
- * @param[in] id is the index of cell
- * @return radius of incircle
+ * Computes the radius of the bounding sphere associated with the specified cell.
+ *
+ * The bounding sphere is the sphere with the minimum radius that contains all the
+ * cell vertices and has the center in the cell centroid.
+ *
+ * @param[in] id is the id of cell
+ * @return The radius of the bounding sphere.
  */
-double LevelSetOctreeKernel::computeCellCircumcircle( long id ) const {
+double LevelSetOctreeKernel::computeCellBoundingRadius( long id ) const {
+
     const VolOctree *mesh = getMesh();
     int cellLevel = mesh->getCellLevel(id);
-    return m_levelToCellCircumcircle[cellLevel];
-}
 
-/*!
- * Clears the geometry cache.
- */
-void LevelSetOctreeKernel::clearGeometryCache(  ) {
-
-    LevelSetKernel::clearGeometryCache();
-
-    clearCellCirclesCache();
+    return getOctantBoundingRadius(cellLevel);
 
 }
 
-/*!
- * Updates the geometry cache after an adaption.
- */
-void LevelSetOctreeKernel::updateGeometryCache( const std::vector<adaption::Info> &adaptionData ) {
-
-    LevelSetKernel::updateGeometryCache(adaptionData);
-
-    updateCellCirclesCache();
-
-}
-
-/*!
- * Clears the cache that hold information about cell incircle and circumcircle.
- */
-void LevelSetOctreeKernel::clearCellCirclesCache(  ) {
-
-    m_levelToCellIncircle.clear();
-    m_levelToCellCircumcircle.clear();
-
-}
-
-/*!
- * Updates the cache that hold information about cell incircle and circumcircle.
- */
-void LevelSetOctreeKernel::updateCellCirclesCache(  ) {
-
-    VolOctree *mesh = getMesh();
-    int dimension = mesh->getDimension();
-    int maxLevel  = mesh->getTree().getMaxLevel();
-
-    m_levelToCellIncircle.resize(maxLevel + 1);
-    m_levelToCellCircumcircle.resize(maxLevel + 1);
-    for (int level = 0; level <= maxLevel; ++level) {
-        double levelSize = mesh->getTree().levelToSize(level);
-
-        m_levelToCellIncircle[level]     = 0.5 * levelSize;
-        m_levelToCellCircumcircle[level] = 0.5 * std::sqrt(dimension) * levelSize;
-    }
-
-}
 }
