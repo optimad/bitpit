@@ -34,14 +34,19 @@ namespace bitpit{
 class LevelSetExternalPiercedStorageManager;
 class LevelSetInternalPiercedStorageManager;
 
-class LevelSetOctreeKernel : public LevelSetKernel{
+struct LevelSetOctreeCellCacheEntry {
+
+    std::array<double, 3> centroid;
+
+    LevelSetOctreeCellCacheEntry(const VolumeKernel &patch, long cellId);
+
+};
+
+class LevelSetOctreeKernel : public LevelSetCachedKernel<LevelSetOctreeCellCacheEntry> {
 
     private:
-    std::vector<double>                         m_levelToCellIncircle ;        /**< Incircles associated with cell levels*/
-    std::vector<double>                         m_levelToCellCircumcircle ;    /**< Circumcircles associated with cell levels*/
-
-    void                                        clearCellCirclesCache();
-    void                                        updateCellCirclesCache();
+    std::vector<double>                         m_octantTangentRadii ;    /**< Octant tangent radii */
+    std::vector<double>                         m_octantBoundingRadii ;   /**< Octant cellTangadii */
 
     public:
     typedef LevelSetExternalPiercedStorageManager DenseStorageManager;
@@ -51,11 +56,12 @@ class LevelSetOctreeKernel : public LevelSetKernel{
 
     VolOctree *                                 getMesh() const override;
 
-    double                                      computeCellIncircle(long) const override;
-    double                                      computeCellCircumcircle(long) const override;
+    double                                      getOctantTangentRadius(int level) const;
+    double                                      getOctantBoundingRadius(int level) const;
 
-    void                                        clearGeometryCache() override;
-    void                                        updateGeometryCache(const std::vector<adaption::Info> &) override;
+    std::array<double, 3>                       computeCellCentroid(long) const override;
+    double                                      computeCellTangentRadius(long) const override;
+    double                                      computeCellBoundingRadius(long) const override;
 
 };
 

@@ -408,11 +408,11 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
     // Define search radius
     //
     // Search radius should be equal to the maximum between the narrow band
-    // size and the diameter of the circumcircle. This guarantees that, when
+    // size and the radius of the bounding sphere. This guarantees that, when
     // the narrow band size is equal or less than zero, the levelset will be
     // evaluated on the cells that intersect the surface and on all their
     // first neighbours.
-    double searchRadius = std::max(this->m_narrowBandSize, 2 * levelsetKernel->getCellCircumcircle());
+    double searchRadius = std::max(this->m_narrowBandSize, 2 * levelsetKernel->getCellBoundingRadius());
 
     // Define mesh bounding box
     //
@@ -481,7 +481,7 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
         processList.erase(cellId);
 
         // Find segment associated to the cell
-        const std::array<double,3> &cellCentroid = levelsetKernel->computeCellCentroid(cellId);
+        std::array<double,3> cellCentroid = levelsetKernel->computeCellCentroid(cellId);
 
         long segmentId;
         double distance;
@@ -565,10 +565,10 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
         //
         // If no segment is identified the cell is not processed.
         long cellId = cellItr.getId();
-        const std::array<double,3> &cellCentroid = levelsetKernel->computeCellCentroid(cellId);
-        double cellCircumcircle = levelsetKernel->computeCellCircumcircle(cellId);
+        std::array<double,3> cellCentroid = levelsetKernel->computeCellCentroid(cellId);
+        double cellBoundingRadius = levelsetKernel->computeCellBoundingRadius(cellId);
 
-        double searchRadius = std::max(this->m_narrowBandSize, cellCircumcircle);
+        double searchRadius = std::max(this->m_narrowBandSize, cellBoundingRadius);
 
         long segmentId;
         double distance;
@@ -594,7 +594,7 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
         // intersects the surface because only cells that intersect the surface
         // are considered, otherwise we need to check if the absolute distance
         // associated with the cell is lower than the intersection distance.
-        if (this->m_narrowBandSize < 0 || cellCircumcircle < std::abs(distance)) {
+        if (this->m_narrowBandSize < 0 || cellBoundingRadius < std::abs(distance)) {
             std::size_t cellRawId = cellItr.getRawIndex();
             intersectedRawCellIds.insert(cellRawId);
         }
@@ -626,7 +626,7 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
             }
 
             // Identify the segment associated with the neighbour
-            const std::array<double,3> &neighCentroid = levelsetKernel->computeCellCentroid(neighId);
+            std::array<double,3> neighCentroid = levelsetKernel->computeCellCentroid(neighId);
 
             double searchRadius = 1.05 * norm2(neighCentroid - cellProjectionPoint);
 
@@ -702,9 +702,9 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::updateNarrowBand( LevelSet
             // explicitly set by the user.
             //
             // If no segment is identified the cell is not processed.
-            const std::array<double,3> &centroid = levelsetKernel->computeCellCentroid(cellId);
+            std::array<double,3> centroid = levelsetKernel->computeCellCentroid(cellId);
 
-            double searchRadius = std::max(this->m_narrowBandSize, levelsetKernel->computeCellCircumcircle(cellId));
+            double searchRadius = std::max(this->m_narrowBandSize, levelsetKernel->computeCellBoundingRadius(cellId));
 
             long segmentId;
             double distance;
@@ -760,7 +760,7 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::updateNarrowBand( LevelSet
         }
 
         // Identify the segment associated with the cell
-        const std::array<double,3> &cellCentroid = levelsetKernel->computeCellCentroid(cellId);
+        std::array<double,3> cellCentroid = levelsetKernel->computeCellCentroid(cellId);
         std::array<double,3> neighProjectionPoint = this->computeProjectionPoint(intersectedNeighId);
 
         double searchRadius = 1.05 * norm2(cellCentroid - neighProjectionPoint);

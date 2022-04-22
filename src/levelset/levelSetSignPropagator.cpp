@@ -446,7 +446,7 @@ void LevelSetSignPropagator::initializePropagation(const LevelSetObjectInterface
             // cannot be external cells
             if (isPatchIntersected) {
                 double geometricTolerance = m_mesh->getTol();
-                const std::array<double,3> &cellCentroid = object->getKernel()->computeCellCentroid(cellId);
+                std::array<double, 3> cellCentroid = object->getKernel()->computeCellCentroid(cellId);
 
                 bool isCentroidInternal = true;
                 for (int i = 0; i < 3; ++i) {
