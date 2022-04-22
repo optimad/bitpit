@@ -394,7 +394,7 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
     log::cout() << " Compute levelset on cartesian mesh"  << std::endl;
 
     // Get mesh information
-    const VolCartesian &mesh = *(levelsetKernel->getCartesianMesh() ) ;
+    const VolCartesian &mesh = *(levelsetKernel->getMesh() ) ;
     int meshDimension = mesh.getDimension();
     VolCartesian::MemoryMode meshMemoryMode = mesh.getMemoryMode();
 

@@ -64,7 +64,7 @@ class LevelSetKernel{
     LevelSetKernel() ;
     LevelSetKernel( VolumeKernel *) ;
 
-    VolumeKernel*                               getMesh() const;
+    virtual VolumeKernel *                      getMesh() const;
 
     const std::array<double,3> &                computeCellCentroid(long) const;
     virtual double                              computeCellIncircle(long) const;

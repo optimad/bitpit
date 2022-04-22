@@ -27,17 +27,16 @@
 
 #include "levelSetKernel.hpp"
 
+#include "bitpit_volcartesian.hpp"
+
 namespace bitpit{
 
-class VolCartesian;
 class LevelSetDirectStorageManager;
 class LevelSetInternalPiercedStorageManager;
 
 class LevelSetCartesianKernel : public LevelSetKernel{
 
     private:
-    VolCartesian*                               m_cartesian ;       /**< Pointer to underlying cartesian mesh*/
-
     double                                      m_cellIncircle ;        /**< Cell incircle*/
     double                                      m_cellCircumcircle ;    /**< Cell circumcircle*/
 
@@ -50,7 +49,7 @@ class LevelSetCartesianKernel : public LevelSetKernel{
 
     LevelSetCartesianKernel( VolCartesian & );
 
-    VolCartesian *                              getCartesianMesh() const;
+    VolCartesian *                              getMesh() const override;
 
     double                                      getCellIncircle() const;
     double                                      getCellCircumcircle() const;
