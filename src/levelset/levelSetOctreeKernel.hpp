@@ -27,17 +27,16 @@
 
 #include "levelSetKernel.hpp"
 
+#include "bitpit_voloctree.hpp"
+
 namespace bitpit{
 
-class VolOctree;
 class LevelSetExternalPiercedStorageManager;
 class LevelSetInternalPiercedStorageManager;
 
 class LevelSetOctreeKernel : public LevelSetKernel{
 
     private:
-    VolOctree*                                  m_octree ;       /**< Pointer to underlying octree mesh*/
-
     std::vector<double>                         m_levelToCellIncircle ;        /**< Incircles associated with cell levels*/
     std::vector<double>                         m_levelToCellCircumcircle ;    /**< Circumcircles associated with cell levels*/
 
@@ -50,7 +49,7 @@ class LevelSetOctreeKernel : public LevelSetKernel{
 
     LevelSetOctreeKernel( VolOctree & );
 
-    VolOctree *                                 getOctreeMesh() const;
+    VolOctree *                                 getMesh() const override;
 
     double                                      computeCellIncircle(long) const override;
     double                                      computeCellCircumcircle(long) const override;

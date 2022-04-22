@@ -39,7 +39,6 @@ namespace bitpit {
  * Constructor
  */
 LevelSetOctreeKernel::LevelSetOctreeKernel(VolOctree & patch ): LevelSetKernel( (static_cast<VolumeKernel*>(&patch)) ){
-    m_octree = &patch ;
 
     clearCellCirclesCache();
     updateCellCirclesCache();
@@ -49,8 +48,8 @@ LevelSetOctreeKernel::LevelSetOctreeKernel(VolOctree & patch ): LevelSetKernel( 
  * Returns a pointer to VolOctree
  * @return pointer to VolOctree
  */
-VolOctree* LevelSetOctreeKernel::getOctreeMesh() const{
-    return m_octree ;
+VolOctree * LevelSetOctreeKernel::getMesh() const{
+    return static_cast<VolOctree *>(LevelSetKernel::getMesh()) ;
 }
 
 /*!
@@ -59,7 +58,8 @@ VolOctree* LevelSetOctreeKernel::getOctreeMesh() const{
  * @return radius of incircle
  */
 double LevelSetOctreeKernel::computeCellIncircle(long id) const {
-    int cellLevel = m_octree->getCellLevel(id);
+    const VolOctree *mesh = getMesh();
+    int cellLevel = mesh->getCellLevel(id);
     return m_levelToCellIncircle[cellLevel];
 }
 
@@ -69,7 +69,8 @@ double LevelSetOctreeKernel::computeCellIncircle(long id) const {
  * @return radius of incircle
  */
 double LevelSetOctreeKernel::computeCellCircumcircle( long id ) const {
-    int cellLevel = m_octree->getCellLevel(id);
+    const VolOctree *mesh = getMesh();
+    int cellLevel = mesh->getCellLevel(id);
     return m_levelToCellCircumcircle[cellLevel];
 }
 
@@ -128,13 +129,14 @@ void LevelSetOctreeKernel::clearCellCirclesCache(  ) {
  */
 void LevelSetOctreeKernel::updateCellCirclesCache(  ) {
 
-    int dimension = m_octree->getDimension();
-    int maxLevel  = m_octree->getTree().getMaxLevel();
+    VolOctree *mesh = getMesh();
+    int dimension = mesh->getDimension();
+    int maxLevel  = mesh->getTree().getMaxLevel();
 
     m_levelToCellIncircle.resize(maxLevel + 1);
     m_levelToCellCircumcircle.resize(maxLevel + 1);
     for (int level = 0; level <= maxLevel; ++level) {
-        double levelSize = m_octree->getTree().levelToSize(level);
+        double levelSize = mesh->getTree().levelToSize(level);
 
         m_levelToCellIncircle[level]     = 0.5 * levelSize;
         m_levelToCellCircumcircle[level] = 0.5 * std::sqrt(dimension) * levelSize;

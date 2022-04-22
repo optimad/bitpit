@@ -76,7 +76,7 @@ LevelSetKernel::~LevelSetKernel(){
  * Returns pointer to underlying mesh.
  * @return pointer to mesh
 */
-VolumeKernel* LevelSetKernel::getMesh() const{
+VolumeKernel * LevelSetKernel::getMesh() const{
     return m_mesh ;
 } 
 

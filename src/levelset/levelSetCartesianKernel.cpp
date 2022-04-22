@@ -40,7 +40,6 @@ namespace bitpit {
  * Constructor
  */
 LevelSetCartesianKernel::LevelSetCartesianKernel(VolCartesian &patch ): LevelSetKernel( (static_cast<VolumeKernel*>(&patch)) ){
-    m_cartesian = &patch ;
 
     clearCellCirclesCache();
     updateCellCirclesCache();
@@ -50,8 +49,8 @@ LevelSetCartesianKernel::LevelSetCartesianKernel(VolCartesian &patch ): LevelSet
  * Returns a pointer to VolCartesian
  * @return pointer to VolCartesian
  */
-VolCartesian* LevelSetCartesianKernel::getCartesianMesh() const{
-    return m_cartesian ;
+VolCartesian * LevelSetCartesianKernel::getMesh() const{
+    return static_cast<VolCartesian *>(LevelSetKernel::getMesh()) ;
 }
 
 /*!
@@ -151,8 +150,9 @@ void LevelSetCartesianKernel::clearCellCirclesCache(  ) {
  */
 void LevelSetCartesianKernel::updateCellCirclesCache(  ) {
 
-    int dimension = m_cartesian->getDimension();
-    std::array<double,3> spacing = m_cartesian->getSpacing();
+    const VolCartesian *mesh = getMesh();
+    int dimension = mesh->getDimension();
+    std::array<double,3> spacing = mesh->getSpacing();
 
     m_cellIncircle     = std::numeric_limits<double>::max();
     m_cellCircumcircle = 0.;
