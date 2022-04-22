@@ -147,8 +147,7 @@ const std::array<double,3> & LevelSetKernel::computeCellCentroid( long id ) cons
  */
 double LevelSetKernel::computeCellIncircle( long id ) const {
 
-    VolumeKernel *patch = getMesh();
-    Cell &cell = patch->getCell(id);
+    const Cell &cell = m_mesh->getCell(id);
 
     const long* interfaceIds = cell.getInterfaces();
     int interfaceCount = cell.getInterfaceCount();
@@ -158,7 +157,7 @@ double LevelSetKernel::computeCellIncircle( long id ) const {
     double radius = std::numeric_limits<double>::max() ;
     for (int k = 0; k < interfaceCount; ++k) {
         long interfaceId = interfaceIds[k];
-        double r = norm2(cellCenter - patch->evalInterfaceCentroid(interfaceId));
+        double r = norm2(cellCenter - m_mesh->evalInterfaceCentroid(interfaceId));
         radius = std::min(radius, r);
     }
 
@@ -166,7 +165,7 @@ double LevelSetKernel::computeCellIncircle( long id ) const {
     int nCellVertices = cellVertexIds.size();
     for (int k = 0; k < nCellVertices; ++k) {
         long vertexId = cellVertexIds[k];
-        double r = norm2(cellCenter - patch->getVertexCoords(vertexId));
+        double r = norm2(cellCenter - m_mesh->getVertexCoords(vertexId));
         radius = std::min(radius, r);
     }
 
@@ -181,8 +180,7 @@ double LevelSetKernel::computeCellIncircle( long id ) const {
  */
 double LevelSetKernel::computeCellCircumcircle( long id ) const {
 
-    VolumeKernel *patch = getMesh();
-    Cell &cell = patch->getCell(id);
+    const Cell &cell = m_mesh->getCell(id);
 
     const long* interfaceIds = cell.getInterfaces();
     int interfaceCount = cell.getInterfaceCount();
@@ -192,7 +190,7 @@ double LevelSetKernel::computeCellCircumcircle( long id ) const {
     double radius = -std::numeric_limits<double>::max() ;
     for (int k = 0; k < interfaceCount; ++k) {
         long interfaceId = interfaceIds[k];
-        double r = norm2(cellCenter - patch->evalInterfaceCentroid(interfaceId));
+        double r = norm2(cellCenter - m_mesh->evalInterfaceCentroid(interfaceId));
         radius = std::max(radius, r);
     }
 
@@ -200,7 +198,7 @@ double LevelSetKernel::computeCellCircumcircle( long id ) const {
     int nCellVertices = cellVertexIds.size();
     for (int k = 0; k < nCellVertices; ++k) {
         long vertexId = cellVertexIds[k];
-        double r = norm2(cellCenter - patch->getVertexCoords(vertexId));
+        double r = norm2(cellCenter - m_mesh->getVertexCoords(vertexId));
         radius = std::max(radius, r);
     }
 
@@ -233,7 +231,7 @@ bool LevelSetKernel::intersectCellPlane( long id, const std::array<double,3> &ro
  * @return true if point is inside, false otherwise
  */
 bool LevelSetKernel::isPointInCell(long id, const std::array<double,3> &pointCoords) const {
-    return getMesh()->isPointInside(id,pointCoords);
+    return m_mesh->isPointInside(id,pointCoords);
 }
 
 /*!
@@ -348,7 +346,7 @@ std::unique_ptr<DataCommunicator> LevelSetKernel::createDataCommunicator( ) cons
 */
 std::unique_ptr<LevelSetSignPropagator> LevelSetKernel::createSignPropagator( ) const {
 
-    return std::unique_ptr<LevelSetSignPropagator>(new LevelSetSignPropagator(getMesh())) ;
+    return std::unique_ptr<LevelSetSignPropagator>(new LevelSetSignPropagator(m_mesh)) ;
 }
 
 }
