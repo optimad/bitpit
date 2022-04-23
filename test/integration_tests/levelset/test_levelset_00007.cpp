@@ -33,6 +33,7 @@
 #include "bitpit_levelset.hpp"
 #include "bitpit_surfunstructured.hpp"
 #include "bitpit_volcartesian.hpp"
+#include "bitpit_voloctree.hpp"
 
 /*!
  * Generate segmentation.
