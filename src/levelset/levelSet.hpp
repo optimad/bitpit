@@ -42,6 +42,7 @@ namespace adaption{
 class VolumeKernel;
 class VolCartesian;
 class VolOctree;
+class VolUnstructured;
 class SurfaceKernel;
 class SurfUnstructured;
 
@@ -65,6 +66,7 @@ class LevelSet{
 
     std::unique_ptr<LevelSetKernel>  createKernel( VolCartesian* ) ;
     std::unique_ptr<LevelSetKernel>  createKernel( VolOctree* ) ;
+    std::unique_ptr<LevelSetKernel>  createKernel( VolUnstructured* ) ;
 
 
     int                     registerObject( std::unique_ptr<LevelSetObject> && ) ;

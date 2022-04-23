@@ -27,6 +27,7 @@
 # include "bitpit_surfunstructured.hpp"
 # include "bitpit_volcartesian.hpp"
 # include "bitpit_voloctree.hpp"
+# include "bitpit_volunstructured.hpp"
 
 # include "levelSetCommon.hpp"
 # include "levelSetKernel.hpp"
@@ -42,6 +43,7 @@
 # include "levelSetSignPropagator.hpp"
 # include "levelSetMaskObject.hpp"
 # include "levelSetObjectFactory.hpp"
+# include "levelSetUnstructuredKernel.hpp"
 
 # include "levelSet.hpp"
 
@@ -118,6 +120,9 @@ void LevelSet::setMesh( VolumeKernel* mesh ) {
     } else if( VolOctree* octree = dynamic_cast<VolOctree*> (mesh) ){
         m_kernel = createKernel(octree) ;
 
+    } else if( VolUnstructured* unstructured = dynamic_cast<VolUnstructured*> (mesh) ){
+        m_kernel = createKernel(unstructured) ;
+
     } else{
         throw std::runtime_error ("Mesh non supported in LevelSet::setMesh()");
     } 
@@ -152,6 +157,16 @@ std::unique_ptr<LevelSetKernel> LevelSet::createKernel( VolCartesian* cartesian 
 std::unique_ptr<LevelSetKernel> LevelSet::createKernel( VolOctree* octree ) {
 
     return std::unique_ptr<LevelSetKernel>(new LevelSetOctreeKernel( *octree)) ;
+
+}
+
+/*!
+ * Creates the kernel onto which the levelset function should be computed.
+ * @param[in] unstructured unstructured patch
+ */
+std::unique_ptr<LevelSetKernel> LevelSet::createKernel( VolUnstructured* unstructured ) {
+
+    return std::unique_ptr<LevelSetKernel>(new LevelSetUnstructuredKernel( *unstructured)) ;
 
 }
 
