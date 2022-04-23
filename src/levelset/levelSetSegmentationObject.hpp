@@ -39,7 +39,7 @@
 #include "levelSetCommon.hpp"
 #include "levelSetCachedObject.hpp"
 #include "levelSetCartesianKernel.hpp"
-#include "levelSetOctreeKernel.hpp"
+#include "levelSetKernel.hpp"
 
 namespace bitpit{
 
@@ -209,9 +209,9 @@ class LevelSetSegmentationObject : public LevelSetCachedObject<narrow_band_cache
 
     void                                        computeNarrowBand(bool) override;
     void                                        computeNarrowBand( LevelSetCartesianKernel *, bool);
-    void                                        computeNarrowBand( LevelSetOctreeKernel *, bool);
+    void                                        computeNarrowBand( LevelSetKernel *, bool);
     void                                        updateNarrowBand(const std::vector<adaption::Info> &, bool) override;
-    void                                        updateNarrowBand(LevelSetOctreeKernel *, const std::vector<adaption::Info> &, bool);
+    void                                        updateNarrowBand(LevelSetKernel *, const std::vector<adaption::Info> &, bool);
 
     public:
 

@@ -343,13 +343,15 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand(bool sig
 
     log::cout() << "Computing levelset within the narrow band... " << std::endl;
 
+    // Cartesian patches are handled separately
     if( LevelSetCartesianKernel* lsCartesian = dynamic_cast<LevelSetCartesianKernel*>(this->m_kernel) ){
         computeNarrowBand( lsCartesian, signd) ;
-
-    } else if ( LevelSetOctreeKernel* lsOctree = dynamic_cast<LevelSetOctreeKernel*>(this->m_kernel) ){
-        computeNarrowBand( lsOctree, signd) ;
-
+        return ;
     }
+
+    // All other patches are handled with the same method.
+    computeNarrowBand(this->m_kernel, signd);
+
 }
 
 /*!
@@ -361,19 +363,19 @@ template<typename narrow_band_cache_t>
 void LevelSetSegmentationObject<narrow_band_cache_t>::updateNarrowBand( const std::vector<adaption::Info> &adaptionData, bool signd){
 
     log::cout() << "Updating levelset within the narrow band... " << std::endl;
-    if( LevelSetCartesianKernel* lsCartesian= dynamic_cast<LevelSetCartesianKernel*>(this->m_kernel) ){
 
-        // Update is not implemented for Cartesian patches
+    // Cartesian patches are handled separately
+    //
+    // Update is not implemented for Cartesian patches, the levelset is cleared and
+    // rebuild from scratch.
+    if( LevelSetCartesianKernel* lsCartesian= dynamic_cast<LevelSetCartesianKernel*>(this->m_kernel) ){
         this->clear( ) ;
         computeNarrowBand( lsCartesian, signd) ;
         return;
     }
 
-    if( LevelSetOctreeKernel* lsOctree = dynamic_cast<LevelSetOctreeKernel*>(this->m_kernel) ){
-        updateNarrowBand( lsOctree, adaptionData, signd ) ;
-        return;
-    }
-
+    // All other patches are handled with the same method
+    updateNarrowBand(this->m_kernel, adaptionData, signd);
 
 }
 
@@ -390,8 +392,6 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::updateNarrowBand( const st
  */
 template<typename narrow_band_cache_t>
 void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSetCartesianKernel *levelsetKernel, bool signd){
-
-    log::cout() << " Compute levelset on cartesian mesh"  << std::endl;
 
     // Get mesh information
     const VolCartesian &mesh = *(levelsetKernel->getMesh() ) ;
@@ -478,7 +478,7 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
     while (!processList.empty()) {
         // Get the cell to process
         long cellId = *(processList.begin());
-        processList.erase(cellId);
+        processList.erase(processList.begin());
 
         // Find segment associated to the cell
         std::array<double,3> cellCentroid = levelsetKernel->computeCellCentroid(cellId);
@@ -528,7 +528,7 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
 }
 
 /*!
- * Computes the levelset within the narrow band on an octree grid.
+ * Computes the levelset within the narrow band.
  * If the size of the narrow band has been set, the method will compute the
  * levelset values on the cells that intersect the surface, on all their
  * first neighbours and on the cells with a distance from the surface less
@@ -536,11 +536,11 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
  * In case the size of the narrow band has not been set, levelset will be
  * evaluated only on the cells that intersect the surface and on all their
  * first neighbours.
- * \param[in] levelsetKernel the octree LevelSetKernel
+ * \param[in] levelsetKernel the levelset mesh kernel
  * \param[in] signd whether signed distance should be calculated
  */
 template<typename narrow_band_cache_t>
-void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSetOctreeKernel *levelsetKernel, bool signd){
+void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSetKernel *levelsetKernel, bool signd){
 
     // Get mesh information
     const VolumeKernel &mesh = *(levelsetKernel->getMesh()) ;
@@ -652,8 +652,7 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
 }
 
 /*!
- * Updates the levelset within the narrow band on an octree grid after an grid
- * adaption.
+ * Updates the levelset within the narrow band after a grid adaption.
  * If the size of the narrow band has been set, the method will compute the
  * levelset values on the cells that intersect the surface, on all their
  * first neighbours and on the cells with a distance from the surface less
@@ -666,7 +665,7 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
  * @param[in] signd whether signed distance should be calculated
  */
 template<typename narrow_band_cache_t>
-void LevelSetSegmentationObject<narrow_band_cache_t>::updateNarrowBand( LevelSetOctreeKernel *levelsetKernel, const std::vector<adaption::Info> &adaptionData, bool signd){
+void LevelSetSegmentationObject<narrow_band_cache_t>::updateNarrowBand( LevelSetKernel *levelsetKernel, const std::vector<adaption::Info> &adaptionData, bool signd){
 
     VolumeKernel &mesh = *(levelsetKernel->getMesh()) ;
     narrow_band_cache_t *narrowBandCache = this->getNarrowBandCache();
