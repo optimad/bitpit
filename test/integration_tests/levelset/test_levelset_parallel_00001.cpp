@@ -1,4 +1,3 @@
-
 /*---------------------------------------------------------------------------*\
  *
  *  bitpit
@@ -33,128 +32,165 @@
 // bitpit
 # include "bitpit_IO.hpp"
 # include "bitpit_surfunstructured.hpp"
+# include "bitpit_volcartesian.hpp"
 # include "bitpit_voloctree.hpp"
 # include "bitpit_levelset.hpp"
 
 /*!
+ * Generate segmentation.
+ *
+ * \param name is the name of the segmentation
+ * \result The generated segmentation.
+ */
+std::unique_ptr<bitpit::SurfUnstructured> generateSegmentation(const std::string &name)
+{
+    // Input geometry
+    std::unique_ptr<bitpit::SurfUnstructured> segmentation( new bitpit::SurfUnstructured(2, MPI_COMM_NULL) );
+
+    segmentation->importSTL("./data/cube.stl", true);
+
+    segmentation->deleteCoincidentVertices();
+    segmentation->initializeAdjacencies();
+
+    segmentation->getVTK().setName(name);
+
+    return segmentation;
+}
+
+/*!
+ * Generate the Octree mesh.
+ *
+ * \result The generated Octree mesh.
+ */
+std::unique_ptr<bitpit::VolOctree> generateOctreeMesh(const bitpit::SurfUnstructured &segmentation)
+{
+    int dimensions = 3;
+
+    std::array<double, 3> segmentationMin;
+    std::array<double, 3> segmentationMax;
+    segmentation.getBoundingBox(segmentationMin, segmentationMax);
+
+    std::array<double, 3> delta = segmentationMax - segmentationMin;
+    segmentationMin -= 0.1 * delta;
+    segmentationMax += 0.1 * delta;
+    delta = segmentationMax - segmentationMin;
+
+    std::array<double, 3> origin = segmentationMin;
+
+    double length = 0.;
+    for (int i = 0; i < 3; ++i) {
+        length = std::max(length, segmentationMax[i] - segmentationMin[i]);
+    };
+
+    double dh = length / 16;
+
+    std::unique_ptr<bitpit::VolOctree> mesh(new bitpit::VolOctree(dimensions, origin, length, dh, MPI_COMM_WORLD));
+
+    return mesh;
+}
+
+/*!
 * Subtest 001
 *
-* Testing 3D levelset parallel refinement.
+* Testing basic features of a 3D levelset on an Octreee mesh.
 *
 * \param rank is the rank of the process
 */
 int subtest_001(int rank)
 {
-    int dimensions(3);
+    BITPIT_UNUSED(rank);
+
+    bitpit::log::cout() << std::endl;
+    bitpit::log::cout() << "Testing three-dimensional levelset on an Octree mesh" << std::endl;
+
+    std::chrono::time_point<std::chrono::system_clock> start;
+    std::chrono::time_point<std::chrono::system_clock> end;
 
     // Input geometry
-    std::unique_ptr<bitpit::SurfUnstructured> STL( new bitpit::SurfUnstructured(dimensions - 1, MPI_COMM_NULL) );
+    bitpit::log::cout() << " - Loading geometry" << std::endl;
 
-    bitpit::log::cout() << " - Loading stl geometry" << std::endl;
-
-    STL->importSTL("./data/cube.stl", true);
-
-    STL->deleteCoincidentVertices() ;
-    STL->initializeAdjacencies() ;
-
-    STL->getVTK().setName("geometry_002") ;
+    std::unique_ptr<bitpit::SurfUnstructured> segmentation = generateSegmentation("geometry_002");
     if (rank == 0) {
-        STL->write() ;
+        segmentation->write();
     }
 
-    bitpit::log::cout() << "n. vertex: " << STL->getVertexCount() << std::endl;
-    bitpit::log::cout() << "n. simplex: " << STL->getCellCount() << std::endl;
+    bitpit::log::cout() << "n. vertex: " << segmentation->getVertexCount() << std::endl;
+    bitpit::log::cout() << "n. simplex: " << segmentation->getCellCount() << std::endl;
 
-    // Create mesh
+    // Create the mesh
     bitpit::log::cout() << " - Setting mesh" << std::endl;
-    std::array<double,3> meshMin, meshMax, delta ;
-    double h(0), dh ;
 
-    STL->getBoundingBox( meshMin, meshMax ) ;
+    std::unique_ptr<bitpit::VolOctree> mesh = generateOctreeMesh(*segmentation);
+    mesh->initializeAdjacencies();
+    mesh->update();
 
-    delta = meshMax -meshMin ;
-    meshMin -=  0.1*delta ;
-    meshMax +=  0.1*delta ;
+    // Initialize levelset
+    bitpit::log::cout() << " - Initializing levelset" << std::endl;
 
-    delta = meshMax -meshMin ;
+    int objectId = 0;
 
-    for( int i=0; i<3; ++i){
-        h = std::max( h, meshMax[i]-meshMin[i] ) ;
-    };
-
-    dh = h / 16. ;
-    bitpit::VolOctree mesh(dimensions, meshMin, h, dh, MPI_COMM_WORLD);
-    mesh.initializeAdjacencies();
-    mesh.initializeInterfaces();
-    mesh.update() ;
-
-    // Configure levelset
-    bitpit::LevelSet levelset;
-    int id0;
-
-    std::chrono::time_point<std::chrono::system_clock>    start, end;
-    int elapsed_init, elapsed_part, elapsed_refi(0);
-
-    std::vector<bitpit::adaption::Info> adaptionData ;
-
-    levelset.setMesh(&mesh) ;
+    bitpit::LevelSet levelset ;
     levelset.setPropagateSign(true);
+    levelset.setMesh(mesh.get());
+    levelset.addObject(segmentation.get(), BITPIT_PI, objectId);
 
-    id0 = levelset.addObject(std::move(STL),BITPIT_PI) ;
-    levelset.getObject(id0).enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
+    // Compute levelset in serial
+    bitpit::log::cout() << " - Evaluating the levelset" << std::endl;
 
-    // Compute levelset in narrowband in serial
     start = std::chrono::system_clock::now();
     levelset.compute();
     end = std::chrono::system_clock::now();
 
-    elapsed_init = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+    int elapsed_init = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
 
     bitpit::log::cout() << " - Exporting serial levelset" << std::endl;
-    mesh.getVTK().setName("levelset_parallel_001_serial") ;
-    mesh.write() ;
+    mesh->getVTK().setName("levelset_parallel_001_octree_serial") ;
+    mesh->write() ;
 
-    // Partition the mesh over available processes
+    // Partition the patch
+    bitpit::log::cout() << " - Partitioning the patch" << std::endl;
+
+    std::vector<bitpit::adaption::Info> partitioningData = mesh->partition(true) ;
+
+    // Compute levelset in parallel
     start = std::chrono::system_clock::now();
-
-    adaptionData = mesh.partition(true) ;
-
-    levelset.update(adaptionData) ;
-
+    levelset.update(partitioningData) ;
     end = std::chrono::system_clock::now();
-    elapsed_part = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
 
-    const bitpit::LevelSetObject &object0 = levelset.getObject(id0);
+    int elapsed_part = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
 
-    if (rank == 0) {
-        bitpit::log::cout() << " - Exporting partitioned levelset" << std::endl;
-    }
+    bitpit::log::cout() << " - Exporting partitioned levelset" << std::endl;
+    mesh->getVTK().setName("levelset_parallel_001_octree_partitioned") ;
+    mesh->write() ;
 
-    mesh.getVTK().setName("levelset_parallel_001_partitioned") ;
-    mesh.write() ;
+    // Refine mesh and update levelset
+    const bitpit::LevelSetObject &object0 = levelset.getObject(objectId);
 
-    // Refine mesh and update levelset 
-    mesh.getVTK().setName("levelset_parallel_001_refined") ;
-    mesh.getVTK().setCounter() ;
-    for( int i=0; i<3; ++i){
+    mesh->getVTK().setName("levelset_parallel_001_octree_refined") ;
+    mesh->getVTK().setCounter() ;
 
-        for( auto & cell : mesh.getCells() ){
+    int elapsed_refi = 0;
+    for (int i=0; i<3; ++i) {
+        for (const bitpit::Cell &cell : mesh->getCells()) {
             long id = cell.getId() ;
-            if( std::abs(object0.getValue(id)) < 100. ){
-                mesh.markCellForRefinement(id) ;
+            if (std::abs(object0.getValue(id)) < 100.) {
+                mesh->markCellForRefinement(id) ;
             }
         }
 
-        adaptionData = mesh.update(true) ;
+        std::vector<bitpit::adaption::Info> adaptionData = mesh->update(true) ;
+
         start = std::chrono::system_clock::now();
         levelset.update(adaptionData) ;
         end = std::chrono::system_clock::now();
 
         elapsed_refi += std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
 
-        mesh.write() ;
+        bitpit::log::cout() << " - Exporting serial levelset" << std::endl;
+        mesh->write();
     }
 
+    // Write elapsed times
     bitpit::log::cout() << "elapsed time initialization " << elapsed_init << " ms" << std::endl;
     bitpit::log::cout() << "elapsed time partitioning   " << elapsed_part << " ms" << std::endl;
     bitpit::log::cout() << "elapsed time refinement     " << elapsed_refi << " ms" << std::endl;
@@ -167,30 +203,32 @@ int subtest_001(int rank)
 */
 int main(int argc, char *argv[])
 {
-	MPI_Init(&argc,&argv);
+    MPI_Init(&argc,&argv);
 
-	// Initialize the logger
-	int nProcs;
-	int	rank;
-	MPI_Comm_size(MPI_COMM_WORLD, &nProcs);
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    // Initialize the logger
+    int nProcs;
+    int rank;
+    MPI_Comm_size(MPI_COMM_WORLD, &nProcs);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-	bitpit::log::manager().initialize(bitpit::log::MODE_COMBINE, true, nProcs, rank);
-	bitpit::log::cout().setDefaultVisibility(bitpit::log::VISIBILITY_GLOBAL);
+    bitpit::log::manager().initialize(bitpit::log::MODE_COMBINE, true, nProcs, rank);
+    bitpit::log::cout().setDefaultVisibility(bitpit::log::VISIBILITY_GLOBAL);
 
-	// Run the subtests
-	bitpit::log::cout() << "Testing levelset parallel refinement." << std::endl;
+    // Run the subtests
+    bitpit::log::cout() << "Testing basic levelset features" << std::endl;
 
-	int status;
-	try {
-		status = subtest_001(rank);
-		if (status != 0) {
-			return status;
-		}
-	} catch (const std::exception &exception) {
-		bitpit::log::cout() << exception.what();
-		exit(1);
-	}
+    int status;
+    try {
+        status = subtest_001(rank);
+        if (status != 0) {
+            return status;
+        }
+    } catch (const std::exception &exception) {
+        bitpit::log::cout() << exception.what();
+        exit(1);
+    }
 
-	MPI_Finalize();
+#if BITPIT_ENABLE_MPI==1
+    MPI_Finalize();
+#endif
 }
