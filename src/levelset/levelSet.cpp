@@ -104,28 +104,30 @@ LevelSetStorageType LevelSet::getStorageType() const{
 }
 
 /*!
- * Sets the grid on which the levelset function should be computed.
- * Only cartesian and octree patches are supported at this moment.
- * @param[in] mesh computational grid
+ * Sets the mesh on which the levelset function should be computed.
+ *
+ * Only cartesian, octree and unstructured patches are supported. If the specified
+ * mesh type is not among the supported types, an exception is thrown.
+ *
+ * @param[in] mesh computational mesh
  */
 void LevelSet::setMesh( VolumeKernel* mesh ) {
 
+    // Mesh can be set only once
     if (m_kernel) {
         throw std::runtime_error ("Mesh can be set just once.");
     }
 
-    if( VolCartesian* cartesian = dynamic_cast<VolCartesian*> (mesh) ){
-        m_kernel = createKernel(cartesian) ;
-
-    } else if( VolOctree* octree = dynamic_cast<VolOctree*> (mesh) ){
-        m_kernel = createKernel(octree) ;
-
-    } else if( VolUnstructured* unstructured = dynamic_cast<VolUnstructured*> (mesh) ){
-        m_kernel = createKernel(unstructured) ;
-
-    } else{
-        throw std::runtime_error ("Mesh non supported in LevelSet::setMesh()");
-    } 
+    // Create the kernel
+    if (VolCartesian *cartesian = dynamic_cast<VolCartesian *>(mesh)) {
+        m_kernel = std::unique_ptr<LevelSetKernel>(new LevelSetCartesianKernel(*cartesian));
+    } else if (VolOctree *octree = dynamic_cast<VolOctree *>(mesh)) {
+        m_kernel = std::unique_ptr<LevelSetKernel>(new LevelSetOctreeKernel(*octree));
+    } else if (VolUnstructured *unstructured = dynamic_cast<VolUnstructured*>(mesh)) {
+        m_kernel = std::unique_ptr<LevelSetKernel>(new LevelSetUnstructuredKernel(*unstructured));
+    } else {
+        throw std::runtime_error ("Unable to create the levelset kernel. Mesh type non supported.");
+    }
 
 # if BITPIT_ENABLE_MPI
     // Initialize the communicator
@@ -137,36 +139,6 @@ void LevelSet::setMesh( VolumeKernel* mesh ) {
     for( auto &obj : m_objects){
         obj.second->setKernel(m_kernel.get());
     }
-
-}
-
-/*!
- * Creates the kernel onto which the levelset function should be computed.
- * @param[in] cartesian cartesian patch
- */
-std::unique_ptr<LevelSetKernel> LevelSet::createKernel( VolCartesian* cartesian ) {
-
-    return std::unique_ptr<LevelSetKernel>(new LevelSetCartesianKernel( *cartesian)) ;
-
-}
-
-/*!
- * Creates the kernel onto which the levelset function should be computed.
- * @param[in] octree octree patch
- */
-std::unique_ptr<LevelSetKernel> LevelSet::createKernel( VolOctree* octree ) {
-
-    return std::unique_ptr<LevelSetKernel>(new LevelSetOctreeKernel( *octree)) ;
-
-}
-
-/*!
- * Creates the kernel onto which the levelset function should be computed.
- * @param[in] unstructured unstructured patch
- */
-std::unique_ptr<LevelSetKernel> LevelSet::createKernel( VolUnstructured* unstructured ) {
-
-    return std::unique_ptr<LevelSetKernel>(new LevelSetUnstructuredKernel( *unstructured)) ;
 
 }
 

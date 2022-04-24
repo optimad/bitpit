@@ -40,9 +40,6 @@ namespace adaption{
     struct Info;
 }
 class VolumeKernel;
-class VolCartesian;
-class VolOctree;
-class VolUnstructured;
 class SurfaceKernel;
 class SurfUnstructured;
 
@@ -63,11 +60,6 @@ class LevelSet{
     double                  m_narrowBandSize;          /**< Size of narrowban, negative values means that the narrowband is disabled  */
     bool                    m_signedDistance;          /**< Flag for sigend/unsigned distance (default = true) */
     bool                    m_propagateSign;           /**< Flag for sign propagation from narrow band (default = false) */
-
-    std::unique_ptr<LevelSetKernel>  createKernel( VolCartesian* ) ;
-    std::unique_ptr<LevelSetKernel>  createKernel( VolOctree* ) ;
-    std::unique_ptr<LevelSetKernel>  createKernel( VolUnstructured* ) ;
-
 
     int                     registerObject( std::unique_ptr<LevelSetObject> && ) ;
 
