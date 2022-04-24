@@ -140,6 +140,21 @@ void LevelSetSignPropagator::execute(const std::vector<adaption::Info> &adaption
         return;
     }
 
+#if BITPIT_ENABLE_MPI
+    // Initialize sign on ghost cells
+    //
+    // Ghost cells are not tracked by adaption, we need to explicitly initialize the sign
+    // on all ghost cells.
+    VolumeKernel::CellConstIterator cellGhostBegin = m_mesh->ghostCellConstBegin();
+    VolumeKernel::CellConstIterator cellGhostEnd   = m_mesh->ghostCellConstEnd();
+
+    for (VolumeKernel::CellConstIterator cellItr = cellGhostBegin; cellItr != cellGhostEnd; ++cellItr) {
+        std::size_t cellRawId = cellItr.getRawIndex();
+        LevelSetSignStorage::KernelIterator cellStorageItr = storage->rawFind(cellRawId);
+        storage->at(cellStorageItr) = LevelSetSignStorage::SIGN_UNDEFINED;
+    }
+#endif
+
     // Propagate sign
     propagate(object, storage);
 }
