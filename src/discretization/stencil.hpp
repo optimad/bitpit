@@ -28,11 +28,34 @@
 #include <array>
 #include <ostream>
 #include <unordered_map>
+#include <vector>
 
 #include "bitpit_common.hpp"
 #include "bitpit_containers.hpp"
 
 namespace bitpit {
+
+// Stencil weight pool
+template<typename weight_t>
+class DiscreteStencilWeightPool
+{
+
+public:
+    DiscreteStencilWeightPool(std::size_t capacity = 128);
+
+    std::size_t size() const;
+    std::size_t capacity() const;
+    void clear(bool release);
+
+    weight_t retrieve();
+    void store(weight_t &&weight);
+    void store(std::vector<weight_t> *weights);
+
+private:
+    std::size_t m_capacity;
+    std::vector<weight_t> m_storage;
+
+};
 
 // Stream operators for the stencil class
 template<typename weight_t>
@@ -76,6 +99,8 @@ public:
     DiscreteStencil(std::size_t nItems, const weight_t &zero = weight_t());
     DiscreteStencil(std::size_t size, const long *pattern, const weight_t &zero = weight_t());
     DiscreteStencil(std::size_t size, const long *pattern, const weight_t *weights, const weight_t &zero = weight_t());
+
+    virtual ~DiscreteStencil() = default;
 
     void initialize(std::size_t nItems, const weight_t &zero = weight_t());
     void initialize(std::size_t size, const long *pattern, const weight_t &zero = weight_t());
@@ -138,20 +163,57 @@ public:
     DiscreteStencil<weight_t> & operator+=(const DiscreteStencil<weight_t> &other);
     DiscreteStencil<weight_t> & operator-=(const DiscreteStencil<weight_t> &other);
 
-private:
-    static void rawSumValue(const weight_t &value, double factor, weight_t *target);
-    static void rawCopyValue(const weight_t &source, weight_t *destination);
-    static void rawMoveValue(weight_t &&source, weight_t *destination);
-
+protected:
     weight_t m_zero;
     std::vector<long> m_pattern;
     std::vector<weight_t> m_weights;
     weight_t m_constant;
 
+    virtual void appendWeight(weight_t &&weight);
+    virtual void appendWeight(const weight_t &weight);
+
+    virtual void clearWeights(bool release);
+
+private:
+    static void rawSumValue(const weight_t &value, double factor, weight_t *target);
+    static void rawCopyValue(const weight_t &source, weight_t *destination);
+    static void rawMoveValue(weight_t &&source, weight_t *destination);
+
     weight_t * findWeight(long id);
     const weight_t * findWeight(long id) const;
 
     bool isWeightNegligible(std::size_t pos, double tolerance = 1.e-12) const;
+
+};
+
+/**
+* \ingroup discretization
+*
+* \brief Metafunction for generating a discretization stencil with a
+* memory pool (MP).
+*
+* \tparam weight_t is the type of the weights stored in the stencil
+*/
+template<typename weight_t>
+class MPDiscreteStencil : public DiscreteStencil<weight_t>
+{
+
+public:
+    typedef DiscreteStencilWeightPool<weight_t> weight_pool_type;
+
+    MPDiscreteStencil(const weight_t &zero = weight_t());
+    MPDiscreteStencil(std::size_t nItems, const weight_t &zero = weight_t());
+    MPDiscreteStencil(std::size_t size, const long *pattern, const weight_t &zero = weight_t());
+    MPDiscreteStencil(std::size_t size, const long *pattern, const weight_t *weights, const weight_t &zero = weight_t());
+
+    void setWeightPool(weight_pool_type *pool);
+
+protected:
+    weight_pool_type *m_weightPool;
+
+    void appendWeight(const weight_t &weight) override;
+
+    void clearWeights(bool release) override;
 
 };
 
@@ -202,15 +264,27 @@ typedef DiscreteStencil<double> StencilScalar;
 typedef DiscreteStencil<std::array<double, 3>> StencilVector;
 typedef DiscreteStencil<std::vector<double>> StencilBlock;
 
+typedef MPDiscreteStencil<double> MPStencilScalar;
+typedef MPDiscreteStencil<std::array<double, 3>> MPStencilVector;
+typedef MPDiscreteStencil<std::vector<double>> MPStencilBlock;
+
 }
 
 // Explicit instantization
 #ifndef __BTPIT_STENCIL_SRC__
 namespace bitpit {
 
+extern template class DiscreteStencilWeightPool<double>;
+extern template class DiscreteStencilWeightPool<std::array<double, 3>>;
+extern template class DiscreteStencilWeightPool<std::vector<double>>;
+
 extern template class DiscreteStencil<double>;
 extern template class DiscreteStencil<std::array<double, 3>>;
 extern template class DiscreteStencil<std::vector<double>>;
+
+extern template class MPDiscreteStencil<double>;
+extern template class MPDiscreteStencil<std::array<double, 3>>;
+extern template class MPDiscreteStencil<std::vector<double>>;
 
 }
 #endif
