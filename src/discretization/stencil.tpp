@@ -28,6 +28,117 @@
 namespace bitpit {
 
 /*!
+* Constructor.
+*
+* \param capacity is the maximum number of weights that can be stored
+* in the pool
+*/
+template<typename weight_t>
+DiscreteStencilWeightPool<weight_t>::DiscreteStencilWeightPool(std::size_t capacity)
+    : m_capacity(capacity)
+{
+}
+
+/*!
+* Get the size of the pool.
+*
+* The size represents the number of weights currently stored in the pool.
+*
+* \param size The size of the pool.
+*/
+template<typename weight_t>
+std::size_t DiscreteStencilWeightPool<weight_t>::size() const
+{
+    return m_storage.size();
+}
+
+/*!
+* Get the capacity of the pool.
+*
+* The capacity represents the maximum number of weights that can be stored
+* in the pool.
+*
+* \param size The capacity of the pool.
+*/
+template<typename weight_t>
+std::size_t DiscreteStencilWeightPool<weight_t>::capacity() const
+{
+    return m_capacity;
+}
+
+/*!
+* Clear the pool.
+*
+* Removes all weights from the pool (which are destroyed), leaving it
+* with a size of 0.
+*
+* \param release if it's true the memory hold by the pool will be
+* released, otherwise the pool will be cleared but its memory will
+* not be relased
+*/
+template<typename weight_t>
+void DiscreteStencilWeightPool<weight_t>::clear(bool release)
+{
+    m_storage.clear();
+    if (release) {
+        m_storage.shrink_to_fit();
+    }
+}
+
+/*!
+* Retrieve a weight from the pool.
+*
+* If the pool is empty, an exception is thrown.
+*
+* \result The weight retrieved from the pool.
+*/
+template<typename weight_t>
+weight_t DiscreteStencilWeightPool<weight_t>::retrieve()
+{
+    if (size() == 0) {
+        throw std::runtime_error("Unable to retrieve a weight from the pool: the pool is empty.");
+    }
+
+    weight_t weight = std::move(m_storage.back());
+    m_storage.pop_back();
+
+    return weight;
+}
+
+/*!
+* Store the given weight in the pool.
+*
+* \param weight is the weight that will be stored in the pool
+*/
+template<typename weight_t>
+void DiscreteStencilWeightPool<weight_t>::store(weight_t &&weight)
+{
+    if (m_capacity == size()) {
+        return;
+    }
+
+    m_storage.emplace_back(std::move(weight));
+}
+
+/*!
+* Store the given weights in the pool.
+*
+* \param weights are the weight that will be stored in the pool
+*/
+template<typename weight_t>
+void DiscreteStencilWeightPool<weight_t>::store(std::vector<weight_t> *weights)
+{
+    std::size_t nStorableWeights = std::min(m_capacity - size(), weights->size());
+    if (nStorableWeights == 0) {
+        return;
+    }
+
+    m_storage.insert(m_storage.end(),
+                     std::make_move_iterator(weights->begin()),
+                     std::make_move_iterator(weights->begin() + nStorableWeights));
+}
+
+/*!
 * Output stream operator from class DiscreteStencil to communication buffer.
 *
 * \param[in] buffer is the output memory stream
@@ -487,7 +598,7 @@ template<typename weight_t>
 void DiscreteStencil<weight_t>::appendItem(long id, const weight_t &weight)
 {
     m_pattern.push_back(id);
-    m_weights.push_back(weight);
+    appendWeight(weight);
 }
 
 /*!
@@ -503,7 +614,7 @@ template<typename weight_t>
 void DiscreteStencil<weight_t>::appendItem(long id, weight_t &&weight)
 {
     m_pattern.push_back(id);
-    m_weights.push_back(std::move(weight));
+    appendWeight(std::move(weight));
 }
 
 /*!
@@ -585,12 +696,11 @@ template<typename weight_t>
 void DiscreteStencil<weight_t>::clear(bool release)
 {
     m_pattern.clear();
-    m_weights.clear();
-
     if (release) {
         m_pattern.shrink_to_fit();
-        m_weights.shrink_to_fit();
     }
+
+    clearWeights(release);
 
     zeroConstant();
 }
@@ -737,6 +847,47 @@ const weight_t * DiscreteStencil<weight_t>::findWeight(long id) const
 }
 
 /*!
+* Append a weight to the stencil.
+*
+* \param weight is the weight that will be appended
+*/
+template<typename weight_t>
+void DiscreteStencil<weight_t>::appendWeight(weight_t &&weight)
+{
+    m_weights.push_back(std::move(weight));
+}
+
+/*!
+* Append a weight to the stencil.
+*
+* \param weight is the weight that will be appended
+*/
+template<typename weight_t>
+void DiscreteStencil<weight_t>::appendWeight(const weight_t &weight)
+{
+    m_weights.push_back(weight);
+}
+
+/*!
+* Clears the weights of the stencil.
+*
+* Removes all weights from the stencil (which are destroyed), leaving the
+* weight container with a size of 0.
+*
+* \param release if it's true the memory hold by the weight container will be
+* released, otherwise the weight container will be cleared but its memory will
+* not be relased
+*/
+template<typename weight_t>
+void DiscreteStencil<weight_t>::clearWeights(bool release)
+{
+    m_weights.clear();
+    if (release) {
+        m_weights.shrink_to_fit();
+    }
+}
+
+/*!
 * Sum the specified value to the target.
 *
 * \param value is the value that will be summed
@@ -869,6 +1020,108 @@ DiscreteStencil<weight_t> & DiscreteStencil<weight_t>::operator-=(const Discrete
     sum(other, - 1.);
 
     return *this;
+}
+
+/*!
+* Constructor
+*
+* \param zero is the value to be used as zero
+*/
+template<typename weight_t>
+MPDiscreteStencil<weight_t>::MPDiscreteStencil(const weight_t &zero)
+    : DiscreteStencil<weight_t>(zero),
+      m_weightPool(nullptr)
+{
+}
+
+/*!
+* Constructor
+*
+* \param size is the stencil size, expressed in number of elements
+* \param zero is the value to be used as zero
+*/
+template<typename weight_t>
+MPDiscreteStencil<weight_t>::MPDiscreteStencil(std::size_t size, const weight_t &zero)
+    : DiscreteStencil<weight_t>(size, zero),
+      m_weightPool(nullptr)
+{
+}
+
+/*!
+* Constructor
+*
+* \param size is the stencil size, expressed in number of elements
+* \param pattern is the patterns of the stencil
+* \param zero is the value to be used as zero
+*/
+template<typename weight_t>
+MPDiscreteStencil<weight_t>::MPDiscreteStencil(std::size_t size, const long *pattern, const weight_t &zero)
+    : DiscreteStencil<weight_t>(size, pattern, zero),
+      m_weightPool(nullptr)
+{
+}
+
+/*!
+* Constructor
+*
+* \param size is the stencil size, expressed in number of elements
+* \param pattern is the patterns of the stencil
+* \param weights are the weights of the stencil
+* \param zero is the value to be used as zero
+*/
+template<typename weight_t>
+MPDiscreteStencil<weight_t>::MPDiscreteStencil(std::size_t size, const long *pattern, const weight_t *weights, const weight_t &zero)
+    : DiscreteStencil<weight_t>(size, pattern, weights, zero),
+      m_weightPool(nullptr)
+
+{
+}
+
+/*!
+* Set the weight pool.
+*
+* \param pool is the weight pool that will be used
+*/
+template<typename weight_t>
+void MPDiscreteStencil<weight_t>::setWeightPool(MPDiscreteStencil<weight_t>::weight_pool_type *pool)
+{
+    m_weightPool = pool;
+}
+
+/*!
+* Append a weight to the stencil.
+*
+* \param weight is the weight that will be appended
+*/
+template<typename weight_t>
+void MPDiscreteStencil<weight_t>::appendWeight(const weight_t &weight)
+{
+    if (m_weightPool && m_weightPool->size() > 0) {
+        this->m_weights.emplace_back(m_weightPool->retrieve());
+        this->m_weights.back() = weight;
+    } else {
+        DiscreteStencil<weight_t>::appendWeight(weight);
+    }
+}
+
+/*!
+* Clears the weights of the stencil.
+*
+* Removes all weights from the stencil (which are destroyed), leaving the
+* weight container with a size of 0.
+*
+* \param release if it's true the memory hold by the weight container will be
+* released, otherwise the weight container will be cleared but its memory will
+* not be relased
+*/
+template<typename weight_t>
+void MPDiscreteStencil<weight_t>::clearWeights(bool release)
+{
+    if (m_weightPool) {
+        m_weightPool->store(&(this->m_weights));
+    }
+
+    DiscreteStencil<weight_t>::clearWeights(release);
 }
 
 }

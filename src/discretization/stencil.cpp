@@ -33,9 +33,17 @@
 // Explicit instantization
 namespace bitpit {
 
+template class DiscreteStencilWeightPool<double>;
+template class DiscreteStencilWeightPool<std::array<double, 3>>;
+template class DiscreteStencilWeightPool<std::vector<double>>;
+
 template class DiscreteStencil<double>;
 template class DiscreteStencil<std::array<double, 3>>;
 template class DiscreteStencil<std::vector<double>>;
+
+template class MPDiscreteStencil<double>;
+template class MPDiscreteStencil<std::array<double, 3>>;
+template class MPDiscreteStencil<std::vector<double>>;
 
 /*!
  * Sum the specified value to the target.
