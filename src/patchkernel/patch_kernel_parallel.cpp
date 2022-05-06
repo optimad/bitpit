@@ -2234,9 +2234,8 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
     std::vector<long> cellSendList;
     std::unordered_set<long> vertexSendList;
 
-    std::unordered_set<long> ghostCellsOverall;
     std::vector<long> frameCellsOverall;
-    std::size_t frameCellIndexOverall = 0;
+    std::unordered_set<long> ghostFrameCellsOverall;
 
     for (int recvRank : recvRanks) {
         //
@@ -2359,7 +2358,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
                         frontierNeighs.insert(neighId);
 
                         if (innerFrontierFace) {
-                            ghostCellsOverall.insert(cellId);
+                            ghostFrameCellsOverall.insert(cellId);
                         }
 
                         //
@@ -2393,6 +2392,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
                                 for (long frontierNeighId : neighsList) {
                                     if (m_partitioningOutgoings.count(frontierNeighId) == 0) {
                                         innerFrontierVertex = true;
+                                        break;
                                     }
                                 }
                             }
@@ -2402,7 +2402,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
                                 frontierNeighs.insert(frontierNeighId);
                                 if (innerFrontierVertex) {
                                     if (m_partitioningOutgoings.count(frontierNeighId) > 0) {
-                                        ghostCellsOverall.insert(frontierNeighId);
+                                        ghostFrameCellsOverall.insert(frontierNeighId);
                                     }
                                 }
                             }
@@ -2462,6 +2462,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
                                     for (long frontierNeighId : neighsList) {
                                         if (m_partitioningOutgoings.count(frontierNeighId) == 0) {
                                             innerFrontierEdge = true;
+                                            break;
                                         }
                                     }
                                 }
@@ -2471,7 +2472,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
                                     frontierNeighs.insert(frontierNeighId);
                                     if (innerFrontierEdge) {
                                         if (m_partitioningOutgoings.count(frontierNeighId) > 0) {
-                                            ghostCellsOverall.insert(frontierNeighId);
+                                            ghostFrameCellsOverall.insert(frontierNeighId);
                                         }
                                     }
                                 }
@@ -2502,26 +2503,12 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
         std::size_t nOutgoingCells = outgoingCells.size();
         std::size_t nHaloCells     = haloCells.size();
 
-        cellSendList.resize(nOutgoingCells + nHaloCells);
+        cellSendList.assign(outgoingCells.begin(), outgoingCells.end());
+        cellSendList.insert(cellSendList.end(), haloCells.begin(), haloCells.end());
+
+        // Update list of frame cells
         if (!sendingAllCells) {
-            frameCellsOverall.resize(frameCellsOverall.size() + frameCells.size());
-        }
-
-        std::size_t outgoingIndex = 0;
-        for (long cellId : outgoingCells) {
-            cellSendList[outgoingIndex] = cellId;
-            ++outgoingIndex;
-
-            if (!sendingAllCells && frameCells.count(cellId) > 0) {
-                frameCellsOverall[frameCellIndexOverall] = cellId;
-                ++frameCellIndexOverall;
-            }
-        }
-
-        std::size_t haloIndex = outgoingIndex;
-        for (long cellId : haloCells) {
-            cellSendList[haloIndex] = cellId;
-            ++haloIndex;
+            frameCellsOverall.insert(frameCellsOverall.end(), frameCells.begin(), frameCells.end());
         }
 
         //
@@ -2726,7 +2713,8 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
 
         // Delete outgoing cells not in the frame
         std::vector<long> deleteList;
-        deleteList.clear();
+
+        deleteList.reserve(nOutgoingCells - frameCells.size());
         for (std::size_t i = 0; i < nOutgoingCells; ++i) {
             long cellId = cellSendList[i];
             if (frameCells.count(cellId) == 0) {
@@ -2766,12 +2754,11 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
     // If the process is sending all its cells we can just clear the patch.
     if (!sendingAllCells) {
         std::vector<long> deleteList;
-        std::vector<long> neighIds;
 
         // Delete frame cells or move them into the ghosts
         deleteList.clear();
         for (long cellId : frameCellsOverall) {
-            bool moveToGhostCells = (ghostCellsOverall.count(cellId) > 0);
+            bool moveToGhostCells = (ghostFrameCellsOverall.count(cellId) > 0);
             if (moveToGhostCells) {
                 int cellOwner = m_partitioningOutgoings.at(cellId);
                 internalCell2GhostCell(cellId, cellOwner);
@@ -2789,9 +2776,6 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
         // to remove stale adjacencies.
         pruneStaleAdjacencies();
 
-        // Update cell adjacencies
-        updateAdjacencies();
-
         // Delete stale ghosts
         //
         // Loop over all the ghosts and keep only the cells that have at least
@@ -2800,6 +2784,8 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
         // Stale ghosts have to be deleted after processing frame cells,
         // because some of the frame cells moved into ghosts may be stale
         // ghosts.
+        std::vector<long> neighIds;
+
         deleteList.clear();
         for (const auto &entry : m_ghostCellOwners) {
             long cellId = entry.first;
