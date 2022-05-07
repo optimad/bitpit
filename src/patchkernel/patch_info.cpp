@@ -389,9 +389,9 @@ const std::unordered_map<long, long> & PatchNumberingInfo::getCellGlobalMap() co
 */
 int PatchNumberingInfo::getCellOwnerFromLocal(long id) const
 {
-	auto ghostCellOwnerItr = m_patch->m_ghostCellOwners.find(id);
-	if (ghostCellOwnerItr != m_patch->m_ghostCellOwners.end()) {
-		return ghostCellOwnerItr->second;
+	auto ghostCellOwnerItr = m_patch->m_ghostCellInfo.find(id);
+	if (ghostCellOwnerItr != m_patch->m_ghostCellInfo.end()) {
+		return ghostCellOwnerItr->second.owner;
 	} else {
 		return m_patch->getRank();
 	}

@@ -374,7 +374,7 @@ PatchKernel::VertexIterator PatchKernel::internalVertex2GhostVertex(long id, int
 	}
 
 	// Set ghost owner
-	setGhostVertexOwner(id, owner);
+	setGhostVertexInfo(id, owner);
 
 	// Return the iterator to the new position
 	return iterator;
@@ -417,7 +417,7 @@ PatchKernel::VertexIterator PatchKernel::ghostVertex2InternalVertex(long id)
 	}
 
 	// Unset ghost owner
-	unsetGhostVertexOwner(id);
+	unsetGhostVertexInfo(id);
 
 	// Return the iterator to the new position
 	return iterator;
@@ -510,7 +510,7 @@ void PatchKernel::_restoreGhostVertex(const VertexIterator &iterator, const std:
 	addPointToBoundingBox(vertex.getCoords());
 
 	// Set owner
-	setGhostVertexOwner(vertex.getId(), owner);
+	setGhostVertexInfo(vertex.getId(), owner);
 }
 
 /*!
@@ -521,7 +521,7 @@ void PatchKernel::_restoreGhostVertex(const VertexIterator &iterator, const std:
 void PatchKernel::_deleteGhostVertex(long id)
 {
 	// Unset ghost owner
-	unsetGhostVertexOwner(id);
+	unsetGhostVertexInfo(id);
 
 	// Update the bounding box
 	const Vertex &vertex = m_vertices[id];
@@ -639,8 +639,8 @@ PatchKernel::CellIterator PatchKernel::internalCell2GhostCell(long id, int owner
 		m_lastInternalCellId = m_cells.getSizeMarker(m_nInternalCells - 1, Cell::NULL_ID);
 	}
 
-	// Set ghost owner
-	setGhostCellOwner(id, owner);
+	// Set ghost information
+	setGhostCellInfo(id, owner);
 
 	// Return the iterator to the new position
 	return iterator;
@@ -682,8 +682,8 @@ PatchKernel::CellIterator PatchKernel::ghostCell2InternalCell(long id)
 		m_firstGhostCellId = firstGhostCellIterator->getId();
 	}
 
-	// Unset ghost owner
-	unsetGhostCellOwner(id);
+	// Unset ghost information
+	unsetGhostCellInfo(id);
 
 	// Return the iterator to the new position
 	return iterator;
@@ -958,8 +958,8 @@ PatchKernel::CellIterator PatchKernel::_addGhostCell(ElementType type, std::uniq
 		m_firstGhostCellId = id;
 	}
 
-	// Set owner
-	setGhostCellOwner(id, owner);
+	// Set ghost information
+	setGhostCellInfo(id, owner);
 
 	// Set the alteration flags of the cell
 	setAddedCellAlterationFlags(id);
@@ -1034,8 +1034,8 @@ void PatchKernel::_restoreGhostCell(const CellIterator &iterator, ElementType ty
 	cell.initialize(iterator.getId(), type, std::move(connectStorage), false, storeInterfaces, storeAdjacencies);
 	m_nGhostCells++;
 
-	// Set owner
-	setGhostCellOwner(cellId, owner);
+	// Set ghost information
+	setGhostCellInfo(cellId, owner);
 
 	// Set the alteration flags of the cell
 	setRestoredCellAlterationFlags(cellId);
@@ -1048,8 +1048,8 @@ void PatchKernel::_restoreGhostCell(const CellIterator &iterator, ElementType ty
 */
 void PatchKernel::_deleteGhostCell(long id)
 {
-	// Unset ghost owner
-	unsetGhostCellOwner(id);
+	// Unset ghost information
+	unsetGhostCellInfo(id);
 
 	// Set the alteration flags of the cell
 	setDeletedCellAlterationFlags(id);
@@ -1830,7 +1830,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningPrepare(const std::unorder
 		}
 
 		long cellId = entry.first;
-		if (m_ghostCellOwners.count(cellId) > 0) {
+		if (m_ghostCellInfo.count(cellId) > 0) {
 			continue;
 		}
 
@@ -2098,7 +2098,7 @@ std::unordered_map<long, int> PatchKernel::_partitioningAlter_evalGhostCellOwner
             int finalOwner;
             buffer >> finalOwner;
 
-            if (finalOwner != m_ghostCellOwners.at(id)) {
+            if (finalOwner != m_ghostCellInfo.at(id).owner) {
                 ghostCellOwnershipChanges[id] = finalOwner;
             }
         }
@@ -2129,7 +2129,8 @@ void PatchKernel::_partitioningAlter_applyGhostCellOwnershipChanges(int sendRank
     for (auto itr = ghostCellOwnershipChanges->begin(); itr != ghostCellOwnershipChanges->end();) {
         // Consider only ghosts previously owned by the sender
         long ghostCellId = itr->first;
-        int previousGhostCellOwner = m_ghostCellOwners.at(ghostCellId);
+        const GhostCellInfo &ghostCellInfo = m_ghostCellInfo.at(ghostCellId);
+        int previousGhostCellOwner = ghostCellInfo.owner;
         if (previousGhostCellOwner != sendRank) {
             ++itr;
             continue;
@@ -2137,7 +2138,7 @@ void PatchKernel::_partitioningAlter_applyGhostCellOwnershipChanges(int sendRank
 
         // Update ghost owner
         int finalGhostCellOwner = itr->second;
-        setGhostCellOwner(ghostCellId, finalGhostCellOwner);
+        setGhostCellInfo(ghostCellId, finalGhostCellOwner);
         itr = ghostCellOwnershipChanges->erase(itr);
     }
 }
@@ -2149,8 +2150,8 @@ void PatchKernel::_partitioningAlter_deleteGhosts()
 {
     // Delete ghost cells
     std::vector<long> cellsDeleteList;
-    cellsDeleteList.reserve(m_ghostCellOwners.size());
-    for (const auto &entry : m_ghostCellOwners) {
+    cellsDeleteList.reserve(m_ghostCellInfo.size());
+    for (const auto &entry : m_ghostCellInfo) {
         long cellId = entry.first;
         cellsDeleteList.emplace_back(cellId);
     }
@@ -2656,8 +2657,8 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
                 int cellOwnerOnReceiver;
                 if (m_partitioningOutgoings.count(cellId) > 0) {
                     cellOwnerOnReceiver = m_partitioningOutgoings.at(cellId);
-                } else if (m_ghostCellOwners.count(cellId) > 0) {
-                    cellOwnerOnReceiver = m_ghostCellOwners.at(cellId);
+                } else if (m_ghostCellInfo.count(cellId) > 0) {
+                    cellOwnerOnReceiver = m_ghostCellInfo.at(cellId).owner;
                 } else {
                     cellOwnerOnReceiver = m_rank;
                 }
@@ -2790,7 +2791,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
         std::vector<long> neighIds;
 
         deleteList.clear();
-        for (const auto &entry : m_ghostCellOwners) {
+        for (const auto &entry : m_ghostCellInfo) {
             long cellId = entry.first;
             bool keep = false;
 
@@ -2800,7 +2801,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
             int nCellAdjacencies = cell.getAdjacencyCount();
             for (int i = 0; i < nCellAdjacencies; ++i) {
                 long neighId = adjacencies[i];
-                if (m_ghostCellOwners.count(neighId) > 0) {
+                if (m_ghostCellInfo.count(neighId) > 0) {
                     continue;
                 } else if (m_partitioningOutgoings.count(neighId) > 0) {
                     continue;
@@ -2816,7 +2817,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
                 neighIds.clear();
                 findCellNeighs(cellId, &neighIds);
                 for (long neighId : neighIds) {
-                    if (m_ghostCellOwners.count(neighId) > 0) {
+                    if (m_ghostCellInfo.count(neighId) > 0) {
                         continue;
                     } else if (m_partitioningOutgoings.count(neighId) > 0) {
                         continue;
@@ -3011,7 +3012,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
         // so we need to build the list on the fly. THe list will contain ghost
         // cells (target) and their neighbours (sources).
         duplicateCellsCandidates.clear();
-        for (auto &entry : m_ghostCellOwners) {
+        for (auto &entry : m_ghostCellInfo) {
             long ghostCellId = entry.first;
 
             duplicateCellsCandidates.insert(ghostCellId);
@@ -3504,11 +3505,11 @@ void PatchKernel::_partitioningCleanup()
 */
 int PatchKernel::getCellRank(long id) const
 {
-	auto cellOwner = m_ghostCellOwners.find(id);
-	if (cellOwner == m_ghostCellOwners.end()) {
+	auto cellInfoItr = m_ghostCellInfo.find(id);
+	if (cellInfoItr == m_ghostCellInfo.end()) {
 		return m_rank;
 	} else {
-		return cellOwner->second;
+		return cellInfoItr->second.owner;
 	}
 }
 
@@ -3520,11 +3521,11 @@ int PatchKernel::getCellRank(long id) const
 */
 int PatchKernel::getCellOwner(long id) const
 {
-	auto cellOwner = m_ghostCellOwners.find(id);
-	if (cellOwner == m_ghostCellOwners.end()) {
+	auto cellInfoItr = m_ghostCellInfo.find(id);
+	if (cellInfoItr == m_ghostCellInfo.end()) {
 		return m_rank;
 	} else {
-		return cellOwner->second;
+		return cellInfoItr->second.owner;
 	}
 }
 
@@ -3536,11 +3537,11 @@ int PatchKernel::getCellOwner(long id) const
 */
 int PatchKernel::getCellHaloLayer(long id) const
 {
-	const Cell &cell = getCell(id);
-	if (cell.isInterior()) {
-		return 0;
-	} else {
+	auto cellInfoItr = m_ghostCellInfo.find(id);
+	if (cellInfoItr == m_ghostCellInfo.end()) {
 		return -1;
+	} else {
+		return cellInfoItr->second.haloLayer;
 	}
 }
 
@@ -3552,11 +3553,11 @@ int PatchKernel::getCellHaloLayer(long id) const
 */
 int PatchKernel::getVertexRank(long id) const
 {
-	auto vertexOwner = m_ghostVertexOwners.find(id);
-	if (vertexOwner == m_ghostVertexOwners.end()) {
+	auto vertexInfoItr = m_ghostVertexInfo.find(id);
+	if (vertexInfoItr == m_ghostVertexInfo.end()) {
 		return m_rank;
 	} else {
-		return vertexOwner->second;
+		return vertexInfoItr->second.owner;
 	}
 }
 
@@ -3568,11 +3569,11 @@ int PatchKernel::getVertexRank(long id) const
 */
 int PatchKernel::getVertexOwner(long id) const
 {
-	auto vertexOwner = m_ghostVertexOwners.find(id);
-	if (vertexOwner == m_ghostVertexOwners.end()) {
+	auto vertexInfoItr = m_ghostVertexInfo.find(id);
+	if (vertexInfoItr == m_ghostVertexInfo.end()) {
 		return m_rank;
 	} else {
-		return vertexOwner->second;
+		return vertexInfoItr->second.owner;
 	}
 }
 
@@ -3867,13 +3868,15 @@ const std::vector<long> & PatchKernel::getGhostExchangeSources(int rank) const
 	\param id is the id of the ghost vertex
 	\param owner is the rank of the process that owns the ghost vertex
 */
-void PatchKernel::setGhostVertexOwner(long id, int owner)
+void PatchKernel::setGhostVertexInfo(long id, int owner)
 {
-	auto ghostVertexOwnerItr = m_ghostVertexOwners.find(id);
-	if (ghostVertexOwnerItr != m_ghostVertexOwners.end()) {
-		ghostVertexOwnerItr->second = owner;
+	auto ghostVertexInfoItr = m_ghostVertexInfo.find(id);
+	if (ghostVertexInfoItr != m_ghostVertexInfo.end()) {
+		ghostVertexInfoItr->second.owner = owner;
 	} else {
-		m_ghostVertexOwners.insert({id, owner});
+		GhostVertexInfo ghostVertexInfo;
+		ghostVertexInfo.owner = owner;
+		m_ghostVertexInfo.insert({id, std::move(ghostVertexInfo)});
 	}
 
 	setPartitioningInfoDirty(true);
@@ -3884,14 +3887,14 @@ void PatchKernel::setGhostVertexOwner(long id, int owner)
 
 	\param id is the id of the ghost vertex
 */
-void PatchKernel::unsetGhostVertexOwner(long id)
+void PatchKernel::unsetGhostVertexInfo(long id)
 {
-	auto ghostVertexOwnerItr = m_ghostVertexOwners.find(id);
-	if (ghostVertexOwnerItr == m_ghostVertexOwners.end()) {
+	auto ghostVertexInfoItr = m_ghostVertexInfo.find(id);
+	if (ghostVertexInfoItr == m_ghostVertexInfo.end()) {
 		return;
 	}
 
-	m_ghostVertexOwners.erase(ghostVertexOwnerItr);
+	m_ghostVertexInfo.erase(ghostVertexInfoItr);
 
 	setPartitioningInfoDirty(true);
 }
@@ -3901,56 +3904,56 @@ void PatchKernel::unsetGhostVertexOwner(long id)
 
 	\param updateExchangeInfo if set to true exchange info will be updated
 */
-void PatchKernel::clearGhostVertexOwners()
+void PatchKernel::clearGhostVerticesInfo()
 {
-	m_ghostVertexOwners.clear();
+	m_ghostVertexInfo.clear();
 
 	setPartitioningInfoDirty(true);
 }
 
 /*!
-	Sets the owner of the specified ghost.
+	Sets the information of the specified ghost.
 
 	\param id is the id of the ghost cell
 	\param owner is the rank of the process that owns the ghost cell
 */
-void PatchKernel::setGhostCellOwner(long id, int owner)
+void PatchKernel::setGhostCellInfo(long id, int owner)
 {
-	auto ghostCellOwnerItr = m_ghostCellOwners.find(id);
-	if (ghostCellOwnerItr != m_ghostCellOwners.end()) {
-		ghostCellOwnerItr->second = owner;
+	auto ghostCellInfoItr = m_ghostCellInfo.find(id);
+	if (ghostCellInfoItr != m_ghostCellInfo.end()) {
+		ghostCellInfoItr->second.owner = owner;
 	} else {
-		m_ghostCellOwners.insert({id, owner});
+		GhostCellInfo ghostCellInfo;
+		ghostCellInfo.owner = owner;
+		m_ghostCellInfo.insert({id, std::move(ghostCellInfo)});
 	}
 
 	setPartitioningInfoDirty(true);
 }
 
 /*!
-	Unsets the owner of the specified ghost.
+	Unsets the information of the specified ghost.
 
 	\param id is the id of the ghost cell
 */
-void PatchKernel::unsetGhostCellOwner(long id)
+void PatchKernel::unsetGhostCellInfo(long id)
 {
-	auto ghostCellOwnerItr = m_ghostCellOwners.find(id);
-	if (ghostCellOwnerItr == m_ghostCellOwners.end()) {
+	auto ghostCellInfoItr = m_ghostCellInfo.find(id);
+	if (ghostCellInfoItr == m_ghostCellInfo.end()) {
 		return;
 	}
 
-	m_ghostCellOwners.erase(ghostCellOwnerItr);
+	m_ghostCellInfo.erase(ghostCellInfoItr);
 
 	setPartitioningInfoDirty(true);
 }
 
 /*!
-	Clear the owners of all the ghosts.
-
-	\param updateExchangeInfo if set to true exchange info will be updated
+	Clear the information of all the ghosts.
 */
-void PatchKernel::clearGhostCellOwners()
+void PatchKernel::clearGhostCellsInfo()
 {
-	m_ghostCellOwners.clear();
+	m_ghostCellInfo.clear();
 
 	setPartitioningInfoDirty(true);
 }
@@ -4114,7 +4117,7 @@ void PatchKernel::updateGhostVertexExchangeInfo()
 	for (VertexConstIterator vertexItr = beginItr; vertexItr != endItr; ++vertexItr) {
 		long vertexId = vertexItr->getId();
 		int vertexOwner = exchangeVertexOwners.at(vertexId);
-		setGhostVertexOwner(vertexId, vertexOwner);
+		setGhostVertexInfo(vertexId, vertexOwner);
 	}
 
 	// Create new ghosts
@@ -4140,8 +4143,8 @@ void PatchKernel::updateGhostVertexExchangeInfo()
 	m_ghostVertexExchangeTargets.clear();
 
 	// Update targets
-	for (const auto &entry : m_ghostVertexOwners) {
-		int ghostVertexOwner = entry.second;
+	for (const auto &entry : m_ghostVertexInfo) {
+		int ghostVertexOwner = entry.second.owner;
 		long ghostVertexId = entry.first;
 		m_ghostVertexExchangeTargets[ghostVertexOwner].push_back(ghostVertexId);
 	}
@@ -4222,7 +4225,7 @@ void PatchKernel::updateGhostVertexExchangeInfo()
 			ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
 			for (long vertexId : cellVertexIds) {
 				// Ghost vertices are not sources.
-				if (m_ghostVertexOwners.count(vertexId) > 0) {
+				if (m_ghostVertexInfo.count(vertexId) > 0) {
 					continue;
 				}
 
@@ -4258,7 +4261,7 @@ void PatchKernel::updateGhostVertexExchangeInfo()
 			ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
 			for (long vertexId : cellVertexIds) {
 				// Ghost vertices are not sources.
-				if (m_ghostVertexOwners.count(vertexId) > 0) {
+				if (m_ghostVertexInfo.count(vertexId) > 0) {
 					continue;
 				}
 
@@ -4421,8 +4424,8 @@ void PatchKernel::updateGhostCellExchangeInfo()
 	m_ghostCellExchangeTargets.clear();
 
 	// Update targets
-	for (const auto &entry : m_ghostCellOwners) {
-		int ghostOwner = entry.second;
+	for (const auto &entry : m_ghostCellInfo) {
+		int ghostOwner = entry.second.owner;
 		long ghostCellId = entry.first;
 		m_ghostCellExchangeTargets[ghostOwner].push_back(ghostCellId);
 	}
@@ -4484,7 +4487,7 @@ std::vector<long> PatchKernel::_findGhostCellExchangeSources(int rank)
 		neighIds.clear();
 		findCellNeighs(ghostCellId, &neighIds);
 		for (long neighId : neighIds) {
-			if (m_ghostCellOwners.count(neighId) > 0) {
+			if (m_ghostCellInfo.count(neighId) > 0) {
 				continue;
 			}
 
