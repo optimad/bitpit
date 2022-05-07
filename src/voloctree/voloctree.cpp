@@ -2319,7 +2319,7 @@ void VolOctree::_dump(std::ostream &stream) const
 			if (dumpedVertices.count(vertexId) == 0) {
 				utils::binary::write(stream, vertexId);
 #if BITPIT_ENABLE_MPI==1
-				utils::binary::write(stream, getVertexRank(vertexId));
+				utils::binary::write(stream, getVertexOwner(vertexId));
 #else
 				int dummyRank = 0;
 				utils::binary::write(stream, dummyRank);

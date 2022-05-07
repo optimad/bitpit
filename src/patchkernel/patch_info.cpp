@@ -387,7 +387,7 @@ const std::unordered_map<long, long> & PatchNumberingInfo::getCellGlobalMap() co
 	\param id is the local id of the cell
 	\return The rank of the specified cell.
 */
-int PatchNumberingInfo::getCellRankFromLocal(long id) const
+int PatchNumberingInfo::getCellOwnerFromLocal(long id) const
 {
 	auto ghostCellOwnerItr = m_patch->m_ghostCellOwners.find(id);
 	if (ghostCellOwnerItr != m_patch->m_ghostCellOwners.end()) {
@@ -403,7 +403,7 @@ int PatchNumberingInfo::getCellRankFromLocal(long id) const
 	\param id is the consecutive id of the cell
 	\return The rank of the specified cell.
 */
-int PatchNumberingInfo::getCellRankFromConsecutive(long id) const
+int PatchNumberingInfo::getCellOwnerFromConsecutive(long id) const
 {
 	if (!m_patch->isPartitioned()) {
 		return m_patch->getRank();
@@ -426,10 +426,10 @@ int PatchNumberingInfo::getCellRankFromConsecutive(long id) const
 	\param id is the global id of the cell
 	\return The rank of the specified cell.
 */
-int PatchNumberingInfo::getCellRankFromGlobal(long id) const
+int PatchNumberingInfo::getCellOwnerFromGlobal(long id) const
 {
     // Global ids and consecutive ids are the same
-    return getCellRankFromConsecutive(id);
+    return getCellOwnerFromConsecutive(id);
 }
 #endif
 
