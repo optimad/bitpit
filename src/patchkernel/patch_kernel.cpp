@@ -240,10 +240,10 @@ PatchKernel::PatchKernel(const PatchKernel &other)
       m_partitioningOutgoings(other.m_partitioningOutgoings),
       m_partitioningGlobalExchanges(other.m_partitioningGlobalExchanges),
       m_partitioningInfoDirty(other.m_partitioningInfoDirty),
-      m_ghostVertexOwners(other.m_ghostVertexOwners),
+      m_ghostVertexInfo(other.m_ghostVertexInfo),
       m_ghostVertexExchangeTargets(other.m_ghostVertexExchangeTargets),
       m_ghostVertexExchangeSources(other.m_ghostVertexExchangeSources),
-      m_ghostCellOwners(other.m_ghostCellOwners),
+      m_ghostCellInfo(other.m_ghostCellInfo),
       m_ghostCellExchangeTargets(other.m_ghostCellExchangeTargets),
       m_ghostCellExchangeSources(other.m_ghostCellExchangeSources)
 #endif
@@ -330,10 +330,10 @@ PatchKernel::PatchKernel(PatchKernel &&other)
       m_partitioningOutgoings(std::move(other.m_partitioningOutgoings)),
       m_partitioningGlobalExchanges(std::move(other.m_partitioningGlobalExchanges)),
       m_partitioningInfoDirty(std::move(other.m_partitioningInfoDirty)),
-      m_ghostVertexOwners(std::move(other.m_ghostVertexOwners)),
+      m_ghostVertexInfo(std::move(other.m_ghostVertexInfo)),
       m_ghostVertexExchangeTargets(std::move(other.m_ghostVertexExchangeTargets)),
       m_ghostVertexExchangeSources(std::move(other.m_ghostVertexExchangeSources)),
-      m_ghostCellOwners(std::move(other.m_ghostCellOwners)),
+      m_ghostCellInfo(std::move(other.m_ghostCellInfo)),
       m_ghostCellExchangeTargets(std::move(other.m_ghostCellExchangeTargets)),
       m_ghostCellExchangeSources(std::move(other.m_ghostCellExchangeSources))
 #endif
@@ -419,10 +419,10 @@ PatchKernel & PatchKernel::operator=(PatchKernel &&other)
 	m_partitioningOutgoings = std::move(other.m_partitioningOutgoings);
 	m_partitioningGlobalExchanges = std::move(other.m_partitioningGlobalExchanges);
 	m_partitioningInfoDirty = std::move(other.m_partitioningInfoDirty);
-	m_ghostVertexOwners = std::move(other.m_ghostVertexOwners);
+	m_ghostVertexInfo = std::move(other.m_ghostVertexInfo);
 	m_ghostVertexExchangeTargets = std::move(other.m_ghostVertexExchangeTargets);
 	m_ghostVertexExchangeSources = std::move(other.m_ghostVertexExchangeSources);
-	m_ghostCellOwners = std::move(other.m_ghostCellOwners);
+	m_ghostCellInfo = std::move(other.m_ghostCellInfo);
 	m_ghostCellExchangeTargets = std::move(other.m_ghostCellExchangeTargets);
 	m_ghostCellExchangeSources = std::move(other.m_ghostCellExchangeSources);
 #endif
@@ -1022,8 +1022,8 @@ void PatchKernel::resetCells()
 #endif
 
 #if BITPIT_ENABLE_MPI==1
-	clearGhostCellOwners();
-	clearGhostVertexOwners();
+	clearGhostCellsInfo();
+	clearGhostVerticesInfo();
 #endif
 
 	resetAdjacencies();
