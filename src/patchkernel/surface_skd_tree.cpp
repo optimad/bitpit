@@ -732,7 +732,7 @@ long SurfaceSkdTree::findPointClosestGlobalCell(int nPoints, const std::array<do
 
         // Set cell rank
         if (cellId != Cell::NULL_ID) {
-            cellRank = patch.getCellRank(cellId);
+            cellRank = patch.getCellOwner(cellId);
         }
     }
 
