@@ -4806,10 +4806,10 @@ void PatchKernel::dumpVertices(std::ostream &stream) const
 	for (const Vertex &vertex : m_vertices) {
 		utils::binary::write(stream, vertex.getId());
 #if BITPIT_ENABLE_MPI==1
-		utils::binary::write(stream, getVertexRank(vertex.getId()));
+		utils::binary::write(stream, getVertexOwner(vertex.getId()));
 #else
-		int dummyRank = 0;
-		utils::binary::write(stream, dummyRank);
+		int dummyOwner = 0;
+		utils::binary::write(stream, dummyOwner);
 #endif
 
 		const std::array<double, 3> &coords = vertex.getCoords();
@@ -4849,11 +4849,11 @@ void PatchKernel::restoreVertices(std::istream &stream)
 		utils::binary::read(stream, id);
 
 #if BITPIT_ENABLE_MPI==1
-		int rank;
-		utils::binary::read(stream, rank);
+		int owner;
+		utils::binary::read(stream, owner);
 #else
-		int dummyRank;
-		utils::binary::read(stream, dummyRank);
+		int dummyOwner;
+		utils::binary::read(stream, dummyOwner);
 #endif
 
 		std::array<double, 3> coords;
@@ -4862,7 +4862,7 @@ void PatchKernel::restoreVertices(std::istream &stream)
 		utils::binary::read(stream, coords[2]);
 
 #if BITPIT_ENABLE_MPI==1
-		restoreVertex(std::move(coords), rank, id);
+		restoreVertex(std::move(coords), owner, id);
 #else
 		restoreVertex(std::move(coords), id);
 #endif
@@ -4899,10 +4899,10 @@ void PatchKernel::dumpCells(std::ostream &stream) const
 		utils::binary::write(stream, cell.getPID());
 		utils::binary::write(stream, cell.getType());
 #if BITPIT_ENABLE_MPI==1
-		utils::binary::write(stream, getCellRank(cell.getId()));
+		utils::binary::write(stream, getCellOwner(cell.getId()));
 #else
-		int dummyRank = 0;
-		utils::binary::write(stream, dummyRank);
+		int dummyOwner = 0;
+		utils::binary::write(stream, dummyOwner);
 #endif
 
 		int cellConnectSize = cell.getConnectSize();
@@ -4951,11 +4951,11 @@ void PatchKernel::restoreCells(std::istream &stream)
 		utils::binary::read(stream, type);
 
 #if BITPIT_ENABLE_MPI==1
-		int rank;
-		utils::binary::read(stream, rank);
+		int owner;
+		utils::binary::read(stream, owner);
 #else
-		int dummyRank;
-		utils::binary::read(stream, dummyRank);
+		int dummyOwner;
+		utils::binary::read(stream, dummyOwner);
 #endif
 
 		int cellConnectSize;
@@ -4968,7 +4968,7 @@ void PatchKernel::restoreCells(std::istream &stream)
 
 		CellIterator iterator;
 #if BITPIT_ENABLE_MPI==1
-		iterator = restoreCell(type, std::move(cellConnect), rank, id);
+		iterator = restoreCell(type, std::move(cellConnect), owner, id);
 #else
 		iterator = restoreCell(type, std::move(cellConnect), id);
 #endif
@@ -7842,7 +7842,7 @@ void PatchKernel::flushData(std::fstream &stream, const std::string &name, VTKFo
 		}
 	} else if (name == "cellRank") {
 		for (const Cell &cell : getVTKCellWriteRange()) {
-			genericIO::flushBINARY(stream, getCellRank(cell.getId()));
+			genericIO::flushBINARY(stream, getCellOwner(cell.getId()));
 		}
 	} else if (name == "vertexRank") {
 		VertexConstIterator endItr = vertexConstEnd();
@@ -7850,7 +7850,7 @@ void PatchKernel::flushData(std::fstream &stream, const std::string &name, VTKFo
 			std::size_t vertexRawId = itr.getRawIndex();
 			long vertexVTKId = m_vtkVertexMap.rawAt(vertexRawId);
 			if (vertexVTKId != Vertex::NULL_ID) {
-				genericIO::flushBINARY(stream, getVertexRank(itr.getId()));
+				genericIO::flushBINARY(stream, getVertexOwner(itr.getId()));
 			}
 		}
 #endif

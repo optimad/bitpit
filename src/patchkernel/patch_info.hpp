@@ -74,9 +74,9 @@ public:
 	long getCellGlobalId(long id) const;
 	const std::unordered_map<long, long> & getCellGlobalMap() const;
 
-	int getCellRankFromLocal(long id) const;
-	int getCellRankFromConsecutive(long id) const;
-	int getCellRankFromGlobal(long id) const;
+	int getCellOwnerFromLocal(long id) const;
+	int getCellOwnerFromConsecutive(long id) const;
+	int getCellOwnerFromGlobal(long id) const;
 #endif
 
 protected:

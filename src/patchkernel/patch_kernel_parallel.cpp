@@ -342,9 +342,9 @@ void PatchKernel::_setHaloSize(std::size_t haloSize)
 	Converts an internal vertex to a ghost vertex.
 
 	\param[in] id is the index of the vertex
-	\param[in] ownerRank is the owner of the vertex
+	\param[in] owner is the rank of the process that owns the ghost cell
 */
-PatchKernel::VertexIterator PatchKernel::internalVertex2GhostVertex(long id, int ownerRank)
+PatchKernel::VertexIterator PatchKernel::internalVertex2GhostVertex(long id, int owner)
 {
 	if (!isExpert()) {
 		return m_vertices.end();
@@ -374,7 +374,7 @@ PatchKernel::VertexIterator PatchKernel::internalVertex2GhostVertex(long id, int
 	}
 
 	// Set ghost owner
-	setGhostVertexOwner(id, ownerRank);
+	setGhostVertexOwner(id, owner);
 
 	// Return the iterator to the new position
 	return iterator;
@@ -460,11 +460,11 @@ const Vertex & PatchKernel::getFirstGhostVertex() const
 	vertex will be updated.
 
 	\param coords are the coordinates of the vertex
-	\param rank is the rank that owns the vertex that will be restored
+	\param owner is the rank that owns the vertex that will be restored
 	\param id is the id of the vertex that will be restored
 	\return An iterator pointing to the restored vertex.
 */
-PatchKernel::VertexIterator PatchKernel::restoreVertex(const std::array<double, 3> &coords, int rank, long id)
+PatchKernel::VertexIterator PatchKernel::restoreVertex(const std::array<double, 3> &coords, int owner, long id)
 {
 	if (!isExpert()) {
 		return vertexEnd();
@@ -477,10 +477,10 @@ PatchKernel::VertexIterator PatchKernel::restoreVertex(const std::array<double, 
 
 	// There is not need to set the id of the vertex as assigned, because
 	// also the index generator will be restored.
-	if (rank == getRank()) {
+	if (owner == getRank()) {
 		_restoreInternalVertex(iterator, coords);
 	} else {
-		_restoreGhostVertex(iterator, coords, rank);
+		_restoreGhostVertex(iterator, coords, owner);
 	}
 
 	return iterator;
@@ -494,9 +494,9 @@ PatchKernel::VertexIterator PatchKernel::restoreVertex(const std::array<double, 
 
 	\param iterator is an iterator pointing to the vertex to restore
 	\param coords are the coordinates of the vertex
-	\param rank is the rank that owns the vertex that will be restored
+	\param owner is the rank that owns the vertex that will be restored
 */
-void PatchKernel::_restoreGhostVertex(const VertexIterator &iterator, const std::array<double, 3> &coords, int rank)
+void PatchKernel::_restoreGhostVertex(const VertexIterator &iterator, const std::array<double, 3> &coords, int owner)
 {
 	// Restore the vertex
 	//
@@ -510,7 +510,7 @@ void PatchKernel::_restoreGhostVertex(const VertexIterator &iterator, const std:
 	addPointToBoundingBox(vertex.getCoords());
 
 	// Set owner
-	setGhostVertexOwner(vertex.getId(), rank);
+	setGhostVertexOwner(vertex.getId(), owner);
 }
 
 /*!
@@ -608,9 +608,9 @@ void PatchKernel::updateFirstGhostVertexId()
 	Converts an internal cell to a ghost cell.
 
 	\param[in] id is the index of the cell
-	\param[in] ownerRank is the owner of the cell
+	\param[in] owner is the rank of the process that owns the ghost cell
 */
-PatchKernel::CellIterator PatchKernel::internalCell2GhostCell(long id, int ownerRank)
+PatchKernel::CellIterator PatchKernel::internalCell2GhostCell(long id, int owner)
 {
 	if (!isExpert()) {
 		return m_cells.end();
@@ -640,7 +640,7 @@ PatchKernel::CellIterator PatchKernel::internalCell2GhostCell(long id, int owner
 	}
 
 	// Set ghost owner
-	setGhostCellOwner(id, ownerRank);
+	setGhostCellOwner(id, owner);
 
 	// Return the iterator to the new position
 	return iterator;
@@ -759,18 +759,18 @@ const Cell & PatchKernel::getFirstGhost() const
 	Ids are considered valid if they are greater or equal than zero.
 
 	\param source is the cell that will be added
-	\param rank is the rank that owns the cell that will be added
+	\param owner is the rank that owns the cell that will be added
 	\param id is the id that will be assigned to the newly created cell.
 	If a negative id value is specified, a new unique id will be generated
 	for the cell
 	\return An iterator pointing to the added cell.
 */
-PatchKernel::CellIterator PatchKernel::addCell(const Cell &source, int rank, long id)
+PatchKernel::CellIterator PatchKernel::addCell(const Cell &source, int owner, long id)
 {
 	Cell cell = source;
 	cell.setId(id);
 
-	return addCell(std::move(cell), rank, id);
+	return addCell(std::move(cell), owner, id);
 }
 
 /*!
@@ -783,12 +783,12 @@ PatchKernel::CellIterator PatchKernel::addCell(const Cell &source, int rank, lon
 	Ids are considered valid if they are greater or equal than zero.
 
 	\param source is the cell that will be added
-	\param rank is the rank that owns the cell that will be added
+	\param owner is the rank that owns the cell that will be added
 	\param id is the id that will be assigned to the newly created cell.
 	If a negative id value is specified, the id of the source will be used
 	\return An iterator pointing to the added cell.
 */
-PatchKernel::CellIterator PatchKernel::addCell(Cell &&source, int rank, long id)
+PatchKernel::CellIterator PatchKernel::addCell(Cell &&source, int owner, long id)
 {
 	if (id < 0) {
 		id = source.getId();
@@ -800,7 +800,7 @@ PatchKernel::CellIterator PatchKernel::addCell(Cell &&source, int rank, long id)
 		std::copy(source.getConnect(), source.getConnect() + connectSize, connectStorage.get());
 	}
 
-	CellIterator iterator = addCell(source.getType(), std::move(connectStorage), rank, id);
+	CellIterator iterator = addCell(source.getType(), std::move(connectStorage), owner, id);
 
 	Cell &cell = (*iterator);
 	id = cell.getId();
@@ -820,13 +820,13 @@ PatchKernel::CellIterator PatchKernel::addCell(Cell &&source, int rank, long id)
 	Ids are considered valid if they are greater or equal than zero.
 
 	\param type is the type of the cell
-	\param rank is the rank that owns the cell that will be added
+	\param owner is the rank that owns the cell that will be added
 	\param id is the id that will be assigned to the newly created cell.
 	If a negative id value is specified, a new unique id will be generated
 	for the cell
 	\return An iterator pointing to the added cell.
 */
-PatchKernel::CellIterator PatchKernel::addCell(ElementType type, int rank, long id)
+PatchKernel::CellIterator PatchKernel::addCell(ElementType type, int owner, long id)
 {
 	std::unique_ptr<long[]> connectStorage;
 	if (ReferenceElementInfo::hasInfo(type)) {
@@ -836,7 +836,7 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementType type, int rank, long 
 		connectStorage = std::unique_ptr<long[]>(nullptr);
 	}
 
-	return addCell(type, std::move(connectStorage), rank, id);
+	return addCell(type, std::move(connectStorage), owner, id);
 }
 
 /*!
@@ -850,20 +850,20 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementType type, int rank, long 
 
 	\param type is the type of the cell
 	\param connectivity is the connectivity of the cell
-	\param rank is the rank that owns the cell that will be added
+	\param owner is the rank that owns the cell that will be added
 	\param id is the id that will be assigned to the newly created cell.
 	If a negative id value is specified, a new unique id will be generated
 	for the cell
 	\return An iterator pointing to the added cell.
 */
 PatchKernel::CellIterator PatchKernel::addCell(ElementType type, const std::vector<long> &connectivity,
-											   int rank, long id)
+											   int owner, long id)
 {
 	int connectSize = connectivity.size();
 	std::unique_ptr<long[]> connectStorage = std::unique_ptr<long[]>(new long[connectSize]);
 	std::copy(connectivity.data(), connectivity.data() + connectSize, connectStorage.get());
 
-	return addCell(type, std::move(connectStorage), rank, id);
+	return addCell(type, std::move(connectStorage), owner, id);
 }
 
 /*!
@@ -878,14 +878,14 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementType type, const std::vect
 	\param type is the type of the cell
 	\param connectStorage is the storage the contains or will contain
 	the connectivity of the element
-	\param rank is the rank that owns the cell that will be added
+	\param owner is the rank that owns the cell that will be added
 	\param id is the id that will be assigned to the newly created cell.
 	If a negative id value is specified, a new unique id will be generated
 	for the cell
 	\return An iterator pointing to the added cell.
 */
 PatchKernel::CellIterator PatchKernel::addCell(ElementType type, std::unique_ptr<long[]> &&connectStorage,
-											   int rank, long id)
+											   int owner, long id)
 {
 	if (!isExpert()) {
 		return cellEnd();
@@ -896,10 +896,10 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementType type, std::unique_ptr
 	}
 
 	CellIterator iterator;
-	if (rank == getRank()) {
+	if (owner == getRank()) {
 		iterator = _addInternalCell(type, std::move(connectStorage), id);
 	} else {
-		iterator = _addGhostCell(type, std::move(connectStorage), rank, id);
+		iterator = _addGhostCell(type, std::move(connectStorage), owner, id);
 	}
 
 	return iterator;
@@ -916,14 +916,14 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementType type, std::unique_ptr
 	\param type is the type of the cell
 	\param connectStorage is the storage the contains or will contain
 	the connectivity of the element
-	\param rank is the rank that owns the cell that will be added
+	\param owner is the rank that owns the cell that will be added
 	\param id is the id that will be assigned to the newly created cell.
 	If a negative id value is specified, a new unique id will be generated
 	for the cell
 	\return An iterator pointing to the newly created cell.
 */
 PatchKernel::CellIterator PatchKernel::_addGhostCell(ElementType type, std::unique_ptr<long[]> &&connectStorage,
-												 int rank, long id)
+                                                     int owner, long id)
 {
 	// Get the id of the cell
 	if (m_cellIdGenerator) {
@@ -959,7 +959,7 @@ PatchKernel::CellIterator PatchKernel::_addGhostCell(ElementType type, std::uniq
 	}
 
 	// Set owner
-	setGhostCellOwner(id, rank);
+	setGhostCellOwner(id, owner);
 
 	// Set the alteration flags of the cell
 	setAddedCellAlterationFlags(id);
@@ -976,12 +976,12 @@ PatchKernel::CellIterator PatchKernel::_addGhostCell(ElementType type, std::uniq
 	\param type is the type of the cell
 	\param connectStorage is the storage the contains or will contain
 	the connectivity of the element
-	\param rank is the rank that owns the cell that will be restored
+	\param owner is the rank that owns the cell that will be restored
 	\param id is the id of the cell that will be restored
 	\return An iterator pointing to the restored cell.
 */
 PatchKernel::CellIterator PatchKernel::restoreCell(ElementType type, std::unique_ptr<long[]> &&connectStorage,
-												   int rank, long id)
+												   int owner, long id)
 {
 	if (!isExpert()) {
 		return cellEnd();
@@ -998,10 +998,10 @@ PatchKernel::CellIterator PatchKernel::restoreCell(ElementType type, std::unique
 
 	// There is not need to set the id of the cell as assigned, because
 	// also the index generator will be restored.
-	if (rank == getRank()) {
+	if (owner == getRank()) {
 		_restoreInternalCell(iterator, type, std::move(connectStorage));
 	} else {
-		_restoreGhostCell(iterator, type, std::move(connectStorage), rank);
+		_restoreGhostCell(iterator, type, std::move(connectStorage), owner);
 	}
 
 	return iterator;
@@ -1017,10 +1017,10 @@ PatchKernel::CellIterator PatchKernel::restoreCell(ElementType type, std::unique
 	\param type is the type of the cell
 	\param connectStorage is the storage the contains or will contain
 	the connectivity of the element
-	\param rank is the rank that owns the cell that will be restored
+	\param owner is the rank that owns the cell that will be restored
 */
 void PatchKernel::_restoreGhostCell(const CellIterator &iterator, ElementType type,
-								std::unique_ptr<long[]> &&connectStorage, int rank)
+                                    std::unique_ptr<long[]> &&connectStorage, int owner)
 {
 	// Restore the cell
 	//
@@ -1035,7 +1035,7 @@ void PatchKernel::_restoreGhostCell(const CellIterator &iterator, ElementType ty
 	m_nGhostCells++;
 
 	// Set owner
-	setGhostCellOwner(cellId, rank);
+	setGhostCellOwner(cellId, owner);
 
 	// Set the alteration flags of the cell
 	setRestoredCellAlterationFlags(cellId);
@@ -3513,6 +3513,22 @@ int PatchKernel::getCellRank(long id) const
 }
 
 /*!
+	Gets the rank of the process that owns the specified cell.
+
+	\param id is the id of the requested cell
+	\result The rank that owns the specified cell.
+*/
+int PatchKernel::getCellOwner(long id) const
+{
+	auto cellOwner = m_ghostCellOwners.find(id);
+	if (cellOwner == m_ghostCellOwners.end()) {
+		return m_rank;
+	} else {
+		return cellOwner->second;
+	}
+}
+
+/*!
 	Gets the halo layer of the specified cell.
 
 	\param id is the id of the requested cell
@@ -3535,6 +3551,22 @@ int PatchKernel::getCellHaloLayer(long id) const
 	\result The rank that owns the specified vertex.
 */
 int PatchKernel::getVertexRank(long id) const
+{
+	auto vertexOwner = m_ghostVertexOwners.find(id);
+	if (vertexOwner == m_ghostVertexOwners.end()) {
+		return m_rank;
+	} else {
+		return vertexOwner->second;
+	}
+}
+
+/*!
+	Gets the rank of the process that owns the specified vertex.
+
+	\param id is the id of the requested vertex
+	\result The rank that owns the specified vertex.
+*/
+int PatchKernel::getVertexOwner(long id) const
 {
 	auto vertexOwner = m_ghostVertexOwners.find(id);
 	if (vertexOwner == m_ghostVertexOwners.end()) {
@@ -3833,15 +3865,15 @@ const std::vector<long> & PatchKernel::getGhostExchangeSources(int rank) const
 	Sets the owner of the specified ghost vertex.
 
 	\param id is the id of the ghost vertex
-	\param rank is the rank of the process that owns the ghost vertex
+	\param owner is the rank of the process that owns the ghost vertex
 */
-void PatchKernel::setGhostVertexOwner(long id, int rank)
+void PatchKernel::setGhostVertexOwner(long id, int owner)
 {
 	auto ghostVertexOwnerItr = m_ghostVertexOwners.find(id);
 	if (ghostVertexOwnerItr != m_ghostVertexOwners.end()) {
-		ghostVertexOwnerItr->second = rank;
+		ghostVertexOwnerItr->second = owner;
 	} else {
-		m_ghostVertexOwners.insert({id, rank});
+		m_ghostVertexOwners.insert({id, owner});
 	}
 
 	setPartitioningInfoDirty(true);
@@ -3880,15 +3912,15 @@ void PatchKernel::clearGhostVertexOwners()
 	Sets the owner of the specified ghost.
 
 	\param id is the id of the ghost cell
-	\param rank is the rank of the process that owns the ghost cell
+	\param owner is the rank of the process that owns the ghost cell
 */
-void PatchKernel::setGhostCellOwner(long id, int rank)
+void PatchKernel::setGhostCellOwner(long id, int owner)
 {
 	auto ghostCellOwnerItr = m_ghostCellOwners.find(id);
 	if (ghostCellOwnerItr != m_ghostCellOwners.end()) {
-		ghostCellOwnerItr->second = rank;
+		ghostCellOwnerItr->second = owner;
 	} else {
-		m_ghostCellOwners.insert({id, rank});
+		m_ghostCellOwners.insert({id, owner});
 	}
 
 	setPartitioningInfoDirty(true);
@@ -4109,9 +4141,9 @@ void PatchKernel::updateGhostVertexExchangeInfo()
 
 	// Update targets
 	for (const auto &entry : m_ghostVertexOwners) {
-		int ghostVertexRank = entry.second;
+		int ghostVertexOwner = entry.second;
 		long ghostVertexId = entry.first;
-		m_ghostVertexExchangeTargets[ghostVertexRank].push_back(ghostVertexId);
+		m_ghostVertexExchangeTargets[ghostVertexOwner].push_back(ghostVertexId);
 	}
 
 	// Sort the targets
@@ -4390,9 +4422,9 @@ void PatchKernel::updateGhostCellExchangeInfo()
 
 	// Update targets
 	for (const auto &entry : m_ghostCellOwners) {
-		int ghostRank = entry.second;
+		int ghostOwner = entry.second;
 		long ghostCellId = entry.first;
-		m_ghostCellExchangeTargets[ghostRank].push_back(ghostCellId);
+		m_ghostCellExchangeTargets[ghostOwner].push_back(ghostCellId);
 	}
 
 	// Sort the targets
