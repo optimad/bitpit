@@ -7819,6 +7819,8 @@ std::unordered_map<long,long> PatchKernel::consecutiveRenumberVertices(long offs
 		interface.renumberVertices(map);
 	}
 
+	setVertexAutoIndexing(false);
+	setVertexAutoIndexing(true);
 	return map;
 }
 
@@ -7873,6 +7875,8 @@ std::unordered_map<long,long> PatchKernel::consecutiveRenumberCells(long offset)
 	}
 #endif
 
+	setCellAutoIndexing(false);
+	setCellAutoIndexing(true);
     return map;
 }
 
