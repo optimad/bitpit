@@ -2712,6 +2712,9 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
         }
 
         // Delete outgoing cells not in the frame
+        //
+        // Frame cells cannot be deleted just now, because they may be ghost cells
+        // for other processes.
         std::vector<long> deleteList;
 
         deleteList.reserve(nOutgoingCells - frameCells.size());
@@ -2781,9 +2784,9 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
         // Loop over all the ghosts and keep only the cells that have at least
         // one internal neighbour that is still on this process.
         //
-        // Stale ghosts have to be deleted after processing frame cells,
-        // because some of the frame cells moved into ghosts may be stale
-        // ghosts.
+        // Stale ghosts have to be deleted after processing frame cells, that's
+        // because some stale ghosts will become such only after deleting the
+        // unneeded frame cells.
         std::vector<long> neighIds;
 
         deleteList.clear();
@@ -4431,7 +4434,7 @@ std::vector<long> PatchKernel::_findGhostCellExchangeSources(int rank)
 {
 	// Get targets for the specified rank
 	//
-	// If there are no targets, there will be no soruces either.
+	// If there are no targets, there will be no sources either.
 	auto ghostExchangeTargetsItr = m_ghostCellExchangeTargets.find(rank);
 	if (ghostExchangeTargetsItr == m_ghostCellExchangeTargets.end()) {
 		return std::vector<long>();
