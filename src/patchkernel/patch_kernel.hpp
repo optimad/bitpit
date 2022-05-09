@@ -1127,6 +1127,9 @@ private:
 
 	void replaceVTKStreamer(const VTKBaseStreamer *original, VTKBaseStreamer *updated);
 
+	template<typename Selector, typename Function, typename SeedContainer>
+	void processCellsNeighbours(const SeedContainer &seeds, int nLayers, Selector isSelected, Function function);
+
 };
 
 }

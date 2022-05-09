@@ -313,6 +313,69 @@ void PatchKernel::mappedItemRenumbering(PiercedVector<item_t, id_t> &container,
 	}
 }
 
+/*!
+	Applies the specified function to the selected neighbours of the provided
+	seeds.
+
+	Neighbours are selected using the specified functor. The functor receives the
+	id of a cell and returns true if the cell should be selected, false otherwise.
+	The function will be evaluated only for the selected cells.
+
+	Starting from the specified seeds, neighbours will be processed one layer after
+	another, until the requested number of layers has been identified and processed.
+
+	Cell processing will be performed using the specified specified functor, that
+	functor should receive in input the id of the cell to be processed and the layer
+	the cell belongs to. The functor should return a boolean value, when the value
+	returned by the function is true, cell processing will stop.
+
+	\param seeds are the seeds
+	\param nLayers is the number of neighbour layers that will be processed
+	\param function is a functor that will be applied
+	\param isSelected is a functor that controls if a neighbour is selected
+	or not
+*/
+template<typename Selector, typename Function, typename SeedContainer>
+void PatchKernel::processCellsNeighbours(const SeedContainer &seeds, int nLayers,
+										 Selector isSelected, Function function)
+{
+	assert(getAdjacenciesBuildStrategy() != ADJACENCIES_NONE);
+
+	std::unordered_set<long> previousSeeds;
+	std::unordered_set<long> currentSeeds;
+	std::unordered_set<long> futureSeeds(seeds.begin(), seeds.end());
+
+	std::vector<long> neighIds;
+	for (int layer = 0; layer < nLayers; ++layer) {
+		previousSeeds.swap(currentSeeds);
+		currentSeeds.swap(futureSeeds);
+		futureSeeds.clear();
+
+		for (long seedId : currentSeeds) {
+			neighIds.clear();
+			findCellNeighs(seedId, &neighIds);
+			for (long neighId : neighIds) {
+				if (previousSeeds.count(neighId) > 0) {
+					continue;
+				} else if (currentSeeds.count(neighId) > 0) {
+					continue;
+				} else if (futureSeeds.count(neighId) > 0) {
+					continue;
+				} else if (!isSelected(neighId)) {
+					continue;
+				}
+
+				bool stop = function(neighId, layer);
+				if (stop) {
+					return;
+				}
+
+				futureSeeds.insert(neighId);
+			}
+		}
+	}
+}
+
 }
 
 #endif
