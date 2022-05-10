@@ -49,7 +49,7 @@ endif()
 #------------------------------------------------------------------------------------#
 # Internal variables
 #------------------------------------------------------------------------------------#
-set(BITPIT_VERSION "1.8.0-devel" CACHE INTERNAL "Version number")
+set(BITPIT_VERSION "1.9.0-devel" CACHE INTERNAL "Version number")
 
 #------------------------------------------------------------------------------------#
 # External utilities
