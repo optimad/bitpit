@@ -185,6 +185,12 @@ function(addTest TEST_NAME TEST_TYPE TEST_LIBRARIES WORKING_DIRECTORY N_PROCS PA
         target_link_libraries(${TEST_TARGET_NAME} "gcov")
     endif()
 
+    # Configure source formatting
+    set(TEST_CLANG_FORMAT_TARGET "clang-format-${TEST_TARGET_NAME}")
+    ClangFormatAddTarget("${TEST_CLANG_FORMAT_TARGET}")
+    ClangFormatTargetSources("${TEST_CLANG_FORMAT_TARGET}" "${TEST_NAME}.cpp")
+    add_dependencies(${CLANG_FORMAT_TARGET} "${TEST_CLANG_FORMAT_TARGET}")
+
     # Add test
     add_test(NAME "${TEST_TARGET_NAME}" COMMAND ${TEST_EXEC} ${TEST_ARGS} WORKING_DIRECTORY "${WORKING_DIRECTORY}")
 
