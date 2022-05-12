@@ -686,6 +686,7 @@ public:
 
 	bool isDistributed() const;
 	int getOwner() const;
+    void updateOwner();
 
 	void setHaloSize(std::size_t haloSize);
 	std::size_t getHaloSize() const;
@@ -1013,8 +1014,6 @@ private:
 
 	void updateGhostVertexOwners();
 	void updateGhostVertexExchangeInfo();
-
-	void updateOwner();
 
 	std::unordered_map<long, int> evaluateExchangeVertexOwners() const;
 #endif
