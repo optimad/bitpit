@@ -60,6 +60,9 @@ include(GetGitRevisionDescription)
 include(CheckCCompilerFlag)
 include(CheckCXXCompilerFlag)
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/external/clang-format/cmake")
+include(ClangFormat)
+
 #------------------------------------------------------------------------------------#
 # Functions
 #------------------------------------------------------------------------------------#
@@ -1132,6 +1135,12 @@ CHECK_CXX_SOURCE_COMPILES("int main() {__builtin_unreachable();}" HAVE___BUILTIN
 if(HAVE___BUILTIN_UNREACHABLE)
     addPrivateDefinitions("HAVE___BUILTIN_UNREACHABLE")
 endif()
+
+#------------------------------------------------------------------------------------#
+# Source code formatting
+#------------------------------------------------------------------------------------#
+SET(CLANG_FORMAT_TARGET "clang-format")
+ClangFormatAddTarget(${CLANG_FORMAT_TARGET})
 
 #------------------------------------------------------------------------------------#
 # Code coverage analysis

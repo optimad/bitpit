@@ -84,6 +84,14 @@ function(configureModule MODULE_NAME)
     if (NOT "${${UPPER_MODULE_NAME}_HEADERS}" STREQUAL "")
         install(FILES ${${UPPER_MODULE_NAME}_HEADERS} DESTINATION include/${PROJECT_NAME})
     endif ()
+
+    # Configure source formatting
+    set(MODULE_CLANG_FORMAT_TARGET "clang-format-${MODULE_NAME}")
+    ClangFormatAddTarget("${MODULE_CLANG_FORMAT_TARGET}")
+    ClangFormatTargetSources("${MODULE_CLANG_FORMAT_TARGET}" "${${UPPER_MODULE_NAME}_SOURCES}")
+    ClangFormatTargetSources("${MODULE_CLANG_FORMAT_TARGET}" "${${UPPER_MODULE_NAME}_HEADERS}")
+    add_dependencies(${CLANG_FORMAT_TARGET} "${MODULE_CLANG_FORMAT_TARGET}")
+
 endfunction()
 
 #------------------------------------------------------------------------------------#
