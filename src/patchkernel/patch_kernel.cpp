@@ -881,8 +881,13 @@ void PatchKernel::finalizeAlterations(bool squeezeStorage)
 #endif
 
 	// Clear alteration flags
-	m_alteredCells.clear();
-	m_alteredInterfaces.clear();
+	if (squeezeStorage) {
+		AlterationFlagsStorage().swap(m_alteredCells);
+		AlterationFlagsStorage().swap(m_alteredInterfaces);
+	} else {
+		m_alteredCells.clear();
+		m_alteredInterfaces.clear();
+	}
 
 	// Synchronize storage
 	m_cells.sync();
