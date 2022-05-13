@@ -3131,7 +3131,7 @@ void PatchKernel::setDeletedCellAlterationFlags(long id)
 	// Set the alteration flags of the cell
 	resetCellAlterationFlags(id, FLAG_DELETED);
 
-	// Set the alteration flags of the adjacencies
+	// Set the alteration flags of the adjacent cells
 	const int nCellAdjacencies = cell.getAdjacencyCount();
 	const long *cellAdjacencies = cell.getAdjacencies();
 	for (int k = 0; k < nCellAdjacencies; ++k) {
