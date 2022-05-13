@@ -2940,7 +2940,15 @@ PatchKernel::CellIterator PatchKernel::_addInternalCell(ElementType type, std::u
 */
 void PatchKernel::setAddedCellAlterationFlags(long id)
 {
-	setCellAlterationFlags(id, FLAG_ADJACENCIES_DIRTY | FLAG_INTERFACES_DIRTY);
+	AlterationFlags flags = FLAG_NONE;
+	if (getAdjacenciesBuildStrategy() != ADJACENCIES_NONE) {
+		flags |= FLAG_ADJACENCIES_DIRTY;
+	}
+	if (getInterfacesBuildStrategy() != INTERFACES_NONE) {
+		flags |= FLAG_INTERFACES_DIRTY;
+	}
+
+	setCellAlterationFlags(id, flags);
 }
 
 #if BITPIT_ENABLE_MPI==0
@@ -3012,7 +3020,15 @@ void PatchKernel::_restoreInternalCell(const CellIterator &iterator, ElementType
 */
 void PatchKernel::setRestoredCellAlterationFlags(long id)
 {
-	setCellAlterationFlags(id, FLAG_ADJACENCIES_DIRTY | FLAG_INTERFACES_DIRTY);
+	AlterationFlags flags = FLAG_NONE;
+	if (getAdjacenciesBuildStrategy() != ADJACENCIES_NONE) {
+		flags |= FLAG_ADJACENCIES_DIRTY;
+	}
+	if (getInterfacesBuildStrategy() != INTERFACES_NONE) {
+		flags |= FLAG_INTERFACES_DIRTY;
+	}
+
+	setCellAlterationFlags(id, flags);
 }
 
 /*!
@@ -3137,7 +3153,15 @@ void PatchKernel::setDeletedCellAlterationFlags(long id)
 	for (int k = 0; k < nCellAdjacencies; ++k) {
 		long adjacencyId = cellAdjacencies[k];
 		if (!testCellAlterationFlags(adjacencyId, FLAG_DELETED)) {
-			setCellAlterationFlags(adjacencyId, FLAG_DANGLING | FLAG_ADJACENCIES_DIRTY | FLAG_INTERFACES_DIRTY);
+			AlterationFlags flags = FLAG_DANGLING;
+			if (getAdjacenciesBuildStrategy() != ADJACENCIES_NONE) {
+				flags |= FLAG_ADJACENCIES_DIRTY;
+			}
+			if (getInterfacesBuildStrategy() != INTERFACES_NONE) {
+				flags |= FLAG_INTERFACES_DIRTY;
+			}
+
+			setCellAlterationFlags(adjacencyId, flags);
 		}
 	}
 

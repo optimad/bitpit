@@ -2786,19 +2786,21 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
     // We may received cells that connect to the existing mesh through one
     // of the faces that are now borders. Marking those border interfaces as
     // dangling allows to delete them and create new internal interfaces.
-    CellConstIterator endItr = ghostCellConstEnd();
-    for (CellConstIterator itr = ghostCellConstBegin(); itr != endItr; ++itr) {
-        const Cell &cell = *itr;
-        const long *interfaces = cell.getInterfaces();
-        const int nCellInterfaces = cell.getInterfaceCount();
+    if (getInterfacesBuildStrategy() != INTERFACES_NONE) {
+        CellConstIterator endItr = ghostCellConstEnd();
+        for (CellConstIterator itr = ghostCellConstBegin(); itr != endItr; ++itr) {
+            const Cell &cell = *itr;
+            const long *interfaces = cell.getInterfaces();
+            const int nCellInterfaces = cell.getInterfaceCount();
 
-        setCellAlterationFlags(cell.getId(), FLAG_INTERFACES_DIRTY);
+            setCellAlterationFlags(cell.getId(), FLAG_INTERFACES_DIRTY);
 
-        for (int k = 0; k < nCellInterfaces; ++k) {
-            long interfaceId = interfaces[k];
-            const Interface &interface = getInterface(interfaceId);
-            if (interface.isBorder()) {
-                setInterfaceAlterationFlags(interfaceId, FLAG_DANGLING);
+            for (int k = 0; k < nCellInterfaces; ++k) {
+                long interfaceId = interfaces[k];
+                const Interface &interface = getInterface(interfaceId);
+                if (interface.isBorder()) {
+                    setInterfaceAlterationFlags(interfaceId, FLAG_DANGLING);
+                }
             }
         }
     }
@@ -3179,7 +3181,9 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
             }
 
             // The interfaces of the cell need to be updated
-            setCellAlterationFlags(cellId, FLAG_INTERFACES_DIRTY);
+            if (getInterfacesBuildStrategy() != INTERFACES_NONE) {
+                setCellAlterationFlags(cellId, FLAG_INTERFACES_DIRTY);
+            }
 
             // Add the cell to the cell map
             if (cellOriginalId != cellId) {
