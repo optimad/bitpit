@@ -239,11 +239,11 @@ namespace bitpit {
         if(m_sizeOctants){
             octvector::const_iterator lastOctant = m_octants.end() - 1;
             uint32_t x,y,z,delta;
-            delta = (uint32_t)(1<<((uint8_t)TreeConstants::MAX_LEVEL - lastOctant->m_level)) - 1;
+            delta = (uint32_t)(1<<((uint8_t)m_treeConstants->maxLevel - lastOctant->m_level)) - 1;
             x = lastOctant->getLogicalX() + delta;
             y = lastOctant->getLogicalY() + delta;
             z = lastOctant->getLogicalZ() + (m_dim-2)*delta;
-            Octant lastDesc = Octant(m_dim, TreeConstants::MAX_LEVEL,x,y,z);
+            Octant lastDesc = Octant(m_dim, m_treeConstants->maxLevel,x,y,z);
             m_lastDescMorton = lastDesc.getMorton();
         } else {
             m_lastDescMorton = 0;
@@ -454,7 +454,7 @@ namespace bitpit {
             }
 
             // Octants cannot be refined further than the maximum level
-            if(octant.getLevel()>=TreeConstants::MAX_LEVEL){
+            if(octant.getLevel()>=m_treeConstants->maxLevel){
                 octant.setMarker(0);
                 octant.m_info[Octant::INFO_AUX] = false;
                 continue;
@@ -650,7 +650,7 @@ namespace bitpit {
                 if (idx+offset < m_sizeOctants){
                     if (nidx < nfchild){
                         if (idx+offset == first_child_index[nidx]){
-                            markerfather = -TreeConstants::MAX_LEVEL;
+                            markerfather = -m_treeConstants->maxLevel;
                             father = m_octants[idx+offset].buildFather();
                             for (uint32_t iii=0; iii<Octant::INFO_ITEM_COUNT; iii++){
                                 father.m_info[iii] = false;
@@ -1080,7 +1080,7 @@ namespace bitpit {
         //
         // This is the Morton number of the last discendent of the same-size
         // virtual neighbour.
-        uint64_t lastCandidateMorton = sameSizeVirtualNeigh.buildLastDesc().getMorton();
+        uint64_t lastCandidateMorton = sameSizeVirtualNeigh.computeLastDescMorton();
 
         // Compute coordinates
         std::array<int64_t,3> coord;
@@ -1336,7 +1336,7 @@ namespace bitpit {
         //
         // This is the Morton number of the last discendent of the same-size
         // virtual neighbour.
-        uint64_t lastCandidateMorton = sameSizeVirtualNeigh.buildLastDesc().getMorton();
+        uint64_t lastCandidateMorton = sameSizeVirtualNeigh.computeLastDescMorton();
 
         // Compute coordinates
         std::array<int64_t,3> coord;
@@ -1581,7 +1581,7 @@ namespace bitpit {
         //
         // This is the Morton number of the last discendent of the same-size
         // virtual neighbour.
-        uint64_t lastCandidateMorton = sameSizeVirtualNeigh.buildLastDesc().getMorton();
+        uint64_t lastCandidateMorton = sameSizeVirtualNeigh.computeLastDescMorton();
 
         // Compute coordinates
         std::array<int64_t,3> coord;
@@ -1681,226 +1681,6 @@ namespace bitpit {
                 }
             }
         }
-    };
-
-    /** Finds local and ghost or only local neighbours of octant(both local and ghost ones) through iface face.
-     * Returns a vector (empty if iface is a bound face) with the index of neighbours
-     * in their structure (octants or ghosts) and sets isghost[i] = true if the
-     * i-th neighbour is ghost in the local tree.
-     * \param[in] idx Index of current octant
-     * \param[in] amIghost Boolean flag to specify if the octant is a ghost one
-     * \param[in] iface Index of face passed through for neighbours finding
-     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
-     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
-     * \param[in] onlyinternal A boolean flag to specify if neighbours have to be found among all the octants (false) or only among the internal ones (true).
-     */
-    void
-    LocalTree::findNeighbours(uint32_t idx, bool amIghost,uint8_t iface, u32vector & neighbours, bvector & isghost, bool onlyinternal) const{
-        const Octant* oct = amIghost ? &m_ghosts[idx] : &m_octants[idx];
-        findNeighbours(oct, iface, neighbours, isghost, onlyinternal);
-    };
-
-    /** Finds local and ghost or only local neighbours of octant(both local and ghost ones) through iedge edge.
-     * Returns a vector (empty if iface is a bound face) with the index of neighbours
-     * in their structure (octants or ghosts) and sets isghost[i] = true if the
-     * i-th neighbour is ghost in the local tree.
-     * \param[in] idx Index of current octant
-     * \param[in] amIghost Boolean flag to specify if the octant is a ghost one
-     * \param[in] iedge Index of edge passed through for neighbours finding
-     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
-     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
-     * \param[in] onlyinternal A boolean flag to specify if neighbours have to be found among all the octants (false) or only among the internal ones (true).
-     */
-    void
-    LocalTree::findEdgeNeighbours(uint32_t idx, bool amIghost,uint8_t iedge, u32vector & neighbours, bvector & isghost, bool onlyinternal) const{
-        const Octant* oct = amIghost ? &m_ghosts[idx] : &m_octants[idx];
-        findEdgeNeighbours(oct, iedge, neighbours, isghost, onlyinternal);
-    };
-
-    /** Finds local and ghost or only local neighbours of octant(both local and ghost ones) through inode node.
-     * Returns a vector (empty if iface is a bound face) with the index of neighbours
-     * in their structure (octants or ghosts) and sets isghost[i] = true if the
-     * i-th neighbour is ghost in the local tree.
-     * \param[in] idx Index of current octant
-     * \param[in] amIghost Boolean flag to specify if the octant is a ghost one
-     * \param[in] inode Index of node passed through for neighbours finding
-     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
-     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
-     * \param[in] onlyinternal A boolean flag to specify if neighbours have to be found among all the octants (false) or only among the internal ones (true).
-     */
-    void
-    LocalTree::findNodeNeighbours(uint32_t idx, bool amIghost,uint8_t inode, u32vector & neighbours, bvector & isghost, bool onlyinternal) const{
-        const Octant* oct = amIghost ? &m_ghosts[idx] : &m_octants[idx];
-        findNodeNeighbours(oct, inode,neighbours, isghost,onlyinternal);
-    };
-
-    /** Finds local and ghost neighbours of ghost octant through iface face.
-     * Returns a vector (empty if iface is a bound face) with the index of neighbours
-     * in their structure (octants or ghosts) and sets isghost[i] = true if the
-     * i-th neighbour is ghost in the local tree.
-     * \param[in] idx Index of the current ghost octant
-     * \param[in] iface Index of face passed through for neighbours finding
-     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
-     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
-     */
-	void
-    LocalTree::findGhostNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours, bvector & isghost) const{
-        const Octant* oct = &m_ghosts[idx];
-        findNeighbours(oct,iface,neighbours, isghost,false);
-    };
-
-    /** Finds local and ghost neighbours of ghost octant through iedge edge.
-     * Returns a vector (empty if iedge is a bound edge) with the index of neighbours
-     * in their structure (octants or ghosts) and sets isghost[i] = true if the
-     * i-th neighbour is ghost in the local tree.
-     * \param[in] idx Index of the current octant
-     * \param[in] iedge Index of edge passed through for neighbours finding
-     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
-     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
-     */
-	void
-    LocalTree::findGhostEdgeNeighbours(uint32_t idx, uint8_t iedge, u32vector & neighbours, bvector & isghost) const{
-        const Octant* oct = &m_ghosts[idx];
-        findEdgeNeighbours(oct, iedge, neighbours, isghost, false);
-    };
-
-    /** Finds local and ghost neighbours of ghost octant through inode node.
-     * Returns a vector (empty if inode is a bound node) with the index of neighbours
-     * in their structure (octants or ghosts) and sets isghost[i] = true if the
-     * i-th neighbour is ghost in the local tree.
-     * \param[in] idx Index of the current octant
-     * \param[in] inode Index of node passed through for neighbours finding
-     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
-     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
-     */
-	void
-    LocalTree::findGhostNodeNeighbours(uint32_t idx, uint8_t inode, u32vector & neighbours, bvector & isghost) const{
-        const Octant* oct = &m_ghosts[idx];
-        findNodeNeighbours(oct, inode, neighbours, isghost, false);
-    };
-
-
-    /** Finds local and ghost neighbours of local octant through iface face.
-     * Returns a vector (empty if iface is a bound face) with the index of neighbours
-     * in their structure (octants or ghosts) and sets isghost[i] = true if the
-     * i-th neighbour is ghost in the local tree.
-     * \param[in] idx Index of the current octant
-     * \param[in] iface Index of face passed through for neighbours finding
-     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
-     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
-     */
-    void
-    LocalTree::findNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours, bvector & isghost) const{
-        findNeighbours(idx, false, iface, neighbours, isghost, false);
-    };
-
-    /** Finds local and ghost neighbours of local octant through iedge edge.
-     * Returns a vector (empty if iedge is a bound edge) with the index of neighbours
-     * in their structure (octants or ghosts) and sets isghost[i] = true if the
-     * i-th neighbour is ghost in the local tree.
-     * \param[in] idx Index of the current octant
-     * \param[in] iedge Index of edge passed through for neighbours finding
-     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
-     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
-     */
-    void
-    LocalTree::findEdgeNeighbours(uint32_t idx, uint8_t iedge, u32vector & neighbours, bvector & isghost) const{
-        findEdgeNeighbours(idx, false, iedge, neighbours, isghost, false);
-    };
-
-    /** Finds local and ghost neighbours of local octant through inode node.
-     * Returns a vector (empty if inode is a bound node) with the index of neighbours
-     * in their structure (octants or ghosts) and sets isghost[i] = true if the
-     * i-th neighbour is ghost in the local tree.
-     * \param[in] idx Index of the current octant
-     * \param[in] inode Index of node passed through for neighbours finding
-     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
-     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
-     */
-    void
-    LocalTree::findNodeNeighbours(uint32_t idx, uint8_t inode, u32vector & neighbours, bvector & isghost) const{
-        findNodeNeighbours(idx, false, inode, neighbours, isghost, false);
-    };
-
-    /** Finds local and ghost neighbours of an octant through iface face.
-     * Returns a vector (empty if iface is a bound face) with the index of neighbours
-     * in their structure (octants or ghosts) and sets isghost[i] = true if the
-     * i-th neighbour is ghost in the local tree.
-     * \param[in] oct Pointer to the current octant
-     * \param[in] iface Index of face passed through for neighbours finding
-     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
-     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
-     */
-    void
-    LocalTree::findNeighbours(const Octant* oct, uint8_t iface, u32vector & neighbours, bvector & isghost) const{
-        findNeighbours(oct, iface, neighbours, isghost, false);
-    };
-
-    /** Finds local and ghost neighbours of an octant through iedge edge.
-     * Returns a vector (empty if iedge is a bound edge) with the index of neighbours
-     * in their structure (octants or ghosts) and sets isghost[i] = true if the
-     * i-th neighbour is ghost in the local tree.
-     * \param[in] oct Pointer to the current octant
-     * \param[in] iedge Index of edge passed through for neighbours finding
-     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
-     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
-     */
-    void
-    LocalTree::findEdgeNeighbours(const Octant* oct, uint8_t iedge, u32vector & neighbours, bvector & isghost) const{
-        findEdgeNeighbours(oct, iedge, neighbours, isghost, false);
-    };
-
-    /** Finds local and ghost neighbours of an octant through inode node.
-     * Returns a vector (empty if inode is a bound node) with the index of neighbours
-     * in their structure (octants or ghosts) and sets isghost[i] = true if the
-     * i-th neighbour is ghost in the local tree.
-     * \param[in] oct Pointer to the current octant
-     * \param[in] inode Index of node passed through for neighbours finding
-     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
-     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
-     */
-    void
-    LocalTree::findNodeNeighbours(const Octant* oct, uint8_t inode, u32vector & neighbours, bvector & isghost) const{
-        findNodeNeighbours(oct, inode, neighbours, isghost, false);
-    };
-
-    /** Finds local neighbours of a ghost octant through iface face.
-     * Returns a vector (empty if iface is a bound face) with the index of neighbours
-     * \param[in] idx Index of the current octant
-     * \param[in] iface Index of face passed through for neighbours finding
-     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
-     */
-	void
-    LocalTree::findGhostNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours) const{
-        bvector isghost;
-        const Octant* oct = &m_ghosts[idx];
-        findNeighbours(oct, iface, neighbours, isghost, true);
-    };
-
-    /** Finds local neighbours of a ghost octant through iedge edge.
-     * Returns a vector (empty if iedge is a bound edge) with the index of neighbours
-     * \param[in] idx Index of the current octant
-     * \param[in] iedge Index of edge passed through for neighbours finding
-     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
-     */
-	void
-    LocalTree::findGhostEdgeNeighbours(uint32_t idx, uint8_t iedge, u32vector & neighbours) const{
-        bvector isghost;
-        const Octant* oct = &m_ghosts[idx];
-        findEdgeNeighbours(oct, iedge, neighbours, isghost, true);
-    };
-
-    /** Finds local neighbours of a ghost octant through inode node.
-     * Returns a vector (empty if inode is a bound node) with the index of neighbours
-     * \param[in] idx Index of the current octant
-     * \param[in] inode Index of node passed through for neighbours finding
-     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
-     */
-	void
-    LocalTree::findGhostNodeNeighbours(uint32_t idx, uint8_t inode, u32vector & neighbours) const{
-        bvector isghost;
-        const Octant* oct = &m_ghosts[idx];
-        findNodeNeighbours(oct, inode, neighbours, isghost, true);
     };
 
     // =================================================================================== //
@@ -2357,11 +2137,11 @@ namespace bitpit {
                 }
 
                 if (balanceOctant){
-                    targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
+                    targetmarker = min(m_treeConstants->maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
 
                     //Balance through faces
                     for (iface=0; iface<m_treeConstants->nFaces; iface++){
-						findNeighbours(idx, iface, neigh, isghost);
+						findNeighbours(m_octants.data() + idx, iface, neigh, isghost, false);
 						sizeneigh = neigh.size();
 						for(i=0; i<sizeneigh; i++){
 							if (!isghost[i]){
@@ -2391,13 +2171,13 @@ namespace bitpit {
 								};
 							}
 						}
-						targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
+						targetmarker = min(m_treeConstants->maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
                     }
 
                     if (Bedge){
                         //Balance through edges
                         for (iedge=0; iedge<m_treeConstants->nEdges; iedge++){
-							findEdgeNeighbours(idx, iedge, neigh, isghost);
+							findEdgeNeighbours(m_octants.data() + idx, iedge, neigh, isghost, false);
 							sizeneigh = neigh.size();
 							for(i=0; i<sizeneigh; i++){
 								if (!isghost[i]){
@@ -2425,14 +2205,14 @@ namespace bitpit {
 									}
 								}
 							}
-							targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
+							targetmarker = min(m_treeConstants->maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
                         }
                     }
 
                     if (Bnode){
                         //Balance through nodes
                         for (inode=0; inode<m_treeConstants->nNodes; inode++){
-							findNodeNeighbours(idx, inode, neigh, isghost);
+							findNodeNeighbours(m_octants.data() + idx, inode, neigh, isghost, false);
 							sizeneigh = neigh.size();
 							for(i=0; i<sizeneigh; i++){
 								if (!isghost[i]){
@@ -2460,7 +2240,7 @@ namespace bitpit {
 									}
 								}
 							}
-							targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
+							targetmarker = min(m_treeConstants->maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
                         }
                     }
 
@@ -2482,13 +2262,13 @@ namespace bitpit {
                 }
 
                 if (balanceOctant){
-                    targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(it->getLevel()+it->getMarker()));
+                    targetmarker = min(m_treeConstants->maxLevel, int8_t(it->getLevel()+it->getMarker()));
 
                     //Balance through faces
                     for (iface=0; iface<m_treeConstants->nFaces; iface++){
                         if(it->getPbound(iface) == true){
                             neigh.clear();
-                            findGhostNeighbours(idx, iface, neigh);
+                            findNeighbours(m_ghosts.data() + idx, iface, neigh, isghost, true);
                             sizeneigh = neigh.size();
                             for(i=0; i<sizeneigh; i++){
                                 if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
@@ -2499,14 +2279,14 @@ namespace bitpit {
                                 }
                             }
                         }
-                        targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(it->getLevel()+it->getMarker()));
+                        targetmarker = min(m_treeConstants->maxLevel, int8_t(it->getLevel()+it->getMarker()));
                     }
 
                     if (Bedge){
                         //Balance through edges
                         for (iedge=0; iedge<m_treeConstants->nEdges; iedge++){
 							neigh.clear();
-							findGhostEdgeNeighbours(idx, iedge, neigh);
+							findEdgeNeighbours(m_ghosts.data() + idx, iedge, neigh, isghost, true);
 							sizeneigh = neigh.size();
 							for(i=0; i<sizeneigh; i++){
 								if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
@@ -2516,7 +2296,7 @@ namespace bitpit {
 									Bdone = true;
 								}
 							}
-							targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(it->getLevel()+it->getMarker()));
+							targetmarker = min(m_treeConstants->maxLevel, int8_t(it->getLevel()+it->getMarker()));
                         }
                     }
 
@@ -2524,7 +2304,7 @@ namespace bitpit {
                         //Balance through nodes
                         for (inode=0; inode<m_treeConstants->nNodes; inode++){
 							neigh.clear();
-							findGhostNodeNeighbours(idx, inode, neigh);
+							findNodeNeighbours(m_ghosts.data() + idx, inode, neigh, isghost, true);
 							sizeneigh = neigh.size();
 							for(i=0; i<sizeneigh; i++){
 								if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
@@ -2534,7 +2314,7 @@ namespace bitpit {
 									Bdone = true;
 								}
 							}
-							targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(it->getLevel()+it->getMarker()));
+							targetmarker = min(m_treeConstants->maxLevel, int8_t(it->getLevel()+it->getMarker()));
                         }
                     }
 
@@ -2551,12 +2331,12 @@ namespace bitpit {
                 for (iit=ibegin; iit!=iend; ++iit){
                     idx = *iit;
                     if (m_octants[idx].getBalance()){
-                        targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
+                        targetmarker = min(m_treeConstants->maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
 
                         //Balance through faces
                         for (iface=0; iface<m_treeConstants->nFaces; iface++){
                             if(!m_octants[idx].getPbound(iface)){
-                                findNeighbours(idx, iface, neigh, isghost);
+                                findNeighbours(m_octants.data() + idx, iface, neigh, isghost, false);
                                 sizeneigh = neigh.size();
                                 for(i=0; i<sizeneigh; i++){
                                     if (!isghost[i]){
@@ -2577,13 +2357,13 @@ namespace bitpit {
                                     }
                                 }
                             }
-                            targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
+                            targetmarker = min(m_treeConstants->maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
                         }
 
                         if (Bedge){
                             //Balance through edges
                             for (iedge=0; iedge<m_treeConstants->nEdges; iedge++){
-								findEdgeNeighbours(idx, iedge, neigh, isghost);
+								findEdgeNeighbours(m_octants.data() + idx, iedge, neigh, isghost, false);
 								sizeneigh = neigh.size();
 								for(i=0; i<sizeneigh; i++){
 									if (!isghost[i]){
@@ -2603,14 +2383,14 @@ namespace bitpit {
 										};
 									}
 								}
-								targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
+								targetmarker = min(m_treeConstants->maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
                             }
                         }
 
                         if (Bnode){
                             //Balance through nodes
                             for (inode=0; inode<m_treeConstants->nNodes; inode++){
-								findNodeNeighbours(idx, inode, neigh, isghost);
+								findNodeNeighbours(m_octants.data() + idx, inode, neigh, isghost, false);
 								sizeneigh = neigh.size();
 								for(i=0; i<sizeneigh; i++){
 									if (!isghost[i]){
@@ -2630,7 +2410,7 @@ namespace bitpit {
 										};
 									}
 								}
-								targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
+								targetmarker = min(m_treeConstants->maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
                             }
                         }
 
@@ -2658,13 +2438,13 @@ namespace bitpit {
                 }
 
                 if (balanceOctant){
-                    targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(it->getLevel()+it->getMarker()));
+                    targetmarker = min(m_treeConstants->maxLevel, int8_t(it->getLevel()+it->getMarker()));
 
                     //Balance through faces
                     for (iface=0; iface<m_treeConstants->nFaces; iface++){
                         if(it->getPbound(iface) == true){
                             neigh.clear();
-                            findGhostNeighbours(idx, iface, neigh);
+                            findNeighbours(m_ghosts.data() + idx, iface, neigh, isghost, true);
                             sizeneigh = neigh.size();
                             for(i=0; i<sizeneigh; i++){
                                 if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
@@ -2675,14 +2455,14 @@ namespace bitpit {
                                 }
                             }
                         }
-                        targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(it->getLevel()+it->getMarker()));
+                        targetmarker = min(m_treeConstants->maxLevel, int8_t(it->getLevel()+it->getMarker()));
                     }
 
                     if (Bedge){
                         //Balance through edges
                         for (iedge=0; iedge<m_treeConstants->nEdges; iedge++){
 							neigh.clear();
-							findGhostEdgeNeighbours(idx, iedge, neigh);
+							findEdgeNeighbours(m_ghosts.data() + idx, iedge, neigh, isghost, true);
 							sizeneigh = neigh.size();
 							for(i=0; i<sizeneigh; i++){
 								if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
@@ -2692,7 +2472,7 @@ namespace bitpit {
 									Bdone = true;
 								}
 							}
-							targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(it->getLevel()+it->getMarker()));
+							targetmarker = min(m_treeConstants->maxLevel, int8_t(it->getLevel()+it->getMarker()));
                         }
                     }
 
@@ -2700,7 +2480,7 @@ namespace bitpit {
                         //Balance through nodes
                         for (inode=0; inode<m_treeConstants->nNodes; inode++){
 							neigh.clear();
-							findGhostNodeNeighbours(idx, inode, neigh);
+							findNodeNeighbours(m_ghosts.data() + idx, inode, neigh, isghost, true);
 							sizeneigh = neigh.size();
 							for(i=0; i<sizeneigh; i++){
 								if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
@@ -2710,7 +2490,7 @@ namespace bitpit {
 									Bdone = true;
 								}
 							}
-							targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(it->getLevel()+it->getMarker()));
+							targetmarker = min(m_treeConstants->maxLevel, int8_t(it->getLevel()+it->getMarker()));
                         }
                     }
 
@@ -2727,12 +2507,12 @@ namespace bitpit {
                 for (iit=ibegin; iit!=iend; ++iit){
                     idx = *iit;
                     if (m_octants[idx].getBalance()){
-                        targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
+                        targetmarker = min(m_treeConstants->maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
 
                         //Balance through faces
                         for (iface=0; iface<m_treeConstants->nFaces; iface++){
                             if(!m_octants[idx].getPbound(iface)){
-                                findNeighbours(idx, iface, neigh, isghost);
+                                findNeighbours(m_octants.data() + idx, iface, neigh, isghost, false);
                                 sizeneigh = neigh.size();
                                 for(i=0; i<sizeneigh; i++){
                                     if (!isghost[i]){
@@ -2753,13 +2533,13 @@ namespace bitpit {
                                     }
                                 }
                             }
-                            targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
+                            targetmarker = min(m_treeConstants->maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
                         }
 
                         if (Bedge){
                             //Balance through edges
                             for (iedge=0; iedge<m_treeConstants->nEdges; iedge++){
-								findEdgeNeighbours(idx, iedge, neigh, isghost);
+								findEdgeNeighbours(m_octants.data() + idx, iedge, neigh, isghost, false);
 								sizeneigh = neigh.size();
 								for(i=0; i<sizeneigh; i++){
 									if (!isghost[i]){
@@ -2779,14 +2559,14 @@ namespace bitpit {
 										};
 									}
 								}
-								targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
+								targetmarker = min(m_treeConstants->maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
                             }
                         }
 
                         if (Bnode){
                             //Balance through nodes
                             for (inode=0; inode<m_treeConstants->nNodes; inode++){
-								findNodeNeighbours(idx, inode, neigh, isghost);
+								findNodeNeighbours(m_octants.data() + idx, inode, neigh, isghost, false);
 								sizeneigh = neigh.size();
 								for(i=0; i<sizeneigh; i++){
 									if (!isghost[i]){
@@ -2806,7 +2586,7 @@ namespace bitpit {
 										};
 									}
 								}
-								targetmarker = min(TreeConstants::MAX_LEVEL, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
+								targetmarker = min(m_treeConstants->maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
                             }
                         }
 
@@ -2849,7 +2629,7 @@ namespace bitpit {
 		for (it = obegin; it != oend; ++it){
 			for (iface = 0; iface < m_dim; iface++){
 				iface2 = iface*2;
-				findGhostNeighbours(idx, iface2, neighbours);
+				findNeighbours(m_ghosts.data() + idx, iface2, neighbours, isghost, true);
 				nsize = neighbours.size();
 				if (!(it->m_info[iface2])){
 					//Internal intersection
@@ -2898,7 +2678,7 @@ namespace bitpit {
 		for (it = obegin; it != oend; ++it){
 			for (iface = 0; iface < m_dim; iface++){
 				iface2 = iface*2;
-				findNeighbours(idx, iface2, neighbours, isghost);
+				findNeighbours(m_octants.data() + idx, iface2, neighbours, isghost, false);
 				nsize = neighbours.size();
 				if (nsize) {
 					if (!(it->m_info[iface2])){
@@ -3007,7 +2787,7 @@ namespace bitpit {
 					}
 					else{
 						//Periodic intersection
-						findNeighbours(idx, iface2+1, neighbours, isghost);
+						findNeighbours(m_octants.data() + idx, iface2+1, neighbours, isghost, false);
 						nsize = neighbours.size();
 						for (i = 0; i < nsize; i++){
 							if (isghost[i]){

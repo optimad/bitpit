@@ -47,9 +47,9 @@ std::unique_ptr<bitpit::SurfUnstructured> generateSegmentation()
     int dimensions = 2;
 
 #if BITPIT_ENABLE_MPI
-    std::unique_ptr<bitpit::SurfUnstructured> segmentation(new bitpit::SurfUnstructured(0, 1, dimensions, MPI_COMM_NULL));
+    std::unique_ptr<bitpit::SurfUnstructured> segmentation(new bitpit::SurfUnstructured(0, dimensions - 1, MPI_COMM_NULL));
 #else
-    std::unique_ptr<bitpit::SurfUnstructured> segmentation(new bitpit::SurfUnstructured(0, 1, dimensions));
+    std::unique_ptr<bitpit::SurfUnstructured> segmentation(new bitpit::SurfUnstructured(0, dimensions - 1));
 #endif
 
     // Create vertex list

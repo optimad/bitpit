@@ -750,7 +750,7 @@ namespace bitpit {
         (*m_log) << "---------------------------------------------" << endl;
         (*m_log) << " Number of proc	:	" + to_string(static_cast<unsigned long long>(m_nproc)) << endl;
         (*m_log) << " Dimension		:	" + to_string(static_cast<unsigned long long>(m_dim)) << endl;
-        (*m_log) << " Max allowed level	:	" + to_string(static_cast<unsigned long long>(TreeConstants::MAX_LEVEL)) << endl;
+        (*m_log) << " Max allowed level	:	" + to_string(static_cast<unsigned long long>(m_treeConstants->maxLevel)) << endl;
         (*m_log) << " Number of octants	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)) << endl;
         (*m_log) << "---------------------------------------------" << endl;
         (*m_log) << " " << endl;
@@ -1008,7 +1008,7 @@ namespace bitpit {
      */
     int
     ParaTree::getMaxLevel() const {
-        return TreeConstants::MAX_LEVEL;
+        return m_treeConstants->maxLevel;
     };
 
     /*! Get the length of the domain in logical domain.
@@ -1016,7 +1016,7 @@ namespace bitpit {
      */
     uint32_t
     ParaTree::getMaxLength() const {
-        return TreeConstants::MAX_LENGTH;
+        return m_treeConstants->lengths[0];
     }
 
     /*! Get the number of nodes for each octant (4 for 2D case, 8 for 3D case)
@@ -1319,72 +1319,72 @@ namespace bitpit {
 
     /*! Get the coordinates of the center of an octant.
      * \param[in] idx Local index of target octant.
-     * \param[out] center Coordinates of the center of octant.
+     * \param[out] centerCoords Coordinates of the center of octant.
      */
     void
-    ParaTree::getCenter(uint32_t idx, darray3& center) const {
-        darray3 center_ = m_octree.m_octants[idx].getLogicalCenter();
-        m_trans.mapCenter(center_, center);
+    ParaTree::getCenter(uint32_t idx, darray3& centerCoords) const {
+        darray3 centerCoords_ = m_octree.m_octants[idx].getLogicalCenter();
+        m_trans.mapCenter(centerCoords_, centerCoords);
     }
 
     /*! Get the coordinates of the center of an octant.
      * \param[in] idx Local index of target octant.
-     * \return center Coordinates of the center of octant.
+     * \return Coordinates of the center of octant.
      */
     darray3
     ParaTree::getCenter(uint32_t idx) const {
-        darray3 center;
-        darray3 center_ = m_octree.m_octants[idx].getLogicalCenter();
-        m_trans.mapCenter(center_, center);
-        return center;
+        darray3 centerCoords;
+        darray3 centerCoords_ = m_octree.m_octants[idx].getLogicalCenter();
+        m_trans.mapCenter(centerCoords_, centerCoords);
+        return centerCoords;
     }
 
     /*! Get the coordinates of the center of a face of an octant.
      * \param[in] idx Local index of target octant.
-     * \param[in] iface Index of the target face.
-     * \return center Coordinates of the center of the iface-th face af octant.
+     * \param[in] face Index of the target face.
+     * \return Coordinates of the center of the face-th face af octant.
      */
     darray3
-    ParaTree::getFaceCenter(uint32_t idx, uint8_t iface) const {
-        darray3 center;
-        darray3 center_ = m_octree.m_octants[idx].getLogicalFaceCenter(iface);
-        m_trans.mapCenter(center_, center);
-        return center;
+    ParaTree::getFaceCenter(uint32_t idx, uint8_t face) const {
+        darray3 centerCoords;
+        darray3 centerCoords_ = m_octree.m_octants[idx].getLogicalFaceCenter(face);
+        m_trans.mapCenter(centerCoords_, centerCoords);
+        return centerCoords;
     }
 
     /*! Get the coordinates of the center of a face of an octant.
      * \param[in] idx Local index of target octant.
-     * \param[in] iface Index of the target face.
-     * \param[out] center Coordinates of the center of the iface-th face af octant.
+     * \param[in] face Index of the target face.
+     * \param[out] centerCoords Coordinates of the center of the face-th face af octant.
      */
     void
-    ParaTree::getFaceCenter(uint32_t idx, uint8_t iface, darray3& center) const {
-        darray3 center_ = m_octree.m_octants[idx].getLogicalFaceCenter(iface);
-        m_trans.mapCenter(center_, center);
+    ParaTree::getFaceCenter(uint32_t idx, uint8_t face, darray3& centerCoords) const {
+        darray3 centerCoords_ = m_octree.m_octants[idx].getLogicalFaceCenter(face);
+        m_trans.mapCenter(centerCoords_, centerCoords);
     }
 
     /*! Get the coordinates of single node of an octant.
      * \param[in] idx Local index of target octant.
-     * \param[in] inode Index of the target node.
-     * \return Coordinates of the inode-th node of octant.
+     * \param[in] node Index of the target node.
+     * \return Coordinates of the node-th node of octant.
      */
     darray3
-    ParaTree::getNode(uint32_t idx, uint8_t inode) const {
-        darray3 node;
-        u32array3 node_ = m_octree.m_octants[idx].getLogicalNode(inode);
-        m_trans.mapNode(node_, node);
-        return node;
+    ParaTree::getNode(uint32_t idx, uint8_t node) const {
+        darray3 nodeCoords;
+        u32array3 nodeCoords_ = m_octree.m_octants[idx].getLogicalNode(node);
+        m_trans.mapNode(nodeCoords_, nodeCoords);
+        return nodeCoords;
     }
 
     /*! Get the coordinates of the center of a face of an octant.
      * \param[in] idx Local index of target octant.
-     * \param[in] inode Index of the target node.
-     * \param[out] node Coordinates of the inode-th node of octant.
+     * \param[in] node Index of the target node.
+     * \param[out] nodeCoords Coordinates of the node-th node of octant.
      */
     void
-    ParaTree::getNode(uint32_t idx, uint8_t inode, darray3& node) const {
-        u32array3 node_ = m_octree.m_octants[idx].getLogicalNode(inode);
-        m_trans.mapNode(node_, node);
+    ParaTree::getNode(uint32_t idx, uint8_t node, darray3& nodeCoords) const {
+        u32array3 nodeCoords_ = m_octree.m_octants[idx].getLogicalNode(node);
+        m_trans.mapNode(nodeCoords_, nodeCoords);
     }
 
     /*! Get the coordinates of the nodes of an octant.
@@ -1392,47 +1392,47 @@ namespace bitpit {
      * \param[out] nodes Coordinates of the nodes of octant.
      */
     void
-    ParaTree::getNodes(uint32_t idx, darr3vector & nodes) const {
-        u32arr3vector nodes_;
-        m_octree.m_octants[idx].getLogicalNodes(nodes_);
-        m_trans.mapNodes(nodes_, nodes);
+    ParaTree::getNodes(uint32_t idx, darr3vector & nodesCoords) const {
+        u32arr3vector nodesCoords_;
+        m_octree.m_octants[idx].getLogicalNodes(nodesCoords_);
+        m_trans.mapNodes(nodesCoords_, nodesCoords);
     }
 
     /*! Get the coordinates of the nodes of an octant.
      * \param[in] idx Local index of target octant.
-     * \return nodes Coordinates of the nodes of octant.
+     * \return Coordinates of the nodes of octant.
      */
     darr3vector
     ParaTree::getNodes(uint32_t idx) const{
-        darr3vector nodes;
-        u32arr3vector nodes_;
-        m_octree.m_octants[idx].getLogicalNodes(nodes_);
-        m_trans.mapNodes(nodes_, nodes);
-        return nodes;
+        darr3vector nodesCoords;
+        u32arr3vector nodesCoords_;
+        m_octree.m_octants[idx].getLogicalNodes(nodesCoords_);
+        m_trans.mapNodes(nodesCoords_, nodesCoords);
+        return nodesCoords;
     }
 
     /*! Get the normal of a face of an octant.
      * \param[in] idx Local index of target octant.
-     * \param[in] iface Index of the face for normal computing.
+     * \param[in] face Index of the face for normal computing.
      * \param[out] normal Coordinates of the normal of face.
      */
     void
-    ParaTree::getNormal(uint32_t idx, uint8_t iface, darray3 & normal) const {
+    ParaTree::getNormal(uint32_t idx, uint8_t face, darray3 & normal) const {
         i8array3 normal_;
-        m_octree.m_octants[idx].getNormal(iface, normal_, m_treeConstants->normals);
+        m_octree.m_octants[idx].getNormal(face, normal_, m_treeConstants->normals);
         m_trans.mapNormals(normal_, normal);
     }
 
     /*! Get the normal of a face of an octant.
      * \param[in] idx Local index of target octant.
-     * \param[in] iface Index of the face for normal computing.
-     * \return normal Coordinates of the normal of face.
+     * \param[in] face Index of the face for normal computing.
+     * \return Normal of the face.
      */
     darray3
-    ParaTree::getNormal(uint32_t idx, uint8_t iface) const {
+    ParaTree::getNormal(uint32_t idx, uint8_t face) const {
         darray3 normal;
         i8array3 normal_;
-        m_octree.m_octants[idx].getNormal(iface, normal_, m_treeConstants->normals);
+        m_octree.m_octants[idx].getNormal(face, normal_, m_treeConstants->normals);
         m_trans.mapNormals(normal_, normal);
         return normal;
     }
@@ -1481,12 +1481,12 @@ namespace bitpit {
     /** Compute the persistent XYZ key of the specified node of an octant (without
      * level).
      * \param[in] idx Local index of the target octant.
-     * \param[in] inode Index of the target node.
+     * \param[in] node Index of the target node.
      * \return persistent XYZ key of the node.
      */
     uint64_t
-    ParaTree::computeNodePersistentKey(uint32_t idx, uint8_t inode) const {
-        return m_octree.computeNodePersistentKey(idx, inode);
+    ParaTree::computeNodePersistentKey(uint32_t idx, uint8_t node) const {
+        return m_octree.computeNodePersistentKey(idx, node);
     };
 
     /*! Get the balancing condition of an octant.
@@ -1500,12 +1500,12 @@ namespace bitpit {
 
     /*! Get the bound condition of the face of the octant
      * \param[in] idx Local index of the target octant
-     * \param[in] iface Index of the face
+     * \param[in] face Index of the face
      * \return Is the face a boundary face?
      */
     bool
-    ParaTree::getBound(uint32_t idx, uint8_t iface) const {
-        return m_octree.m_octants[idx].getBound(iface);
+    ParaTree::getBound(uint32_t idx, uint8_t face) const {
+        return m_octree.m_octants[idx].getBound(face);
     }
 
     /*! Get the bound condition of the face of the octant
@@ -1519,12 +1519,12 @@ namespace bitpit {
 
     /*! Get the partition bound condition of the face of the octant
      * \param[in] idx Local index of the target octant
-     * \param[in] iface Index of the face
+     * \param[in] face Index of the face
      * \return Is the face a partition boundary face?
      */
     bool
-    ParaTree::getPbound(uint32_t idx, uint8_t iface) const {
-        return m_octree.m_octants[idx].getPbound(iface);
+    ParaTree::getPbound(uint32_t idx, uint8_t face) const {
+        return m_octree.m_octants[idx].getPbound(face);
     }
 
     /*! Get the partition bound condition of the face of the octant
@@ -1769,72 +1769,72 @@ namespace bitpit {
 
     /*! Get the coordinates of the center of an octant.
      * \param[in] oct Pointer to the target octant
-     * \param[out] center Coordinates of the center of octant.
+     * \param[out] centerCoords Coordinates of the center of octant.
      */
     void
-    ParaTree::getCenter(const Octant* oct, darray3& center) const {
-        darray3 center_ = oct->getLogicalCenter();
-        m_trans.mapCenter(center_, center);
+    ParaTree::getCenter(const Octant* oct, darray3& centerCoords) const {
+        darray3 centerCoords_ = oct->getLogicalCenter();
+        m_trans.mapCenter(centerCoords_, centerCoords);
     }
 
     /*! Get the coordinates of the center of an octant.
      * \param[in] oct Pointer to the target octant
-     * \return center Coordinates of the center of octant.
+     * \return Coordinates of the center of octant.
      */
     darray3
     ParaTree::getCenter(const Octant* oct) const {
-        darray3 center;
-        darray3 center_ = oct->getLogicalCenter();
-        m_trans.mapCenter(center_, center);
-        return center;
+        darray3 centerCoords;
+        darray3 centerCoords_ = oct->getLogicalCenter();
+        m_trans.mapCenter(centerCoords_, centerCoords);
+        return centerCoords;
     }
 
     /*! Get the coordinates of the center of a face of an octant.
      * \param[in] oct Pointer to the target octant
-     * \param[in] iface Index of the target face.
-     * \return center Coordinates of the center of the iface-th face af octant.
+     * \param[in] face Index of the target face.
+     * \return Coordinates of the center of the face-th face af octant.
      */
     darray3
-    ParaTree::getFaceCenter(const Octant* oct, uint8_t iface) const {
-        darray3 center;
-        darray3 center_ = oct->getLogicalFaceCenter(iface);
-        m_trans.mapCenter(center_, center);
-        return center;
+    ParaTree::getFaceCenter(const Octant* oct, uint8_t face) const {
+        darray3 centerCoords;
+        darray3 centerCoords_ = oct->getLogicalFaceCenter(face);
+        m_trans.mapCenter(centerCoords_, centerCoords);
+        return centerCoords;
     }
 
     /*! Get the coordinates of the center of a face of an octant.
      * \param[in] oct Pointer to the target octant
-     * \param[in] iface Index of the target face.
-     * \param[out] center Coordinates of the center of the iface-th face af octant.
+     * \param[in] face Index of the target face.
+     * \param[out] centerCoords Coordinates of the center of the face-th face af octant.
      */
     void
-    ParaTree::getFaceCenter(const Octant* oct, uint8_t iface, darray3& center) const {
-        darray3 center_ = oct->getLogicalFaceCenter(iface);
-        m_trans.mapCenter(center_, center);
+    ParaTree::getFaceCenter(const Octant* oct, uint8_t face, darray3& centerCoords) const {
+        darray3 centerCoords_ = oct->getLogicalFaceCenter(face);
+        m_trans.mapCenter(centerCoords_, centerCoords);
     }
 
     /*! Get the coordinates of single node of an octant.
      * \param[in] oct Pointer to the target octant
-     * \param[in] inode Index of the target node.
-     * \return Coordinates of the inode-th node of octant.
+     * \param[in] node Index of the target node.
+     * \return Coordinates of the node-th node of octant.
      */
     darray3
-    ParaTree::getNode(const Octant* oct, uint8_t inode) const {
-        darray3 node;
-        u32array3 node_ = oct->getLogicalNode(inode);
-        m_trans.mapNode(node_, node);
-        return node;
+    ParaTree::getNode(const Octant* oct, uint8_t node) const {
+        darray3 nodeCoords;
+        u32array3 nodeCoords_ = oct->getLogicalNode(node);
+        m_trans.mapNode(nodeCoords_, nodeCoords);
+        return nodeCoords;
     }
 
     /*! Get the coordinates of the center of a face of an octant.
      * \param[in] oct Pointer to the target octant
-     * \param[in] inode Index of the target node.
-     * \param[out] node Coordinates of the inode-th node of octant.
+     * \param[in] node Index of the target node.
+     * \param[out] nodeCoords Coordinates of the node-th node of octant.
      */
     void
-    ParaTree::getNode(const Octant* oct, uint8_t inode, darray3& node) const {
-        u32array3 node_ = oct->getLogicalNode(inode);
-        m_trans.mapNode(node_, node);
+    ParaTree::getNode(const Octant* oct, uint8_t node, darray3& nodeCoords) const {
+        u32array3 nodeCoords_ = oct->getLogicalNode(node);
+        m_trans.mapNode(nodeCoords_, nodeCoords);
     }
 
     /*! Get the coordinates of the nodes of an octant.
@@ -1843,46 +1843,46 @@ namespace bitpit {
      */
     void
     ParaTree::getNodes(const Octant* oct, darr3vector & nodes) const {
-        u32arr3vector nodes_;
-        oct->getLogicalNodes(nodes_);
-        m_trans.mapNodes(nodes_, nodes);
+        u32arr3vector nodesCoords_;
+        oct->getLogicalNodes(nodesCoords_);
+        m_trans.mapNodes(nodesCoords_, nodes);
     }
 
     /*! Get the coordinates of the nodes of an octant.
      * \param[in] oct Pointer to the target octant
-     * \return nodes Coordinates of the nodes of octant.
+     * \return Coordinates of the nodes of octant.
      */
     darr3vector
     ParaTree::getNodes(const Octant* oct) const {
         darr3vector nodes;
-        u32arr3vector nodes_;
-        oct->getLogicalNodes(nodes_);
-        m_trans.mapNodes(nodes_, nodes);
+        u32arr3vector nodesCoords_;
+        oct->getLogicalNodes(nodesCoords_);
+        m_trans.mapNodes(nodesCoords_, nodes);
         return nodes;
     }
 
     /*! Get the normal of a face of an octant.
      * \param[in] oct Pointer to the target octant
-     * \param[in] iface Index of the face for normal computing.
+     * \param[in] face Index of the face for normal computing.
      * \param[out] normal Coordinates of the normal of face.
      */
     void
-    ParaTree::getNormal(const Octant* oct, uint8_t iface, darray3 & normal) const {
+    ParaTree::getNormal(const Octant* oct, uint8_t face, darray3 & normal) const {
         i8array3 normal_;
-        oct->getNormal(iface, normal_, m_treeConstants->normals);
+        oct->getNormal(face, normal_, m_treeConstants->normals);
         m_trans.mapNormals(normal_, normal);
     }
 
     /*! Get the normal of a face of an octant.
      * \param[in] oct Pointer to the target octant
-     * \param[in] iface Index of the face for normal computing.
-     * \return normal Coordinates of the normal of face.
+     * \param[in] face Index of the face for normal computing.
+     * \return Normal of the face.
      */
     darray3
-    ParaTree::getNormal(const Octant* oct, uint8_t iface) const {
+    ParaTree::getNormal(const Octant* oct, uint8_t face) const {
         darray3 normal;
         i8array3 normal_;
-        oct->getNormal(iface, normal_, m_treeConstants->normals);
+        oct->getNormal(face, normal_, m_treeConstants->normals);
         m_trans.mapNormals(normal_, normal);
         return normal;
     }
@@ -1940,12 +1940,12 @@ namespace bitpit {
     /** Compute the persistent XYZ key of the specified node of an octant (without
      * level).
      * \param[in] oct Pointer to the target octant
-     * \param[in] inode Index of the target node.
+     * \param[in] node Index of the target node.
      * \return persistent XYZ key of the node.
      */
     uint64_t
-    ParaTree::computeNodePersistentKey(const Octant* oct, uint8_t inode) const {
-        return oct->computeNodePersistentKey(inode);
+    ParaTree::computeNodePersistentKey(const Octant* oct, uint8_t node) const {
+        return oct->computeNodePersistentKey(node);
     };
 
     /*! Get the balancing condition of an octant.
@@ -1959,12 +1959,12 @@ namespace bitpit {
 
     /*! Get the bound condition of the face of the octant
      * \param[in] oct Pointer to the target octant
-     * \param[in] iface Index of the face
+     * \param[in] face Index of the face
      * \return Is the face a boundary face?
      */
     bool
-    ParaTree::getBound(const Octant* oct, uint8_t iface) const {
-        return oct->getBound(iface);
+    ParaTree::getBound(const Octant* oct, uint8_t face) const {
+        return oct->getBound(face);
     }
 
     /*! Get the bound condition of the octant
@@ -1978,12 +1978,12 @@ namespace bitpit {
 
     /*! Get the partition bound condition of the face of the octant
      * \param[in] oct Pointer to the target octant
-     * \param[in] iface Index of the face
+     * \param[in] face Index of the face
      * \return Is the face a partition boundary face?
      */
     bool
-    ParaTree::getPbound(const Octant* oct, uint8_t iface) const {
-        return oct->getPbound(iface);
+    ParaTree::getPbound(const Octant* oct, uint8_t face) const {
+        return oct->getPbound(face);
     }
 
     /*! Get the partition bound condition of the face of the octant
@@ -2134,7 +2134,7 @@ namespace bitpit {
      */
     double
     ParaTree::getLocalMinSize() const {
-        uint32_t size = uint32_t(1)<<(TreeConstants::MAX_LEVEL-m_octree.getLocalMaxDepth());
+        uint32_t size = uint32_t(1)<<(m_treeConstants->maxLevel-m_octree.getLocalMaxDepth());
         return m_trans.mapSize(size);
     };
 
@@ -2388,11 +2388,11 @@ namespace bitpit {
             oct = m_octree.extractGhostOctant(inter->m_owners[inter->m_finer]);
         else
             oct = m_octree.extractOctant(inter->m_owners[inter->m_finer]);
-        darray3  center_ = oct.getLogicalCenter();
+        darray3  centerCoords_ = oct.getLogicalCenter();
         int sign = ( int(2*((inter->m_iface)%2)) - 1);
         double deplace = double (sign * int(oct.getLogicalSize())) / 2;
-        center_[inter->m_iface/2] = uint32_t(int(center_[inter->m_iface/2]) + deplace);
-        m_trans.mapCenter(center_, center);
+        centerCoords_[inter->m_iface/2] = uint32_t(int(centerCoords_[inter->m_iface/2]) + deplace);
+        m_trans.mapCenter(centerCoords_, center);
         return center;
     }
 
@@ -2408,16 +2408,16 @@ namespace bitpit {
             oct = m_octree.extractGhostOctant(inter->m_owners[inter->m_finer]);
         else
             oct = m_octree.extractOctant(inter->m_owners[inter->m_finer]);
-        uint8_t iface = inter->m_iface;
-        u32arr3vector nodes_all;
-        oct.getLogicalNodes(nodes_all);
-        u32arr3vector nodes_(m_treeConstants->nNodesPerFace);
+        uint8_t face = inter->m_iface;
+        u32arr3vector nodesCoords_all;
+        oct.getLogicalNodes(nodesCoords_all);
+        u32arr3vector nodesCoords_(m_treeConstants->nNodesPerFace);
         for (int i=0; i<m_treeConstants->nNodesPerFace; i++){
             for (int j=0; j<3; j++){
-                nodes_[i][j] = nodes_all[m_treeConstants->faceNode[iface][i]][j];
+                nodesCoords_[i][j] = nodesCoords_all[m_treeConstants->faceNode[face][i]][j];
             }
         }
-        m_trans.mapNodesIntersection(nodes_, nodes);
+        m_trans.mapNodesIntersection(nodesCoords_, nodes);
         return nodes;
     }
 
@@ -2433,9 +2433,9 @@ namespace bitpit {
             oct = m_octree.extractGhostOctant(inter->m_owners[inter->m_finer]);
         else
             oct = m_octree.extractOctant(inter->m_owners[inter->m_finer]);
-        uint8_t iface = inter->m_iface;
+        uint8_t face = inter->m_iface;
         i8array3 normal_;
-        oct.getNormal(iface, normal_, m_treeConstants->normals);
+        oct.getNormal(face, normal_, m_treeConstants->normals);
         m_trans.mapNormals(normal_, normal);
         return normal;
     }
@@ -2622,30 +2622,26 @@ namespace bitpit {
     // OTHER OCTANT BASED METHODS												    			   //
     // =================================================================================== //
 
-    /** Finds local and ghost or only local neighbours of octant(both local and ghost ones) through iface face/edge/node.
-     * Returns a vector (empty if iface is a bound face) with the index of neighbours
-     * in their structure (octants or ghosts) and sets isghost[i] = true if the
-     * i-th neighbour is ghost in the local tree.
+    /** Finds the neighbours (both local and ghost ones) of the octant through the specified entity (face/edge/node).
+     * Returns a vector with the index of the neighbours in their container and
+     * sets isghost[i] = true if the i-th neighbour is ghost in the local tree.
      * \param[in] oct Pointer to the current octant.
-     * \param[in] iface Index of face/edge/node passed through for neighbours finding
-     * \param[in] codim Codimension of the iface-th entity 1=edge, 2=node
-     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+     * \param[in] entityIdx Index of face/edge/node passed through for neighbours finding
+     * \param[in] entityCodim Codimension of the entity (1=face, 2=edge and 3=vertex for 3D trees, 1=face, 2=vertex for 2D trees)
+     * \param[out] neighbours Vector with the index of the neighbours in their container
      * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
      * \param[in] onlyinternal A boolean flag to specify if neighbours have to be found among all the octants (false) or only among the internal ones (true).*/
     void
-    ParaTree::findNeighbours(const Octant* oct, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost, bool onlyinternal) const{
+    ParaTree::findNeighbours(const Octant* oct, uint8_t entityIdx, uint8_t entityCodim, u32vector & neighbours, bvector & isghost, bool onlyinternal) const{
 
-        bool	Fedge = ((codim==2) && (m_dim==3));
-        bool	Fnode = (codim == m_dim);
-
-        if (codim == 1){
-            m_octree.findNeighbours(oct, iface, neighbours, isghost, onlyinternal);
+        if (entityCodim == 1){
+            m_octree.findNeighbours(oct, entityIdx, neighbours, isghost, onlyinternal);
         }
-        else if (Fedge){
-            m_octree.findEdgeNeighbours(oct, iface, neighbours, isghost, onlyinternal);
+        else if (entityCodim == 2 && m_dim == 3){
+            m_octree.findEdgeNeighbours(oct, entityIdx, neighbours, isghost, onlyinternal);
         }
-        else if (Fnode){
-            m_octree.findNodeNeighbours(oct, iface, neighbours, isghost, onlyinternal);
+        else if (entityCodim == m_dim){
+            m_octree.findNodeNeighbours(oct, entityIdx, neighbours, isghost, onlyinternal);
         }
         else {
             neighbours.clear();
@@ -2654,148 +2650,181 @@ namespace bitpit {
 
     };
 
-
-    /** Finds all the neighbours of a local octant through iface face/edge/node.
-     * Returns a vector (empty if iface is a bound face) with the index of neighbours
-     * in their structure (octants or ghosts) and sets isghost[i] = true if the
-     * i-th neighbour is ghost in the local tree.
+    /** Finds the neighbours (both local and ghost ones) of the octant through the specified entity (face/edge/node).
+     * Returns a vector with the index of the neighbours in their container and
+     * sets isghost[i] = true if the i-th neighbour is ghost in the local tree.
      * \param[in] idx Index of current octant
-     * \param[in] iface Index of face/edge/node passed through for neighbours finding
-     * \param[in] codim Codimension of the iface-th entity 1=edge, 2=node
-     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+     * \param[in] entityIdx Index of face/edge/node passed through for neighbours finding
+     * \param[in] entityCodim Codimension of the entity (1=face, 2=edge and 3=vertex for 3D trees, 1=face, 2=vertex for 2D trees)
+     * \param[out] neighbours Vector with the index of the neighbours in their container
      * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs. */
     void
-    ParaTree::findNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost) const {
+    ParaTree::findNeighbours(uint32_t idx, uint8_t entityIdx, uint8_t entityCodim, u32vector & neighbours, bvector & isghost) const {
 
         const Octant* oct = &m_octree.m_octants[idx];
 
-        findNeighbours(oct, iface, codim, neighbours, isghost, false);
+        findNeighbours(oct, entityIdx, entityCodim, neighbours, isghost, false);
 
     };
 
-    /** Finds all the neighbours of an octant through iface face/edge/node.
-     * Returns a vector (empty if iface is a bound face) with the index of neighbours
-     * in their structure (octants or ghosts) and sets isghost[i] = true if the
-     * i-th neighbour is ghost in the local tree.
+    /** Finds all the internal neighbours of a local octant through the specified entity (face/edge/node).
+     * Returns a vector with the index of the neighbours in their container.
+     * \param[in] idx Index of current octant
+     * \param[in] entityIdx Index of face/edge/node passed through for neighbours finding
+     * \param[in] entityCodim Codimension of the entity (1=face, 2=edge and 3=vertex for 3D trees, 1=face, 2=vertex for 2D trees)
+     * \param[out] neighbours Vector of internal neighbours indices in octants/ghosts structure */
+    void
+    ParaTree::findNeighbours(uint32_t idx, uint8_t entityIdx, uint8_t entityCodim, u32vector & neighbours) const {
+
+        const Octant* oct = &m_octree.m_octants[idx];
+        bvector isghost;
+        findNeighbours(oct, entityIdx, entityCodim, neighbours, isghost, true);
+
+    };
+
+    /** Finds all the neighbours of an octant through the specified entity (face/edge/node).
+     * Returns a vector with the index of the neighbours in their container and
+     * sets isghost[i] = true if the i-th neighbour is ghost in the local tree.
      * \param[in] oct Pointer to current octant
-     * \param[in] iface Index of face/edge/node passed through for neighbours finding
-     * \param[in] codim Codimension of the iface-th entity 1=edge, 2=node
-     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+     * \param[in] entityIdx Index of face/edge/node passed through for neighbours finding
+     * \param[in] entityCodim Codimension of the entity (1=face, 2=edge and 3=vertex for 3D trees, 1=face, 2=vertex for 2D trees)
+     * \param[out] neighbours Vector with the index of the neighbours in their container
      * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs. */
     void
-    ParaTree::findNeighbours(const Octant* oct, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost) const {
+    ParaTree::findNeighbours(const Octant* oct, uint8_t entityIdx, uint8_t entityCodim, u32vector & neighbours, bvector & isghost) const {
 
-        findNeighbours(oct, iface, codim, neighbours, isghost, false);
+        findNeighbours(oct, entityIdx, entityCodim, neighbours, isghost, false);
 
     };
 
-    /** Finds the internal neighbours of ghost octant through iface face/edge/node.
-     * Returns a vector (empty if iface is a bound face) with the index of neighbours
-     * in their structure ( only local octants ).
+    /** Finds the internal neighbours of the octant through the specified entity (face/edge/node).
+     * Returns a vector with the index of the neighbours in their container.
      * \param[in] idx Index of current octant
-     * \param[in] iface Index of face/edge/node passed through for neighbours finding
-     * \param[in] codim Codimension of the iface-th entity 1=edge, 2=node
-     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+     * \param[in] entityIdx Index of face/edge/node passed through for neighbours finding
+     * \param[in] entityCodim Codimension of the entity (1=face, 2=edge and 3=vertex for 3D trees, 1=face, 2=vertex for 2D trees)
+     * \param[out] neighbours Vector with the index of the neighbours in their container
      */
     void
-    ParaTree::findGhostNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours) const {
+    ParaTree::findGhostNeighbours(uint32_t idx, uint8_t entityIdx, uint8_t entityCodim, u32vector & neighbours) const {
 
         const Octant* oct = &m_octree.m_ghosts[idx];
         bvector isghost;
-        findNeighbours(oct, iface, codim, neighbours, isghost, true);
+        findNeighbours(oct, entityIdx, entityCodim, neighbours, isghost, true);
 
     };
 
-    /** Finds all the neighbours of ghost octant through iface face/edge/node.
-     * Returns a vector (empty if iface is a bound face) with the index of neighbours
-     * in their structure ( only local octants ).
+    /** Finds the ghost neighbours of the octant through the specified entity (face/edge/node).
+     * Returns a vector with the index of the neighbours in their container and
+     * sets isghost[i] = true if the i-th neighbour is ghost in the local tree.
      * \param[in] idx Index of current octant
-     * \param[in] iface Index of face/edge/node passed through for neighbours finding
-     * \param[in] codim Codimension of the iface-th entity 1=edge, 2=node
-     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+     * \param[in] entityIdx Index of face/edge/node passed through for neighbours finding
+     * \param[in] entityCodim Codimension of the entity (1=face, 2=edge and 3=vertex for 3D trees, 1=face, 2=vertex for 2D trees)
+     * \param[out] neighbours Vector with the index of the neighbours in their container
      * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs.
      */
     void
-    ParaTree::findGhostNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost) const {
+    ParaTree::findGhostNeighbours(uint32_t idx, uint8_t entityIdx, uint8_t entityCodim, u32vector & neighbours, bvector & isghost) const {
 
         const Octant* oct = &m_octree.m_ghosts[idx];
-        findNeighbours(oct, iface, codim, neighbours, isghost, false);
+        findNeighbours(oct, entityIdx, entityCodim, neighbours, isghost, false);
 
     };
 
-    /** Finds all the neighbours of ghost octant through iface face/edge/node.
-     * Returns a vector (empty if iface is a bound face) with the index of neighbours
-     * in their structure ( only local octants ).
+    /** Finds all the neighbours of ghost octant through the specified entity (face/edge/node).
+     * Returns a vector with the index of the neighbours in their container and
+     * sets isghost[i] = true if the i-th neighbour is ghost in the local tree.
      * \param[in] oct Pointer to current ghost octant
-     * \param[in] iface Index of face/edge/node passed through for neighbours finding
-     * \param[in] codim Codimension of the iface-th entity 1=edge, 2=node
-     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+     * \param[in] entityIdx Index of face/edge/node passed through for neighbours finding
+     * \param[in] entityCodim Codimension of the entity (1=face, 2=edge and 3=vertex for 3D trees, 1=face, 2=vertex for 2D trees)
+     * \param[out] neighbours Vector with the index of the neighbours in their container
      * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs.
      */
     void
-    ParaTree::findGhostNeighbours(const Octant* oct, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost) const {
+    ParaTree::findGhostNeighbours(const Octant* oct, uint8_t entityIdx, uint8_t entityCodim, u32vector & neighbours, bvector & isghost) const {
 
-        findNeighbours(oct, iface, codim, neighbours, isghost, false);
+        findNeighbours(oct, entityIdx, entityCodim, neighbours, isghost, false);
 
     };
 
     /** Finds all the neighbours of a node
     * \param[in] oct Pointer to current octant
-    * \param[in] inode Index of node passed through for neighbours finding
-    * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+    * \param[in] node Index of node passed through for neighbours finding
+    * \param[out] neighbours Vector with the index of the neighbours in their container
     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs.
     */
     void
-    ParaTree::findAllNodeNeighbours(const Octant* oct, uint32_t inode, u32vector & neighbours, bvector & isghost) const {
+    ParaTree::findAllNodeNeighbours(const Octant* oct, uint32_t node, u32vector & neighbours, bvector & isghost) const {
 
-        u32vector neigh_edge, neigh_face;
-        bvector isghost_edge, isghost_face;
+        int dim = getDim();
+        int octantLevel = getLevel(oct);
+
+        u32vector codimNeighnours;
+        bvector codimIsGhost;
 
         // Get vertex neighbours
-        int dim = getDim();
-        m_octree.findNodeNeighbours(oct, inode, neighbours, isghost, false);
+        m_octree.findNodeNeighbours(oct, node, neighbours, isghost, false);
 
-        int octantLevel = getLevel(oct);
+        // Get edge neighbours
+        //
+        // On non uniform trees the vertex can be inside the edge of the
+        // neighbour (hanging nodes). To correctly consider these neighbours,
+        // the following logic can be used:
+        //  - if an edge neighbour has the same level or a lower level than
+        //    the current cell, then it certainly is also a vertex neighbour;
+        //  - if a edge neighbour has a higher level than the current cell,
+        //    it is necessary to check if the neighbour actually contains the
+        //    vertex.
         if (dim == 3) {
-            for (int edge : m_treeConstants->nodeEdge[inode]) {
-                findNeighbours(oct, edge, 2, neigh_edge, isghost_edge);
-                for (std::size_t i = 0; i < neigh_edge.size(); ++i) {
+            for (int edge : m_treeConstants->nodeEdge[node]) {
+                findNeighbours(oct, edge, 2, codimNeighnours, codimIsGhost, false);
+                for (std::size_t i = 0; i < codimNeighnours.size(); ++i) {
                     const Octant* neighOctant;
-                    if (isghost_edge[i]==0) {
-                        neighOctant = &m_octree.m_octants[neigh_edge[i]];
+                    if (codimIsGhost[i]==0) {
+                        neighOctant = &m_octree.m_octants[codimNeighnours[i]];
                     }
                     else {
-                        neighOctant = &m_octree.m_ghosts[neigh_edge[i]];
+                        neighOctant = &m_octree.m_ghosts[codimNeighnours[i]];
                     }
                     int neighOctantLevel = getLevel(neighOctant);
                     if (neighOctantLevel <= octantLevel) {
-                        neighbours.push_back(neigh_edge[i]);
-                        isghost.push_back(isghost_edge[i]);
-                    } else if (isNodeOnOctant(oct, inode, neighOctant)) {
-                        neighbours.push_back(neigh_edge[i]);
-                        isghost.push_back(isghost_edge[i]);
+                        neighbours.push_back(codimNeighnours[i]);
+                        isghost.push_back(codimIsGhost[i]);
+                    } else if (isNodeOnOctant(oct, node, neighOctant)) {
+                        neighbours.push_back(codimNeighnours[i]);
+                        isghost.push_back(codimIsGhost[i]);
                     }
                 }
             }
         }
+
+        // Get face neighbours
+        //
+        // On non uniform trees the vertex can be inside the face of the
+        // neighbour (hanging nodes). To correctly consider these neighbours,
+        // the following logic can be used:
+        //  - if an face neighbour has the same level or a lower level than
+        //    the current cell, then it certainly is also a vertex neighbour;
+        //  - if a face neighbour has a higher level than the current cell,
+        //    it is necessary to check if the neighbour actually contains the
+        //    vertex.
         for (int j = 0; j < dim; ++j) {
-            int face = m_treeConstants->nodeFace[inode][j];
-            findNeighbours(oct, face, 1, neigh_face, isghost_face);
-            for (std::size_t i = 0; i < neigh_face.size(); ++i) {
+            int face = m_treeConstants->nodeFace[node][j];
+            findNeighbours(oct, face, 1, codimNeighnours, codimIsGhost, false);
+            for (std::size_t i = 0; i < codimNeighnours.size(); ++i) {
                 const Octant* neighOctant;
-                if (isghost_face[i]==0) {
-                    neighOctant = &m_octree.m_octants[neigh_face[i]];
+                if (codimIsGhost[i]==0) {
+                    neighOctant = &m_octree.m_octants[codimNeighnours[i]];
                 }
                 else {
-                    neighOctant = &m_octree.m_ghosts[neigh_face[i]];
+                    neighOctant = &m_octree.m_ghosts[codimNeighnours[i]];
                 }
                 int neighOctantLevel = getLevel(neighOctant);
                 if (neighOctantLevel <= octantLevel) {
-                    neighbours.push_back(neigh_face[i]);
-                    isghost.push_back(isghost_face[i]);
-                } else if (isNodeOnOctant(oct, inode, neighOctant)) {
-                    neighbours.push_back(neigh_face[i]);
-                    isghost.push_back(isghost_face[i]);
+                    neighbours.push_back(codimNeighnours[i]);
+                    isghost.push_back(codimIsGhost[i]);
+                } else if (isNodeOnOctant(oct, node, neighOctant)) {
+                    neighbours.push_back(codimNeighnours[i]);
+                    isghost.push_back(codimIsGhost[i]);
                 }
             }
         }
@@ -2803,44 +2832,23 @@ namespace bitpit {
 
     /** Finds all the neighbours of a node
     * \param[in] idx Index of current octant
-    * \param[in] inode Index of node passed through for neighbours finding
-    * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+    * \param[in] node Index of node passed through for neighbours finding
+    * \param[out] neighbours Vector with the index of the neighbours in their container
     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs.
     */
     void
-    ParaTree::findAllNodeNeighbours(uint32_t idx, uint32_t inode, u32vector & neighbours, bvector & isghost) {
+    ParaTree::findAllNodeNeighbours(uint32_t idx, uint32_t node, u32vector & neighbours, bvector & isghost) {
 
         Octant* oct = getOctant(idx);
-        findAllNodeNeighbours(oct, inode, neighbours, isghost);
+        findAllNodeNeighbours(oct, node, neighbours, isghost);
     };
-
-    /** Compute neighbours adjacencies for every internal octant, storing them in a structure provided by the user
-     * \param[in] idx Index of the octant
-     * \param[out] globalNeighs Vector of global neighbours indices
-     */
-    void
-    ParaTree::findAllGlobalNeighbours(uint32_t idx, std::vector<uint64_t> &globalNeighs){
-
-        u32vector neighs;
-        bvector isghost;
-        findAllCodimensionNeighbours(idx,neighs,isghost);
-        size_t nofNeighs = neighs.size();
-
-        globalNeighs.resize(nofNeighs);
-        for(size_t n = 0; n < nofNeighs; ++n){
-            if(isghost[n])
-                globalNeighs[n] = getGhostGlobalIdx(neighs[n]);
-            else
-                globalNeighs[n] = getGlobalIdx(neighs[n]);
-        }
-    }
 
     /** Finds all the neighbours of an internal octant through all its boundaries of any codimension.
      * Returns a vector with the index of neighbours
      * in their structure (octants or ghosts) and sets isghost[i] = true if the
      * i-th neighbour is ghost in the local tree.
      * \param[in] idx Index of current octant
-     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+     * \param[out] neighbours Vector with the index of the neighbours in their container
      * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs.
      */
     void
@@ -2854,11 +2862,11 @@ namespace bitpit {
      * in their structure (octants or ghosts) and sets isghost[i] = true if the
      * i-th neighbour is ghost in the local tree. Neighbours are not sorted by Morton.
      * \param[in] oct pointer to the current octant
-     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+     * \param[out] neighbours Vector with the index of the neighbours in their container
      * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs.
      */
     void
-    ParaTree::findAllCodimensionNeighbours(Octant* oct, u32vector & neighbours, bvector & isghost){
+    ParaTree::findAllCodimensionNeighbours(const Octant* oct, u32vector & neighbours, bvector & isghost){
         std::array<uint8_t, 4> nCodimensionItems;
         nCodimensionItems[0] = 0;
         nCodimensionItems[1] = getNfaces();
@@ -2867,19 +2875,16 @@ namespace bitpit {
         }
         nCodimensionItems[m_dim] = getNnodes();
 
-        neighbours.clear();
-        neighbours.reserve(26);
-        isghost.clear();
-        isghost.reserve(26);
         u32vector singleCodimNeighbours;
         bvector singleCodimIsGhost;
+
+        neighbours.clear();
+        isghost.clear();
         for(uint8_t codim = 1; codim <= m_dim; ++codim){
             for(int item = 0; item < nCodimensionItems[codim]; ++item){
-                findNeighbours(oct,item,codim,singleCodimNeighbours,singleCodimIsGhost);
-                for(size_t i = 0; i < singleCodimIsGhost.size(); ++i){
-                    isghost.push_back(singleCodimIsGhost[i]);
-                    neighbours.push_back(singleCodimNeighbours[i]);
-                }
+                findNeighbours(oct,item,codim,singleCodimNeighbours,singleCodimIsGhost,false);
+                neighbours.insert( neighbours.end(), singleCodimNeighbours.begin(), singleCodimNeighbours.end() );
+                isghost.insert( isghost.end(), singleCodimIsGhost.begin(), singleCodimIsGhost.end() );
             }
         }
     }
@@ -2889,7 +2894,7 @@ namespace bitpit {
      * in their structure (octants or ghosts) and sets isghost[i] = true if the
      * i-th neighbour is ghost in the local tree.
      * \param[in] idx Index of current octant
-     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+     * \param[out] neighbours Vector with the index of the neighbours in their container
      * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs.
      */
     void
@@ -2903,34 +2908,12 @@ namespace bitpit {
      * in their structure (octants or ghosts) and sets isghost[i] = true if the
      * i-th neighbour is ghost in the local tree. Neighbours are not sorted by Morton.
      * \param[in] oct pointer to the current octant
-     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+     * \param[out] neighbours Vector with the index of the neighbours in their container
      * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs.
      */
     void
     ParaTree::findGhostAllCodimensionNeighbours(Octant* oct, u32vector & neighbours, bvector & isghost){
-        std::array<uint8_t, 4> nCodimensionItems;
-        nCodimensionItems[0] = 0;
-        nCodimensionItems[1] = getNfaces();
-        if(m_dim == 3){
-            nCodimensionItems[2] = getNedges();
-        }
-        nCodimensionItems[m_dim] = getNnodes();
-
-        neighbours.clear();
-        neighbours.reserve(26);
-        isghost.clear();
-        isghost.reserve(26);
-        u32vector singleCodimNeighbours;
-        bvector singleCodimIsGhost;
-        for(uint8_t codim = 1; codim <= m_dim; ++codim){
-            for(int item = 0; item < nCodimensionItems[codim]; ++item){
-                findGhostNeighbours(oct,item,codim,singleCodimNeighbours,singleCodimIsGhost);
-                for(size_t i = 0; i < singleCodimIsGhost.size(); ++i){
-                    isghost.push_back(singleCodimIsGhost[i]);
-                    neighbours.push_back(singleCodimNeighbours[i]);
-                }
-            }
-        }
+        findAllCodimensionNeighbours(oct, neighbours, isghost);
     }
 
     /** Get the internal octant owner of an input point.
@@ -3058,10 +3041,11 @@ namespace bitpit {
         y = m_trans.mapY(std::min(std::max(point[1], 0.0), 1.0));
         z = m_trans.mapZ(std::min(std::max(point[2], 0.0), 1.0));
 
-        if (x == TreeConstants::MAX_LENGTH) x = x - 1;
-        if (y == TreeConstants::MAX_LENGTH) y = y - 1;
-        if (z == TreeConstants::MAX_LENGTH) z = z - 1;
-        morton = PABLO::computeMorton(x,y,z);
+        uint32_t maxLength = getMaxLength();
+        if (x == maxLength) x = x - 1;
+        if (y == maxLength) y = y - 1;
+        if (z == maxLength) z = z - 1;
+        morton = PABLO::computeMorton(m_dim,x,y,z);
 
 
         powner = 0;
@@ -3137,10 +3121,11 @@ namespace bitpit {
         y = m_trans.mapY(std::min(std::max(point[1], 0.0), 1.0));
         z = m_trans.mapZ(std::min(std::max(point[2], 0.0), 1.0));
 
-        if (x == TreeConstants::MAX_LENGTH) x = x - 1;
-        if (y == TreeConstants::MAX_LENGTH) y = y - 1;
-        if (z == TreeConstants::MAX_LENGTH) z = z - 1;
-        morton = PABLO::computeMorton(x,y,z);
+        uint32_t maxLength = getMaxLength();
+        if (x == maxLength) x = x - 1;
+        if (y == maxLength) y = y - 1;
+        if (z == maxLength) z = z - 1;
+        morton = PABLO::computeMorton(m_dim,x,y,z);
 
 
         powner = 0;
@@ -3278,7 +3263,8 @@ namespace bitpit {
         y = m_trans.mapY(point[1]);
         z = m_trans.mapZ(point[2]);
 
-        if ((x > TreeConstants::MAX_LENGTH) || (y > TreeConstants::MAX_LENGTH) || (z > TreeConstants::MAX_LENGTH)
+        uint32_t maxLength = getMaxLength();
+        if ((x > maxLength) || (y > maxLength) || (z > maxLength)
             || (point[0] < m_trans.m_origin[0]) || (point[1] < m_trans.m_origin[1]) || (point[2] < m_trans.m_origin[2])){
             return -1;
         }
@@ -3286,16 +3272,16 @@ namespace bitpit {
         if (m_serial)
             return m_rank;
 
-        if (x == TreeConstants::MAX_LENGTH)
+        if (x == maxLength)
             x = x - 1;
 
-        if (y == TreeConstants::MAX_LENGTH)
+        if (y == maxLength)
             y = y - 1;
 
-        if (z == TreeConstants::MAX_LENGTH)
+        if (z == maxLength)
             z = z - 1;
 
-        morton = PABLO::computeMorton(x, y, z);
+        morton = PABLO::computeMorton(m_dim, x, y, z);
 
         for (int p = 0; p < m_nproc; ++p){
             if (morton <= m_partitionLastDesc[p] && morton >= m_partitionFirstDesc[p])
@@ -4012,21 +3998,21 @@ namespace bitpit {
     }
 
     /** Get the logical coordinates of a node
-     * \param[in] inode Local index of node
+     * \param[in] node Local index of node
      * \return Constant reference to a vector containing the coordinates of the node.
      */
     const u32array3 &
-    ParaTree::getNodeLogicalCoordinates(uint32_t inode) const {
-        return m_octree.m_nodes[inode];
+    ParaTree::getNodeLogicalCoordinates(uint32_t node) const {
+        return m_octree.m_nodes[node];
     }
 
     /** Get the physical coordinates of a node
-     * \param[in] inode Local index of node
+     * \param[in] node Local index of node
      * \return Vector with the coordinates of the node.
      */
     darray3
-    ParaTree::getNodeCoordinates(uint32_t inode) const {
-        return m_trans.mapCoordinates(m_octree.m_nodes[inode]);
+    ParaTree::getNodeCoordinates(uint32_t node) const {
+        return m_trans.mapCoordinates(m_octree.m_nodes[node]);
     }
 
     /** Get the connectivity of the ghost octants
@@ -4484,7 +4470,7 @@ namespace bitpit {
      */
     double
     ParaTree::levelToSize(uint8_t level) {
-        uint32_t size = uint32_t(1)<<(TreeConstants::MAX_LEVEL-level);
+        uint32_t size = uint32_t(1)<<(m_treeConstants->maxLevel-level);
         return m_trans.mapSize(size);
     }
 
@@ -4805,14 +4791,14 @@ namespace bitpit {
         // Partitioning is modified to guarantee that families of octants at
         // the desired level above the maximum depth reached in the tree
         // are retained compact on the same process.
-        uint8_t level = uint8_t(min(int(max(int(m_maxDepth) - int(level_), int(1))) , int(TreeConstants::MAX_LEVEL)));
+        uint8_t level = uint8_t(min(int(max(int(m_maxDepth) - int(level_), int(1))) , int(m_treeConstants->maxLevel)));
         uint8_t* new_boundary_owner = new uint8_t[m_nproc-1];
         uint8_t new_interfaces_count;
         uint8_t first_new_interface_rank_index;
         uint8_t* new_interfaces_count_per_rank = new uint8_t[m_nproc];
         uint8_t* first_new_interface_rank_index_per_rank = new uint8_t[m_nproc];
 
-        uint32_t Dh = uint32_t(pow(double(2),double(TreeConstants::MAX_LEVEL-level)));
+        uint32_t Dh = uint32_t(pow(double(2),double(m_treeConstants->maxLevel-level)));
         uint32_t istart, nocts, rest;
         uint32_t forw = 0, backw = 0;
         uint32_t i = 0, iproc, j;
@@ -5286,6 +5272,8 @@ namespace bitpit {
                                       std::vector<AccretionData> *accretions) {
 
         // The neighbour of the internal seeds are the next layer of sources.
+        u32vector seedNeighLocalIds;
+        bvector seedNeighGhostFlag;
         for(AccretionData &accretion : *accretions){
             // If the accretion doesn't have internal seeds we can skip it
             std::size_t nSeeds = accretion.internalSeeds.size();
@@ -5315,9 +5303,20 @@ namespace bitpit {
                 // Find the 1-ring of the source
                 auto oneRingsCacheItr = oneRingsCache->find(seedLocalIdx);
                 if (oneRingsCacheItr == oneRingsCache->end()) {
+                    const Octant *seedOctant = getOctant(seedLocalIdx);
+                    findAllCodimensionNeighbours(seedOctant, seedNeighLocalIds, seedNeighGhostFlag);
+                    size_t nSeedNeighs = seedNeighLocalIds.size();
+
                     oneRingsCacheItr = oneRingsCache->insert({seedLocalIdx, std::vector<uint64_t>()}).first;
-                    findAllGlobalNeighbours(seedLocalIdx, oneRingsCacheItr->second);
-                    oneRingsCacheItr->second.push_back(getGlobalIdx(seedLocalIdx));
+                    oneRingsCacheItr->second.resize(nSeedNeighs + 1);
+                    for(size_t n = 0; n < nSeedNeighs; ++n){
+                        if (!seedNeighGhostFlag[n]) {
+                            oneRingsCacheItr->second[n] = getGlobalIdx(seedNeighLocalIds[n]);
+                        } else {
+                            oneRingsCacheItr->second[n] = getGhostGlobalIdx(seedNeighLocalIds[n]);
+                        }
+                    }
+                    oneRingsCacheItr->second[nSeedNeighs] = getGlobalIdx(seedLocalIdx);
                 }
                 const std::vector<uint64_t> &seedOneRing = oneRingsCacheItr->second;
 

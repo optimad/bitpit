@@ -43,7 +43,7 @@ public:
     virtual ~BasePiercedVectorStorage() = default;
 
 protected:
-    BasePiercedVectorStorage();
+    BasePiercedVectorStorage() = default;
 
 };
 

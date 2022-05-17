@@ -49,7 +49,7 @@ public:
     virtual ~BasePiercedKernel() = default;
 
 protected:
-    BasePiercedKernel();
+    BasePiercedKernel() = default;
 
 };
 
@@ -342,6 +342,8 @@ public:
     // Contructors
     PiercedKernel();
     PiercedKernel(std::size_t n);
+    PiercedKernel(const PiercedKernel &other) = default;
+    PiercedKernel(PiercedKernel &&other) = default;
 
     // Destructor
     ~PiercedKernel() override;

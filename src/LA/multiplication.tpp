@@ -39,7 +39,7 @@ namespace linearalgebra{
 template <class T>
 void matmul(
     T                                            A,
-    std::vector< std::vector< T > >             &B,
+    const  std::vector< std::vector< T > >      &B,
     std::vector< std::vector< T > >             &C
 ) {
 
@@ -48,10 +48,7 @@ void matmul(
 // ========================================================================== //
 
 // Local variables
-int          m, n;
-
-// Counters
-int          i, j;
+std::size_t          m, n;
 
 // ========================================================================== //
 // CHECK INPUT                                                                //
@@ -75,9 +72,9 @@ if (n == 0) {
 C.resize(m);
 
 // Perform product
-for (i = 0; i < m; i++) {
+for (std::size_t i = 0; i < m; i++) {
     C[i].resize(n, (T) 0.0);
-    for (j = 0; j < n; j++) {
+    for (std::size_t j = 0; j < n; j++) {
         C[i][j] = A * B[i][j];
     } //next j
 } //next i
@@ -93,10 +90,10 @@ return; };
     \param[in] B input matrix
     \param[in,out] C product between A and B
 */
-template <class T, size_t m, size_t n>
+template <class T, std::size_t m, std::size_t n>
 void matmul(
     T                                            A,
-    std::array< std::array< T, n >, m >         &B,
+    const std::array< std::array< T, n >, m >   &B,
     std::array< std::array< T, n >, m >         &C
 ) {
 
@@ -106,9 +103,6 @@ void matmul(
 
 // Local variables
 // none
-
-// Counters
-size_t       i, j;
 
 // ========================================================================== //
 // CHECK INPUT                                                                //
@@ -125,8 +119,8 @@ if (n == 0) {
 // ========================================================================== //
 // PERFORM PRODUCT                                                            //
 // ========================================================================== //
-for (i = 0; i < m; i++) {
-    for (j = 0; j < n; j++) {
+for (std::size_t i = 0; i < m; i++) {
+    for (std::size_t j = 0; j < n; j++) {
         C[i][j] = A * B[i][j];
     } //next j
 } //next i
@@ -143,7 +137,7 @@ return; };
 */
 template <class T>
 void matmul(
-    std::vector< std::vector< T > >             &B,
+    const std::vector< std::vector< T > >       &B,
     T                                            A,
     std::vector< std::vector< T > >             &C
 ) {
@@ -153,7 +147,7 @@ void matmul(
 // ========================================================================== //
 
 // Local variables
-int          m, n;
+std::size_t          m, n;
 
 // Counters
 // none
@@ -188,9 +182,9 @@ return; };
     \param[in] B input scalar
     \param[in,out] C product between A and B
 */
-template <class T, size_t m, size_t n>
+template <class T, std::size_t m, std::size_t n>
 void matmul(
-    std::array< std::array< T, n >, m >         &B,
+    const std::array< std::array< T, n >, m >   &B,
     T                                            A,
     std::array< std::array< T, n >, m >         &C
 ) {
@@ -234,8 +228,8 @@ return; };
 */
 template <class T>
 void matmul(
-    std::vector< T >                            &A,
-    std::vector< std::vector < T > >            &B,
+    const std::vector< T >                      &A,
+    const std::vector< std::vector < T > >      &B,
     std::vector< T >                            &C
 ) {
 
@@ -244,10 +238,7 @@ void matmul(
 // ========================================================================== //
 
 // Local variables
-int           l, m, n;
-
-// Counters
-int           i, j;
+std::size_t           l, m, n;
 
 // ========================================================================== //
 // CHECK INPUT                                                                //
@@ -282,9 +273,9 @@ if (l != m) {
 C.resize(n, 0.0);
 
 // Compute matrix product
-for (i = 0; i < n; i++) {
+for (std::size_t i = 0; i < n; i++) {
     C[i] = 0.0;
-    for (j = 0; j < m; j++) {
+    for (std::size_t j = 0; j < m; j++) {
         C[i] += A[j]*B[j][i];
     } //next j
 } //next i
@@ -300,10 +291,10 @@ return; }
     \param[in] B input matrix
     \param[in,out] C product between A and B
 */
-template <class T, size_t m, size_t n>
+template <class T, std::size_t m, std::size_t n>
 void matmul(
-    std::array< T, m >                          &A,
-    std::array< std::array < T, n >, m >        &B,
+    const std::array< T, m >                    &A,
+    const std::array< std::array < T, n >, m >  &B,
     std::array< T, n >                          &C
 ) {
 
@@ -313,9 +304,6 @@ void matmul(
 
 // Local variables
 // none
-
-// Counters
-size_t        i, j;
 
 // ========================================================================== //
 // CHECK INPUT                                                                //
@@ -332,9 +320,9 @@ if (n == 0) {
 // ========================================================================== //
 // COMPUTE THE MATRIX PRODUCT                                                 //
 // ========================================================================== //
-for (i = 0; i < n; i++) {
+for (std::size_t i = 0; i < n; i++) {
     C[i] = 0.0;
-    for (j = 0; j < m; j++) {
+    for (std::size_t j = 0; j < m; j++) {
         C[i] += A[j]*B[j][i];
     } //next j
 } //next i
@@ -351,8 +339,8 @@ return; }
 */
 template <class T>
 void matmul(
-    std::vector< std::vector < T > >            &A,
-    std::vector< T >                            &B,
+    const std::vector< std::vector < T > >      &A,
+    const std::vector< T >                      &B,
     std::vector< T >                            &C
 ) {
 
@@ -361,10 +349,7 @@ void matmul(
 // ========================================================================== //
 
 // Local variables
-int           l, m, n;
-
-// Counters
-int           i, j;
+std::size_t           l, m, n;
 
 // ========================================================================== //
 // CHECK INPUT                                                                //
@@ -399,9 +384,9 @@ if (l != n) {
 C.resize(m, 0.0);
 
 // Compute matrix product
-for (i = 0; i < m; i++) {
+for (std::size_t i = 0; i < m; i++) {
     C[i] = 0.0;
-    for (j = 0; j < n; j++) {
+    for (std::size_t j = 0; j < n; j++) {
         C[i] += B[j]*A[i][j];
     } //next j
 } //next i
@@ -417,10 +402,10 @@ return; }
     \param[in] B input vector
     \param[in,out] C product between A and B
 */
-template <class T, size_t m, size_t n>
+template <class T, std::size_t m, std::size_t n>
 void matmul(
-    std::array< std::array < T, n >, m >        &A,
-    std::array< T, n >                          &B,
+    const std::array< std::array < T, n >, m >  &A,
+    const std::array< T, n >                    &B,
     std::array< T, m >                          &C
 ) {
 
@@ -430,9 +415,6 @@ void matmul(
 
 // Local variables
 // none
-
-// Counters
-size_t        i, j;
 
 // ========================================================================== //
 // CHECK INPUT                                                                //
@@ -449,9 +431,9 @@ if (n == 0) {
 // ========================================================================== //
 // COMPUTE THE MATRIX PRODUCT                                                 //
 // ========================================================================== //
-for (i = 0; i < m; i++) {
+for (std::size_t i = 0; i < m; i++) {
     C[i] = 0.0;
-    for (j = 0; j < n; j++) {
+    for (std::size_t j = 0; j < n; j++) {
         C[i] += B[j]*A[i][j];
     } //next j
 } //next i
@@ -468,8 +450,8 @@ return; }
 */
 template <class T>
 void matmul(
-    std::vector< std::vector< T > >             &A,
-    std::vector< std::vector< T > >             &B,
+    const std::vector< std::vector< T > >       &A,
+    const std::vector< std::vector< T > >       &B,
     std::vector< std::vector< T > >             &C
 ) {
 
@@ -478,10 +460,7 @@ void matmul(
 // ========================================================================== //
 
 // Local variables
-int          m1, n1, n2, m2;
-
-// Counters
-int          i, j, k;
+std::size_t          m1, n1, n2, m2;
 
 // ========================================================================== //
 // CHECK INPUT                                                                //
@@ -519,11 +498,11 @@ if (n1 != m2) {
 // Resiz output variable
 C.resize(m1);
 
-for (i = 0; i < m1; i++) {
+for (std::size_t i = 0; i < m1; i++) {
     C[i].resize(n2, (T) 0.0);
-    for (j = 0; j < n2; j++) {
+    for (std::size_t j = 0; j < n2; j++) {
         C[i][j] = (T) 0.0;
-        for (k = 0; k < n1; k++) {
+        for (std::size_t k = 0; k < n1; k++) {
             C[i][j] += A[i][k] * B[k][j];
         } //next k
     } //next j
@@ -540,10 +519,10 @@ return; };
     \param[in] B input matrix
     \param[in,out] C product between A and B
 */
-template <class T, size_t m, size_t n, size_t l>
+template <class T, std::size_t m, std::size_t n, std::size_t l>
 void matmul(
-    std::array< std::array< T, n >, m >         &A,
-    std::array< std::array< T, l >, n >         &B,
+    const std::array< std::array< T, n >, m >   &A,
+    const std::array< std::array< T, l >, n >   &B,
     std::array< std::array< T, l >, m >         &C
 ) {
 
@@ -553,9 +532,6 @@ void matmul(
 
 // Local variables
 // none
-
-// Counters
-size_t       i, j, k;
 
 // ========================================================================== //
 // CHECK INPUT                                                                //
@@ -577,10 +553,10 @@ if (l == 0) {
 // ========================================================================== //
 // PERFORM PRODUCT                                                            //
 // ========================================================================== //
-for (i = 0; i < m; i++) {
-    for (j = 0; j < l; j++) {
+for (std::size_t i = 0; i < m; i++) {
+    for (std::size_t j = 0; j < l; j++) {
         C[i][j] = (T) 0.0;
-        for (k = 0; k < n; k++) {
+        for (std::size_t k = 0; k < n; k++) {
             C[i][j] += A[i][k] * B[k][j];
         } //next k
     } //next j
@@ -605,13 +581,13 @@ std::vector< std::vector<T> > matmul(
 
     std::vector< std::vector<T> > Tr = transpose(N);
 
-    int d1= M.size();
-    int d2= Tr.size();
+    std::size_t d1= M.size();
+    std::size_t d2= Tr.size();
 
     std::vector< std::vector<T> > Q(d1, std::vector<T> (d2, T()) );
 
-    for( int i=0; i<d1; i++){
-        for( int j=0; j<d2; j++){
+    for( std::size_t i=0; i<d1; i++){
+        for( std::size_t j=0; j<d2; j++){
             Q[i][j]= dotProduct( M[i], Tr[j] );
         };
     };
@@ -627,20 +603,18 @@ std::vector< std::vector<T> > matmul(
 
     \result product of M and N.
 */
-template <class T, size_t d1, size_t d2, size_t d3>
+template <class T, std::size_t d1, std::size_t d2, std::size_t d3>
 std::array< std::array<T, d2> , d1> matmul(
     const std::array< std::array<T, d3>, d1>    &M,
     const std::array<std::array<T, d2>, d3>     &N
 ){
-    int i, j;
-
     std::array< std::array<T, d2> , d1> Q;
     std::array< std::array<T, d3> , d2> Tr;
 
     Tr = transpose( N ) ;
 
-    for( i=0; i<d1; i++){
-        for( j=0; j<d2; j++){
+    for( std::size_t i=0; i<d1; i++){
+        for( std::size_t j=0; j<d2; j++){
             Q[i][j]= dotProduct( M[i], Tr[j] );
         };
     };
@@ -663,10 +637,10 @@ std::vector< std::vector<T> > matmulDiag(
     const std::vector<std::vector<T> >          &N
 ) {
 
-    int d1= M.size();
+    std::size_t d1= M.size();
     std::vector< std::vector<T> > Q( N );
 
-    for( int i=0; i<d1; i++){
+    for( std::size_t i=0; i<d1; i++){
         Q[i] *= M[i] ;
     };
 
@@ -690,9 +664,9 @@ std::vector< std::vector<T> > matmulDiag(
 
     std::vector< std::vector<T> > Q( M );
 
-    int d1= M.size() ;
+    std::size_t d1= M.size() ;
 
-    for( int i=0; i<d1; i++ ){
+    for( std::size_t i=0; i<d1; i++ ){
         Q[i] = M[i] * N ;
     };
 
@@ -709,13 +683,13 @@ std::vector< std::vector<T> > matmulDiag(
 
     \result diadic product between M and N.
 */
-template <class T, size_t d1, size_t d2>
+template <class T, std::size_t d1, std::size_t d2>
 std::array< std::array<T, d2> , d1> matmulDiag(
     const std::array< T, d1>                    &M,
     const std::array<std::array<T, d2>, d1>     &N
 ){
 
-    int i;
+    std::size_t i;
     std::array< std::array<T, d2> , d1> Q(N);
 
     for( i=0; i<d1; i++){
@@ -734,13 +708,13 @@ std::array< std::array<T, d2> , d1> matmulDiag(
 
     \result diadic product between M and N.
 */
-template <class T, size_t d1, size_t d2>
+template <class T, std::size_t d1, std::size_t d2>
 std::array< std::array<T, d2> , d1> matmulDiag(
     const std::array<std::array<T, d2>, d1>     &M,
     const std::array< T, d2>                    &N
 ) {
 
-    int i;
+    std::size_t i;
     std::array< std::array<T, d2> , d1> Q;
 
     for( i=0; i<d1; i++){
@@ -767,11 +741,11 @@ std::vector<T> matmul(
     const std::vector<T>                        &x
 ) {
 
-    int d1 = M.size();
+    std::size_t d1 = M.size();
 
     std::vector<T>      z(d1,0.0);
 
-    for( int i=0; i<d1; i++){
+    for( std::size_t i=0; i<d1; i++){
         z[i]= dotProduct( M[i], x );
     }
 
@@ -787,7 +761,7 @@ std::vector<T> matmul(
 
     \result product between M and x
 */
-template <class T, size_t d1, size_t d2>
+template <class T, std::size_t d1, std::size_t d2>
 std::array<T, d1> matmul(
     const std::array< std::array<T, d2>, d1>    &M,
     const std::array<T, d2>                     &x
@@ -795,7 +769,7 @@ std::array<T, d1> matmul(
 
     std::array<T, d1>      z;
 
-    for( size_t i=0; i<d1; i++){
+    for( std::size_t i=0; i<d1; i++){
         z[i]= dotProduct( M[i], x);
     }
 
@@ -817,14 +791,13 @@ std::vector<std::vector<T>> tensorProduct(
     const std::vector<T>                        &y
 ) {
 
-    int  i, j;
-    int  n = x.size(); 
-    int  m = y.size(); 
+    std::size_t  n = x.size();
+    std::size_t  m = y.size();
     std::vector<T>      row(m,0.0);
     std::vector<std::vector<T>> z(n,row) ;
 
-    for( i=0; i<n; i++){
-        for( j=0; j<m; j++){
+    for( std::size_t i=0; i<n; i++){
+        for( std::size_t j=0; j<m; j++){
             z[i][j] = x[i] *y[j] ;
         };
     };
@@ -840,16 +813,15 @@ return (z);}
 
     \result tensor product between x and y
 */
-template <class T, size_t n, size_t m>
+template <class T, std::size_t n, std::size_t m>
 std::array<std::array<T,m>,n> tensorProduct(
     const std::array<T,n>                       &x,
     const std::array<T,m>                       &y
 ) {
-    int  i, j;
     std::array<std::array<T,m>,n> z ;
 
-    for( i=0; i<n; i++){
-        for( j=0; j<m; j++){
+    for( std::size_t i=0; i<n; i++){
+        for( std::size_t j=0; j<m; j++){
             z[i][j] = x[i] *y[j] ;
         };
     };

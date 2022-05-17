@@ -84,7 +84,7 @@ PiercedVector<value_t, id_t>::PiercedVector(PiercedVector<value_t, id_t> &&other
     : PiercedVectorKernel<id_t>(std::move(other)),
       PiercedVectorStorage<value_t, id_t>(std::move(other), this, other.getSyncMode())
 {
-    // Since we have swapped the kernel, the list of registered slaves contains
+    // Since we have moved the kernel, the list of registered slaves contains
     // also the internal storage of other vector. We need to unregister that
     // storage from the kernel.
     this->unregisterSlave(&other);

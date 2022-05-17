@@ -130,6 +130,59 @@ VolumeKernel::VolumeKernel(int id, int dimension, bool expert)
 }
 
 /*!
+	Get the codimension of the patch in the volume space.
+
+	\result The codimension of the patch in the volume space.
+*/
+int VolumeKernel::getVolumeCodimension() const
+{
+	return 0;
+}
+
+/*!
+	Get the codimension of the patch in the surface space.
+
+	\result The codimension of the patch in the surface space.
+*/
+int VolumeKernel::getSurfaceCodimension() const
+{
+	return -1;
+}
+
+/*!
+	Get the codimension of the patch in the line space.
+
+	\result The codimension of the patch in the line space.
+*/
+int VolumeKernel::getLineCodimension() const
+{
+	return -2;
+}
+
+/*!
+	Get the codimension of the patch in the point space.
+
+	\result The codimension of the patch in the point space.
+*/
+int VolumeKernel::getPointCodimension() const
+{
+	return -3;
+}
+
+/*!
+	Extracts the external envelope and appends it to the given patch.
+
+	The external envelope is composed by all the free faces of the patch.
+
+	\param[in,out] envelope is the patch to which the external envelope
+	will be appended
+*/
+void VolumeKernel::extractEnvelope(SurfaceKernel &envelope) const
+{
+	PatchKernel::extractEnvelope(envelope);
+}
+
+/*!
 	Checks if the specified point is inside the patch.
 
 	\param[in] x is the x coordinate of the point

@@ -165,12 +165,22 @@ bitpit_library(
 )
 
 bitpit_library(
+    name = "lineunstructured",
+    deps = [
+        ":IO",
+        ":common",
+        ":patchkernel",
+    ],
+)
+
+bitpit_library(
     name = "surfunstructured",
     deps = [
         ":IO",
         ":common",
         ":communications",
         ":containers",
+        ":lineunstructured",
         ":operators",
         ":patchkernel",
     ],

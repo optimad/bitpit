@@ -49,9 +49,9 @@ int subtest_001()
     log::cout() << "Importing STL..." << std::endl;
 
 #if BITPIT_ENABLE_MPI
-    std::unique_ptr<SurfUnstructured> surfaceMesh(new SurfUnstructured (2, 3, MPI_COMM_NULL));
+    std::unique_ptr<SurfUnstructured> surfaceMesh(new SurfUnstructured (2, MPI_COMM_NULL));
 #else
-    std::unique_ptr<SurfUnstructured> surfaceMesh(new SurfUnstructured (2, 3));
+    std::unique_ptr<SurfUnstructured> surfaceMesh(new SurfUnstructured (2));
 #endif
     surfaceMesh->setExpert(true);
     surfaceMesh->importSTL("./data/buddha.stl", STLReader::FormatUnknown, true);

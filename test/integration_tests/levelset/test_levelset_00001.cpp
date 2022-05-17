@@ -94,9 +94,9 @@ int subtest_001()
 
     // Input geometry
 #if BITPIT_ENABLE_MPI
-    std::unique_ptr<bitpit::SurfUnstructured> STL( new bitpit::SurfUnstructured(0,1,dimensions,MPI_COMM_NULL) );
+    std::unique_ptr<bitpit::SurfUnstructured> STL( new bitpit::SurfUnstructured(dimensions - 1,MPI_COMM_NULL) );
 #else
-    std::unique_ptr<bitpit::SurfUnstructured> STL( new bitpit::SurfUnstructured(0,1,dimensions) );
+    std::unique_ptr<bitpit::SurfUnstructured> STL( new bitpit::SurfUnstructured(dimensions - 1) );
 #endif
     STL->initializeAdjacencies();
 

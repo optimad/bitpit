@@ -33,11 +33,4 @@ namespace bitpit {
 * \brief Base class for pierced vector kernels.
 */
 
-/**
-* Constructs an empty base pierced vector storage.
-*/
-BasePiercedVectorStorage::BasePiercedVectorStorage()
-{
-}
-
 }

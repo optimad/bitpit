@@ -95,8 +95,7 @@ SurfaceKernel::SurfaceKernel(bool expert)
 	means that each processor will be unaware of the existence of the other
 	processes.
 
-	\param patch_dim is the dimension of the patch
-	\param space_dim is the dimension of the space
+	\param dimension is the dimension of the patch
 	\param communicator is the communicator to be used for exchanging data
 	among the processes. If a null comunicator is provided, a serial patch
 	will be created
@@ -104,24 +103,20 @@ SurfaceKernel::SurfaceKernel(bool expert)
 	cells halo
 	\param expert if true, the expert mode will be enabled
 */
-SurfaceKernel::SurfaceKernel(int patch_dim, int space_dim, MPI_Comm communicator, std::size_t haloSize, bool expert)
-	: PatchKernel(patch_dim, communicator, haloSize, expert)
+SurfaceKernel::SurfaceKernel(int dimension, MPI_Comm communicator, std::size_t haloSize, bool expert)
+	: PatchKernel(dimension, communicator, haloSize, expert)
 #else
 /*!
 	Creates a patch.
 
-	\param patch_dim is the dimension of the patch
-	\param space_dim is the dimension of the space
+	\param dimension is the dimension of the patch
 	\param expert if true, the expert mode will be enabled
 */
-SurfaceKernel::SurfaceKernel(int patch_dim, int space_dim, bool expert)
-	: PatchKernel(patch_dim, expert)
+SurfaceKernel::SurfaceKernel(int dimension, bool expert)
+	: PatchKernel(dimension, expert)
 #endif
 {
     initialize();
-
-    // Set the sapce dimension
-    setSpaceDimension(space_dim);
 }
 
 #if BITPIT_ENABLE_MPI==1
@@ -133,8 +128,7 @@ SurfaceKernel::SurfaceKernel(int patch_dim, int space_dim, bool expert)
 	processes.
 
 	\param id is the id that will be assigned to the patch
-	\param patch_dim is the dimension of the patch
-	\param space_dim is the dimension of the space
+	\param dimension is the dimension of the patch
 	\param communicator is the communicator to be used for exchanging data
 	among the processes. If a null comunicator is provided, a serial patch
 	will be created
@@ -142,22 +136,20 @@ SurfaceKernel::SurfaceKernel(int patch_dim, int space_dim, bool expert)
 	cells halo
 	\param expert if true, the expert mode will be enabled
 */
-SurfaceKernel::SurfaceKernel(int id, int patch_dim, int space_dim, MPI_Comm communicator, std::size_t haloSize, bool expert)
-	: PatchKernel(id, patch_dim, communicator, haloSize, expert)
+SurfaceKernel::SurfaceKernel(int id, int dimension, MPI_Comm communicator, std::size_t haloSize, bool expert)
+	: PatchKernel(id, dimension, communicator, haloSize, expert)
 #else
 /*!
 	Creates a patch.
 
 	\param id is the id that will be assigned to the patch
-	\param patch_dim is the dimension of the patch
-	\param space_dim is the dimension of the space
+	\param dimension is the dimension of the patch
 	\param expert if true, the expert mode will be enabled
 */
-SurfaceKernel::SurfaceKernel(int id, int patch_dim, int space_dim, bool expert)
-	: PatchKernel(id, patch_dim, expert)
+SurfaceKernel::SurfaceKernel(int id, int dimension, bool expert)
+	: PatchKernel(id, dimension, expert)
 #endif
 {
-    m_spaceDim = space_dim;
 }
 
 /*!
@@ -165,34 +157,60 @@ SurfaceKernel::SurfaceKernel(int id, int patch_dim, int space_dim, bool expert)
 */
 void SurfaceKernel::initialize()
 {
-    // Space dimension
-    m_spaceDim = -1;
+    // Nothing to do
 }
 
 /*!
-	Sets the dimension of the working space.
+	Get the codimension of the patch in the volume space.
 
-	\param dimension the dimension of the working patch
+	\result The codimension of the patch in the volume space.
 */
-void SurfaceKernel::setSpaceDimension(int dimension)
+int SurfaceKernel::getVolumeCodimension() const
 {
-    // If the dimension was already assigned, reset the patch
-    if (m_spaceDim > 0 && m_spaceDim != dimension) {
-        reset();
-    }
-
-    // Set the dimension
-    m_spaceDim = dimension;
+	return 1;
 }
 
 /*!
- * Returns the number of dimensions of the working space (set at patch construction)
- *
- * \result The number of dimensions.
- */
-int SurfaceKernel::getSpaceDimension(void) const
+	Get the codimension of the patch in the surface space.
+
+	\result The codimension of the patch in the surface space.
+*/
+int SurfaceKernel::getSurfaceCodimension() const
 {
-    return(m_spaceDim);
+	return 0;
+}
+
+/*!
+	Get the codimension of the patch in the line space.
+
+	\result The codimension of the patch in the line space.
+*/
+int SurfaceKernel::getLineCodimension() const
+{
+	return -1;
+}
+
+/*!
+	Get the codimension of the patch in the point space.
+
+	\result The codimension of the patch in the point space.
+*/
+int SurfaceKernel::getPointCodimension() const
+{
+	return -2;
+}
+
+/*!
+	Extracts the external envelope and appends it to the given patch.
+
+	The external envelope is composed by all the free faces of the patch.
+
+	\param[in,out] envelope is the patch to which the external envelope
+	will be appended
+*/
+void SurfaceKernel::extractEnvelope(LineKernel &envelope) const
+{
+	PatchKernel::extractEnvelope(envelope);
 }
 
 /*!
@@ -433,8 +451,7 @@ double SurfaceKernel::evalAngleAtVertex(long id, int vertex) const
     } else if (cellType == ElementType::VERTEX) {
         return 0.;
     } else if (cellType == ElementType::LINE) {
-        if (m_spaceDim - getDimension() == 1)   return BITPIT_PI;
-        else                                    return 0.;
+        return BITPIT_PI;
     }
 
     ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
@@ -591,10 +608,14 @@ double SurfaceKernel::evalAspectRatio(long id, int &edge_id) const
  * If cell is of type ElementType::VERTEX or ElementType::LINE, returns 0.0
  * 
  * \param[in] id cell ID
- * 
+ * \param orientation is a vector carring the additional information needed
+ * to un-ambigously define a normal to the element (e.g., when evaluating
+ * the normal of a one-dimensional element, this versor is perpendicular to
+ * the plane where the normal should lie)
+ *
  * \result facet normal
 */
-std::array<double, 3> SurfaceKernel::evalFacetNormal(long id) const
+std::array<double, 3> SurfaceKernel::evalFacetNormal(long id, const std::array<double, 3> &orientation) const
 {
     // ====================================================================== //
     // VARIABLES DECLARATION                                                  //
@@ -615,12 +636,8 @@ std::array<double, 3> SurfaceKernel::evalFacetNormal(long id) const
      || (cell_->getType() == ElementType::VERTEX)) return normal;
     
     if (cell_->getType() == ElementType::LINE) {
-        if (m_spaceDim - getDimension() == 1) {
-            std::array<double, 3>       z = {{0.0, 0.0, 1.0}};
-            normal = m_vertices[cellVertexIds[1]].getCoords() - m_vertices[cellVertexIds[0]].getCoords();
-            normal = crossProduct(normal, z);
-        }
-        else return normal;
+        normal = m_vertices[cellVertexIds[1]].getCoords() - m_vertices[cellVertexIds[0]].getCoords();
+        normal = crossProduct(normal, orientation);
     }
 
     if (cell_->getType() == ElementType::TRIANGLE) {

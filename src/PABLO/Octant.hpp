@@ -158,6 +158,7 @@ public:
     Octant();
 private:
     Octant(uint8_t dim);
+    Octant(uint8_t dim, uint8_t level, uint64_t morton);
     Octant(uint8_t dim, uint8_t level, int32_t x, int32_t y, int32_t z = 0);
     Octant(bool bound, uint8_t dim, uint8_t level, int32_t x, int32_t y, int32_t z = 0);
     bool operator ==(const Octant & oct2);
@@ -179,6 +180,8 @@ public:
     // =================================================================================== //
     // PUBLIC METHODS
     // =================================================================================== //
+    uint64_t        computeLastDescMorton() const;
+    u32array3       computeLastDescCoordinates() const;
     uint64_t        computeFatherMorton() const;
     u32array3       computeFatherCoordinates() const;
 

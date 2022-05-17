@@ -29,6 +29,7 @@
 #include <vector>
 
 #include "bitpit_patchkernel.hpp"
+#include "bitpit_lineunstructured.hpp"
 
 namespace bitpit {
 
@@ -40,13 +41,13 @@ public:
     // Constructors
 #if BITPIT_ENABLE_MPI==1
     SurfUnstructured(MPI_Comm communicator);
-    SurfUnstructured(int patch_dim, int space_dim, MPI_Comm communicator);
-    SurfUnstructured(int id, int patch_dim, int space_dim, MPI_Comm communicator);
+    SurfUnstructured(int dimension, MPI_Comm communicator);
+    SurfUnstructured(int id, int dimension, MPI_Comm communicator);
     SurfUnstructured(std::istream &stream, MPI_Comm communicator);
 #else
     SurfUnstructured();
-    SurfUnstructured(int patch_dim, int space_dim);
-    SurfUnstructured(int id, int patch_dim, int space_dim);
+    SurfUnstructured(int dimension);
+    SurfUnstructured(int id, int dimension);
     SurfUnstructured(std::istream &stream);
 #endif
 
@@ -60,7 +61,7 @@ public:
     long locatePoint(const std::array<double, 3> &point) const override;
 
     // Evaluations
-    void extractEdgeNetwork(SurfUnstructured &net);
+    void extractEdgeNetwork(LineUnstructured &net);
 
     // I/O routines
     int importSTL(const std::string &filename, int PIDOffset = 0, bool PIDSquash = false);

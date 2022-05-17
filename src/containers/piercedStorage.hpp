@@ -115,10 +115,10 @@ protected:
     PiercedStorageSyncSlave();
     PiercedStorageSyncSlave(const PiercedKernel<id_t> *kernel);
     PiercedStorageSyncSlave(PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode);
-    PiercedStorageSyncSlave(const PiercedStorageSyncSlave<id_t> &other, const PiercedKernel<id_t> *kernel);
+    PiercedStorageSyncSlave(const PiercedStorageSyncSlave<id_t> &other, const PiercedKernel<id_t> *kernel = nullptr);
     PiercedStorageSyncSlave(const PiercedStorageSyncSlave<id_t> &other, PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode);
-    PiercedStorageSyncSlave(const PiercedStorageSyncSlave<id_t> &other);
-    PiercedStorageSyncSlave(PiercedStorageSyncSlave<id_t> &&other);
+    PiercedStorageSyncSlave(PiercedStorageSyncSlave<id_t> &&other, const PiercedKernel<id_t> *kernel = nullptr);
+    PiercedStorageSyncSlave(PiercedStorageSyncSlave<id_t> &&other, PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode);
 
     // Methods for synchronizing the storage
     virtual void _postSetStaticKernel();
@@ -343,10 +343,10 @@ public:
     PiercedStorage(std::size_t nFields);
     PiercedStorage(std::size_t nFields, const PiercedKernel<id_t> *kernel);
     PiercedStorage(std::size_t nFields, PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode);
-    PiercedStorage(const PiercedStorage<value_t, id_t> &other, const PiercedKernel<id_t> *kernel);
+    PiercedStorage(const PiercedStorage<value_t, id_t> &other, const PiercedKernel<id_t> *kernel = nullptr);
     PiercedStorage(const PiercedStorage<value_t, id_t> &other, PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode);
-    PiercedStorage(const PiercedStorage<value_t, id_t> &other);
-    PiercedStorage(PiercedStorage<value_t, id_t> &&other);
+    PiercedStorage(PiercedStorage<value_t, id_t> &&other, const PiercedKernel<id_t> *kernel = nullptr);
+    PiercedStorage(PiercedStorage<value_t, id_t> &&other, PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode);
 
     PiercedStorage & operator=(const PiercedStorage &other);
     PiercedStorage & operator=(PiercedStorage &&other);

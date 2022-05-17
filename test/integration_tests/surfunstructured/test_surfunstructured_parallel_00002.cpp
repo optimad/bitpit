@@ -79,7 +79,7 @@ int subtest_001(
 
 // Local variables
 string                          in_name_bin = "./data/buddha.stl";
-SurfUnstructured                mesh(2, 3, MPI_COMM_WORLD);
+SurfUnstructured                mesh(2, MPI_COMM_WORLD);
 
 // Counters
 // none
@@ -226,7 +226,7 @@ int subtest_002(
 // ========================================================================== //
 
 // Local variables
-SurfUnstructured                mesh(2, 3, communicator);
+SurfUnstructured                mesh(2, communicator);
 
 // Counters
 // none
