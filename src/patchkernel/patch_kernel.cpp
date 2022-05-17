@@ -7818,6 +7818,9 @@ void PatchKernel::consecutiveRenumberVertices(long offset)
 	for(Interface &interface : getInterfaces()) {
 		interface.renumberVertices(map);
 	}
+
+	setVertexAutoIndexing(false);
+	setVertexAutoIndexing(true);
 }	
 
 /*!
@@ -7852,6 +7855,9 @@ void PatchKernel::consecutiveRenumberCells(long offset)
 			interface.setNeigh(map.at(neighId), neighFace);
 		}
 	}
+
+	setCellAutoIndexing(false);
+	setCellAutoIndexing(true);
 
 	// Renumber last internal and first ghost markers
 	if (m_lastInternalCellId >= 0) {
@@ -7891,6 +7897,9 @@ void PatchKernel::consecutiveRenumberInterfaces(long offset)
 			interfaceId = map.at(interfaceId);
 		}
 	}
+	
+	setInterfaceAutoIndexing(false);
+	setInterfaceAutoIndexing(true);
 }
 
 /*!
