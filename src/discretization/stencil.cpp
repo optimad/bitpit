@@ -37,6 +37,56 @@ template class DiscreteStencil<double>;
 template class DiscreteStencil<std::array<double, 3>>;
 template class DiscreteStencil<std::vector<double>>;
 
+/*!
+ * Sum the specified value to the target.
+ *
+ * \param value is the value that will be summed
+ * \param factor is the factor the value will be multiplied with
+ * \param target on output will contain the original weight plus the value multiplied by the factor
+ */
+template<>
+void DiscreteStencil<std::array<double, 3>>::rawSumValue(const std::array<double, 3> &value, double factor, std::array<double, 3> *target)
+{
+    for (int i = 0; i < 3; ++i) {
+        (*target)[i] += factor * value[i];
+    }
+}
+
+/*!
+ * Sum the specified value to the target.
+ *
+ * The target will be resized to match the size of the value to be summed. If the value size is
+ * greater that the target size, missing target elements will be initialized to zero before
+ * summing the specified value.
+ *
+ * \param value is the value that will be summed
+ * \param factor is the factor the value will be multiplied with
+ * \param target on output will contain the original weight plus the value multiplied by the factor
+ */
+template<>
+void DiscreteStencil<std::vector<double>>::rawSumValue(const std::vector<double> &value, double factor, std::vector<double> *target)
+{
+    std::size_t valueSize  = value.size();
+    std::size_t targetSize = target->size();
+    std::size_t commonSize = std::min(valueSize, targetSize);
+
+    for (std::size_t i = 0; i < commonSize; ++i) {
+        (*target)[i] += factor * value[i];
+    }
+
+    if (valueSize > targetSize) {
+        target->insert(target->end(), value.cbegin() + commonSize, value.cend());
+
+        if (factor != 1.) {
+            auto targetBegin = target->begin();
+            auto targetEnd   = target->end();
+            for (auto itr = targetBegin + commonSize; itr != targetEnd; ++itr) {
+                *itr *= factor;
+            }
+        }
+    }
+}
+
 /**
  * Set the source value into the target.
  *
@@ -50,7 +100,9 @@ void DiscreteStencil<std::array<double, 3>>::rawCopyValue(const std::array<doubl
 }
 
 /**
- * Set the source value into the target.
+ * Copy the source value into the target.
+ *
+ * The target will be resized to match the size of the source.
  *
  * \param source is the value that will be set
  * \param[out] target on output will contain the source value
@@ -58,10 +110,16 @@ void DiscreteStencil<std::array<double, 3>>::rawCopyValue(const std::array<doubl
 template<>
 void DiscreteStencil<std::vector<double>>::rawCopyValue(const std::vector<double> &source, std::vector<double> *target)
 {
-    if (source.size() == target->size()) {
-        std::copy_n(source.data(), source.size(), target->data());
-    } else {
-        target->assign(source.begin(), source.end());
+    std::size_t sourceSize = source.size();
+    std::size_t targetSize = target->size();
+    std::size_t commonSize = std::min(sourceSize, targetSize);
+
+    std::copy_n(source.data(), commonSize, target->data());
+
+    if (sourceSize < targetSize) {
+        target->resize(sourceSize);
+    } else if (sourceSize > targetSize) {
+        target->insert(target->end(), source.begin() + commonSize, source.end());
     }
 }
 

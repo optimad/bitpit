@@ -465,8 +465,21 @@ int SurfUnstructured::importSTL(const std::string &filename, STLReader::Format f
         }
 
         // Generate patch cells from STL facets
-        reserveVertices(getVertexCount() + nFacetVertices * nFacets);
         reserveCells(getCellCount() + nFacets);
+
+        std::size_t nEstimatedVertices;
+        if (joinFacets) {
+            // The number of facets and the number of vertices of a triangulation
+            // are related by the inequality nFacets <= 2 * nVertices - 4, where
+            // the equality holds for a closed triangulation. To limit memory usage
+            // we estimate the number of vertices assuming a closed triangulation
+            // (this gives us the minimum number of nodes the triangulation could
+            // possibly have).
+            nEstimatedVertices = 0.5 * nFacets + 2;
+        } else {
+            nEstimatedVertices = nFacetVertices * nFacets;
+        }
+        reserveVertices(getVertexCount() + nEstimatedVertices);
 
         vertexCache.clear();
 

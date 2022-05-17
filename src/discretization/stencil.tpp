@@ -149,10 +149,14 @@ void DiscreteStencil<weight_t>::initialize(std::size_t size, const weight_t &zer
 {
     rawCopyValue(zero, &m_zero);
 
-    resize(size);
-    for (std::size_t n = 0; n < size; ++n) {
+    std::size_t previousSize = this->size();
+    std::size_t commonSize   = std::min(previousSize, size);
+    for (std::size_t n = 0; n < commonSize; ++n) {
         m_pattern[n] = -1;
         rawCopyValue(m_zero, m_weights.data() + n);
+    }
+    if (previousSize != size) {
+        resize(size);
     }
 
     zeroConstant();
@@ -170,10 +174,17 @@ void DiscreteStencil<weight_t>::initialize(std::size_t size, const long *pattern
 {
     rawCopyValue(zero, &m_zero);
 
-    resize(size);
-    for (std::size_t n = 0; n < size; ++n) {
+    std::size_t previousSize = this->size();
+    std::size_t commonSize   = std::min(previousSize, size);
+    for (std::size_t n = 0; n < commonSize; ++n) {
         m_pattern[n] = pattern[n];
         rawCopyValue(m_zero, m_weights.data() + n);
+    }
+    if (previousSize != size) {
+        resize(size);
+        for (std::size_t n = previousSize; n < size; ++n) {
+            m_pattern[n] = pattern[n];
+        }
     }
 
     zeroConstant();
@@ -192,10 +203,19 @@ void DiscreteStencil<weight_t>::initialize(std::size_t size, const long *pattern
 {
     rawCopyValue(zero, &m_zero);
 
-    resize(size);
-    for (std::size_t n = 0; n < size; ++n) {
+    std::size_t previousSize = this->size();
+    std::size_t commonSize   = std::min(previousSize, size);
+    for (std::size_t n = 0; n < commonSize; ++n) {
         m_pattern[n] = pattern[n];
         rawCopyValue(weights[n], m_weights.data() + n);
+    }
+    if (size > previousSize) {
+        reserve(size);
+        for (std::size_t n = previousSize; n < size; ++n) {
+            appendItem(pattern[n], weights[n]);
+        }
+    } else if (size < previousSize) {
+        resize(size);
     }
 
     zeroConstant();
@@ -210,16 +230,7 @@ void DiscreteStencil<weight_t>::initialize(std::size_t size, const long *pattern
 template<typename weight_t>
 void DiscreteStencil<weight_t>::initialize(const DiscreteStencil<weight_t> &other)
 {
-    rawCopyValue(other.m_zero, &m_zero);
-
-    std::size_t nItems = other.size();
-    resize(nItems);
-    for (std::size_t n = 0; n < nItems; ++n) {
-        m_pattern[n] = other.m_pattern[n];
-        rawCopyValue(other.m_weights[n], m_weights.data() + n);
-    }
-
-    setConstant(other.m_constant);
+    initialize(other.size(), other.m_pattern.data(), other.m_weights.data(), other.m_zero);
 }
 
 /*!
@@ -394,11 +405,12 @@ void DiscreteStencil<weight_t>::setWeight(std::size_t pos, weight_t &&weight)
 *
 * \param pos is the position of the weight
 * \param value is the value that will be summed
+* \param factor is the factor by which the value will be multiplied
 */
 template<typename weight_t>
-void DiscreteStencil<weight_t>::sumWeight(std::size_t pos, const weight_t &value)
+void DiscreteStencil<weight_t>::sumWeight(std::size_t pos, const weight_t &value, double factor)
 {
-    m_weights[pos] += value;
+    rawSumValue(value, factor, m_weights.data() + pos);
 }
 
 /*!
@@ -448,15 +460,17 @@ void DiscreteStencil<weight_t>::setItem(std::size_t pos, long id, weight_t &&wei
 *
 * \param id is the index of the item
 * \param value is the value that will be summed
+* \param factor is the factor by which the value will be multiplied
 */
 template<typename weight_t>
-void DiscreteStencil<weight_t>::sumItem(long id, const weight_t &value)
+void DiscreteStencil<weight_t>::sumItem(long id, const weight_t &value, double factor)
 {
     weight_t *weight = findWeight(id);
     if (weight) {
-        *weight += value;
+        rawSumValue(value, factor, weight);
     } else {
         appendItem(id, value);
+        m_weights.back() *= factor;
     }
 }
 
@@ -540,11 +554,12 @@ void DiscreteStencil<weight_t>::setConstant(weight_t &&value)
 * Sum the specified value to the constant associated to the stencil.
 *
 * \param value is the value that will be summed
+* \param factor is the factor by which the value will be multiplied
 */
 template<typename weight_t>
-void DiscreteStencil<weight_t>::sumConstant(const weight_t &value)
+void DiscreteStencil<weight_t>::sumConstant(const weight_t &value, double factor)
 {
-    m_constant += value;
+    rawSumValue(value, factor, &m_constant);
 }
 
 /*!
@@ -578,6 +593,23 @@ void DiscreteStencil<weight_t>::clear(bool release)
     }
 
     zeroConstant();
+}
+
+/*!
+* Sum the specified stencil.
+*
+* \param other is the stencil that will be summed
+* \param factor is the factor by which the other stencil will be multiplied
+*/
+template<typename weight_t>
+void DiscreteStencil<weight_t>::sum(const DiscreteStencil<weight_t> &other, double factor)
+{
+    const std::size_t other_nItems = other.size();
+    for (std::size_t n = 0; n < other_nItems; ++n) {
+        sumItem(other.m_pattern[n], other.m_weights[n], factor);
+    }
+
+    sumConstant(other.m_constant, factor);
 }
 
 /*!
@@ -628,9 +660,9 @@ void DiscreteStencil<weight_t>::addComplementToZero(long id)
         return;
     }
 
-    weight_t complement = -1. * m_weights[0];
-    for (std::size_t n = 1; n < nItems; ++n) {
-        complement -= m_weights[n];
+    weight_t complement = m_zero;
+    for (std::size_t n = 0; n < nItems; ++n) {
+        rawSumValue(m_weights[n], -1., &complement);
     }
 
     appendItem(id, complement);
@@ -644,8 +676,7 @@ void DiscreteStencil<weight_t>::zero()
 {
     const std::size_t nItems = size();
     for (std::size_t n = 0; n < nItems; ++n) {
-        weight_t &weight = m_weights[n];
-        rawCopyValue(m_zero, &weight);
+        rawCopyValue(m_zero, m_weights.data() + n);
     }
 
     setConstant(m_zero);
@@ -673,10 +704,11 @@ bool DiscreteStencil<weight_t>::optimizeWeight(std::size_t pos, double tolerance
 template<typename weight_t>
 weight_t * DiscreteStencil<weight_t>::findWeight(long id)
 {
-    const std::size_t nItems = size();
-    for (std::size_t n = 0; n < nItems; ++n) {
-        if (m_pattern[n] == id) {
-            return (m_weights.data() + n);
+    auto patternBegin = m_pattern.cbegin();
+    auto patternEnd   = m_pattern.cend();
+    for (auto itr = patternBegin; itr != patternEnd; ++itr) {
+        if (*itr == id) {
+            return (m_weights.data() + std::distance(patternBegin, itr));
         }
     }
 
@@ -693,14 +725,28 @@ weight_t * DiscreteStencil<weight_t>::findWeight(long id)
 template<typename weight_t>
 const weight_t * DiscreteStencil<weight_t>::findWeight(long id) const
 {
-    const std::size_t nItems = size();
-    for (std::size_t n = 0; n < nItems; ++n) {
-        if (m_pattern[n] == id) {
-            return (m_weights.data() + n);
+    auto patternBegin = m_pattern.cbegin();
+    auto patternEnd   = m_pattern.cend();
+    for (auto itr = patternBegin; itr != patternEnd; ++itr) {
+        if (*itr == id) {
+            return (m_weights.data() + std::distance(patternBegin, itr));
         }
     }
 
     return nullptr;
+}
+
+/*!
+* Sum the specified value to the target.
+*
+* \param value is the value that will be summed
+* \param factor is the factor the value will be multiplied with
+* \param target on output will contain the original weight plus the value multiplied by the factor
+*/
+template<typename weight_t>
+void DiscreteStencil<weight_t>::rawSumValue(const weight_t &value, double factor, weight_t *target)
+{
+    *target += factor * value;
 }
 
 /**
@@ -743,7 +789,7 @@ void DiscreteStencil<weight_t>::display(std::ostream &out, double factor) const
         long id = m_pattern[n];
         weight_t value = factor * m_weights[n];
         out << "   id: " << id << " weight: " << value << std::endl;
-        sum += value;
+        rawSumValue(value, 1., &sum);
     }
 
     out << " constant : " << (factor * m_constant) << std::endl;
@@ -772,9 +818,8 @@ size_t DiscreteStencil<weight_t>::getBinarySize() const
 template<typename weight_t>
 DiscreteStencil<weight_t> & DiscreteStencil<weight_t>::operator*=(double factor)
 {
-    const std::size_t nItems = size();
-    for (std::size_t n = 0; n < nItems; ++n) {
-        m_weights[n] *= factor;
+    for (weight_t &weight : m_weights) {
+        weight *= factor;
     }
     m_constant *= factor;
 
@@ -790,9 +835,8 @@ DiscreteStencil<weight_t> & DiscreteStencil<weight_t>::operator*=(double factor)
 template<typename weight_t>
 DiscreteStencil<weight_t> & DiscreteStencil<weight_t>::operator/=(double factor)
 {
-    const std::size_t nItems = size();
-    for (std::size_t n = 0; n < nItems; ++n) {
-        m_weights[n] /= factor;
+    for (weight_t &weight : m_weights) {
+        weight /= factor;
     }
     m_constant /= factor;
 
@@ -808,12 +852,7 @@ DiscreteStencil<weight_t> & DiscreteStencil<weight_t>::operator/=(double factor)
 template<typename weight_t>
 DiscreteStencil<weight_t> & DiscreteStencil<weight_t>::operator+=(const DiscreteStencil<weight_t> &other)
 {
-    const std::size_t other_nItems = other.size();
-    for (std::size_t n = 0; n < other_nItems; ++n) {
-        sumItem(other.m_pattern[n], other.m_weights[n]);
-    }
-
-    m_constant += other.m_constant;
+    sum(other, 1.);
 
     return *this;
 }
@@ -827,12 +866,7 @@ DiscreteStencil<weight_t> & DiscreteStencil<weight_t>::operator+=(const Discrete
 template<typename weight_t>
 DiscreteStencil<weight_t> & DiscreteStencil<weight_t>::operator-=(const DiscreteStencil<weight_t> &other)
 {
-    const std::size_t other_nItems = other.size();
-    for (std::size_t n = 0; n < other_nItems; ++n) {
-        sumItem(other.m_pattern[n], -1. * other.m_weights[n]);
-    }
-
-    m_constant -= other.m_constant;
+    sum(other, - 1.);
 
     return *this;
 }

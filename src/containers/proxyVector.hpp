@@ -234,7 +234,7 @@ public:
     typedef typename container_t::pointer pointer;
     typedef typename container_t::const_pointer const_pointer;
 
-    ~ProxyVectorStorage();
+    ~ProxyVectorStorage() override;
 
     void swap(ProxyVectorStorage &other) noexcept;
 
