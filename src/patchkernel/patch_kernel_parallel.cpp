@@ -167,24 +167,82 @@ int PatchKernel::getProcessorCount() const
 /*!
 	Check if the patch is distributed among different processes.
 
+	A patch is distributed among different processes if it doesn't have an owner.
+
+	Setting the appropriate function argument, this function can be called also
+	when the patch is not up-to-date. If dirty patches are allowed and the patch
+	is actually dirty, the function will evaluate the owner on-the-fly. Otherwise
+	the function will return the owner evaluated during the last update. In any
+	case, if dirt patches are allowed, the function is a collective function and
+	needs to be called by all processes (otherwise a deadlock will occur).
+
 	\return Return true if the patch is distributed among different processes,
 	false otherwise.
 */
-bool PatchKernel::isDistributed() const
+bool PatchKernel::isDistributed(bool allowDirty) const
 {
-	return (getOwner() < 0);
+	return (getOwner(allowDirty) < 0);
 }
 
 /*!
 	If the path is NOT distributed among different processes, returns the
 	process that owns the patch, otherwise returns a negative number.
 
+	Setting the appropriate function argument, this function can be called also
+	when the patch is not up-to-date. If dirty patches are allowed and the patch
+	is actually dirty, the function will evaluate the owner on-the-fly. Otherwise
+	the function will return the owner evaluated during the last update. In any
+	case, if dirt patches are allowed, the function is a collective function and
+	needs to be called by all processes (otherwise a deadlock will occur).
+
+	\param allowDirty if set to true, the function will evaluate the owner of a dirty
+	patch on on-the-fly; otherwise the function will return the owner evaluated during
+	the last updated, even if the patch is currently dirty. If dirty patch are allowed,
+	the function is a collective function and needs to be called by all processes
+	(otherwise a deadlock will occur)
 	\return If the path is NOT distributed among different processes, returns
 	the process that owns the patch, otherwise returns a negative number.
 */
-int PatchKernel::getOwner() const
+int PatchKernel::getOwner(bool allowDirty) const
 {
-	return m_owner;
+	assert(allowDirty || arePartitioningInfoDirty(false));
+	if (!allowDirty || !arePartitioningInfoDirty(true)) {
+		return m_owner;
+	} else {
+		return evalOwner();
+	}
+}
+
+/*!
+	Evaluate the owner of the patch.
+
+	This function can be called also when the patch is not up-to-date. If the patch
+	is up-to-date, the function will return the same result of PatchKernel::getOwner().
+
+	If the path is NOT distributed among different processes, the owner is set
+	to the process that owns the cells, otherwise the owner is set to a negative
+	number.
+*/
+int PatchKernel::evalOwner() const
+{
+	long nInternalCells = getInternalCellCount();
+	long nGlobalInternalCells = nInternalCells;
+	if (isPartitioned()) {
+		MPI_Allreduce(MPI_IN_PLACE, &nGlobalInternalCells, 1, MPI_LONG, MPI_SUM, getCommunicator());
+	}
+
+	int owner;
+	if (nInternalCells == nGlobalInternalCells) {
+		owner = getRank();
+	} else {
+		owner = -1;
+	}
+
+	if (isPartitioned()) {
+		MPI_Allreduce(MPI_IN_PLACE, &owner, 1, MPI_INT, MPI_MAX, getCommunicator());
+	}
+
+	return owner;
 }
 
 /*!
@@ -196,21 +254,7 @@ int PatchKernel::getOwner() const
 */
 void PatchKernel::updateOwner()
 {
-	long nInternalCells = getInternalCellCount();
-	long nGlobalInternalCells = nInternalCells;
-	if (isPartitioned()) {
-		MPI_Allreduce(MPI_IN_PLACE, &nGlobalInternalCells, 1, MPI_LONG, MPI_SUM, getCommunicator());
-	}
-
-	if (nInternalCells == nGlobalInternalCells) {
-		m_owner = getRank();
-	} else {
-		m_owner = -1;
-	}
-
-	if (isPartitioned()) {
-		MPI_Allreduce(MPI_IN_PLACE, &m_owner, 1, MPI_INT, MPI_MAX, getCommunicator());
-	}
+	m_owner = evalOwner();
 }
 
 /*!
