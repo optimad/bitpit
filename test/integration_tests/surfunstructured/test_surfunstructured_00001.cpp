@@ -298,15 +298,15 @@ vector<long>                            cell_list;
 
     // Vertices stats
     if (mesh.getVertexCount() != 27)            return 1;
-    if (mesh.countFreeVertices() != 20)         return 1;
+    if (mesh.countBorderVertices() != 20)       return 1;
 
     // Faces stats
     if (mesh.countFaces() != 59)                return 1;
-    if (mesh.countFreeFaces() != 21)            return 1;
+    if (mesh.countBorderFaces() != 21)          return 1;
 
     // Cells stats
     if (mesh.getCellCount() != 33)              return 1;
-    if (mesh.countFreeCells() != 21)            return 1;
+    if (mesh.countBorderCells() != 21)          return 1;
 
     // Compute 1-ring of vertex 12 ------------------------------------------ //
     ring1 = mesh.findCellVertexOneRing(7, 2);
@@ -325,15 +325,15 @@ vector<long>                            cell_list;
 
     // Vertices stats
     if (envelope.getVertexCount() != 20)        return 1;
-    if (envelope.countFreeVertices() != 0)      return 1;
+    if (envelope.countBorderVertices() != 0)    return 1;
 
     // Faces stats
     if (envelope.countFaces() != 20)            return 1;
-    if (envelope.countFreeFaces() != 0)         return 1;
+    if (envelope.countBorderFaces() != 0)       return 1;
 
     // Cells stats
     if (envelope.getCellCount() != 21)          return 1;
-    if (envelope.countFreeCells() != 0)         return 1;
+    if (envelope.countBorderCells() != 0)       return 1;
 
     // Export triangulation ------------------------------------------------- //
     mesh.write("step1");
@@ -382,15 +382,15 @@ vector<long>                            cell_list;
 
     // Vertices stats
     if (mesh.getVertexCount() != 27)            return 2;
-    if (mesh.countFreeVertices() != 24)         return 2;
+    if (mesh.countBorderVertices() != 24)       return 2;
 
     // Face stats
     if (mesh.countFaces() != 57)                return 2;
-    if (mesh.countFreeFaces() != 25)            return 2;
+    if (mesh.countBorderFaces() != 25)          return 2;
 
     // Cells stats
     if (mesh.getCellCount() != 30)              return 2;
-    if (mesh.countFreeCells() != 23)            return 2;
+    if (mesh.countBorderCells() != 23)          return 2;
 
     // Compute 1-ring of vertex 12 ------------------------------------------ //
     ring1 = mesh.findCellVertexOneRing(23, 0);
@@ -409,15 +409,15 @@ vector<long>                            cell_list;
 
     // Vertex stats
     if (envelope.getVertexCount() != 24)        return 2;
-    if (envelope.countFreeVertices() != 1)      return 2;
+    if (envelope.countBorderVertices() != 1)    return 2;
 
     // Faces stats
     if (envelope.countFaces() != 24)            return 2;
-    if (envelope.countFreeFaces() != 1)         return 2;
+    if (envelope.countBorderFaces() != 1)       return 2;
 
     // Cells stats
     if (envelope.getCellCount() != 25)          return 2;
-    if (envelope.countFreeCells() != 1)         return 2;
+    if (envelope.countBorderCells() != 1)       return 2;
 
     // Export triangulation ------------------------------------------------- //
     mesh.write("step2");
@@ -466,15 +466,15 @@ vector<long>                            cell_list;
 
     // Vertices stats
     if (mesh.getVertexCount() != 27)            return 3;
-    if (mesh.countFreeVertices() != 20)         return 3;
+    if (mesh.countBorderVertices() != 20)       return 3;
 
     // Faces stats
     if (mesh.countFaces() != 59)                return 3;
-    if (mesh.countFreeFaces() != 21)            return 3;
+    if (mesh.countBorderFaces() != 21)          return 3;
 
     // Cells stats
     if (mesh.getCellCount() != 33)              return 3;
-    if (mesh.countFreeCells() != 21)            return 3;
+    if (mesh.countBorderCells() != 21)          return 3;
 
     // Compute 1-ring of vertex 11 ------------------------------------------ //
     ring1 = mesh.findCellVertexOneRing(7, 2);
@@ -493,15 +493,15 @@ vector<long>                            cell_list;
 
     // Vertices stats
     if (envelope.getVertexCount() != 20)        return 3;
-    if (envelope.countFreeVertices() != 0)      return 3;
+    if (envelope.countBorderVertices() != 0)    return 3;
 
     // Check faces stats
     if (envelope.countFaces() != 20)            return 3;
-    if (envelope.countFreeFaces() != 0)         return 3;
+    if (envelope.countBorderFaces() != 0)       return 3;
 
     // Check cells stats
     if (envelope.getCellCount() != 21)          return 3;
-    if (envelope.countFreeCells() != 0)         return 3;
+    if (envelope.countBorderCells() != 0)       return 3;
 
     // Export triangulation ------------------------------------------------- //
     mesh.write("step3");
