@@ -26,12 +26,14 @@
 // ========================================================================== //
 // INCLUDES                                                                   //
 // ========================================================================== //
-#include <mpi.h>
-#include <chrono>
-#include <unordered_set>
 #if BITPIT_ENABLE_METIS==1
 #include <metis.h>
 #endif
+#include <mpi.h>
+
+#include <chrono>
+#include <unordered_set>
+#include <unordered_map>
 
 #include "bitpit_communications.hpp"
 
@@ -609,8 +611,9 @@ void PatchKernel::updateFirstGhostVertexId()
 
 	\param[in] id is the index of the cell
 	\param[in] owner is the rank of the process that owns the ghost cell
+	\param[in] haloLayer is the halo layer the ghost cell belongs to
 */
-PatchKernel::CellIterator PatchKernel::internalCell2GhostCell(long id, int owner)
+PatchKernel::CellIterator PatchKernel::internalCell2GhostCell(long id, int owner, int haloLayer)
 {
 	if (!isExpert()) {
 		return m_cells.end();
@@ -640,7 +643,7 @@ PatchKernel::CellIterator PatchKernel::internalCell2GhostCell(long id, int owner
 	}
 
 	// Set ghost information
-	setGhostCellInfo(id, owner);
+	setGhostCellInfo(id, owner, haloLayer);
 
 	// Return the iterator to the new position
 	return iterator;
@@ -767,10 +770,7 @@ const Cell & PatchKernel::getFirstGhost() const
 */
 PatchKernel::CellIterator PatchKernel::addCell(const Cell &source, int owner, long id)
 {
-	Cell cell = source;
-	cell.setId(id);
-
-	return addCell(std::move(cell), owner, id);
+	return addCell(source, owner, 0, id);
 }
 
 /*!
@@ -790,24 +790,7 @@ PatchKernel::CellIterator PatchKernel::addCell(const Cell &source, int owner, lo
 */
 PatchKernel::CellIterator PatchKernel::addCell(Cell &&source, int owner, long id)
 {
-	if (id < 0) {
-		id = source.getId();
-	}
-
-	int connectSize = source.getConnectSize();
-	std::unique_ptr<long[]> connectStorage = std::unique_ptr<long[]>(new long[connectSize]);
-	if (!source.hasInfo()){
-		std::copy(source.getConnect(), source.getConnect() + connectSize, connectStorage.get());
-	}
-
-	CellIterator iterator = addCell(source.getType(), std::move(connectStorage), owner, id);
-
-	Cell &cell = (*iterator);
-	id = cell.getId();
-	cell = std::move(source);
-	cell.setId(id);
-
-	return iterator;
+	return addCell(source, owner, 0, id);
 }
 
 /*!
@@ -828,15 +811,7 @@ PatchKernel::CellIterator PatchKernel::addCell(Cell &&source, int owner, long id
 */
 PatchKernel::CellIterator PatchKernel::addCell(ElementType type, int owner, long id)
 {
-	std::unique_ptr<long[]> connectStorage;
-	if (ReferenceElementInfo::hasInfo(type)) {
-		int connectSize = ReferenceElementInfo::getInfo(type).nVertices;
-		connectStorage = std::unique_ptr<long[]>(new long[connectSize]);
-	} else {
-		connectStorage = std::unique_ptr<long[]>(nullptr);
-	}
-
-	return addCell(type, std::move(connectStorage), owner, id);
+	return addCell(type, owner, 0, id);
 }
 
 /*!
@@ -859,11 +834,7 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementType type, int owner, long
 PatchKernel::CellIterator PatchKernel::addCell(ElementType type, const std::vector<long> &connectivity,
 											   int owner, long id)
 {
-	int connectSize = connectivity.size();
-	std::unique_ptr<long[]> connectStorage = std::unique_ptr<long[]>(new long[connectSize]);
-	std::copy(connectivity.data(), connectivity.data() + connectSize, connectStorage.get());
-
-	return addCell(type, std::move(connectStorage), owner, id);
+	return addCell(type, connectivity, owner, 0, id);
 }
 
 /*!
@@ -887,6 +858,157 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementType type, const std::vect
 PatchKernel::CellIterator PatchKernel::addCell(ElementType type, std::unique_ptr<long[]> &&connectStorage,
 											   int owner, long id)
 {
+	return addCell(type, std::move(connectStorage), owner, 0, id);
+}
+
+/*!
+	Adds the specified cell to the patch.
+
+	If valid, the specified id will we assigned to the newly created cell,
+	otherwise a new unique id will be generated for the cell. However, it
+	is not possible to create a new cell with an id already assigned to an
+	existing cell of the patch. If this happens, an exception is thrown.
+	Ids are considered valid if they are greater or equal than zero.
+
+	\param source is the cell that will be added
+	\param owner is the rank that owns the cell that will be added
+	\param haloLayer is the halo layer the cell belongs to, this argument is only relevant
+	if the cell is a ghost
+	\param id is the id that will be assigned to the newly created cell.
+	If a negative id value is specified, a new unique id will be generated
+	for the cell
+	\return An iterator pointing to the added cell.
+*/
+PatchKernel::CellIterator PatchKernel::addCell(const Cell &source, int owner, int haloLayer, long id)
+{
+	Cell cell = source;
+	cell.setId(id);
+
+	return addCell(std::move(cell), owner, haloLayer, id);
+}
+
+/*!
+	Adds the specified cell to the patch.
+
+	If valid, the specified id will we assigned to the newly created cell,
+	otherwise a new unique id will be generated for the cell. However, it
+	is not possible to create a new cell with an id already assigned to an
+	existing cell of the patch. If this happens, an exception is thrown.
+	Ids are considered valid if they are greater or equal than zero.
+
+	\param source is the cell that will be added
+	\param owner is the rank that owns the cell that will be added
+	\param haloLayer is the halo layer the cell belongs to, this argument is only relevant
+	if the cell is a ghost
+	\param id is the id that will be assigned to the newly created cell.
+	If a negative id value is specified, the id of the source will be used
+	\return An iterator pointing to the added cell.
+*/
+PatchKernel::CellIterator PatchKernel::addCell(Cell &&source, int owner, int haloLayer, long id)
+{
+	if (id < 0) {
+		id = source.getId();
+	}
+
+	int connectSize = source.getConnectSize();
+	std::unique_ptr<long[]> connectStorage = std::unique_ptr<long[]>(new long[connectSize]);
+	if (!source.hasInfo()){
+		std::copy(source.getConnect(), source.getConnect() + connectSize, connectStorage.get());
+	}
+
+	CellIterator iterator = addCell(source.getType(), std::move(connectStorage), owner, haloLayer, id);
+
+	Cell &cell = (*iterator);
+	id = cell.getId();
+	cell = std::move(source);
+	cell.setId(id);
+
+	return iterator;
+}
+
+/*!
+	Adds a new cell with the specified id and type.
+
+	If valid, the specified id will we assigned to the newly created cell,
+	otherwise a new unique id will be generated for the cell. However, it
+	is not possible to create a new cell with an id already assigned to an
+	existing cell of the patch. If this happens, an exception is thrown.
+	Ids are considered valid if they are greater or equal than zero.
+
+	\param type is the type of the cell
+	\param owner is the rank that owns the cell that will be added
+	\param haloLayer is the halo layer the cell belongs to, this argument is only relevant
+	if the cell is a ghost
+	\param id is the id that will be assigned to the newly created cell.
+	If a negative id value is specified, a new unique id will be generated
+	for the cell
+	\return An iterator pointing to the added cell.
+*/
+PatchKernel::CellIterator PatchKernel::addCell(ElementType type, int owner, int haloLayer, long id)
+{
+	std::unique_ptr<long[]> connectStorage;
+	if (ReferenceElementInfo::hasInfo(type)) {
+		int connectSize = ReferenceElementInfo::getInfo(type).nVertices;
+		connectStorage = std::unique_ptr<long[]>(new long[connectSize]);
+	} else {
+		connectStorage = std::unique_ptr<long[]>(nullptr);
+	}
+
+	return addCell(type, std::move(connectStorage), owner, haloLayer, id);
+}
+
+/*!
+	Adds a new cell with the specified id, type, and connectivity.
+
+	If valid, the specified id will we assigned to the newly created cell,
+	otherwise a new unique id will be generated for the cell. However, it
+	is not possible to create a new cell with an id already assigned to an
+	existing cell of the patch. If this happens, an exception is thrown.
+	Ids are considered valid if they are greater or equal than zero.
+
+	\param type is the type of the cell
+	\param connectivity is the connectivity of the cell
+	\param owner is the rank that owns the cell that will be added
+	\param haloLayer is the halo layer the cell belongs to, this argument is only relevant
+	if the cell is a ghost
+	\param id is the id that will be assigned to the newly created cell.
+	If a negative id value is specified, a new unique id will be generated
+	for the cell
+	\return An iterator pointing to the added cell.
+*/
+PatchKernel::CellIterator PatchKernel::addCell(ElementType type, const std::vector<long> &connectivity,
+											   int owner, int haloLayer, long id)
+{
+	int connectSize = connectivity.size();
+	std::unique_ptr<long[]> connectStorage = std::unique_ptr<long[]>(new long[connectSize]);
+	std::copy(connectivity.data(), connectivity.data() + connectSize, connectStorage.get());
+
+	return addCell(type, std::move(connectStorage), owner, haloLayer, id);
+}
+
+/*!
+	Adds a new cell with the specified id, type, and connectivity.
+
+	If valid, the specified id will we assigned to the newly created cell,
+	otherwise a new unique id will be generated for the cell. However, it
+	is not possible to create a new cell with an id already assigned to an
+	existing cell of the patch. If this happens, an exception is thrown.
+	Ids are considered valid if they are greater or equal than zero.
+
+	\param type is the type of the cell
+	\param connectStorage is the storage the contains or will contain
+	the connectivity of the element
+	\param owner is the rank that owns the cell that will be added
+	\param haloLayer is the halo layer the cell belongs to, this argument is only relevant
+	if the cell is a ghost
+	\param id is the id that will be assigned to the newly created cell.
+	If a negative id value is specified, a new unique id will be generated
+	for the cell
+	\return An iterator pointing to the added cell.
+*/
+PatchKernel::CellIterator PatchKernel::addCell(ElementType type, std::unique_ptr<long[]> &&connectStorage,
+											   int owner, int haloLayer, long id)
+{
 	if (!isExpert()) {
 		return cellEnd();
 	}
@@ -899,7 +1021,7 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementType type, std::unique_ptr
 	if (owner == getRank()) {
 		iterator = _addInternalCell(type, std::move(connectStorage), id);
 	} else {
-		iterator = _addGhostCell(type, std::move(connectStorage), owner, id);
+		iterator = _addGhostCell(type, std::move(connectStorage), owner, haloLayer, id);
 	}
 
 	return iterator;
@@ -917,13 +1039,14 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementType type, std::unique_ptr
 	\param connectStorage is the storage the contains or will contain
 	the connectivity of the element
 	\param owner is the rank that owns the cell that will be added
+	\param haloLayer is the halo layer the ghost cell belongs to
 	\param id is the id that will be assigned to the newly created cell.
 	If a negative id value is specified, a new unique id will be generated
 	for the cell
 	\return An iterator pointing to the newly created cell.
 */
 PatchKernel::CellIterator PatchKernel::_addGhostCell(ElementType type, std::unique_ptr<long[]> &&connectStorage,
-                                                     int owner, long id)
+                                                     int owner, int haloLayer, long id)
 {
 	// Get the id of the cell
 	if (m_cellIdGenerator) {
@@ -959,7 +1082,7 @@ PatchKernel::CellIterator PatchKernel::_addGhostCell(ElementType type, std::uniq
 	}
 
 	// Set ghost information
-	setGhostCellInfo(id, owner);
+	setGhostCellInfo(id, owner, haloLayer);
 
 	// Set the alteration flags of the cell
 	setAddedCellAlterationFlags(id);
@@ -977,11 +1100,13 @@ PatchKernel::CellIterator PatchKernel::_addGhostCell(ElementType type, std::uniq
 	\param connectStorage is the storage the contains or will contain
 	the connectivity of the element
 	\param owner is the rank that owns the cell that will be restored
+	\param haloLayer is the halo layer the cell belongs to, this argument is only relevant
+	if the cell is a ghost
 	\param id is the id of the cell that will be restored
 	\return An iterator pointing to the restored cell.
 */
 PatchKernel::CellIterator PatchKernel::restoreCell(ElementType type, std::unique_ptr<long[]> &&connectStorage,
-												   int owner, long id)
+												   int owner, int haloLayer, long id)
 {
 	if (!isExpert()) {
 		return cellEnd();
@@ -1001,7 +1126,7 @@ PatchKernel::CellIterator PatchKernel::restoreCell(ElementType type, std::unique
 	if (owner == getRank()) {
 		_restoreInternalCell(iterator, type, std::move(connectStorage));
 	} else {
-		_restoreGhostCell(iterator, type, std::move(connectStorage), owner);
+		_restoreGhostCell(iterator, type, std::move(connectStorage), owner, haloLayer);
 	}
 
 	return iterator;
@@ -1018,9 +1143,12 @@ PatchKernel::CellIterator PatchKernel::restoreCell(ElementType type, std::unique
 	\param connectStorage is the storage the contains or will contain
 	the connectivity of the element
 	\param owner is the rank that owns the cell that will be restored
+	\param haloLayer is the halo layer the cell belongs to, this argument is only relevant
+	if the cell is a ghost
 */
 void PatchKernel::_restoreGhostCell(const CellIterator &iterator, ElementType type,
-                                    std::unique_ptr<long[]> &&connectStorage, int owner)
+                                    std::unique_ptr<long[]> &&connectStorage,
+                                    int owner, int haloLayer)
 {
 	// Restore the cell
 	//
@@ -1035,7 +1163,7 @@ void PatchKernel::_restoreGhostCell(const CellIterator &iterator, ElementType ty
 	m_nGhostCells++;
 
 	// Set ghost information
-	setGhostCellInfo(cellId, owner);
+	setGhostCellInfo(cellId, owner, haloLayer);
 
 	// Set the alteration flags of the cell
 	setRestoredCellAlterationFlags(cellId);
@@ -2138,7 +2266,7 @@ void PatchKernel::_partitioningAlter_applyGhostCellOwnershipChanges(int sendRank
 
         // Update ghost owner
         int finalGhostCellOwner = itr->second;
-        setGhostCellInfo(ghostCellId, finalGhostCellOwner);
+        setGhostCellInfo(ghostCellId, finalGhostCellOwner, ghostCellInfo.haloLayer);
         itr = ghostCellOwnershipChanges->erase(itr);
     }
 }
@@ -2227,7 +2355,8 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
 
     std::unordered_set<long> outgoingCells;
     std::unordered_set<long> frameCells;
-    std::unordered_set<long> haloCells;
+    std::unordered_map<long, std::size_t> haloCells;
+    std::vector<long> firstHaloLayerCells;
 
     std::unordered_set<long> frameVertices;
     std::unordered_set<long> haloVertices;
@@ -2236,7 +2365,8 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
     std::unordered_set<long> vertexSendList;
 
     std::vector<long> frameCellsOverall;
-    std::unordered_set<long> ghostFrameCellsOverall;
+    std::unordered_set<long> ghostHaloCellsOverall;
+    std::unordered_set<long> innerFrontierCellsOverall;
 
     for (int recvRank : recvRanks) {
         //
@@ -2271,16 +2401,19 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
         // receiver rank that have a face, an edge or a vertex on a frontier
         // face.
         //
-        // Halo is made up by cells not explicitly marked for being sent to
-        // the receiver that have a face, an edge or a vertex on a frontier
-        // face.
+        // The first layer of halo cells is made up by cells not explicitly
+        // marked for being sent to the receiver that have a face, an edge
+        // or a vertex on a frontier face. Cells on subsequent halo layers
+        // are identifies as cells not explicitly marked for being sent
+        // that are neighbours of the the previous halo layer. At this
+        // stage we are only building the first layer of halo cells.
         //
-        // We also identify cells that, at the end of the partitionig, will
-        // be ghosts for the current rank. These are all the outgonig cells
-        // that have a face/edge/vertex on the inner frontier. A face/edge/
-        // vertex is on the inner frontier if its on the frontier and one of
-        // the cells that contain that item is not an outgoing cell (i.e.,
-        // is not explicitly marked for being sent to any rank).
+        // We also identify outgoing cells that have a face/edge/vertex on
+        // the inner frontier. A face/edge/vertex is on the inner frontier
+        // if its on the frontier and one of the cells that contain that
+        // item is not an outgoing cell (i.e., is not explicitly marked for
+        // being sent to any rank). Cells on inner frontier will belong to
+        // the first layer of ghost cells for the current rank.
         //
         // There are no halo nor frame cells if we are serializing a patch.
         //
@@ -2359,7 +2492,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
                         frontierNeighs.insert(neighId);
 
                         if (innerFrontierFace) {
-                            ghostFrameCellsOverall.insert(cellId);
+                            innerFrontierCellsOverall.insert(cellId);
                         }
 
                         //
@@ -2403,7 +2536,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
                                 frontierNeighs.insert(frontierNeighId);
                                 if (innerFrontierVertex) {
                                     if (m_partitioningOutgoings.count(frontierNeighId) > 0) {
-                                        ghostFrameCellsOverall.insert(frontierNeighId);
+                                        innerFrontierCellsOverall.insert(frontierNeighId);
                                     }
                                 }
                             }
@@ -2473,7 +2606,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
                                     frontierNeighs.insert(frontierNeighId);
                                     if (innerFrontierEdge) {
                                         if (m_partitioningOutgoings.count(frontierNeighId) > 0) {
-                                            ghostFrameCellsOverall.insert(frontierNeighId);
+                                            innerFrontierCellsOverall.insert(frontierNeighId);
                                         }
                                     }
                                 }
@@ -2481,18 +2614,59 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
                         }
 
                         // Tell apart frame and halo cells
-                        //
-                        // Frame cells on inner frontier will be ghost cells
-                        // for the current rank.
                         for (long frontierNeighId : frontierNeighs) {
                             if (outgoingCells.count(frontierNeighId) > 0) {
                                 frameCells.insert(frontierNeighId);
                             } else {
-                                haloCells.insert(frontierNeighId);
+                                haloCells.insert({frontierNeighId, 0});
                             }
                         }
                     }
                 }
+            }
+
+            // Identify cells on subsequent frame layers
+            //
+            // Only cells sent to the receiver rank can be frame cells.
+            if (m_haloSize > 1) {
+                auto frameSelector = [&outgoingCells](long cellId) {
+                    return (outgoingCells.count(cellId) != 0);
+                };
+
+                auto frameBuilder = [&frameCells](long cellId, int layer) {
+                    BITPIT_UNUSED(layer);
+
+                    frameCells.insert(cellId);
+
+                    return false;
+                };
+
+                processCellsNeighbours(frameCells, m_haloSize - 1, frameSelector, frameBuilder);
+            }
+
+            // Identify cells on subsequent halo layers
+            //
+            // The selector should discard cells in the frame, this ensures that
+            // the halo will not extend to the cells being sent to the receiver
+            // rank.
+            if (m_haloSize > 1) {
+                firstHaloLayerCells.clear();
+                firstHaloLayerCells.reserve(haloCells.size());
+                for (const auto &haloEntry : haloCells) {
+                    firstHaloLayerCells.push_back(haloEntry.first);
+                }
+
+                auto haloSelector = [&frameCells](long cellId) {
+                    return (frameCells.count(cellId) == 0);
+                };
+
+                auto haloBuilder = [&haloCells](long cellId, int layer) {
+                    haloCells.insert({cellId, layer + 1});
+
+                    return false;
+                };
+
+                processCellsNeighbours(firstHaloLayerCells, m_haloSize - 1, haloSelector, haloBuilder);
             }
         }
 
@@ -2505,11 +2679,26 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
         std::size_t nHaloCells     = haloCells.size();
 
         cellSendList.assign(outgoingCells.begin(), outgoingCells.end());
-        cellSendList.insert(cellSendList.end(), haloCells.begin(), haloCells.end());
 
-        // Update list of frame cells
-        if (!sendingAllCells) {
-            frameCellsOverall.insert(frameCellsOverall.end(), frameCells.begin(), frameCells.end());
+        std::size_t haloIndex = cellSendList.size();
+        cellSendList.resize(cellSendList.size() + nHaloCells);
+        for (const auto &haloEntry : haloCells) {
+            cellSendList[haloIndex] = haloEntry.first;
+            ++haloIndex;
+        }
+
+        // Update list of overall frame cells
+        frameCellsOverall.insert(frameCellsOverall.end(), frameCells.begin(), frameCells.end());
+
+        // Update list of halo cells
+        for (const auto &haloEntry : haloCells) {
+            long cellId = haloEntry.first;
+            const Cell &cell = getCell(cellId);
+            if (cell.isInterior()) {
+                continue;
+            }
+
+            ghostHaloCellsOverall.insert(cellId);
         }
 
         //
@@ -2522,7 +2711,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
         }
 
         // Start the communication
-        long cellsBufferSize = 2 * sizeof(long) + 2 * nHaloCells * sizeof(int) + 2 * (nOutgoingCells + nHaloCells) * sizeof(bool);
+        long cellsBufferSize = 2 * sizeof(long) + 3 * nHaloCells * sizeof(int) + 2 * (nOutgoingCells + nHaloCells) * sizeof(bool);
         for (const long cellId : cellSendList) {
             cellsBufferSize += m_cells.at(cellId).getBinarySize();
         }
@@ -2665,6 +2854,15 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
 
                 cellsBuffer << cellOwnerOnReceiver;
 
+                int cellHaloLayerOnReceiver;
+                if (cellOwnerOnReceiver != recvRank) {
+                    cellHaloLayerOnReceiver = haloCells.at(cellId);
+                } else {
+                    cellHaloLayerOnReceiver = -1;
+                }
+
+                cellsBuffer << cellHaloLayerOnReceiver;
+
                 int ghostCellOwnershipChange;
                 if (ghostCellOwnershipChanges->count(cellId) > 0) {
                     ghostCellOwnershipChange = ghostCellOwnershipChanges->at(cellId);
@@ -2759,17 +2957,48 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
     if (!sendingAllCells) {
         std::vector<long> deleteList;
 
-        // Delete frame cells or move them into the ghosts
+        // Convert inner cells into ghosts
+        //
+        // All cells on the inner frontier should become ghost cells. These
+        // cells belongs to the first halo layer and defines the seeds for
+        // growing the subsequent halo layers.
+        for (long cellId : innerFrontierCellsOverall) {
+            const Cell &cell = getCell(cellId);
+            std::size_t cellHaloLayer = 0;
+            if (!confirmCellHaloLayer(cell, cellHaloLayer, m_partitioningOutgoings)) {
+                continue;
+            }
+
+            int cellOwner = m_partitioningOutgoings.at(cellId);
+            internalCell2GhostCell(cellId, cellOwner, cellHaloLayer);
+        }
+
+        auto ghostFrameSelector = [this](long cellId) {
+            return (m_partitioningOutgoings.count(cellId) != 0);
+        };
+
+        auto ghostFrameBuilder = [this](long cellId, int layer) {
+            int cellOwner = m_partitioningOutgoings.at(cellId);
+            internalCell2GhostCell(cellId, cellOwner, layer + 1);
+
+            return false;
+        };
+
+        processCellsNeighbours(innerFrontierCellsOverall, m_haloSize - 1, ghostFrameSelector, ghostFrameBuilder);
+
+        // Delete frame cells that are not ghosts
+        //
+        // Now that the new ghosts have been created, we can delete all the
+        // frontier cells that are not ghosts.
         deleteList.clear();
         for (long cellId : frameCellsOverall) {
-            bool moveToGhostCells = (ghostFrameCellsOverall.count(cellId) > 0);
-            if (moveToGhostCells) {
-                int cellOwner = m_partitioningOutgoings.at(cellId);
-                internalCell2GhostCell(cellId, cellOwner);
-            } else {
-                deleteList.push_back(cellId);
-                ghostCellOwnershipChanges->erase(cellId);
+            const Cell &cell = getCell(cellId);
+            if (!cell.isInterior()) {
+                continue;
             }
+
+            deleteList.push_back(cellId);
+            ghostCellOwnershipChanges->erase(cellId);
         }
 
         deleteCells(deleteList);
@@ -2780,69 +3009,59 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
         // to remove stale adjacencies.
         pruneStaleAdjacencies();
 
-        // Delete stale ghosts
+        // Delete or update ghosts
         //
-        // Loop over all the ghosts and keep only the cells that have at least
-        // one internal neighbour that is still on this process.
+        // Some of the halo cells may be stale ghosts. Ghosts in the first halo
+        // layer are considered stale if they have has no inner neighbours. Ghost
+        // on subsequent layers are considered stale if they have no neighbours
+        // in the previous halo layer.
         //
-        // Stale ghosts have to be deleted after processing frame cells, that's
-        // because some stale ghosts will become such only after deleting the
-        // unneeded frame cells.
+        // A layer at a time, stale ghost cells are found and deleted, valid ghosts
+        // are identified because we need to re-compute the layer layer associated
+        // with those ghosts.
         std::vector<long> neighIds;
+        std::vector<long> updateList;
 
-        deleteList.clear();
-        for (const auto &entry : m_ghostCellInfo) {
-            long cellId = entry.first;
-            bool keep = false;
-
-            // First do a cheap search among the face neighbours.
-            const Cell &cell = m_cells.at(cellId);
-            const long *adjacencies = cell.getAdjacencies();
-            int nCellAdjacencies = cell.getAdjacencyCount();
-            for (int i = 0; i < nCellAdjacencies; ++i) {
-                long neighId = adjacencies[i];
-                if (m_ghostCellInfo.count(neighId) > 0) {
-                    continue;
-                } else if (m_partitioningOutgoings.count(neighId) > 0) {
+        for (int haloLayer = 0; haloLayer < static_cast<int>(m_haloSize); ++haloLayer) {
+            deleteList.clear();
+            for (long cellId : ghostHaloCellsOverall) {
+                // Consider only cells in the current halo layer
+                const GhostCellInfo &ghostInfo = m_ghostCellInfo.at(cellId);
+                if (ghostInfo.haloLayer != haloLayer) {
                     continue;
                 }
 
-                keep = true;
-                break;
-            }
-
-            // If we haven't find a neighbour that is still on this
-            // process, do a search among all the neighbours.
-            if (!keep) {
-                neighIds.clear();
-                findCellNeighs(cellId, &neighIds);
-                for (long neighId : neighIds) {
-                    if (m_ghostCellInfo.count(neighId) > 0) {
-                        continue;
-                    } else if (m_partitioningOutgoings.count(neighId) > 0) {
-                        continue;
-                    }
-
-                    keep = true;
-                    break;
+                // Cells for which the halo layer is not confirmed will be delete, cells
+                // for which the halo layer is confirmed will be updated.
+                const Cell &cell = getCell(cellId);
+                if (confirmCellHaloLayer(cell, haloLayer, m_partitioningOutgoings)) {
+                    updateList.push_back(cellId);
+                } else {
+                    deleteList.push_back(cellId);
                 }
             }
 
-            // Add the cell to the delete list
-            if (!keep) {
-                deleteList.push_back(cellId);
+            // Delete stale ghost in this layer
+            for (long cellId : deleteList) {
                 ghostCellOwnershipChanges->erase(cellId);
+                ghostHaloCellsOverall.erase(cellId);
             }
+            deleteCells(deleteList);
+
+            // Prune stale adjacencies
+            pruneStaleAdjacencies();
         }
 
-        deleteCells(deleteList);
-
-        // Prune cell adjacencies and interfaces
+        // Compute layer associated with ghosts in the halo of the outgoing cells
         //
-        // At this stage we cannot fully update adjacencies and interfaces, but
-        // we need to remove stale adjacencies and interfaces.
-        pruneStaleAdjacencies();
+        // Some cells have been deleted because they are now on a different processor,
+        // we need to update the halo layer associated with the ghost cells left in
+        // the halo of the outgoing cells.
+        for (long ghostId : updateList) {
+            computeCellHaloLayer(ghostId);
+        }
 
+        // Prune stale interfaces
         pruneStaleInterfaces();
 
         // Delete orphan vertices
@@ -2852,7 +3071,6 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
         reset();
         ghostCellOwnershipChanges->clear();
     }
-
     // Wait for previous communications to finish
     if (cellsSizeRequest != MPI_REQUEST_NULL) {
         MPI_Wait(&cellsSizeRequest, MPI_STATUS_IGNORE);
@@ -3012,16 +3230,31 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
         // so we need to build the list on the fly. THe list will contain ghost
         // cells (target) and their neighbours (sources).
         duplicateCellsCandidates.clear();
-        for (auto &entry : m_ghostCellInfo) {
-            long ghostCellId = entry.first;
+        std::vector<long> firstHaloLayerCells;
+        for (const auto &ghostOwnerEntry : m_ghostCellInfo) {
+            long ghostId = ghostOwnerEntry.first;
 
-            duplicateCellsCandidates.insert(ghostCellId);
-
-            findCellNeighs(ghostCellId, &neighIds);
-            for (long neighId : neighIds) {
-                duplicateCellsCandidates.insert(neighId);
+            duplicateCellsCandidates.insert(ghostId);
+            if (getCellHaloLayer(ghostId) == 0) {
+                firstHaloLayerCells.push_back(ghostId);
             }
         }
+
+        auto duplicateCandidatesSelector = [this](long cellId) {
+            BITPIT_UNUSED(cellId);
+
+            return (m_ghostCellInfo.count(cellId) == 0);
+        };
+
+        auto duplicateCandidatesBuilder = [&duplicateCellsCandidates](long cellId, int layer) {
+            BITPIT_UNUSED(layer);
+
+            duplicateCellsCandidates.insert({cellId});
+
+            return false;
+        };
+
+        processCellsNeighbours(firstHaloLayerCells, m_haloSize, duplicateCandidatesSelector, duplicateCandidatesBuilder);
 
         // Duplicate vertex candidates
         //
@@ -3243,12 +3476,15 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
             cellsBuffer >> isHalo;
 
             int cellOwner;
+            int cellHaloLayer;
             int ghostCellOwnershipChange;
             if (isHalo) {
                 cellsBuffer >> cellOwner;
+                cellsBuffer >> cellHaloLayer;
                 cellsBuffer >> ghostCellOwnershipChange;
             } else {
                 cellOwner = patchRank;
+                cellHaloLayer = -1;
                 ghostCellOwnershipChange = -1;
             }
 
@@ -3305,7 +3541,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
                     throw std::runtime_error("A cell with the same id of the received cell already exists.");
                 }
 
-                CellIterator cellIterator = addCell(std::move(cell), cellOwner);
+                CellIterator cellIterator = addCell(std::move(cell), cellOwner, cellHaloLayer);
                 cellId = cellIterator.getId();
                 addedCells.push_back(cellId);
 
@@ -3325,6 +3561,14 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
                     ghostCell2InternalCell(cellId);
                     ghostCellOwnershipChanges->erase(cellId);
                     isTracked = trackPartitioning;
+                }
+
+                // Update the halo layer associated with ghost cells
+                if (!isInterior) {
+                    const GhostCellInfo &ghostInfo = m_ghostCellInfo.at(cellId);
+                    if (ghostInfo.haloLayer > cellHaloLayer) {
+                        setGhostCellInfo(cellId, ghostInfo.owner, cellHaloLayer);
+                    }
                 }
 
                 // Save the adjacencies of the received cell, this adjacencies
@@ -3916,15 +4160,18 @@ void PatchKernel::clearGhostVerticesInfo()
 
 	\param id is the id of the ghost cell
 	\param owner is the rank of the process that owns the ghost cell
+	\param haloLayer is the halo layer the ghost cell belongs to
 */
-void PatchKernel::setGhostCellInfo(long id, int owner)
+void PatchKernel::setGhostCellInfo(long id, int owner, int haloLayer)
 {
 	auto ghostCellInfoItr = m_ghostCellInfo.find(id);
 	if (ghostCellInfoItr != m_ghostCellInfo.end()) {
-		ghostCellInfoItr->second.owner = owner;
+		ghostCellInfoItr->second.owner     = owner;
+		ghostCellInfoItr->second.haloLayer = haloLayer;
 	} else {
 		GhostCellInfo ghostCellInfo;
-		ghostCellInfo.owner = owner;
+		ghostCellInfo.owner     = owner;
+		ghostCellInfo.haloLayer = haloLayer;
 		m_ghostCellInfo.insert({id, std::move(ghostCellInfo)});
 	}
 
@@ -3946,6 +4193,57 @@ void PatchKernel::unsetGhostCellInfo(long id)
 	m_ghostCellInfo.erase(ghostCellInfoItr);
 
 	setPartitioningInfoDirty(true);
+}
+
+/*!
+	Compute the halo layer associated with the specified ghost cell.
+
+	The neighbours are processed one layer at the time until an internal cell
+	is found. If an internal cell cannot be found in the specified halo size,
+	an error is thrown.
+
+	\param id is the id of the cell
+*/
+void PatchKernel::computeCellHaloLayer(int id)
+{
+	// Early return if the cell is interior
+	if (getCell(id).isInterior()) {
+		unsetGhostCellInfo(id);
+		return;
+	}
+
+	// Process the neighbours until we find an internal cell
+	bool haloLayerIdentified = false;
+
+	std::array<long, 1> layerUpdateSeed = {{ id }};
+
+	auto layerUpdateSelector = [](long cellId) {
+		BITPIT_UNUSED(cellId);
+
+		return true;
+	};
+
+	auto layerUpdateProcessor = [this, id, &haloLayerIdentified](long cellId, int layer) {
+		const Cell &cell = getCell(cellId);
+		if (cell.isInterior()) {
+			const GhostCellInfo &cellGhostInfo = m_ghostCellInfo.at(id);
+			if (cellGhostInfo.haloLayer != layer) {
+				setGhostCellInfo(id, cellGhostInfo.owner, layer);
+			}
+
+			haloLayerIdentified = true;
+
+			return true;
+		}
+
+		return false;
+	};
+
+	processCellsNeighbours(layerUpdateSeed, m_haloSize, layerUpdateSelector, layerUpdateProcessor);
+
+	if (!haloLayerIdentified) {
+		throw std::runtime_error ("Unable to identify the halo layer of the cell.");
+	}
 }
 
 /*!
@@ -4475,27 +4773,30 @@ std::vector<long> PatchKernel::_findGhostCellExchangeSources(int rank)
 		return std::vector<long>();
 	}
 
-	std::vector<long> &rankTargets = ghostExchangeTargetsItr->second;
+	const std::vector<long> &rankTargets = ghostExchangeTargetsItr->second;
 
-	// The internal neighbours of the ghosts will be sources for the rank
-	assert(getAdjacenciesBuildStrategy() != ADJACENCIES_NONE);
+	// Generate sources from the targets
+	std::vector<long> exchangeSources;
 
-	std::vector<long> neighIds;
-	std::unordered_set<long> exchangeSources;
-	exchangeSources.reserve(rankTargets.size());
-	for (long ghostCellId : rankTargets) {
-		neighIds.clear();
-		findCellNeighs(ghostCellId, &neighIds);
-		for (long neighId : neighIds) {
-			if (m_ghostCellInfo.count(neighId) > 0) {
-				continue;
-			}
+	auto sourceSelector = [](long cellId) {
+		BITPIT_UNUSED(cellId);
 
-			exchangeSources.insert(neighId);
+		return true;
+	};
+
+	auto sourceBuilder = [this, &exchangeSources](long cellId, int layer) {
+		BITPIT_UNUSED(layer);
+
+		if (m_ghostCellInfo.count(cellId) == 0) {
+			exchangeSources.push_back(cellId);
 		}
-	}
 
-	return std::vector<long>(exchangeSources.begin(), exchangeSources.end());
+		return false;
+	};
+
+	processCellsNeighbours(rankTargets, m_haloSize, sourceSelector, sourceBuilder);
+
+	return exchangeSources;
 }
 
 }

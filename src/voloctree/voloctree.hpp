@@ -126,10 +126,6 @@ public:
 	void setLength(double length);
 	void scale(const std::array<double, 3> &scaling, const std::array<double, 3> &center) override;
 
-#if BITPIT_ENABLE_MPI==1
-	int getCellHaloLayer(long id) const override;
-#endif
-
 protected:
 	VolOctree(const VolOctree &other);
 

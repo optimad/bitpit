@@ -69,16 +69,16 @@ int subtest_001(int rank)
         mesh.addVertex({{5., 0., 0.00000000}}, 10);
         mesh.addVertex({{5., 1., 0.00000000}}, 11);
 
-        mesh.addCell(ElementType::TRIANGLE, std::vector<long>({{ 0,  3,  1}}), 0, 0);
-        mesh.addCell(ElementType::TRIANGLE, std::vector<long>({{ 0,  2,  3}}), 0, 1);
-        mesh.addCell(ElementType::TRIANGLE, std::vector<long>({{ 2,  5,  3}}), 0, 2);
-        mesh.addCell(ElementType::TRIANGLE, std::vector<long>({{ 2,  4,  5}}), 0, 3);
-        mesh.addCell(ElementType::TRIANGLE, std::vector<long>({{ 4,  7,  5}}), 0, 4);
-        mesh.addCell(ElementType::TRIANGLE, std::vector<long>({{ 4,  6,  7}}), 0, 5);
-        mesh.addCell(ElementType::TRIANGLE, std::vector<long>({{ 6,  9,  7}}), 0, 6);
-        mesh.addCell(ElementType::TRIANGLE, std::vector<long>({{ 6,  8,  9}}), 0, 7);
-        mesh.addCell(ElementType::TRIANGLE, std::vector<long>({{ 8, 11,  9}}), 1, 8);
-        mesh.addCell(ElementType::TRIANGLE, std::vector<long>({{ 8, 10, 11}}), 1, 9);
+        mesh.addCell(ElementType::TRIANGLE, std::vector<long>({{ 0,  3,  1}}), 0, -1, 0);
+        mesh.addCell(ElementType::TRIANGLE, std::vector<long>({{ 0,  2,  3}}), 0, -1, 1);
+        mesh.addCell(ElementType::TRIANGLE, std::vector<long>({{ 2,  5,  3}}), 0, -1, 2);
+        mesh.addCell(ElementType::TRIANGLE, std::vector<long>({{ 2,  4,  5}}), 0, -1, 3);
+        mesh.addCell(ElementType::TRIANGLE, std::vector<long>({{ 4,  7,  5}}), 0, -1, 4);
+        mesh.addCell(ElementType::TRIANGLE, std::vector<long>({{ 4,  6,  7}}), 0, -1, 5);
+        mesh.addCell(ElementType::TRIANGLE, std::vector<long>({{ 6,  9,  7}}), 0, -1, 6);
+        mesh.addCell(ElementType::TRIANGLE, std::vector<long>({{ 6,  8,  9}}), 0, -1, 7);
+        mesh.addCell(ElementType::TRIANGLE, std::vector<long>({{ 8, 11,  9}}), 1,  0, 8);
+        mesh.addCell(ElementType::TRIANGLE, std::vector<long>({{ 8, 10, 11}}), 1,  0, 9);
     } else if (rank == 1) {
         mesh.addVertex({{3., 0., 0.00000000}},  6);
         mesh.addVertex({{3., 1., 0.00000000}},  7);
@@ -93,13 +93,13 @@ int subtest_001(int rank)
         mesh.addVertex({{8., 0., 0.00000000}}, 16);
         mesh.addVertex({{8., 1., 0.00000000}}, 17);
 
-        mesh.addCell(ElementType::TRIANGLE, std::vector<long>({{ 6,  9,  7}}), 0,  8);
-        mesh.addCell(ElementType::TRIANGLE, std::vector<long>({{ 6,  8,  9}}), 0,  9);
-        mesh.addCell(ElementType::TRIANGLE, std::vector<long>({{ 8, 11,  9}}), 1, 10);
-        mesh.addCell(ElementType::TRIANGLE, std::vector<long>({{ 8, 10, 11}}), 1, 11);
-        mesh.addCell(ElementType::PIXEL,    std::vector<long>({{10, 12, 11, 13}}), 1, 12);
-        mesh.addCell(ElementType::PIXEL,    std::vector<long>({{12, 14, 13, 15}}), 1, 13);
-        mesh.addCell(ElementType::PIXEL,    std::vector<long>({{14, 16, 15, 17}}), 2, 14);
+        mesh.addCell(ElementType::TRIANGLE, std::vector<long>({{ 6,  9,  7}}),     0,  0,  8);
+        mesh.addCell(ElementType::TRIANGLE, std::vector<long>({{ 6,  8,  9}}),     0,  0,  9);
+        mesh.addCell(ElementType::TRIANGLE, std::vector<long>({{ 8, 11,  9}}),     1, -1, 10);
+        mesh.addCell(ElementType::TRIANGLE, std::vector<long>({{ 8, 10, 11}}),     1, -1, 11);
+        mesh.addCell(ElementType::PIXEL,    std::vector<long>({{10, 12, 11, 13}}), 1, -1, 12);
+        mesh.addCell(ElementType::PIXEL,    std::vector<long>({{12, 14, 13, 15}}), 1, -1, 13);
+        mesh.addCell(ElementType::PIXEL,    std::vector<long>({{14, 16, 15, 17}}), 2,  0, 14);
     } else if (rank == 2) {
         mesh.addVertex({{ 6., 0., 0.00000000}}, 12);
         mesh.addVertex({{ 6., 1., 0.00000000}}, 13);
@@ -112,10 +112,10 @@ int subtest_001(int rank)
         mesh.addVertex({{10., 0., 0.00000000}}, 20);
         mesh.addVertex({{10., 1., 0.00000000}}, 21);
 
-        mesh.addCell(ElementType::PIXEL, std::vector<long>({{12, 14, 13, 15}}), 1, 13);
-        mesh.addCell(ElementType::PIXEL, std::vector<long>({{14, 16, 15, 17}}), 2, 14);
-        mesh.addCell(ElementType::PIXEL, std::vector<long>({{16, 18, 17, 19}}), 2, 15);
-        mesh.addCell(ElementType::PIXEL, std::vector<long>({{18, 20, 19, 21}}), 2, 16);
+        mesh.addCell(ElementType::PIXEL, std::vector<long>({{12, 14, 13, 15}}), 1,  0, 13);
+        mesh.addCell(ElementType::PIXEL, std::vector<long>({{14, 16, 15, 17}}), 2, -1, 14);
+        mesh.addCell(ElementType::PIXEL, std::vector<long>({{16, 18, 17, 19}}), 2, -1, 15);
+        mesh.addCell(ElementType::PIXEL, std::vector<long>({{18, 20, 19, 21}}), 2, -1, 16);
     }
 
     mesh.update();

@@ -46,7 +46,7 @@ int subtest_001(int rank, VolUnstructured *patch_2D, VolUnstructured *patch_2D_r
     // Create the patch
     log::cout() << "Creating 2D patch..." << std::endl;
 
-    patch_2D = new VolUnstructured(2, MPI_COMM_WORLD);
+    patch_2D = new VolUnstructured(2, MPI_COMM_WORLD, 2);
     patch_2D->getVTK().setName("unstructured_patch_2D");
 
     patch_2D->setVertexAutoIndexing(false);
@@ -323,7 +323,7 @@ int subtest_002(int rank, VolUnstructured *patch_3D, VolUnstructured *patch_3D_r
     // Create the patch
     log::cout() << "\n\n:: 3D unstructured mesh ::\n";
 
-    patch_3D = new VolUnstructured(3, MPI_COMM_WORLD);
+    patch_3D = new VolUnstructured(3, MPI_COMM_WORLD, 2);
     patch_3D->getVTK().setName("unstructured_patch_3D");
 
     patch_3D->setVertexAutoIndexing(false);

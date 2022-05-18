@@ -1876,13 +1876,16 @@ std::vector<long> VolOctree::importCells(const std::vector<OctantInfo> &octantIn
 			uint64_t globalTreeId = m_tree->getGhostGlobalIdx(octantInfo.id);
 			owner = m_tree->getOwnerRank(globalTreeId);
 		}
+
+		// Cell halo layer
+		int haloLayer = m_tree->getGhostLayer(octant);
 #endif
 
 		// Add cell
 		long cellId;
 		if (!restoreStream) {
 #if BITPIT_ENABLE_MPI==1
-			CellIterator cellIterator = addCell(m_cellTypeInfo->type, std::move(cellConnect), owner);
+			CellIterator cellIterator = addCell(m_cellTypeInfo->type, std::move(cellConnect), owner, haloLayer);
 #else
 			CellIterator cellIterator = addCell(m_cellTypeInfo->type, std::move(cellConnect));
 #endif
@@ -1891,7 +1894,7 @@ std::vector<long> VolOctree::importCells(const std::vector<OctantInfo> &octantIn
 			utils::binary::read(*restoreStream, cellId);
 
 #if BITPIT_ENABLE_MPI==1
-			restoreCell(m_cellTypeInfo->type, std::move(cellConnect), owner, cellId);
+			restoreCell(m_cellTypeInfo->type, std::move(cellConnect), owner, haloLayer, cellId);
 #else
 			restoreCell(m_cellTypeInfo->type, std::move(cellConnect), cellId);
 #endif

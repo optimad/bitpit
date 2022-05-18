@@ -499,17 +499,22 @@ public:
 	CellIterator addCell(ElementType type, std::unique_ptr<long[]> &&connectStorage, long id = Element::NULL_ID);
 #if BITPIT_ENABLE_MPI==1
 	CellIterator addCell(const Cell &source, int owner, long id = Element::NULL_ID);
+	CellIterator addCell(const Cell &source, int owner, int haloLayer, long id = Element::NULL_ID);
 	CellIterator addCell(Cell &&source, int owner, long id = Element::NULL_ID);
+	CellIterator addCell(Cell &&source, int owner, int haloLayer, long id = Element::NULL_ID);
 	CellIterator addCell(ElementType type, int owner, long id = Element::NULL_ID);
+	CellIterator addCell(ElementType type, int owner, int haloLayer, long id = Element::NULL_ID);
 	CellIterator addCell(ElementType type, const std::vector<long> &connectivity, int owner, long id = Element::NULL_ID);
+	CellIterator addCell(ElementType type, const std::vector<long> &connectivity, int owner, int haloLayer, long id = Element::NULL_ID);
 	CellIterator addCell(ElementType type, std::unique_ptr<long[]> &&connectStorage, int owner, long id = Element::NULL_ID);
+	CellIterator addCell(ElementType type, std::unique_ptr<long[]> &&connectStorage, int owner, int haloLayer, long id = Element::NULL_ID);
 #endif
 	bool deleteCell(long id);
 	template<typename IdStorage>
 	bool deleteCells(const IdStorage &ids);
 #if BITPIT_ENABLE_MPI==1
 	CellIterator ghostCell2InternalCell(long id);
-	CellIterator internalCell2GhostCell(long id, int owner);
+	CellIterator internalCell2GhostCell(long id, int owner, int haloLayer);
 #endif
 	virtual double evalCellSize(long id) const = 0;
 	BITPIT_DEPRECATED(long countFreeCells() const);
@@ -702,7 +707,7 @@ public:
 
 	int getCellOwner(long id) const;
 	BITPIT_DEPRECATED(int getCellRank(long id) const);
-	virtual int getCellHaloLayer(long id) const;
+	int getCellHaloLayer(long id) const;
 
 	int getVertexOwner(long id) const;
 	BITPIT_DEPRECATED(int getVertexRank(long id) const);
@@ -797,7 +802,7 @@ protected:
 #endif
 
 #if BITPIT_ENABLE_MPI==1
-	CellIterator restoreCell(ElementType type, std::unique_ptr<long[]> &&connectStorage, int owner, long id);
+	CellIterator restoreCell(ElementType type, std::unique_ptr<long[]> &&connectStorage, int owner, int haloLayer, long id);
 #else
 	CellIterator restoreCell(ElementType type, std::unique_ptr<long[]> &&connectStorage, long id);
 #endif
@@ -1016,9 +1021,11 @@ private:
 	void unsetGhostVertexInfo(long id);
 	void clearGhostVerticesInfo();
 
-	void setGhostCellInfo(long id, int owner);
+	void setGhostCellInfo(long id, int owner, int haloLayer);
 	void unsetGhostCellInfo(long id);
 	void clearGhostCellsInfo();
+
+	void computeCellHaloLayer(int id);
 
 	void _partitioningAlter_deleteGhosts();
 
@@ -1041,6 +1048,9 @@ private:
 	int evalOwner() const;
 
 	std::unordered_map<long, int> evaluateExchangeVertexOwners() const;
+
+	template<typename ExcludeList>
+	bool confirmCellHaloLayer(const Cell &cell, int haloLayer, const ExcludeList &excludeList = ExcludeList()) const;
 #endif
 
 #if BITPIT_ENABLE_MPI==1
@@ -1106,12 +1116,12 @@ private:
 
 	CellIterator _addInternalCell(ElementType type, std::unique_ptr<long[]> &&connectStorage, long id);
 #if BITPIT_ENABLE_MPI==1
-	CellIterator _addGhostCell(ElementType type, std::unique_ptr<long[]> &&connectStorage, int owner, long id);
+	CellIterator _addGhostCell(ElementType type, std::unique_ptr<long[]> &&connectStorage, int owner, int haloLayer, long id);
 #endif
 
 	void _restoreInternalCell(const CellIterator &iterator, ElementType type, std::unique_ptr<long[]> &&connectStorage);
 #if BITPIT_ENABLE_MPI==1
-	void _restoreGhostCell(const CellIterator &iterator, ElementType type, std::unique_ptr<long[]> &&connectStorage, int owner);
+	void _restoreGhostCell(const CellIterator &iterator, ElementType type, std::unique_ptr<long[]> &&connectStorage, int owner, int haloLayer);
 #endif
 
 	void _deleteInternalCell(long id);
@@ -1136,5 +1146,6 @@ private:
 
 // Template implementation
 #include "patch_kernel.tpp"
+#include "patch_kernel_parallel.tpp"
 
 #endif
