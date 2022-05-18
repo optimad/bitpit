@@ -49,9 +49,11 @@ namespace bitpit {
 
 	\param communicator is the communicator to be used for exchanging data
 	among the processes
+	\param haloSize is the size, expressed in number of layers, of the ghost
+	cells halo
 */
-SurfUnstructured::SurfUnstructured(MPI_Comm communicator)
-	: SurfaceKernel(communicator, 1, true)
+SurfUnstructured::SurfUnstructured(MPI_Comm communicator, std::size_t haloSize)
+	: SurfaceKernel(communicator, haloSize, true)
 #else
 /*!
 	Creates an uninitialized serial patch.
@@ -73,9 +75,11 @@ SurfUnstructured::SurfUnstructured()
 	\param dimension is the dimension of the patch
 	\param communicator is the communicator to be used for exchanging data
 	among the processes
+	\param haloSize is the size, expressed in number of layers, of the ghost
+	cells halo
 */
-SurfUnstructured::SurfUnstructured(int dimension, MPI_Comm communicator)
-	: SurfaceKernel(PatchManager::AUTOMATIC_ID, dimension, communicator, 1, true)
+SurfUnstructured::SurfUnstructured(int dimension, MPI_Comm communicator, std::size_t haloSize)
+	: SurfaceKernel(PatchManager::AUTOMATIC_ID, dimension, communicator, haloSize, true)
 #else
 /*!
 	Creates a patch.
@@ -100,9 +104,11 @@ SurfUnstructured::SurfUnstructured(int dimension)
 	\param dimension is the dimension of the patch
 	\param communicator is the communicator to be used for exchanging data
 	among the processes
+	\param haloSize is the size, expressed in number of layers, of the ghost
+	cells halo
 */
-SurfUnstructured::SurfUnstructured(int id, int dimension, MPI_Comm communicator)
-	: SurfaceKernel(id, dimension, communicator, 1, true)
+SurfUnstructured::SurfUnstructured(int id, int dimension, MPI_Comm communicator, std::size_t haloSize)
+	: SurfaceKernel(id, dimension, communicator, haloSize, true)
 #else
 /*!
 	Creates a patch.
@@ -126,9 +132,11 @@ SurfUnstructured::SurfUnstructured(int id, int dimension)
 	\param stream is the stream to read from
 	\param communicator is the communicator to be used for exchanging data
 	among the processes
+	\param haloSize is the size, expressed in number of layers, of the ghost
+	cells halo
 */
-SurfUnstructured::SurfUnstructured(std::istream &stream, MPI_Comm communicator)
-	: SurfaceKernel(communicator, 1, false)
+SurfUnstructured::SurfUnstructured(std::istream &stream, MPI_Comm communicator, std::size_t haloSize)
+	: SurfaceKernel(communicator, haloSize, false)
 #else
 /*!
 	Creates a patch restoring the patch saved in the specified stream.

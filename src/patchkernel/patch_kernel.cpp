@@ -573,6 +573,7 @@ void PatchKernel::initialize()
 #if BITPIT_ENABLE_MPI==1
 	m_vtk.addData<long>("cellGlobalIndex", VTKFieldType::SCALAR, VTKLocation::CELL, this);
 	m_vtk.addData<int>("cellRank", VTKFieldType::SCALAR, VTKLocation::CELL, this);
+	m_vtk.addData<int>("cellHaloLayer", VTKFieldType::SCALAR, VTKLocation::CELL, this);
 	m_vtk.addData<int>("vertexRank", VTKFieldType::SCALAR, VTKLocation::POINT, this);
 #endif
 }
@@ -4898,11 +4899,16 @@ void PatchKernel::dumpCells(std::ostream &stream) const
 		utils::binary::write(stream, cell.getId());
 		utils::binary::write(stream, cell.getPID());
 		utils::binary::write(stream, cell.getType());
+
 #if BITPIT_ENABLE_MPI==1
 		utils::binary::write(stream, getCellOwner(cell.getId()));
+		utils::binary::write(stream, getCellHaloLayer(cell.getId()));
 #else
 		int dummyOwner = 0;
 		utils::binary::write(stream, dummyOwner);
+
+		int dummyHaloLayer = 0;
+		utils::binary::write(stream, dummyHaloLayer);
 #endif
 
 		int cellConnectSize = cell.getConnectSize();
@@ -4953,9 +4959,15 @@ void PatchKernel::restoreCells(std::istream &stream)
 #if BITPIT_ENABLE_MPI==1
 		int owner;
 		utils::binary::read(stream, owner);
+
+		int haloLayer;
+		utils::binary::read(stream, haloLayer);
 #else
 		int dummyOwner;
 		utils::binary::read(stream, dummyOwner);
+
+		int dummyHaloLayer;
+		utils::binary::read(stream, dummyHaloLayer);
 #endif
 
 		int cellConnectSize;
@@ -4968,7 +4980,7 @@ void PatchKernel::restoreCells(std::istream &stream)
 
 		CellIterator iterator;
 #if BITPIT_ENABLE_MPI==1
-		iterator = restoreCell(type, std::move(cellConnect), owner, id);
+		iterator = restoreCell(type, std::move(cellConnect), owner, haloLayer, id);
 #else
 		iterator = restoreCell(type, std::move(cellConnect), id);
 #endif
@@ -7843,6 +7855,10 @@ void PatchKernel::flushData(std::fstream &stream, const std::string &name, VTKFo
 	} else if (name == "cellRank") {
 		for (const Cell &cell : getVTKCellWriteRange()) {
 			genericIO::flushBINARY(stream, getCellOwner(cell.getId()));
+		}
+	} else if (name == "cellHaloLayer") {
+		for (const Cell &cell : getVTKCellWriteRange()) {
+			genericIO::flushBINARY(stream, getCellHaloLayer(cell.getId()));
 		}
 	} else if (name == "vertexRank") {
 		VertexConstIterator endItr = vertexConstEnd();

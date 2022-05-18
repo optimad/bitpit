@@ -40,10 +40,10 @@ public:
 
     // Constructors
 #if BITPIT_ENABLE_MPI==1
-    SurfUnstructured(MPI_Comm communicator);
-    SurfUnstructured(int dimension, MPI_Comm communicator);
-    SurfUnstructured(int id, int dimension, MPI_Comm communicator);
-    SurfUnstructured(std::istream &stream, MPI_Comm communicator);
+    SurfUnstructured(MPI_Comm communicator, std::size_t haloSize = 1);
+    SurfUnstructured(int dimension, MPI_Comm communicator, std::size_t haloSize = 1);
+    SurfUnstructured(int id, int dimension, MPI_Comm communicator, std::size_t haloSize = 1);
+    SurfUnstructured(std::istream &stream, MPI_Comm communicator, std::size_t haloSize = 1);
 #else
     SurfUnstructured();
     SurfUnstructured(int dimension);
