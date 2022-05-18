@@ -516,6 +516,7 @@ public:
 	BITPIT_DEPRECATED(long countFreeCells() const);
 	long countBorderCells() const;
 	long countOrphanCells() const;
+	std::vector<long> findOrphanCells() const;
 	virtual std::array<double, 3> evalCellCentroid(long id) const;
 	virtual void evalCellBoundingBox(long id, std::array<double,3> *minPoint, std::array<double,3> *maxPoint) const;
 	BITPIT_DEPRECATED(ConstProxyVector<std::array<double BITPIT_COMMA 3>> getCellVertexCoordinates(long id) const);
