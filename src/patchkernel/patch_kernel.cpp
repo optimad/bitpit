@@ -3129,6 +3129,19 @@ long PatchKernel::countBorderCells() const
 */
 long PatchKernel::countOrphanCells() const
 {
+	return findOrphanCells().size();
+}
+
+/*!
+	Finds orphan cells within the patch.
+
+	A cell is orphan if not adjacent to any cell in the patch (neither
+	along an edge, nor at vertex)
+
+	\return The number of orphan cells.
+*/
+std::vector<long> PatchKernel::findOrphanCells() const
+{
 	// Compute vertex valence
 	std::unordered_map<long, short> vertexValence;
 	for (const Cell &cell : m_cells) {
@@ -3141,7 +3154,7 @@ long PatchKernel::countOrphanCells() const
 	}
 
 	// Loop over cells
-	long nOrphanCells = 0;
+	std::vector<long> orphanCells;
 	for (const Cell &cell : m_cells) {
 		long isIsolated = true;
 		ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
@@ -3155,11 +3168,11 @@ long PatchKernel::countOrphanCells() const
 		}
 
 		if (isIsolated) {
-			++nOrphanCells;
+			orphanCells.push_back(cell.getId());
 		}
-        }
+	}
 
-	return nOrphanCells;
+	return orphanCells;
 }
 
 /*!
