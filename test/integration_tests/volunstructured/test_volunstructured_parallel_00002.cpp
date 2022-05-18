@@ -44,9 +44,9 @@ void fillMesh(VolUnstructured *mesh)
     double heightbottom = -1.0;
     double heighttop    =  1.0;
 
-    int nr = 47;
-    int nt = 55;
-    int nh = 50;
+    int nr = 4;
+    int nt = 5;
+    int nh = 7;
 
     double deltar = (radiusout - radiusin) / double(nr);
     double deltat = (azimuthout - azimuthin) / double(nt);
@@ -112,7 +112,7 @@ int subtest_001(int rank)
     // Create the patch
     log::cout() << "Creating patch..." << std::endl;
 
-    std::unique_ptr<VolUnstructured> patch = std::unique_ptr<VolUnstructured>(new VolUnstructured(3, MPI_COMM_WORLD));
+    std::unique_ptr<VolUnstructured> patch = std::unique_ptr<VolUnstructured>(new VolUnstructured(3, MPI_COMM_WORLD, 3));
     if (rank == 0) {
         fillMesh(patch.get());
     }

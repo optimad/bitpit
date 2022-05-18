@@ -50,9 +50,11 @@ namespace bitpit {
 	\param communicator is the communicator to be used for exchanging data
 	among the processes. If a null comunicator is provided, a serial patch
 	will be created
+	\param haloSize is the size, expressed in number of layers, of the ghost
+	cells halo
 */
-VolUnstructured::VolUnstructured(MPI_Comm communicator)
-	: VolumeKernel(communicator, 1, true)
+VolUnstructured::VolUnstructured(MPI_Comm communicator, std::size_t haloSize)
+	: VolumeKernel(communicator, haloSize, true)
 #else
 /*!
 	Creates an uninitialized serial patch.
@@ -75,9 +77,11 @@ VolUnstructured::VolUnstructured()
 	\param communicator is the communicator to be used for exchanging data
 	among the processes. If a null comunicator is provided, a serial patch
 	will be created
+	\param haloSize is the size, expressed in number of layers, of the ghost
+	cells halo
 */
-VolUnstructured::VolUnstructured(int dimension, MPI_Comm communicator)
-	: VolUnstructured(PatchManager::AUTOMATIC_ID, dimension, communicator)
+VolUnstructured::VolUnstructured(int dimension, MPI_Comm communicator, std::size_t haloSize)
+	: VolUnstructured(PatchManager::AUTOMATIC_ID, dimension, communicator, haloSize)
 #else
 /*!
 	Creates a patch.
@@ -103,9 +107,11 @@ VolUnstructured::VolUnstructured(int dimension)
 	\param communicator is the communicator to be used for exchanging data
 	among the processes. If a null comunicator is provided, a serial patch
 	will be created
+	\param haloSize is the size, expressed in number of layers, of the ghost
+	cells halo
 */
-VolUnstructured::VolUnstructured(int id, int dimension, MPI_Comm communicator)
-	: VolumeKernel(id, dimension, communicator, 1, true)
+VolUnstructured::VolUnstructured(int id, int dimension, MPI_Comm communicator, std::size_t haloSize)
+	: VolumeKernel(id, dimension, communicator, haloSize, true)
 #else
 /*!
 	Creates a patch.

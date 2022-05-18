@@ -39,9 +39,9 @@ public:
 	using PatchKernel::locatePoint;
 
 #if BITPIT_ENABLE_MPI==1
-	VolUnstructured(MPI_Comm communicator);
-	VolUnstructured(int dimension, MPI_Comm communicator);
-	VolUnstructured(int id, int dimension, MPI_Comm communicator);
+	VolUnstructured(MPI_Comm communicator, std::size_t haloSize = 1);
+	VolUnstructured(int dimension, MPI_Comm communicator, std::size_t haloSize = 1);
+	VolUnstructured(int id, int dimension, MPI_Comm communicator, std::size_t haloSize = 1);
 #else
 	VolUnstructured();
 	VolUnstructured(int dimension);
