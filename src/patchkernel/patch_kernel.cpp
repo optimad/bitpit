@@ -3176,6 +3176,82 @@ std::vector<long> PatchKernel::findOrphanCells() const
 }
 
 /*!
+	Finds duplicate cells within the patch.
+
+	A cell is a duplicate if there is at least one other cell with exactly
+	the same vertices.
+
+	\return The number of duplicate cells.
+*/
+long PatchKernel::countDuplicateCells() const
+{
+	return findDuplicateCells().size();
+}
+
+/*!
+	Finds duplicate cells within the patch.
+
+	A cell is a duplicate if there is at least one other cell with exactly
+	the same vertices.
+
+	\return The list of duplicate cells.
+*/
+std::vector<long> PatchKernel::findDuplicateCells() const
+{
+	// Define the hasher and the predicate to be used for lists of vertex ids
+	//
+	// These operators should be able to identify that two lists of vertex ids
+	// are the same regardless of the order in which the ids are listed.
+	auto hasher = [](const ConstProxyVector<long> &ids)
+	{
+		std::size_t hash = std::hash<long>{}(0);
+		for (long id : ids) {
+			hash = hash + std::hash<long>{}(id);
+		}
+
+		return hash;
+	};
+
+	std::unordered_map<long, std::size_t > counters;
+	auto predicate = [&counters](const ConstProxyVector<long> &ids_A, const ConstProxyVector<long> &ids_B)
+	{
+		counters.clear();
+		for (long id : ids_A) {
+			counters[id]++;
+		}
+		for (long id : ids_B) {
+			counters[id]--;
+		}
+
+		for (const auto &entry : counters) {
+			if (entry.second != 0) {
+				return false;
+			}
+		}
+
+		return true;
+	};
+
+	// Detect if there are cells that share the same list of vertices
+	//
+	// For each cell, the list of vertex ids is added into a set. If a collision
+	// is detected, we have found a duplicate cell.
+	std::vector<long> duplicateCells;
+	std::unordered_set<ConstProxyVector<long>, decltype(hasher), decltype(predicate)> vertexStash(getCellCount(), hasher, predicate);
+	for (const Cell &cell : m_cells) {
+		ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
+		auto vertexStashItr = vertexStash.find(cellVertexIds);
+		if (vertexStashItr == vertexStash.end()) {
+			vertexStash.insert(std::move(cellVertexIds));
+		} else {
+			duplicateCells.push_back(cell.getId());
+		}
+	}
+
+	return duplicateCells;
+}
+
+/*!
 	Updates the id of the last internal cell.
 */
 void PatchKernel::updateLastInternalCellId()

@@ -487,6 +487,215 @@ int subtest_002()
 }
 
 /*!
+* Subtest 003
+*
+* Testing identification of duplicate cells
+*/
+int subtest_003()
+{
+    log::cout() << "\n\n:: Testing identification of duplicate cells in 3D unstructured mesh ::\n";
+
+#if BITPIT_ENABLE_MPI
+    VolUnstructured *patch_3D = new VolUnstructured(0, 3, MPI_COMM_NULL);
+#else
+    VolUnstructured *patch_3D = new VolUnstructured(0, 3);
+#endif
+    patch_3D->getVTK().setName("unstructured_uniform_patch_3D_with_duplicates");
+
+    patch_3D->setVertexAutoIndexing(false);
+
+    patch_3D->addVertex({{0.00000000, 0.00000000,  0.00000000}},  1);
+    patch_3D->addVertex({{1.00000000, 0.00000000,  0.00000000}},  2);
+    patch_3D->addVertex({{1.00000000, 1.00000000,  0.00000000}},  3);
+    patch_3D->addVertex({{0.00000000, 1.00000000, -0.75000000}},  4);
+    patch_3D->addVertex({{0.00000000, 0.00000000,  1.00000000}},  5);
+    patch_3D->addVertex({{1.00000000, 0.00000000,  1.00000000}},  6);
+    patch_3D->addVertex({{1.00000000, 1.00000000,  1.00000000}},  7);
+    patch_3D->addVertex({{0.00000000, 1.00000000,  1.00000000}},  8);
+    patch_3D->addVertex({{1.00000000, 0.00000000,  0.54678323}},  9);
+    patch_3D->addVertex({{0.50000000, 0.00000000,  1.00000000}}, 10);
+    patch_3D->addVertex({{0.00000000, 0.00000000,  0.54678323}}, 11);
+    patch_3D->addVertex({{1.00000000, 1.00000000,  0.54678323}}, 12);
+    patch_3D->addVertex({{0.50000000, 1.00000000,  1.00000000}}, 13);
+    patch_3D->addVertex({{0.00000000, 1.00000000,  0.54678323}}, 14);
+    patch_3D->addVertex({{1.00000000, 0.50000000,  1.00000000}}, 15);
+    patch_3D->addVertex({{0.00000000, 0.50000000,  1.00000000}}, 16);
+    patch_3D->addVertex({{0.51053620, 0.00000000,  0.34680184}}, 17);
+    patch_3D->addVertex({{0.36278402, 0.00000000,  0.68603230}}, 18);
+    patch_3D->addVertex({{0.69618860, 0.00000000,  0.73234294}}, 19);
+    patch_3D->addVertex({{0.51053620, 1.00000000,  0.34680184}}, 20);
+    patch_3D->addVertex({{0.36278402, 1.00000000,  0.68603230}}, 21);
+    patch_3D->addVertex({{0.69618860, 1.00000000,  0.73234294}}, 22);
+    patch_3D->addVertex({{1.00000000, 0.51053620,  0.34680184}}, 23);
+    patch_3D->addVertex({{1.00000000, 0.36278402,  0.68603230}}, 24);
+    patch_3D->addVertex({{1.00000000, 0.69618860,  0.73234294}}, 25);
+    patch_3D->addVertex({{0.00000000, 0.51053620,  0.34680184}}, 26);
+    patch_3D->addVertex({{0.00000000, 0.36278402,  0.68603230}}, 27);
+    patch_3D->addVertex({{0.00000000, 0.69618860,  0.73234294}}, 28);
+    patch_3D->addVertex({{0.50000000, 0.50000000,  1.00000000}}, 29);
+    patch_3D->addVertex({{0.75000000, 0.25000000,  1.00000000}}, 30);
+    patch_3D->addVertex({{0.25000000, 0.25000000,  1.00000000}}, 31);
+    patch_3D->addVertex({{0.00000000, 0.00000000, -1.50000000}}, 32);
+    patch_3D->addVertex({{1.00000000, 0.00000000, -1.00000000}}, 33);
+    patch_3D->addVertex({{1.00000000, 1.00000000, -0.50000000}}, 34);
+    patch_3D->addVertex({{0.00000000, 1.00000000, -1.00000000}}, 35);
+    patch_3D->addVertex({{0.00000000, 0.00000000, -2.25000000}}, 36);
+    patch_3D->addVertex({{1.00000000, 0.00000000, -1.66666666}}, 37);
+    patch_3D->addVertex({{1.00000000, 1.00000000, -2.12500000}}, 38);
+    patch_3D->addVertex({{0.00000000, 1.00000000, -2.00000000}}, 39);
+    patch_3D->addVertex({{0.00000000, 0.00000000, -3.00000000}}, 40);
+    patch_3D->addVertex({{1.00000000, 0.00000000, -3.00000000}}, 41);
+    patch_3D->addVertex({{1.00000000, 1.00000000, -3.00000000}}, 42);
+    patch_3D->addVertex({{0.00000000, 1.00000000, -3.00000000}}, 43);
+    patch_3D->addVertex({{0.00000000, 0.00000000, -4.00000000}}, 44);
+    patch_3D->addVertex({{1.00000000, 0.00000000, -4.00000000}}, 45);
+    patch_3D->addVertex({{1.00000000, 1.00000000, -4.00000000}}, 46);
+    patch_3D->addVertex({{0.00000000, 1.00000000, -4.00000000}}, 47);
+    patch_3D->addVertex({{0.50000000, 0.00000000, -4.00000000}}, 48);
+    patch_3D->addVertex({{1.00000000, 0.50000000, -4.00000000}}, 49);
+    patch_3D->addVertex({{0.50000000, 1.00000000, -4.00000000}}, 50);
+    patch_3D->addVertex({{0.33333333, 0.66666666, -4.00000000}}, 51);
+    patch_3D->addVertex({{0.00000000, 0.50000000, -4.00000000}}, 52);
+
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{29, 22, 25, 20}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{18, 26, 27, 29}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{26, 21, 28, 29}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{ 4, 26, 23, 20}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{24, 29, 25, 23}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{29, 21, 22, 20}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{26, 28, 27, 29}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{23, 26, 29, 20}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{26, 23, 29, 17}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{18, 26, 29, 17}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{24, 29, 23, 17}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{26, 21, 29, 20}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{29, 25, 23, 20}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{ 4, 23,  3, 20}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{31, 18, 27, 29}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{22, 12, 25, 20}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{18, 26, 11, 27}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{ 9, 19, 24, 17}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{26, 21, 14, 28}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{15, 22,  7, 25}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{15, 29, 22, 25}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{25, 12, 23, 20}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{23,  4,  3,  2}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{26, 18, 11, 17}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{ 9, 24, 23, 17}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{21, 26, 14, 20}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{28, 21, 13, 29}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{30, 18, 19, 10}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{30, 31, 29, 18}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{30, 31, 18, 10}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{21,  8, 28, 13}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{16, 13, 29, 28}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{16, 13, 28,  8}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{13, 15, 22,  7}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{13, 15, 29, 22}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{15, 24, 29, 25}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{21, 13, 29, 22}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{28, 16, 27, 29}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{31, 18,  5, 27}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{24, 30, 15, 29}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{16, 31, 27, 29}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{18, 11,  5, 27}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{30, 19, 24,  6}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{ 1, 26, 11, 17}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{19,  9, 24,  6}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{14, 21,  8, 28}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{18, 31,  5, 10}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{23, 12,  3, 20}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{19, 30, 10,  6}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{ 7, 22, 12, 25}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{24, 30,  6, 15}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{16, 31,  5, 27}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{23,  9, 17,  2}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{26,  4, 14, 20}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{18, 17, 24, 19}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{24, 17, 18, 29}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{18, 24, 30, 19}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{30, 24, 18, 29}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{ 2, 17, 26,  1}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{ 2, 26, 17, 23}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{ 4,  2, 26,  1}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{ 4, 26,  2, 23}}));
+    patch_3D->addCell(ElementType::WEDGE,      std::vector<long>({{ 2, 4, 1, 33, 35, 32}}));
+    patch_3D->addCell(ElementType::WEDGE,      std::vector<long>({{ 4, 2, 3, 35, 33, 34}}));
+    patch_3D->addCell(ElementType::PYRAMID,    std::vector<long>({{36, 37, 38, 39, 33}}));
+    patch_3D->addCell(ElementType::PYRAMID,    std::vector<long>({{39, 38, 34, 35, 33}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{35, 36, 39, 33}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{32, 35, 33, 36}}));
+    patch_3D->addCell(ElementType::HEXAHEDRON, std::vector<long>({{42, 43, 40, 41, 38, 39, 36, 37}}));
+    patch_3D->addCell(ElementType::POLYHEDRON, std::vector<long>({{11,
+                                                                         4, 42, 43, 40, 41,
+                                                                         5, 52, 51, 50, 49, 48,
+                                                                         3, 41, 40, 48,
+                                                                         3, 42, 41, 49,
+                                                                         3, 43, 42, 50,
+                                                                         3, 40, 43, 52,
+                                                                         3, 43, 51, 52,
+                                                                         3, 43, 50, 51,
+                                                                         3, 42, 49, 50,
+                                                                         3, 41, 48, 49,
+                                                                         3, 40, 52, 48
+                                                                       }}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{52, 51, 47, 43}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{51, 50, 47, 43}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{44, 48, 52, 40}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{48, 45, 49, 41}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{50, 49, 46, 42}}));
+
+    patch_3D->addCell(ElementType::WEDGE,      std::vector<long>({{ 2, 4, 1, 33, 35, 32}}));
+    patch_3D->addCell(ElementType::WEDGE,      std::vector<long>({{ 4, 2, 3, 35, 33, 34}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{21,  8, 28, 13}}));
+    patch_3D->addCell(ElementType::TETRA,      std::vector<long>({{16, 13, 29, 28}}));
+    patch_3D->addCell(ElementType::HEXAHEDRON, std::vector<long>({{42, 43, 40, 41, 38, 39, 36, 37}}));
+    patch_3D->addCell(ElementType::POLYHEDRON, std::vector<long>({{11,
+                                                                         4, 42, 43, 40, 41,
+                                                                         5, 52, 51, 50, 49, 48,
+                                                                         3, 41, 40, 48,
+                                                                         3, 42, 41, 49,
+                                                                         3, 43, 42, 50,
+                                                                         3, 40, 43, 52,
+                                                                         3, 43, 51, 52,
+                                                                         3, 43, 50, 51,
+                                                                         3, 42, 49, 50,
+                                                                         3, 41, 48, 49,
+                                                                         3, 40, 52, 48
+                                                                       }}));
+
+    patch_3D->initializeAdjacencies();
+    patch_3D->initializeInterfaces();
+    patch_3D->update();
+    patch_3D->write();
+
+    // List of expected duplicate cells
+    std::vector<long> expectedDuplicateCells;
+    expectedDuplicateCells.push_back(75);
+    expectedDuplicateCells.push_back(76);
+    expectedDuplicateCells.push_back(77);
+    expectedDuplicateCells.push_back(78);
+    expectedDuplicateCells.push_back(79);
+    expectedDuplicateCells.push_back(80);
+
+    log::cout() << "\n>> Expected duplicate cells: " << expectedDuplicateCells << "\n";
+
+    // Identify duplicate cells
+    std::vector<long> duplicateCells = patch_3D->findDuplicateCells();
+
+    log::cout() << ">> Duplicate cells: " << duplicateCells << "\n";
+
+    if (expectedDuplicateCells != duplicateCells) {
+        throw std::runtime_error("Duplicate cells doens't match the expected ones.");
+    }
+
+    // Clean-up
+    delete patch_3D;
+
+    return 0;
+}
+
+/*!
 * Main program.
 */
 int main(int argc, char *argv[])
@@ -512,6 +721,11 @@ int main(int argc, char *argv[])
         }
 
         status = subtest_002();
+        if (status != 0) {
+            return status;
+        }
+
+        status = subtest_003();
         if (status != 0) {
             return status;
         }
