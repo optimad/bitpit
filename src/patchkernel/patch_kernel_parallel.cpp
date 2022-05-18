@@ -2609,7 +2609,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
 
         verticesBuffer << (long) vertexSendList.size();
         for (long vertexId : vertexSendList) {
-            // Cell information
+            // Vertex information
             bool isFrame = (frameVertices.count(vertexId) > 0);
             bool isHalo  = (haloVertices.count(vertexId) > 0);
 
@@ -3127,7 +3127,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
 
         verticesMap.clear();
         for (long i = 0; i < nRecvVertices; ++i) {
-            // Cell data
+            // Vertex data
             bool isFrame;
             verticesBuffer >> isFrame;
 
