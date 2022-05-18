@@ -110,6 +110,42 @@ void readConfiguration(const std::string &filename, Config *rootConfig)
 }
 
 /*!
+    Reading a json dictionary from plain c++ string and fill a bitpit::Config tree
+    accordingly.
+
+    String Encoding is always considered of UTF-8 type .
+
+    \param[in] source string with JSON contents
+    \param[in,out] rootConfig is a pointer to Config tree that will be used
+    to store the data read from the string
+*/
+void readBufferConfiguration(const std::string &source, Config *rootConfig)
+{
+    if (!rootConfig) {
+        throw std::runtime_error("JSON::readDoc Null Config tree structure passed");
+    }
+
+    // Open a UTF-8 compliant rapidjson::StringStream
+    rapidjson::StringStream str(source.c_str());
+    // Parse stream directly
+    rapidjson::Document jsonRoot;
+    jsonRoot.ParseStream(str);
+
+    // Handle parse errors
+    if (jsonRoot.HasParseError()) {
+        std::string message = "JSON:readBufferConfiguration error of type : ";
+        message += std::string(rapidjson::GetParseError_En(jsonRoot.GetParseError()));
+        throw std::runtime_error(message.c_str());
+    }
+
+    // Root should be an object, bitpit doens't support root arrays.
+    assert(jsonRoot.IsObject() && "JSON:readBufferConfiguration parsed document root is not an object");
+
+    // Fill the configuration
+    readNode("", jsonRoot, rootConfig);
+}
+
+/*!
     Read recursively a json object content and fill accordingly the Config tree
     branch.
 
@@ -244,6 +280,43 @@ void writeConfiguration(const std::string &filename, const Config *rootConfig, b
 
     // Close the file.
     std::fclose(fp);
+}
+
+/*!
+    Write a bitpit::Config tree contents to json formatted c++ string.
+
+    NOTE: JSON root document object does not have a key name unlike XML.
+
+    Tree contents will be written to a plain c++ string, with UTF-8 standard encoding, and 
+    appended to any previous content of the source string.
+    
+    \param[in] source string to write JSON contents.
+    \param[in] rootConfig pointer to the Config tree to be written on target string
+*/
+void writeBufferConfiguration(std::string &source, const Config *rootConfig)
+{
+    if (!rootConfig) {
+        throw std::runtime_error("JSON::writeConfiguration Null Config tree structure passed");
+    }
+
+    // DOM Document is GenericDocument<UTF8<>>
+    rapidjson::Document jsonRoot;
+
+    // Get the allocator
+    rapidjson::Document::AllocatorType &allocator = jsonRoot.GetAllocator();
+
+    // Create a root node and recursively fill it
+    jsonRoot.SetObject();
+    writeNode(rootConfig, jsonRoot, allocator);
+
+    // Write on a buffer with initial capacity 1024
+    rapidjson::StringBuffer buffer(0, 1024);
+
+    // Use single-ultracompact UTF-8 JSON format
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    jsonRoot.Accept(writer);
+
+    source += std::string(buffer.GetString());
 }
 
 /*!

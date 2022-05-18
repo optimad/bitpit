@@ -102,6 +102,23 @@ namespace config {
 
 };
 
+// Configuration parsing from/ writing to string 
+class ConfigStringParser : public Config
+{
+
+public:
+    ConfigStringParser(bool XMLorJSON = false);
+    ConfigStringParser(bool XMLorJSON, bool multiSections);
+
+    bool getFormat();
+
+    void read(const std::string &source, bool append = true);
+    void write(std::string & source, bool append = true) const;
+
+private:
+    bool m_xmlOrJson;
+};
+
 }
 
 #endif

@@ -109,6 +109,62 @@ int subtest_001()
     return 0;
 }
 
+
+/*!
+* Subtest 002
+*
+* Testing configuration string parser, to absorb/flush xml contents directly on string.
+*/
+int subtest_002()
+{
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+
+    std::cout << "Testing configuration XML stringfication" << std::endl;
+    std::cout << std::endl;
+
+    //create a sample config tree.
+    std::shared_ptr<bitpit::ConfigStringParser> writeStr = std::make_shared<bitpit::ConfigStringParser>(false, true); //enable xml format, enable multisection.
+    
+    //fill the writeStr tree with some data 
+    writeStr->set("ActivateOption", "1");
+    writeStr->set("Origin", "Albuquerque");
+    writeStr->set("Span", "180.0 48.0 46.0"); 
+    writeStr->set("Dimension", "5 7 3");
+    {
+        auto &subsect = writeStr->addSection("UserData");
+        subsect.set("Name","Walter");
+        subsect.set("Surname","White");
+        subsect.set("Nick","Heisenberg");
+        subsect.set("PassPhrase", "Say my name!");
+    } 
+    {
+        auto &subsect = writeStr->addSection("UserData");
+        subsect.set("Name","Jesse");
+        subsect.set("Surname","Pinkman");
+        subsect.set("Nick","Captain Cook");
+        subsect.set("PassPhrase", "Yo!");
+    } 
+    
+    std::string bufferXML;
+    //write writeStr Content to the string buffer
+    writeStr->write(bufferXML);
+    
+    std::cout<<bufferXML<<std::endl;
+
+    //read buffer in another configstring parser
+    std::shared_ptr<bitpit::ConfigStringParser> parseStr = std::make_shared<bitpit::ConfigStringParser>(false, true); //enable xml format, enable multisection.
+    parseStr->read(bufferXML);
+
+    bool check = parseStr->hasSection("UserData");
+    check = check && parseStr->hasOption("Origin");
+    check = check && parseStr->getSections("UserData").size() == 2;
+
+
+    return int(!check);
+}
+
 /*!
 * Main program.
 */
@@ -130,6 +186,7 @@ int main(int argc, char *argv[])
     int status;
     try {
         status = subtest_001();
+        status = std::max(status, subtest_002());
         if (status != 0) {
             return status;
         }

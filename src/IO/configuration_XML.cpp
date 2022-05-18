@@ -26,6 +26,7 @@
 #include <libxml/parser.h>
 #include <stdexcept>
 #include <string>
+#include <cstring>
 
 #include "configuration_XML.hpp"
 
@@ -217,6 +218,41 @@ void readConfiguration(const std::string &filename, const std::string &rootname,
 }
 
 /*!
+    Read xml information from a plain xml-formatted std::string and fill the Config tree.
+    The method is meant for general-purpose xml info absorbing. So no version checking 
+    is done in this context, nor rootname one. 
+    \param source string containing all the info formatted in XML style.
+    \param rootConfig pointer to Config tree to store data parsed from the string.
+*/
+void readBufferConfiguration(const std::string &source, Config *rootConfig)
+{
+    if (!rootConfig) {
+        throw std::runtime_error("XML::readConfiguration Null Config tree structure passed");
+    }
+
+    // Macro to check API for match with the DLL we are using
+    LIBXML_TEST_VERSION
+
+    // Read the XML string
+    const char * cstr = source.c_str();
+    xmlDoc *doc = xmlParseMemory(cstr, strlen(cstr));
+    if (doc == nullptr) {
+        throw std::runtime_error("Could not parse XML configuration string: \"" + source + "\"");
+    }
+
+    // Get the root element
+    xmlNode * rootElement = xmlDocGetRootElement(doc);
+
+    //read it as usual
+    readNode(rootElement->children, rootConfig);
+
+    // Clean-up
+    xmlFreeDoc(doc);
+    xmlCleanupParser();
+}
+
+
+/*!
     Write the configuration to the specified file.
 
     \param filename is the filename where the configuration will be written to
@@ -281,6 +317,75 @@ void writeConfiguration(const std::string &filename, const std::string &rootname
 
     // Write the XML
     xmlFreeTextWriter(writer);
+}
+
+/*!
+    Write the Config Tree to a c++ string (xml-stringfication). All contents will 
+    be appended to the target source string.
+    The method is meant for general-purpose xml info flushing.  
+    \param source string to write to
+    \param rootConfig pointer to the Config tree to be stringfied.
+    \param rootname (optional) name of the root section. Default is "root".
+*/
+void writeBufferConfiguration(std::string &source, const Config *rootConfig, const std::string &rootname)
+{
+    if (!rootConfig) {
+        throw std::runtime_error("XML::writeConfiguration Null Config tree structure passed");
+    }
+
+    int status;
+
+    xmlBufferPtr buffer = xmlBufferCreate();
+    if (buffer == NULL) {
+        throw std::runtime_error("Error creating the writing buffer");
+    }
+    // Create a new XmlWriter for DOM tree acting on memory buffer, with no compression
+    xmlTextWriterPtr writer = xmlNewTextWriterMemory(buffer, 0);
+    if (writer == NULL) {
+        throw std::runtime_error("Error creating the xml buffer writer");
+    }
+    //no indent.
+    xmlTextWriterSetIndent(writer, 0);
+
+    // Start the document
+    status = xmlTextWriterStartDocument(writer, NULL, DEFAULT_ENCODING.c_str(), NULL);
+    if (status < 0) {
+        throw std::runtime_error("Error at xmlTextWriterStartDocument");
+    }
+
+    // Start the root element
+    xmlChar *elementName = encodeString(rootname, DEFAULT_ENCODING);
+    status = xmlTextWriterStartElement(writer, BAD_CAST elementName);
+    if (status < 0) {
+        throw std::runtime_error("Error at xmlTextWriterStartElement");
+    }
+
+    // Attribute version is not relevant in this context.
+
+    // Write the configuration
+    writeNode(writer, rootConfig, DEFAULT_ENCODING);
+
+    // End section
+    status = xmlTextWriterEndElement(writer);
+    if (status < 0) {
+        throw std::runtime_error("Error at xmlTextWriterEndElement");
+    }
+
+    // Close the document
+    status = xmlTextWriterEndDocument(writer);
+    if (status < 0) {
+        throw std::runtime_error("Error at xmlTextWriterEndDocument");
+    }
+
+    // free the XML writer
+    xmlFreeTextWriter(writer);
+
+    //buffer is still hanging on, append its contents to the output string
+    //xmlChar (aka unsigned char) simple casting to char should be enough
+    source += std::string(reinterpret_cast<char*>(buffer->content));
+
+    //free the buffer
+    xmlBufferFree(buffer);
 }
 
 }

@@ -25,6 +25,7 @@
 
 #include "configuration.hpp"
 #include "configuration_XML.hpp"
+#include "compiler.hpp"
 
 #if HAS_RAPIDJSON_LIB
 #include "configuration_JSON.hpp"
@@ -356,6 +357,115 @@ namespace config {
     void write(const std::string &filename)
     {
         root.write(filename);
+    }
+
+}
+
+/*!
+    \class ConfigStringParser
+    \ingroup Configuration
+    \brief Configuration parser to c++ string
+
+    This class implements a configuration parser to absorb/flush directly on 
+    c++ string buffers.
+*/
+
+
+/*!
+    Construct a new parser.
+
+    \param XMLorJSON false to activate XML format, true for JSON format if supported,
+    otherwise fallback automatically to XML.
+*/
+ConfigStringParser::ConfigStringParser(bool XMLorJSON)
+    : Config(false)
+{
+#if HAS_RAPIDJSON_LIB
+    m_xmlOrJson = XMLorJSON;
+#else
+    BITPIT_UNUSED(XMLorJSON);
+    //revert to default XML
+    m_xmlOrJson = false;
+#endif
+}
+
+/*!
+    Construct a new parser, activating multiSections support.
+
+    \param XMLorJSON false to activate XML format, true for JSON format if supported,
+    otherwise fallback automatically to XML.
+    \param multiSections if set to true the configuration parser will allow
+    multiple sections with the same name
+*/
+ConfigStringParser::ConfigStringParser(bool XMLorJSON, bool multiSections)
+    : Config(multiSections)
+{
+#if HAS_RAPIDJSON_LIB
+    m_xmlOrJson = XMLorJSON;
+#else
+    BITPIT_UNUSED(XMLorJSON);
+    //revert to default XML
+    m_xmlOrJson = false;
+#endif
+}
+
+/*!
+    Return a bool to identify the format targeted by the class to parse/write the 
+    buffer string. 0 is XML, 1 is JSON 
+
+    \return boolean identifying the target format 
+*/
+bool ConfigStringParser::getFormat()
+{
+    return m_xmlOrJson;
+}
+
+/*!
+    Absorb the targeted buffer string formatted as specified in class construction
+    (XML or JSON).
+
+    \param source target buffer string to read
+    \param append controls if the buffer string contents will be appended to the
+    current configuration or if the current configuration will be overwritten
+    by them.
+*/
+void ConfigStringParser::read(const std::string &source, bool append)
+{
+    // Processing not-append requests
+    if (!append) {
+        Config::clear();
+    }
+
+    if(m_xmlOrJson){
+#if HAS_RAPIDJSON_LIB
+        config::JSON::readBufferConfiguration(source, this);
+#endif
+    }else{
+        config::XML::readBufferConfiguration(source, this);
+    }
+}
+
+/*!
+    Flush the configuration to a buffer string, with the format specified
+    in class construction (XML or JSON).
+
+    \param source target buffer string to write on
+    \param append controls if the configuration contents will be appended to the
+    target string or if the string will be overwritten by them.
+*/
+void ConfigStringParser::write(std::string &source, bool append) const
+{
+    // Processing not-append requests
+    if (!append) {
+        source.clear();
+    }
+
+    if(m_xmlOrJson){
+#if HAS_RAPIDJSON_LIB
+        config::JSON::writeBufferConfiguration(source, this);
+#endif
+    }else{
+        config::XML::writeBufferConfiguration(source, this, "root");
     }
 
 }

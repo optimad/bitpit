@@ -38,9 +38,11 @@ namespace XML {
 extern const std::string DEFAULT_ENCODING;
 
 void readConfiguration(const std::string &filename, const std::string &rootname, bool checkVersion, int version, Config *rootConfig);
+void readBufferConfiguration(const std::string &source,  Config *rootConfig);
 void readNode(xmlNodePtr root, Config *config);
 
 void writeConfiguration(const std::string &filename, const std::string & rootname, int version, const Config *rootConfig);
+void writeBufferConfiguration(std::string &source, const Config *rootConfig, const std::string &rootname = "root");
 void writeNode(xmlTextWriterPtr writer, const Config *config, const std::string &encoding = DEFAULT_ENCODING);
 
 xmlChar * encodeString(const std::string &in, const std::string &encoding);
