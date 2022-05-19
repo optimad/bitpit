@@ -51,10 +51,12 @@ template class LevelSetCachedObject<LevelSetNarrowBandCache<LevelSetDirectStorag
 LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>::LevelSetNarrowBandCache(Kernel *kernel)
     : LevelSetExternalPiercedStorageManager(kernel), LevelSetNarrowBandCacheBase<LevelSetExternalPiercedStorageManager>()
 {
-    m_values    = addStorage<double>(getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_JOURNALED);
-    m_gradients = addStorage<std::array<double, 3>>(getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_JOURNALED);
+    // Cache entries are added and processed one at the time, there is no
+    // advantage in using a journaled synchronization.
+    m_values    = addStorage<double>(getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_CONCURRENT);
+    m_gradients = addStorage<std::array<double, 3>>(getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_CONCURRENT);
 
-    m_narrowBandFlag = addStorage<char>(getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_JOURNALED);
+    m_narrowBandFlag = addStorage<char>(getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_CONCURRENT);
     m_narrowBandFlag->fill(0);
 }
 
@@ -250,8 +252,10 @@ void LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>::swap(LevelS
 LevelSetNarrowBandCache<LevelSetInternalPiercedStorageManager>::LevelSetNarrowBandCache()
     : LevelSetInternalPiercedStorageManager(), LevelSetNarrowBandCacheBase<LevelSetInternalPiercedStorageManager>()
 {
-    m_values    = addStorage<double>(getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_JOURNALED);
-    m_gradients = addStorage<std::array<double, 3>>(getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_JOURNALED);
+    // Cache entries are added and processed one at the time, there is no
+    // advantage in using a journaled synchronization.
+    m_values    = addStorage<double>(getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_CONCURRENT);
+    m_gradients = addStorage<std::array<double, 3>>(getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_CONCURRENT);
 }
 
 /*!

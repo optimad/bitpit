@@ -480,8 +480,10 @@ std::array<double,3> SegmentationKernel::computeSegmentVertexNormal( const SurfU
 LevelSetSegmentationNarrowBandCache<LevelSetExternalPiercedStorageManager>::LevelSetSegmentationNarrowBandCache(Kernel *kernel)
     : LevelSetExternalPiercedStorageManager(kernel), LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>(kernel), LevelSetSegmentationNarrowBandCacheBase<LevelSetExternalPiercedStorageManager>()
 {
-    m_supportIds     = this->template addStorage<long>(this->getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_JOURNALED);
-    m_surfaceNormals = this->template addStorage<std::array<double, 3>>(this->getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_JOURNALED);
+    // Cache entries are added and processed one at the time, there is no
+    // advantage in using a journaled synchronization.
+    m_supportIds     = this->template addStorage<long>(this->getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_CONCURRENT);
+    m_surfaceNormals = this->template addStorage<std::array<double, 3>>(this->getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_CONCURRENT);
 }
 
 /*!
@@ -542,8 +544,10 @@ const std::array<double, 3> & LevelSetSegmentationNarrowBandCache<LevelSetExtern
 LevelSetSegmentationNarrowBandCache<LevelSetInternalPiercedStorageManager>::LevelSetSegmentationNarrowBandCache()
     : LevelSetInternalPiercedStorageManager(), LevelSetNarrowBandCache<LevelSetInternalPiercedStorageManager>(), LevelSetSegmentationNarrowBandCacheBase<LevelSetInternalPiercedStorageManager>()
 {
-    m_supportIds     = this->template addStorage<long>(this->getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_JOURNALED);
-    m_surfaceNormals = this->template addStorage<std::array<double, 3>>(this->getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_JOURNALED);
+    // Cache entries are added and processed one at the time, there is no
+    // advantage in using a journaled synchronization.
+    m_supportIds     = this->template addStorage<long>(this->getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_CONCURRENT);
+    m_surfaceNormals = this->template addStorage<std::array<double, 3>>(this->getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_CONCURRENT);
 }
 
 /*!
