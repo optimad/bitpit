@@ -69,14 +69,13 @@ void SkdPatchInfo::buildCache()
 */
 void SkdPatchInfo::buildCache(const PatchKernel::CellConstRange &cellRange)
 {
-    m_cellBoxes = std::unique_ptr<BoxCache>(new BoxCache(2, &(m_patch->getCells())));
+    m_cellBoxes = std::unique_ptr<BoxCache>(new BoxCache(1, &(m_patch->getCells())));
     for (auto itr = cellRange.cbegin(); itr != cellRange.cend(); ++itr) {
         std::size_t rawCellId = itr.getRawIndex();
 
         // Bounding box
-        std::array<double, 3> *cellBoxMin = m_cellBoxes->rawData(rawCellId, 0);
-        std::array<double, 3> *cellBoxMax = m_cellBoxes->rawData(rawCellId, 1);
-        m_patch->evalElementBoundingBox(*itr, cellBoxMin, cellBoxMax);
+        std::array<std::array<double, 3>, 2> *cellBox = m_cellBoxes->rawData(rawCellId);
+        m_patch->evalElementBoundingBox(*itr, cellBox->data(), cellBox->data() + 1);
     }
 }
 
@@ -120,25 +119,17 @@ std::size_t SkdPatchInfo::getCellRawId(std::size_t n) const
 }
 
 /*!
-* Get the minimum point of the cached bounding box of the specified cell.
+* Get a the points that define the bounding box of the specified cell.
+*
+* The first point defines the minimum point of the bounding box, whereas the second point
+* defines the maximum point of the bounding box.
 *
 * \param rawId is the raw id of the cell
 * \result The minimum point of the cached bounding box of the specified cell.
 */
-const std::array<double, 3> & SkdPatchInfo::getCachedBoxMin(std::size_t rawId) const
+const std::array<std::array<double, 3>, 2> & SkdPatchInfo::getCachedBox(std::size_t rawId) const
 {
-    return m_cellBoxes->rawAt(rawId, 0);
-}
-
-/*!
-* Get the maximum point of the cached bounding box of the specified cell.
-*
-* \param rawId is the raw id of the cell
-* \result The maximum point of the cached bounding box of the specified cell.
-*/
-const std::array<double, 3> & SkdPatchInfo::getCachedBoxMax(std::size_t rawId) const
-{
-    return m_cellBoxes->rawAt(rawId, 1);
+    return m_cellBoxes->rawAt(rawId);
 }
 
 /*!
@@ -149,7 +140,23 @@ const std::array<double, 3> & SkdPatchInfo::getCachedBoxMax(std::size_t rawId) c
 */
 std::array<double, 3> SkdPatchInfo::evalCachedBoxMean(std::size_t rawId) const
 {
-    return 0.5 * (m_cellBoxes->rawAt(rawId, 0) + m_cellBoxes->rawAt(rawId, 1));
+    const std::array<std::array<double, 3>, 2> &cellBox = m_cellBoxes->rawAt(rawId);
+
+    return 0.5 * (cellBox[0] + cellBox[1]);
+}
+
+/*!
+* Get the average point of the cached bounding box of the specified cell along the given direction.
+*
+* \param rawId is the raw id of the cell
+* \param direction is the direction along which the mean is requested
+* \result The average point of the cached bounding box of the specified cell.
+*/
+double SkdPatchInfo::evalCachedBoxMean(std::size_t rawId, int direction) const
+{
+    const std::array<std::array<double, 3>, 2> &cellBox = m_cellBoxes->rawAt(rawId);
+
+    return 0.5 * (cellBox[0][direction] + cellBox[1][direction]);
 }
 
 /*!
@@ -472,15 +479,14 @@ void SkdNode::initializeBoundingBox()
     // Evaluate the bounding box
     const std::vector<std::size_t> &cellRawIds = m_patchInfo->getCellRawIds();
 
-    m_boxMin = m_patchInfo->getCachedBoxMin(cellRawIds[m_cellRangeBegin]);
-    m_boxMax = m_patchInfo->getCachedBoxMax(cellRawIds[m_cellRangeBegin]);
+    const std::array<std::array<double, 3>, 2> &firstCellBox = m_patchInfo->getCachedBox(cellRawIds[m_cellRangeBegin]);
+    m_boxMin = firstCellBox[0];
+    m_boxMax = firstCellBox[1];
     for (std::size_t n = m_cellRangeBegin + 1; n < m_cellRangeEnd; n++) {
-        const std::size_t rawCellId = cellRawIds[n];
-        const std::array<double, 3> &cellBoxMin = m_patchInfo->getCachedBoxMin(rawCellId);
-        const std::array<double, 3> &cellBoxMax = m_patchInfo->getCachedBoxMax(rawCellId);
+        const std::array<std::array<double, 3>, 2> &cellBox = m_patchInfo->getCachedBox(cellRawIds[n]);
         for (int d = 0; d < 3; ++d) {
-            m_boxMin[d] = std::min(cellBoxMin[d], m_boxMin[d]);
-            m_boxMax[d] = std::max(cellBoxMax[d], m_boxMax[d]);
+            m_boxMin[d] = std::min(cellBox[0][d], m_boxMin[d]);
+            m_boxMax[d] = std::max(cellBox[1][d], m_boxMax[d]);
         }
     }
 
@@ -574,6 +580,28 @@ std::array<double, 3> SkdNode::evalBoxWeightedMean() const
         boxWeightedMean += m_patchInfo->evalCachedBoxMean(rawCellId);
     }
     boxWeightedMean /= (double) getCellCount();
+
+    return boxWeightedMean;
+}
+
+/*!
+* Evaluates the weighted centroid along the specified direction of the bounding box
+* associated with the node.
+*
+* \param direction is the direction along which the centroid is requested
+* \result The the weighted centroid of the bounding box associated to
+* the node.
+*/
+double SkdNode::evalBoxWeightedMean(int direction) const
+{
+    const std::vector<std::size_t> &cellRawIds = m_patchInfo->getCellRawIds();
+
+    double boxWeightedMean = m_patchInfo->evalCachedBoxMean(cellRawIds[m_cellRangeBegin], direction);
+    for (std::size_t n = m_cellRangeBegin + 1; n < m_cellRangeEnd; ++n) {
+        const std::size_t rawCellId = cellRawIds[n];
+        boxWeightedMean += m_patchInfo->evalCachedBoxMean(rawCellId, direction);
+    }
+    boxWeightedMean /= getCellCount();
 
     return boxWeightedMean;
 }
@@ -1290,13 +1318,12 @@ void PatchSkdTree::createChildren(std::size_t parentId, std::size_t leafThreshol
     // the same coordinate along the split direction and therefore all the
     // cells would be assigned to the left chiled) the split will be performed
     // along one of the other directions.
-    std::array<double, 3> parentWeightedCentroid = parent.evalBoxWeightedMean();
     for (int d = 0; d < 3; ++d) {
         // Update the split direction
         int splitDirection = (largerDirection + d) % 3;
 
         // Get the threshold for the split
-        double splitThreshold = parentWeightedCentroid[splitDirection];
+        double splitThreshold = parent.evalBoxWeightedMean(splitDirection);
 
         // Order the elements
         //
@@ -1309,12 +1336,12 @@ void PatchSkdTree::createChildren(std::size_t parentId, std::size_t leafThreshol
         std::size_t rightEnd   = parent.m_cellRangeEnd;
         while (true) {
             // Update the right begin
-            while (rightBegin != leftEnd && m_patchInfo.evalCachedBoxMean(m_cellRawIds[rightBegin])[splitDirection] <= splitThreshold) {
+            while (rightBegin != leftEnd && m_patchInfo.evalCachedBoxMean(m_cellRawIds[rightBegin], splitDirection) <= splitThreshold) {
                 rightBegin++;
             }
 
             // Update the left end
-            while (rightBegin != leftEnd && m_patchInfo.evalCachedBoxMean(m_cellRawIds[leftEnd - 1])[splitDirection] > splitThreshold) {
+            while (rightBegin != leftEnd && m_patchInfo.evalCachedBoxMean(m_cellRawIds[leftEnd - 1], splitDirection) > splitThreshold) {
                 leftEnd--;
             }
 
