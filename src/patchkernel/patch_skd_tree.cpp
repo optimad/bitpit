@@ -73,24 +73,10 @@ void SkdPatchInfo::buildCache(const PatchKernel::CellConstRange &cellRange)
     for (auto itr = cellRange.cbegin(); itr != cellRange.cend(); ++itr) {
         std::size_t rawCellId = itr.getRawIndex();
 
-        // Cell info
-        const Cell &cell = *itr;
-        ConstProxyVector<long> cellConnect = cell.getVertexIds();
-        int nCellVertices = cellConnect.size();
-
         // Bounding box
-        std::array<double, 3> &cellBoxMin = m_cellBoxes->rawAt(rawCellId, 0);
-        std::array<double, 3> &cellBoxMax = m_cellBoxes->rawAt(rawCellId, 1);
-
-        cellBoxMin = m_patch->getVertexCoords(cellConnect[0]);
-        cellBoxMax = cellBoxMin;
-        for (int i = 1; i < nCellVertices; ++i) {
-            const std::array<double, 3> &coords = m_patch->getVertexCoords(cellConnect[i]);
-            for (int d = 0; d < 3; ++d) {
-                cellBoxMin[d] = std::min(coords[d], cellBoxMin[d]);
-                cellBoxMax[d] = std::max(coords[d], cellBoxMax[d]);
-            }
-        }
+        std::array<double, 3> *cellBoxMin = m_cellBoxes->rawData(rawCellId, 0);
+        std::array<double, 3> *cellBoxMax = m_cellBoxes->rawData(rawCellId, 1);
+        m_patch->evalElementBoundingBox(*itr, cellBoxMin, cellBoxMax);
     }
 }
 
