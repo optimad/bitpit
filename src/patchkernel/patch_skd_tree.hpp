@@ -44,14 +44,11 @@ public:
     const std::vector<std::size_t> & getCellRawIds() const;
     std::size_t getCellRawId(std::size_t n) const;
 
-    const std::array<double, 3> & getCachedCentroid(std::size_t rawId) const;
-
     const std::array<double, 3> & getCachedBoxMin(std::size_t rawId) const;
     const std::array<double, 3> & getCachedBoxMax(std::size_t rawId) const;
     std::array<double, 3> evalCachedBoxMean(std::size_t rawId) const;
 
 protected:
-    typedef PiercedStorage<std::array<double, 3>, long> CentroidCache;
     typedef PiercedStorage<std::array<double, 3>, long> BoxCache;
 
     SkdPatchInfo(const PatchKernel *patch, const std::vector<std::size_t> *cellRawIds);
@@ -59,7 +56,6 @@ protected:
     const PatchKernel *m_patch;
     const std::vector<std::size_t> *m_cellRawIds;
 
-    std::unique_ptr<CentroidCache> m_cellCentroids;
     std::unique_ptr<BoxCache> m_cellBoxes;
 
 };
