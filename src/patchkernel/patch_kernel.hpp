@@ -504,7 +504,8 @@ public:
 	CellIterator addCell(ElementType type, std::unique_ptr<long[]> &&connectStorage, int rank, long id = Element::NULL_ID);
 #endif
 	bool deleteCell(long id);
-	bool deleteCells(const std::vector<long> &ids);
+	template<typename IdStorage>
+	bool deleteCells(const IdStorage &ids);
 #if BITPIT_ENABLE_MPI==1
 	CellIterator ghostCell2InternalCell(long id);
 	CellIterator internalCell2GhostCell(long id, int ownerRank);
@@ -586,7 +587,8 @@ public:
 	InterfaceIterator addInterface(ElementType type, const std::vector<long> &connectivity, long id = Element::NULL_ID);
 	InterfaceIterator addInterface(ElementType type, std::unique_ptr<long[]> &&connectStorage, long id = Element::NULL_ID);
 	bool deleteInterface(long id);
-	bool deleteInterfaces(const std::vector<long> &ids);
+	template<typename IdStorage>
+	bool deleteInterfaces(const IdStorage &ids);
 	long countFreeInterfaces() const;
 	long countOrphanInterfaces() const;
 	std::vector<long> findOrphanInterfaces() const;
@@ -799,7 +801,8 @@ protected:
 #endif
 
 	bool deleteVertex(long id);
-	bool deleteVertices(const std::vector<long> &ids);
+	template<typename IdStorage>
+	bool deleteVertices(const IdStorage &ids);
 #if BITPIT_ENABLE_MPI==1
 	VertexIterator ghostVertex2InternalVertex(long id);
 	VertexIterator internalVertex2GhostVertex(long id, int ownerRank);
