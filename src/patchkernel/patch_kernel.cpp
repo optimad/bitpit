@@ -2005,58 +2005,6 @@ bool PatchKernel::deleteVertex(long id)
 }
 
 /*!
-	Deletes a list of vertices.
-
-	\param ids are the ids of the vertices to be deleted
-*/
-bool PatchKernel::deleteVertices(const std::vector<long> &ids)
-{
-	if (!isExpert()) {
-		return false;
-	}
-
-	// Deleting the last vertex requires some additional work. If the ids
-	// of vertices to be deleted contain the last vertex, that vertex is
-	// deleted after deleting all other vertices. In this way we make sure
-	// to delete the last vertex just once (after deleting the last vertex,
-	// another vertex becomes the last one and that vertex may be on the
-	// deletion list as well, and on and so forth). The same applies for
-	// the first ghost.
-	bool deleteLastInternalVertex = false;
-#if BITPIT_ENABLE_MPI==1
-	bool deleteFirstGhostVertex = false;
-#endif
-	std::vector<long>::const_iterator end = ids.cend();
-	for (std::vector<long>::const_iterator i = ids.cbegin(); i != end; ++i) {
-		long vertexId = *i;
-		if (vertexId == m_lastInternalVertexId) {
-			deleteLastInternalVertex = true;
-			continue;
-		}
-#if BITPIT_ENABLE_MPI==1
-		else if (vertexId == m_firstGhostVertexId) {
-			deleteFirstGhostVertex = true;
-			continue;
-		}
-#endif
-
-		deleteVertex(vertexId);
-	}
-
-	if (deleteLastInternalVertex) {
-		deleteVertex(m_lastInternalVertexId);
-	}
-
-#if BITPIT_ENABLE_MPI==1
-	if (deleteFirstGhostVertex) {
-		deleteVertex(m_firstGhostVertexId);
-	}
-#endif
-
-	return true;
-}
-
-/*!
 	Internal function to delete an internal vertex.
 
 	\param id is the id of the vertex
@@ -3032,58 +2980,6 @@ bool PatchKernel::deleteCell(long id)
 	}
 #else
 	_deleteInternalCell(id);
-#endif
-
-	return true;
-}
-
-/*!
-	Deletes a list of cells.
-
-	\param ids are the ids of the cells to be deleted
- */
-bool PatchKernel::deleteCells(const std::vector<long> &ids)
-{
-	if (!isExpert()) {
-		return false;
-	}
-
-	// Deleteing the last internal cell requires some additional work. If the
-	// ids of cells to be deleted contains the last internal cell, we delete
-	// that cell ater deleting all other cells. In this way we make sure to
-	// deleting the last internal cells just once (after deleting the last
-	// internal, another cells becomes the last one and  that cells may be
-	// on the deletion list, and on and so forth). The same applies for the
-	// first ghost.
-	bool deleteLastInternalCell = false;
-#if BITPIT_ENABLE_MPI==1
-	bool deleteFirstGhostCell = false;
-#endif
-	std::vector<long>::const_iterator end = ids.cend();
-	for (std::vector<long>::const_iterator i = ids.cbegin(); i != end; ++i) {
-		long cellId = *i;
-		if (cellId == m_lastInternalCellId) {
-			deleteLastInternalCell = true;
-			continue;
-		}
-#if BITPIT_ENABLE_MPI==1
-		else if (cellId == m_firstGhostCellId) {
-			deleteFirstGhostCell = true;
-			continue;
-		}
-#endif
-
-		deleteCell(cellId);
-	}
-
-	if (deleteLastInternalCell) {
-		deleteCell(m_lastInternalCellId);
-	}
-
-#if BITPIT_ENABLE_MPI==1
-	if (deleteFirstGhostCell) {
-		deleteCell(m_firstGhostCellId);
-	}
 #endif
 
 	return true;
@@ -4541,49 +4437,6 @@ void PatchKernel::_deleteInterface(long id)
 	if (m_interfaceIdGenerator) {
 		m_interfaceIdGenerator->trash(id);
 	}
-}
-
-/*!
-	Deletes a list of interfaces.
-
-	\param ids are the ids of the interfaces to be deleted
-*/
-bool PatchKernel::deleteInterfaces(const std::vector<long> &ids)
-{
-	if (!isExpert()) {
-		return false;
-	}
-
-	// Deleting the last interface requires some additional work. If the ids
-	// of interfaces to be deleted contain the last interface, that interface
-	// is deleted after deleting all other interfaces. In this way we make
-	// sure to delete the last interface just once (after deleting the last
-	// interface, another interface becomes the last one and that interface
-	// may be on the deletion list as well, and on and so forth).
-	std::size_t lastId;
-	if (!m_interfaces.empty()) {
-		lastId = m_interfaces.back().getId();
-	} else {
-		lastId = Interface::NULL_ID;
-	}
-
-	bool deleteLast = false;
-	std::vector<long>::const_iterator end = ids.cend();
-	for (std::vector<long>::const_iterator i = ids.cbegin(); i != end; ++i) {
-		std::size_t interfaceId = *i;
-		if (interfaceId == lastId) {
-			deleteLast = true;
-			continue;
-		}
-
-		deleteInterface(interfaceId);
-	}
-
-	if (deleteLast) {
-		deleteInterface(lastId);
-	}
-
-	return true;
 }
 
 /*!
