@@ -69,8 +69,7 @@ void SkdPatchInfo::buildCache()
 */
 void SkdPatchInfo::buildCache(const PatchKernel::CellConstRange &cellRange)
 {
-    m_cellBoxes     = std::unique_ptr<BoxCache>(new BoxCache(2, &(m_patch->getCells())));
-    m_cellCentroids = std::unique_ptr<BoxCache>(new CentroidCache(1, &(m_patch->getCells())));
+    m_cellBoxes = std::unique_ptr<BoxCache>(new BoxCache(2, &(m_patch->getCells())));
     for (auto itr = cellRange.cbegin(); itr != cellRange.cend(); ++itr) {
         std::size_t rawCellId = itr.getRawIndex();
 
@@ -80,22 +79,18 @@ void SkdPatchInfo::buildCache(const PatchKernel::CellConstRange &cellRange)
         int nCellVertices = cellConnect.size();
 
         // Bounding box
-        std::array<double, 3> &cellBoxMin   = m_cellBoxes->rawAt(rawCellId, 0);
-        std::array<double, 3> &cellBoxMax   = m_cellBoxes->rawAt(rawCellId, 1);
-        std::array<double, 3> &cellCentroid = m_cellCentroids->rawAt(rawCellId, 0);
+        std::array<double, 3> &cellBoxMin = m_cellBoxes->rawAt(rawCellId, 0);
+        std::array<double, 3> &cellBoxMax = m_cellBoxes->rawAt(rawCellId, 1);
 
-        cellBoxMin   = m_patch->getVertexCoords(cellConnect[0]);
-        cellBoxMax   = cellBoxMin;
-        cellCentroid = cellBoxMin;
+        cellBoxMin = m_patch->getVertexCoords(cellConnect[0]);
+        cellBoxMax = cellBoxMin;
         for (int i = 1; i < nCellVertices; ++i) {
             const std::array<double, 3> &coords = m_patch->getVertexCoords(cellConnect[i]);
             for (int d = 0; d < 3; ++d) {
-                cellBoxMin[d]    = std::min(coords[d], cellBoxMin[d]);
-                cellBoxMax[d]    = std::max(coords[d], cellBoxMax[d]);
-                cellCentroid[d] += coords[d];
+                cellBoxMin[d] = std::min(coords[d], cellBoxMin[d]);
+                cellBoxMax[d] = std::max(coords[d], cellBoxMax[d]);
             }
         }
-        cellCentroid /= double(nCellVertices);
     }
 }
 
@@ -105,7 +100,6 @@ void SkdPatchInfo::buildCache(const PatchKernel::CellConstRange &cellRange)
 void SkdPatchInfo::destroyCache()
 {
     m_cellBoxes.reset();
-    m_cellCentroids.reset();
 }
 
 /*!
@@ -137,17 +131,6 @@ const std::vector<std::size_t> & SkdPatchInfo::getCellRawIds() const
 std::size_t SkdPatchInfo::getCellRawId(std::size_t n) const
 {
     return (*m_cellRawIds)[n];
-}
-
-/*!
-* Get the cached centroid of the specified cell.
-*
-* \param rawId is the raw id of the cell
-* \result The cached centroid of the specified cell.
-*/
-const std::array<double, 3> & SkdPatchInfo::getCachedCentroid(std::size_t rawId) const
-{
-    return m_cellCentroids->rawAt(rawId, 0);
 }
 
 /*!
@@ -599,10 +582,10 @@ std::array<double, 3> SkdNode::evalBoxWeightedMean() const
 {
     const std::vector<std::size_t> &cellRawIds = m_patchInfo->getCellRawIds();
 
-    std::array<double, 3> boxWeightedMean = m_patchInfo->getCachedCentroid(cellRawIds[m_cellRangeBegin]);
+    std::array<double, 3> boxWeightedMean = m_patchInfo->evalCachedBoxMean(cellRawIds[m_cellRangeBegin]);
     for (std::size_t n = m_cellRangeBegin + 1; n < m_cellRangeEnd; ++n) {
         const std::size_t rawCellId = cellRawIds[n];
-        boxWeightedMean += m_patchInfo->getCachedCentroid(rawCellId);
+        boxWeightedMean += m_patchInfo->evalCachedBoxMean(rawCellId);
     }
     boxWeightedMean /= (double) getCellCount();
 
@@ -1340,12 +1323,12 @@ void PatchSkdTree::createChildren(std::size_t parentId, std::size_t leafThreshol
         std::size_t rightEnd   = parent.m_cellRangeEnd;
         while (true) {
             // Update the right begin
-            while (rightBegin != leftEnd && m_patchInfo.getCachedCentroid(m_cellRawIds[rightBegin])[splitDirection] <= splitThreshold) {
+            while (rightBegin != leftEnd && m_patchInfo.evalCachedBoxMean(m_cellRawIds[rightBegin])[splitDirection] <= splitThreshold) {
                 rightBegin++;
             }
 
             // Update the left end
-            while (rightBegin != leftEnd && m_patchInfo.getCachedCentroid(m_cellRawIds[leftEnd - 1])[splitDirection] > splitThreshold) {
+            while (rightBegin != leftEnd && m_patchInfo.evalCachedBoxMean(m_cellRawIds[leftEnd - 1])[splitDirection] > splitThreshold) {
                 leftEnd--;
             }
 
