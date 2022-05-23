@@ -1091,6 +1091,10 @@ const T* FlatVector2D<T>::operator[](std::size_t i) const
 {
     assert(isIndexValid(i));
 
+    if (m_v.empty()) {
+        return nullptr;
+    }
+
     std::size_t index = m_index[i];
     return &m_v[index];
 }
@@ -1105,6 +1109,10 @@ template <class T>
 T* FlatVector2D<T>::operator[](std::size_t i)
 {
     assert(isIndexValid(i));
+
+    if (m_v.empty()) {
+        return nullptr;
+    }
 
     std::size_t index = m_index[i];
     return &m_v[index];
