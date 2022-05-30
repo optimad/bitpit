@@ -80,25 +80,24 @@ class LoggerBuffer : public std::streambuf
 {
 
 public:
-    LoggerBuffer(std::size_t bufferSize = 256);
+    LoggerBuffer(int nProcesses, int rank, std::size_t bufferSize = 256);
     LoggerBuffer(LoggerBuffer const &other);
     ~LoggerBuffer();
+
+    int getProcessCount() const;
+    int getRank() const;
 
     bool isConsoleTimestampEnabled() const;
     void setConsoleEnabled(bool enabled);
     void setConsoleTimestampEnabled(bool enabled);
     void setConsoleStream(std::ostream *console);
     std::ostream & getConsoleStream();
-    void setConsolePrefix(const std::string &prefix);
-    std::string getConsolePrefix()	const;
 
     bool isFileTimestampEnabled() const;
     void setFileEnabled(bool enabled);
     void setFileTimestampEnabled(bool enabled);
     void setFileStream(std::ofstream *file);
     std::ofstream & getFileStream();
-    void setFilePrefix(const std::string &prefix);
-    std::string getFilePrefix() const;
 
     void setContext(const std::string &context);
     void setPadding(const std::string &padding);
@@ -106,6 +105,10 @@ public:
     int flush(bool terminate);
 
 private:
+    int m_nProcesses;
+    int m_rank;
+    std::string m_rankPrefix;
+
     std::vector<char> m_buffer;
 
     std::string m_context;
@@ -114,12 +117,10 @@ private:
     bool m_consoleEnabled;
     bool m_consoleTimestampEnabled;
     std::ostream *m_console;
-    std::string m_consolePrefix;
 
     bool m_fileEnabled;
     bool m_fileTimestampEnabled;
     std::ofstream *m_file;
-    std::string m_filePrefix;
 
     const std::string getTimestamp() const;
 
@@ -138,9 +139,6 @@ public:
     Logger(const std::string &name,
            std::ostream *consoleStream, std::ofstream *fileStream,
            int nProcessors = 1, int rank = 0);
-
-    int getProcessorCount();
-    int getRank();
 
     void setContext(const std::string &context);
     std::string getContext();
@@ -197,8 +195,6 @@ public:
 
 private:
     std::string m_name;
-    int m_nProcessors;
-    int m_rank;
     LoggerBuffer m_buffer;
 
     int m_indentation;

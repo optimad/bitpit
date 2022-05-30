@@ -50,11 +50,16 @@ namespace bitpit{
 
 /*!
     Creates a new buffer.
+
+    \param nProcessess is the total number of processes in the communicator
+    \param rank is the parallel rank in the communicator
+    \param bufferSize is the size of the internal buffer
 */
-LoggerBuffer::LoggerBuffer(std::size_t bufferSize)
-    : m_buffer(bufferSize + 1), m_context(""), m_padding(""),
-      m_consoleEnabled(false), m_consoleTimestampEnabled(false), m_console(&std::cout), m_consolePrefix(""),
-      m_fileEnabled(false), m_fileTimestampEnabled(true), m_file(nullptr), m_filePrefix("")
+LoggerBuffer::LoggerBuffer(int nProcessess, int rank, std::size_t bufferSize)
+    : m_nProcesses(nProcessess), m_rank(rank),
+      m_buffer(bufferSize + 1), m_context(""), m_padding(""),
+      m_consoleEnabled(false), m_consoleTimestampEnabled(false), m_console(&std::cout),
+      m_fileEnabled(false), m_fileTimestampEnabled(true), m_file(nullptr)
 {
     // Set the buffer
     char *bufferBegin = &m_buffer.front();
@@ -65,6 +70,16 @@ LoggerBuffer::LoggerBuffer(std::size_t bufferSize)
 
     // Set log file data
     setFileEnabled(false);
+
+    // Set parallel data
+    if (m_nProcesses > 1) {
+        int nDigits = ceil(log10(m_nProcesses));
+        std::ostringstream convert;
+        convert << std::setw(nDigits) << m_rank;
+        m_rankPrefix = "#" + convert.str();
+    } else {
+        m_rankPrefix = "";
+    }
 }
 
 /*!
@@ -75,17 +90,17 @@ LoggerBuffer::LoggerBuffer(std::size_t bufferSize)
 */
 LoggerBuffer::LoggerBuffer(const LoggerBuffer &other)
     : std::streambuf(),
+      m_nProcesses(other.m_nProcesses),
+      m_rank(other.m_rank),
+      m_rankPrefix(other.m_rankPrefix),
       m_buffer(other.m_buffer),
       m_context(other.m_context),
       m_padding(other.m_padding),
-      m_consoleEnabled(other.m_consoleEnabled),
       m_consoleTimestampEnabled(other.m_consoleTimestampEnabled),
       m_console(other.m_console),
-      m_consolePrefix(other.m_consolePrefix),
       m_fileEnabled(other.m_fileEnabled),
       m_fileTimestampEnabled(other.m_fileTimestampEnabled),
-      m_file(other.m_file),
-      m_filePrefix(other.m_filePrefix)
+      m_file(other.m_file)
 {
     // Set the buffer
     char *bufferBegin = &m_buffer.front();
@@ -98,6 +113,26 @@ LoggerBuffer::LoggerBuffer(const LoggerBuffer &other)
 LoggerBuffer::~LoggerBuffer()
 {
     sync();
+}
+
+/*!
+    Count the nuomber of processes in the communicator.
+
+    \result The number of processes in the communicator.
+*/
+int LoggerBuffer::getProcessCount() const
+{
+    return m_nProcesses;
+}
+
+/*!
+    Gets the rank in the communicator.
+
+    \result The rank in the communicator.
+*/
+int LoggerBuffer::getRank() const
+{
+    return m_rank;
 }
 
 /*!
@@ -184,8 +219,8 @@ int LoggerBuffer::flush(bool terminate)
                 *m_console << "[" + getTimestamp() + "] ";
             }
 
-            if (!m_consolePrefix.empty()) {
-                *m_console << m_consolePrefix << " :: ";
+            if (!m_rankPrefix.empty()) {
+                *m_console << m_rankPrefix << " :: ";
             }
 
             if (!m_context.empty()) {
@@ -212,8 +247,8 @@ int LoggerBuffer::flush(bool terminate)
                 *m_file << "[" + getTimestamp() + "] ";
             }
 
-            if (!m_filePrefix.empty()) {
-                *m_file << m_filePrefix << " :: ";
+            if (!m_rankPrefix.empty()) {
+                *m_file << m_rankPrefix << " :: ";
             }
 
             if (!m_context.empty()) {
@@ -298,29 +333,6 @@ std::ostream & LoggerBuffer::getConsoleStream()
 }
 
 /*!
-    Sets the prefix for console output.
-
-    \param prefix is the prefix that will be prepended to every line of the
-    console output
-*/
-void LoggerBuffer::setConsolePrefix(const std::string &prefix)
-{
-    flush(true);
-
-    m_consolePrefix = prefix;
-}
-
-/*!
-    Gets the prefix for console output.
-
-    \result The prefix for console output.
-*/
-std::string LoggerBuffer::getConsolePrefix() const
-{
-    return m_consolePrefix;
-}
-
-/*!
     Enables the output on the log file.
 
     The output on the log file can be enabled only id the log file path has
@@ -381,29 +393,6 @@ void LoggerBuffer::setFileStream(std::ofstream *file)
 std::ofstream & LoggerBuffer::getFileStream()
 {
     return *m_file;
-}
-
-/*!
-    Sets the prefix for file output.
-
-    \param prefix is the prefix that will be prepended to every line of the
-    file output
-*/
-void LoggerBuffer::setFilePrefix(const std::string &prefix)
-{
-    flush(true);
-
-    m_filePrefix = prefix;
-}
-
-/*!
-    Gets the prefix for file output.
-
-    \result The prefix for file output.
-*/
-std::string LoggerBuffer::getFilePrefix() const
-{
-    return m_filePrefix;
 }
 
 /*!
@@ -468,9 +457,9 @@ const std::string LoggerBuffer::getTimestamp() const
 */
 Logger::Logger(const std::string &name,
                std::ostream *consoleStream, std::ofstream *fileStream,
-               int nProcessors, int rank)
+               int nProcessess, int rank)
     : std::ios(nullptr), std::ostream(&m_buffer),
-      m_name(name), m_nProcessors(nProcessors), m_rank(rank), m_buffer(256),
+      m_name(name), m_buffer(nProcessess, rank, 256),
       m_indentation(0), m_context(""),
       m_defaultSeverity(log::INFO), m_defaultVisibility(log::VISIBILITY_MASTER),
       m_consoleDisabledThreshold(log::NOTSET), m_consoleVerbosityThreshold(log::INFO),
@@ -479,20 +468,6 @@ Logger::Logger(const std::string &name,
     // Set buffer data
     setConsoleStream(consoleStream);
     setFileStream(fileStream);
-
-    // Set parallel data
-    if (m_nProcessors > 1) {
-        int nDigits = ceil(log10(m_nProcessors));
-        std::ostringstream convert;
-        convert << std::setw(nDigits) << m_rank;
-        std::string rankPrefix = "#" + convert.str();
-
-        m_buffer.setConsolePrefix(rankPrefix);
-        m_buffer.setFilePrefix(rankPrefix);
-    } else {
-        m_buffer.setConsolePrefix("");
-        m_buffer.setFilePrefix("");
-    }
 
     // Set default logger properties
     setConsoleEnabled(m_defaultSeverity, m_defaultVisibility);
@@ -508,7 +483,6 @@ Logger::Logger(const std::string &name,
 Logger::Logger(const Logger &other)
     : std::ios(nullptr), std::ostream(&m_buffer),
       m_name(other.m_name),
-      m_nProcessors(other.m_nProcessors), m_rank(other.m_rank),
       m_buffer(other.m_buffer),
       m_indentation(other.m_indentation), m_context(other.m_context),
       m_defaultSeverity(other.m_defaultSeverity), m_defaultVisibility(other.m_defaultVisibility),
@@ -802,7 +776,7 @@ void Logger::setConsoleEnabled(log::Level severity, log::Visibility visibility)
     bool isConsoleEnabled = true;
     if (severity <= m_consoleDisabledThreshold) {
         isConsoleEnabled = false;
-    } else if (visibility == log::VISIBILITY_MASTER && (m_rank != 0)) {
+    } else if (visibility == log::VISIBILITY_MASTER && (m_buffer.getRank() != 0)) {
         isConsoleEnabled = false;
     } else {
         isConsoleEnabled = (severity >= m_consoleVerbosityThreshold);
@@ -822,16 +796,6 @@ void Logger::setConsoleEnabled(log::Level severity, log::Visibility visibility)
 log::Level Logger::getConsoleVerbosity()
 {
     return m_consoleVerbosityThreshold;
-}
-
-/*!
-    Gets the prefix for the messages printed on the console.
-
-    \result The prefix for the messages printed on the console.
-*/
-std::string Logger::getConsolePrefix()
-{
-    return m_buffer.getConsolePrefix();
 }
 
 /*!
@@ -896,22 +860,12 @@ void Logger::setFileEnabled(log::Level severity, log::Visibility visibility)
     bool isFileEnabled = true;
     if (severity <= m_fileDisabledThreshold) {
         isFileEnabled = false;
-    } else if (visibility == log::VISIBILITY_MASTER && (m_rank != 0)) {
+    } else if (visibility == log::VISIBILITY_MASTER && (m_buffer.getRank() != 0)) {
         isFileEnabled = false;
     } else {
         isFileEnabled = (severity >= m_fileVerbosityThreshold);
     }
     m_buffer.setFileEnabled(isFileEnabled);
-}
-
-/*!
-    Gets the prefix for the messages printed on the log file.
-
-    \result The prefix for the messages printed on the log file.
-*/
-std::string Logger::getFilePrefix()
-{
-    return m_buffer.getFilePrefix();
 }
 
 /*!
@@ -957,26 +911,6 @@ void Logger::setIndentation(int delta)
 int Logger::getIndentation()
 {
     return m_indentation;
-}
-
-/*!
-    Count the nuomber of processes in the communicator.
-
-    \result The number of processes in the communicator.
-*/
-int Logger::getProcessorCount()
-{
-    return m_nProcessors;
-}
-
-/*!
-    Gets the rank in the communicator.
-
-    \result The rank in the communicator.
-*/
-int Logger::getRank()
-{
-    return m_rank;
 }
 
 /*!
@@ -1420,13 +1354,13 @@ Logger & LoggerManager::debug(const std::string &name, log::Visibility defaultVi
 
     \param mode is the mode that will be set
     \param reset if true the log files will be reset
-    \param nProcessors is the total number of processes in the communicator
+    \param nProcessess is the total number of processes in the communicator
     \param rank is the parallel rank in the communicator
 */
 void LoggerManager::initialize(log::Mode mode, bool reset,
-                            int nProcessors, int rank)
+                            int nProcessess, int rank)
 {
-    initialize(mode, m_defaultName, reset, m_defaultDirectory, nProcessors, rank);
+    initialize(mode, m_defaultName, reset, m_defaultDirectory, nProcessess, rank);
 }
 
 /*!
@@ -1435,13 +1369,13 @@ void LoggerManager::initialize(log::Mode mode, bool reset,
     \param mode is the mode that will be set
     \param reset if true the log files will be reset
     \param directory is the default directory for saving the log files
-    \param nProcessors is the total number of processes in the communicator
+    \param nProcessess is the total number of processes in the communicator
     \param rank is the parallel rank in the communicator
 */
 void LoggerManager::initialize(log::Mode mode, bool reset, const std::string &directory,
-                            int nProcessors, int rank)
+                            int nProcessess, int rank)
 {
-    initialize(mode, m_defaultName, reset, directory, nProcessors, rank);
+    initialize(mode, m_defaultName, reset, directory, nProcessess, rank);
 }
 
 /*!
@@ -1451,12 +1385,12 @@ void LoggerManager::initialize(log::Mode mode, bool reset, const std::string &di
     \param name is the name for the default logger
     \param reset if true the log files will be reset
     \param directory is the default directory for saving the log files
-    \param nProcessors is the total number of processes in the communicator
+    \param nProcessess is the total number of processes in the communicator
     \param rank is the parallel rank in the communicator
 */
 void LoggerManager::initialize(log::Mode mode, const std::string &name, bool reset,
                             const std::string &directory,
-                            int nProcessors, int rank)
+                            int nProcessess, int rank)
 {
     if (isInitialized()) {
         log::cout().println("Logger initialization has to be called before creating the loggers.");
@@ -1471,7 +1405,7 @@ void LoggerManager::initialize(log::Mode mode, const std::string &name, bool res
     m_defaultDirectory = directory;
 
     // Create the logger
-    _create(m_defaultName, reset, directory, nProcessors, rank);
+    _create(m_defaultName, reset, directory, nProcessess, rank);
 }
 
 /*!
@@ -1479,13 +1413,13 @@ void LoggerManager::initialize(log::Mode mode, const std::string &name, bool res
 
     \param name is the name for the logger
     \param reset if true the log files will be reset
-    \param nProcessors is the total number of processes in the communicator
+    \param nProcessess is the total number of processes in the communicator
     \param rank is the parallel rank in the communicator
 */
 void LoggerManager::create(const std::string &name, bool reset,
-                           int nProcessors, int rank)
+                           int nProcessess, int rank)
 {
-    create(name, reset, m_defaultDirectory, nProcessors, rank);
+    create(name, reset, m_defaultDirectory, nProcessess, rank);
 }
 
 /*!
@@ -1494,12 +1428,12 @@ void LoggerManager::create(const std::string &name, bool reset,
     \param name is the name for the logger
     \param reset if true the log files will be reset
     \param directory is the directory for saving the log files
-    \param nProcessors is the total number of processes in the communicator
+    \param nProcessess is the total number of processes in the communicator
     \param rank is the parallel rank in the communicator
 */
 void LoggerManager::create(const std::string &name, bool reset,
                            const std::string &directory,
-                           int nProcessors, int rank)
+                           int nProcessess, int rank)
 {
     // Its not possible to create a log with the default name nor a log
     // with the same name of an existent logger nor a log with an empty
@@ -1521,7 +1455,7 @@ void LoggerManager::create(const std::string &name, bool reset,
 
     // Create the logger
     if (m_mode == log::MODE_SEPARATE) {
-        _create(name, reset, directory, nProcessors, rank);
+        _create(name, reset, directory, nProcessess, rank);
     } else {
         _create(name, cout(m_defaultName));
     }
@@ -1637,20 +1571,20 @@ log::Mode LoggerManager::getMode() const
     \param name is the name for the logger
     \param reset if true the log files will be reset
     \param directory is the directory for saving the log files
-    \param nProcessors is the total number of processes in the communicator
+    \param nProcessess is the total number of processes in the communicator
     \param rank is the parallel rank in the communicator
 */
 void LoggerManager::_create(const std::string &name, bool reset,
                             const std::string &directory,
-                            int nProcessors, int rank)
+                            int nProcessess, int rank)
 {
     // Get the file path
     FileHandler fileHandler;
     fileHandler.setDirectory(directory);
     fileHandler.setName(name);
     fileHandler.setAppendix("log");
-    fileHandler.setParallel(nProcessors > 1);
-    if (nProcessors > 1) {
+    fileHandler.setParallel(nProcessess > 1);
+    if (nProcessess > 1) {
         fileHandler.setBlock(rank);
     }
 
@@ -1673,7 +1607,7 @@ void LoggerManager::_create(const std::string &name, bool reset,
     std::ostream &consoleStream = std::cout;
 
     // Create the logger
-    m_loggers[name]     = std::unique_ptr<Logger>(new Logger(name, &consoleStream, &fileStream, nProcessors, rank));
+    m_loggers[name]     = std::unique_ptr<Logger>(new Logger(name, &consoleStream, &fileStream, nProcessess, rank));
     m_loggerUsers[name] = 1;
 }
 
