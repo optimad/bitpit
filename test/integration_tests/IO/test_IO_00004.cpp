@@ -125,7 +125,7 @@ int subtest_002()
     std::cout << std::endl;
 
     //create a sample config tree.
-    std::shared_ptr<bitpit::ConfigStringParser> writeStr = std::make_shared<bitpit::ConfigStringParser>(false, true); //enable xml format, enable multisection.
+    std::shared_ptr<bitpit::ConfigStringParser> writeStr = std::make_shared<bitpit::ConfigStringParser>(ConfigStringParser::Format::XML, true); //enable xml format, enable multisection.
     
     //fill the writeStr tree with some data 
     writeStr->set("ActivateOption", "1");
@@ -154,7 +154,7 @@ int subtest_002()
     std::cout<<bufferXML<<std::endl;
 
     //read buffer in another configstring parser
-    std::shared_ptr<bitpit::ConfigStringParser> parseStr = std::make_shared<bitpit::ConfigStringParser>(false, true); //enable xml format, enable multisection.
+    std::shared_ptr<bitpit::ConfigStringParser> parseStr = std::make_shared<bitpit::ConfigStringParser>(ConfigStringParser::Format::XML, true); //enable xml format, enable multisection.
     parseStr->read(bufferXML);
 
     bool check = parseStr->hasSection("UserData");

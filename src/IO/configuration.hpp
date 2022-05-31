@@ -107,16 +107,26 @@ class ConfigStringParser : public Config
 {
 
 public:
-    ConfigStringParser(bool XMLorJSON = false);
-    ConfigStringParser(bool XMLorJSON, bool multiSections);
 
-    bool getFormat();
+    /*!
+     * @ingroup Configuration
+    * Enum class defining format allowed in ConfigStringParser class
+    */
+    enum class Format{
+        XML = 0,/**< xml formatted  */ 
+        JSON= 1 /**< json formatted  */
+    };
+
+    ConfigStringParser(Format format = Format::XML);
+    ConfigStringParser(Format format, bool multiSections);
+
+    Format getFormat();
 
     void read(const std::string &source, bool append = true);
     void write(std::string & source, bool append = true) const;
 
 private:
-    bool m_xmlOrJson;
+    Format m_format;
 };
 
 }

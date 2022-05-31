@@ -374,50 +374,46 @@ namespace config {
 /*!
     Construct a new parser.
 
-    \param XMLorJSON false to activate XML format, true for JSON format if supported,
-    otherwise fallback automatically to XML.
+    \param format type of format to parse, of ConfigStringParser::Format enum type
 */
-ConfigStringParser::ConfigStringParser(bool XMLorJSON)
+ConfigStringParser::ConfigStringParser(ConfigStringParser::Format format)
     : Config(false)
 {
 #if HAS_RAPIDJSON_LIB
-    m_xmlOrJson = XMLorJSON;
+    m_format = format;
 #else
-    BITPIT_UNUSED(XMLorJSON);
+    BITPIT_UNUSED(format);
     //revert to default XML
-    m_xmlOrJson = false;
+    m_format = Format::XML;
 #endif
 }
 
 /*!
     Construct a new parser, activating multiSections support.
 
-    \param XMLorJSON false to activate XML format, true for JSON format if supported,
-    otherwise fallback automatically to XML.
+    \param format type of format to parse, of ConfigStringParser::Format enum type
     \param multiSections if set to true the configuration parser will allow
     multiple sections with the same name
 */
-ConfigStringParser::ConfigStringParser(bool XMLorJSON, bool multiSections)
+ConfigStringParser::ConfigStringParser(ConfigStringParser::Format format, bool multiSections)
     : Config(multiSections)
 {
 #if HAS_RAPIDJSON_LIB
-    m_xmlOrJson = XMLorJSON;
+    m_format = format;
 #else
-    BITPIT_UNUSED(XMLorJSON);
+    BITPIT_UNUSED(format);
     //revert to default XML
-    m_xmlOrJson = false;
+    m_format = Format::XML;
 #endif
 }
 
 /*!
-    Return a bool to identify the format targeted by the class to parse/write the 
-    buffer string. 0 is XML, 1 is JSON 
-
-    \return boolean identifying the target format 
+    \return the format of the class in ConfigStringParser::Format enum type 
 */
-bool ConfigStringParser::getFormat()
+ConfigStringParser::Format 
+ConfigStringParser::getFormat()
 {
-    return m_xmlOrJson;
+    return m_format;
 }
 
 /*!
@@ -436,7 +432,7 @@ void ConfigStringParser::read(const std::string &source, bool append)
         Config::clear();
     }
 
-    if(m_xmlOrJson){
+    if(m_format == Format::JSON){
 #if HAS_RAPIDJSON_LIB
         config::JSON::readBufferConfiguration(source, this);
 #endif
@@ -460,7 +456,7 @@ void ConfigStringParser::write(std::string &source, bool append) const
         source.clear();
     }
 
-    if(m_xmlOrJson){
+    if(m_format == Format::JSON){
 #if HAS_RAPIDJSON_LIB
         config::JSON::writeBufferConfiguration(source, this);
 #endif

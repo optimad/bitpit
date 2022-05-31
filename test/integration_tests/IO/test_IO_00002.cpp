@@ -115,7 +115,7 @@ int subtest_002()
     std::cout << std::endl;
 
     //create a sample config tree.
-    std::shared_ptr<bitpit::ConfigStringParser> writeStr = std::make_shared<bitpit::ConfigStringParser>(true, true); //enable json format, enable multisection.
+    std::shared_ptr<bitpit::ConfigStringParser> writeStr = std::make_shared<bitpit::ConfigStringParser>(ConfigStringParser::Format::JSON, true); //enable json format, enable multisection.
     
     //fill the writeStr tree with some data 
     writeStr->set("ActivateOption", "1");
@@ -144,7 +144,7 @@ int subtest_002()
     std::cout<<bufferJSON<<std::endl;
 
     //read buffer in another configstring parser
-    std::shared_ptr<bitpit::ConfigStringParser> parseStr=std::make_shared<bitpit::ConfigStringParser>(true, true); //enable json format, enable multisection.
+    std::shared_ptr<bitpit::ConfigStringParser> parseStr=std::make_shared<bitpit::ConfigStringParser>(ConfigStringParser::Format::JSON, true); //enable json format, enable multisection.
     parseStr->read(bufferJSON);
 
     bool check = parseStr->hasSection("UserData");
