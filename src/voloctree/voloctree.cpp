@@ -445,6 +445,11 @@ void VolOctree::initializeTree(std::unique_ptr<PabloUniform> *adopter, std::size
 void VolOctree::initializeTree(std::unique_ptr<PabloUniform> *adopter)
 #endif
 {
+	// Initialize logger
+#if
+	m_tree->getLog().setDefaultSeverity(log::DEBUG);
+#endif
+
 #if BITPIT_ENABLE_MPI==1
 	// Initialize partitioning
     if (isCommunicatorSet()) {

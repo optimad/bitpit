@@ -30,10 +30,12 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <memory>
 #include <sstream>
 #include <functional>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <type_traits>
 
 #include "fileHandler.hpp"
 #include "logger.hpp"
@@ -439,6 +441,10 @@ std::ofstream & LoggerBuffer::getFileStream()
 */
 void LoggerBuffer::setContext(const std::string &context)
 {
+    if (m_context == context) {
+        return;
+    }
+
     flush(true);
 
     m_context = context;
@@ -451,6 +457,10 @@ void LoggerBuffer::setContext(const std::string &context)
 */
 void LoggerBuffer::setPadding(const std::string &padding)
 {
+    if (m_padding == padding) {
+        return;
+    }
+
     flush(true);
 
     m_padding = padding;
@@ -492,88 +502,17 @@ const std::string LoggerBuffer::getTimestamp() const
 
     The constructor is private so that it can not be called.
 */
-Logger::Logger(const std::string &name,
-               std::ostream *consoleStream, std::ofstream *fileStream,
-               int nProcessess, int rank)
-    : std::ios(nullptr), std::ostream(&m_buffer),
-      m_name(name), m_buffer(nProcessess, rank, 256),
+Logger::Logger(const std::string &name, const std::shared_ptr<LoggerBuffer> &buffer)
+    : std::ios(nullptr), std::ostream(nullptr),
+      m_name(name), m_buffer(buffer),
       m_indentation(0), m_context(""),
       m_defaultSeverity(log::INFO), m_defaultVisibility(log::VISIBILITY_MASTER),
       m_consoleDisabledThreshold(log::NOTSET), m_consoleVerbosityThreshold(log::INFO),
-      m_fileDisabledThreshold(log::NOTSET), m_fileVerbosityThreshold(log::INFO)
+      m_fileDisabledThreshold(log::NOTSET), m_fileVerbosityThreshold(log::INFO),
+      m_consoleTimestampEnabled(false), m_fileTimestampEnabled(false)
 {
-    // Set buffer data
-    setConsoleStream(consoleStream);
-    setFileStream(fileStream);
-
-    // Set default logger properties
-    setConsoleEnabled(m_defaultSeverity, m_defaultVisibility);
-    setFileEnabled(m_defaultSeverity, m_defaultVisibility);
-}
-
-/*!
-    Copy constructor.
-
-    \param other is another logger, whose configuration will be used to
-    initialize the current logger
-*/
-Logger::Logger(const Logger &other)
-    : std::ios(nullptr), std::ostream(&m_buffer),
-      m_name(other.m_name),
-      m_buffer(other.m_buffer),
-      m_indentation(other.m_indentation), m_context(other.m_context),
-      m_defaultSeverity(other.m_defaultSeverity), m_defaultVisibility(other.m_defaultVisibility),
-      m_consoleDisabledThreshold(other.m_consoleDisabledThreshold),
-      m_consoleVerbosityThreshold(other.m_consoleVerbosityThreshold),
-      m_fileDisabledThreshold(other.m_fileDisabledThreshold),
-      m_fileVerbosityThreshold(other.m_fileVerbosityThreshold)
-{
-    // Copy buffer properties
-    copyfmt(other);
-    exceptions(other.exceptions());
-    clear(other.rdstate());
-    basic_ios<char>::rdbuf(other.rdbuf());
-}
-
-/*!
-    Sets the stream to be used for the output on the console.
-
-    \param console is the stream to be used for the output on the console
-*/
-void Logger::setConsoleStream(std::ostream *console)
-{
-    m_buffer.setConsoleStream(console);
-}
-
-/*!
-    Gets the stream to be used for the output on the console.
-
-    \result The stream to be used for the output on the console.
-*/
-std::ostream & Logger::getConsoleStream()
-{
-    return m_buffer.getConsoleStream();
-}
-
-/*!
-    Sets the stream to be used for the output on the file.
-
-    \param file is the stream to be used for the output on the file
-*/
-void Logger::setFileStream(std::ofstream *file)
-{
-    m_buffer.setFileStream(file);
-}
-
-
-/*!
-    Gets the stream to be used for the output on the file.
-
-    \result The stream to be used for the output on the file.
-*/
-std::ofstream & Logger::getFileStream()
-{
-    return m_buffer.getFileStream();
+    // St stream buffer
+    basic_ios<char>::rdbuf(m_buffer.get());
 }
 
 /*!
@@ -653,10 +592,6 @@ void Logger::setDefaultSeverity(log::Level severity)
     // Set default severity
     assert(severity != log::Level::NOTSET);
     m_defaultSeverity = severity;
-
-    // Set default logger properties
-    setConsoleEnabled(m_defaultSeverity, m_defaultVisibility);
-    setFileEnabled(m_defaultSeverity, m_defaultVisibility);
 }
 
 /*!
@@ -699,10 +634,6 @@ void Logger::setDefaultVisibility(log::Visibility visibility)
     // Set default visibility
     assert(visibility != log::VISIBILITY_NOTSET);
     m_defaultVisibility = visibility;
-
-    // Set default logger properties
-    setConsoleEnabled(m_defaultSeverity, m_defaultVisibility);
-    setFileEnabled(m_defaultSeverity, m_defaultVisibility);
 }
 
 /*!
@@ -771,7 +702,7 @@ void Logger::setTimestampEnabled(bool enabled)
 */
 bool Logger::isConsoleTimestampEnabled() const
 {
-    return m_buffer.isConsoleTimestampEnabled();
+    return m_consoleTimestampEnabled;
 }
 
 /*!
@@ -781,7 +712,7 @@ bool Logger::isConsoleTimestampEnabled() const
 */
 void Logger::setConsoleTimestampEnabled(bool enabled)
 {
-    m_buffer.setConsoleTimestampEnabled(enabled);
+    m_consoleTimestampEnabled = enabled;
 }
 
 /*!
@@ -797,28 +728,50 @@ void Logger::setConsoleVerbosity(log::Level threshold)
 {
     // Set verbosity threshold
     m_consoleVerbosityThreshold = threshold;
-
-    // Set default logger properties
-    setConsoleEnabled(m_defaultSeverity, m_defaultVisibility);
 }
 
 /*!
-    Enable or disable console logging.
+    Setup buffer.
 
     \param severity is the severity of the message to be printed
     \param visibility is the visibility of the message to be printed
 */
-void Logger::setConsoleEnabled(log::Level severity, log::Visibility visibility)
+void Logger::setupBuffer(log::Level severity, log::Visibility visibility)
 {
+    // Set context
+    m_buffer->setContext(m_context);
+
+    // Set padding
+    std::string padding = std::string(m_indentation, ' ');
+    m_buffer->setPadding(padding);
+
+    // Setup console
     bool isConsoleEnabled = true;
     if (severity <= m_consoleDisabledThreshold) {
         isConsoleEnabled = false;
-    } else if (visibility == log::VISIBILITY_MASTER && (m_buffer.getRank() != 0)) {
+    } else if (visibility == log::VISIBILITY_MASTER && (m_buffer->getRank() != 0)) {
         isConsoleEnabled = false;
     } else {
         isConsoleEnabled = (severity >= m_consoleVerbosityThreshold);
     }
-    m_buffer.setConsoleEnabled(isConsoleEnabled);
+    m_buffer->setConsoleEnabled(isConsoleEnabled);
+    if (isConsoleEnabled) {
+        m_buffer->setConsoleTimestampEnabled(m_consoleTimestampEnabled);
+    }
+
+    // Setup file
+    bool isFileEnabled = true;
+    if (severity <= m_fileDisabledThreshold) {
+        isFileEnabled = false;
+    } else if (visibility == log::VISIBILITY_MASTER && (m_buffer->getRank() != 0)) {
+        isFileEnabled = false;
+    } else {
+        isFileEnabled = (severity >= m_fileVerbosityThreshold);
+    }
+    m_buffer->setFileEnabled(isFileEnabled);
+    if (isFileEnabled) {
+        m_buffer->setFileTimestampEnabled(m_fileTimestampEnabled);
+    }
 }
 
 /*!
@@ -843,7 +796,7 @@ log::Level Logger::getConsoleVerbosity()
 */
 bool Logger::isFileTimestampEnabled() const
 {
-    return m_buffer.isFileTimestampEnabled();
+    return m_fileTimestampEnabled;
 }
 
 /*!
@@ -853,7 +806,7 @@ bool Logger::isFileTimestampEnabled() const
 */
 void Logger::setFileTimestampEnabled(bool enabled)
 {
-    m_buffer.setFileTimestampEnabled(enabled);
+    m_fileTimestampEnabled = enabled;
 }
 
 /*!
@@ -869,9 +822,6 @@ void Logger::setFileVerbosity(log::Level threshold)
 {
     // Set verbosity threshold
     m_fileVerbosityThreshold = threshold;
-
-    // Set default logger properties
-    setConsoleEnabled(m_defaultSeverity, m_defaultVisibility);
 }
 
 /*!
@@ -887,34 +837,17 @@ log::Level Logger::getFileVerbosity()
 }
 
 /*!
-    Enable or disable file logging.
-
-    \param severity is the severity of the message to be printed
-    \param visibility is the visibility of the message to be printed
-*/
-void Logger::setFileEnabled(log::Level severity, log::Visibility visibility)
-{
-    bool isFileEnabled = true;
-    if (severity <= m_fileDisabledThreshold) {
-        isFileEnabled = false;
-    } else if (visibility == log::VISIBILITY_MASTER && (m_buffer.getRank() != 0)) {
-        isFileEnabled = false;
-    } else {
-        isFileEnabled = (severity >= m_fileVerbosityThreshold);
-    }
-    m_buffer.setFileEnabled(isFileEnabled);
-}
-
-/*!
     Sets the context used when printing the messages.
 
     \param context is the context used when printing the messages.
 */
 void Logger::setContext(const std::string &context)
 {
-    m_context = context;
+    if (context == m_context) {
+        return;
+    }
 
-    m_buffer.setContext(m_context);
+    m_context = context;
 }
 
 /*!
@@ -935,9 +868,6 @@ std::string Logger::getContext()
 void Logger::setIndentation(int delta)
 {
     m_indentation = std::max(m_indentation + delta, 0);
-
-    std::string padding = std::string(m_indentation, ' ');
-    m_buffer.setPadding(padding);
 }
 
 /*!
@@ -1011,7 +941,7 @@ void Logger::println(const std::string &line, log::Level severity, log::Visibili
 */
 void Logger::print(const std::string &message)
 {
-    (*this) << message;
+    print(message, getDefaultSeverity(), getDefaultVisibility());
 }
 
 /*!
@@ -1045,20 +975,7 @@ void Logger::print(const std::string &message, log::Visibility visibility)
 */
 void Logger::print(const std::string &message, log::Level severity, log::Visibility visibility)
 {
-    // Set logger properties for the message that need to be printed
-    if (severity != m_defaultSeverity || visibility != m_defaultVisibility) {
-        setConsoleEnabled(severity, visibility);
-        setFileEnabled(severity, visibility);
-    }
-
-    // Print the line
-    (*this) << message;
-
-    // Reset default logger properties
-    if (severity != m_defaultSeverity || visibility != m_defaultVisibility) {
-        setConsoleEnabled(m_defaultSeverity, m_defaultVisibility);
-        setFileEnabled(m_defaultSeverity, m_defaultVisibility);
-    }
+    print<const std::string &>(message, severity, visibility);
 }
 
 /*!
@@ -1494,7 +1411,8 @@ void LoggerManager::create(const std::string &name, bool reset,
     if (m_mode == log::MODE_SEPARATE) {
         _create(name, reset, directory, nProcessess, rank);
     } else {
-        _create(name, cout(m_defaultName));
+        Logger &defaultLogger = cout(m_defaultName);
+        _create(name, defaultLogger.m_buffer);
     }
 }
 
@@ -1643,21 +1561,24 @@ void LoggerManager::_create(const std::string &name, bool reset,
     // Use cout as console stream
     std::ostream &consoleStream = std::cout;
 
+    // Create the buffer
+    std::shared_ptr<LoggerBuffer> buffer = std::make_shared<LoggerBuffer>(nProcessess, rank, 256);
+    buffer->setFileStream(&fileStream);
+    buffer->setConsoleStream(&consoleStream);
+
     // Create the logger
-    m_loggers[name]     = std::unique_ptr<Logger>(new Logger(name, &consoleStream, &fileStream, nProcessess, rank));
-    m_loggerUsers[name] = 1;
+    _create(name, buffer);
 }
 
 /*!
     Internal function to create a logger.
 
     \param name is the name for the logger
-    \param master is a reference to the logger from which the settings will
-    be copied from
+    \param buffer is the buffer that will be used for the logger
 */
-void LoggerManager::_create(const std::string &name, Logger &master)
+void LoggerManager::_create(const std::string &name, std::shared_ptr<LoggerBuffer> &buffer)
 {
-    m_loggers[name]     = std::unique_ptr<Logger>(new Logger(master));
+    m_loggers[name]     = std::unique_ptr<Logger>(new Logger(name,  buffer));
     m_loggerUsers[name] = 1;
 }
 

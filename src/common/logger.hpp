@@ -139,10 +139,6 @@ class Logger : public std::ostream
 friend class LoggerManager;
 
 public:
-    Logger(const std::string &name,
-           std::ostream *consoleStream, std::ofstream *fileStream,
-           int nProcessors = 1, int rank = 0);
-
     void setContext(const std::string &context);
     std::string getContext();
 
@@ -170,17 +166,11 @@ public:
 
     bool isConsoleTimestampEnabled() const;
     void setConsoleTimestampEnabled(bool enabled);
-    void setConsoleStream(std::ostream *console);
-    std::ostream & getConsoleStream();
-    std::string getConsolePrefix();
     void setConsoleVerbosity(log::Level threshold);
     log::Level getConsoleVerbosity();
 
     bool isFileTimestampEnabled() const;
     void setFileTimestampEnabled(bool enabled);
-    void setFileStream(std::ofstream *file);
-    std::ofstream & getFileStream();
-    std::string getFilePrefix();
     void setFileVerbosity(log::Level threshold);
     log::Level getFileVerbosity();
 
@@ -196,9 +186,19 @@ public:
     void print(const std::string &message, log::Visibility visibility);
     void print(const std::string &message, log::Level severity, log::Visibility visibility);
 
+    template<typename T>
+    void print(const T &value, log::Level severity, log::Visibility visibility)
+    {
+        // Setup buffer
+        setupBuffer(severity, visibility);
+
+        // Print the value
+        static_cast<std::ostream &>(*this) << value;
+    };
+
 private:
     std::string m_name;
-    LoggerBuffer m_buffer;
+    std::shared_ptr<LoggerBuffer> m_buffer;
 
     int m_indentation;
     std::string m_context;
@@ -212,10 +212,14 @@ private:
     log::Level m_fileDisabledThreshold;
     log::Level m_fileVerbosityThreshold;
 
-    Logger(Logger const&);
+    bool m_consoleTimestampEnabled;
+    bool m_fileTimestampEnabled;
 
-    void setConsoleEnabled(log::Level severity, log::Visibility visibility);
-    void setFileEnabled(log::Level severity, log::Visibility visibility);
+    Logger(const std::string &name, const std::shared_ptr<LoggerBuffer> &buffer);
+    Logger(const Logger &other) = delete;
+    Logger(Logger &&other) = delete;
+
+    void setupBuffer(log::Level severity, log::Visibility visibility);
 
 };
 
@@ -298,12 +302,10 @@ private:
     LoggerManager(LoggerManager const&) = delete;
     LoggerManager& operator=(LoggerManager const&) = delete;
 
-    void _create(const std::string &name, bool reset, const std::string &directory,
-                int nProcessors, int rank);
-    void _create(const std::string &name, Logger &master);
+    void _create(const std::string &name, bool reset, const std::string &directory, int nProcessors, int rank);
+    void _create(const std::string &name, std::shared_ptr<LoggerBuffer> &buffer);
 
 };
-
 
 /*!
     \ingroup common_logger
@@ -399,6 +401,14 @@ namespace log {
 
 }
 
+}
+
+template<typename T>
+bitpit::Logger & operator<<(bitpit::Logger &logger, const T &value)
+{
+    logger.print(value, logger.getDefaultSeverity(), logger.getDefaultVisibility());
+
+    return logger;
 }
 
 #endif
