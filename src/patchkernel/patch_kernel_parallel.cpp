@@ -208,12 +208,13 @@ bool PatchKernel::isDistributed(bool allowDirty) const
 */
 int PatchKernel::getOwner(bool allowDirty) const
 {
-	assert(allowDirty || arePartitioningInfoDirty(false));
-	if (!allowDirty || !arePartitioningInfoDirty(true)) {
-		return m_owner;
-	} else {
+	if (allowDirty) {
 		return evalOwner();
 	}
+
+	assert(!arePartitioningInfoDirty(false));
+
+	return m_owner;
 }
 
 /*!
