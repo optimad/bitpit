@@ -425,7 +425,9 @@ namespace bitpit {
     void
     ParaTree::initializeLogger(const std::string &logfile){
         log::manager().create(logfile, false, m_nproc, m_rank);
+
         m_log = &log::cout(logfile);
+        m_log->setContext("PABLO");
     }
 
     /*! Reset the octree
@@ -740,7 +742,6 @@ namespace bitpit {
      */
     void
     ParaTree::printHeader(){
-        (*m_log) << log::context("PABLO");
         (*m_log) << "---------------------------------------------" << endl;
         (*m_log) << "- PABLO PArallel Balanced Linear Octree -" << endl;
         (*m_log) << "---------------------------------------------" << endl;
