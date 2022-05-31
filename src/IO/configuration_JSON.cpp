@@ -290,10 +290,11 @@ void writeConfiguration(const std::string &filename, const Config *rootConfig, b
     Tree contents will be written to a plain c++ string, with UTF-8 standard encoding, and 
     appended to any previous content of the source string.
     
-    \param[in] source string to write JSON contents.
     \param[in] rootConfig pointer to the Config tree to be written on target string
+    \param[inout] source string to write JSON contents.
+
 */
-void writeBufferConfiguration(std::string &source, const Config *rootConfig)
+void writeBufferConfiguration(const Config *rootConfig, std::string &source)
 {
     if (!rootConfig) {
         throw std::runtime_error("JSON::writeConfiguration Null Config tree structure passed");

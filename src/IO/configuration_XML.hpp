@@ -42,7 +42,7 @@ void readBufferConfiguration(const std::string &source,  Config *rootConfig);
 void readNode(xmlNodePtr root, Config *config);
 
 void writeConfiguration(const std::string &filename, const std::string & rootname, int version, const Config *rootConfig);
-void writeBufferConfiguration(std::string &source, const Config *rootConfig, const std::string &rootname = "root");
+void writeBufferConfiguration(const Config *rootConfig, std::string &source, const std::string &rootname = "root");
 void writeNode(xmlTextWriterPtr writer, const Config *config, const std::string &encoding = DEFAULT_ENCODING);
 
 xmlChar * encodeString(const std::string &in, const std::string &encoding);

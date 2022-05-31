@@ -323,11 +323,11 @@ void writeConfiguration(const std::string &filename, const std::string &rootname
     Write the Config Tree to a c++ string (xml-stringfication). All contents will 
     be appended to the target source string.
     The method is meant for general-purpose xml info flushing.  
-    \param source string to write to
     \param rootConfig pointer to the Config tree to be stringfied.
+    \param source string to write to
     \param rootname (optional) name of the root section. Default is "root".
 */
-void writeBufferConfiguration(std::string &source, const Config *rootConfig, const std::string &rootname)
+void writeBufferConfiguration(const Config *rootConfig, std::string &source, const std::string &rootname)
 {
     if (!rootConfig) {
         throw std::runtime_error("XML::writeConfiguration Null Config tree structure passed");

@@ -40,7 +40,7 @@ void readBufferConfiguration(const std::string &source, Config *rootConfig);
 void readNode(const std::string &key, const rapidjson::Value &value, Config *config);
 
 void writeConfiguration(const std::string &filename, const Config *rootConfig, bool prettify = true);
-void writeBufferConfiguration(std::string &source, const Config *rootConfig);
+void writeBufferConfiguration(const Config *rootConfig, std::string &source);
 void writeNode(const Config *config, rapidjson::Value &rootJSONData, rapidjson::Document::AllocatorType &allocator);
 
 std::string decodeValue(const rapidjson::Value &value);

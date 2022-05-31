@@ -458,10 +458,10 @@ void ConfigStringParser::write(std::string &source, bool append) const
 
     if(m_format == Format::JSON){
 #if HAS_RAPIDJSON_LIB
-        config::JSON::writeBufferConfiguration(source, this);
+        config::JSON::writeBufferConfiguration(this, source);
 #endif
     }else{
-        config::XML::writeBufferConfiguration(source, this, "root");
+        config::XML::writeBufferConfiguration(this, source, "root");
     }
 
 }
