@@ -185,92 +185,129 @@ int LoggerBuffer::sync()
 */
 int LoggerBuffer::flush(bool terminate)
 {
-    int status = 0;
-    if (pptr() == pbase()) {
-        return status;
+    // Get buffer information
+    const char *bufferBegin = pbase();
+    const char *bufferEnd   = pptr();
+    if (bufferBegin == bufferEnd) {
+        return 0;
     }
 
-    // Identify line breakers
-    std::vector<char *> linePointers;
-    linePointers.push_back(pbase());
-    for (char *p = pbase(), *e = pptr() - 1; p != e; ++p) {
-        if (*p == '\n') {
-            linePointers.push_back(p + 1);
+    // Flush buffer a line at the time
+    const char *lineBegin = nullptr;
+    const char *lineEnd   = bufferBegin;
+    while (lineEnd != bufferEnd) {
+        // Update line information
+        lineBegin = lineEnd;
+        for (lineEnd = lineBegin; lineEnd != bufferEnd; ++lineEnd) {
+            if (*lineEnd == '\n') {
+                lineEnd += 1;
+                break;
+            }
         }
-    }
-    linePointers.push_back(pptr());
 
-    // Detect if a new line must be added at the end
-    terminate = (terminate && *(linePointers.back() - 1) != '\n');
+        // Detect if a new line must be added at the end of the line
+        bool terminateLine = false;
+        if (terminate && (lineEnd == bufferEnd)) {
+            if (bufferBegin == bufferEnd) {
+                terminateLine = true;
+            } else if (*(bufferEnd - 1) != '\n') {
+                terminateLine = true;
+            }
+        }
 
-    // Move the internal pointer
-    std::ptrdiff_t nCharacters = pptr() - pbase();
-    pbump(- nCharacters);
-
-    // Write all lines
-    for (unsigned int i = 0; i < linePointers.size() - 1; ++i) {
-        char *firstCharacter = linePointers[i];
-        char *lastCharacter  = linePointers[i + 1];
-        std::ptrdiff_t lineSize = lastCharacter - firstCharacter;
-
-        // Write to the console
-        if (m_console && m_consoleEnabled) {
+        // Get timestamp
+        std::string consoleTimestamp;
+        std::string fileTimestamp;
+        if (m_consoleTimestampEnabled || m_fileTimestampEnabled) {
+            std::string timestamp = getTimestamp();
             if (m_consoleTimestampEnabled) {
-                *m_console << "[" + getTimestamp() + "] ";
+                consoleTimestamp = timestamp;
             }
-
-            if (!m_rankPrefix.empty()) {
-                *m_console << m_rankPrefix << " :: ";
-            }
-
-            if (!m_context.empty()) {
-                *m_console << m_context << " :: ";
-            }
-
-            if (!m_padding.empty()) {
-                *m_console << m_padding;
-            }
-
-            m_console->write(firstCharacter, lineSize);
-            if ((m_console->rdstate() & std::ifstream::failbit ) != 0) {
-                status = -1;
-            }
-
-            if (terminate && lastCharacter == linePointers.back()) {
-                *m_console << "\n";
+            if (m_fileTimestampEnabled) {
+                fileTimestamp = timestamp;
             }
         }
 
-        // Write to file
+        // Flush line to console
+        if (m_console && m_consoleEnabled) {
+            int status = flushLine(*m_console, lineBegin, lineEnd, consoleTimestamp, terminateLine);
+            if (status != 0) {
+                return status;
+            }
+        }
+
+        // Flush line to file
         if (m_file && m_fileEnabled && m_file->is_open()) {
-            if (m_fileTimestampEnabled) {
-                *m_file << "[" + getTimestamp() + "] ";
-            }
-
-            if (!m_rankPrefix.empty()) {
-                *m_file << m_rankPrefix << " :: ";
-            }
-
-            if (!m_context.empty()) {
-                *m_file << m_context + " :: ";
-            }
-
-            if (!m_padding.empty()) {
-                *m_file << m_padding;
-            }
-
-            m_file->write(firstCharacter, lineSize);
-            if ((m_file->rdstate() & std::ifstream::failbit ) != 0) {
-                status = -1;
-            }
-
-            if (terminate && lastCharacter == linePointers.back()) {
-                *m_file << "\n";
+            int status = flushLine(*m_file, lineBegin, lineEnd, fileTimestamp, terminateLine);
+            if (status != 0) {
+                return status;
             }
         }
     }
 
-    return status;
+    // Reset the internal pointer
+    pbump(bufferBegin - bufferEnd);
+
+    return 0;
+}
+
+/*!
+    Flushes stream buffer.
+
+    \param stream is the steam the line will be flushed to
+    \param begin refers to the first character of the line
+    \param end refers to the past-the-last character of the line
+    \param timestamp if the timestamp that will be printed at the beginning
+    of the line, if an empty string is provided, no timestamp information
+    will be printed
+    \param terminate if set to true a new line character will be printed at
+    \the end of the line
+    \return Returns 0 to indicates success, -1 to indicate failure.
+*/
+int LoggerBuffer::flushLine(std::ostream &stream, const char *begin, const char *end,
+                            const std::string &timestamp, bool terminate)
+{
+    if (!timestamp.empty()) {
+        stream << "[" + timestamp + "] ";
+        if ((stream.rdstate() & std::ifstream::failbit) != 0) {
+            return -1;
+        }
+    }
+
+    if (!m_rankPrefix.empty()) {
+        stream << m_rankPrefix << " :: ";
+        if ((stream.rdstate() & std::ifstream::failbit) != 0) {
+            return -1;
+        }
+    }
+
+    if (!m_context.empty()) {
+        stream << m_context + " :: ";
+        if ((stream.rdstate() & std::ifstream::failbit) != 0) {
+            return -1;
+        }
+    }
+
+    if (!m_padding.empty()) {
+        stream << m_padding;
+        if ((stream.rdstate() & std::ifstream::failbit) != 0) {
+            return -1;
+        }
+    }
+
+    stream.write(begin, end - begin);
+    if ((stream.rdstate() & std::ifstream::failbit) != 0) {
+        return -1;
+    }
+
+    if (terminate) {
+        stream << "\n";
+        if ((stream.rdstate() & std::ifstream::failbit) != 0) {
+            return -1;
+        }
+    }
+
+    return 0;
 }
 
 /*!

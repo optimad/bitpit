@@ -127,6 +127,9 @@ private:
     int_type overflow(int_type ch) override;
     int sync() override;
 
+    int flushLine(std::ostream &stream, const char *begin, const char *end,
+                  const std::string &timestamp, bool terminate);
+
 };
 
 // Logger
