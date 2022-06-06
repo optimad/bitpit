@@ -1053,9 +1053,9 @@ namespace bitpit {
         }
         else{
             u32array3 sameSizeVirtualNeighCoords = oct->getLogicalCoordinates();
-            sameSizeVirtualNeighCoords[0] += cxyz[0] * size;
-            sameSizeVirtualNeighCoords[1] += cxyz[1] * size;
-            sameSizeVirtualNeighCoords[2] += cxyz[2] * size;
+            sameSizeVirtualNeighCoords[0] += uint32_t(cxyz[0]) * size;
+            sameSizeVirtualNeighCoords[1] += uint32_t(cxyz[1]) * size;
+            sameSizeVirtualNeighCoords[2] += uint32_t(cxyz[2]) * size;
 
             sameSizeVirtualNeigh = Octant(m_dim, level, sameSizeVirtualNeighCoords[0], sameSizeVirtualNeighCoords[1], sameSizeVirtualNeighCoords[2]);
         }
@@ -1100,7 +1100,7 @@ namespace bitpit {
                 u32array3 coordtry = m_octants[candidateIdx].getLogicalCoordinates();
 
                 bool isNeighbourCandidate = true;
-                for (int idim=0; idim<m_dim; idim++){
+                for (int8_t idim=0; idim<m_dim; idim++){
                     int32_t Dx     = int32_t(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
                     int32_t Dxstar = int32_t((cxyz[idim]-1)/2)*(m_octants[candidateIdx].getLogicalSize()) + int32_t((cxyz[idim]+1)/2)*size;
                     if (Dx != Dxstar){
@@ -1114,7 +1114,7 @@ namespace bitpit {
                     uint8_t leveltry = m_octants[candidateIdx].getLevel();
                     if (leveltry > level){
                         array<int64_t,3> coord1 ={{1, 1, 1}} ;
-                        for (int idim=0; idim<m_dim; idim++){
+                        for (int8_t idim=0; idim<m_dim; idim++){
                             coord1[idim] = coord[idim] + size;
                         }
 
@@ -1124,7 +1124,7 @@ namespace bitpit {
                     }
                     else if (leveltry < level){
                         u32array3 coordtry1 = {{1, 1, 1}};
-                        for (int idim=0; idim<m_dim; idim++){
+                        for (int8_t idim=0; idim<m_dim; idim++){
                             coordtry1[idim] = coordtry[idim] + m_octants[candidateIdx].getLogicalSize();
                         }
 
@@ -1191,7 +1191,7 @@ namespace bitpit {
                     u32array3 coordtry = m_ghosts[candidateIdx].getLogicalCoordinates();
 
                     bool isNeighbourCandidate = true;
-                    for (int idim=0; idim<m_dim; idim++){
+                    for (int8_t idim=0; idim<m_dim; idim++){
                         int32_t Dx     = int32_t(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
                         int32_t Dxstar = int32_t((cxyz[idim]-1)/2)*(m_ghosts[candidateIdx].getLogicalSize()) + int32_t((cxyz[idim]+1)/2)*size;
                         if (Dx != Dxstar){
@@ -1205,7 +1205,7 @@ namespace bitpit {
                         uint8_t leveltry = m_ghosts[candidateIdx].getLevel();
                         if (leveltry > level){
                             array<int64_t, 3> coord1 = {{1, 1, 1}};
-                            for (int idim=0; idim<m_dim; idim++){
+                            for (int8_t idim=0; idim<m_dim; idim++){
                                 coord1[idim] = coord[idim] + size;
                             }
 
@@ -1215,7 +1215,7 @@ namespace bitpit {
                         }
                         else if (leveltry < level){
                             u32array3 coordtry1 = {{1, 1, 1}};
-                            for (int idim=0; idim<m_dim; idim++){
+                            for (int8_t idim=0; idim<m_dim; idim++){
                                 coordtry1[idim] = coordtry[idim] + m_ghosts[candidateIdx].getLogicalSize();
                             }
 
@@ -1309,9 +1309,9 @@ namespace bitpit {
         }
         else{
             u32array3 sameSizeVirtualNeighCoords = oct->getLogicalCoordinates();
-            sameSizeVirtualNeighCoords[0] += cxyz[0] * size;
-            sameSizeVirtualNeighCoords[1] += cxyz[1] * size;
-            sameSizeVirtualNeighCoords[2] += cxyz[2] * size;
+            sameSizeVirtualNeighCoords[0] += uint32_t(cxyz[0]) * size;
+            sameSizeVirtualNeighCoords[1] += uint32_t(cxyz[1]) * size;
+            sameSizeVirtualNeighCoords[2] += uint32_t(cxyz[2]) * size;
 
             sameSizeVirtualNeigh = Octant(m_dim, level, sameSizeVirtualNeighCoords[0], sameSizeVirtualNeighCoords[1], sameSizeVirtualNeighCoords[2]);
         }
@@ -1356,7 +1356,7 @@ namespace bitpit {
                 u32array3 coordtry = m_octants[candidateIdx].getLogicalCoordinates();
 
                 bool isNeighbourCandidate = true;
-                for (int idim=0; idim<m_dim; idim++){
+                for (int8_t idim=0; idim<m_dim; idim++){
                     int32_t Dx     = int32_t(int32_t(abs(cxyz[idim]))*(-int32_t(coord[idim]) + int32_t(coordtry[idim])));
                     int32_t Dxstar = int32_t((cxyz[idim]-1)/2)*(m_octants[candidateIdx].getLogicalSize()) + int32_t((cxyz[idim]+1)/2)*size;
 
@@ -1371,7 +1371,7 @@ namespace bitpit {
                     uint8_t leveltry = m_octants[candidateIdx].getLevel();
                     if (leveltry > level){
                         u32array3 coord1 = {{1, 1, 1}};
-                        for (int idim=0; idim<m_dim; idim++){
+                        for (int8_t idim=0; idim<m_dim; idim++){
                             coord1[idim] = coord[idim] + size;
                         }
 
@@ -1381,7 +1381,7 @@ namespace bitpit {
                     }
                     else if (leveltry < level){
                         u32array3 coordtry1 = {{1, 1, 1}};
-                        for (int idim=0; idim<m_dim; idim++){
+                        for (int8_t idim=0; idim<m_dim; idim++){
                             coordtry1[idim] = coordtry[idim] + m_octants[candidateIdx].getLogicalSize();
                         }
 
@@ -1437,7 +1437,7 @@ namespace bitpit {
                     u32array3 coordtry = m_ghosts[candidateIdx].getLogicalCoordinates();
 
                     bool isNeighbourCandidate = true;
-                    for (int idim=0; idim<m_dim; idim++){
+                    for (int8_t idim=0; idim<m_dim; idim++){
                         int32_t Dx     = int32_t(int32_t(abs(cxyz[idim]))*(-int32_t(coord[idim]) + int32_t(coordtry[idim])));
                         int32_t Dxstar = int32_t((cxyz[idim]-1)/2)*(m_ghosts[candidateIdx].getLogicalSize()) + int32_t((cxyz[idim]+1)/2)*size;
 
@@ -1452,7 +1452,7 @@ namespace bitpit {
                         uint8_t leveltry = m_ghosts[candidateIdx].getLevel();
                         if (leveltry > level){
                             u32array3 coord1 = {{1, 1, 1}};
-                            for (int idim=0; idim<m_dim; idim++){
+                            for (int8_t idim=0; idim<m_dim; idim++){
                                 coord1[idim] = coord[idim] + size;
                             }
 
@@ -1462,7 +1462,7 @@ namespace bitpit {
                         }
                         else if (leveltry < level){
                             u32array3 coordtry1 = {{1, 1, 1}};
-                            for (int idim=0; idim<m_dim; idim++){
+                            for (int8_t idim=0; idim<m_dim; idim++){
                                 coordtry1[idim] = coordtry[idim] + m_ghosts[candidateIdx].getLogicalSize();
                             }
 
@@ -1554,9 +1554,9 @@ namespace bitpit {
         }
         else{
             u32array3 sameSizeVirtualNeighCoords = oct->getLogicalCoordinates();
-            sameSizeVirtualNeighCoords[0] += cxyz[0] * size;
-            sameSizeVirtualNeighCoords[1] += cxyz[1] * size;
-            sameSizeVirtualNeighCoords[2] += cxyz[2] * size;
+            sameSizeVirtualNeighCoords[0] += uint32_t(cxyz[0]) * size;
+            sameSizeVirtualNeighCoords[1] += uint32_t(cxyz[1]) * size;
+            sameSizeVirtualNeighCoords[2] += uint32_t(cxyz[2]) * size;
 
             sameSizeVirtualNeigh = Octant(m_dim, level, sameSizeVirtualNeighCoords[0], sameSizeVirtualNeighCoords[1], sameSizeVirtualNeighCoords[2]);
         }
@@ -1601,7 +1601,7 @@ namespace bitpit {
                 u32array3 coordtry = m_octants[candidateIdx].getLogicalCoordinates();
 
                 bool isNeighbour = true;
-                for (int idim=0; idim<m_dim; idim++){
+                for (int8_t idim=0; idim<m_dim; idim++){
                     int32_t Dx     = int32_t(int32_t(abs(cxyz[idim]))*(-int32_t(coord[idim]) + int32_t(coordtry[idim])));
                     int32_t Dxstar = int32_t((cxyz[idim]-1)/2)*(m_octants[candidateIdx].getLogicalSize()) + int32_t((cxyz[idim]+1)/2)*size;
 
@@ -1652,7 +1652,7 @@ namespace bitpit {
                     u32array3 coordtry = m_ghosts[candidateIdx].getLogicalCoordinates();
 
                     bool isNeighbour = true;
-                    for (int idim=0; idim<m_dim; idim++){
+                    for (int8_t idim=0; idim<m_dim; idim++){
                         int32_t Dx     = int32_t(int32_t(abs(cxyz[idim]))*(-int32_t(coord[idim]) + int32_t(coordtry[idim])));
                         int32_t Dxstar = int32_t((cxyz[idim]-1)/2)*(m_ghosts[candidateIdx].getLogicalSize()) + int32_t((cxyz[idim]+1)/2)*size;
 
