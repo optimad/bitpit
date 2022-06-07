@@ -2236,7 +2236,7 @@ void PiercedKernel<id_t>::setPosEmptyId(std::size_t pos, std::size_t nextUsedPos
 {
     assert(nextUsedPos > pos);
 
-    m_ids[pos] = pos - nextUsedPos;
+    m_ids[pos] = -1 * id_t(nextUsedPos - pos);
 }
 
 /**
