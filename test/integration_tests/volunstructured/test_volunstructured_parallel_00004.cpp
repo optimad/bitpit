@@ -43,7 +43,7 @@ int subtest_001(int rank)
     // Create the patch
     //
     std::unique_ptr<VolUnstructured> patch = std::unique_ptr<VolUnstructured>(new VolUnstructured(3, MPI_COMM_WORLD));
-    patch->getVTK().setName("test_00003_partitioned_mesh");
+    patch->getVTK().setName("test_00004_partitioned_mesh");
     patch->setVertexAutoIndexing(false);
     if (rank == 0) {
         patch->addVertex({{0.00000000, 0.00000000,  0.00000000}},  1);
@@ -192,42 +192,28 @@ int subtest_001(int rank)
     patch->initializeInterfaces();
     patch->update();
 
+#if BITPIT_ENABLE_METIS
     //
     // Partition the patch
     //
-
-    // Evaluate cell ranks
-    log::cout() << "Evaluating cell ranks..." << std::endl;
-
-    std::unordered_map<long, int> cellRanks;
-    if (rank == 0) {
-        int nProcs;
-        MPI_Comm_size(patch->getCommunicator(), &nProcs);
-        std::size_t nMaxCellsPerProc = std::ceil((double) patch->getInternalCellCount() / nProcs);
-
-        std::size_t index = 0;
-        for (auto itr = patch->internalCellBegin(); itr != patch->internalCellEnd(); ++itr) {
-            int rank = std::floor((double) index / nMaxCellsPerProc);
-            ++index;
-
-            cellRanks[itr.getId()] = rank;
-        }
-    }
 
     // Partition
     log::cout() << "Partitioning the patch..." << std::endl;
 
     std::clock_t partitioningStartTime = clock();
 
-    patch->partition(cellRanks, true, true);
+    patch->partition(true, true);
 
     std::clock_t partitioningEndTime = clock();
 
     double partitioningElapsed = double(partitioningEndTime - partitioningStartTime) / CLOCKS_PER_SEC;
 
     log::cout() << "    Partition completed in " << partitioningElapsed << " seconds" << std::endl;
+#endif
 
+    //
     // Show patch info
+    //
     log::cout() << "Cell count: " << patch->getCellCount() << std::endl;
     log::cout() << "Internal cell count: " << patch->getInternalCellCount() << std::endl;
     log::cout() << "Ghost cell count: " << patch->getGhostCellCount() << std::endl;

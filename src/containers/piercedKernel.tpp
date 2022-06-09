@@ -1323,9 +1323,7 @@ typename PiercedKernel<id_t>::FillAction PiercedKernel<id_t>::fillAppend(id_t id
     validateId(id);
 
     // Add the id
-    m_ids.emplace_back();
-    id_t &storedId = m_ids.back();
-    storedId = id;
+    m_ids.emplace_back(id);
 
     // Update last used position
     setEndPos(rawSize());
@@ -2238,7 +2236,7 @@ void PiercedKernel<id_t>::setPosEmptyId(std::size_t pos, std::size_t nextUsedPos
 {
     assert(nextUsedPos > pos);
 
-    m_ids[pos] = pos - nextUsedPos;
+    m_ids[pos] = -1 * id_t(nextUsedPos - pos);
 }
 
 /**

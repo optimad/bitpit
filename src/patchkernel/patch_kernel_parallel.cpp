@@ -29,6 +29,9 @@
 #include <mpi.h>
 #include <chrono>
 #include <unordered_set>
+#if BITPIT_ENABLE_METIS==1
+#include <metis.h>
+#endif
 
 #include "bitpit_communications.hpp"
 
@@ -167,24 +170,82 @@ int PatchKernel::getProcessorCount() const
 /*!
 	Check if the patch is distributed among different processes.
 
+	A patch is distributed among different processes if it doesn't have an owner.
+
+	Setting the appropriate function argument, this function can be called also
+	when the patch is not up-to-date. If dirty patches are allowed and the patch
+	is actually dirty, the function will evaluate the owner on-the-fly. Otherwise
+	the function will return the owner evaluated during the last update. In any
+	case, if dirt patches are allowed, the function is a collective function and
+	needs to be called by all processes (otherwise a deadlock will occur).
+
 	\return Return true if the patch is distributed among different processes,
 	false otherwise.
 */
-bool PatchKernel::isDistributed() const
+bool PatchKernel::isDistributed(bool allowDirty) const
 {
-	return (getOwner() < 0);
+	return (getOwner(allowDirty) < 0);
 }
 
 /*!
 	If the path is NOT distributed among different processes, returns the
 	process that owns the patch, otherwise returns a negative number.
 
+	Setting the appropriate function argument, this function can be called also
+	when the patch is not up-to-date. If dirty patches are allowed and the patch
+	is actually dirty, the function will evaluate the owner on-the-fly. Otherwise
+	the function will return the owner evaluated during the last update. In any
+	case, if dirt patches are allowed, the function is a collective function and
+	needs to be called by all processes (otherwise a deadlock will occur).
+
+	\param allowDirty if set to true, the function will evaluate the owner of a dirty
+	patch on on-the-fly; otherwise the function will return the owner evaluated during
+	the last updated, even if the patch is currently dirty. If dirty patch are allowed,
+	the function is a collective function and needs to be called by all processes
+	(otherwise a deadlock will occur)
 	\return If the path is NOT distributed among different processes, returns
 	the process that owns the patch, otherwise returns a negative number.
 */
-int PatchKernel::getOwner() const
+int PatchKernel::getOwner(bool allowDirty) const
 {
-	return m_owner;
+	assert(allowDirty || arePartitioningInfoDirty(false));
+	if (!allowDirty || !arePartitioningInfoDirty(true)) {
+		return m_owner;
+	} else {
+		return evalOwner();
+	}
+}
+
+/*!
+	Evaluate the owner of the patch.
+
+	This function can be called also when the patch is not up-to-date. If the patch
+	is up-to-date, the function will return the same result of PatchKernel::getOwner().
+
+	If the path is NOT distributed among different processes, the owner is set
+	to the process that owns the cells, otherwise the owner is set to a negative
+	number.
+*/
+int PatchKernel::evalOwner() const
+{
+	long nInternalCells = getInternalCellCount();
+	long nGlobalInternalCells = nInternalCells;
+	if (isPartitioned()) {
+		MPI_Allreduce(MPI_IN_PLACE, &nGlobalInternalCells, 1, MPI_LONG, MPI_SUM, getCommunicator());
+	}
+
+	int owner = -1;
+	if (nGlobalInternalCells > 0) {
+		if (nInternalCells == nGlobalInternalCells) {
+			owner = getRank();
+		}
+
+		if (isPartitioned()) {
+			MPI_Allreduce(MPI_IN_PLACE, &owner, 1, MPI_INT, MPI_MAX, getCommunicator());
+		}
+	}
+
+	return owner;
 }
 
 /*!
@@ -196,21 +257,7 @@ int PatchKernel::getOwner() const
 */
 void PatchKernel::updateOwner()
 {
-	long nInternalCells = getInternalCellCount();
-	long nGlobalInternalCells = nInternalCells;
-	if (isPartitioned()) {
-		MPI_Allreduce(MPI_IN_PLACE, &nGlobalInternalCells, 1, MPI_LONG, MPI_SUM, getCommunicator());
-	}
-
-	if (nInternalCells == nGlobalInternalCells) {
-		m_owner = getRank();
-	} else {
-		m_owner = -1;
-	}
-
-	if (isPartitioned()) {
-		MPI_Allreduce(MPI_IN_PLACE, &m_owner, 1, MPI_INT, MPI_MAX, getCommunicator());
-	}
+	m_owner = evalOwner();
 }
 
 /*!
@@ -1319,116 +1366,7 @@ std::vector<adaption::Info> PatchKernel::partitioningPrepare(const std::unordere
 		throw std::runtime_error ("A partitioning is already in progress.");
 	}
 
-	// Fill partitioning ranks
-	int patchRank = getRank();
-
-	std::set<int> recvRanks;
-	m_partitioningOutgoings.clear();
-	for (auto &entry : cellRanks) {
-		int recvRank = entry.second;
-		if (recvRank == patchRank) {
-			continue;
-		}
-
-		long cellId = entry.first;
-		if (m_ghostCellOwners.count(cellId) > 0) {
-			continue;
-		}
-
-		m_partitioningOutgoings.insert(entry);
-		recvRanks.insert(recvRank);
-	}
-
-	// Identify exchange entries
-	int nRanks = getProcessorCount();
-
-	int nExchanges = recvRanks.size();
-	std::vector<std::pair<int, int>> exchanges;
-	exchanges.reserve(nExchanges);
-	for (int recvRank : recvRanks) {
-		exchanges.emplace_back(patchRank, recvRank);
-	}
-
-	int exchangesGatherCount = 2 * nExchanges;
-	std::vector<int> exchangeGatherCount(nRanks);
-	MPI_Allgather(&exchangesGatherCount, 1, MPI_INT, exchangeGatherCount.data(), 1, MPI_INT, m_communicator);
-
-	std::vector<int> exchangesGatherDispls(nRanks, 0);
-	for (int i = 1; i < nRanks; ++i) {
-		exchangesGatherDispls[i] = exchangesGatherDispls[i - 1] + exchangeGatherCount[i - 1];
-	}
-
-	int nGlobalExchanges = nExchanges;
-	MPI_Allreduce(MPI_IN_PLACE, &nGlobalExchanges, 1, MPI_INT, MPI_SUM, m_communicator);
-
-	m_partitioningGlobalExchanges.resize(nGlobalExchanges);
-	MPI_Allgatherv(exchanges.data(), exchangesGatherCount, MPI_INT, m_partitioningGlobalExchanges.data(),
-	               exchangeGatherCount.data(), exchangesGatherDispls.data(), MPI_INT, m_communicator);
-
-	std::sort(m_partitioningGlobalExchanges.begin(), m_partitioningGlobalExchanges.end(), greater<std::pair<int,int>>());
-
-	// Get global list of ranks that will send data
-	std::unordered_set<int> globalSendRanks;
-	for (const std::pair<int, int> &entry : m_partitioningGlobalExchanges) {
-		globalSendRanks.insert(entry.first);
-	}
-
-	// Get global list of ranks that will receive data
-	std::unordered_set<int> globalRecvRanks;
-	for (const std::pair<int, int> &entry : m_partitioningGlobalExchanges) {
-		globalRecvRanks.insert(entry.second);
-	}
-
-	// Identify if this is a serialization or a normal partitioning
-	//
-	// We are serializing the patch if all the processes are sending all
-	// their cells to the same rank.
-	m_partitioningSerialization = (globalRecvRanks.size() == 1);
-	if (m_partitioningSerialization) {
-		int receiverRank = *(globalRecvRanks.begin());
-		if (patchRank != receiverRank) {
-			if (m_partitioningOutgoings.size() != (std::size_t) getInternalCellCount()) {
-				m_partitioningSerialization = false;
-			}
-		}
-
-		MPI_Allreduce(MPI_IN_PLACE, &m_partitioningSerialization, 1, MPI_C_BOOL, MPI_LAND, m_communicator);
-	}
-
-	// Build the information on the cells that will be sent
-	//
-	// Only internal cells are tracked.
-	std::vector<adaption::Info> partitioningData;
-	if (trackPartitioning) {
-		for (const std::pair<int, int> &entry : m_partitioningGlobalExchanges) {
-			int sendRank = entry.first;
-			if (sendRank != patchRank) {
-				continue;
-			}
-
-			int recvRank = entry.second;
-
-			std::vector<long> previous;
-			for (const auto &entry : m_partitioningOutgoings) {
-				int cellRank = entry.second;
-				if (cellRank != recvRank) {
-					continue;
-				}
-
-				long cellId = entry.first;
-				previous.push_back(cellId);
-			}
-
-			if (!previous.empty()) {
-				partitioningData.emplace_back();
-				adaption::Info &partitioningInfo = partitioningData.back();
-				partitioningInfo.entity   = adaption::ENTITY_CELL;
-				partitioningInfo.type     = adaption::TYPE_PARTITION_SEND;
-				partitioningInfo.rank     = recvRank;
-				partitioningInfo.previous = std::move(previous);
-			}
-		}
-	}
+	std::vector<adaption::Info> partitioningData = _partitioningPrepare(cellRanks, trackPartitioning);
 
 	// Update the status
 	setPartitioningStatus(PARTITIONING_PREPARED);
@@ -1733,10 +1671,22 @@ double PatchKernel::evalPartitioningUnbalance(const std::unordered_map<long, dou
 
 /*!
 	Prepares the patch for performing the partitioning.
+*/
+#if BITPIT_ENABLE_METIS==1
+/*!
+	This function uses METIS to evaluate patch partitioning, hence it can only be
+	used when the patch is all on a single process.
 
-	Default implementation is a no-op function and can only be used to
-	partition an empty patch.
-
+	METIS expects weights to be integer numbers, non-integer weights are rounded to
+	the nearest integer and weights less than 1 are set to 1.
+*/
+#else
+/*!
+	Default implementation is a no-op function and can only be used if the patch is
+	empty or if the patch is not distributed and a single partition is requested.
+*/
+#endif
+/*!
 	\param cellWeights are the weights of the cells, the weight represents the
 	relative computational cost associated with a specified cell. If no weight
 	is specified for a cell, the default weight will be used
@@ -1750,15 +1700,231 @@ double PatchKernel::evalPartitioningUnbalance(const std::unordered_map<long, dou
 */
 std::vector<adaption::Info> PatchKernel::_partitioningPrepare(const std::unordered_map<long, double> &cellWeights, double defaultWeight, bool trackPartitioning)
 {
-	BITPIT_UNUSED(cellWeights);
-	BITPIT_UNUSED(defaultWeight);
-	BITPIT_UNUSED(trackPartitioning);
-
-	if (m_nInternalCells > 0) {
-		throw std::runtime_error ("For this patch automatic partitioning can be used only to initialize partitioning on an empty patch.");
+	// Default partitioning can only be used when the patch is all on a single process
+	if (isDistributed()) {
+		throw std::runtime_error("Default partitioning can only be used when the patch is all on a single process");
 	}
 
-	return std::vector<adaption::Info>();
+	// Early return if the mesh is empty
+	if (empty(true)) {
+		return std::vector<adaption::Info>();
+	}
+
+	// Early return if there is a single partition
+	if (getProcessorCount() == 1) {
+		return std::vector<adaption::Info>();
+	}
+
+	// Evaluate partitioning
+#if BITPIT_ENABLE_METIS==1
+	std::unordered_map<long, int> cellRanks;
+	if (getRank() == getOwner()) {
+		// Initialize map between patch vertices and METIS nodes
+		//
+		// METIS node numbering needs to be contiguous and needs to start from zero.
+		std::unordered_map<long, idx_t> vertexToNodeMap;
+
+		idx_t nodeId = 0;
+		for (const Vertex &vertex : m_vertices) {
+			vertexToNodeMap[vertex.getId()] = nodeId;
+			++nodeId;
+		}
+
+		// Create METIS mesh
+		idx_t nElements = getInternalCellCount();
+		idx_t nNodes = getInternalVertexCount();
+
+		idx_t connectSize = 0;
+		for (const Cell &cell : m_cells){
+			connectSize += static_cast<idx_t>(cell.getVertexCount());
+		}
+
+		std::vector<idx_t> connectStorage(connectSize);
+		std::vector<idx_t> connectRanges(nElements + 1);
+		std::vector<idx_t> elementWeights(nElements, static_cast<idx_t>(std::max(defaultWeight, 1.)));
+
+		idx_t i = 0;
+		idx_t j = 0;
+		connectRanges[0] = 0;
+		for (const Cell &cell : m_cells) {
+			// Element connectivity
+			for (long vertex : cell.getVertexIds()) {
+				connectStorage[j] = vertexToNodeMap[vertex];
+				++j;
+			}
+			connectRanges[i + 1] = j;
+
+			// Element weight
+			auto weightItr = cellWeights.find(cell.getId());
+			if (weightItr != cellWeights.end()) {
+				elementWeights[i] = static_cast<idx_t>(std::max(std::round(weightItr->second), 1.));
+			}
+
+			// Increase counters
+			i++;
+		}
+
+		// Get the number of common nodes two elements should share to be considered neighbours
+		idx_t nCommonNodes = getDimension();
+
+		// Get the number of partitions the mesh should be split into
+		idx_t nPartitions = getProcessorCount();
+
+		// Evaluate partitioning
+		idx_t objectiveValue;
+
+		std::vector<idx_t> elementRanks(nElements);
+		std::vector<idx_t> nodeRanks(nNodes);
+
+		int status = METIS_PartMeshDual(&nElements, &nNodes, connectRanges.data(), connectStorage.data(),
+										elementWeights.data(), nullptr, &nCommonNodes, &nPartitions, nullptr,
+										nullptr, &objectiveValue, elementRanks.data(), nodeRanks.data());
+
+		if (status != METIS_OK) {
+			throw std::runtime_error("Error during partitioning (METIS error " + std::to_string(status) + ")");
+		}
+
+		// Fill the cell ranks
+		int metisId = 0;
+		for (const Cell &cell : m_cells) {
+			int metisRank = elementRanks[metisId];
+			if (metisRank != getRank()) {
+				cellRanks[cell.getId()] = elementRanks[metisId];
+			}
+			++metisId;
+		}
+	}
+
+	return _partitioningPrepare(cellRanks, trackPartitioning);
+#else
+	throw std::runtime_error("METIS library is required for automatic patch partitioning.");
+#endif
+}
+
+/*!
+	Partitions the patch among the processes. Each cell will be assigned
+	to a specific process according to the specified input.
+
+	\param cellRanks are the ranks of the cells after the partitioning
+	\param trackPartitioning if set to true, the changes to the patch will be
+	tracked
+	\result Returns a vector of adaption::Info that can be used to track
+	the changes done during the partitioning.
+*/
+std::vector<adaption::Info> PatchKernel::_partitioningPrepare(const std::unordered_map<long, int> &cellRanks, bool trackPartitioning)
+{
+	// Fill partitioning ranks
+	int patchRank = getRank();
+
+	std::set<int> recvRanks;
+	m_partitioningOutgoings.clear();
+	for (auto &entry : cellRanks) {
+		int recvRank = entry.second;
+		if (recvRank == patchRank) {
+			continue;
+		}
+
+		long cellId = entry.first;
+		if (m_ghostCellOwners.count(cellId) > 0) {
+			continue;
+		}
+
+		m_partitioningOutgoings.insert(entry);
+		recvRanks.insert(recvRank);
+	}
+
+	// Identify exchange entries
+	int nRanks = getProcessorCount();
+
+	int nExchanges = recvRanks.size();
+	std::vector<std::pair<int, int>> exchanges;
+	exchanges.reserve(nExchanges);
+	for (int recvRank : recvRanks) {
+		exchanges.emplace_back(patchRank, recvRank);
+	}
+
+	int exchangesGatherCount = 2 * nExchanges;
+	std::vector<int> exchangeGatherCount(nRanks);
+	MPI_Allgather(&exchangesGatherCount, 1, MPI_INT, exchangeGatherCount.data(), 1, MPI_INT, m_communicator);
+
+	std::vector<int> exchangesGatherDispls(nRanks, 0);
+	for (int i = 1; i < nRanks; ++i) {
+		exchangesGatherDispls[i] = exchangesGatherDispls[i - 1] + exchangeGatherCount[i - 1];
+	}
+
+	int nGlobalExchanges = nExchanges;
+	MPI_Allreduce(MPI_IN_PLACE, &nGlobalExchanges, 1, MPI_INT, MPI_SUM, m_communicator);
+
+	m_partitioningGlobalExchanges.resize(nGlobalExchanges);
+	MPI_Allgatherv(exchanges.data(), exchangesGatherCount, MPI_INT, m_partitioningGlobalExchanges.data(),
+	               exchangeGatherCount.data(), exchangesGatherDispls.data(), MPI_INT, m_communicator);
+
+	std::sort(m_partitioningGlobalExchanges.begin(), m_partitioningGlobalExchanges.end(), greater<std::pair<int,int>>());
+
+	// Get global list of ranks that will send data
+	std::unordered_set<int> globalSendRanks;
+	for (const std::pair<int, int> &entry : m_partitioningGlobalExchanges) {
+		globalSendRanks.insert(entry.first);
+	}
+
+	// Get global list of ranks that will receive data
+	std::unordered_set<int> globalRecvRanks;
+	for (const std::pair<int, int> &entry : m_partitioningGlobalExchanges) {
+		globalRecvRanks.insert(entry.second);
+	}
+
+	// Identify if this is a serialization or a normal partitioning
+	//
+	// We are serializing the patch if all the processes are sending all
+	// their cells to the same rank.
+	m_partitioningSerialization = (globalRecvRanks.size() == 1);
+	if (m_partitioningSerialization) {
+		int receiverRank = *(globalRecvRanks.begin());
+		if (patchRank != receiverRank) {
+			if (m_partitioningOutgoings.size() != (std::size_t) getInternalCellCount()) {
+				m_partitioningSerialization = false;
+			}
+		}
+
+		MPI_Allreduce(MPI_IN_PLACE, &m_partitioningSerialization, 1, MPI_C_BOOL, MPI_LAND, m_communicator);
+	}
+
+	// Build the information on the cells that will be sent
+	//
+	// Only internal cells are tracked.
+	std::vector<adaption::Info> partitioningData;
+	if (trackPartitioning) {
+		for (const std::pair<int, int> &entry : m_partitioningGlobalExchanges) {
+			int sendRank = entry.first;
+			if (sendRank != patchRank) {
+				continue;
+			}
+
+			int recvRank = entry.second;
+
+			std::vector<long> previous;
+			for (const auto &entry : m_partitioningOutgoings) {
+				int cellRank = entry.second;
+				if (cellRank != recvRank) {
+					continue;
+				}
+
+				long cellId = entry.first;
+				previous.push_back(cellId);
+			}
+
+			if (!previous.empty()) {
+				partitioningData.emplace_back();
+				adaption::Info &partitioningInfo = partitioningData.back();
+				partitioningInfo.entity   = adaption::ENTITY_CELL;
+				partitioningInfo.type     = adaption::TYPE_PARTITION_SEND;
+				partitioningInfo.rank     = recvRank;
+				partitioningInfo.previous = std::move(previous);
+			}
+		}
+	}
+
+	return partitioningData;
 }
 
 /*!

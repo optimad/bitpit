@@ -294,6 +294,8 @@ bool VolUnstructured::isPointInside(const std::array<double, 3> &point) const
 {
 	BITPIT_UNUSED(point);
 
+	throw std::runtime_error ("The function 'isPointInside' is not implemented yet");
+
 	return false;
 }
 
@@ -308,6 +310,8 @@ bool VolUnstructured::isPointInside(long id, const std::array<double, 3> &point)
 {
 	BITPIT_UNUSED(id);
 	BITPIT_UNUSED(point);
+
+	throw std::runtime_error ("The function 'isPointInside' is not implemented yet");
 
 	return false;
 }
@@ -327,7 +331,9 @@ long VolUnstructured::locatePoint(const std::array<double, 3> &point) const
 {
 	BITPIT_UNUSED(point);
 
-	return false;
+	throw std::runtime_error ("The function 'locatePoint' is not implemented yet");
+
+	return Cell::NULL_ID;
 }
 
 }

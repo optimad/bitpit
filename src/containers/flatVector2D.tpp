@@ -1091,7 +1091,7 @@ const T* FlatVector2D<T>::operator[](std::size_t i) const
 {
     assert(isIndexValid(i));
 
-    if(m_v.empty()) {
+    if (m_v.empty()) {
         return nullptr;
     }
 
@@ -1110,7 +1110,7 @@ T* FlatVector2D<T>::operator[](std::size_t i)
 {
     assert(isIndexValid(i));
 
-    if(m_v.empty()) {
+    if (m_v.empty()) {
         return nullptr;
     }
 

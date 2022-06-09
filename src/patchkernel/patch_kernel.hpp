@@ -684,8 +684,8 @@ public:
 	int getRank() const;
 	int getProcessorCount() const;
 
-	bool isDistributed() const;
-	int getOwner() const;
+	bool isDistributed(bool allowDirty = false) const;
+	int getOwner(bool allowDirty = false) const;
 
 	void setHaloSize(std::size_t haloSize);
 	std::size_t getHaloSize() const;
@@ -896,6 +896,7 @@ protected:
 	void setPartitioned(bool partitioned);
 	void setPartitioningStatus(PartitioningStatus status);
 	virtual std::vector<adaption::Info> _partitioningPrepare(const std::unordered_map<long, double> &cellWeights, double defaultWeight, bool trackPartitioning);
+	virtual std::vector<adaption::Info> _partitioningPrepare(const std::unordered_map<long, int> &cellRanks, bool trackPartitioning);
 	virtual std::vector<adaption::Info> _partitioningAlter(bool trackPartitioning);
 	virtual void _partitioningCleanup();
 
@@ -1015,6 +1016,7 @@ private:
 	void updateGhostVertexExchangeInfo();
 
 	void updateOwner();
+	int evalOwner() const;
 
 	std::unordered_map<long, int> evaluateExchangeVertexOwners() const;
 #endif

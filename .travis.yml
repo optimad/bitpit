@@ -20,6 +20,7 @@ addons:
       - libopenmpi-dev
       - libpetsc3.6
       - libpetsc3.6.2-dev
+      - metis
 
 env:
   global:
