@@ -165,7 +165,7 @@ bool PatchKernel::deleteInterfaces(const IdStorage &ids)
 	// sure to delete the last interface just once (after deleting the last
 	// interface, another interface becomes the last one and that interface
 	// may be on the deletion list as well, and on and so forth).
-	std::size_t lastId;
+	long lastId;
 	if (!m_interfaces.empty()) {
 		lastId = m_interfaces.back().getId();
 	} else {
