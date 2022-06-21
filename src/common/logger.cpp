@@ -114,8 +114,8 @@ LoggerBuffer::~LoggerBuffer()
 LoggerBuffer::int_type LoggerBuffer::overflow(int_type character)
 {
     if (character != traits_type::eof()) {
-        // Write the charater to the buffer and then increment pptr() by
-        // calling pbump(1). It's always safe to write thecharater to the
+        // Write the character to the buffer and then increment pptr() by
+        // calling pbump(1). It's always safe to write the charater to the
         // buffer because we reserved an extra char at the end of our buffer
         // in the constructor.
         assert(std::less_equal<char *>()(pptr(), epptr()));
@@ -1095,7 +1095,7 @@ void Logger::print(const std::string &message, log::Level severity, log::Visibil
     \ingroup common_logger
     \brief Manager for the loggers.
 
-    This class implements a manager for the loggers. The manager allowes the
+    This class implements a manager for the loggers. The manager allows the
     different loggers to work together.
 */
 
@@ -1160,7 +1160,7 @@ LoggerManager & LoggerManager::manager()
     Returns an instance of default logger.
 
     The default severity of the messages will be set to the specified level,
-    if no default severity is specified, the default sevirity will remain
+    if no default severity is specified, the default severity will remain
     unaltered.
 
     The default visibility of the messages will be set to the specified level,
@@ -1183,7 +1183,7 @@ Logger & LoggerManager::cout(log::Level defaultSeverity, log::Visibility default
     does not exists a new instance will be created.
 
     The default severity of the messages will be set to the specified level,
-    if no default severity is specified, the default sevirity will remain
+    if no default severity is specified, the default severity will remain
     unaltered.
 
     The default visibility of the messages will be set to the specified level,
@@ -1530,11 +1530,11 @@ void LoggerManager::create(const std::string &name, bool reset,
 /*!
     Destroys the specified logger.
 
-    The logger can be shared among differen users, a logger is destoryed
+    The logger can be shared among different users, a logger is destroyed
     only if it has no users.
 
     \param name is the name of the logger
-    \param force controls if the logger will be destory also if it still
+    \param force controls if the logger will be destroyed also if it still
     has users
     \result True if the logger has been destroyed, false otherwise.
 */
@@ -1585,7 +1585,7 @@ bool LoggerManager::exists(const std::string &name) const
     Checks if the logger manager has been initialized.
 
     Explicit initialization of the manager is done using the function
-    'initialize', implicit initialization happnes the first time a
+    'initialize', implicit initialization happens the first time a
     logger is created.
 
     \result Returns true if the logger manager has been initialized, false
@@ -1845,7 +1845,7 @@ namespace log {
         Returns an instance of the default logger.
 
         The default severity of the messages will be set to the specified
-        level, if no default severity is specified, the default sevirity
+        level, if no default severity is specified, the default severity
         will remain unaltered.
 
         The default visibility of the messages will be set to the specified
@@ -1864,7 +1864,7 @@ namespace log {
         Returns an instance of the specified logger.
 
         The default severity of the messages will be set to the specified
-        level, if no default severity is specified, the default sevirity
+        level, if no default severity is specified, the default severity
         will remain unaltered.
 
         The default visibility of the messages will be set to the specified
@@ -2166,7 +2166,7 @@ namespace log {
     }
 
     /*!
-        Set the visibility ofthe messages.
+        Set the visibility of the messages.
 
         \param logger is a reference pointing to the logger
         \param visibility is the visibility of the messages
