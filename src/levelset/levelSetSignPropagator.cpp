@@ -204,6 +204,21 @@ void LevelSetSignPropagator::propagate(const LevelSetObjectInterface *object, Le
         }
     }
 
+    // Check if there are seeds to be used for sign propagation
+    //
+    // We need at least one seed to be able to perform sign propagation (i.e., at least one
+    // cell should be in the levelset narrowband).
+    long nGlobalSeeds = rawSeeds.size();
+#if BITPIT_ENABLE_MPI
+    if (m_mesh->isPartitioned()) {
+        MPI_Allreduce(MPI_IN_PLACE, &nGlobalSeeds, 1, MPI_LONG, MPI_SUM, m_mesh->getCommunicator());
+    }
+#endif
+
+    if (nGlobalSeeds == 0) {
+        throw std::runtime_error("Unable to propagate the sign: the list of seeds is empty!");
+    }
+
     // Use the seeds to propagate the sign
     executeSeedPropagation(rawSeeds, storage);
 
