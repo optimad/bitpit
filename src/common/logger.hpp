@@ -299,12 +299,10 @@ private:
     LoggerManager(LoggerManager const&) = delete;
     LoggerManager& operator=(LoggerManager const&) = delete;
 
-    void _create(const std::string &name, bool reset, const std::string &directory,
-                int nProcesses, int rank);
+    void _create(const std::string &name, bool reset, const std::string &directory, int nProcesses, int rank);
     void _create(const std::string &name, Logger &master);
 
 };
-
 
 /*!
     \ingroup common_logger
