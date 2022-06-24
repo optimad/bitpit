@@ -884,8 +884,20 @@ void PiercedStorage<value_t, id_t>::rawErase(std::size_t pos, std::size_t n)
 template<typename value_t, typename id_t>
 void PiercedStorage<value_t, id_t>::rawSwap(std::size_t pos_first, std::size_t pos_second)
 {
+    std::size_t firstOffset  = pos_first * m_nFields;
+    std::size_t secondOffset = pos_second * m_nFields;
     for (std::size_t k = 0; k < m_nFields; ++k) {
-        std::swap(m_fields[pos_first * m_nFields + k], m_fields[pos_second * m_nFields + k]);
+        // We cannot use std::swap because it will not work for bool storages
+        //
+        // The [] operator of std::vector<bool> returns a temporary object of a
+        // proxy type called std::vector<bool>::reference, rather than an actual
+        // bool&.
+        //
+        // Although the libstdc++ defines an overload for swapping this type of
+        // proxy objects, this is just an extension to the standard.
+        auto temp = std::move(m_fields[firstOffset + k]);
+        m_fields[firstOffset + k]  = m_fields[secondOffset + k];
+        m_fields[secondOffset + k] = std::move(temp);
     }
 }
 
