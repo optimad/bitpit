@@ -27,6 +27,7 @@
 
 #include "bitpit_common.hpp"
 
+#include "logger.hpp"
 #include "voloctree.hpp"
 
 namespace bitpit {
@@ -445,6 +446,11 @@ void VolOctree::initializeTree(std::unique_ptr<PabloUniform> *adopter, std::size
 void VolOctree::initializeTree(std::unique_ptr<PabloUniform> *adopter)
 #endif
 {
+	// Initialize logger
+#ifdef NDEBUG
+	m_tree->getLog().setVerbosities(log::WARNING);
+#endif
+
 #if BITPIT_ENABLE_MPI==1
 	// Initialize partitioning
     if (isCommunicatorSet()) {
