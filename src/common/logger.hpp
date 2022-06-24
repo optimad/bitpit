@@ -80,51 +80,57 @@ class LoggerBuffer : public std::streambuf
 {
 
 public:
-    LoggerBuffer(std::size_t bufferSize = 256);
-    LoggerBuffer(LoggerBuffer const &other);
+    struct Settings {
+        int indentation;
+        std::string context;
+        bool consoleTimestampEnabled;
+        bool fileTimestampEnabled;
+    };
+
+    LoggerBuffer(int nProcesses, int rank, std::size_t bufferSize = 256);
+    LoggerBuffer(const LoggerBuffer &other) = delete;
+    LoggerBuffer(LoggerBuffer &&other) = delete;
+
     ~LoggerBuffer();
 
-    bool isConsoleTimestampEnabled() const;
+    int getProcessCount() const;
+    int getRank() const;
+
     void setConsoleEnabled(bool enabled);
-    void setConsoleTimestampEnabled(bool enabled);
     void setConsoleStream(std::ostream *console);
     std::ostream & getConsoleStream();
-    void setConsolePrefix(const std::string &prefix);
-    std::string getConsolePrefix()	const;
 
-    bool isFileTimestampEnabled() const;
     void setFileEnabled(bool enabled);
-    void setFileTimestampEnabled(bool enabled);
     void setFileStream(std::ofstream *file);
     std::ofstream & getFileStream();
-    void setFilePrefix(const std::string &prefix);
-    std::string getFilePrefix() const;
 
-    void setContext(const std::string &context);
-    void setPadding(const std::string &padding);
+    const Settings * getSettings() const;
+    void setSettings(const std::shared_ptr<Settings> &settings);
 
     int flush(bool terminate);
 
 private:
     std::vector<char> m_buffer;
 
-    std::string m_context;
-    std::string m_padding;
+    int m_nProcesses;
+    int m_rank;
+    std::string m_rankPrefix;
 
     bool m_consoleEnabled;
-    bool m_consoleTimestampEnabled;
     std::ostream *m_console;
-    std::string m_consolePrefix;
 
     bool m_fileEnabled;
-    bool m_fileTimestampEnabled;
     std::ofstream *m_file;
-    std::string m_filePrefix;
 
-    const std::string getTimestamp() const;
+    std::shared_ptr<Settings> m_settings;
+
+    std::string getTimestamp() const;
 
     int_type overflow(int_type ch) override;
     int sync() override;
+
+    int flushLine(std::ostream &stream, const char *begin, const char *end,
+                  const std::string &timestamp, bool terminate);
 
 };
 
@@ -135,13 +141,6 @@ class Logger : public std::ostream
 friend class LoggerManager;
 
 public:
-    Logger(const std::string &name,
-           std::ostream *consoleStream, std::ofstream *fileStream,
-           int nProcesses = 1, int rank = 0);
-
-    int getProcessorCount();
-    int getRank();
-
     void setContext(const std::string &context);
     std::string getContext();
 
@@ -169,17 +168,11 @@ public:
 
     bool isConsoleTimestampEnabled() const;
     void setConsoleTimestampEnabled(bool enabled);
-    void setConsoleStream(std::ostream *console);
-    std::ostream & getConsoleStream();
-    std::string getConsolePrefix();
     void setConsoleVerbosity(log::Level threshold);
     log::Level getConsoleVerbosity();
 
     bool isFileTimestampEnabled() const;
     void setFileTimestampEnabled(bool enabled);
-    void setFileStream(std::ofstream *file);
-    std::ofstream & getFileStream();
-    std::string getFilePrefix();
     void setFileVerbosity(log::Level threshold);
     log::Level getFileVerbosity();
 
@@ -195,14 +188,24 @@ public:
     void print(const std::string &message, log::Visibility visibility);
     void print(const std::string &message, log::Level severity, log::Visibility visibility);
 
+    template<typename T>
+    void print(const T &value, log::Level severity, log::Visibility visibility)
+    {
+        // Format buffer
+        m_buffer->setSettings(m_bufferSettings);
+
+        // Enable buffer streams
+        enableBufferStreams(severity, visibility);
+
+        // Print the value
+        static_cast<std::ostream &>(*this) << value;
+    };
+
 private:
     std::string m_name;
-    int m_nProcesses;
-    int m_rank;
-    LoggerBuffer m_buffer;
 
-    int m_indentation;
-    std::string m_context;
+    std::shared_ptr<LoggerBuffer> m_buffer;
+    std::shared_ptr<LoggerBuffer::Settings> m_bufferSettings;
 
     log::Level m_defaultSeverity;
     log::Visibility m_defaultVisibility;
@@ -213,10 +216,12 @@ private:
     log::Level m_fileDisabledThreshold;
     log::Level m_fileVerbosityThreshold;
 
-    Logger(Logger const&);
+    Logger(const std::string &name, const std::shared_ptr<LoggerBuffer> &buffer);
+    Logger(const Logger &other) = delete;
+    Logger(Logger &&other) = delete;
 
-    void setConsoleEnabled(log::Level severity, log::Visibility visibility);
-    void setFileEnabled(log::Level severity, log::Visibility visibility);
+    void formatBuffer();
+    void enableBufferStreams(log::Level severity, log::Visibility visibility);
 
 };
 
@@ -300,7 +305,7 @@ private:
     LoggerManager& operator=(LoggerManager const&) = delete;
 
     void _create(const std::string &name, bool reset, const std::string &directory, int nProcesses, int rank);
-    void _create(const std::string &name, Logger &master);
+    void _create(const std::string &name, std::shared_ptr<LoggerBuffer> &buffer);
 
 };
 
@@ -396,6 +401,14 @@ namespace log {
     Logger & setIndentation(Logger &logger, const int &delta);
     LoggerManipulator<int> indent(int delta);
 
+}
+
+template<typename T>
+bitpit::Logger & operator<<(bitpit::Logger &logger, const T &value)
+{
+    logger.print(value, logger.getDefaultSeverity(), logger.getDefaultVisibility());
+
+    return logger;
 }
 
 }
