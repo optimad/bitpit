@@ -468,9 +468,9 @@ const std::string LoggerBuffer::getTimestamp() const
 */
 Logger::Logger(const std::string &name,
                std::ostream *consoleStream, std::ofstream *fileStream,
-               int nProcessors, int rank)
+               int nProcesses, int rank)
     : std::ios(nullptr), std::ostream(&m_buffer),
-      m_name(name), m_nProcessors(nProcessors), m_rank(rank), m_buffer(256),
+      m_name(name), m_nProcesses(nProcesses), m_rank(rank), m_buffer(256),
       m_indentation(0), m_context(""),
       m_defaultSeverity(log::INFO), m_defaultVisibility(log::VISIBILITY_MASTER),
       m_consoleDisabledThreshold(log::NOTSET), m_consoleVerbosityThreshold(log::INFO),
@@ -481,8 +481,8 @@ Logger::Logger(const std::string &name,
     setFileStream(fileStream);
 
     // Set parallel data
-    if (m_nProcessors > 1) {
-        int nDigits = ceil(log10(m_nProcessors));
+    if (m_nProcesses > 1) {
+        int nDigits = ceil(log10(m_nProcesses));
         std::ostringstream convert;
         convert << std::setw(nDigits) << m_rank;
         std::string rankPrefix = "#" + convert.str();
@@ -508,7 +508,7 @@ Logger::Logger(const std::string &name,
 Logger::Logger(const Logger &other)
     : std::ios(nullptr), std::ostream(&m_buffer),
       m_name(other.m_name),
-      m_nProcessors(other.m_nProcessors), m_rank(other.m_rank),
+      m_nProcesses(other.m_nProcesses), m_rank(other.m_rank),
       m_buffer(other.m_buffer),
       m_indentation(other.m_indentation), m_context(other.m_context),
       m_defaultSeverity(other.m_defaultSeverity), m_defaultVisibility(other.m_defaultVisibility),
@@ -966,7 +966,7 @@ int Logger::getIndentation()
 */
 int Logger::getProcessorCount()
 {
-    return m_nProcessors;
+    return m_nProcesses;
 }
 
 /*!
@@ -1420,13 +1420,13 @@ Logger & LoggerManager::debug(const std::string &name, log::Visibility defaultVi
 
     \param mode is the mode that will be set
     \param reset if true the log files will be reset
-    \param nProcessors is the total number of processes in the communicator
+    \param nProcesses is the total number of processes in the communicator
     \param rank is the parallel rank in the communicator
 */
 void LoggerManager::initialize(log::Mode mode, bool reset,
-                            int nProcessors, int rank)
+                            int nProcesses, int rank)
 {
-    initialize(mode, m_defaultName, reset, m_defaultDirectory, nProcessors, rank);
+    initialize(mode, m_defaultName, reset, m_defaultDirectory, nProcesses, rank);
 }
 
 /*!
@@ -1435,13 +1435,13 @@ void LoggerManager::initialize(log::Mode mode, bool reset,
     \param mode is the mode that will be set
     \param reset if true the log files will be reset
     \param directory is the default directory for saving the log files
-    \param nProcessors is the total number of processes in the communicator
+    \param nProcesses is the total number of processes in the communicator
     \param rank is the parallel rank in the communicator
 */
 void LoggerManager::initialize(log::Mode mode, bool reset, const std::string &directory,
-                            int nProcessors, int rank)
+                            int nProcesses, int rank)
 {
-    initialize(mode, m_defaultName, reset, directory, nProcessors, rank);
+    initialize(mode, m_defaultName, reset, directory, nProcesses, rank);
 }
 
 /*!
@@ -1451,12 +1451,12 @@ void LoggerManager::initialize(log::Mode mode, bool reset, const std::string &di
     \param name is the name for the default logger
     \param reset if true the log files will be reset
     \param directory is the default directory for saving the log files
-    \param nProcessors is the total number of processes in the communicator
+    \param nProcesses is the total number of processes in the communicator
     \param rank is the parallel rank in the communicator
 */
 void LoggerManager::initialize(log::Mode mode, const std::string &name, bool reset,
                             const std::string &directory,
-                            int nProcessors, int rank)
+                            int nProcesses, int rank)
 {
     if (isInitialized()) {
         log::cout().println("Logger initialization has to be called before creating the loggers.");
@@ -1471,7 +1471,7 @@ void LoggerManager::initialize(log::Mode mode, const std::string &name, bool res
     m_defaultDirectory = directory;
 
     // Create the logger
-    _create(m_defaultName, reset, directory, nProcessors, rank);
+    _create(m_defaultName, reset, directory, nProcesses, rank);
 }
 
 /*!
@@ -1479,13 +1479,13 @@ void LoggerManager::initialize(log::Mode mode, const std::string &name, bool res
 
     \param name is the name for the logger
     \param reset if true the log files will be reset
-    \param nProcessors is the total number of processes in the communicator
+    \param nProcesses is the total number of processes in the communicator
     \param rank is the parallel rank in the communicator
 */
 void LoggerManager::create(const std::string &name, bool reset,
-                           int nProcessors, int rank)
+                           int nProcesses, int rank)
 {
-    create(name, reset, m_defaultDirectory, nProcessors, rank);
+    create(name, reset, m_defaultDirectory, nProcesses, rank);
 }
 
 /*!
@@ -1494,12 +1494,12 @@ void LoggerManager::create(const std::string &name, bool reset,
     \param name is the name for the logger
     \param reset if true the log files will be reset
     \param directory is the directory for saving the log files
-    \param nProcessors is the total number of processes in the communicator
+    \param nProcesses is the total number of processes in the communicator
     \param rank is the parallel rank in the communicator
 */
 void LoggerManager::create(const std::string &name, bool reset,
                            const std::string &directory,
-                           int nProcessors, int rank)
+                           int nProcesses, int rank)
 {
     // Its not possible to create a log with the default name nor a log
     // with the same name of an existent logger nor a log with an empty
@@ -1521,7 +1521,7 @@ void LoggerManager::create(const std::string &name, bool reset,
 
     // Create the logger
     if (m_mode == log::MODE_SEPARATE) {
-        _create(name, reset, directory, nProcessors, rank);
+        _create(name, reset, directory, nProcesses, rank);
     } else {
         _create(name, cout(m_defaultName));
     }
@@ -1637,20 +1637,20 @@ log::Mode LoggerManager::getMode() const
     \param name is the name for the logger
     \param reset if true the log files will be reset
     \param directory is the directory for saving the log files
-    \param nProcessors is the total number of processes in the communicator
+    \param nProcesses is the total number of processes in the communicator
     \param rank is the parallel rank in the communicator
 */
 void LoggerManager::_create(const std::string &name, bool reset,
                             const std::string &directory,
-                            int nProcessors, int rank)
+                            int nProcesses, int rank)
 {
     // Get the file path
     FileHandler fileHandler;
     fileHandler.setDirectory(directory);
     fileHandler.setName(name);
     fileHandler.setAppendix("log");
-    fileHandler.setParallel(nProcessors > 1);
-    if (nProcessors > 1) {
+    fileHandler.setParallel(nProcesses > 1);
+    if (nProcesses > 1) {
         fileHandler.setBlock(rank);
     }
 
@@ -1673,7 +1673,7 @@ void LoggerManager::_create(const std::string &name, bool reset,
     std::ostream &consoleStream = std::cout;
 
     // Create the logger
-    m_loggers[name]     = std::unique_ptr<Logger>(new Logger(name, &consoleStream, &fileStream, nProcessors, rank));
+    m_loggers[name]     = std::unique_ptr<Logger>(new Logger(name, &consoleStream, &fileStream, nProcesses, rank));
     m_loggerUsers[name] = 1;
 }
 

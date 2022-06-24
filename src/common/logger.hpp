@@ -137,7 +137,7 @@ friend class LoggerManager;
 public:
     Logger(const std::string &name,
            std::ostream *consoleStream, std::ofstream *fileStream,
-           int nProcessors = 1, int rank = 0);
+           int nProcesses = 1, int rank = 0);
 
     int getProcessorCount();
     int getRank();
@@ -197,7 +197,7 @@ public:
 
 private:
     std::string m_name;
-    int m_nProcessors;
+    int m_nProcesses;
     int m_rank;
     LoggerBuffer m_buffer;
 
@@ -251,21 +251,21 @@ public:
     Logger & debug(const std::string &name, log::Visibility visibility = log::VISIBILITY_NOTSET);
 
     void initialize(log::Mode mode, bool reset,
-                    int nProcessors, int rank);
+                    int nProcesses, int rank);
 
     void initialize(log::Mode mode, bool reset = false,
                     const std::string &directory = BITPIT_LOG_DIRECTORY,
-                    int nProcessors = 1, int rank = 0);
+                    int nProcesses = 1, int rank = 0);
 
     void initialize(log::Mode mode, const std::string &name,
                     bool reset = false, const std::string &directory = BITPIT_LOG_DIRECTORY,
-                    int nProcessors = 1, int rank = 0);
+                    int nProcesses = 1, int rank = 0);
 
     void create(const std::string &name, bool reset = false,
-                int nProcessors = 1, int rank = 0);
+                int nProcesses = 1, int rank = 0);
 
     void create(const std::string &name, bool reset, const std::string &directory,
-                int nProcessors = 1, int rank = 0);
+                int nProcesses = 1, int rank = 0);
 
     bool destroy(const std::string &name, bool force = false);
 
@@ -300,7 +300,7 @@ private:
     LoggerManager& operator=(LoggerManager const&) = delete;
 
     void _create(const std::string &name, bool reset, const std::string &directory,
-                int nProcessors, int rank);
+                int nProcesses, int rank);
     void _create(const std::string &name, Logger &master);
 
 };
