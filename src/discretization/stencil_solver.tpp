@@ -1003,7 +1003,12 @@ template<typename stencil_t>
 void DiscretizationStencilSolver<stencil_t>::update(std::size_t nRows, const long *rows,
                                                     const StencilSolverAssembler &assembler)
 {
-    update(nRows, rows, static_cast<const StencilSolverAssembler &>(assembler));
+    auto discretizationAssembler = dynamic_cast<const DiscretizationStencilSolverAssembler<stencil_t> *>(&assembler);
+    if (!discretizationAssembler) {
+        throw std::runtime_error("Unable to update the stencil solver: assembler is not a DiscretizationStencilSolverAssembler.");
+    }
+
+    update(nRows, rows, *discretizationAssembler);
 }
 
 /*!
