@@ -32,6 +32,8 @@
 
 #include "element.hpp"
 
+namespace bitpit {
+
 /*!
 	Input stream operator for class Element
 
@@ -39,17 +41,17 @@
 	\param[in] element is the element to be streamed
 	\result Returns the same input stream received in input.
 */
-bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buffer, bitpit::Element &element)
+IBinaryStream& operator>>(IBinaryStream &buffer, Element &element)
 {
 	// Initialize the element
-	bitpit::ElementType type;
+	ElementType type;
 	buffer >> type;
 
 	long id;
 	buffer >> id;
 
 	int connectSize;
-	if (bitpit::ReferenceElementInfo::hasInfo(type)) {
+	if (ReferenceElementInfo::hasInfo(type)) {
 		element._initialize(id, type);
 		connectSize = element.getConnectSize();
 	} else {
@@ -76,13 +78,13 @@ bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buffer, bitpit::Element
 	\param[in] element is the element to be streamed
 	\result Returns the same output stream received in input.
 */
-bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream  &buffer, const bitpit::Element &element)
+OBinaryStream& operator<<(OBinaryStream  &buffer, const Element &element)
 {
 	buffer << element.getType();
 	buffer << element.getId();
 
 	int connectSize = element.getConnectSize();
-	if (!bitpit::ReferenceElementInfo::hasInfo(element.m_type)) {
+	if (!ReferenceElementInfo::hasInfo(element.m_type)) {
 		buffer << connectSize;
 	}
 
@@ -92,8 +94,6 @@ bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream  &buffer, const bitpit::
 
 	return buffer;
 }
-
-namespace bitpit {
 
 /*!
 	\class Tesselation
