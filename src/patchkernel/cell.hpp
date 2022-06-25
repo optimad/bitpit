@@ -32,21 +32,19 @@
 #include "element.hpp"
 
 namespace bitpit {
-	class Cell;
-	class PatchKernel;
-}
 
-bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buf, bitpit::Cell& cell);
-bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &buf, const bitpit::Cell& cell);
+class Cell;
+class PatchKernel;
 
-namespace bitpit {
+IBinaryStream & operator>>(IBinaryStream &buf, Cell& cell);
+OBinaryStream & operator<<(OBinaryStream &buf, const Cell& cell);
 
 class Cell : public Element {
 
 friend class PatchKernel;
 
-friend bitpit::OBinaryStream& (::operator<<) (bitpit::OBinaryStream& buf, const Cell& cell);
-friend bitpit::IBinaryStream& (::operator>>) (bitpit::IBinaryStream& buf, Cell& cell);
+friend OBinaryStream& (operator<<) (OBinaryStream& buf, const Cell& cell);
+friend IBinaryStream& (operator>>) (IBinaryStream& buf, Cell& cell);
 
 public:
 	Cell();
