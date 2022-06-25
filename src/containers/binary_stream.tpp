@@ -22,6 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
+namespace bitpit {
+
 /*!
 * Read the specified value from the stream.
 *
@@ -30,7 +32,7 @@
 * \result Returns the updated input stream.
 */
 template<typename T>
-bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &stream, T &value)
+IBinaryStream& operator>>(IBinaryStream &stream, T &value)
 {
     stream.read(reinterpret_cast<char *>(&value), sizeof(T));
 
@@ -48,7 +50,7 @@ bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &stream, T &value)
 * \result Returns the updated input stream.
 */
 template<typename T>
-bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &stream, std::vector<T> &vector)
+IBinaryStream& operator>>(IBinaryStream &stream, std::vector<T> &vector)
 {
     std::size_t size;
     stream.read(reinterpret_cast<char *>(&size), sizeof(size));
@@ -67,7 +69,7 @@ bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &stream, std::vector<T> 
 * \result Returns the updated output stream.
 */
 template<typename T>
-bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &stream, const T &value)
+OBinaryStream& operator<<(OBinaryStream &stream, const T &value)
 {
     stream.write(reinterpret_cast<const char *>(&value), sizeof(T));
 
@@ -84,7 +86,7 @@ bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &stream, const T &value)
 * \result Returns the updated output stream.
 */
 template<typename T>
-bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &stream, const std::vector<T> &vector)
+OBinaryStream& operator<<(OBinaryStream &stream, const std::vector<T> &vector)
 {
     std::size_t size = vector.size();
     stream.write(reinterpret_cast<const char *>(&size), sizeof(size));
@@ -92,4 +94,6 @@ bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &stream, const std::vect
     stream.write(reinterpret_cast<const char *>(vector.data()), size * sizeof(T));
 
     return stream;
+}
+
 }
