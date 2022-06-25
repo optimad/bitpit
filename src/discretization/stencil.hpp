@@ -32,22 +32,17 @@
 #include "bitpit_common.hpp"
 #include "bitpit_containers.hpp"
 
-// Stream operators for the stencil class
 namespace bitpit {
 
+// Stream operators for the stencil class
 template<typename weight_t>
 class DiscreteStencil;
 
-}
+template<typename weight_t>
+OBinaryStream & operator<<(OBinaryStream &buffer, const DiscreteStencil<weight_t> &stencil);
 
 template<typename weight_t>
-bitpit::OBinaryStream & operator<<(bitpit::OBinaryStream &buffer, const bitpit::DiscreteStencil<weight_t> &stencil);
-
-template<typename weight_t>
-bitpit::IBinaryStream & operator>>(bitpit::IBinaryStream &buffer, bitpit::DiscreteStencil<weight_t> &stencil);
-
-// Declaration of the stencil class
-namespace bitpit {
+IBinaryStream & operator>>(IBinaryStream &buffer, DiscreteStencil<weight_t> &stencil);
 
 /**
 * \ingroup discretization
@@ -60,9 +55,9 @@ template <typename weight_t>
 class DiscreteStencil {
 
 template<typename U>
-friend bitpit::OBinaryStream & (::operator<<) (bitpit::OBinaryStream &buffer, const DiscreteStencil<U> &stencil);
+friend OBinaryStream & (operator<<) (OBinaryStream &buffer, const DiscreteStencil<U> &stencil);
 template<typename U>
-friend bitpit::IBinaryStream & (::operator>>) (bitpit::IBinaryStream &buffer, DiscreteStencil<U> &stencil);
+friend IBinaryStream & (operator>>) (IBinaryStream &buffer, DiscreteStencil<U> &stencil);
 
 public:
     long NULL_ID = - std::numeric_limits<long>::max();
