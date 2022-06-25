@@ -35,12 +35,6 @@ namespace bitpit{
     class RecvBuffer;
 };
 
-template<typename T>
-bitpit::SendBuffer & operator<<(bitpit::SendBuffer &buffer, const T &value);
-
-template<typename T>
-bitpit::RecvBuffer & operator>>(bitpit::RecvBuffer &buffer, T &value);
-
 // Declaration of the communications buffers
 namespace bitpit {
 
@@ -48,6 +42,12 @@ class DataCommunicator;
 
 typedef OBinaryStream RawSendBuffer;
 typedef IBinaryStream RawRecvBuffer;
+
+template<typename T>
+SendBuffer & operator<<(SendBuffer &buffer, const T &value);
+
+template<typename T>
+RecvBuffer & operator>>(RecvBuffer &buffer, T &value);
 
 /*!
     \ingroup communications
@@ -92,7 +92,7 @@ class SendBuffer : public CommunicationBuffer<RawSendBuffer>
     friend DataCommunicator;
 
     template<typename T>
-    friend SendBuffer & (::operator<<) (SendBuffer &buffer, const T &value);
+    friend SendBuffer & (operator<<) (SendBuffer &buffer, const T &value);
 
 public:
     SendBuffer(size_t size = 0, bool doubleBuffer = false);
@@ -108,7 +108,7 @@ class RecvBuffer : public CommunicationBuffer<RawRecvBuffer>
     friend DataCommunicator;
 
     template<typename T>
-    friend RecvBuffer & (::operator>>) (RecvBuffer &buffer, T &value);
+    friend RecvBuffer & (operator>>) (RecvBuffer &buffer, T &value);
 
 public:
     RecvBuffer(size_t size = 0, bool doubleBuffer = false);

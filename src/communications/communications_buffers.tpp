@@ -28,6 +28,36 @@
 namespace bitpit {
 
 /*!
+    Output stream operator for the send buffer.
+
+    \param[in] buffer is the send buffer
+    \param[in] value is the value to be streamed
+    \result A reference of the buffer.
+*/
+template<typename T>
+bitpit::SendBuffer & operator<<(bitpit::SendBuffer &buffer, const T &value)
+{
+    buffer.getFront() << value;
+
+    return buffer;
+}
+
+/*!
+    Input stream operator for the receive buffer.
+
+    \param[in] buffer is the send buffer
+    \param[in] value is the value to be streamed
+    \result A reference of the buffer.
+*/
+template<typename T>
+bitpit::RecvBuffer & operator>>(bitpit::RecvBuffer &buffer, T &value)
+{
+    buffer.getFront() >> value;
+
+    return buffer;
+}
+
+/*!
     Create a new communication buffer
  */
 template<typename RawBufferType>
@@ -151,36 +181,6 @@ const std::vector<RawBufferType> & CommunicationBuffer<RawBufferType>::getBuffer
     return m_buffers;
 }
 
-}
-
-/*!
-    Output stream operator for the send buffer.
-
-    \param[in] buffer is the send buffer
-    \param[in] value is the value to be streamed
-    \result A reference of the buffer.
-*/
-template<typename T>
-bitpit::SendBuffer & operator<<(bitpit::SendBuffer &buffer, const T &value)
-{
-    buffer.getFront() << value;
-
-    return buffer;
-}
-
-/*!
-    Input stream operator for the receive buffer.
-
-    \param[in] buffer is the send buffer
-    \param[in] value is the value to be streamed
-    \result A reference of the buffer.
-*/
-template<typename T>
-bitpit::RecvBuffer & operator>>(bitpit::RecvBuffer &buffer, T &value)
-{
-    buffer.getFront() >> value;
-
-    return buffer;
 }
 
 # endif
