@@ -1420,6 +1420,54 @@ out << x[n-1];
 
 return(out); };
 
+namespace bitpit {
+
+// Output operator ================================================================== //
+
+// ---------------------------------------------------------------------------------- //
+/*!
+    Insertion operator for std::vector.
+
+    Flush the content of std::vector to std::ostream.
+    The content of the input vector is flushed with the following format:
+    x[0] x[1] x[2] ... x[n-1] where n = x.size();
+    (i.e. vector elements are separated by blank spaces).
+    Template parameter T can be any type such that operator<< is defined.
+
+    \param[in,out] out output stream
+    \param[in] x argument of insertion operator
+
+    \result reference to the stream (allows concatenation)
+*/
+template <class T>
+Logger& operator<< (
+    Logger                                      &out,
+    const std::vector< T >                      &x
+) {
+
+    // ================================================================================== //
+// VARIABLES DECLARATION                                                              //
+// ================================================================================== //
+
+// Local variables
+size_t               n = x.size();
+
+// Counters
+// none
+
+// ================================================================================== //
+// OUTPUT VECTOR CONTENT                                                              //
+// ================================================================================== //
+if (n == 0) return(out);
+for (size_t i = 0; i < n-1; i++) {
+    out << x[i] << " ";
+} //next i
+out << x[n-1];
+
+return(out); };
+
+}
+
 // Input operator =================================================================== //
 
 // ---------------------------------------------------------------------------------- //
