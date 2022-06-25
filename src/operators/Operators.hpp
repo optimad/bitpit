@@ -50,7 +50,10 @@
 # include <iomanip>
 # include <iostream>
 # include <algorithm>
-# include <functional> 
+# include <functional>
+
+// bitpit
+# include "bitpit_common.hpp"
 
 // ================================================================================== //
 // FUNCTION PROTOTYPES                                                                //
@@ -244,6 +247,18 @@ std::ofstream& operator<< (                                                     
         std::ofstream                           &,                                    // (input) output file stream
         const std::vector< T >                  &                                     // (input) std::vector to be streamed
         );
+
+namespace bitpit {
+
+using ::operator<<;
+
+template <class T>
+Logger& operator<< (                                                                  // INSERTION OPERATOR
+        Logger                                  &,                                    // (input) output file stream
+        const std::vector< T >                  &                                     // (input) std::vector to be streamed
+        );
+
+}
 
 // Input operators ------------------------------------------------------------------ //
 template <class T>
@@ -619,6 +634,18 @@ std::ofstream& operator<< (                                                     
         std::ofstream                           &,                                    // (input) output file stream
         const std::array<T, d>                  &                                     // (input) std::array to be streamed
         );
+
+namespace bitpit {
+
+using ::operator<<;
+
+template <class T, size_t d>
+Logger& operator<< (                                                                  // INSERTION OPERATOR
+        Logger                                  &,                                    // (input) logger
+        const std::array<T, d>                  &                                     // (input) std::array to be streamed
+        );
+
+}
 
 // Input operators ------------------------------------------------------------------ //
 template <class T, size_t d>
