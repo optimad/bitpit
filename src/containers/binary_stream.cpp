@@ -28,6 +28,8 @@
 
 #include "binary_stream.hpp"
 
+namespace bitpit {
+
 /*!
 * Stream a string from the binary stream.
 *
@@ -67,8 +69,6 @@ bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &stream, const std::stri
 
     return stream;
 }
-
-namespace bitpit {
 
 /*!
 * \class BinaryStream

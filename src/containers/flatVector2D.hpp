@@ -33,17 +33,15 @@
 #include "binary_stream.hpp"
 
 namespace bitpit{
-    template<class T>
-    class FlatVector2D;
-}
 
 template<class T>
-bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &buffer, const bitpit::FlatVector2D<T> &vector);
+class FlatVector2D;
 
 template<class T>
-bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buffer, bitpit::FlatVector2D<T> &vector);
+OBinaryStream& operator<<(OBinaryStream &buffer, const FlatVector2D<T> &vector);
 
-namespace bitpit{
+template<class T>
+IBinaryStream& operator>>(IBinaryStream &buffer, FlatVector2D<T> &vector);
 
 /*!
     @ingroup containers
@@ -62,9 +60,9 @@ class FlatVector2D
 {
 
 template<class U>
-friend bitpit::OBinaryStream& (::operator<<) (bitpit::OBinaryStream &buffer, const FlatVector2D<U> &vector);
+friend OBinaryStream& (operator<<) (OBinaryStream &buffer, const FlatVector2D<U> &vector);
 template<class U>
-friend bitpit::IBinaryStream& (::operator>>) (bitpit::IBinaryStream &buffer, FlatVector2D<U> &vector);
+friend IBinaryStream& (operator>>) (IBinaryStream &buffer, FlatVector2D<U> &vector);
 
 public:
     FlatVector2D(bool initialize = true);

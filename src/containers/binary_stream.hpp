@@ -32,36 +32,31 @@
 #include <iostream>
 #include <stdexcept>
 
-// Forward declarations
 namespace bitpit {
 
+// Stream operators
 class IBinaryStream;
 class OBinaryStream;
 
-};
-
-// Stream operators
 template<typename T>
-bitpit::IBinaryStream & operator>>(bitpit::IBinaryStream &stream, T &value);
+IBinaryStream & operator>>(IBinaryStream &stream, T &value);
 
 template<typename T>
-bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &stream, std::vector<T> &vector);
+IBinaryStream& operator>>(IBinaryStream &stream, std::vector<T> &vector);
 
 template<>
-bitpit::IBinaryStream & operator>>(bitpit::IBinaryStream &stream, std::string &value);
+IBinaryStream & operator>>(IBinaryStream &stream, std::string &value);
 
 template<typename T>
-bitpit::OBinaryStream & operator<<(bitpit::OBinaryStream &stream, const T &value);
+OBinaryStream & operator<<(OBinaryStream &stream, const T &value);
 
 template<typename T>
-bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &stream, const std::vector<T> &vector);
+OBinaryStream& operator<<(OBinaryStream &stream, const std::vector<T> &vector);
 
 template<>
-bitpit::OBinaryStream & operator<<(bitpit::OBinaryStream &stream, const std::string &value);
+OBinaryStream & operator<<(OBinaryStream &stream, const std::string &value);
 
 // Binary stream
-namespace bitpit{
-
 class BinaryStream {
 
 public:
@@ -107,7 +102,7 @@ private:
 class IBinaryStream : public BinaryStream {
 
 template<typename T>
-friend IBinaryStream & (::operator>>)(IBinaryStream &stream, T &value);
+friend IBinaryStream & (operator>>)(IBinaryStream &stream, T &value);
 
 public:
     IBinaryStream(void);
@@ -125,7 +120,7 @@ public:
 class OBinaryStream : public BinaryStream {
 
 template<typename T>
-friend OBinaryStream & (::operator<<)(OBinaryStream &stream, const T &value);
+friend OBinaryStream & (operator<<)(OBinaryStream &stream, const T &value);
 
 public:
     OBinaryStream();
