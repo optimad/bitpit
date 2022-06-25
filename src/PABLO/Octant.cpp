@@ -32,6 +32,8 @@
 #include <cmath>
 #include <iostream>
 
+namespace bitpit {
+
 /*!
  * Input stream operator for class Octant. Stream cell data from memory
  * input stream to container.
@@ -40,7 +42,7 @@
  * \param[in] octant is the octant object
  * \result Returns the same input stream received in input.
  */
-bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buffer, bitpit::Octant &octant)
+IBinaryStream& operator>>(IBinaryStream &buffer, Octant &octant)
 {
     uint8_t dimensions;
     buffer >> dimensions;
@@ -56,7 +58,7 @@ bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buffer, bitpit::Octant 
 
     buffer >> octant.m_ghost;
 
-    for(int i = 0; i < bitpit::Octant::INFO_ITEM_COUNT; ++i){
+    for(int i = 0; i < Octant::INFO_ITEM_COUNT; ++i){
         bool value;
         buffer >> value;
         octant.m_info[i] = value;
@@ -73,7 +75,7 @@ bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buffer, bitpit::Octant 
  * \param[in] octant is the octant object
  * \result Returns the same output stream received in input.
  */
-bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream  &buffer, const bitpit::Octant &octant)
+OBinaryStream& operator<<(OBinaryStream  &buffer, const Octant &octant)
 {
     buffer << octant.m_dim;
     buffer << octant.m_level;
@@ -84,14 +86,12 @@ bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream  &buffer, const bitpit::
 
     buffer << octant.m_ghost;
 
-    for(int i = 0; i < bitpit::Octant::INFO_ITEM_COUNT; ++i){
+    for(int i = 0; i < Octant::INFO_ITEM_COUNT; ++i){
         buffer << (bool) octant.m_info[i];
     }
 
     return buffer;
 }
-
-namespace bitpit {
 
 // =================================================================================== //
 // NAME SPACES                                                                         //
