@@ -1,0 +1,9 @@
+<map id="bitpit::BasePiercedVectorKernel" name="bitpit::BasePiercedVectorKernel">
+<area shape="rect" id="node1" title="Base class for pierced vector kernels." alt="" coords="5,112,173,153"/>
+<area shape="rect" id="node2" href="$classbitpit_1_1PiercedVectorKernel.html" title=" " alt="" coords="499,112,673,153"/>
+<area shape="rect" id="node7" href="$classbitpit_1_1PiercedVectorKernel.html" title="Kernel of the pierced vector." alt="" coords="223,141,397,183"/>
+<area shape="rect" id="node3" href="$classbitpit_1_1PiercedVector.html" title=" " alt="" coords="1025,5,1164,47"/>
+<area shape="rect" id="node4" href="$classbitpit_1_1PiercedVector.html" title=" " alt="" coords="1025,84,1164,125"/>
+<area shape="rect" id="node5" href="$classbitpit_1_1PiercedVector.html" title=" " alt="" coords="1025,176,1164,217"/>
+<area shape="rect" id="node6" href="$classbitpit_1_1PiercedVector.html" title="Metafunction for generating a pierced vector." alt="" coords="723,81,861,123"/>
+</map>

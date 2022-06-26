@@ -1,6 +1,0 @@
-<map id="bitpit::PiercedKernel&lt; id_t &gt;::positionLess" name="bitpit::PiercedKernel&lt; id_t &gt;::positionLess">
-<area shape="rect" id="node1" title=" " alt="" coords="17,261,165,303"/>
-<area shape="rect" id="node2" href="$classbitpit_1_1PiercedKernel.html" title=" " alt="" coords="22,157,159,199"/>
-<area shape="rect" id="node3" href="$classbitpit_1_1BasePiercedKernel.html" title="Base class for the pierced kernel." alt="" coords="7,81,174,108"/>
-<area shape="rect" id="node4" href="$classbitpit_1_1PiercedSyncMaster.html" title="Base class for defining an object that acts like a master in pierced synchronization." alt="" coords="5,5,176,32"/>
-</map>

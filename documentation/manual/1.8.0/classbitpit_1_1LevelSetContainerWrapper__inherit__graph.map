@@ -1,0 +1,6 @@
+<map id="bitpit::LevelSetContainerWrapper" name="bitpit::LevelSetContainerWrapper">
+<area shape="rect" id="node1" title="Is the base class for defining container wrappers." alt="" coords="5,71,168,112"/>
+<area shape="rect" id="node2" href="$classbitpit_1_1LevelSetPointerContainerWrapper.html" title="Is the base class for defining container wrappers around pointers." alt="" coords="216,5,420,47"/>
+<area shape="rect" id="node3" href="$classbitpit_1_1LevelSetSharedContainerWrapper.html" title="Is the base class for defining container wrappers around shared pointers." alt="" coords="216,71,420,112"/>
+<area shape="rect" id="node4" href="$classbitpit_1_1LevelSetUniqueContainerWrapper.html" title="Is the base class for defining container wrappers around shared pointers." alt="" coords="216,136,420,177"/>
+</map>

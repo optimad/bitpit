@@ -1,6 +1,0 @@
-<map id="bitpit::QualifiedInterfaceHalfEdge&lt; QualifiedInterface &gt;" name="bitpit::QualifiedInterfaceHalfEdge&lt; QualifiedInterface &gt;">
-<area shape="rect" id="node1" title="The QualifiedInterfaceHalfEdge class defines interface half&#45;edges." alt="" coords="756,5,959,47"/>
-<area shape="rect" id="node2" href="$classbitpit_1_1ElementHalfFace.html" title=" " alt="" coords="548,5,707,47"/>
-<area shape="rect" id="node3" href="$classbitpit_1_1ElementHalfItem.html" title="The ElementHalfItem class is the base calss for defining element half&#45;edge and half&#45;faces." alt="" coords="5,11,160,52"/>
-<area shape="rect" id="node4" href="$classbitpit_1_1ElementHalfFace.html" title="The ElementHalfFace class defines element half&#45;faces." alt="" coords="209,40,368,81"/>
-</map>
