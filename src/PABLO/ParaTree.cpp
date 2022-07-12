@@ -3698,9 +3698,8 @@ namespace bitpit {
     ParaTree::adaptGlobalRefine(bool mapper_flag) {
         //TODO recoding for adapting with abs(marker) > 1
         uint32_t nocts0 = getNumOctants();
-        vector<Octant>::iterator iter, iterend = m_octree.m_octants.end();
 
-        for (iter = m_octree.m_octants.begin(); iter != iterend; ++iter){
+        for (auto iter = m_octree.m_octants.begin(); iter < m_octree.m_octants.end(); ++iter){
             iter->m_info[Octant::INFO_NEW4REFINEMENT] = false;
             iter->m_info[Octant::INFO_NEW4COARSENING] = false;
             iter->m_info[Octant::INFO_AUX] = false;
@@ -3781,14 +3780,14 @@ namespace bitpit {
     bool
     ParaTree::adaptGlobalCoarse(bool mapper_flag) {
         //TODO recoding for adapting with abs(marker) > 1
-        uint32_t nocts0 = getNumOctants();
-        vector<Octant>::iterator iter, iterend = m_octree.m_octants.end();
 
-        for (iter = m_octree.m_octants.begin(); iter != iterend; ++iter){
+        for (auto iter = m_octree.m_octants.begin(); iter < m_octree.m_octants.end(); ++iter){
             iter->m_info[Octant::INFO_NEW4REFINEMENT] = false;
             iter->m_info[Octant::INFO_NEW4COARSENING] = false;
             iter->m_info[Octant::INFO_AUX] = false;
         }
+
+        uint32_t nocts0 = getNumOctants();
 
         if (mapper_flag){
             m_mapIdx.resize(nocts0);
@@ -4506,13 +4505,13 @@ namespace bitpit {
         //TODO recoding for adapting with abs(marker) > 1
 
         m_loadBalanceRanges.clear();
-        uint32_t nocts0 = getNumOctants();
-        vector<Octant >::iterator iter, iterend = m_octree.m_octants.end();
 
-        for (iter = m_octree.m_octants.begin(); iter != iterend; ++iter){
+        for (auto iter = m_octree.m_octants.begin(); iter < m_octree.m_octants.end(); ++iter){
             iter->m_info[Octant::INFO_NEW4REFINEMENT] = false;
             iter->m_info[Octant::INFO_NEW4COARSENING] = false;
         }
+
+        uint32_t nocts0 = getNumOctants();
 
         // m_mapIdx init
         if (mapflag) {
