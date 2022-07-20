@@ -215,9 +215,9 @@ void LevelSetSignPropagator::propagate(const LevelSetObjectInterface *object, Le
     }
 #endif
 
-    if (nGlobalSeeds == 0) {
-        throw std::runtime_error("Unable to propagate the sign: the list of seeds is empty!");
-    }
+//    if (nGlobalSeeds == 0) {
+//        throw std::runtime_error("Unable to propagate the sign: the list of seeds is empty!");
+//    }
 
     // Use the seeds to propagate the sign
     executeSeedPropagation(rawSeeds, storage);
