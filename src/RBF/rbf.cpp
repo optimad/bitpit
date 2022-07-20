@@ -60,8 +60,8 @@ namespace bitpit {
  * INTERP, by default. Use setFunction and setMode for changing it.
  */
 RBFKernel::RBFKernel()
+    : m_supportRadii(1, 1.)
 {
-    m_supportRadius = 1.;
     m_nodes         = 0;
     m_fields        = 0;
 
@@ -80,7 +80,7 @@ RBFKernel::RBFKernel()
  */
 RBFKernel::RBFKernel(const RBFKernel & other)
     : m_fields(other.m_fields), m_mode(other.m_mode),
-      m_supportRadius(other.m_supportRadius), m_typef(other.m_typef),
+      m_supportRadii(other.m_supportRadii), m_typef(other.m_typef),
       m_fPtr(other.m_fPtr), m_error(other.m_error), m_value(other.m_value),
       m_weight(other.m_weight), m_activeNodes(other.m_activeNodes),
       m_maxFields(other.m_maxFields), m_nodes(other.m_nodes)
@@ -96,7 +96,7 @@ void RBFKernel::swap(RBFKernel &other) noexcept
 {
    std::swap(m_fields, other.m_fields);
    std::swap(m_mode, other.m_mode);
-   std::swap(m_supportRadius, other.m_supportRadius);
+   std::swap(m_supportRadii, other.m_supportRadii);
    std::swap(m_typef, other.m_typef);
    std::swap(m_fPtr, other.m_fPtr);
    std::swap(m_error, other.m_error);
@@ -357,18 +357,46 @@ void RBFKernel::deactivateAllNodes()
  */
 void RBFKernel::setSupportRadius( double  radius )
 {
-    m_supportRadius = radius;
-    return;
+    m_supportRadii.resize(1);
+    m_supportRadii[0] = radius;
 }
 
 /*!
- * Return currently set support radius used by all RBFKernel kernel functions.
+ * Set the support radius of all RBFKernel kernel functions. Supported in both modes.
+ * @param[in] radius support radius
+ */
+void RBFKernel::setSupportRadius( const std::vector<double> & radius )
+{
+    m_supportRadii = radius;
+}
+
+/*!
+ * Return currently set support radius used by the RBFKernel kernel functions.
+ * If functions are using a variable support radius, the radius of the first
+ * function is returned.
  * Supported in both modes.
  * @return support radius
  */
 double RBFKernel::getSupportRadius()
 {
-    return m_supportRadius;
+    return m_supportRadii[0];
+}
+
+/*!
+ * Return currently set support radius used by the ith RBFKernel kernel function.
+ * Supported in both modes.
+ * It's up to the caller to ensure the function index is valid. Invalid function
+ * indexes will lead to undefined beahviour.
+ * @return support radius
+ */
+double RBFKernel::getSupportRadius(int i)
+{
+    bool variableSupportRadius = (m_supportRadii.size() != 1);
+    if (!variableSupportRadius) {
+        return m_supportRadii[0];
+    }
+
+    return m_supportRadii[i];
 }
 
 /*!
@@ -570,7 +598,7 @@ std::vector<double> RBFKernel::evalRBF( const std::array<double,3> &point)
 
     for( i=0; i<m_nodes; ++i ){
         if( m_activeNodes[i] ) {
-            dist = calcDist(point, i) / m_supportRadius;
+            dist = calcDist(point, i) / getSupportRadius(i);
             basis = evalBasis( dist );
 
             for( j=0; j<m_fields; ++j) {
@@ -602,7 +630,7 @@ std::vector<double> RBFKernel::evalRBF(int jnode)
 
     for( i=0; i<m_nodes; ++i ) {
         if( m_activeNodes[i] ) {
-            dist = calcDist(jnode, i) / m_supportRadius;
+            dist = calcDist(jnode, i) / getSupportRadius(i);
             basis = evalBasis( dist );
 
             for( j=0; j<m_fields; ++j) {
@@ -655,8 +683,7 @@ int RBFKernel::solve()
     k=0;
     for( const auto &i : activeSet ) {
         for( const auto &j : activeSet ){
-
-            dist = calcDist(j,i) / m_supportRadius;
+            dist = calcDist(j,i) / getSupportRadius(j);
             A[k] = evalBasis( dist );
             k++;
         }
@@ -902,9 +929,9 @@ int RBFKernel::solveLSQ()
     }
 
     k=0;
-    for( const auto &j : activeSet ) {
-        for( i=0; i<nP; ++i) {
-            dist = calcDist(j,i) / m_supportRadius;
+    for( const auto &i : activeSet ) {
+        for( const auto &j : activeSet ){
+            dist = calcDist(j,i) / getSupportRadius(j);
             A[k] = evalBasis( dist );
             k++;
         }
