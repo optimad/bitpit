@@ -208,14 +208,16 @@ void LevelSetSignPropagator::propagate(const LevelSetObjectInterface *object, Le
     //
     // We need at least one seed to be able to perform sign propagation (i.e., at least one
     // cell should be in the levelset narrowband).
-    long nGlobalSeeds = rawSeeds.size();
+    long nGlobalSeeds   = rawSeeds.size();
+    long nGlobalWaiting = m_nWaiting;
 #if BITPIT_ENABLE_MPI
     if (m_mesh->isPartitioned()) {
         MPI_Allreduce(MPI_IN_PLACE, &nGlobalSeeds, 1, MPI_LONG, MPI_SUM, m_mesh->getCommunicator());
+        MPI_Allreduce(MPI_IN_PLACE, &nGlobalWaiting, 1, MPI_LONG, MPI_SUM, m_mesh->getCommunicator());
     }
 #endif
 
-    if (nGlobalSeeds == 0) {
+    if (nGlobalWaiting != 0 && nGlobalSeeds == 0) {
         throw std::runtime_error("Unable to propagate the sign: the list of seeds is empty!");
     }
 
@@ -226,7 +228,7 @@ void LevelSetSignPropagator::propagate(const LevelSetObjectInterface *object, Le
     // If there are cells with an unknown sign, data communication among
     // ghost cells is needed. However it is only possibly to have cells with
     // an unknown sign for partinioned patches.
-    long nGlobalWaiting = m_nWaiting;
+    nGlobalWaiting = m_nWaiting;
     if (m_mesh->isPartitioned()) {
         MPI_Allreduce(MPI_IN_PLACE, &nGlobalWaiting, 1, MPI_LONG, MPI_SUM, m_mesh->getCommunicator());
     }
