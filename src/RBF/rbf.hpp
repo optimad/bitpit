@@ -67,7 +67,7 @@ class RBFKernel{
 private:
     int     m_fields;                               /**<Number of data fields defined on RBF nodes.*/
     RBFMode m_mode;                                 /**<Behaviour of RBF class (interpolation or parametrization).*/
-    double  m_supportRadius;                        /**<Support radius of function used as Radiabl Basis Function.*/
+    std::vector<double>  m_supportRadii;            /**<Support radii of function used as Radial Basis Function.*/
     RBFBasisFunction m_typef;                       /**<Recognize type of RBF shape function actually in the class. */
     double  (*m_fPtr)(double);
 
@@ -104,7 +104,9 @@ public:
     void                    deactivateAllNodes();
 
     void                    setSupportRadius(double);
+    void                    setSupportRadius(const std::vector<double> &);
     double                  getSupportRadius();
+    double                  getSupportRadius(int);
 
     void                    setMode(RBFMode mode);
     RBFMode                 getMode();
