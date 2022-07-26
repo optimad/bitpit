@@ -111,23 +111,6 @@ void SegmentationKernel::setSurface( const SurfUnstructured *surface, double fea
     m_surface      = surface;
     m_featureAngle = featureAngle;
 
-    // Check if segment is supported
-    SurfUnstructured::CellConstIterator endItr = m_surface->cellConstEnd();
-    for( SurfUnstructured::CellConstIterator segmentItr = m_surface->cellConstBegin(); segmentItr != endItr; ++segmentItr ){
-        switch (segmentItr->getType()) {
-
-        case ElementType::VERTEX :
-        case ElementType::LINE :
-        case ElementType::TRIANGLE :
-            break ;
-
-        default:
-            throw std::runtime_error ("levelset: only segments and triangles supported in LevelSetSegmentation!") ;
-            break ;
-
-        }
-    }
-
     // Segment vertices information
     m_segmentVertexOffset.setStaticKernel(&m_surface->getCells());
 
@@ -200,6 +183,25 @@ int SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords,
         long id1 = segmentVertexIds[1] ;
         long id2 = segmentVertexIds[2] ;
         pointProjectionVector -= CGElem::projectPointTriangle( pointCoords, m_surface->getVertexCoords(id0), m_surface->getVertexCoords(id1), m_surface->getVertexCoords(id2), lambda );
+
+        break;
+    }
+
+    case ElementType::PIXEL:
+    case ElementType::QUAD:
+    {
+        std::array<std::array<double, 3>, ReferenceElementInfo::MAX_ELEM_VERTICES> vertexCoors;
+        m_surface->getElementVertexCoordinates(segment, vertexCoors.data());
+        pointProjectionVector -= CGElem::projectPointPolygon( pointCoords, nSegmentVertices, vertexCoors.data(), lambda );
+
+        break;
+    }
+
+    case ElementType::POLYGON:
+    {
+        std::vector<std::array<double, 3>> vertexCoors(nSegmentVertices);
+        m_surface->getElementVertexCoordinates(segment, vertexCoors.data());
+        pointProjectionVector -= CGElem::projectPointPolygon( pointCoords, nSegmentVertices, vertexCoors.data(), lambda );
 
         break;
     }
