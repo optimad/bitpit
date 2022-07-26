@@ -111,23 +111,6 @@ void SegmentationKernel::setSurface( const SurfUnstructured *surface, double fea
     m_surface      = surface;
     m_featureAngle = featureAngle;
 
-    // Check if segment is supported
-    SurfUnstructured::CellConstIterator endItr = m_surface->cellConstEnd();
-    for( SurfUnstructured::CellConstIterator segmentItr = m_surface->cellConstBegin(); segmentItr != endItr; ++segmentItr ){
-        switch (segmentItr->getType()) {
-
-        case ElementType::VERTEX :
-        case ElementType::LINE :
-        case ElementType::TRIANGLE :
-            break ;
-
-        default:
-            throw std::runtime_error ("levelset: only segments and triangles supported in LevelSetSegmentation!") ;
-            break ;
-
-        }
-    }
-
     // Segment vertices information
     m_segmentVertexOffset.setStaticKernel(&m_surface->getCells());
 
@@ -206,7 +189,10 @@ int SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords,
 
     default:
     {
-        std::runtime_error ("Type of cell not supported.");
+        BITPIT_CREATE_WORKSPACE(segmentVertexCoors, std::array<double BITPIT_COMMA 3>, nSegmentVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
+        m_surface->getElementVertexCoordinates(segment, segmentVertexCoors);
+        pointProjectionVector -= CGElem::projectPointPolygon( pointCoords, nSegmentVertices, segmentVertexCoors, lambda );
+
         break;
     }
 
