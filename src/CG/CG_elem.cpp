@@ -739,6 +739,9 @@ int convertBarycentricToFlagPolygon( std::size_t nLambda, double const *lambda, 
  * No check is performed to check convexity.
  * Formula [6] of <a href="igeometry.caltech.edu/pubs/MHBD02.pdf">this</a> paper is implemented.
  * This formula actually refers to the method of Eugene Wachpress in the manuscript A Rational Finite Elment Basis.
+ * Generalized Barycentric Coordinates cannot be evaluated for degenerate polygons
+ * (i.e. polygons with consecutive collinear edges). No checks are performed to
+ * find out if the specified polygon is degenerate.
  * \param[in] p point
  * \param[in] vertex vertex coordinates of polygon
  * \param[out] lambda generalized barycentric coordinates of p
@@ -753,6 +756,9 @@ void computeGeneralizedBarycentric( array3D const &p, std::vector<array3D> const
  * No check is performed to check convexity.
  * Formula [6] of <a href="igeometry.caltech.edu/pubs/MHBD02.pdf">this</a> paper is implemented.
  * This formula actually refers to the method of Eugene Wachpress in the manuscript A Rational Finite Elment Basis.
+ * Generalized Barycentric Coordinates cannot be evaluated for degenerate polygons
+ * (i.e. polygons with consecutive collinear edges). No checks are performed to
+ * find out if the specified polygon is degenerate.
  * \param[in] p point
  * \param[in] nVertices number of polygon vertices
  * \param[in] vertex vertex coordinates of polygon
@@ -770,6 +776,9 @@ void computeGeneralizedBarycentric( array3D const &p, std::size_t nVertices, arr
  * No check is performed to check convexity.
  * Formula [6] of <a href="igeometry.caltech.edu/pubs/MHBD02.pdf">this</a> paper is implemented.
  * This formula actually refers to the method of Eugene Wachpress in the manuscript A Rational Finite Elment Basis.
+ * Generalized Barycentric Coordinates cannot be evaluated for degenerate polygons
+ * (i.e. polygons with consecutive collinear edges). No checks are performed to
+ * find out if the specified polygon is degenerate.
  * \param[in] p point
  * \param[in] nVertices number of polygon vertices
  * \param[in] vertex vertex coordinates of polygon
