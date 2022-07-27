@@ -35,6 +35,8 @@
 #include "bitpit_volcartesian.hpp"
 #include "bitpit_voloctree.hpp"
 
+const int SPACE_DIMENSION = 2;
+
 /*!
  * Generate segmentation.
  *
@@ -47,12 +49,10 @@ std::unique_ptr<bitpit::SurfUnstructured> generateSegmentation()
     const double dtheta = 2. * BITPIT_PI / ((double) N);
 
     // Initialize segmentation
-    int dimensions = 2;
-
 #if BITPIT_ENABLE_MPI
-    std::unique_ptr<bitpit::SurfUnstructured> segmentation(new bitpit::SurfUnstructured(0, dimensions - 1, MPI_COMM_NULL));
+    std::unique_ptr<bitpit::SurfUnstructured> segmentation(new bitpit::SurfUnstructured(0, SPACE_DIMENSION - 1, MPI_COMM_NULL));
 #else
-    std::unique_ptr<bitpit::SurfUnstructured> segmentation(new bitpit::SurfUnstructured(0, dimensions - 1));
+    std::unique_ptr<bitpit::SurfUnstructured> segmentation(new bitpit::SurfUnstructured(0, SPACE_DIMENSION - 1));
 #endif
 
     // Create vertex list
@@ -95,19 +95,16 @@ std::unique_ptr<bitpit::SurfUnstructured> generateSegmentation()
  */
 std::unique_ptr<bitpit::VolCartesian> generateCartesianMesh(const bitpit::SurfUnstructured &segmentation)
 {
-    int dimensions = 2;
+    std::array<double, 3> segmentationMin;
+    std::array<double, 3> segmentationMax;
+    segmentation.getBoundingBox(segmentationMin, segmentationMax);
 
-    std::array<double, 3> meshMin, meshMax;
-    segmentation.getBoundingBox(meshMin, meshMax);
-
-    std::array<double, 3> delta = meshMax - meshMin;
-    meshMin -= 0.1 * delta;
-    meshMax += 0.1 * delta;
-    delta = meshMax - meshMin;
+    std::array<double, 3> length = 1.1 * (segmentationMax - segmentationMin);
+    std::array<double, 3> origin = -0.5 * length;
 
     std::array<int,3> nc = {{128, 128, 0}};
 
-    std::unique_ptr<bitpit::VolCartesian> mesh(new bitpit::VolCartesian(dimensions, meshMin, delta, nc));
+    std::unique_ptr<bitpit::VolCartesian> mesh(new bitpit::VolCartesian(SPACE_DIMENSION, origin, length, nc));
 
     return mesh;
 }
@@ -119,30 +116,23 @@ std::unique_ptr<bitpit::VolCartesian> generateCartesianMesh(const bitpit::SurfUn
  */
 std::unique_ptr<bitpit::VolOctree> generateOctreeMesh(const bitpit::SurfUnstructured &segmentation)
 {
-    int dimensions = 2;
-
     std::array<double, 3> segmentationMin;
     std::array<double, 3> segmentationMax;
     segmentation.getBoundingBox(segmentationMin, segmentationMax);
 
-    std::array<double, 3> delta = segmentationMax - segmentationMin;
-    segmentationMin -= 0.1 * delta;
-    segmentationMax += 0.1 * delta;
-    delta = segmentationMax - segmentationMin;
-
-    std::array<double, 3> origin = segmentationMin;
-
     double length = 0.;
     for (int i = 0; i < 3; ++i) {
-        length = std::max(length, segmentationMax[i] - segmentationMin[i]);
+        length = std::max(length, 1.1 * (segmentationMax[i] - segmentationMin[i]));
     };
+
+    std::array<double, 3> origin = - 0.5 * std::array<double, 3>{{length, length, 0.}};
 
     double dh = length / 128;
 
 #if BITPIT_ENABLE_MPI
-    std::unique_ptr<bitpit::VolOctree> mesh(new bitpit::VolOctree(dimensions, origin, length, dh, MPI_COMM_NULL));
+    std::unique_ptr<bitpit::VolOctree> mesh(new bitpit::VolOctree(SPACE_DIMENSION, origin, length, dh, MPI_COMM_NULL));
 #else
-    std::unique_ptr<bitpit::VolOctree> mesh(new bitpit::VolOctree(dimensions, origin, length, dh));
+    std::unique_ptr<bitpit::VolOctree> mesh(new bitpit::VolOctree(SPACE_DIMENSION, origin, length, dh));
 #endif
 
     return mesh;
