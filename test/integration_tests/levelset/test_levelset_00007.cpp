@@ -167,9 +167,9 @@ int subtest_001()
     mesh->update();
 
     // Initialize test
-    long testCellId0 = 13832;
-    long testCellId1 = 12438;
-    long testCellId2 = 10432;
+    long testCellId0 = 12065;
+    long testCellId1 = 13590;
+    long testCellId2 = 15495;
 
     int objectId = 0;
 
@@ -285,9 +285,9 @@ int subtest_002()
     mesh->switchMemoryMode(bitpit::VolCartesian::MEMORY_LIGHT);
 
     // Initialize test
-    long testCellId0 = 13832;
-    long testCellId1 = 12438;
-    long testCellId2 = 10432;
+    long testCellId0 = 12065;
+    long testCellId1 = 13590;
+    long testCellId2 = 15495;
 
     int objectId = 0;
 
@@ -414,9 +414,9 @@ int subtest_003()
     mesh->update();
 
     // Initialize test
-    long testCellId0 = 10437;
-    long testCellId1 = 10518;
-    long testCellId2 =  9930;
+    long testCellId0 = 9873;
+    long testCellId1 = 10652;
+    long testCellId2 = 10905;
 
     int objectId = 0;
 
