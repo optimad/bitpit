@@ -867,11 +867,6 @@ void PatchKernel::finalizeAlterations(bool squeezeStorage)
 	// Flush interfaces data structures
 	m_interfaces.flush();
 
-	// Squeeze the patch
-	if (squeezeStorage) {
-		squeeze();
-	}
-
 #if BITPIT_ENABLE_MPI==1
 	// Update partitioning information
 	bool partitioningInfoDirty = arePartitioningInfoDirty();
@@ -881,12 +876,12 @@ void PatchKernel::finalizeAlterations(bool squeezeStorage)
 #endif
 
 	// Clear alteration flags
+	m_alteredCells.clear();
+	m_alteredInterfaces.clear();
+
+	// Squeeze the patch
 	if (squeezeStorage) {
-		AlterationFlagsStorage().swap(m_alteredCells);
-		AlterationFlagsStorage().swap(m_alteredInterfaces);
-	} else {
-		m_alteredCells.clear();
-		m_alteredInterfaces.clear();
+		squeeze();
 	}
 
 	// Synchronize storage
@@ -5226,8 +5221,24 @@ bool PatchKernel::squeezeInterfaces()
 */
 bool PatchKernel::squeeze()
 {
-	bool status = squeezeVertices();
+	bool status = true;
+
+	// Alteration flags
+	if (m_alteredCells.empty()) {
+		AlterationFlagsStorage().swap(m_alteredCells);
+	}
+
+	if (m_alteredInterfaces.empty()) {
+		AlterationFlagsStorage().swap(m_alteredInterfaces);
+	}
+
+	// Vertices
+	status |= squeezeVertices();
+
+	// Cells
 	status |= squeezeCells();
+
+	// Interfaces
 	status |= squeezeInterfaces();
 
 	return status;
