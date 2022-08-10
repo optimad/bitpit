@@ -229,12 +229,9 @@ PatchKernel::PatchKernel(const PatchKernel &other)
       m_expert(other.m_expert),
       m_dimension(other.m_dimension),
       m_toleranceCustom(other.m_toleranceCustom),
-      m_tolerance(other.m_tolerance),
-      m_rank(other.m_rank),
-      m_nProcessors(other.m_nProcessors)
+      m_tolerance(other.m_tolerance)
 #if BITPIT_ENABLE_MPI==1
-      , m_communicator(MPI_COMM_NULL),
-      m_partitioningStatus(other.m_partitioningStatus),
+      , m_partitioningStatus(other.m_partitioningStatus),
       m_owner(other.m_owner),
       m_haloSize(other.m_haloSize),
       m_partitioningCellsTag(other.m_partitioningCellsTag),
@@ -251,6 +248,14 @@ PatchKernel::PatchKernel(const PatchKernel &other)
       m_ghostCellExchangeSources(other.m_ghostCellExchangeSources)
 #endif
 {
+#if BITPIT_ENABLE_MPI==1
+	// Initialize the communicator
+	initializeCommunicator(other.getCommunicator());
+#else
+	// Initialize serial communicator
+	initializeSerialCommunicator();
+#endif
+
 	// Create index generators
 	importVertexIndexGenerator(other);
 	importInterfaceIndexGenerator(other);
@@ -261,14 +266,6 @@ PatchKernel::PatchKernel(const PatchKernel &other)
 
 	// Update the VTK streamer
 	replaceVTKStreamer(&other, this);
-
-#if BITPIT_ENABLE_MPI==1
-	// Set the communicator
-	MPI_Comm communicator = other.getCommunicator();
-	if (communicator != MPI_COMM_NULL) {
-		initializeCommunicator(communicator);
-	}
-#endif
 }
 
 /*!
@@ -540,9 +537,8 @@ void PatchKernel::initialize()
 		updatePartitioningInfo(true);
 	}
 #else
-	// Dummy parallel information
-	m_rank        = 0;
-	m_nProcessors = 1;
+	// Initialize serial communicator
+	initializeSerialCommunicator();
 #endif
 
 	// Initialize the geometrical tolerance
@@ -580,6 +576,17 @@ void PatchKernel::initialize()
 	m_vtk.addData<int>("vertexRank", VTKFieldType::SCALAR, VTKLocation::POINT, this);
 #endif
 }
+
+#if BITPIT_ENABLE_MPI!=1
+/*!
+	Initialize a dummy communicator to be used when MPI support is disabled.
+*/
+void PatchKernel::initializeSerialCommunicator()
+{
+	m_rank        = 0;
+	m_nProcessors = 1;
+}
+#endif
 
 /*!
 	Destroys the patch.

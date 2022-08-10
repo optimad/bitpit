@@ -1032,6 +1032,7 @@ private:
 	void freeCommunicator();
 #else
 	void initialize();
+    void initializeSerialCommunicator();
 #endif
 
 	void finalizeAlterations(bool squeezeStorage = false);
