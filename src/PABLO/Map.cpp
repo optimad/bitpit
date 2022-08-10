@@ -127,7 +127,7 @@ double Map::mapZ(uint32_t Z) const {
  * \return Coordinates in logical domain.
  */
 u32array3 Map::mapCoordinates(darray3 const & X) const {
-	u32array3 coords;
+	u32array3 coords = {{0, 0, 0}};
 	for (int i=0; i<3; ++i){
 		coords[i] = (uint32_t)(double(m_maxLength) * X[i]);
 	}
