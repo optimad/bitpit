@@ -240,11 +240,7 @@ Octant::getDim() const{return m_dim;};
  */
 u32array3
 Octant::getLogicalCoordinates() const{
-	u32array3 coords;
-	coords[0] = getLogicalX();
-	coords[1] = getLogicalY();
-	coords[2] = getLogicalZ();
-	return coords;
+	return {{getLogicalX(), getLogicalY(), getLogicalZ()}};
 };
 
 /*! Get the coordinates of an octant, i.e. the coordinates of its node 0.
@@ -479,10 +475,8 @@ Octant::getLogicalVolume() const{
  */
 darray3
 Octant::getLogicalCenter() const{
-	double	dh;
-	darray3 center;
-
-	dh = double(getLogicalSize())*0.5;
+	double dh = double(getLogicalSize())*0.5;
+	darray3 center = {{0., 0., 0.}};
 	center[0] = getLogicalX() + dh;
 	center[1] = getLogicalY() + dh;
 	center[2] = getLogicalZ() + double(m_dim-2)*dh;
@@ -497,12 +491,10 @@ Octant::getLogicalCenter() const{
  */
 darray3
 Octant::getLogicalFaceCenter(uint8_t iface) const{
-	double	dh_2;
-	darray3 center;
-
 	assert(iface < m_dim*2);
 
-	dh_2 = double(getLogicalSize())*0.5;
+	double dh_2 = double(getLogicalSize())*0.5;
+	darray3 center = {{0., 0., 0.}};
 	center[0] = getLogicalX() + (double)sm_treeConstants[m_dim].faceDisplacements[iface][0] * dh_2;
 	center[1] = getLogicalY() + (double)sm_treeConstants[m_dim].faceDisplacements[iface][1] * dh_2;
 	center[2] = getLogicalZ() + double(m_dim-2) * (double)sm_treeConstants[m_dim].faceDisplacements[iface][2] * dh_2;
@@ -519,7 +511,7 @@ Octant::getLogicalFaceCenter(uint8_t iface) const{
 darray3
 Octant::getLogicalEdgeCenter(uint8_t iedge) const{
 	double	dh_2;
-	darray3 center;
+	darray3 center = {{0., 0., 0.}};
 
 	dh_2 = double(getLogicalSize())*0.5;
 	center[0] = getLogicalX() + (double)sm_treeConstants[m_dim].edgeDisplacements[iedge][0] * dh_2;
@@ -1864,7 +1856,7 @@ Octant Octant::computeEdgePeriodicOctant(uint8_t iedge) const {
  * \return Coordinates of octant considered as periodic ghost out of the logical domain.
  */
 array<int64_t,3> Octant::getPeriodicCoord(uint8_t iface) const {
-	array<int64_t,3> coord;
+	array<int64_t,3> coord = {{0, 0, 0}};
 	coord[0] = getLogicalX();
 	coord[1] = getLogicalY();
 	coord[2] = getLogicalZ();
@@ -1914,7 +1906,7 @@ array<int64_t,3> Octant::getPeriodicCoord(uint8_t iface) const {
  * \return Coordinates of octant considered as periodic ghost out of the logical domain.
  */
 array<int64_t,3> Octant::getNodePeriodicCoord(uint8_t inode) const {
-    array<int64_t,3> coord;
+    array<int64_t,3> coord = {{0, 0, 0}};
     coord[0] = getLogicalX();
     coord[1] = getLogicalY();
     coord[2] = getLogicalZ();
@@ -1987,7 +1979,7 @@ array<int64_t,3> Octant::getNodePeriodicCoord(uint8_t inode) const {
  * \return Coordinates of octant considered as periodic ghost out of the logical domain.
  */
 array<int64_t,3> Octant::getEdgePeriodicCoord(uint8_t iedge) const {
-    array<int64_t,3> coord;
+    array<int64_t,3> coord = {{0, 0, 0}};
     coord[0] = getLogicalX();
     coord[1] = getLogicalY();
     coord[2] = getLogicalZ();

@@ -1333,7 +1333,7 @@ namespace bitpit {
      */
     darray3
     ParaTree::getCenter(uint32_t idx) const {
-        darray3 centerCoords;
+        darray3 centerCoords  = {{0., 0., 0.}};
         darray3 centerCoords_ = m_octree.m_octants[idx].getLogicalCenter();
         m_trans.mapCenter(centerCoords_, centerCoords);
         return centerCoords;
@@ -1346,7 +1346,7 @@ namespace bitpit {
      */
     darray3
     ParaTree::getFaceCenter(uint32_t idx, uint8_t face) const {
-        darray3 centerCoords;
+        darray3 centerCoords  = {{0., 0., 0.}};
         darray3 centerCoords_ = m_octree.m_octants[idx].getLogicalFaceCenter(face);
         m_trans.mapCenter(centerCoords_, centerCoords);
         return centerCoords;
@@ -1370,7 +1370,7 @@ namespace bitpit {
      */
     darray3
     ParaTree::getNode(uint32_t idx, uint8_t node) const {
-        darray3 nodeCoords;
+        darray3 nodeCoords    = {{0., 0., 0.}};
         u32array3 nodeCoords_ = m_octree.m_octants[idx].getLogicalNode(node);
         m_trans.mapNode(nodeCoords_, nodeCoords);
         return nodeCoords;
@@ -1430,8 +1430,8 @@ namespace bitpit {
      */
     darray3
     ParaTree::getNormal(uint32_t idx, uint8_t face) const {
-        darray3 normal;
-        i8array3 normal_;
+        darray3 normal   = {{0., 0., 0.}};
+        i8array3 normal_ = {{0, 0, 0}};
         m_octree.m_octants[idx].getNormal(face, normal_, m_treeConstants->normals);
         m_trans.mapNormals(normal_, normal);
         return normal;
@@ -1783,7 +1783,7 @@ namespace bitpit {
      */
     darray3
     ParaTree::getCenter(const Octant* oct) const {
-        darray3 centerCoords;
+        darray3 centerCoords  = {{0., 0., 0.}};
         darray3 centerCoords_ = oct->getLogicalCenter();
         m_trans.mapCenter(centerCoords_, centerCoords);
         return centerCoords;
@@ -1796,7 +1796,7 @@ namespace bitpit {
      */
     darray3
     ParaTree::getFaceCenter(const Octant* oct, uint8_t face) const {
-        darray3 centerCoords;
+        darray3 centerCoords  = {{0., 0., 0.}};
         darray3 centerCoords_ = oct->getLogicalFaceCenter(face);
         m_trans.mapCenter(centerCoords_, centerCoords);
         return centerCoords;
@@ -1820,7 +1820,7 @@ namespace bitpit {
      */
     darray3
     ParaTree::getNode(const Octant* oct, uint8_t node) const {
-        darray3 nodeCoords;
+        darray3 nodeCoords    = {{0., 0., 0.}};
         u32array3 nodeCoords_ = oct->getLogicalNode(node);
         m_trans.mapNode(nodeCoords_, nodeCoords);
         return nodeCoords;
@@ -1880,8 +1880,8 @@ namespace bitpit {
      */
     darray3
     ParaTree::getNormal(const Octant* oct, uint8_t face) const {
-        darray3 normal;
-        i8array3 normal_;
+        darray3 normal   = {{0., 0., 0.}};
+        i8array3 normal_ = {{0, 0, 0}};
         oct->getNormal(face, normal_, m_treeConstants->normals);
         m_trans.mapNormals(normal_, normal);
         return normal;
@@ -2382,13 +2382,14 @@ namespace bitpit {
      */
     darray3
     ParaTree::getCenter(const Intersection* inter) const {
-        darray3 center;
         Octant oct(m_dim);
         if(inter->m_finer && inter->m_isghost)
             oct = m_octree.extractGhostOctant(inter->m_owners[inter->m_finer]);
         else
             oct = m_octree.extractOctant(inter->m_owners[inter->m_finer]);
-        darray3  centerCoords_ = oct.getLogicalCenter();
+
+        darray3 center = {{0., 0., 0.}};
+        darray3 centerCoords_ = oct.getLogicalCenter();
         int sign = ( int(2*((inter->m_iface)%2)) - 1);
         double deplace = double (sign * int(oct.getLogicalSize())) / 2;
         centerCoords_[inter->m_iface/2] = uint32_t(int(centerCoords_[inter->m_iface/2]) + deplace);
@@ -2427,14 +2428,15 @@ namespace bitpit {
      */
     darray3
     ParaTree::getNormal(const Intersection* inter) const {
-        darray3 normal;
         Octant oct(m_dim);
         if(inter->m_finer && inter->m_isghost)
             oct = m_octree.extractGhostOctant(inter->m_owners[inter->m_finer]);
         else
             oct = m_octree.extractOctant(inter->m_owners[inter->m_finer]);
+
         uint8_t face = inter->m_iface;
-        i8array3 normal_;
+        darray3 normal = {{0., 0., 0.}};
+        i8array3 normal_ = {{0, 0, 0}};
         oct.getNormal(face, normal_, m_treeConstants->normals);
         m_trans.mapNormals(normal_, normal);
         return normal;
