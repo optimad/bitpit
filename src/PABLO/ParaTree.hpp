@@ -450,6 +450,8 @@ namespace bitpit {
 
 #if BITPIT_ENABLE_MPI==1
         void	_initializeCommunicator(MPI_Comm comm);
+#else
+        void	_initializeSerialCommunicator();
 #endif
         void	_initializePartitions();
         void	_initialize(uint8_t dim, const std::string &logfile);
