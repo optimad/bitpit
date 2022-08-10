@@ -64,7 +64,7 @@ ReferenceElementInfo::ReferenceElementInfo(int _dimension, ElementType _type, in
     }
 
     edgeTypeStorage.fill(ElementType::UNDEFINED);
-    for (int i = 0; i < MAX_ELEM_FACES; ++i) {
+    for (int i = 0; i < MAX_ELEM_EDGES; ++i) {
         edgeConnectStorage[i].fill(-1);
     }
 }
