@@ -345,6 +345,9 @@ namespace bitpit {
         // Set the dimension to a dummy value
         setDim(dim);
 
+        // Initialize the global number of octants
+        m_globalNumOctants = 0;
+
         // Initialize the number of ghost layers
         m_nofGhostLayers = 1;
     }
@@ -371,11 +374,11 @@ namespace bitpit {
         _initializeSerialCommunicator();
 #endif
 
-        // Initialize partitions
-        _initializePartitions();
-
         // Initialized the tree
         _initialize(0, logfile);
+
+        // Initialize partitions
+        _initializePartitions();
     }
 
     /*! Initialize the octree
@@ -401,15 +404,15 @@ namespace bitpit {
         _initializeSerialCommunicator();
 #endif
 
-        // Initialize partitions
-        _initializePartitions();
-
         // Initialized the tree
         if (dim < 2 || dim > 3) {
             throw std::runtime_error ("Invalid value for the dimension");
         }
 
         _initialize(dim, logfile);
+
+        // Initialize partitions
+        _initializePartitions();
     }
 
     /*! Re-initializes the octree
@@ -418,15 +421,15 @@ namespace bitpit {
      */
     void
     ParaTree::reinitialize(uint8_t dim, const std::string &logfile) {
-        // Initialize partitions
-        _initializePartitions();
-
         // Initialized the tree
         if (dim < 2 || dim > 3) {
             throw std::runtime_error ("Invalid value for the dimension");
         }
 
         _initialize(dim, logfile);
+
+        // Initialize partitions
+        _initializePartitions();
     }
 
     /*! Initialize the logger
