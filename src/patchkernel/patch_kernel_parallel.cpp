@@ -1798,6 +1798,10 @@ std::vector<adaption::Info> PatchKernel::_partitioningPrepare(const std::unorder
 
 	return _partitioningPrepare(cellRanks, trackPartitioning);
 #else
+	BITPIT_UNUSED(cellWeights);
+	BITPIT_UNUSED(defaultWeight);
+	BITPIT_UNUSED(trackPartitioning);
+
 	throw std::runtime_error("METIS library is required for automatic patch partitioning.");
 #endif
 }
