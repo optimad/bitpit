@@ -198,7 +198,7 @@ std::array<std::array<double, 3>, 3> Interface::evalRotationFromCartesian(std::a
 	//          R =   | [y_int] |
 	//                | [z_int] |
 	//
-	std::array<std::array<double, 3>, 3> R;
+	std::array<std::array<double, 3>, 3> R = {{{{0., 0., 0.}}, {{0., 0., 0.}}, {{0., 0., 0.}}}};
 
 	// x-interface axis
 	for (int k = 0; k < 3; ++k) {
@@ -267,7 +267,7 @@ std::array<std::array<double, 3>, 3> Interface::evalRotationInverse(const std::a
 */
 std::array<std::array<double, 3>, 3> Interface::evalRotationTranspose(const std::array<std::array<double, 3>, 3> &R)
 {
-	std::array<std::array<double, 3>, 3> R_transposed;
+	std::array<std::array<double, 3>, 3> R_transposed = {{{{0., 0., 0.}}, {{0., 0., 0.}}, {{0., 0., 0.}}}};
 	for (int i = 0; i < 3; i++) {
 		for (int j = 0; j < 3; j++) {
 			R_transposed[j][i] = R[i][j];
@@ -377,11 +377,7 @@ int Interface::getNeighFace() const
 */
 std::array<long, 2> Interface::getOwnerNeigh() const
 {
-	std::array<long, 2> cells;
-	cells[0] = m_owner;
-	cells[1] = m_neigh;
-
-	return cells;
+	return {{m_owner, m_neigh}};
 }
 
 /*!
