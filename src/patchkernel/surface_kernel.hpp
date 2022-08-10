@@ -87,8 +87,6 @@ private:
     bool haveSameOrientation(const Cell &cell_A, int face_A, const Cell &cell_B, int face_B) const;
 
 protected:
-    int m_spaceDim;
-
 #if BITPIT_ENABLE_MPI==1
     SurfaceKernel(MPI_Comm communicator, std::size_t haloSize, bool expert);
     SurfaceKernel(int dimension, MPI_Comm communicator, std::size_t haloSize, bool expert);
