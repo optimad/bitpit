@@ -224,11 +224,9 @@ namespace bitpit {
           m_partitionRangeGlobalIdx(other.m_partitionRangeGlobalIdx),
           m_partitionRangeGlobalIdx0(other.m_partitionRangeGlobalIdx0),
           m_globalNumOctants(other.m_globalNumOctants),
-          m_nproc(other.m_nproc),
           m_maxDepth(other.m_maxDepth),
           m_treeConstants(other.m_treeConstants),
           m_nofGhostLayers(other.m_nofGhostLayers),
-          m_rank(other.m_rank),
           m_octree(other.m_octree),
           m_bordersPerProc(other.m_bordersPerProc),
           m_internals(other.m_internals),
@@ -250,6 +248,8 @@ namespace bitpit {
     {
 #if BITPIT_ENABLE_MPI==1
         _initializeCommunicator(other.m_comm);
+#else
+        _initializeSerialCommunicator();
 #endif
     }
 
@@ -276,6 +276,10 @@ namespace bitpit {
         // Early return if the communicator is a null communicator
         if (communicator == MPI_COMM_NULL) {
             m_comm = MPI_COMM_NULL;
+
+            m_nproc = 1;
+            m_rank  = 0;
+
             return;
         }
 
@@ -285,6 +289,20 @@ namespace bitpit {
         // instead, a duplicate of a user-specified communicator should always
         // be used.
         MPI_Comm_dup(communicator, &m_comm);
+
+        // Get MPI information
+        MPI_Comm_size(m_comm, &m_nproc);
+        MPI_Comm_rank(m_comm, &m_rank);
+    }
+#else
+    /*! Internal function to initialize a dummy communicator to be used
+     * when MPI support is disabled.
+     */
+    void
+    ParaTree::_initializeSerialCommunicator()
+    {
+        m_nproc = 1;
+        m_rank  = 0;
     }
 #endif
 
@@ -294,21 +312,6 @@ namespace bitpit {
      */
     void
     ParaTree::_initializePartitions() {
-#if BITPIT_ENABLE_MPI==1
-        // Set MPI information
-        if (isCommSet()) {
-            MPI_Comm_size(m_comm, &m_nproc);
-            MPI_Comm_rank(m_comm, &m_rank);
-        } else {
-            m_rank  = 0;
-            m_nproc = 1;
-        }
-#else
-        // Set dummy MPI information
-        m_rank  = 0;
-        m_nproc = 1;
-#endif
-
         // Create the data structures for storing partion information
         m_partitionFirstDesc.resize(m_nproc);
         m_partitionLastDesc.resize(m_nproc);
@@ -363,8 +366,11 @@ namespace bitpit {
 #if BITPIT_ENABLE_MPI==1
         // Initialize the communicator
         _initializeCommunicator(comm);
-
+#else
+        // Initialize serial communicator
+        _initializeSerialCommunicator();
 #endif
+
         // Initialize partitions
         _initializePartitions();
 
@@ -390,8 +396,11 @@ namespace bitpit {
 #if BITPIT_ENABLE_MPI==1
         // Initialize the communicator
         _initializeCommunicator(comm);
-
+#else
+        // Initialize serial communicator
+        _initializeSerialCommunicator();
 #endif
+
         // Initialize partitions
         _initializePartitions();
 
