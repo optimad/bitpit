@@ -28,6 +28,7 @@
 #include <libxml/xmlwriter.h>
 
 #include "configuration_config.hpp"
+#include "bitpit_api.hpp"
 
 namespace bitpit {
 
@@ -35,7 +36,7 @@ namespace config {
 
 namespace XML {
 
-extern const std::string DEFAULT_ENCODING;
+extern BITPIT_API const std::string DEFAULT_ENCODING;
 
 void readConfiguration(const std::string &filename, const std::string &rootname, bool checkVersion, int version, Config *rootConfig);
 void readNode(xmlNodePtr root, Config *config);
