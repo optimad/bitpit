@@ -70,6 +70,8 @@ struct KSPStatus {
 class SystemMatrixAssembler {
 
 public:
+    virtual ~SystemMatrixAssembler() = default;
+
     virtual long getRowCount() const = 0;
     virtual long getColCount() const = 0;
 
