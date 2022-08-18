@@ -37,6 +37,7 @@
 #include "bitpit_voloctree.hpp"
 
 #include "levelSetCommon.hpp"
+#include "levelSetBoundedObject.hpp"
 #include "levelSetCachedObject.hpp"
 #include "levelSetCartesianKernel.hpp"
 #include "levelSetKernel.hpp"
