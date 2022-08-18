@@ -1069,17 +1069,17 @@ private:
 
 	void dumpVertexAutoIndexing(std::ostream &stream) const;
 	void restoreVertexAutoIndexing(std::istream &stream);
-	void createVertexIndexGenerator();
+	void createVertexIndexGenerator(bool populate);
 	void importVertexIndexGenerator(const PatchKernel &source);
 
 	void dumpCellAutoIndexing(std::ostream &stream) const;
 	void restoreCellAutoIndexing(std::istream &stream);
-	void createCellIndexGenerator();
+	void createCellIndexGenerator(bool populate);
 	void importCellIndexGenerator(const PatchKernel &source);
 
 	void dumpInterfaceAutoIndexing(std::ostream &stream) const;
 	void restoreInterfaceAutoIndexing(std::istream &stream);
-	void createInterfaceIndexGenerator();
+	void createInterfaceIndexGenerator(bool populate);
 	void importInterfaceIndexGenerator(const PatchKernel &source);
 
 	VertexIterator _addInternalVertex(const std::array<double, 3> &coords, long id);

@@ -1516,13 +1516,7 @@ void PatchKernel::setVertexAutoIndexing(bool enabled)
 	}
 
 	if (enabled) {
-		createVertexIndexGenerator();
-
-		VertexConstIterator beginItr = m_vertices.cbegin();
-		VertexConstIterator endItr   = m_vertices.cend();
-		for (VertexConstIterator itr = beginItr; itr != endItr; ++itr) {
-			m_vertexIdGenerator->setAssigned(itr.getId());
-		}
+		createVertexIndexGenerator(true);
 	} else {
 		m_vertexIdGenerator.reset();
 	}
@@ -1545,7 +1539,7 @@ void PatchKernel::dumpVertexAutoIndexing(std::ostream &stream) const
 */
 void PatchKernel::restoreVertexAutoIndexing(std::istream &stream)
 {
-	createVertexIndexGenerator();
+	createVertexIndexGenerator(false);
 	m_vertexIdGenerator->restore(stream);
 }
 
@@ -1553,13 +1547,26 @@ void PatchKernel::restoreVertexAutoIndexing(std::istream &stream)
 	Create the vertex index generator.
 
 	If the index generator is already created, the existing index generator will be reset.
+
+	\param populate if set to true, the index generator will be populated with current
+	vertex ids
 */
-void PatchKernel::createVertexIndexGenerator()
+void PatchKernel::createVertexIndexGenerator(bool populate)
 {
+	// Create or reset index generator
 	if (!m_vertexIdGenerator) {
 		m_vertexIdGenerator = std::unique_ptr<IndexGenerator<long>>(new IndexGenerator<long>());
 	} else {
 		m_vertexIdGenerator->reset();
+	}
+
+	// Populate index generator with current ids
+	if (populate) {
+		VertexConstIterator beginItr = m_vertices.cbegin();
+		VertexConstIterator endItr   = m_vertices.cend();
+		for (VertexConstIterator itr = beginItr; itr != endItr; ++itr) {
+			m_vertexIdGenerator->setAssigned(itr.getId());
+		}
 	}
 }
 
@@ -2356,13 +2363,7 @@ void PatchKernel::setCellAutoIndexing(bool enabled)
 	}
 
 	if (enabled) {
-		createCellIndexGenerator();
-
-		CellConstIterator beginItr = m_cells.cbegin();
-		CellConstIterator endItr   = m_cells.cend();
-		for (CellConstIterator itr = beginItr; itr != endItr; ++itr) {
-			m_cellIdGenerator->setAssigned(itr.getId());
-		}
+		createCellIndexGenerator(true);
 	} else {
 		m_cellIdGenerator.reset();
 	}
@@ -2385,7 +2386,7 @@ void PatchKernel::dumpCellAutoIndexing(std::ostream &stream) const
 */
 void PatchKernel::restoreCellAutoIndexing(std::istream &stream)
 {
-	createCellIndexGenerator();
+	createCellIndexGenerator(false);
 	m_cellIdGenerator->restore(stream);
 }
 
@@ -2393,13 +2394,26 @@ void PatchKernel::restoreCellAutoIndexing(std::istream &stream)
 	Create the cell index generator.
 
 	If the index generator is already created, the existing index generator will be reset.
+
+	\param populate if set to true, the index generator will be populated with current
+	cell ids
 */
-void PatchKernel::createCellIndexGenerator()
+void PatchKernel::createCellIndexGenerator(bool populate)
 {
+	// Create or reset index generator
 	if (!m_cellIdGenerator) {
 		m_cellIdGenerator = std::unique_ptr<IndexGenerator<long>>(new IndexGenerator<long>());
 	} else {
 		m_cellIdGenerator->reset();
+	}
+
+	// Populate index generator with current ids
+	if (populate) {
+		CellConstIterator beginItr = m_cells.cbegin();
+		CellConstIterator endItr   = m_cells.cend();
+		for (CellConstIterator itr = beginItr; itr != endItr; ++itr) {
+			m_cellIdGenerator->setAssigned(itr.getId());
+		}
 	}
 }
 
@@ -4090,13 +4104,7 @@ void PatchKernel::setInterfaceAutoIndexing(bool enabled)
 	}
 
 	if (enabled) {
-		createInterfaceIndexGenerator();
-
-		InterfaceConstIterator beginItr = m_interfaces.cbegin();
-		InterfaceConstIterator endItr   = m_interfaces.cend();
-		for (InterfaceConstIterator itr = beginItr; itr != endItr; ++itr) {
-			m_interfaceIdGenerator->setAssigned(itr.getId());
-		}
+		createInterfaceIndexGenerator(true);
 	} else {
 		if (getInterfacesBuildStrategy() == INTERFACES_AUTOMATIC) {
 			throw std::runtime_error("Auto-indexing cannot be disabled if interfaces build strategy is set to automatic.");
@@ -4123,7 +4131,7 @@ void PatchKernel::dumpInterfaceAutoIndexing(std::ostream &stream) const
 */
 void PatchKernel::restoreInterfaceAutoIndexing(std::istream &stream)
 {
-	createInterfaceIndexGenerator();
+	createInterfaceIndexGenerator(false);
 	m_interfaceIdGenerator->restore(stream);
 }
 
@@ -4131,13 +4139,26 @@ void PatchKernel::restoreInterfaceAutoIndexing(std::istream &stream)
 	Create the interface index generator.
 
 	If the index generator is already created, the existing index generator will be reset.
+
+	\param populate if set to true, the index generator will be populated with current
+	interface ids
 */
-void PatchKernel::createInterfaceIndexGenerator()
+void PatchKernel::createInterfaceIndexGenerator(bool populate)
 {
+	// Create or reset index generator
 	if (!m_interfaceIdGenerator) {
 		m_interfaceIdGenerator = std::unique_ptr<IndexGenerator<long>>(new IndexGenerator<long>());
 	} else {
 		m_interfaceIdGenerator->reset();
+	}
+
+	// Populate index generator with current ids
+	if (populate) {
+		InterfaceConstIterator beginItr = m_interfaces.cbegin();
+		InterfaceConstIterator endItr   = m_interfaces.cend();
+		for (InterfaceConstIterator itr = beginItr; itr != endItr; ++itr) {
+			m_interfaceIdGenerator->setAssigned(itr.getId());
+		}
 	}
 }
 
@@ -7844,6 +7865,11 @@ void PatchKernel::consecutiveRenumberVertices(long offset)
 	for(Interface &interface : getInterfaces()) {
 		interface.renumberVertices(map);
 	}
+
+	// Reset index generator
+	if (isVertexAutoIndexingEnabled()) {
+		createVertexIndexGenerator(true);
+	}
 }	
 
 /*!
@@ -7890,6 +7916,11 @@ void PatchKernel::consecutiveRenumberCells(long offset)
 	}
 #endif
 
+	// Reset index generator
+	if (isCellAutoIndexingEnabled()) {
+		createCellIndexGenerator(true);
+	}
+
 #if BITPIT_ENABLE_MPI==1
 	// Update partitioning information
 	if (isPartitioned()) {
@@ -7916,6 +7947,11 @@ void PatchKernel::consecutiveRenumberInterfaces(long offset)
 			long &interfaceId = interfaces[i];
 			interfaceId = map.at(interfaceId);
 		}
+	}
+
+	// Reset index generator
+	if (isInterfaceAutoIndexingEnabled()) {
+		createInterfaceIndexGenerator(true);
 	}
 }
 
