@@ -39,6 +39,7 @@
 #include <sys/stat.h>
 #include <type_traits>
 
+#include "compiler.hpp"
 #include "fileHandler.hpp"
 #include "logger.hpp"
 
