@@ -32,6 +32,8 @@ namespace bitpit {
 class LevelSetBoundedObject {
 
 public:
+    virtual ~LevelSetBoundedObject() = default;
+
     virtual void                                getBoundingBox( std::array<double,3> &, std::array<double,3> & )const =0  ;
 # if BITPIT_ENABLE_MPI
     virtual void                                getGlobalBoundingBox( std::array<double,3> &, std::array<double,3> & )const =0  ;

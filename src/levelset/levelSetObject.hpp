@@ -52,6 +52,8 @@ class LevelSetKernel;
 class LevelSetObjectInterface {
 
     public:
+    virtual ~LevelSetObjectInterface() = default;
+
     virtual LevelSetKernel *                    getKernel() = 0;
     virtual const LevelSetKernel *              getKernel() const = 0;
     virtual void                                setKernel(LevelSetKernel *) = 0;
