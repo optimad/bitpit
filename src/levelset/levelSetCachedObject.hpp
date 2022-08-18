@@ -32,7 +32,6 @@
 
 # include "bitpit_containers.hpp"
 
-# include "levelSetBoundedObject.hpp"
 # include "levelSetKernel.hpp"
 # include "levelSetSignedObject.hpp"
 # include "levelSetStorage.hpp"
