@@ -1624,10 +1624,7 @@ VolOctree::StitchInfo VolOctree::deleteCells(const std::vector<DeleteInfo> &dele
 		// For now, all cell vertices will be listed. Later, the vertex of
 		// the dangling faces will be removed from the list.
 		ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
-		for (int k = 0; k < nCellVertices; ++k) {
-			long vertexId = cellVertexIds[k];
-			deadVertices.insert(vertexId);
-		}
+		deadVertices.insert(cellVertexIds.cbegin(), cellVertexIds.cend());
 
 		// Remove patch-tree associations
 		const OctantInfo &octantInfo = getCellOctant(cellId);
