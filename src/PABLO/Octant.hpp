@@ -133,7 +133,7 @@ class Octant{
     };
 
     enum OctantInfoExt {
-        EXT_INFO_ITEM_COUNT = 4;
+        EXT_INFO_ITEM_COUNT = 4
     };
 
 private:
