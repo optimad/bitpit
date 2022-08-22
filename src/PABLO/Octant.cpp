@@ -892,6 +892,10 @@ void	Octant::buildChildren(Octant *children) const {
 		oct.m_info[INFO_PBOUNDFACE0 + xf] = false;
 		oct.m_info[INFO_PBOUNDFACE0 + yf] = false;
 		oct.m_info[INFO_PBOUNDFACE0 + zf] = false;
+
+		for (uint8_t i = 0; i < EXT_INFO_ITEM_COUNT; ++i) {
+			oct.m_info_ext[i] = 0;
+		}
 	}
 };
 
