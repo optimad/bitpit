@@ -1946,7 +1946,7 @@ namespace bitpit {
      */
     uint64_t
     ParaTree::getLastDescMorton(const Octant* oct) const {
-        return oct->buildLastDesc().getMorton();
+        return oct->computeLastDescMorton();
     };
 
     /** Compute the persistent XYZ key of the specified node of an octant (without
@@ -2193,7 +2193,7 @@ namespace bitpit {
      */
     uint64_t
     ParaTree::getLastDescMorton(uint32_t idx) const {
-        return m_octree.m_octants[idx].buildLastDesc().getMorton();
+        return m_octree.m_octants[idx].computeLastDescMorton();
     };
 
     /*!Get the begin position for the iterator of the local internal octants.
