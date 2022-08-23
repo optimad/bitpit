@@ -1736,7 +1736,7 @@ namespace bitpit {
     void
     LocalTree::preBalance21(bool internal){
 
-        Octant 			father(m_dim), lastdesc(m_dim);
+        Octant 			father(m_dim);
         uint64_t 		mortonld;
         uint32_t 		nocts;
         uint32_t 		idx, idx2, idx0, last_idx;
@@ -1869,8 +1869,7 @@ namespace bitpit {
         if(getNumOctants()){
             if (internal){
                 father = m_octants[0].buildFather();
-                lastdesc = father.buildLastDesc();
-                mortonld = lastdesc.getMorton();
+                mortonld = father.computeLastDescMorton();
                 nbro = 0;
                 for (idx=0; idx<m_treeConstants->nChildren; idx++){
                     if (idx<nocts){
@@ -1919,7 +1918,7 @@ namespace bitpit {
     void
     LocalTree::preBalance21(u32vector& newmodified){
 
-        Octant 				father(m_dim), lastdesc(m_dim);
+        Octant 				father(m_dim);
         uint64_t 			mortonld;
         uint32_t 			nocts;
         uint32_t 			idx, idx2, idx0, last_idx;
@@ -2053,8 +2052,7 @@ namespace bitpit {
 
         // Check first internal octants
         father = m_octants[0].buildFather();
-        lastdesc = father.buildLastDesc();
-        mortonld = lastdesc.getMorton();
+        mortonld = father.computeLastDescMorton();
         nbro = 0;
         for (idx=0; idx<m_treeConstants->nChildren; idx++){
             // Check if family is complete or to be checked in the internal loop (some brother refined)
