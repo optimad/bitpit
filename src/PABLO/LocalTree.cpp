@@ -240,9 +240,9 @@ namespace bitpit {
             octvector::const_iterator lastOctant = m_octants.end() - 1;
             uint32_t x,y,z,delta;
             delta = (uint32_t)(1<<((uint8_t)m_treeConstants->maxLevel - lastOctant->m_level)) - 1;
-            x = lastOctant->getLogicalX() + delta;
-            y = lastOctant->getLogicalY() + delta;
-            z = lastOctant->getLogicalZ() + (m_dim-2)*delta;
+            x = lastOctant->getLogicalCoordinates(0) + delta;
+            y = lastOctant->getLogicalCoordinates(1) + delta;
+            z = lastOctant->getLogicalCoordinates(2) + (m_dim-2)*delta;
             Octant lastDesc = Octant(m_dim, m_treeConstants->maxLevel,x,y,z);
             m_lastDescMorton = lastDesc.getMorton();
         } else {
@@ -1088,9 +1088,9 @@ namespace bitpit {
             coord = oct->getPeriodicCoord(iface);
         }
         else{
-            coord[0] = oct->getLogicalX();
-            coord[1] = oct->getLogicalY();
-            coord[2] = oct->getLogicalZ();
+            coord[0] = oct->getLogicalCoordinates(0);
+            coord[1] = oct->getLogicalCoordinates(1);
+            coord[2] = oct->getLogicalCoordinates(2);
         }
 
         // Search for neighbours of different sizes
@@ -1344,9 +1344,9 @@ namespace bitpit {
             coord = oct->getEdgePeriodicCoord(iedge);
         }
         else{
-            coord[0] = oct->getLogicalX();
-            coord[1] = oct->getLogicalY();
-            coord[2] = oct->getLogicalZ();
+            coord[0] = oct->getLogicalCoordinates(0);
+            coord[1] = oct->getLogicalCoordinates(1);
+            coord[2] = oct->getLogicalCoordinates(2);
         }
 
         // Search for neighbours of different sizes
@@ -1589,9 +1589,9 @@ namespace bitpit {
             coord = oct->getNodePeriodicCoord(inode);
         }
         else{
-            coord[0] = oct->getLogicalX();
-            coord[1] = oct->getLogicalY();
-            coord[2] = oct->getLogicalZ();
+            coord[0] = oct->getLogicalCoordinates(0);
+            coord[1] = oct->getLogicalCoordinates(1);
+            coord[2] = oct->getLogicalCoordinates(2);
         }
 
         // Search for neighbours of different sizes

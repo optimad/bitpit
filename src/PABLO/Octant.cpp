@@ -240,31 +240,15 @@ Octant::getDim() const{return m_dim;};
  */
 u32array3
 Octant::getLogicalCoordinates() const{
-	return {{getLogicalX(), getLogicalY(), getLogicalZ()}};
+	return {{getLogicalCoordinates(0), getLogicalCoordinates(1), getLogicalCoordinates(2)}};
 };
 
 /*! Get the coordinates of an octant, i.e. the coordinates of its node 0.
- * \return Coordinate X of node 0.
+ * \return Coordinates of node 0.
  */
 uint32_t
-Octant::getLogicalX() const{
-	return PABLO::computeCoordinate(m_dim, m_morton, 0);
-};
-
-/*! Get the coordinates of an octant, i.e. the coordinates of its node 0.
- * \return Coordinate Y of node 0.
- */
-uint32_t
-Octant::getLogicalY() const{
-	return PABLO::computeCoordinate(m_dim, m_morton, 1);
-};
-
-/*! Get the coordinates of an octant, i.e. the coordinates of its node 0.
- * \return Coordinate Z of node 0.
- */
-uint32_t
-Octant::getLogicalZ() const{
-	return PABLO::computeCoordinate(m_dim, m_morton, 2);
+Octant::getLogicalCoordinates(int coord) const{
+	return PABLO::computeCoordinate(m_dim, m_morton, coord);
 };
 
 /*! Get the level of an octant.
@@ -477,9 +461,9 @@ darray3
 Octant::getLogicalCenter() const{
 	double dh = double(getLogicalSize())*0.5;
 	darray3 center = {{0., 0., 0.}};
-	center[0] = getLogicalX() + dh;
-	center[1] = getLogicalY() + dh;
-	center[2] = getLogicalZ() + double(m_dim-2)*dh;
+	center[0] = getLogicalCoordinates(0) + dh;
+	center[1] = getLogicalCoordinates(1) + dh;
+	center[2] = getLogicalCoordinates(2) + double(m_dim-2)*dh;
 	return center;
 };
 
@@ -495,9 +479,9 @@ Octant::getLogicalFaceCenter(uint8_t iface) const{
 
 	double dh_2 = double(getLogicalSize())*0.5;
 	darray3 center = {{0., 0., 0.}};
-	center[0] = getLogicalX() + (double)sm_treeConstants[m_dim].faceDisplacements[iface][0] * dh_2;
-	center[1] = getLogicalY() + (double)sm_treeConstants[m_dim].faceDisplacements[iface][1] * dh_2;
-	center[2] = getLogicalZ() + double(m_dim-2) * (double)sm_treeConstants[m_dim].faceDisplacements[iface][2] * dh_2;
+	center[0] = getLogicalCoordinates(0) + (double)sm_treeConstants[m_dim].faceDisplacements[iface][0] * dh_2;
+	center[1] = getLogicalCoordinates(1) + (double)sm_treeConstants[m_dim].faceDisplacements[iface][1] * dh_2;
+	center[2] = getLogicalCoordinates(2) + double(m_dim-2) * (double)sm_treeConstants[m_dim].faceDisplacements[iface][2] * dh_2;
 
 	return center;
 };
@@ -514,9 +498,9 @@ Octant::getLogicalEdgeCenter(uint8_t iedge) const{
 	darray3 center = {{0., 0., 0.}};
 
 	dh_2 = double(getLogicalSize())*0.5;
-	center[0] = getLogicalX() + (double)sm_treeConstants[m_dim].edgeDisplacements[iedge][0] * dh_2;
-	center[1] = getLogicalY() + (double)sm_treeConstants[m_dim].edgeDisplacements[iedge][1] * dh_2;
-	center[2] = getLogicalZ() + double(m_dim-2) * (double)sm_treeConstants[m_dim].edgeDisplacements[iedge][2] * dh_2;
+	center[0] = getLogicalCoordinates(0) + (double)sm_treeConstants[m_dim].edgeDisplacements[iedge][0] * dh_2;
+	center[1] = getLogicalCoordinates(1) + (double)sm_treeConstants[m_dim].edgeDisplacements[iedge][1] * dh_2;
+	center[2] = getLogicalCoordinates(2) + double(m_dim-2) * (double)sm_treeConstants[m_dim].edgeDisplacements[iedge][2] * dh_2;
 	return center;
 };
 
@@ -1857,9 +1841,9 @@ Octant Octant::computeEdgePeriodicOctant(uint8_t iedge) const {
  */
 array<int64_t,3> Octant::getPeriodicCoord(uint8_t iface) const {
 	array<int64_t,3> coord = {{0, 0, 0}};
-	coord[0] = getLogicalX();
-	coord[1] = getLogicalY();
-	coord[2] = getLogicalZ();
+	coord[0] = getLogicalCoordinates(0);
+	coord[1] = getLogicalCoordinates(1);
+	coord[2] = getLogicalCoordinates(2);
 	int64_t dh = this->getLogicalSize();
 	int64_t maxLength = int64_t(1)<<sm_treeConstants[m_dim].maxLevel;
 
@@ -1907,9 +1891,9 @@ array<int64_t,3> Octant::getPeriodicCoord(uint8_t iface) const {
  */
 array<int64_t,3> Octant::getNodePeriodicCoord(uint8_t inode) const {
     array<int64_t,3> coord = {{0, 0, 0}};
-    coord[0] = getLogicalX();
-    coord[1] = getLogicalY();
-    coord[2] = getLogicalZ();
+    coord[0] = getLogicalCoordinates(0);
+    coord[1] = getLogicalCoordinates(1);
+    coord[2] = getLogicalCoordinates(2);
     int64_t dh = this->getLogicalSize();
     int64_t maxLength = int64_t(1)<<sm_treeConstants[m_dim].maxLevel;
 
@@ -1980,9 +1964,9 @@ array<int64_t,3> Octant::getNodePeriodicCoord(uint8_t inode) const {
  */
 array<int64_t,3> Octant::getEdgePeriodicCoord(uint8_t iedge) const {
     array<int64_t,3> coord = {{0, 0, 0}};
-    coord[0] = getLogicalX();
-    coord[1] = getLogicalY();
-    coord[2] = getLogicalZ();
+    coord[0] = getLogicalCoordinates(0);
+    coord[1] = getLogicalCoordinates(1);
+    coord[2] = getLogicalCoordinates(2);
     int64_t dh = this->getLogicalSize();
     int64_t maxLength = int64_t(1)<<sm_treeConstants[m_dim].maxLevel;
 
