@@ -208,7 +208,7 @@ private:
 	void 		computeNeighSearchBegin(uint64_t sameSizeVirtualNeighMorton, const octvector &octants, uint32_t *searchBeginIdx, uint64_t *searchBeginMorton) const;
 
 	void 		preBalance21(bool internal);
-	void 		preBalance21(u32vector& newmodified);
+	void 		preBalance21(std::vector<Octant *> *updatedOctants, std::vector<bool> *updatedGhostFlags);
 	bool 		localBalance(bool doNew, bool doInterior);
 
 	void 		computeIntersections();

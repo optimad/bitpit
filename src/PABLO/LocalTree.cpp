@@ -1905,10 +1905,13 @@ namespace bitpit {
     // =================================================================================== //
 
     /*! Pre-processing for 2:1 balancing of local tree. Check if there are broken families over processes.
-     * \param[out] newmodified Vector of indices of interior octants checked and whose marker is modified.
+     * \param[out] updatedOctants If a valid pointer is provided, the pointers of the updated
+     * octants will be added to the specified list.
+     * \param[out] updatedGhostFlags If a valid pointer is provided, the ghost flags of the
+     * updated octants will be added to the specified list.
      */
     void
-    LocalTree::preBalance21(u32vector& newmodified){
+    LocalTree::preBalance21(std::vector<Octant *> *updatedOctants, std::vector<bool> *updatedGhostFlags){
 
         Octant 				father(m_dim);
         uint64_t 			mortonld;
@@ -1985,7 +1988,12 @@ namespace bitpit {
                             if (m_octants[ii].getMarker()<0){
                                 m_octants[ii].setMarker(0);
                                 m_octants[ii].m_info[Octant::INFO_AUX]=true;
-                                newmodified.push_back(ii);
+                                if (updatedOctants) {
+                                    updatedOctants->push_back(m_octants.data() + ii);
+                                }
+                                if (updatedGhostFlags) {
+                                    updatedGhostFlags->push_back(false);
+                                }
                             }
                         }
                         //Clean index of ghost brothers in case of coarsening a broken family
@@ -2032,7 +2040,12 @@ namespace bitpit {
                             if (m_octants[ii].getMarker()<0){
                                 m_octants[ii].setMarker(0);
                                 m_octants[ii].m_info[Octant::INFO_AUX]=true;
-                                newmodified.push_back(ii);
+                                if (updatedOctants) {
+                                    updatedOctants->push_back(m_octants.data() + ii);
+                                }
+                                if (updatedGhostFlags) {
+                                    updatedGhostFlags->push_back(false);
+                                }
                             }
                         }
                         //Clean index of ghost brothers in case of coarsening a broken family
@@ -2077,7 +2090,12 @@ namespace bitpit {
                     if (idx<=last_idx){
                         m_octants[idx].setMarker(0);
                         m_octants[idx].m_info[Octant::INFO_AUX]=true;
-                        newmodified.push_back(idx);
+                        if (updatedOctants) {
+                            updatedOctants->push_back(m_octants.data() + idx);
+                        }
+                        if (updatedGhostFlags) {
+                            updatedGhostFlags->push_back(false);
+                        }
                     }
                 }
             }
@@ -2096,502 +2114,138 @@ namespace bitpit {
     bool
     LocalTree::localBalance(bool doNew, bool doInterior){
 
-        uint32_t			sizeneigh;
-        u32vector		 	neigh;
-        u32vector		 	modified, newmodified;
-        uint32_t 			i, idx;
-        uint8_t				iface, iedge, inode;
-        int8_t				targetmarker;
-        vector<bool> 		isghost;
-        bool				Bdone = false;
-        bool				Bedge = ((m_balanceCodim>1) && (m_dim==3));
-        bool				Bnode = (m_balanceCodim==m_dim);
+        bool balanceEdges = ((m_balanceCodim>1) && (m_dim==3));
+        bool balanceNodes = (m_balanceCodim==m_dim);
 
-        octvector::iterator 	obegin, oend, it;
-        u32vector::iterator 	ibegin, iend, iit;
+        std::vector<Octant *> processOctants;
+        std::vector<bool> processGhostFlags;
 
-        //If interior octants have to be balanced
+        // Identify internal octants that will be processed
         if(doInterior){
-            // First loop on the octants
-            obegin = m_octants.begin();
-            oend = m_octants.end();
-            idx = 0;
-            for (it=obegin; it!=oend; ++it){
-                bool balanceOctant = it->getBalance();
+            for (Octant &octant : m_octants){
+                // Skip octants that doesn't need balancing
+                bool balanceOctant = octant.getBalance();
                 if (balanceOctant) {
                     if (doNew) {
-                        balanceOctant = (it->m_info[Octant::INFO_AUX] || (it->getMarker() != 0) || it->getIsNewC() || it->getIsNewR());
+                        balanceOctant = (octant.m_info[Octant::INFO_AUX] || (octant.getMarker() != 0) || octant.getIsNewC() || octant.getIsNewR());
                     } else {
-                        balanceOctant = (it->m_info[Octant::INFO_AUX] || (it->getMarker() != 0));
+                        balanceOctant = (octant.m_info[Octant::INFO_AUX] || (octant.getMarker() != 0));
                     }
                 }
 
-                if (balanceOctant){
-                    targetmarker = min(m_treeConstants->maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
-
-                    //Balance through faces
-                    for (iface=0; iface<m_treeConstants->nFaces; iface++){
-						findNeighbours(m_octants.data() + idx, iface, neigh, isghost, false, false);
-						sizeneigh = neigh.size();
-						for(i=0; i<sizeneigh; i++){
-							if (!isghost[i]){
-								{
-									if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) > (targetmarker + 1) ){
-										m_octants[idx].setMarker(m_octants[neigh[i]].getLevel()+m_octants[neigh[i]].getMarker()-1-m_octants[idx].getLevel());
-										m_octants[idx].m_info[Octant::INFO_AUX] = true;
-										modified.push_back(idx);
-										Bdone = true;
-									}
-									else if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
-										m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-										m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
-										modified.push_back(neigh[i]);
-										Bdone = true;
-									}
-								};
-							}
-							else{
-								{
-									if((m_ghosts[neigh[i]].getLevel() + m_ghosts[neigh[i]].getMarker()) > (targetmarker + 1) ){
-										m_octants[idx].setMarker(m_ghosts[neigh[i]].getLevel()+m_ghosts[neigh[i]].getMarker()-1-m_octants[idx].getLevel());
-										m_octants[idx].m_info[Octant::INFO_AUX] = true;
-										modified.push_back(idx);
-										Bdone = true;
-									}
-								};
-							}
-						}
-						targetmarker = min(m_treeConstants->maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
-                    }
-
-                    if (Bedge){
-                        //Balance through edges
-                        for (iedge=0; iedge<m_treeConstants->nEdges; iedge++){
-							findEdgeNeighbours(m_octants.data() + idx, iedge, neigh, isghost, false, false);
-							sizeneigh = neigh.size();
-							for(i=0; i<sizeneigh; i++){
-								if (!isghost[i]){
-									{
-										if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) > (targetmarker + 1) ){
-											m_octants[idx].setMarker(m_octants[neigh[i]].getLevel()+m_octants[neigh[i]].getMarker()-1-m_octants[idx].getLevel());
-											m_octants[idx].m_info[Octant::INFO_AUX] = true;
-											modified.push_back(idx);
-											Bdone = true;
-										}
-										else if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
-											m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-											m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
-											modified.push_back(neigh[i]);
-											Bdone = true;
-										}
-									};
-								}
-								else{
-									if((m_ghosts[neigh[i]].getLevel() + m_ghosts[neigh[i]].getMarker()) > (targetmarker + 1) ){
-										m_octants[idx].setMarker(m_ghosts[neigh[i]].getLevel()+m_ghosts[neigh[i]].getMarker()-1-m_octants[idx].getLevel());
-										m_octants[idx].m_info[Octant::INFO_AUX] = true;
-										modified.push_back(idx);
-										Bdone = true;
-									}
-								}
-							}
-							targetmarker = min(m_treeConstants->maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
-                        }
-                    }
-
-                    if (Bnode){
-                        //Balance through nodes
-                        for (inode=0; inode<m_treeConstants->nNodes; inode++){
-							findNodeNeighbours(m_octants.data() + idx, inode, neigh, isghost, false, false);
-							sizeneigh = neigh.size();
-							for(i=0; i<sizeneigh; i++){
-								if (!isghost[i]){
-									{
-										if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) > (targetmarker + 1) ){
-											m_octants[idx].setMarker(m_octants[neigh[i]].getLevel()+m_octants[neigh[i]].getMarker()-1-m_octants[idx].getLevel());
-											m_octants[idx].m_info[Octant::INFO_AUX] = true;
-											modified.push_back(idx);
-											Bdone = true;
-										}
-										else if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
-											m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-											m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
-											modified.push_back(neigh[i]);
-											Bdone = true;
-										}
-									};
-								}
-								else{
-									if((m_ghosts[neigh[i]].getLevel() + m_ghosts[neigh[i]].getMarker()) > (targetmarker + 1) ){
-										m_octants[idx].setMarker(m_ghosts[neigh[i]].getLevel()+m_ghosts[neigh[i]].getMarker()-1-m_octants[idx].getLevel());
-										m_octants[idx].m_info[Octant::INFO_AUX] = true;
-										modified.push_back(idx);
-										Bdone = true;
-									}
-								}
-							}
-							targetmarker = min(m_treeConstants->maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
-                        }
-                    }
-
+                if (!balanceOctant) {
+                    continue;
                 }
-                idx++;
+
+                // Add octant to the process list
+                processOctants.push_back(&octant);
+                processGhostFlags.push_back(false);
             }
-            // Loop on ghost octants (influence over interior borders)
-            obegin = m_ghosts.begin();
-            oend = m_ghosts.end();
-            idx = 0;
-            for (it=obegin; it!=oend; ++it){
-                bool balanceOctant = it->getBalance();
-                if (balanceOctant) {
-                    if (doNew) {
-                        balanceOctant = (it->m_info[Octant::INFO_AUX] || it->getIsNewC() || it->getIsNewR());
-                    } else {
-                        balanceOctant = (it->m_info[Octant::INFO_AUX] || (it->getMarker() != 0));
-                    }
-                }
-
-                if (balanceOctant){
-                    targetmarker = min(m_treeConstants->maxLevel, int8_t(it->getLevel()+it->getMarker()));
-
-                    //Balance through faces
-                    for (iface=0; iface<m_treeConstants->nFaces; iface++){
-                        if(it->getPbound(iface) == true){
-                            neigh.clear();
-                            findNeighbours(m_ghosts.data() + idx, iface, neigh, isghost, true, false);
-                            sizeneigh = neigh.size();
-                            for(i=0; i<sizeneigh; i++){
-                                if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
-                                    m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-                                    m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
-                                    modified.push_back(neigh[i]);
-                                    Bdone = true;
-                                }
-                            }
-                        }
-                        targetmarker = min(m_treeConstants->maxLevel, int8_t(it->getLevel()+it->getMarker()));
-                    }
-
-                    if (Bedge){
-                        //Balance through edges
-                        for (iedge=0; iedge<m_treeConstants->nEdges; iedge++){
-							neigh.clear();
-							findEdgeNeighbours(m_ghosts.data() + idx, iedge, neigh, isghost, true, false);
-							sizeneigh = neigh.size();
-							for(i=0; i<sizeneigh; i++){
-								if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
-									m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-									m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
-									modified.push_back(neigh[i]);
-									Bdone = true;
-								}
-							}
-							targetmarker = min(m_treeConstants->maxLevel, int8_t(it->getLevel()+it->getMarker()));
-                        }
-                    }
-
-                    if (Bnode){
-                        //Balance through nodes
-                        for (inode=0; inode<m_treeConstants->nNodes; inode++){
-							neigh.clear();
-							findNodeNeighbours(m_ghosts.data() + idx, inode, neigh, isghost, true, false);
-							sizeneigh = neigh.size();
-							for(i=0; i<sizeneigh; i++){
-								if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
-									m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-									m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
-									modified.push_back(neigh[i]);
-									Bdone = true;
-								}
-							}
-							targetmarker = min(m_treeConstants->maxLevel, int8_t(it->getLevel()+it->getMarker()));
-                        }
-                    }
-
-                }
-                idx++;
-            }
-
-            // While loop for iterative balancing
-            while(!modified.empty()){
-                newmodified.clear();
-
-                ibegin = modified.begin();
-                iend = modified.end();
-                for (iit=ibegin; iit!=iend; ++iit){
-                    idx = *iit;
-                    if (m_octants[idx].getBalance()){
-                        targetmarker = min(m_treeConstants->maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
-
-                        //Balance through faces
-                        for (iface=0; iface<m_treeConstants->nFaces; iface++){
-                            if(!m_octants[idx].getPbound(iface)){
-                                findNeighbours(m_octants.data() + idx, iface, neigh, isghost, false, false);
-                                sizeneigh = neigh.size();
-                                for(i=0; i<sizeneigh; i++){
-                                    if (!isghost[i]){
-                                        {
-                                            if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
-                                                m_octants[idx].setMarker(m_octants[neigh[i]].getLevel()+m_octants[neigh[i]].getMarker()-m_octants[idx].getLevel()-1);
-                                                m_octants[idx].m_info[Octant::INFO_AUX] = true;
-                                                newmodified.push_back(idx);
-                                                Bdone = true;
-                                            }
-                                            else if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
-                                                m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-                                                m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
-                                                newmodified.push_back(neigh[i]);
-                                                Bdone = true;
-                                            }
-                                        };
-                                    }
-                                }
-                            }
-                            targetmarker = min(m_treeConstants->maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
-                        }
-
-                        if (Bedge){
-                            //Balance through edges
-                            for (iedge=0; iedge<m_treeConstants->nEdges; iedge++){
-								findEdgeNeighbours(m_octants.data() + idx, iedge, neigh, isghost, false, false);
-								sizeneigh = neigh.size();
-								for(i=0; i<sizeneigh; i++){
-									if (!isghost[i]){
-										{
-											if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
-												m_octants[idx].setMarker(m_octants[neigh[i]].getLevel()+m_octants[neigh[i]].getMarker()-m_octants[idx].getLevel()-1);
-												m_octants[idx].m_info[Octant::INFO_AUX] = true;
-												newmodified.push_back(idx);
-												Bdone = true;
-											}
-											else if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
-												m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-												m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
-												newmodified.push_back(neigh[i]);
-												Bdone = true;
-											}
-										};
-									}
-								}
-								targetmarker = min(m_treeConstants->maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
-                            }
-                        }
-
-                        if (Bnode){
-                            //Balance through nodes
-                            for (inode=0; inode<m_treeConstants->nNodes; inode++){
-								findNodeNeighbours(m_octants.data() + idx, inode, neigh, isghost, false, false);
-								sizeneigh = neigh.size();
-								for(i=0; i<sizeneigh; i++){
-									if (!isghost[i]){
-										{
-											if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
-												m_octants[idx].setMarker(m_octants[neigh[i]].getLevel()+m_octants[neigh[i]].getMarker()-m_octants[idx].getLevel()-1);
-												m_octants[idx].m_info[Octant::INFO_AUX] = true;
-												newmodified.push_back(idx);
-												Bdone = true;
-											}
-											else if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
-												m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-												m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
-												newmodified.push_back(neigh[i]);
-												Bdone = true;
-											}
-										};
-									}
-								}
-								targetmarker = min(m_treeConstants->maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
-                            }
-                        }
-
-                    }
-                }
-                preBalance21(newmodified);
-                modified.swap(newmodified);
-            }// end while
-
         }
-        else{
 
-            // Loop on ghost octants (influence over interior borders)
-            obegin = m_ghosts.begin();
-            oend = m_ghosts.end();
-            idx = 0;
-            for (it=obegin; it!=oend; ++it){
-                bool balanceOctant = it->getBalance();
-                if (balanceOctant) {
-                    if (doNew) {
-                        balanceOctant = (it->m_info[Octant::INFO_AUX] || it->getIsNewC() || it->getIsNewR());
-                    } else {
-                        balanceOctant = it->m_info[Octant::INFO_AUX];
-                    }
+        // Identify ghost octants that will be processed
+        //
+        // Ghost octants will be balanced by the process that owns them, however they may
+        // balancing of local octants.
+        for (Octant &octant : m_ghosts){
+            // Skip octants that doesn't need balancing
+            bool balanceOctant = octant.getBalance();
+            if (balanceOctant) {
+                if (doNew) {
+                    balanceOctant = (octant.m_info[Octant::INFO_AUX] || (octant.getMarker() != 0) || octant.getIsNewC() || octant.getIsNewR());
+                } else {
+                    balanceOctant = (octant.m_info[Octant::INFO_AUX] || (octant.getMarker() != 0));
                 }
-
-                if (balanceOctant){
-                    targetmarker = min(m_treeConstants->maxLevel, int8_t(it->getLevel()+it->getMarker()));
-
-                    //Balance through faces
-                    for (iface=0; iface<m_treeConstants->nFaces; iface++){
-                        if(it->getPbound(iface) == true){
-                            neigh.clear();
-                            findNeighbours(m_ghosts.data() + idx, iface, neigh, isghost, true, false);
-                            sizeneigh = neigh.size();
-                            for(i=0; i<sizeneigh; i++){
-                                if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
-                                    m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-                                    m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
-                                    modified.push_back(neigh[i]);
-                                    Bdone = true;
-                                }
-                            }
-                        }
-                        targetmarker = min(m_treeConstants->maxLevel, int8_t(it->getLevel()+it->getMarker()));
-                    }
-
-                    if (Bedge){
-                        //Balance through edges
-                        for (iedge=0; iedge<m_treeConstants->nEdges; iedge++){
-							neigh.clear();
-							findEdgeNeighbours(m_ghosts.data() + idx, iedge, neigh, isghost, true, false);
-							sizeneigh = neigh.size();
-							for(i=0; i<sizeneigh; i++){
-								if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
-									m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-									m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
-									modified.push_back(neigh[i]);
-									Bdone = true;
-								}
-							}
-							targetmarker = min(m_treeConstants->maxLevel, int8_t(it->getLevel()+it->getMarker()));
-                        }
-                    }
-
-                    if (Bnode){
-                        //Balance through nodes
-                        for (inode=0; inode<m_treeConstants->nNodes; inode++){
-							neigh.clear();
-							findNodeNeighbours(m_ghosts.data() + idx, inode, neigh, isghost, true, false);
-							sizeneigh = neigh.size();
-							for(i=0; i<sizeneigh; i++){
-								if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
-									m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-									m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
-									modified.push_back(neigh[i]);
-									Bdone = true;
-								}
-							}
-							targetmarker = min(m_treeConstants->maxLevel, int8_t(it->getLevel()+it->getMarker()));
-                        }
-                    }
-
-                }
-                idx++;
             }
 
-            // While loop for iterative balancing
-            while(!modified.empty()){
-                newmodified.clear();
+            if (!balanceOctant) {
+                continue;
+            }
 
-                ibegin = modified.begin();
-                iend = modified.end();
-                for (iit=ibegin; iit!=iend; ++iit){
-                    idx = *iit;
-                    if (m_octants[idx].getBalance()){
-                        targetmarker = min(m_treeConstants->maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
+            // Add octant to the process list
+            processOctants.push_back(&octant);
+            processGhostFlags.push_back(true);
+        }
 
-                        //Balance through faces
-                        for (iface=0; iface<m_treeConstants->nFaces; iface++){
-                            if(!m_octants[idx].getPbound(iface)){
-                                findNeighbours(m_octants.data() + idx, iface, neigh, isghost, false, false);
-                                sizeneigh = neigh.size();
-                                for(i=0; i<sizeneigh; i++){
-                                    if (!isghost[i]){
-                                        {
-                                            if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
-                                                m_octants[idx].setMarker(m_octants[neigh[i]].getLevel()+m_octants[neigh[i]].getMarker()-m_octants[idx].getLevel()-1);
-                                                m_octants[idx].m_info[Octant::INFO_AUX] = true;
-                                                newmodified.push_back(idx);
-                                                Bdone = true;
-                                            }
-                                            else if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
-                                                m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-                                                m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
-                                                newmodified.push_back(neigh[i]);
-                                                Bdone = true;
-                                            }
-                                        };
-                                    }
-                                }
-                            }
-                            targetmarker = min(m_treeConstants->maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
-                        }
+        // Iterative balacing
+        std::vector<uint32_t> neighs;
+        std::vector<bool> neighGhostFlags;
 
-                        if (Bedge){
-                            //Balance through edges
-                            for (iedge=0; iedge<m_treeConstants->nEdges; iedge++){
-								findEdgeNeighbours(m_octants.data() + idx, iedge, neigh, isghost, false, false);
-								sizeneigh = neigh.size();
-								for(i=0; i<sizeneigh; i++){
-									if (!isghost[i]){
-										{
-											if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
-												m_octants[idx].setMarker(m_octants[neigh[i]].getLevel()+m_octants[neigh[i]].getMarker()-m_octants[idx].getLevel()-1);
-												m_octants[idx].m_info[Octant::INFO_AUX] = true;
-												newmodified.push_back(idx);
-												Bdone = true;
-											}
-											else if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
-												m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-												m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
-												newmodified.push_back(neigh[i]);
-												Bdone = true;
-											}
-										};
-									}
-								}
-								targetmarker = min(m_treeConstants->maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
-                            }
-                        }
+        bool updated = false;
+        std::vector<Octant *> updatedProcessOctants;
+        std::vector<bool> updatedProcessGhostFlags;
+        while (!processOctants.empty()) {
+            std::size_t processSize = processOctants.size();
+            for (std::size_t n = 0; n < processSize; ++n) {
+                Octant &octant = *(processOctants[n]);
+                bool ghostFlag = processGhostFlags[n];
 
-                        if (Bnode){
-                            //Balance through nodes
-                            for (inode=0; inode<m_treeConstants->nNodes; inode++){
-								findNodeNeighbours(m_octants.data() + idx, inode, neigh, isghost, false, false);
-								sizeneigh = neigh.size();
-								for(i=0; i<sizeneigh; i++){
-									if (!isghost[i]){
-										{
-											if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
-												m_octants[idx].setMarker(m_octants[neigh[i]].getLevel()+m_octants[neigh[i]].getMarker()-m_octants[idx].getLevel()-1);
-												m_octants[idx].m_info[Octant::INFO_AUX] = true;
-												newmodified.push_back(idx);
-												Bdone = true;
-											}
-											else if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
-												m_octants[neigh[i]].setMarker(targetmarker-m_octants[neigh[i]].getLevel()-1);
-												m_octants[neigh[i]].m_info[Octant::INFO_AUX] = true;
-												newmodified.push_back(neigh[i]);
-												Bdone = true;
-											}
-										};
-									}
-								}
-								targetmarker = min(m_treeConstants->maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
-                            }
-                        }
+                // Identify neighbours that will be used for balancing
+                neighs.clear();
+                neighGhostFlags.clear();
 
+                for (int iface=0; iface < m_treeConstants->nFaces; iface++) {
+                    findNeighbours(&octant, iface, neighs, neighGhostFlags, ghostFlag, true);
+                }
+
+                if (balanceNodes) {
+                    for (int inode=0; inode < m_treeConstants->nNodes; inode++) {
+                        findNodeNeighbours(&octant, inode, neighs, neighGhostFlags, ghostFlag, true);
                     }
                 }
-                preBalance21(newmodified);
-                modified.swap(newmodified);
-            }// end while
-            obegin = oend = m_octants.end();
-            ibegin = iend = modified.end();
+
+                if (balanceEdges) {
+                    for (int iedge=0; iedge < m_treeConstants->nEdges; iedge++) {
+                        findEdgeNeighbours(&octant, iedge, neighs, neighGhostFlags, ghostFlag, true);
+                    }
+                }
+
+                // Balance octant
+                int8_t level       = octant.getLevel();
+                int8_t futureLevel = std::min(m_treeConstants->maxLevel, static_cast<int8_t>(level + octant.getMarker()));
+
+                std::size_t nNeighs = neighs.size();
+                for(std::size_t i = 0; i < nNeighs; i++){
+                    bool neighGhostFlag = neighGhostFlags[i];
+                    Octant &neighOctant = (neighGhostFlag ? m_ghosts[neighs[i]]: m_octants[neighs[i]]);
+
+                    int8_t neighLevel       = neighOctant.getLevel();
+                    int8_t neighFutureLevel = std::min(m_treeConstants->maxLevel, static_cast<int8_t>(neighLevel + neighOctant.getMarker()));
+                    if(!ghostFlag && futureLevel < neighFutureLevel - 1) {
+                        futureLevel = neighFutureLevel - 1;
+                        octant.setMarker(futureLevel - level);
+                        octant.m_info[Octant::INFO_AUX] = true;
+                        updated = true;
+                        updatedProcessOctants.push_back(&octant);
+                        updatedProcessGhostFlags.push_back(ghostFlag);
+                    }
+                    else if(!neighGhostFlag && neighFutureLevel < futureLevel - 1) {
+                        neighOctant.setMarker((futureLevel - 1) - neighLevel);
+                        neighOctant.m_info[Octant::INFO_AUX] = true;
+                        updated = true;
+                        if (neighOctant.getBalance()) {
+                            updatedProcessOctants.push_back(&neighOctant);
+                            updatedProcessGhostFlags.push_back(neighGhostFlag);
+                        }
+                    }
+                }
+            }
+
+            // Update process list
+            updatedProcessOctants.swap(processOctants);
+            updatedProcessGhostFlags.swap(processGhostFlags);
+
+            updatedProcessOctants.clear();
+            updatedProcessGhostFlags.clear();
+
+            // Prepare the tree for the next iteration
+            if (!processOctants.empty()) {
+                preBalance21(&processOctants, &processGhostFlags);
+            }
         }
-        return Bdone;
-        // Pay attention : info[15] may be true after local balance for some octants
+
+        return updated;
     };
-
 
     // =================================================================================== //
 
