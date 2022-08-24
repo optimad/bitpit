@@ -528,9 +528,9 @@ namespace bitpit {
             const Octant &octant = m_octree.m_octants[i];
 
             utils::binary::write(stream, octant.getLevel());
-            utils::binary::write(stream, octant.getLogicalX());
-            utils::binary::write(stream, octant.getLogicalY());
-            utils::binary::write(stream, octant.getLogicalZ());
+            utils::binary::write(stream, octant.getLogicalCoordinates(0));
+            utils::binary::write(stream, octant.getLogicalCoordinates(1));
+            utils::binary::write(stream, octant.getLogicalCoordinates(2));
             utils::binary::write(stream, octant.getGhostLayer());
 
             for (size_t k = 0; k < Octant::INFO_ITEM_COUNT; ++k) {
@@ -1281,7 +1281,7 @@ namespace bitpit {
      */
     double
     ParaTree::getX(uint32_t idx) const {
-        return m_trans.mapX(m_octree.m_octants[idx].getLogicalX());
+        return m_trans.mapX(m_octree.m_octants[idx].getLogicalCoordinates(0));
     }
 
     /*! Get the coordinates of an octant, i.e. the coordinates of its node 0.
@@ -1290,7 +1290,7 @@ namespace bitpit {
      */
     double
     ParaTree::getY(uint32_t idx) const {
-        return m_trans.mapY(m_octree.m_octants[idx].getLogicalY());
+        return m_trans.mapY(m_octree.m_octants[idx].getLogicalCoordinates(1));
     }
 
     /*! Get the coordinates of an octant, i.e. the coordinates of its node 0.
@@ -1299,7 +1299,7 @@ namespace bitpit {
      */
     double
     ParaTree::getZ(uint32_t idx) const {
-        return m_trans.mapZ(m_octree.m_octants[idx].getLogicalZ());
+        return m_trans.mapZ(m_octree.m_octants[idx].getLogicalCoordinates(2));
     }
 
     /*! Get the size of an octant, i.e. the side length.
@@ -1731,7 +1731,7 @@ namespace bitpit {
      */
     double
     ParaTree::getX(const Octant* oct) const {
-        return m_trans.mapX(oct->getLogicalX());
+        return m_trans.mapX(oct->getLogicalCoordinates(0));
     }
 
     /*! Get the coordinates of an octant, i.e. the coordinates of its node 0.
@@ -1740,7 +1740,7 @@ namespace bitpit {
      */
     double
     ParaTree::getY(const Octant* oct) const {
-        return m_trans.mapY(oct->getLogicalY());
+        return m_trans.mapY(oct->getLogicalCoordinates(1));
     }
 
     /*! Get the coordinates of an octant, i.e. the coordinates of its node 0.
@@ -1749,7 +1749,7 @@ namespace bitpit {
      */
     double
     ParaTree::getZ(const Octant* oct) const {
-        return m_trans.mapZ(oct->getLogicalZ());
+        return m_trans.mapZ(oct->getLogicalCoordinates(2));
     }
 
     /*! Get the size of an octant, i.e. the side length.
@@ -4868,9 +4868,9 @@ namespace bitpit {
                 // Compute the rest w.r.t. the size of the octant of the same size
                 // of a compact family of the desired level
                 i = istart;
-                rest = m_octree.m_octants[i].getLogicalX()%Dh + m_octree.m_octants[i].getLogicalY()%Dh;
+                rest = m_octree.m_octants[i].getLogicalCoordinates(0)%Dh + m_octree.m_octants[i].getLogicalCoordinates(1)%Dh;
                 if (m_dim == 3){
-                    rest += m_octree.m_octants[i].getLogicalZ()%Dh;
+                    rest += m_octree.m_octants[i].getLogicalCoordinates(2)%Dh;
                 }
 
                 // Deplace forward the index of the octant i defining the process boundary until the previous
@@ -4881,9 +4881,9 @@ namespace bitpit {
                         break;
                     }
                     i++;
-                    rest = m_octree.m_octants[i].getLogicalX()%Dh + m_octree.m_octants[i].getLogicalY()%Dh;
+                    rest = m_octree.m_octants[i].getLogicalCoordinates(0)%Dh + m_octree.m_octants[i].getLogicalCoordinates(1)%Dh;
                     if (m_dim == 3){
-                        rest += m_octree.m_octants[i].getLogicalZ()%Dh;
+                        rest += m_octree.m_octants[i].getLogicalCoordinates(2)%Dh;
                     }
                 }
 
@@ -4892,9 +4892,9 @@ namespace bitpit {
 
                 // Do the same for a backward correction try
                 i = istart;
-                rest = m_octree.m_octants[i].getLogicalX()%Dh + m_octree.m_octants[i].getLogicalY()%Dh;
+                rest = m_octree.m_octants[i].getLogicalCoordinates(0)%Dh + m_octree.m_octants[i].getLogicalCoordinates(1)%Dh;
                 if (m_dim == 3){
-                    rest += m_octree.m_octants[i].getLogicalZ()%Dh;
+                    rest += m_octree.m_octants[i].getLogicalCoordinates(2)%Dh;
                 }
                 while(rest!=0){
                     if (i==0){
@@ -4902,9 +4902,9 @@ namespace bitpit {
                         break;
                     }
                     i--;
-                    rest = m_octree.m_octants[i].getLogicalX()%Dh + m_octree.m_octants[i].getLogicalY()%Dh;
+                    rest = m_octree.m_octants[i].getLogicalCoordinates(0)%Dh + m_octree.m_octants[i].getLogicalCoordinates(1)%Dh;
                     if (m_dim == 3){
-                        rest += m_octree.m_octants[i].getLogicalZ()%Dh;
+                        rest += m_octree.m_octants[i].getLogicalCoordinates(2)%Dh;
                     }
                 }
 
