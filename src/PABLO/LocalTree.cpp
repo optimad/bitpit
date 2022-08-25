@@ -1722,225 +1722,45 @@ namespace bitpit {
 
     // =================================================================================== //
 
-    /*! Pre-processing for 2:1 balancing of local tree. Check if there are broken families over processes.
-     * \param[in] internal Set to true if the interior octants have to be checked.
-     */
-    void
-    LocalTree::preBalance21(bool internal){
-
-        Octant 			father(m_dim);
-        uint64_t 		mortonld;
-        uint32_t 		nocts, nghosts;
-        uint32_t 		idx, idx2, idx0, last_idx;
-        uint32_t 		idx1_gh, idx2_gh;
-        int8_t 			marker;
-        uint8_t 		nbro;
-
-        //------------------------------------------ //
-        // Initialization
-
-        nbro = 0;
-        idx=0;
-        idx2_gh = idx0 = 0;
-        idx1_gh=0;
-
-        nocts   = m_octants.size();
-        nghosts = m_ghosts.size();
-        last_idx=nocts-1;
-
-        //Clean index of ghost brothers in case of coarsening a broken family
-        m_lastGhostBros.clear();
-        m_firstGhostBros.clear();
-
-        // Set index for start and end check for ghosts
-        bool checkend = true;
-        bool checkstart = true;
-        if (m_ghosts.size()){
-            while(m_ghosts[idx2_gh].getMorton() <= m_lastDescMorton){
-                idx2_gh++;
-                if (idx2_gh > nghosts-1) break;
-            }
-            if (idx2_gh > nghosts-1) checkend = false;
-
-            while(m_ghosts[idx1_gh].getMorton() <= m_octants[0].getMorton()){
-                idx1_gh++;
-                if (idx1_gh > nghosts-1) break;
-            }
-            if (idx1_gh == 0) checkstart = false;
-            idx1_gh-=1;
-        }
-
-        // Start and End on ghosts
-        if (m_ghosts.size() && nocts > 0){
-            if (checkstart){
-                if (m_ghosts[idx1_gh].buildFather()==m_octants[0].buildFather()){
-                    father = m_ghosts[idx1_gh].buildFather();
-                    nbro = 0;
-                    idx = idx1_gh;
-                    marker = m_ghosts[idx].getMarker();
-                    while(marker < 0 && m_ghosts[idx].buildFather() == father){
-
-                        //Add ghost index to structure for mapper in case of coarsening a broken family
-                        m_firstGhostBros.push_back(idx);
-
-                        nbro++;
-                        if (idx==0)
-                            break;
-                        idx--;
-                        marker = m_ghosts[idx].getMarker();
-                    }
-                    idx = 0;
-                    while(idx<nocts && m_octants[idx].buildFather() == father){
-                        if(m_octants[idx].getMarker()<0)
-                            nbro++;
-                        idx++;
-                        if(idx==nocts)
-                            break;
-                    }
-                    if (nbro != m_treeConstants->nChildren && idx!=nocts){
-                        for(uint32_t ii=0; ii<idx; ii++){
-                            if (m_octants[ii].getMarker()<0){
-                                m_octants[ii].setMarker(0);
-                                m_octants[ii].m_info[Octant::INFO_AUX]=true;
-                            }
-                        }
-                        //Clean ghost index to structure for mapper in case of coarsening a broken family
-                        m_firstGhostBros.clear();
-                    }
-                }
-            }
-
-            if (checkend){
-                bool checklocal = false;
-                if (m_ghosts[idx2_gh].buildFather()==m_octants[nocts-1].buildFather()){
-                    father = m_ghosts[idx2_gh].buildFather();
-                    if (idx!=nocts){
-                        nbro = 0;
-                        checklocal = true;
-                    }
-                    idx = idx2_gh;
-                    marker = m_ghosts[idx].getMarker();
-                    while(marker < 0 && m_ghosts[idx].buildFather() == father){
-
-                        //Add ghost index to structure for mapper in case of coarsening a broken family
-                        m_lastGhostBros.push_back(idx);
-
-                        nbro++;
-                        idx++;
-                        if(idx == nghosts){
-                            break;
-                        }
-                        marker = m_ghosts[idx].getMarker();
-                    }
-                    idx = nocts-1;
-                    if (checklocal){
-                        while(m_octants[idx].buildFather() == father ){
-                            if (m_octants[idx].getMarker()<0)
-                                nbro++;
-                            if (idx==0)
-                                break;
-                            idx--;
-                        }
-                    }
-                    last_idx=idx;
-                    if (nbro != m_treeConstants->nChildren && idx!=nocts-1){
-                        for(uint32_t ii=idx+1; ii<nocts; ii++){
-                            if (m_octants[ii].getMarker()<0){
-                                m_octants[ii].setMarker(0);
-                                m_octants[ii].m_info[Octant::INFO_AUX]=true;
-                            }
-                        }
-                        //Clean ghost index to structure for mapper in case of coarsening a broken family
-                        m_lastGhostBros.clear();
-                    }
-                }
-            }
-        }
-
-        // Check first internal octants
-        if(getNumOctants()){
-            if (internal){
-                father = m_octants[0].buildFather();
-                mortonld = father.computeLastDescMorton();
-                nbro = 0;
-                for (idx=0; idx<m_treeConstants->nChildren; idx++){
-                    if (idx<nocts){
-                        // Check if family is complete or to be checked in the internal loop (some brother refined)
-                        if (m_octants[idx].getMorton() <= mortonld){
-                            nbro++;
-                        }
-                    }
-                }
-                if (nbro != m_treeConstants->nChildren)
-                    idx0 = nbro;
-
-                // Check and coarse internal octants
-                for (idx=idx0; idx<nocts; idx++){
-                    if(m_octants[idx].getMarker() < 0 && m_octants[idx].getLevel() > 0){
-                        nbro = 0;
-                        father = m_octants[idx].buildFather();
-                        // Check if family is to be coarsened
-                        for (idx2=idx; idx2<idx+m_treeConstants->nChildren; idx2++){
-                            if (idx2<nocts){
-                                if(m_octants[idx2].getMarker() < 0 && m_octants[idx2].buildFather() == father){
-                                    nbro++;
-                                }
-                            }
-                        }
-                        if (nbro == m_treeConstants->nChildren){
-                            idx = idx2-1;
-                        }
-                        else{
-                            if (idx<=last_idx){
-                                m_octants[idx].setMarker(0);
-                                m_octants[idx].m_info[Octant::INFO_AUX]=true;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    };
-
-    // =================================================================================== //
-
-    /*! Pre-processing for 2:1 balancing of local tree. Check if there are broken families over processes.
+    /*! Fix markers of broken families over processes.
      * \param[out] updatedOctants If a valid pointer is provided, the pointers of the updated
      * octants will be added to the specified list.
      * \param[out] updatedGhostFlags If a valid pointer is provided, the ghost flags of the
      * updated octants will be added to the specified list.
+     * \return True if some markers were modified to fix broken families.
      */
-    void
-    LocalTree::preBalance21(std::vector<Octant *> *updatedOctants, std::vector<bool> *updatedGhostFlags){
+    bool
+    LocalTree::fixBrokenFamiliesMarkers(std::vector<Octant *> *updatedOctants, std::vector<bool> *updatedGhostFlags){
 
-        Octant 				father(m_dim);
-        uint64_t 			mortonld;
-        uint32_t 			nocts, nghosts;
-        uint32_t 			idx, idx2, idx0, last_idx;
-        uint32_t 			idx1_gh, idx2_gh;
-        int8_t 			marker;
-        uint8_t 			nbro;
-
-        //------------------------------------------ //
         // Initialization
+        bool updated = false;
 
-        nbro = 0;
-        idx=0;
-        idx2_gh = idx0 = 0;
-        idx1_gh=0;
+        uint32_t nocts = m_octants.size();
+        if (nocts == 0) {
+            return updated;
+        }
 
-        nocts   = m_octants.size();
-        nghosts = m_ghosts.size();
-        last_idx=nocts-1;
+        uint32_t nghosts = m_ghosts.size();
+
+        uint32_t idx      = 0;
+        uint32_t idx0     = 0;
+        uint32_t idx2     = 0;
+        uint32_t idx1_gh  = 0;
+        uint32_t idx2_gh  = 0;
+        uint32_t last_idx =nocts-1;
+
+        uint8_t nbro = 0;
+        Octant father(m_dim);
 
         //Clean index of ghost brothers in case of coarsening a broken family
         m_lastGhostBros.clear();
         m_firstGhostBros.clear();
 
-        // Set index for start and end check for ghosts
+        // Process ghosts
         bool checkend = true;
         bool checkstart = true;
-        if (m_ghosts.size()){
+        if (nghosts > 0){
+            // Set index for start and end check for ghosts
             while(m_ghosts[idx2_gh].getMorton() <= m_lastDescMorton){
                 idx2_gh++;
                 if (idx2_gh > nghosts-1) break;
@@ -1953,17 +1773,14 @@ namespace bitpit {
             }
             if (idx1_gh == 0) checkstart = false;
             idx1_gh-=1;
-        }
 
-
-        // Start and End on ghosts
-        if (m_ghosts.size() && nocts > 0){
+            // Start and End on ghosts
             if (checkstart){
                 if (m_ghosts[idx1_gh].buildFather()==m_octants[0].buildFather()){
                     father = m_ghosts[idx1_gh].buildFather();
                     nbro = 0;
                     idx = idx1_gh;
-                    marker = m_ghosts[idx].getMarker();
+                    int8_t marker = m_ghosts[idx].getMarker();
                     while(marker < 0 && m_ghosts[idx].buildFather() == father){
 
                         //Add ghost index to structure for mapper in case of coarsening a broken family
@@ -1985,15 +1802,17 @@ namespace bitpit {
                     }
                     if (nbro != m_treeConstants->nChildren && idx!=nocts){
                         for(uint32_t ii=0; ii<idx; ii++){
-                            if (m_octants[ii].getMarker()<0){
-                                m_octants[ii].setMarker(0);
-                                m_octants[ii].m_info[Octant::INFO_AUX]=true;
+                            Octant &octant = m_octants[ii];
+                            if (octant.getMarker()<0){
+                                octant.setMarker(0);
+                                octant.m_info[Octant::INFO_AUX]=true;
                                 if (updatedOctants) {
-                                    updatedOctants->push_back(m_octants.data() + ii);
+                                    updatedOctants->push_back(&octant);
                                 }
                                 if (updatedGhostFlags) {
                                     updatedGhostFlags->push_back(false);
                                 }
+                                updated = true;
                             }
                         }
                         //Clean index of ghost brothers in case of coarsening a broken family
@@ -2011,7 +1830,7 @@ namespace bitpit {
                         checklocal = true;
                     }
                     idx = idx2_gh;
-                    marker = m_ghosts[idx].getMarker();
+                    int8_t marker = m_ghosts[idx].getMarker();
                     while(marker < 0 && m_ghosts[idx].buildFather() == father){
 
                         //Add ghost index to structure for mapper in case of coarsening a broken family
@@ -2037,15 +1856,17 @@ namespace bitpit {
                     last_idx=idx;
                     if (nbro != m_treeConstants->nChildren && idx!=nocts-1){
                         for(uint32_t ii=idx+1; ii<nocts; ii++){
-                            if (m_octants[ii].getMarker()<0){
-                                m_octants[ii].setMarker(0);
-                                m_octants[ii].m_info[Octant::INFO_AUX]=true;
+                            Octant &octant = m_octants[ii];
+                            if (octant.getMarker()<0){
+                                octant.setMarker(0);
+                                octant.m_info[Octant::INFO_AUX]=true;
                                 if (updatedOctants) {
-                                    updatedOctants->push_back(m_octants.data() + ii);
+                                    updatedOctants->push_back(&octant);
                                 }
                                 if (updatedGhostFlags) {
                                     updatedGhostFlags->push_back(false);
                                 }
+                                updated = true;
                             }
                         }
                         //Clean index of ghost brothers in case of coarsening a broken family
@@ -2057,7 +1878,7 @@ namespace bitpit {
 
         // Check first internal octants
         father = m_octants[0].buildFather();
-        mortonld = father.computeLastDescMorton();
+        uint64_t mortonld = father.computeLastDescMorton();
         nbro = 0;
         for (idx=0; idx<m_treeConstants->nChildren; idx++){
             // Check if family is complete or to be checked in the internal loop (some brother refined)
@@ -2067,14 +1888,17 @@ namespace bitpit {
                 }
             }
         }
-        if (nbro != m_treeConstants->nChildren)
+
+        if (nbro != m_treeConstants->nChildren) {
             idx0 = nbro;
+        }
 
         // Check and coarse internal octants
         for (idx=idx0; idx<nocts; idx++){
-            if(m_octants[idx].getMarker() < 0 && m_octants[idx].getLevel() > 0){
+            Octant &octant = m_octants[idx];
+            if(octant.getMarker() < 0 && octant.getLevel() > 0){
                 nbro = 0;
-                father = m_octants[idx].buildFather();
+                father = octant.buildFather();
                 // Check if family is to be coarsened
                 for (idx2=idx; idx2<idx+m_treeConstants->nChildren; idx2++){
                     if (idx2<nocts){
@@ -2088,19 +1912,22 @@ namespace bitpit {
                 }
                 else{
                     if (idx<=last_idx){
-                        m_octants[idx].setMarker(0);
-                        m_octants[idx].m_info[Octant::INFO_AUX]=true;
+                        octant.setMarker(0);
+                        octant.m_info[Octant::INFO_AUX]=true;
                         if (updatedOctants) {
-                            updatedOctants->push_back(m_octants.data() + idx);
+                            updatedOctants->push_back(&octant);
                         }
                         if (updatedGhostFlags) {
                             updatedGhostFlags->push_back(false);
                         }
+                        updated = true;
                     }
                 }
             }
         }
-    };
+
+        return updated;
+    }
 
     // =================================================================================== //
 
@@ -2175,6 +2002,13 @@ namespace bitpit {
         std::vector<Octant *> updatedProcessOctants;
         std::vector<bool> updatedProcessGhostFlags;
         while (!processOctants.empty()) {
+            // Fix broken families markers
+            bool brokenFamilieisFixed = fixBrokenFamiliesMarkers(&processOctants, &processGhostFlags);
+            if (brokenFamilieisFixed) {
+                updated = true;
+            }
+
+            // Balance
             std::size_t processSize = processOctants.size();
             for (std::size_t n = 0; n < processSize; ++n) {
                 Octant &octant = *(processOctants[n]);
@@ -2237,11 +2071,6 @@ namespace bitpit {
 
             updatedProcessOctants.clear();
             updatedProcessGhostFlags.clear();
-
-            // Prepare the tree for the next iteration
-            if (!processOctants.empty()) {
-                preBalance21(&processOctants, &processGhostFlags);
-            }
         }
 
         return updated;
