@@ -148,6 +148,27 @@ private:
 	// METHODS
 	// =================================================================================== //
 
+protected:
+	std::array<int64_t, 3> computeFirstVirtualNeighOffset(uint8_t level, uint8_t iface, uint8_t neighLevel) const;
+	std::array<int64_t, 3> computeLastVirtualNeighOffset(uint8_t level, uint8_t iface, uint8_t neighLevel) const;
+	void computeVirtualNeighOffsets(uint8_t level, uint8_t iface, uint8_t neighLevel, std::vector<std::array<int64_t, 3>> *neighOffsets) const;
+
+	std::array<int64_t, 3> computeFirstVirtualNodeNeighOffset(uint8_t level, uint8_t inode, uint8_t neighLevel) const;
+	std::array<int64_t, 3> computeLastVirtualNodeNeighOffset(uint8_t level, uint8_t inode, uint8_t neighLevel) const;
+	void computeVirtualNodeNeighOffsets(uint8_t level, uint8_t inode, uint8_t neighLevel, std::vector<std::array<int64_t, 3>> *neighOffsets) const;
+
+	std::array<int64_t, 3> computeFirstVirtualEdgeNeighOffset(uint8_t level, uint8_t iedge, uint8_t neighLevel) const;
+	std::array<int64_t, 3> computeLastVirtualEdgeNeighOffset(uint8_t level, uint8_t iedge, uint8_t neighLevel) const;
+	void computeVirtualEdgeNeighOffsets(uint8_t level, uint8_t iedge, uint8_t neighLevel, std::vector<std::array<int64_t, 3>> *neighOffsets) const;
+
+	std::array<int64_t, 3> getPeriodicOffset(const Octant &octant, uint8_t iface) const;
+	std::array<int64_t, 3> getNodePeriodicOffset(const Octant &octant, uint8_t inode) const;
+	std::array<int64_t, 3> getEdgePeriodicOffset(const Octant &octant, uint8_t iedge) const;
+
+	uint8_t getMaxNeighLevel(const Octant &octant) const;
+	uint8_t getMaxNodeNeighLevel(const Octant &octant) const;
+	uint8_t getMaxEdgeNeighLevel(const Octant &octant) const;
+
 	// =================================================================================== //
 	// BASIC GET/SET METHODS
 	// =================================================================================== //

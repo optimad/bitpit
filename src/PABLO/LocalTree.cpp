@@ -2076,6 +2076,429 @@ namespace bitpit {
         return updated;
     };
 
+	// =================================================================================== //
+
+	/*! Compute the offset from the origin of an octant to its first virtual face neighobur.
+	* The term "virtual" means that the tree may not contain any octant at the position
+	* defined by the computed offset.
+	* \param[in] level The level of the octant.
+	* \param[in] iface Local index of the face.
+	* \param[in] neighLevel The level of the virtual neighbours.
+	* \return The computed offset.
+	*/
+	std::array<int64_t, 3> LocalTree::computeFirstVirtualNeighOffset(uint8_t level, uint8_t iface, uint8_t neighLevel) const {
+
+		// Get normalized offsets
+		const int8_t (&normalizedOffsets)[3] = m_treeConstants->normals[iface];
+
+		// Get octant sizes
+		uint32_t size      = m_treeConstants->lengths[level];
+		uint32_t neighSize = m_treeConstants->lengths[neighLevel];
+
+		// Compute the coordinates of the virtual neighbour
+		std::array<int64_t, 3> neighOffsets;
+		for (int i = 0; i < 3; ++i) {
+			neighOffsets[i] = normalizedOffsets[i];
+			if (neighOffsets[i] > 0) {
+				neighOffsets[i] *= size;
+			} else {
+				neighOffsets[i] *= neighSize;
+			}
+		}
+
+		return neighOffsets;
+	}
+
+	/*! Compute the offset from the origin of an octant to its last virtual face neighobur.
+	* The term "virtual" means that the tree may not contain any octant at the position
+	* defined by the computed offset.
+	* \param[in] level The level of the octant.
+	* \param[in] iface Local index of the face.
+	* \param[in] neighLevel The level of the virtual neighbours.
+	* \return The computed offset.
+	*/
+	std::array<int64_t, 3> LocalTree::computeLastVirtualNeighOffset(uint8_t level, uint8_t iface, uint8_t neighLevel) const {
+
+		// Get octant sizes
+		uint32_t size      = m_treeConstants->lengths[level];
+		uint32_t neighSize = m_treeConstants->lengths[neighLevel];
+
+		// Compute the coordinates of the virtual neighbour
+		std::array<int64_t, 3> neighOffsets = computeFirstVirtualNeighOffset(level, iface, neighLevel);
+
+		uint32_t delta = size - neighSize;
+		switch (iface) {
+			case 0 :
+			case 1 :
+				neighOffsets[1] += delta;
+				neighOffsets[2] += delta;
+				break;
+
+			case 2 :
+			case 3 :
+				neighOffsets[0] += delta;
+				neighOffsets[2] += delta;
+				break;
+
+			case 4 :
+			case 5 :
+				neighOffsets[0] += delta;
+				neighOffsets[1] += delta;
+				break;
+		}
+
+		return neighOffsets;
+	}
+
+	/*! Compute the offsets from the origin of an octant to its virtual node neighoburs.
+	* The term "virtual" means that the tree may not contain any octant at the positions
+	* defined by the computed offsets.
+	* \param[in] level The level of the octant.
+	* \param[in] iface Local index of the node.
+	* \param[in] neighLevel The level of the virtual neighbours.
+	* \param[out] neighOffsets On output will contain the offsets.
+	*/
+	void LocalTree::computeVirtualNeighOffsets(uint8_t level, uint8_t iface, uint8_t neighLevel, std::vector<std::array<int64_t, 3>> *neighOffsets) const {
+
+		// Get octant sizes
+		uint32_t neighSize = m_treeConstants->lengths[neighLevel];
+
+		// Direction of the increments
+		int direction1;
+		int direction2;
+		switch (iface) {
+			case 0:
+			case 1:
+				direction1 = 1;
+				direction2 = 2;
+				break;
+
+			case 2:
+			case 3:
+				direction1 = 0;
+				direction2 = 2;
+				break;
+
+			default:
+				direction1 = 0;
+				direction2 = 1;
+				break;
+		}
+
+		// Compute the coordinates of the virtual neighbour
+		int nNeighsDirection1 = 1 << (neighLevel - level);
+		int nNeighsDirection2 = (m_dim > 2) ? nNeighsDirection1 : 1;
+		int nNeighs           = nNeighsDirection1 * nNeighsDirection2;
+
+		neighOffsets->assign(nNeighs, computeFirstVirtualNeighOffset(level, iface, neighLevel));
+
+		int k = 0;
+		for (int j = 0; j < nNeighsDirection2; ++j) {
+			for (int i = 0; i < nNeighsDirection1; ++i) {
+				(*neighOffsets)[k][direction1] += i * neighSize;
+				(*neighOffsets)[k][direction2] += j * neighSize;
+				++k;
+			}
+		}
+	}
+
+	/*! Compute the offset from the origin of an octant to its first virtual node neighobur.
+	* The term "virtual" means that the tree may not contain any octant at the position
+	* defined by the computed offset.
+	* \param[in] level The level of the octant.
+	* \param[in] inode Local index of the node.
+	* \param[in] neighLevel The level of the virtual neighbours.
+	* \return The computed offset.
+	*/
+	std::array<int64_t, 3> LocalTree::computeFirstVirtualNodeNeighOffset(uint8_t level, uint8_t inode, uint8_t neighLevel) const {
+
+		// Get normalized offsets
+		const int8_t (&normalizedOffsets)[3] = m_treeConstants->nodeCoeffs[inode];
+
+		// Get octant sizes
+		uint32_t size      = m_treeConstants->lengths[level];
+		uint32_t neighSize = m_treeConstants->lengths[neighLevel];
+
+		// Compute the coordinates of the virtual neighbour
+		std::array<int64_t, 3> neighOffsets;
+		for (int i = 0; i < 3; ++i) {
+			neighOffsets[i] = normalizedOffsets[i];
+			if (neighOffsets[i] > 0) {
+				neighOffsets[i] *= size;
+			} else {
+				neighOffsets[i] *= neighSize;
+			}
+		}
+
+		return neighOffsets;
+	}
+
+	/*! Compute the offset from the origin of an octant to its last virtual node neighobur.
+	* The term "virtual" means that the tree may not contain any octant at the position
+	* defined by the computed offset.
+	* \param[in] level The level of the octant.
+	* \param[in] inode Local index of the node.
+	* \param[in] neighLevel The level of the virtual neighbours.
+	* \return The computed offset.
+	*/
+	std::array<int64_t, 3> LocalTree::computeLastVirtualNodeNeighOffset(uint8_t level, uint8_t inode, uint8_t neighLevel) const {
+
+		return computeFirstVirtualNodeNeighOffset(level, inode, neighLevel);
+	}
+
+	/*! Compute the offsets from the origin of an octant to its virtual node neighoburs.
+	* The term "virtual" means that the tree may not contain any octant at the positions
+	* defined by the computed offsets.
+	* \param[in] level The level of the octant.
+	* \param[in] inode Local index of the node.
+	* \param[in] neighLevel The level of the virtual neighbours.
+	* \param[out] neighOffsets On output will contain the offsets.
+	*/
+	void LocalTree::computeVirtualNodeNeighOffsets(uint8_t level, uint8_t inode, uint8_t neighLevel, std::vector<std::array<int64_t, 3>> *neighOffsets) const {
+
+		neighOffsets->assign(1, computeFirstVirtualNodeNeighOffset(level, inode, neighLevel));
+	}
+
+	/*! Compute the offset from the origin of an octant to its first virtual edge neighobur.
+	* The term "virtual" means that the tree may not contain any octant at the position
+	* defined by the computed offset.
+	* \param[in] level The level of the octant.
+	* \param[in] iedge Local index of the edge.
+	* \param[in] neighLevel The level of the virtual neighbours.
+	* \return The computed offset.
+	*/
+	std::array<int64_t, 3> LocalTree::computeFirstVirtualEdgeNeighOffset(uint8_t level, uint8_t iedge, uint8_t neighLevel) const {
+
+		// Get normalized offsets
+		const int8_t (&normalizedOffsets)[3] = m_treeConstants->edgeCoeffs[iedge];
+
+		// Get octant sizes
+		uint32_t size      = m_treeConstants->lengths[level];
+		uint32_t neighSize = m_treeConstants->lengths[neighLevel];
+
+		// Compute the coordinates of the virtual neighbour
+		std::array<int64_t, 3> neighOffsets;
+		for (int i = 0; i < 3; ++i) {
+			neighOffsets[i] = normalizedOffsets[i];
+			if (neighOffsets[i] > 0) {
+				neighOffsets[i] *= size;
+			} else {
+				neighOffsets[i] *= neighSize;
+			}
+		}
+
+		return neighOffsets;
+	}
+
+	/*! Compute the offset from the origin of an octant to its last virtual edge neighobur.
+	* The term "virtual" means that the tree may not contain any octant at the position
+	* defined by the computed offset.
+	* \param[in] level The level of the octant.
+	* \param[in] iedge Local index of the edge.
+	* \param[in] neighLevel The level of the virtual neighbours.
+	* \return The computed offset.
+	*/
+	std::array<int64_t, 3> LocalTree::computeLastVirtualEdgeNeighOffset(uint8_t level, uint8_t iedge, uint8_t neighLevel) const {
+
+		// Get octant sizes
+		uint32_t size      = m_treeConstants->lengths[level];
+		uint32_t neighSize = m_treeConstants->lengths[neighLevel];
+
+		// Compute the coordinates of the virtual neighbour
+		std::array<int64_t, 3> neighOffsets = computeFirstVirtualEdgeNeighOffset(level, iedge, neighLevel);
+
+		uint32_t offset = size - neighSize;
+		switch (iedge) {
+			case 0:
+			case 1:
+			case 8:
+			case 9:
+				neighOffsets[1] += offset;
+				break;
+
+			case 2:
+			case 3:
+			case 10:
+			case 11:
+				neighOffsets[0] += offset;
+				break;
+
+			case 4:
+			case 5:
+			case 6:
+			case 7:
+				neighOffsets[2] += offset;
+				break;
+		}
+
+		return neighOffsets;
+	}
+
+	/*! Compute the offsets from the origin of an octant to its virtual edge neighoburs.
+	* The term "virtual" means that the tree may not contain any octant at the positions
+	* defined by the computed offsets.
+	* \param[in] level The level of the octant.
+	* \param[in] iedge Local index of the edge.
+	* \param[in] neighLevel The level of the virtual neighbours.
+	* \param[out] neighOffsets On output will contain the offsets.
+	*/
+	void LocalTree::computeVirtualEdgeNeighOffsets(uint8_t level, uint8_t iedge, uint8_t neighLevel, std::vector<std::array<int64_t, 3>> *neighOffsets) const {
+
+		// Get octant sizes
+		uint32_t neighSize = m_treeConstants->lengths[neighLevel];
+
+		// Direction of the increments
+		int direction;
+		switch (iedge) {
+			case 0:
+			case 1:
+			case 8:
+			case 9:
+				direction = 1;
+				break;
+
+			case 2:
+			case 3:
+			case 10:
+			case 11:
+				direction = 0;
+				break;
+
+			default:
+				direction = 2;
+				break;
+		}
+
+		// Compute the coordinates of the virtual neighbours
+		int nNeighs = 1 << (neighLevel - level);
+		neighOffsets->assign(nNeighs, computeFirstVirtualEdgeNeighOffset(level, iedge, neighLevel));
+		for (int i = 1; i < nNeighs; ++i) {
+			(*neighOffsets)[i][direction] += i * neighSize;
+		}
+	}
+
+	// =================================================================================== //
+
+	/*! Get the periodic offset for the specified face of the given octant.
+	* The offset is the displacement that should be applied to a point on the specified
+	* face to move that point to the corresponding periodic face.
+	* \param[in] octant Octant for which the offset should be evaluated
+	* \param[in] iface Index of face
+	* \return The periodic offset for the specified face of the given octant.
+	*/
+	std::array<int64_t, 3> LocalTree::getPeriodicOffset(const Octant &octant, uint8_t iface) const {
+
+		std::array<int64_t, 3> offset = {{0, 0, 0}};
+		if (!isPeriodic(&octant, iface)) {
+			return offset;
+		}
+
+		int64_t maxLength = m_treeConstants->lengths[0];
+		const int8_t (&referenceOffset)[3] = m_treeConstants->normals[iface];
+
+		for (int d = 0; d < m_dim; ++d) {
+			offset[d] = - maxLength * static_cast<int64_t>(referenceOffset[d]);
+		}
+
+		return offset;
+	}
+
+	/*! Get the periodic offset for the specified node of the given octant.
+	* The offset is the displacement that should be applied to a point on the specified
+	* node to move that point to the corresponding periodic node.
+	* \param[in] octant Octant for which the offset should be evaluated
+	* \param[in] inode Index of node
+	* \return The periodic offset for the specified node of the given octant.
+	*/
+	std::array<int64_t, 3> LocalTree::getNodePeriodicOffset(const Octant &octant, uint8_t inode) const {
+
+		std::array<int64_t, 3> offset = {{0, 0, 0}};
+		for (int i = 0; i < m_dim; ++i) {
+			uint8_t face = m_treeConstants->nodeFace[inode][i];
+			if (!isPeriodic(&octant, face)) {
+				continue;
+			}
+
+			std::array<int64_t, 3> faceOffset = getPeriodicOffset(octant, face);
+			for (int d = 0; d < m_dim; ++d) {
+				offset[d] += faceOffset[d];
+			}
+		}
+
+		return offset;
+	}
+
+	/*! Get the periodic offset for the specified edge of the given octant.
+	* The offset is the displacement that should be applied to a point on the specified
+	* edge to move that point to the corresponding periodic edge.
+	* \param[in] octant Octant for which the offset should be evaluated
+	* \param[in] iedge Index of edge
+	* \return The periodic offset for the specified edge of the given octant.
+	*/
+	std::array<int64_t, 3> LocalTree::getEdgePeriodicOffset(const Octant &octant, uint8_t iedge) const {
+
+		std::array<int64_t, 3> offset = {{0, 0, 0}};
+		for (uint8_t face : m_treeConstants->edgeFace[iedge]) {
+			if (!isPeriodic(&octant, face)) {
+				continue;
+			}
+
+			std::array<int64_t, 3> faceOffset = getPeriodicOffset(octant, face);
+			for (int d = 0; d < m_dim; ++d) {
+				offset[d] += faceOffset[d];
+			}
+		}
+
+		return offset;
+	}
+
+    // =================================================================================== //
+
+	/*! Get the maximum level a face neighbour of the specified octant can have.
+	* If 2:1 face balance is active, a neighbour can only have one more refinement level than
+	* the specified octant.
+	* \param[in] octant Octant for which the check has to be performed.
+	* \return The maximum level a face neighbour of the specified octant can have.
+	*/
+	uint8_t LocalTree::getMaxNeighLevel(const Octant &octant) const {
+
+		if (octant.getBalance()) {
+			return octant.getLevel() + 1;
+		} else {
+			return m_treeConstants->maxLevel;
+		}
+	}
+
+	/*! Get the maximum level a node neighbour of the specified octant can have.
+	* If 2:1 node balance is active, a neighbour can only have one more refinement level than
+	* the specified octant.
+	* \param[in] octant Octant for which the check has to be performed.
+	* \return The maximum level a node neighbour of the specified octant can have.
+	*/
+	uint8_t LocalTree::getMaxNodeNeighLevel(const Octant &octant) const {
+
+        if (octant.getBalance() && m_balanceCodim == m_dim) {
+			return octant.getLevel() + 1;
+		} else {
+			return m_treeConstants->maxLevel;
+		}
+	}
+
+	/*! Get the maximum level an edge neighbour of the specified octant can have.
+	* If 2:1 edge balance is active, a neighbour can only have one more refinement level than
+	* the specified octant.
+	* \param[in] octant Octant for which the check has to be performed.
+	* \return The maximum level an edge neighbour of the specified octant can have.
+	*/
+	uint8_t LocalTree::getMaxEdgeNeighLevel(const Octant &octant) const {
+
+		if (octant.getBalance() && m_balanceCodim > 1) {
+			return octant.getLevel() + 1;
+		} else {
+			return m_treeConstants->maxLevel;
+		}
+	}
+
     // =================================================================================== //
 
     /*! Compute and store in m_intersections the intersections of the local tree.

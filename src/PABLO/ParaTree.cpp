@@ -5008,42 +5008,45 @@ namespace bitpit {
         int countpbd = 0;
         int countint = 0;
         std::set<int> neighProcs;
-        uint32_t nVirtualNeighbors;
-        std::vector<uint64_t> virtualNeighbors;
+        std::vector<std::array<int64_t, 3>> virtualNeighOffsets;
         for (uint32_t idx = 0; idx < m_octree.getNumOctants(); ++idx) {
             neighProcs.clear();
             Octant &octant = m_octree.m_octants[idx];
+            u32array3 octantCoord = octant.getLogicalCoordinates();
+            uint8_t octantLevel = octant.getLevel();
 
             // Virtual Face Neighbors
+            uint8_t maxFaceNeighLevel = std::min(m_octree.getMaxNeighLevel(octant), static_cast<uint8_t>(m_maxDepth));
             for(uint8_t i = 0; i < m_treeConstants->nFaces; ++i){
-                bool isFacePbound = false;
-                if(octant.getBound(i) == false){
-                    octant.computeFaceVirtualMortons(i, m_maxDepth, &nVirtualNeighbors, &virtualNeighbors);
-                    if (nVirtualNeighbors > 0) {
-                        uint32_t maxDelta = nVirtualNeighbors/2;
-                        for(uint32_t j = 0; j <= maxDelta; ++j){
-                            int neighProcFirst = findOwner(virtualNeighbors[j]);
-                            if (neighProcFirst != m_rank) {
-                                neighProcs.insert(neighProcFirst);
-                                isFacePbound = true;
-                            }
-
-                            int neighProcLast = findOwner(virtualNeighbors[nVirtualNeighbors - 1 - j]);
-                            if (neighProcLast != m_rank) {
-                                neighProcs.insert(neighProcLast);
-                                isFacePbound = true;
-                            }
-
-                            //					//TODO debug
-                            //					if (abs(pBegin-pEnd) <= 1) j = maxDelta + 1;
-                        }
+                bool isFacePeriodic = m_octree.isPeriodic(&octant, i);
+                if (!isFacePeriodic) {
+                    bool isFaceBoundary = octant.getBound(i);
+                    if (isFaceBoundary) {
+                        continue;
                     }
                 }
-                else if(m_periodic[i]){
-                    uint64_t virtualNeighbor = octant.computePeriodicMorton(i);
-                    int neighProc = findOwner(virtualNeighbor);
-                    if(neighProc != m_rank){
-                        neighProcs.insert(neighProc);
+
+                std::array<int64_t, 3> virtualOctantOrigin = {{octantCoord[0], octantCoord[1], octantCoord[2]}};
+                if (isFacePeriodic) {
+                    std::array<int64_t, 3> periodicOffset = m_octree.getPeriodicOffset(octant, i);
+                    virtualOctantOrigin[0] += periodicOffset[0];
+                    virtualOctantOrigin[1] += periodicOffset[1];
+                    virtualOctantOrigin[2] += periodicOffset[2];
+                }
+
+                m_octree.computeVirtualNeighOffsets(octantLevel, i, maxFaceNeighLevel, &virtualNeighOffsets);
+
+                bool isFacePbound = false;
+                for(const std::array<int64_t, 3> &virtualNeighOffset : virtualNeighOffsets){
+                    std::array<int64_t, 3> virtualNeighCoord = virtualOctantOrigin;
+                    virtualNeighCoord[0] += virtualNeighOffset[0];
+                    virtualNeighCoord[1] += virtualNeighOffset[1];
+                    virtualNeighCoord[2] += virtualNeighOffset[2];
+                    uint64_t virtualNeighMorton = PABLO::computeMorton(m_dim, virtualNeighCoord[0], virtualNeighCoord[1], virtualNeighCoord[2]);
+
+                    int virtualNeighProc = findOwner(virtualNeighMorton);
+                    if (virtualNeighProc != m_rank) {
+                        neighProcs.insert(virtualNeighProc);
                         isFacePbound = true;
                     }
                 }
@@ -5052,50 +5055,71 @@ namespace bitpit {
             }
 
             // Virtual Edge Neighbors
+            uint8_t maxEdgeNeighLevel = std::min(m_octree.getMaxEdgeNeighLevel(octant), static_cast<uint8_t>(m_maxDepth));
             for(uint8_t e = 0; e < m_treeConstants->nEdges; ++e){
-                octant.computeEdgeVirtualMortons(e, m_maxDepth, m_octree.m_balanceCodim, m_treeConstants->edgeFace, &nVirtualNeighbors, &virtualNeighbors);
-                if(nVirtualNeighbors > 0){
-                    uint32_t maxDelta = nVirtualNeighbors/2;
-                    for(uint32_t ee = 0; ee <= maxDelta; ++ee){
-                        int neighProcFirst = findOwner(virtualNeighbors[ee]);
-                        if (neighProcFirst != m_rank) {
-                            neighProcs.insert(neighProcFirst);
-                        }
-
-                        int neighProcLast = findOwner(virtualNeighbors[nVirtualNeighbors - 1- ee]);
-                        if (neighProcLast != m_rank) {
-                            neighProcs.insert(neighProcLast);
-                        }
-
-                        //					//TODO debug
-                        //					if (abs(pBegin-pEnd) <= 1) ee = maxDelta + 1;
+                bool isEdgePeriodic = m_octree.isEdgePeriodic(&octant, e);
+                if (!isEdgePeriodic) {
+                    bool isEdgeBoundary = octant.getEdgeBound(e);
+                    if (isEdgeBoundary) {
+                        continue;
                     }
                 }
-                else if(m_octree.isEdgePeriodic(&octant, e)){
-                    Octant periodicNeighbor = octant.computeEdgePeriodicOctant(e);
-                    int neighProc = findOwner(periodicNeighbor.getMorton());
-                    if(neighProc != m_rank){
-                        neighProcs.insert(neighProc);
+
+                std::array<int64_t, 3> virtualOctantOrigin = {{octantCoord[0], octantCoord[1], octantCoord[2]}};
+                if (isEdgePeriodic) {
+                    std::array<int64_t, 3> periodicOffset = m_octree.getEdgePeriodicOffset(octant, e);
+                    virtualOctantOrigin[0] += periodicOffset[0];
+                    virtualOctantOrigin[1] += periodicOffset[1];
+                    virtualOctantOrigin[2] += periodicOffset[2];
+                }
+
+                m_octree.computeVirtualEdgeNeighOffsets(octantLevel, e, maxEdgeNeighLevel, &virtualNeighOffsets);
+
+                for(const std::array<int64_t, 3> &virtualNeighOffset : virtualNeighOffsets){
+                    std::array<int64_t, 3> virtualNeighCoord = virtualOctantOrigin;
+                    virtualNeighCoord[0] += virtualNeighOffset[0];
+                    virtualNeighCoord[1] += virtualNeighOffset[1];
+                    virtualNeighCoord[2] += virtualNeighOffset[2];
+                    uint64_t virtualNeighMorton = PABLO::computeMorton(m_dim, virtualNeighCoord[0], virtualNeighCoord[1], virtualNeighCoord[2]);
+
+                    int virtualNeighProc = findOwner(virtualNeighMorton);
+                    if (virtualNeighProc != m_rank) {
+                        neighProcs.insert(virtualNeighProc);
                     }
                 }
             }
 
             // Virtual Corner Neighbors
+            uint8_t maxNodeNeighLevel = std::min(m_octree.getMaxNodeNeighLevel(octant), static_cast<uint8_t>(m_maxDepth));
             for(uint8_t c = 0; c < m_treeConstants->nNodes; ++c){
-                bool hasVirtualNeighbour;
-                uint64_t virtualNeighbor;
-                octant.computeNodeVirtualMorton(c, m_maxDepth,m_treeConstants->nodeFace, &hasVirtualNeighbour, &virtualNeighbor);
-                if(hasVirtualNeighbour){
-                    int neighProc = findOwner(virtualNeighbor);
-                    if (neighProc != m_rank) {
-                        neighProcs.insert(neighProc);
+                bool isNodePeriodic = m_octree.isNodePeriodic(&octant, c);
+                if (!isNodePeriodic) {
+                    bool isNodeBoundary = octant.getNodeBound(c);
+                    if (isNodeBoundary) {
+                        continue;
                     }
                 }
-                else if(m_octree.isNodePeriodic(&octant, c)){
-                    Octant periodicNeighbor = octant.computeNodePeriodicOctant(c);
-                    int neighProc = findOwner(periodicNeighbor.getMorton());
-                    if(neighProc != m_rank){
-                        neighProcs.insert(neighProc);
+
+                std::array<int64_t, 3> virtualOctantOrigin = {{octantCoord[0], octantCoord[1], octantCoord[2]}};
+                if (isNodePeriodic) {
+                    std::array<int64_t, 3> periodicOffset = m_octree.getNodePeriodicOffset(octant, c);
+                    virtualOctantOrigin[0] += periodicOffset[0];
+                    virtualOctantOrigin[1] += periodicOffset[1];
+                    virtualOctantOrigin[2] += periodicOffset[2];
+                }
+
+                m_octree.computeVirtualNodeNeighOffsets(octantLevel, c, maxNodeNeighLevel, &virtualNeighOffsets);
+
+                for(const std::array<int64_t, 3> &virtualNeighOffset : virtualNeighOffsets){
+                    std::array<int64_t, 3> virtualNeighCoord = virtualOctantOrigin;
+                    virtualNeighCoord[0] += virtualNeighOffset[0];
+                    virtualNeighCoord[1] += virtualNeighOffset[1];
+                    virtualNeighCoord[2] += virtualNeighOffset[2];
+                    uint64_t virtualNeighMorton = PABLO::computeMorton(m_dim, virtualNeighCoord[0], virtualNeighCoord[1], virtualNeighCoord[2]);
+
+                    int virtualNeighProc = findOwner(virtualNeighMorton);
+                    if (virtualNeighProc != m_rank) {
+                        neighProcs.insert(virtualNeighProc);
                     }
                 }
             }
