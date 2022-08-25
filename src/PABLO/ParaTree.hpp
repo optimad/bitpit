@@ -472,7 +472,7 @@ namespace bitpit {
         // OTHER OCTANT BASED METHODS												    	   //
         // =================================================================================== //
 
-        void        findNeighbours(const Octant* oct, uint8_t face, uint8_t codim, u32vector & neighbours, bvector & isghost, bool onlyinternals) const;
+        void        findNeighbours(const Octant* oct, uint8_t face, uint8_t codim, u32vector & neighbours, bvector & isghost, bool onlyinternals, bool append) const;
     public:
         void 		findNeighbours(uint32_t idx, uint8_t face, uint8_t codim, u32vector & neighbours, bvector & isghost) const;
         void 		findNeighbours(uint32_t idx, uint8_t face, uint8_t codim, u32vector & neighbours) const;
