@@ -5785,14 +5785,6 @@ namespace bitpit {
             commMarker();
 #endif
 
-            // Pre-processing for 2:1 balancing
-            m_octree.preBalance21(processInternals);
-
-#if BITPIT_ENABLE_MPI==1
-            // Communicate markers
-            commMarker();
-#endif
-
             // Execute local loadbalance
             markersModified = m_octree.localBalance(balanceNewOctants, processInternals);
 #if BITPIT_ENABLE_MPI==1
@@ -5804,17 +5796,6 @@ namespace bitpit {
             // Increase iteration counter
             iteration++;
         }
-
-        // Post-processing for 2:1 balancing
-        //
-        // The post-process is done calling the pre-process function on the
-        // ghost octants.
-        m_octree.preBalance21(false);
-
-#if BITPIT_ENABLE_MPI==1
-        // Communicate markers
-        commMarker();
-#endif
 
         // Print footer
         if (verbose){
