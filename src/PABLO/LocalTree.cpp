@@ -25,8 +25,6 @@
 // =================================================================================== //
 // INCLUDES                                                                            //
 // =================================================================================== //
-#include "bitpit_common.hpp"
-
 #include "LocalTree.hpp"
 #include <map>
 #include <unordered_map>
@@ -1022,7 +1020,7 @@ namespace bitpit {
             return;
         }
 
-        // Initialize search in the octants
+        // Initialize search
         uint32_t candidateIdx    = 0;
         uint64_t candidateMorton = 0;
 
@@ -1030,23 +1028,24 @@ namespace bitpit {
         uint64_t faceArea  = oct->getLogicalArea();
 
         uint32_t size = oct->getLogicalSize();
+
+        std::array<int64_t, 3> coord = {{oct->getLogicalCoordinates(0), oct->getLogicalCoordinates(1), oct->getLogicalCoordinates(2)}};
+        if (isperiodic) {
+            std::array<int64_t, 3> periodicOffset = getPeriodicOffset(*oct, iface);
+            coord[0] += periodicOffset[0];
+            coord[1] += periodicOffset[1];
+            coord[2] += periodicOffset[2];
+        }
+
         const int8_t (&cxyz)[3] = m_treeConstants->normals[iface];
 
-        // Build Morton number of virtual neigh of same size
-        Octant sameSizeVirtualNeigh;
-        if (isperiodic){
-            sameSizeVirtualNeigh = oct->computePeriodicOctant(iface);
-        }
-        else{
-            u32array3 sameSizeVirtualNeighCoords = oct->getLogicalCoordinates();
-            sameSizeVirtualNeighCoords[0] += uint32_t(cxyz[0]) * size;
-            sameSizeVirtualNeighCoords[1] += uint32_t(cxyz[1]) * size;
-            sameSizeVirtualNeighCoords[2] += uint32_t(cxyz[2]) * size;
-
-            sameSizeVirtualNeigh = Octant(m_dim, level, sameSizeVirtualNeighCoords[0], sameSizeVirtualNeighCoords[1], sameSizeVirtualNeighCoords[2]);
-        }
-
-        uint64_t sameSizeVirtualNeighMorton = sameSizeVirtualNeigh.getMorton();
+        // Compute same-size virtual neighbour information
+        std::array<int64_t, 3> sameSizeVirtualNeighOffset = computeFirstVirtualNeighOffset(level, iface, level);
+        std::array<int64_t, 3> sameSizeVirtualNeighCoord = coord;
+        sameSizeVirtualNeighCoord[0] += sameSizeVirtualNeighOffset[0];
+        sameSizeVirtualNeighCoord[1] += sameSizeVirtualNeighOffset[1];
+        sameSizeVirtualNeighCoord[2] += sameSizeVirtualNeighOffset[2];
+        uint64_t sameSizeVirtualNeighMorton = PABLO::computeMorton(m_dim, sameSizeVirtualNeighCoord[0], sameSizeVirtualNeighCoord[1], sameSizeVirtualNeighCoord[2]);
 
         //
         // Search in the internal octants
@@ -1064,29 +1063,25 @@ namespace bitpit {
 
         // Compute the Morton number of the last candidate
         //
-        // This is the Morton number of the last discendent of the same-size
+        // This is the Morton number of the last descendant of the same-size
         // virtual neighbour.
-        uint64_t lastCandidateMorton = sameSizeVirtualNeigh.computeLastDescMorton();
-
-        // Compute coordinates
-        std::array<int64_t,3> coord;
-        if (isperiodic){
-            coord = oct->getPeriodicCoord(iface);
-        }
-        else{
-            coord[0] = oct->getLogicalCoordinates(0);
-            coord[1] = oct->getLogicalCoordinates(1);
-            coord[2] = oct->getLogicalCoordinates(2);
-        }
+        uint8_t maxNeighLevel = getMaxNeighLevel(*oct);
+        std::array<int64_t, 3> lastCandidateOffset = computeLastVirtualNeighOffset(level, iface, maxNeighLevel);
+        std::array<int64_t, 3> lastCandidateCoord = coord;
+        lastCandidateCoord[0] += lastCandidateOffset[0];
+        lastCandidateCoord[1] += lastCandidateOffset[1];
+        lastCandidateCoord[2] += lastCandidateOffset[2];
+        uint64_t lastCandidateMorton = PABLO::computeMorton(m_dim, lastCandidateCoord[0], lastCandidateCoord[1], lastCandidateCoord[2]);
 
         // Search for neighbours of different sizes
         if (candidateIdx < getNumOctants()){
             while(true){
                 // Detect if the candidate is a neighbour
-                u32array3 coordtry = m_octants[candidateIdx].getLogicalCoordinates();
-
+                u32array3 coordtry = {{0, 0, 0}};
                 bool isNeighbourCandidate = true;
                 for (int8_t idim=0; idim<m_dim; idim++){
+                    coordtry[idim] = m_octants[candidateIdx].getLogicalCoordinates(idim);
+
                     int32_t Dx     = int32_t(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
                     int32_t Dxstar = int32_t((cxyz[idim]-1)/2)*(m_octants[candidateIdx].getLogicalSize()) + int32_t((cxyz[idim]+1)/2)*size;
                     if (Dx != Dxstar){
@@ -1174,10 +1169,11 @@ namespace bitpit {
             if (candidateIdx < getNumGhosts()){
                 while(true){
                     // Detect if the candidate is a neighbour
-                    u32array3 coordtry = m_ghosts[candidateIdx].getLogicalCoordinates();
-
+                    u32array3 coordtry = {{0, 0, 0}};
                     bool isNeighbourCandidate = true;
                     for (int8_t idim=0; idim<m_dim; idim++){
+                        coordtry[idim] = m_ghosts[candidateIdx].getLogicalCoordinates(idim);
+
                         int32_t Dx     = int32_t(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
                         int32_t Dxstar = int32_t((cxyz[idim]-1)/2)*(m_ghosts[candidateIdx].getLogicalSize()) + int32_t((cxyz[idim]+1)/2)*size;
                         if (Dx != Dxstar){
@@ -1289,23 +1285,24 @@ namespace bitpit {
         uint32_t edgeSize  = oct->getLogicalSize();
 
         uint32_t size = oct->getLogicalSize();
+
+        std::array<int64_t, 3> coord = {{oct->getLogicalCoordinates(0), oct->getLogicalCoordinates(1), oct->getLogicalCoordinates(2)}};
+        if (isperiodic) {
+            std::array<int64_t, 3> periodicOffset = getEdgePeriodicOffset(*oct, iedge);
+            coord[0] += periodicOffset[0];
+            coord[1] += periodicOffset[1];
+            coord[2] += periodicOffset[2];
+        }
+
         const int8_t (&cxyz)[3] = m_treeConstants->edgeCoeffs[iedge];
 
-        // Build Morton number of virtual neigh of same size
-        Octant sameSizeVirtualNeigh;
-        if (isperiodic){
-            sameSizeVirtualNeigh = oct->computeEdgePeriodicOctant(iedge);
-        }
-        else{
-            u32array3 sameSizeVirtualNeighCoords = oct->getLogicalCoordinates();
-            sameSizeVirtualNeighCoords[0] += uint32_t(cxyz[0]) * size;
-            sameSizeVirtualNeighCoords[1] += uint32_t(cxyz[1]) * size;
-            sameSizeVirtualNeighCoords[2] += uint32_t(cxyz[2]) * size;
-
-            sameSizeVirtualNeigh = Octant(m_dim, level, sameSizeVirtualNeighCoords[0], sameSizeVirtualNeighCoords[1], sameSizeVirtualNeighCoords[2]);
-        }
-
-        uint64_t sameSizeVirtualNeighMorton = sameSizeVirtualNeigh.getMorton();
+        // Compute same-size virtual neighbour information
+        std::array<int64_t, 3> sameSizeVirtualNeighOffset = computeFirstVirtualEdgeNeighOffset(level, iedge, level);
+        std::array<int64_t, 3> sameSizeVirtualNeighCoord = coord;
+        sameSizeVirtualNeighCoord[0] += sameSizeVirtualNeighOffset[0];
+        sameSizeVirtualNeighCoord[1] += sameSizeVirtualNeighOffset[1];
+        sameSizeVirtualNeighCoord[2] += sameSizeVirtualNeighOffset[2];
+        uint64_t sameSizeVirtualNeighMorton = PABLO::computeMorton(m_dim, sameSizeVirtualNeighCoord[0], sameSizeVirtualNeighCoord[1], sameSizeVirtualNeighCoord[2]);
 
         //
         // Search in the internal octants
@@ -1323,29 +1320,25 @@ namespace bitpit {
 
         // Compute the Morton number of the last candidate
         //
-        // This is the Morton number of the last discendent of the same-size
+        // This is the Morton number of the last descendant of the same-size
         // virtual neighbour.
-        uint64_t lastCandidateMorton = sameSizeVirtualNeigh.computeLastDescMorton();
-
-        // Compute coordinates
-        std::array<int64_t,3> coord;
-        if (isperiodic){
-            coord = oct->getEdgePeriodicCoord(iedge);
-        }
-        else{
-            coord[0] = oct->getLogicalCoordinates(0);
-            coord[1] = oct->getLogicalCoordinates(1);
-            coord[2] = oct->getLogicalCoordinates(2);
-        }
+        uint8_t maxEdgeNeighLevel = getMaxEdgeNeighLevel(*oct);
+        std::array<int64_t, 3> lastCandidateOffset = computeLastVirtualEdgeNeighOffset(level, iedge, maxEdgeNeighLevel);
+        std::array<int64_t, 3> lastCandidateCoord = coord;
+        lastCandidateCoord[0] += lastCandidateOffset[0];
+        lastCandidateCoord[1] += lastCandidateOffset[1];
+        lastCandidateCoord[2] += lastCandidateOffset[2];
+        uint64_t lastCandidateMorton = PABLO::computeMorton(m_dim, lastCandidateCoord[0], lastCandidateCoord[1], lastCandidateCoord[2]);
 
         // Search for neighbours of different sizes
         if (candidateIdx < getNumOctants()) {
             while(true){
                 // Detect if the candidate is a neighbour
-                u32array3 coordtry = m_octants[candidateIdx].getLogicalCoordinates();
-
+                u32array3 coordtry = {{0, 0, 0}};
                 bool isNeighbourCandidate = true;
                 for (int8_t idim=0; idim<m_dim; idim++){
+                    coordtry[idim] = m_octants[candidateIdx].getLogicalCoordinates(idim);
+
                     int32_t Dx     = int32_t(int32_t(abs(cxyz[idim]))*(-int32_t(coord[idim]) + int32_t(coordtry[idim])));
                     int32_t Dxstar = int32_t((cxyz[idim]-1)/2)*(m_octants[candidateIdx].getLogicalSize()) + int32_t((cxyz[idim]+1)/2)*size;
 
@@ -1423,10 +1416,11 @@ namespace bitpit {
             if (candidateIdx < getNumGhosts()){
                 while(true){
                     // Detect if the candidate is a neighbour
-                    u32array3 coordtry = m_ghosts[candidateIdx].getLogicalCoordinates();
-
+                    u32array3 coordtry = {{0, 0, 0}};
                     bool isNeighbourCandidate = true;
                     for (int8_t idim=0; idim<m_dim; idim++){
+                        coordtry[idim] = m_ghosts[candidateIdx].getLogicalCoordinates(idim);
+
                         int32_t Dx     = int32_t(int32_t(abs(cxyz[idim]))*(-int32_t(coord[idim]) + int32_t(coordtry[idim])));
                         int32_t Dxstar = int32_t((cxyz[idim]-1)/2)*(m_ghosts[candidateIdx].getLogicalSize()) + int32_t((cxyz[idim]+1)/2)*size;
 
@@ -1532,28 +1526,29 @@ namespace bitpit {
             return;
         }
 
-        // Search in the octants
+        // Initialize search
         uint32_t candidateIdx    = 0;
         uint64_t candidateMorton = 0;
 
         uint32_t size = oct->getLogicalSize();
+
+        std::array<int64_t, 3> coord = {{oct->getLogicalCoordinates(0), oct->getLogicalCoordinates(1), oct->getLogicalCoordinates(2)}};
+        if (isperiodic) {
+            std::array<int64_t, 3> periodicOffset = getNodePeriodicOffset(*oct, inode);
+            coord[0] += periodicOffset[0];
+            coord[1] += periodicOffset[1];
+            coord[2] += periodicOffset[2];
+        }
+
         const int8_t (&cxyz)[3] = m_treeConstants->nodeCoeffs[inode];
 
-        // Build Morton number of virtual neigh of same size
-        Octant sameSizeVirtualNeigh;
-        if (isperiodic){
-            sameSizeVirtualNeigh = oct->computeNodePeriodicOctant(inode);
-        }
-        else{
-            u32array3 sameSizeVirtualNeighCoords = oct->getLogicalCoordinates();
-            sameSizeVirtualNeighCoords[0] += uint32_t(cxyz[0]) * size;
-            sameSizeVirtualNeighCoords[1] += uint32_t(cxyz[1]) * size;
-            sameSizeVirtualNeighCoords[2] += uint32_t(cxyz[2]) * size;
-
-            sameSizeVirtualNeigh = Octant(m_dim, level, sameSizeVirtualNeighCoords[0], sameSizeVirtualNeighCoords[1], sameSizeVirtualNeighCoords[2]);
-        }
-
-        uint64_t sameSizeVirtualNeighMorton = sameSizeVirtualNeigh.getMorton();
+        // Compute same-size virtual neighbour information
+        std::array<int64_t, 3> sameSizeVirtualNeighOffset = computeFirstVirtualNodeNeighOffset(level, inode, level);
+        std::array<int64_t, 3> sameSizeVirtualNeighCoord = coord;
+        sameSizeVirtualNeighCoord[0] += sameSizeVirtualNeighOffset[0];
+        sameSizeVirtualNeighCoord[1] += sameSizeVirtualNeighOffset[1];
+        sameSizeVirtualNeighCoord[2] += sameSizeVirtualNeighOffset[2];
+        uint64_t sameSizeVirtualNeighMorton = PABLO::computeMorton(m_dim, sameSizeVirtualNeighCoord[0], sameSizeVirtualNeighCoord[1], sameSizeVirtualNeighCoord[2]);
 
         //
         // Search in the internal octants
@@ -1571,29 +1566,25 @@ namespace bitpit {
 
         // Compute the Morton number of the last candidate
         //
-        // This is the Morton number of the last discendent of the same-size
+        // This is the Morton number of the last descendant of the same-size
         // virtual neighbour.
-        uint64_t lastCandidateMorton = sameSizeVirtualNeigh.computeLastDescMorton();
-
-        // Compute coordinates
-        std::array<int64_t,3> coord;
-        if (isperiodic){
-            coord = oct->getNodePeriodicCoord(inode);
-        }
-        else{
-            coord[0] = oct->getLogicalCoordinates(0);
-            coord[1] = oct->getLogicalCoordinates(1);
-            coord[2] = oct->getLogicalCoordinates(2);
-        }
+        uint8_t maxNodeNeighLevel = getMaxNodeNeighLevel(*oct);
+        std::array<int64_t, 3> lastCandidateOffset = computeLastVirtualNodeNeighOffset(level, inode, maxNodeNeighLevel);
+        std::array<int64_t, 3> lastCandidateCoord = coord;
+        lastCandidateCoord[0] += lastCandidateOffset[0];
+        lastCandidateCoord[1] += lastCandidateOffset[1];
+        lastCandidateCoord[2] += lastCandidateOffset[2];
+        uint64_t lastCandidateMorton = PABLO::computeMorton(m_dim, lastCandidateCoord[0], lastCandidateCoord[1], lastCandidateCoord[2]);
 
         // Search for neighbours of different sizes
         if (candidateIdx < getNumOctants()) {
             while(true){
                 // Detect if the candidate is a neighbour
-                u32array3 coordtry = m_octants[candidateIdx].getLogicalCoordinates();
-
+                u32array3 coordtry = {{0, 0, 0}};
                 bool isNeighbour = true;
                 for (int8_t idim=0; idim<m_dim; idim++){
+                    coordtry[idim] = m_octants[candidateIdx].getLogicalCoordinates(idim);
+
                     int32_t Dx     = int32_t(int32_t(abs(cxyz[idim]))*(-int32_t(coord[idim]) + int32_t(coordtry[idim])));
                     int32_t Dxstar = int32_t((cxyz[idim]-1)/2)*(m_octants[candidateIdx].getLogicalSize()) + int32_t((cxyz[idim]+1)/2)*size;
 
@@ -1641,10 +1632,11 @@ namespace bitpit {
             if (candidateIdx < getNumGhosts()) {
                 while(true){
                     // Detect if the candidate is a neighbour
-                    u32array3 coordtry = m_ghosts[candidateIdx].getLogicalCoordinates();
-
+                    u32array3 coordtry = {{0, 0, 0}};
                     bool isNeighbour = true;
                     for (int8_t idim=0; idim<m_dim; idim++){
+                        coordtry[idim] = m_ghosts[candidateIdx].getLogicalCoordinates(idim);
+
                         int32_t Dx     = int32_t(int32_t(abs(cxyz[idim]))*(-int32_t(coord[idim]) + int32_t(coordtry[idim])));
                         int32_t Dxstar = int32_t((cxyz[idim]-1)/2)*(m_ghosts[candidateIdx].getLogicalSize()) + int32_t((cxyz[idim]+1)/2)*size;
 
@@ -2044,23 +2036,23 @@ namespace bitpit {
                     Octant &neighOctant = (neighGhostFlag ? m_ghosts[neighs[i]]: m_octants[neighs[i]]);
 
                     int8_t neighLevel       = neighOctant.getLevel();
-                    int8_t neighFutureLevel = std::min(m_treeConstants->maxLevel, static_cast<int8_t>(neighLevel + neighOctant.getMarker()));
+                    int8_t neighFutureLevel = std::min(m_treeConstants->maxLevel, int8_t(neighLevel + neighOctant.getMarker()));
                     if(!ghostFlag && futureLevel < neighFutureLevel - 1) {
                         futureLevel = neighFutureLevel - 1;
                         octant.setMarker(futureLevel - level);
                         octant.m_info[Octant::INFO_AUX] = true;
-                        updated = true;
                         updatedProcessOctants.push_back(&octant);
                         updatedProcessGhostFlags.push_back(ghostFlag);
+                        updated = true;
                     }
                     else if(!neighGhostFlag && neighFutureLevel < futureLevel - 1) {
                         neighOctant.setMarker((futureLevel - 1) - neighLevel);
                         neighOctant.m_info[Octant::INFO_AUX] = true;
-                        updated = true;
                         if (neighOctant.getBalance()) {
                             updatedProcessOctants.push_back(&neighOctant);
                             updatedProcessGhostFlags.push_back(neighGhostFlag);
                         }
+                        updated = true;
                     }
                 }
             }
