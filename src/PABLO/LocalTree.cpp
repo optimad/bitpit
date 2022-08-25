@@ -1001,15 +1001,18 @@ namespace bitpit {
      * i-th neighbour is ghost in the local tree.
      * \param[in] oct Pointer to the current octant
      * \param[in] iface Index of face passed through for neighbours finding
-     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
-     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
+     * \param[in,out] neighbours Vector of neighbours indices in octants/ghosts structure
+     * \param[in,out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
      * \param[in] onlyinternal A boolean flag to specify if neighbours have to be found among all the octants (false) or only among the internal ones (true).
+     * \param[in] append A boolean flag to specify if neighbours will be appended to the given vector or if the given vectors will be cleared before adding the neighbours.
      */
     void
-    LocalTree::findNeighbours(const Octant* oct, uint8_t iface, u32vector & neighbours, bvector & isghost, bool onlyinternal) const{
+    LocalTree::findNeighbours(const Octant* oct, uint8_t iface, u32vector & neighbours, bvector & isghost, bool onlyinternal, bool append) const{
 
-        isghost.clear();
-        neighbours.clear();
+        if (!append) {
+            isghost.clear();
+            neighbours.clear();
+        }
 
         // Default if iface is nface<iface<0
         if (iface >= m_treeConstants->nFaces){
@@ -1257,15 +1260,18 @@ namespace bitpit {
      * i-th neighbour is ghost in the local tree.
      * \param[in] oct Pointer to the current octant
      * \param[in] iedge Index of edge passed through for neighbours finding
-     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
-     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
+     * \param[in,out] neighbours Vector of neighbours indices in octants/ghosts structure
+     * \param[in,out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
      * \param[in] onlyinternal A boolean flag to specify if neighbours have to be found among all the octants (false) or only among the internal ones (true).
+     * \param[in] append A boolean flag to specify if neighbours will be appended to the given vector or if the given vectors will be cleared before adding the neighbours.
      */
     void
-    LocalTree::findEdgeNeighbours(const Octant* oct, uint8_t iedge, u32vector & neighbours, bvector & isghost, bool onlyinternal) const{
+    LocalTree::findEdgeNeighbours(const Octant* oct, uint8_t iedge, u32vector & neighbours, bvector & isghost, bool onlyinternal, bool append) const{
 
-        isghost.clear();
-        neighbours.clear();
+        if (!append) {
+            isghost.clear();
+            neighbours.clear();
+        }
 
         // Default if iedge is nface<iedge<0
         if (iedge >= m_treeConstants->nEdges){
@@ -1505,15 +1511,18 @@ namespace bitpit {
      * i-th neighbour is ghost in the local tree.
      * \param[in] oct Pointer to the current octant
      * \param[in] inode Index of node passed through for neighbours finding
-     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
-     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
+     * \param[in,out] neighbours Vector of neighbours indices in octants/ghosts structure
+     * \param[in,out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
+    * \param[in] append A boolean flag to specify if neighbours will be appended to the given vector or if the given vectors will be cleared before adding the neighbours.*
      * \param[in] onlyinternal A boolean flag to specify if neighbours have to be found among all the octants (false) or only among the internal ones (true).
      */
     void
-    LocalTree::findNodeNeighbours(const Octant* oct, uint8_t inode, u32vector & neighbours, bvector & isghost, bool onlyinternal) const{
+    LocalTree::findNodeNeighbours(const Octant* oct, uint8_t inode, u32vector & neighbours, bvector & isghost, bool onlyinternal, bool append) const{
 
-        isghost.clear();
-        neighbours.clear();
+        if (!append) {
+            isghost.clear();
+            neighbours.clear();
+        }
 
         // Default if inode is nnodes<inode<0
         if (inode >= m_treeConstants->nNodes){
@@ -2139,7 +2148,7 @@ namespace bitpit {
 
                     //Balance through faces
                     for (iface=0; iface<m_treeConstants->nFaces; iface++){
-						findNeighbours(m_octants.data() + idx, iface, neigh, isghost, false);
+						findNeighbours(m_octants.data() + idx, iface, neigh, isghost, false, false);
 						sizeneigh = neigh.size();
 						for(i=0; i<sizeneigh; i++){
 							if (!isghost[i]){
@@ -2175,7 +2184,7 @@ namespace bitpit {
                     if (Bedge){
                         //Balance through edges
                         for (iedge=0; iedge<m_treeConstants->nEdges; iedge++){
-							findEdgeNeighbours(m_octants.data() + idx, iedge, neigh, isghost, false);
+							findEdgeNeighbours(m_octants.data() + idx, iedge, neigh, isghost, false, false);
 							sizeneigh = neigh.size();
 							for(i=0; i<sizeneigh; i++){
 								if (!isghost[i]){
@@ -2210,7 +2219,7 @@ namespace bitpit {
                     if (Bnode){
                         //Balance through nodes
                         for (inode=0; inode<m_treeConstants->nNodes; inode++){
-							findNodeNeighbours(m_octants.data() + idx, inode, neigh, isghost, false);
+							findNodeNeighbours(m_octants.data() + idx, inode, neigh, isghost, false, false);
 							sizeneigh = neigh.size();
 							for(i=0; i<sizeneigh; i++){
 								if (!isghost[i]){
@@ -2266,7 +2275,7 @@ namespace bitpit {
                     for (iface=0; iface<m_treeConstants->nFaces; iface++){
                         if(it->getPbound(iface) == true){
                             neigh.clear();
-                            findNeighbours(m_ghosts.data() + idx, iface, neigh, isghost, true);
+                            findNeighbours(m_ghosts.data() + idx, iface, neigh, isghost, true, false);
                             sizeneigh = neigh.size();
                             for(i=0; i<sizeneigh; i++){
                                 if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
@@ -2284,7 +2293,7 @@ namespace bitpit {
                         //Balance through edges
                         for (iedge=0; iedge<m_treeConstants->nEdges; iedge++){
 							neigh.clear();
-							findEdgeNeighbours(m_ghosts.data() + idx, iedge, neigh, isghost, true);
+							findEdgeNeighbours(m_ghosts.data() + idx, iedge, neigh, isghost, true, false);
 							sizeneigh = neigh.size();
 							for(i=0; i<sizeneigh; i++){
 								if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
@@ -2302,7 +2311,7 @@ namespace bitpit {
                         //Balance through nodes
                         for (inode=0; inode<m_treeConstants->nNodes; inode++){
 							neigh.clear();
-							findNodeNeighbours(m_ghosts.data() + idx, inode, neigh, isghost, true);
+							findNodeNeighbours(m_ghosts.data() + idx, inode, neigh, isghost, true, false);
 							sizeneigh = neigh.size();
 							for(i=0; i<sizeneigh; i++){
 								if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
@@ -2334,7 +2343,7 @@ namespace bitpit {
                         //Balance through faces
                         for (iface=0; iface<m_treeConstants->nFaces; iface++){
                             if(!m_octants[idx].getPbound(iface)){
-                                findNeighbours(m_octants.data() + idx, iface, neigh, isghost, false);
+                                findNeighbours(m_octants.data() + idx, iface, neigh, isghost, false, false);
                                 sizeneigh = neigh.size();
                                 for(i=0; i<sizeneigh; i++){
                                     if (!isghost[i]){
@@ -2361,7 +2370,7 @@ namespace bitpit {
                         if (Bedge){
                             //Balance through edges
                             for (iedge=0; iedge<m_treeConstants->nEdges; iedge++){
-								findEdgeNeighbours(m_octants.data() + idx, iedge, neigh, isghost, false);
+								findEdgeNeighbours(m_octants.data() + idx, iedge, neigh, isghost, false, false);
 								sizeneigh = neigh.size();
 								for(i=0; i<sizeneigh; i++){
 									if (!isghost[i]){
@@ -2388,7 +2397,7 @@ namespace bitpit {
                         if (Bnode){
                             //Balance through nodes
                             for (inode=0; inode<m_treeConstants->nNodes; inode++){
-								findNodeNeighbours(m_octants.data() + idx, inode, neigh, isghost, false);
+								findNodeNeighbours(m_octants.data() + idx, inode, neigh, isghost, false, false);
 								sizeneigh = neigh.size();
 								for(i=0; i<sizeneigh; i++){
 									if (!isghost[i]){
@@ -2442,7 +2451,7 @@ namespace bitpit {
                     for (iface=0; iface<m_treeConstants->nFaces; iface++){
                         if(it->getPbound(iface) == true){
                             neigh.clear();
-                            findNeighbours(m_ghosts.data() + idx, iface, neigh, isghost, true);
+                            findNeighbours(m_ghosts.data() + idx, iface, neigh, isghost, true, false);
                             sizeneigh = neigh.size();
                             for(i=0; i<sizeneigh; i++){
                                 if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
@@ -2460,7 +2469,7 @@ namespace bitpit {
                         //Balance through edges
                         for (iedge=0; iedge<m_treeConstants->nEdges; iedge++){
 							neigh.clear();
-							findEdgeNeighbours(m_ghosts.data() + idx, iedge, neigh, isghost, true);
+							findEdgeNeighbours(m_ghosts.data() + idx, iedge, neigh, isghost, true, false);
 							sizeneigh = neigh.size();
 							for(i=0; i<sizeneigh; i++){
 								if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
@@ -2478,7 +2487,7 @@ namespace bitpit {
                         //Balance through nodes
                         for (inode=0; inode<m_treeConstants->nNodes; inode++){
 							neigh.clear();
-							findNodeNeighbours(m_ghosts.data() + idx, inode, neigh, isghost, true);
+							findNodeNeighbours(m_ghosts.data() + idx, inode, neigh, isghost, true, false);
 							sizeneigh = neigh.size();
 							for(i=0; i<sizeneigh; i++){
 								if((m_octants[neigh[i]].getLevel() + m_octants[neigh[i]].getMarker()) < (targetmarker - 1)){
@@ -2510,7 +2519,7 @@ namespace bitpit {
                         //Balance through faces
                         for (iface=0; iface<m_treeConstants->nFaces; iface++){
                             if(!m_octants[idx].getPbound(iface)){
-                                findNeighbours(m_octants.data() + idx, iface, neigh, isghost, false);
+                                findNeighbours(m_octants.data() + idx, iface, neigh, isghost, false, false);
                                 sizeneigh = neigh.size();
                                 for(i=0; i<sizeneigh; i++){
                                     if (!isghost[i]){
@@ -2537,7 +2546,7 @@ namespace bitpit {
                         if (Bedge){
                             //Balance through edges
                             for (iedge=0; iedge<m_treeConstants->nEdges; iedge++){
-								findEdgeNeighbours(m_octants.data() + idx, iedge, neigh, isghost, false);
+								findEdgeNeighbours(m_octants.data() + idx, iedge, neigh, isghost, false, false);
 								sizeneigh = neigh.size();
 								for(i=0; i<sizeneigh; i++){
 									if (!isghost[i]){
@@ -2564,7 +2573,7 @@ namespace bitpit {
                         if (Bnode){
                             //Balance through nodes
                             for (inode=0; inode<m_treeConstants->nNodes; inode++){
-								findNodeNeighbours(m_octants.data() + idx, inode, neigh, isghost, false);
+								findNodeNeighbours(m_octants.data() + idx, inode, neigh, isghost, false, false);
 								sizeneigh = neigh.size();
 								for(i=0; i<sizeneigh; i++){
 									if (!isghost[i]){
@@ -2627,7 +2636,7 @@ namespace bitpit {
 		for (it = obegin; it != oend; ++it){
 			for (iface = 0; iface < m_dim; iface++){
 				iface2 = iface*2;
-				findNeighbours(m_ghosts.data() + idx, iface2, neighbours, isghost, true);
+				findNeighbours(m_ghosts.data() + idx, iface2, neighbours, isghost, true, false);
 				nsize = neighbours.size();
 				if (!(it->m_info[iface2])){
 					//Internal intersection
@@ -2676,7 +2685,7 @@ namespace bitpit {
 		for (it = obegin; it != oend; ++it){
 			for (iface = 0; iface < m_dim; iface++){
 				iface2 = iface*2;
-				findNeighbours(m_octants.data() + idx, iface2, neighbours, isghost, false);
+				findNeighbours(m_octants.data() + idx, iface2, neighbours, isghost, false, false);
 				nsize = neighbours.size();
 				if (nsize) {
 					if (!(it->m_info[iface2])){
@@ -2785,7 +2794,7 @@ namespace bitpit {
 					}
 					else{
 						//Periodic intersection
-						findNeighbours(m_octants.data() + idx, iface2+1, neighbours, isghost, false);
+						findNeighbours(m_octants.data() + idx, iface2+1, neighbours, isghost, false, false);
 						nsize = neighbours.size();
 						for (i = 0; i < nsize; i++){
 							if (isghost[i]){

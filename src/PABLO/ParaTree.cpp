@@ -2642,20 +2642,21 @@ namespace bitpit {
      * \param[in] oct Pointer to the current octant.
      * \param[in] entityIdx Index of face/edge/node passed through for neighbours finding
      * \param[in] entityCodim Codimension of the entity (1=face, 2=edge and 3=vertex for 3D trees, 1=face, 2=vertex for 2D trees)
-     * \param[out] neighbours Vector with the index of the neighbours in their container
-     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
-     * \param[in] onlyinternal A boolean flag to specify if neighbours have to be found among all the octants (false) or only among the internal ones (true).*/
+     * \param[in,out] neighbours Vector with the index of the neighbours in their container
+     * \param[in,out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
+     * \param[in] onlyinternal A boolean flag to specify if neighbours have to be found among all the octants (false) or only among the internal ones (true).
+     * \param[in] append A boolean flag to specify if neighbours will be appended to the given vector or if the given vectors will be cleared before adding the neighbours.*/
     void
-    ParaTree::findNeighbours(const Octant* oct, uint8_t entityIdx, uint8_t entityCodim, u32vector & neighbours, bvector & isghost, bool onlyinternal) const{
+    ParaTree::findNeighbours(const Octant* oct, uint8_t entityIdx, uint8_t entityCodim, u32vector & neighbours, bvector & isghost, bool onlyinternal, bool append) const{
 
         if (entityCodim == 1){
-            m_octree.findNeighbours(oct, entityIdx, neighbours, isghost, onlyinternal);
+            m_octree.findNeighbours(oct, entityIdx, neighbours, isghost, onlyinternal, append);
         }
         else if (entityCodim == 2 && m_dim == 3){
-            m_octree.findEdgeNeighbours(oct, entityIdx, neighbours, isghost, onlyinternal);
+            m_octree.findEdgeNeighbours(oct, entityIdx, neighbours, isghost, onlyinternal, append);
         }
         else if (entityCodim == m_dim){
-            m_octree.findNodeNeighbours(oct, entityIdx, neighbours, isghost, onlyinternal);
+            m_octree.findNodeNeighbours(oct, entityIdx, neighbours, isghost, onlyinternal, append);
         }
         else {
             neighbours.clear();
@@ -2677,7 +2678,7 @@ namespace bitpit {
 
         const Octant* oct = &m_octree.m_octants[idx];
 
-        findNeighbours(oct, entityIdx, entityCodim, neighbours, isghost, false);
+        findNeighbours(oct, entityIdx, entityCodim, neighbours, isghost, false, false);
 
     };
 
@@ -2692,7 +2693,7 @@ namespace bitpit {
 
         const Octant* oct = &m_octree.m_octants[idx];
         bvector isghost;
-        findNeighbours(oct, entityIdx, entityCodim, neighbours, isghost, true);
+        findNeighbours(oct, entityIdx, entityCodim, neighbours, isghost, true, false);
 
     };
 
@@ -2707,7 +2708,7 @@ namespace bitpit {
     void
     ParaTree::findNeighbours(const Octant* oct, uint8_t entityIdx, uint8_t entityCodim, u32vector & neighbours, bvector & isghost) const {
 
-        findNeighbours(oct, entityIdx, entityCodim, neighbours, isghost, false);
+        findNeighbours(oct, entityIdx, entityCodim, neighbours, isghost, false, false);
 
     };
 
@@ -2723,7 +2724,7 @@ namespace bitpit {
 
         const Octant* oct = &m_octree.m_ghosts[idx];
         bvector isghost;
-        findNeighbours(oct, entityIdx, entityCodim, neighbours, isghost, true);
+        findNeighbours(oct, entityIdx, entityCodim, neighbours, isghost, true, false);
 
     };
 
@@ -2740,7 +2741,7 @@ namespace bitpit {
     ParaTree::findGhostNeighbours(uint32_t idx, uint8_t entityIdx, uint8_t entityCodim, u32vector & neighbours, bvector & isghost) const {
 
         const Octant* oct = &m_octree.m_ghosts[idx];
-        findNeighbours(oct, entityIdx, entityCodim, neighbours, isghost, false);
+        findNeighbours(oct, entityIdx, entityCodim, neighbours, isghost, false, false);
 
     };
 
@@ -2756,7 +2757,7 @@ namespace bitpit {
     void
     ParaTree::findGhostNeighbours(const Octant* oct, uint8_t entityIdx, uint8_t entityCodim, u32vector & neighbours, bvector & isghost) const {
 
-        findNeighbours(oct, entityIdx, entityCodim, neighbours, isghost, false);
+        findNeighbours(oct, entityIdx, entityCodim, neighbours, isghost, false, false);
 
     };
 
@@ -2776,7 +2777,7 @@ namespace bitpit {
         bvector codimIsGhost;
 
         // Get vertex neighbours
-        m_octree.findNodeNeighbours(oct, node, neighbours, isghost, false);
+        findNeighbours(oct, node, m_dim, neighbours, isghost, false, false);
 
         // Get edge neighbours
         //
@@ -2790,7 +2791,7 @@ namespace bitpit {
         //    vertex.
         if (dim == 3) {
             for (int edge : m_treeConstants->nodeEdge[node]) {
-                findNeighbours(oct, edge, 2, codimNeighnours, codimIsGhost, false);
+                findNeighbours(oct, edge, 2, codimNeighnours, codimIsGhost, false, false);
                 for (std::size_t i = 0; i < codimNeighnours.size(); ++i) {
                     const Octant* neighOctant;
                     if (codimIsGhost[i]==0) {
@@ -2823,7 +2824,7 @@ namespace bitpit {
         //    vertex.
         for (int j = 0; j < dim; ++j) {
             int face = m_treeConstants->nodeFace[node][j];
-            findNeighbours(oct, face, 1, codimNeighnours, codimIsGhost, false);
+            findNeighbours(oct, face, 1, codimNeighnours, codimIsGhost, false, false);
             for (std::size_t i = 0; i < codimNeighnours.size(); ++i) {
                 const Octant* neighOctant;
                 if (codimIsGhost[i]==0) {
@@ -2896,7 +2897,7 @@ namespace bitpit {
         isghost.clear();
         for(uint8_t codim = 1; codim <= m_dim; ++codim){
             for(int item = 0; item < nCodimensionItems[codim]; ++item){
-                findNeighbours(oct,item,codim,singleCodimNeighbours,singleCodimIsGhost,false);
+                findNeighbours(oct,item,codim,singleCodimNeighbours,singleCodimIsGhost,false,false);
                 neighbours.insert( neighbours.end(), singleCodimNeighbours.begin(), singleCodimNeighbours.end() );
                 isghost.insert( isghost.end(), singleCodimIsGhost.begin(), singleCodimIsGhost.end() );
             }

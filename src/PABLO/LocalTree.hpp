@@ -203,9 +203,9 @@ private:
 	void 		checkCoarse(uint64_t partLastDesc, u32vector & mapidx);
 	void 		updateLocalMaxDepth();
 
-    void        findNeighbours(const Octant* oct, uint8_t iface, u32vector & neighbours, bvector & isghost, bool onlyinternal) const;
-    void        findEdgeNeighbours(const Octant* oct, uint8_t iedge, u32vector & neighbours, bvector & isghost, bool onlyinternal) const;
-    void        findNodeNeighbours(const Octant* oct, uint8_t inode, u32vector & neighbours, bvector & isghost, bool onlyinternal) const;
+    void        findNeighbours(const Octant* oct, uint8_t iface, u32vector & neighbours, bvector & isghost, bool onlyinternal, bool append) const;
+    void        findEdgeNeighbours(const Octant* oct, uint8_t iedge, u32vector & neighbours, bvector & isghost, bool onlyinternal, bool append) const;
+    void        findNodeNeighbours(const Octant* oct, uint8_t inode, u32vector & neighbours, bvector & isghost, bool onlyinternal, bool append) const;
 
 	void 		computeNeighSearchBegin(uint64_t sameSizeVirtualNeighMorton, const octvector &octants, uint32_t *searchBeginIdx, uint64_t *searchBeginMorton) const;
 
