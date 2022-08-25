@@ -26,6 +26,7 @@
 // INCLUDES                                                                            //
 // =================================================================================== //
 #include "bitpit_common.hpp"
+#include "bitpit_operators.hpp"
 
 #include "ParaTree.hpp"
 #include <climits>
@@ -2890,16 +2891,16 @@ namespace bitpit {
         }
         nCodimensionItems[m_dim] = getNnodes();
 
-        u32vector singleCodimNeighbours;
-        bvector singleCodimIsGhost;
-
         neighbours.clear();
         isghost.clear();
+
+        int initalCapacity = uipow(3, m_dim) - 1;
+        neighbours.reserve(initalCapacity);
+        isghost.reserve(initalCapacity);
+
         for(uint8_t codim = 1; codim <= m_dim; ++codim){
             for(int item = 0; item < nCodimensionItems[codim]; ++item){
-                findNeighbours(oct,item,codim,singleCodimNeighbours,singleCodimIsGhost,false,false);
-                neighbours.insert( neighbours.end(), singleCodimNeighbours.begin(), singleCodimNeighbours.end() );
-                isghost.insert( isghost.end(), singleCodimIsGhost.begin(), singleCodimIsGhost.end() );
+                findNeighbours(oct,item,codim,neighbours,isghost,false,true);
             }
         }
     }
