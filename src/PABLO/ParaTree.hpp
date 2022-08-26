@@ -571,7 +571,7 @@ namespace bitpit {
         void 		exchangeGhostHaloAccretions(DataCommunicator *dataCommunicator, std::vector<AccretionData> *accretions);
 
         void 		computeGhostHalo();
-        void 		commMarker();
+        bool 		commMarker();
 #endif
         void 		updateAfterCoarse();
         void 		balance21(bool verbose, bool balanceNewOctants);
