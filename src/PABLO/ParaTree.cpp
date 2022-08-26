@@ -630,7 +630,6 @@ namespace bitpit {
         // Restore octants
         uint32_t nOctants;
         utils::binary::read(stream, nOctants);
-        m_octree.m_sizeOctants = nOctants;
 
         uint32_t nGlobalOctants;
         utils::binary::read(stream, nGlobalOctants);
@@ -1648,10 +1647,11 @@ namespace bitpit {
      */
     uint64_t
     ParaTree::getGhostGlobalIdx(uint32_t idx) const {
-        if (idx<m_octree.m_sizeGhosts){
+        uint32_t nGhosts = m_octree.getNumGhosts();
+        if (idx<nGhosts){
             return m_octree.m_globalIdxGhosts[idx];
         };
-        return uint64_t(m_octree.m_sizeGhosts);
+        return uint64_t(nGhosts);
     };
 
     /*! Returns true if the specified global index belongs to the current
@@ -4710,7 +4710,7 @@ namespace bitpit {
     void
     ParaTree::computePartition(const dvector *weight, uint32_t *partition){
 
-        assert(weight->size() >= m_octree.m_sizeOctants);
+        assert(weight->size() >= m_octree.getNumOctants());
 
         // Evaluate global weights
         //
@@ -4727,7 +4727,8 @@ namespace bitpit {
             // that can be exchanged using MPI funcitons is limited to INT_MAX.
             assert(m_globalNumOctants <= INT_MAX);
             std::vector<int> currentPartition(m_nproc);
-            MPI_Allgather(&(m_octree.m_sizeOctants), 1, MPI_INT, currentPartition.data(), 1, MPI_INT, m_comm);
+            int nOctants = m_octree.getNumOctants();
+            MPI_Allgather(&nOctants, 1, MPI_INT, currentPartition.data(), 1, MPI_INT, m_comm);
 
             std::vector<int> displacements(m_nproc);
             displacements[0] = 0;
@@ -4737,7 +4738,7 @@ namespace bitpit {
 
             globalWeightsStorage.resize(m_globalNumOctants);
             globalWeights = globalWeightsStorage.data();
-            MPI_Allgatherv(weight->data(), m_octree.m_sizeOctants, MPI_DOUBLE, globalWeightsStorage.data(),
+            MPI_Allgatherv(weight->data(), nOctants, MPI_DOUBLE, globalWeightsStorage.data(),
                            currentPartition.data(), displacements.data(), MPI_DOUBLE, m_comm);
         }
 
@@ -4959,8 +4960,6 @@ namespace bitpit {
     void
     ParaTree::updateLoadBalance() {
         //update sizes
-        m_octree.m_sizeOctants = m_octree.m_octants.size();
-
         m_octree.updateLocalMaxDepth();
         uint64_t* rbuff = new uint64_t[m_nproc];
 
@@ -5621,15 +5620,15 @@ namespace bitpit {
         std::sort(ghostCommunicatorRecvsRanks.begin(), ghostCommunicatorRecvsRanks.end());
 
         // Prepare ghost data structures
-        m_octree.m_sizeGhosts = 0;
+        uint32_t nGhosts = 0;
         for (int rank : ghostCommunicatorRecvsRanks) {
             RecvBuffer &recvBuffer = ghostDataCommunicator.getRecvBuffer(rank);
             std::size_t nRankGhosts = recvBuffer.getSize() / GHOST_ENTRY_BINARY_SIZE;
-            m_octree.m_sizeGhosts += nRankGhosts;
+            nGhosts += nRankGhosts;
         }
 
-        m_octree.m_ghosts.resize(m_octree.m_sizeGhosts);
-        m_octree.m_globalIdxGhosts.resize(m_octree.m_sizeGhosts);
+        m_octree.m_ghosts.resize(nGhosts);
+        m_octree.m_globalIdxGhosts.resize(nGhosts);
 
         // Receive the ghosts
         //

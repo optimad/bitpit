@@ -813,16 +813,15 @@ namespace bitpit {
 
                 m_octree.m_octants.resize(newSizeOctants);
                 m_octree.m_octants.shrink_to_fit();
-                m_octree.m_sizeOctants = m_octree.m_octants.size();
 
                 if (userData) {
-                    userData->resize(m_octree.m_sizeOctants);
+                    userData->resize(newSizeOctants);
                     userData->shrink();
                 }
             } else {
                 // Compute information about the current partitioning
                 uint64_t lastOctantGlobalIdx  = m_partitionRangeGlobalIdx[m_rank];
-                uint64_t firstOctantGlobalIdx = lastOctantGlobalIdx - m_octree.m_sizeOctants + 1;
+                uint64_t firstOctantGlobalIdx = lastOctantGlobalIdx - m_octree.m_octants.size() + 1;
 
                 // Initialize communications
                 DataCommunicator lbCommunicator(m_comm);
@@ -877,13 +876,12 @@ namespace bitpit {
                 }
 
                 // Move resident octants into place
-                if (newSizeOctants > m_octree.m_sizeOctants) {
+                if (newSizeOctants > m_octree.m_octants.size()) {
                     m_octree.m_octants.reserve(newSizeOctants);
                     m_octree.m_octants.resize(newSizeOctants);
-                    m_octree.m_sizeOctants = m_octree.m_octants.size();
 
                     if (userData) {
-                        userData->resize(m_octree.m_sizeOctants);
+                        userData->resize(newSizeOctants);
                     }
                 }
 
@@ -929,13 +927,12 @@ namespace bitpit {
                     }
                 }
 
-                if (newSizeOctants < m_octree.m_sizeOctants) {
+                if (newSizeOctants < m_octree.m_octants.size()) {
                     m_octree.m_octants.resize(newSizeOctants);
                     m_octree.m_octants.shrink_to_fit();
-                    m_octree.m_sizeOctants = m_octree.m_octants.size();
 
                     if (userData) {
-                        userData->resize(m_octree.m_sizeOctants);
+                        userData->resize(newSizeOctants);
                         userData->shrink();
                     }
                 }
@@ -970,12 +967,11 @@ namespace bitpit {
 
             // Update ghosts
             m_octree.m_ghosts.clear();
-            m_octree.m_sizeGhosts = 0;
 
             computeGhostHalo();
 
             if (userData) {
-                userData->resizeGhost(m_octree.m_sizeGhosts);
+                userData->resizeGhost(m_octree.getNumGhosts());
             }
         }
 #endif
