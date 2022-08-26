@@ -908,19 +908,14 @@ namespace bitpit {
     bool
     LocalTree::globalCoarse(u32vector & mapidx){
 
-        uint32_t 	idx;
-        bool 		dorefine = false;
-
-        for (idx=0; idx<m_sizeOctants; idx++){
-            m_octants[idx].setMarker(-1);
+        for (Octant &octant : m_octants){
+            octant.setMarker(-1);
         }
-        for (idx=0; idx<m_sizeGhosts; idx++){
-            m_ghosts[idx].setMarker(-1);
+        for (Octant &octant : m_ghosts){
+            octant.setMarker(-1);
         }
 
-        dorefine = coarse(mapidx);
-
-        return dorefine;
+        return coarse(mapidx);
 
     };
 
