@@ -238,13 +238,6 @@ public:
     std::vector<Octant>    buildChildren() const;
     void                   buildChildren(Octant *children) const;
 protected:
-    uint64_t computePeriodicMorton(uint8_t iface) const;
-    Octant computePeriodicOctant(uint8_t iface) const;
-    Octant computeNodePeriodicOctant(uint8_t inode) const;
-    Octant computeEdgePeriodicOctant(uint8_t iedge) const;
-    std::array<int64_t,3> getPeriodicCoord(uint8_t iface) const;
-    std::array<int64_t,3> getNodePeriodicCoord(uint8_t inode) const;
-    std::array<int64_t,3> getEdgePeriodicCoord(uint8_t iedge) const;
     uint8_t getFamilySplittingNode() const;
 };
 
