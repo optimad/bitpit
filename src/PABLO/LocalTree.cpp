@@ -453,7 +453,6 @@ namespace bitpit {
             // Octants cannot be refined further than the maximum level
             if(octant.getLevel()>=m_treeConstants->maxLevel){
                 octant.setMarker(0);
-                octant.m_info[Octant::INFO_AUX] = false;
                 continue;
             }
 
@@ -514,7 +513,6 @@ namespace bitpit {
             } else {
                 // Move original octant out of the container
                 Octant fatherOctant = std::move(octant);
-                fatherOctant.m_info[Octant::INFO_AUX] = false;
 
                 // Create children
                 uint8_t nChildren = fatherOctant.countChildren();
@@ -663,7 +661,6 @@ namespace bitpit {
                                 }
                             }
                             father.m_info[Octant::INFO_NEW4COARSENING] = true;
-                            father.m_info[Octant::INFO_AUX] = false;
                             father.setMarker(markerfather);
                             //Impossible in this version
 //                            if (markerfather < 0 && mapsize == 0){
@@ -846,7 +843,6 @@ namespace bitpit {
                         }
                     }
                     father.m_info[Octant::INFO_NEW4COARSENING] = true;
-                    father.m_info[Octant::INFO_AUX] = false;
                     father.setGhostLayer(-1);
                     //Impossible in this version
                     //                if (markerfather < 0 && mapsize == 0){
@@ -1799,7 +1795,6 @@ namespace bitpit {
                             Octant &octant = m_octants[ii];
                             if (octant.getMarker()<0){
                                 octant.setMarker(0);
-                                octant.m_info[Octant::INFO_AUX]=true;
                                 if (updatedOctants) {
                                     updatedOctants->push_back(&octant);
                                 }
@@ -1853,7 +1848,6 @@ namespace bitpit {
                             Octant &octant = m_octants[ii];
                             if (octant.getMarker()<0){
                                 octant.setMarker(0);
-                                octant.m_info[Octant::INFO_AUX]=true;
                                 if (updatedOctants) {
                                     updatedOctants->push_back(&octant);
                                 }
@@ -1907,7 +1901,6 @@ namespace bitpit {
                 else{
                     if (idx<=last_idx){
                         octant.setMarker(0);
-                        octant.m_info[Octant::INFO_AUX]=true;
                         if (updatedOctants) {
                             updatedOctants->push_back(&octant);
                         }
@@ -1926,14 +1919,13 @@ namespace bitpit {
     // =================================================================================== //
 
     /*! 2:1 balancing on level a local tree (refinement wins!)
-     * The balance is enforced on octants with the AUX bit set and, if
-     * requested, also on new octants.
      * \param[in] doNew Set to true the balance is enforced also on new octants.
      * \param[in] doInterior Set to false if the interior octants are already balanced.
+     * \param[in] doGhost Set to true if the ghost octants will be processed.
      * \return True if balanced done with some markers modification.
      */
     bool
-    LocalTree::localBalance(bool doNew, bool doInterior){
+    LocalTree::localBalance(bool doNew, bool doInterior, bool doGhost){
 
         bool balanceEdges = ((m_balanceCodim>1) && (m_dim==3));
         bool balanceNodes = (m_balanceCodim==m_dim);
@@ -1948,9 +1940,9 @@ namespace bitpit {
                 bool balanceOctant = octant.getBalance();
                 if (balanceOctant) {
                     if (doNew) {
-                        balanceOctant = (octant.m_info[Octant::INFO_AUX] || (octant.getMarker() != 0) || octant.getIsNewC() || octant.getIsNewR());
+                        balanceOctant = (octant.getMarker() != 0) || octant.getIsNewC() || octant.getIsNewR();
                     } else {
-                        balanceOctant = (octant.m_info[Octant::INFO_AUX] || (octant.getMarker() != 0));
+                        balanceOctant = (octant.getMarker() != 0);
                     }
                 }
 
@@ -1967,25 +1959,22 @@ namespace bitpit {
         // Identify ghost octants that will be processed
         //
         // Ghost octants will be balanced by the process that owns them, however they may
-        // balancing of local octants.
-        for (Octant &octant : m_ghosts){
-            // Skip octants that doesn't need balancing
-            bool balanceOctant = octant.getBalance();
-            if (balanceOctant) {
-                if (doNew) {
-                    balanceOctant = (octant.m_info[Octant::INFO_AUX] || (octant.getMarker() != 0) || octant.getIsNewC() || octant.getIsNewR());
-                } else {
-                    balanceOctant = (octant.m_info[Octant::INFO_AUX] || (octant.getMarker() != 0));
+        // affect balancing of local octants. If ghost octnts are processed, we process all
+        // ghost octants of the first layer, not only the ones that need balancing. That's
+        // because it's faster to process all the ghost octants that may affect balacning
+        // of internal octants, rather than find the ones that actually affect balacing of
+        // internal octants.
+        if (doGhost) {
+            for (Octant &octant : m_ghosts){
+                // Only ghosts of the first layer can affect load balance
+                if (octant.getGhostLayer() > 0) {
+                    continue;
                 }
-            }
 
-            if (!balanceOctant) {
-                continue;
+                // Add octant to the process list
+                processOctants.push_back(&octant);
+                processGhostFlags.push_back(true);
             }
-
-            // Add octant to the process list
-            processOctants.push_back(&octant);
-            processGhostFlags.push_back(true);
         }
 
         // Iterative balacing
@@ -2042,14 +2031,12 @@ namespace bitpit {
                     if(!ghostFlag && futureLevel < neighFutureLevel - 1) {
                         futureLevel = neighFutureLevel - 1;
                         octant.setMarker(futureLevel - level);
-                        octant.m_info[Octant::INFO_AUX] = true;
                         updatedProcessOctants.push_back(&octant);
                         updatedProcessGhostFlags.push_back(ghostFlag);
                         updated = true;
                     }
                     else if(!neighGhostFlag && neighFutureLevel < futureLevel - 1) {
                         neighOctant.setMarker((futureLevel - 1) - neighLevel);
-                        neighOctant.m_info[Octant::INFO_AUX] = true;
                         if (neighOctant.getBalance()) {
                             updatedProcessOctants.push_back(&neighOctant);
                             updatedProcessGhostFlags.push_back(neighGhostFlag);

@@ -383,8 +383,6 @@ Octant::getBalance() const{return (m_info[OctantInfo::INFO_BALANCED]);};
  */
 void
 Octant::setMarker(int8_t marker){
-	if (marker != m_marker)
-		m_info[OctantInfo::INFO_AUX] = true;
 	this->m_marker = marker;
 };
 
@@ -393,8 +391,6 @@ Octant::setMarker(int8_t marker){
  */
 void
 Octant::setBalance(bool balance){
-	if (balance != m_info[OctantInfo::INFO_BALANCED])
-		m_info[OctantInfo::INFO_AUX] = true;
 	m_info[OctantInfo::INFO_BALANCED] = balance;
 };
 

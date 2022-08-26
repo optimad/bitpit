@@ -3720,7 +3720,6 @@ namespace bitpit {
         for (iter = m_octree.m_octants.begin(); iter != iterend; ++iter){
             iter->m_info[Octant::INFO_NEW4REFINEMENT] = false;
             iter->m_info[Octant::INFO_NEW4COARSENING] = false;
-            iter->m_info[Octant::INFO_AUX] = false;
         }
 
         // Initialize mapping
@@ -3804,7 +3803,6 @@ namespace bitpit {
         for (iter = m_octree.m_octants.begin(); iter != iterend; ++iter){
             iter->m_info[Octant::INFO_NEW4REFINEMENT] = false;
             iter->m_info[Octant::INFO_NEW4COARSENING] = false;
-            iter->m_info[Octant::INFO_AUX] = false;
         }
 
         if (mapper_flag){
@@ -5691,17 +5689,19 @@ namespace bitpit {
         ghostDataCommunicator.waitAllSends();
     }
 
-    /*! Communicate the marker of the octants and the auxiliary info[15].
+    /*! Communicate the marker of the octants.
+     * \return True if markers of the current process have been updated (this is a local
+     * information).
      */
-    void
+    bool
     ParaTree::commMarker() {
         // If the tree is not partitioned, there is nothing to communicate.
         if (m_serial) {
-            return;
+            return false;
         }
 
         // Binary size of a marker entry in the communication buffer
-        const std::size_t MARKER_ENTRY_BINARY_SIZE = sizeof(int8_t) + sizeof(bool);
+        const std::size_t MARKER_ENTRY_BINARY_SIZE = sizeof(Octant::m_marker);
 
         // Fill communication buffer with level and marker
         //
@@ -5722,7 +5722,6 @@ namespace bitpit {
             for(std::size_t i = 0; i < nRankBorders; ++i){
                 const Octant &octant = m_octree.m_octants[rankBordersPerProc[i]];
                 sendBuffer << octant.getMarker();
-                sendBuffer << static_cast<bool>(octant.m_info[Octant::INFO_AUX]);
             }
         }
 
@@ -5737,6 +5736,7 @@ namespace bitpit {
         std::vector<int> recvRanks = markerCommunicator.getRecvRanks();
         std::sort(recvRanks.begin(), recvRanks.end());
 
+        bool updated = false;
         uint32_t ghostIdx = 0;
         for(int rank : recvRanks){
             markerCommunicator.waitRecv(rank);
@@ -5746,17 +5746,20 @@ namespace bitpit {
             for(std::size_t i = 0; i < nRankGhosts; ++i){
                 int8_t marker;
                 recvBuffer >> marker;
-                m_octree.m_ghosts[ghostIdx].setMarker(marker);
 
-                bool aux;
-                recvBuffer >> aux;
-                m_octree.m_ghosts[ghostIdx].m_info[Octant::INFO_AUX] = aux;
+                Octant &octant = m_octree.m_ghosts[ghostIdx];
+                if (octant.getMarker() != marker) {
+                    octant.setMarker(marker);
+                    updated = true;
+                }
 
                 ++ghostIdx;
             }
         }
 
         markerCommunicator.waitAllSends();
+
+        return updated;
     }
 #endif
 
@@ -5794,33 +5797,37 @@ namespace bitpit {
             (*m_log) << " " << endl;
         }
 
-        // 2:1 balancing
-        int iteration = 0;
-        bool markersModified = true;
-        while (markersModified) {
-            if (verbose){
-                (*m_log) << " Iteration	:	" + to_string(iteration) << endl;
-            }
-
-            // Only first iteration will process internl octants
-            bool processInternals = (iteration == 0);
-
-#if BITPIT_ENABLE_MPI==1
-            // Communicate markers
-            commMarker();
-#endif
-
-            // Execute local loadbalance
-            markersModified = m_octree.localBalance(balanceNewOctants, processInternals);
-#if BITPIT_ENABLE_MPI==1
-            if (!m_serial) {
-                MPI_Allreduce(MPI_IN_PLACE, &markersModified, 1, MPI_C_BOOL, MPI_LOR, m_comm);
-            }
-#endif
-
-            // Increase iteration counter
-            iteration++;
+        // Process internal octants
+        if (verbose){
+            (*m_log) << " Processing internal octants" << endl;
         }
+
+        m_octree.localBalance(balanceNewOctants, true, false);
+
+#if BITPIT_ENABLE_MPI==1
+        // Propagate marker changes across processes
+        if (!m_serial) {
+            if (verbose){
+                (*m_log) << " Propagating marker changes across processes" << endl;
+            }
+
+            while (true) {
+                // Exchange markers across processes
+                bool markersUpdated = commMarker();
+                MPI_Allreduce(MPI_IN_PLACE, &markersUpdated, 1, MPI_C_BOOL, MPI_LOR, m_comm);
+                if (!markersUpdated) {
+                    break;
+                }
+
+                // Process ghost octants to propagate marker changes applied by other processes
+                bool balanceUpdated = m_octree.localBalance(balanceNewOctants, false, true);
+                MPI_Allreduce(MPI_IN_PLACE, &balanceUpdated, 1, MPI_C_BOOL, MPI_LOR, m_comm);
+                if (!balanceUpdated) {
+                    break;
+                }
+            }
+        }
+#endif
 
         // Print footer
         if (verbose){
