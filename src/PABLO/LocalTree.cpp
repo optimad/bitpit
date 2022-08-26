@@ -90,7 +90,7 @@ namespace bitpit {
      */
     uint32_t
     LocalTree::getNumGhosts() const{
-        return m_sizeGhosts;
+        return m_ghosts.size();
     };
 
     /*! Get the number of the octants in the local tree.
@@ -98,7 +98,7 @@ namespace bitpit {
      */
     uint32_t
     LocalTree::getNumOctants() const{
-        return m_sizeOctants;
+        return m_octants.size();
     };
 
     /*! Get max depth reached in local tree
@@ -224,7 +224,7 @@ namespace bitpit {
      */
     void
     LocalTree::setFirstDescMorton(){
-        if(m_sizeOctants){
+        if(getNumOctants() > 0){
             octvector::const_iterator firstOctant = m_octants.begin();
             m_firstDescMorton = firstOctant->getMorton();
         } else {
@@ -236,7 +236,7 @@ namespace bitpit {
      */
     void
     LocalTree::setLastDescMorton(){
-        if(m_sizeOctants){
+        if(getNumOctants() > 0){
             octvector::const_iterator lastOctant = m_octants.end() - 1;
             uint32_t x,y,z,delta;
             delta = (uint32_t)(1<<((uint8_t)m_treeConstants->maxLevel - lastOctant->m_level)) - 1;
@@ -380,9 +380,6 @@ namespace bitpit {
         } else {
             m_localMaxDepth = -1;
         }
-
-        m_sizeGhosts  = m_ghosts.size();
-        m_sizeOctants = m_octants.size();
 
         setFirstDescMorton();
         setLastDescMorton();
@@ -554,9 +551,6 @@ namespace bitpit {
             }
         }
 
-        // Update the number of octants
-        m_sizeOctants = nFutureOctants;
-
         return (!refinementCompleted);
 
     };
@@ -587,16 +581,18 @@ namespace bitpit {
         //------------------------------------------ //
         // Initialization
 
-        m_sizeOctants = m_octants.size();
-        m_sizeGhosts = m_ghosts.size();
+        uint32_t nInitialOctants = getNumOctants();
+        if (nInitialOctants == 0) {
+            return false;
+        }
 
-        if (m_sizeOctants == 0) return false;
+        uint32_t nInitialGhosts = getNumGhosts();
 
         nbro = nend = nstart = 0;
         nidx = offset = 0;
 
         idx2_gh = 0;
-        idx1_gh = m_sizeGhosts - 1;
+        idx1_gh = nInitialGhosts - 1;
 
         //------------------------------------------ //
 
@@ -604,7 +600,7 @@ namespace bitpit {
         if (m_ghosts.size()){
             bool check = true;
             while(check){
-                check = idx1_gh < m_sizeGhosts;
+                check = idx1_gh < nInitialGhosts;
                 if (check){
                     check = m_ghosts[idx1_gh].getMorton() > m_firstDescMorton;
                 }
@@ -613,7 +609,7 @@ namespace bitpit {
 
             check = true;
             while(check){
-                check = idx2_gh < m_sizeGhosts;
+                check = idx2_gh < nInitialGhosts;
                 if (check){
                     check = m_ghosts[idx2_gh].getMorton() < m_lastDescMorton;
                 }
@@ -622,13 +618,13 @@ namespace bitpit {
         }
 
         // Check and coarse internal octants
-        for (idx=0; idx<m_sizeOctants; idx++){
+        for (idx=0; idx<nInitialOctants; idx++){
             if(m_octants[idx].getMarker() < 0 && m_octants[idx].getLevel() > 0){
                 nbro = 0;
                 father = m_octants[idx].buildFather();
                 // Check if family is to be refined
                 for (idx2=idx; idx2<idx+m_treeConstants->nChildren; idx2++){
-                    if (idx2<m_sizeOctants){
+                    if (idx2<nInitialOctants){
                         if(m_octants[idx2].getMarker() < 0 && m_octants[idx2].buildFather() == father){
                             nbro++;
                         }
@@ -641,13 +637,13 @@ namespace bitpit {
                 }
             }
         }
-        uint32_t nblock = m_sizeOctants;
+        uint32_t nblock = nInitialOctants;
         uint32_t nfchild = first_child_index.size();
         if (nidx!=0){
-            nblock = m_sizeOctants - nidx*nchm1;
+            nblock = nInitialOctants - nidx*nchm1;
             nidx = 0;
             for (idx=0; idx<nblock; idx++){
-                if (idx+offset < m_sizeOctants){
+                if (idx+offset < nInitialOctants){
                     if (nidx < nfchild){
                         if (idx+offset == first_child_index[nidx]){
                             markerfather = -m_treeConstants->maxLevel;
@@ -657,7 +653,7 @@ namespace bitpit {
                             }
                             father.setGhostLayer(-1);
                             for(idx2=0; idx2<m_treeConstants->nChildren; idx2++){
-                                if (idx2 < m_sizeOctants){
+                                if (idx2 < nInitialOctants){
                                     if (markerfather < m_octants[idx+offset+idx2].getMarker()+1){
                                         markerfather = m_octants[idx+offset+idx2].getMarker()+1;
                                     }
@@ -692,15 +688,15 @@ namespace bitpit {
         }
         m_octants.resize(nblock, Octant(m_dim));
         m_octants.shrink_to_fit();
-        m_sizeOctants = m_octants.size();
+        nInitialOctants = m_octants.size();
         if(mapsize > 0){
-            mapidx.resize(m_sizeOctants);
+            mapidx.resize(nInitialOctants);
         }
 
         //Check ghosts
         if (m_ghosts.size()){
             // Start on ghosts
-            if (m_sizeOctants > 0 && idx1_gh < m_sizeGhosts){
+            if (nInitialOctants > 0 && idx1_gh < nInitialGhosts){
                 if (m_ghosts[idx1_gh].buildFather() == m_octants[0].buildFather()){
                     father = m_ghosts[idx1_gh].buildFather();
                     nbro = 0;
@@ -721,7 +717,7 @@ namespace bitpit {
                     nstart = 0;
                     idx = 0;
                     marker = m_octants[idx].getMarker();
-                    if (idx==m_sizeOctants-1) wstop = true;
+                    if (idx==nInitialOctants-1) wstop = true;
                     while(marker < 0 && m_octants[idx].buildFather() == father){
                         nbro++;
                         nstart++;
@@ -729,7 +725,7 @@ namespace bitpit {
                             break;
                         }
                         idx++;
-                        if (idx==m_sizeOctants-1){
+                        if (idx==nInitialOctants-1){
                             wstop = true;
                         }
                         marker = m_octants[idx].getMarker();
@@ -742,35 +738,35 @@ namespace bitpit {
                     }
                 }
                 if (nstart != 0){
-                    for (idx=0; idx<m_sizeOctants; idx++){
-                        if (idx+offset < m_sizeOctants){
+                    for (idx=0; idx<nInitialOctants; idx++){
+                        if (idx+offset < nInitialOctants){
                             m_octants[idx] = m_octants[idx+offset];
                             if(mapsize > 0) mapidx[idx] = mapidx[idx+offset];
                         }
                     }
-                    m_octants.resize(m_sizeOctants-offset, Octant(m_dim));
+                    m_octants.resize(nInitialOctants-offset, Octant(m_dim));
                     m_octants.shrink_to_fit();
-                    m_sizeOctants = m_octants.size();
+                    nInitialOctants = m_octants.size();
                     if(mapsize > 0){
-                        mapidx.resize(m_sizeOctants);
+                        mapidx.resize(nInitialOctants);
                     }
                 }
             }
 
 
             //Verify family between more then two processes
-            if (m_sizeOctants > 0 && idx2_gh < m_sizeGhosts){
+            if (nInitialOctants > 0 && idx2_gh < nInitialGhosts){
 
                 if (m_ghosts[idx2_gh].buildFather() == father){
 
-                    if (m_ghosts[idx2_gh].buildFather() == m_octants[m_sizeOctants-1].buildFather()){
+                    if (m_ghosts[idx2_gh].buildFather() == m_octants[nInitialOctants-1].buildFather()){
 
                         uint64_t idx22_gh = idx2_gh;
                         marker = m_ghosts[idx22_gh].getMarker();
                         while(marker < 0 && m_ghosts[idx22_gh].buildFather() == father){
                             nbro++;
                             idx22_gh++;
-                            if(idx22_gh == m_sizeGhosts){
+                            if(idx22_gh == nInitialGhosts){
                                 break;
                             }
                             marker = m_ghosts[idx22_gh].getMarker();
@@ -778,7 +774,7 @@ namespace bitpit {
 
                         if (nbro == m_treeConstants->nChildren){
                             m_octants.clear();
-                            m_sizeOctants = 0;
+                            nInitialOctants = 0;
                             if(mapsize > 0){
                                 mapidx.clear();
                             }
@@ -791,8 +787,8 @@ namespace bitpit {
 
 
             // End on ghosts
-            if (m_sizeOctants > 0 && idx2_gh < m_sizeGhosts){
-                if (m_ghosts[idx2_gh].buildFather() == m_octants[m_sizeOctants-1].buildFather()){
+            if (nInitialOctants > 0 && idx2_gh < nInitialGhosts){
+                if (m_ghosts[idx2_gh].buildFather() == m_octants[nInitialOctants-1].buildFather()){
                     father = m_ghosts[idx2_gh].buildFather();
                     for (uint32_t iii=0; iii<Octant::INFO_ITEM_COUNT; iii++){
                         father.m_info[iii] = false;
@@ -812,13 +808,13 @@ namespace bitpit {
                         }
                         father.m_info[Octant::INFO_BALANCED] = father.m_info[Octant::INFO_BALANCED] || m_ghosts[idx].m_info[Octant::INFO_BALANCED];
                         idx++;
-                        if(idx == m_sizeGhosts){
+                        if(idx == nInitialGhosts){
                             break;
                         }
                         marker = m_ghosts[idx].getMarker();
                     }
                     nend = 0;
-                    idx = m_sizeOctants-1;
+                    idx = nInitialOctants-1;
                     marker = m_octants[idx].getMarker();
                     if (idx==0) wstop = true;
                     while(marker < 0 && m_octants[idx].buildFather() == father){
@@ -846,7 +842,7 @@ namespace bitpit {
                 if (nend != 0){
                     for (idx=0; idx < nend; idx++){
                         for (uint32_t iii=0; iii<Octant::INFO_ITEM_COUNT - 1; iii++){
-                            father.m_info[iii] = father.m_info[iii] || m_octants[m_sizeOctants-idx-1].m_info[iii];
+                            father.m_info[iii] = father.m_info[iii] || m_octants[nInitialOctants-idx-1].m_info[iii];
                         }
                     }
                     father.m_info[Octant::INFO_NEW4COARSENING] = true;
@@ -857,19 +853,17 @@ namespace bitpit {
                         //                    docoarse = true;
                         //                }
                     father.setMarker(markerfather);
-                    m_octants.resize(m_sizeOctants-offset, Octant(m_dim));
+                    m_octants.resize(nInitialOctants-offset, Octant(m_dim));
                     m_octants.push_back(father);
                     m_octants.shrink_to_fit();
-                    m_sizeOctants = m_octants.size();
+                    nInitialOctants = m_octants.size();
                     if(mapsize > 0){
-                        mapidx.resize(m_sizeOctants);
+                        mapidx.resize(nInitialOctants);
                     }
                 }
             }
 
         }//end if ghosts size
-
-        m_sizeOctants = m_octants.size();
 
         // Update maximum depth
         updateLocalMaxDepth();
@@ -931,7 +925,8 @@ namespace bitpit {
         uint32_t        mapsize = mapidx.size();
         uint8_t         toDelete = 0;
 
-        if (m_sizeOctants>0){
+        uint32_t nInitialOctants = getNumOctants();
+        if (nInitialOctants>0){
 
             idx = 0;
             if (m_octants[idx].getMorton() < partLastDesc){
@@ -939,28 +934,26 @@ namespace bitpit {
                 Octant father0 = m_octants[idx].buildFather();
                 Octant father = father0;
 
-                while(father == father0 && idx < m_sizeOctants){
+                while(father == father0 && idx < nInitialOctants){
                     toDelete++;
                     idx++;
-                    if (idx<m_sizeOctants) father = m_octants[idx].buildFather();
+                    if (idx<nInitialOctants) father = m_octants[idx].buildFather();
                 }
 
-                if (m_sizeOctants>toDelete){
-                    for(idx=0; idx<m_sizeOctants-toDelete; idx++){
+                if (nInitialOctants>toDelete){
+                    for(idx=0; idx<nInitialOctants-toDelete; idx++){
                         m_octants[idx] = m_octants[idx+toDelete];
                         if (mapsize>0) mapidx[idx] = mapidx[idx+toDelete];
                     }
-                    m_octants.resize(m_sizeOctants-toDelete, Octant(m_dim));
-                    m_sizeOctants = m_octants.size();
+                    m_octants.resize(nInitialOctants-toDelete, Octant(m_dim));
                     if (mapsize>0){
-                        mapidx.resize(m_sizeOctants);
+                        mapidx.resize(m_octants.size());
                     }
                 }
                 else{
                     m_octants.clear();
                     mapidx.clear();
                 }
-                m_sizeOctants = m_octants.size();
                 setFirstDescMorton();
             }
 
@@ -1087,7 +1080,7 @@ namespace bitpit {
         }
 
         // Search for neighbours of different sizes
-        if (candidateIdx < m_sizeOctants){
+        if (candidateIdx < getNumOctants()){
             while(true){
                 // Detect if the candidate is a neighbour
                 u32array3 coordtry = m_octants[candidateIdx].getLogicalCoordinates();
@@ -1141,7 +1134,7 @@ namespace bitpit {
 
                 // Advance to the next candidate
                 candidateIdx++;
-                if (candidateIdx > m_sizeOctants - 1){
+                if (candidateIdx > getNumOctants() - 1){
                     break;
                 }
 
@@ -1158,7 +1151,7 @@ namespace bitpit {
         // If we want also the neighbours that are ghosts, we always need to
         // search in the ghosts, the only exception is for faces of internal
         // octants that are not process boundaries.
-        bool ghostSearch = !onlyinternal && (m_sizeGhosts > 0);
+        bool ghostSearch = !onlyinternal && (getNumGhosts() > 0);
         if (ghostSearch){
             if (!oct->getIsGhost() && !oct->getPbound(iface)){
                 ghostSearch = false;
@@ -1178,7 +1171,7 @@ namespace bitpit {
             }
 
             // Search for neighbours of different sizes
-            if (candidateIdx < m_sizeGhosts){
+            if (candidateIdx < getNumGhosts()){
                 while(true){
                     // Detect if the candidate is a neighbour
                     u32array3 coordtry = m_ghosts[candidateIdx].getLogicalCoordinates();
@@ -1231,7 +1224,7 @@ namespace bitpit {
                     }
 
                     candidateIdx++;
-                    if (candidateIdx > m_sizeGhosts - 1){
+                    if (candidateIdx > getNumGhosts() - 1){
                         break;
                     }
 
@@ -1346,7 +1339,7 @@ namespace bitpit {
         }
 
         // Search for neighbours of different sizes
-        if (candidateIdx < m_sizeOctants) {
+        if (candidateIdx < getNumOctants()) {
             while(true){
                 // Detect if the candidate is a neighbour
                 u32array3 coordtry = m_octants[candidateIdx].getLogicalCoordinates();
@@ -1401,7 +1394,7 @@ namespace bitpit {
 
                 // Advance to the next candidate
                 candidateIdx++;
-                if (candidateIdx > m_sizeOctants-1){
+                if (candidateIdx > getNumOctants()-1){
                     break;
                 }
 
@@ -1415,7 +1408,7 @@ namespace bitpit {
         //
         // Search in the ghost octants
         //
-        if (m_sizeGhosts > 0 && !onlyinternal){
+        if (getNumGhosts() > 0 && !onlyinternal){
             // Identify the index of the first neighbour candidate
             computeNeighSearchBegin(sameSizeVirtualNeighMorton, m_ghosts, &candidateIdx, &candidateMorton);
 
@@ -1427,7 +1420,7 @@ namespace bitpit {
             }
 
             // Search for neighbours of different sizes
-            if (candidateIdx < m_sizeGhosts){
+            if (candidateIdx < getNumGhosts()){
                 while(true){
                     // Detect if the candidate is a neighbour
                     u32array3 coordtry = m_ghosts[candidateIdx].getLogicalCoordinates();
@@ -1482,7 +1475,7 @@ namespace bitpit {
 
                     // Advance to the next candidate
                     candidateIdx++;
-                    if (candidateIdx > m_sizeGhosts-1){
+                    if (candidateIdx > getNumGhosts()-1){
                         break;
                     }
 
@@ -1594,7 +1587,7 @@ namespace bitpit {
         }
 
         // Search for neighbours of different sizes
-        if (candidateIdx < m_sizeOctants) {
+        if (candidateIdx < getNumOctants()) {
             while(true){
                 // Detect if the candidate is a neighbour
                 u32array3 coordtry = m_octants[candidateIdx].getLogicalCoordinates();
@@ -1618,7 +1611,7 @@ namespace bitpit {
                 }
 
                 candidateIdx++;
-                if (candidateIdx > m_sizeOctants-1){
+                if (candidateIdx > getNumOctants()-1){
                     break;
                 }
 
@@ -1633,7 +1626,7 @@ namespace bitpit {
         // Search in the ghost octants
         //
 
-        if (m_sizeGhosts > 0 && !onlyinternal){
+        if (getNumGhosts() > 0 && !onlyinternal){
             // Identify the index of the first neighbour candidate
             computeNeighSearchBegin(sameSizeVirtualNeighMorton, m_ghosts, &candidateIdx, &candidateMorton);
 
@@ -1645,7 +1638,7 @@ namespace bitpit {
             }
 
             // Search for neighbours of different sizes
-            if (candidateIdx < m_sizeGhosts) {
+            if (candidateIdx < getNumGhosts()) {
                 while(true){
                     // Detect if the candidate is a neighbour
                     u32array3 coordtry = m_ghosts[candidateIdx].getLogicalCoordinates();
@@ -1669,7 +1662,7 @@ namespace bitpit {
                     }
 
                     candidateIdx++;
-                    if (candidateIdx > m_sizeGhosts-1){
+                    if (candidateIdx > getNumGhosts()-1){
                         break;
                     }
 
@@ -1737,7 +1730,7 @@ namespace bitpit {
 
         Octant 			father(m_dim);
         uint64_t 		mortonld;
-        uint32_t 		nocts;
+        uint32_t 		nocts, nghosts;
         uint32_t 		idx, idx2, idx0, last_idx;
         uint32_t 		idx1_gh, idx2_gh;
         int8_t 			marker;
@@ -1752,7 +1745,7 @@ namespace bitpit {
         idx1_gh=0;
 
         nocts   = m_octants.size();
-        m_sizeGhosts = m_ghosts.size();
+        nghosts = m_ghosts.size();
         last_idx=nocts-1;
 
         //Clean index of ghost brothers in case of coarsening a broken family
@@ -1765,13 +1758,13 @@ namespace bitpit {
         if (m_ghosts.size()){
             while(m_ghosts[idx2_gh].getMorton() <= m_lastDescMorton){
                 idx2_gh++;
-                if (idx2_gh > m_sizeGhosts-1) break;
+                if (idx2_gh > nghosts-1) break;
             }
-            if (idx2_gh > m_sizeGhosts-1) checkend = false;
+            if (idx2_gh > nghosts-1) checkend = false;
 
             while(m_ghosts[idx1_gh].getMorton() <= m_octants[0].getMorton()){
                 idx1_gh++;
-                if (idx1_gh > m_sizeGhosts-1) break;
+                if (idx1_gh > nghosts-1) break;
             }
             if (idx1_gh == 0) checkstart = false;
             idx1_gh-=1;
@@ -1834,7 +1827,7 @@ namespace bitpit {
 
                         nbro++;
                         idx++;
-                        if(idx == m_sizeGhosts){
+                        if(idx == nghosts){
                             break;
                         }
                         marker = m_ghosts[idx].getMarker();
@@ -1919,7 +1912,7 @@ namespace bitpit {
 
         Octant 				father(m_dim);
         uint64_t 			mortonld;
-        uint32_t 			nocts;
+        uint32_t 			nocts, nghosts;
         uint32_t 			idx, idx2, idx0, last_idx;
         uint32_t 			idx1_gh, idx2_gh;
         int8_t 			marker;
@@ -1934,7 +1927,7 @@ namespace bitpit {
         idx1_gh=0;
 
         nocts   = m_octants.size();
-        m_sizeGhosts = m_ghosts.size();
+        nghosts = m_ghosts.size();
         last_idx=nocts-1;
 
         //Clean index of ghost brothers in case of coarsening a broken family
@@ -1947,13 +1940,13 @@ namespace bitpit {
         if (m_ghosts.size()){
             while(m_ghosts[idx2_gh].getMorton() <= m_lastDescMorton){
                 idx2_gh++;
-                if (idx2_gh > m_sizeGhosts-1) break;
+                if (idx2_gh > nghosts-1) break;
             }
-            if (idx2_gh > m_sizeGhosts-1) checkend = false;
+            if (idx2_gh > nghosts-1) checkend = false;
 
             while(m_ghosts[idx1_gh].getMorton() <= m_octants[0].getMorton()){
                 idx1_gh++;
-                if (idx1_gh > m_sizeGhosts-1) break;
+                if (idx1_gh > nghosts-1) break;
             }
             if (idx1_gh == 0) checkstart = false;
             idx1_gh-=1;
@@ -2018,7 +2011,7 @@ namespace bitpit {
 
                         nbro++;
                         idx++;
-                        if(idx == m_sizeGhosts){
+                        if(idx == nghosts){
                             break;
                         }
                         marker = m_ghosts[idx].getMarker();
@@ -2988,7 +2981,7 @@ namespace bitpit {
         unordered_map<uint64_t, array<uint32_t, 3> > nodeCoords;
         unordered_map<uint64_t, vector<uint64_t> >   nodeOctants;
         uint32_t                                     noctants = getNumOctants();
-        uint32_t                                     nghosts  = m_sizeGhosts;
+        uint32_t                                     nghosts  = getNumGhosts();
 
 
 
