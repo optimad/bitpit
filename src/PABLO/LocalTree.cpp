@@ -891,16 +891,11 @@ namespace bitpit {
     bool
     LocalTree::globalRefine(u32vector & mapidx){
 
-        uint32_t 	idx;
-        bool 		dorefine = false;
-
-        for (idx=0; idx<m_sizeOctants; idx++){
-            m_octants[idx].setMarker(1);
+        for (Octant &octant : m_octants){
+            octant.setMarker(1);
         }
 
-        dorefine = refine(mapidx);
-
-        return dorefine;
+        return refine(mapidx);
 
     };
 
