@@ -31,7 +31,6 @@
 #include "tree_constants.hpp"
 #include "Octant.hpp"
 #include "Intersection.hpp"
-#include "morton.hpp"
 
 namespace bitpit {
 

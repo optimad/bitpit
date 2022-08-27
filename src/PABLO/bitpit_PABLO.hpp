@@ -31,6 +31,7 @@
  */
 
 #include "PabloUniform.hpp"
+#include "morton.hpp"
 
 #include "moduleEnd.hpp"
 #endif

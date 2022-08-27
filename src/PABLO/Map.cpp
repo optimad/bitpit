@@ -2,7 +2,6 @@
 // INCLUDES                                                                            //
 // =================================================================================== //
 #include "tree_constants.hpp"
-#include "Operators.hpp"
 #include "Map.hpp"
 #include <cmath>
 
