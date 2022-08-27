@@ -26,6 +26,8 @@
 // INCLUDES                                                                            //
 // =================================================================================== //
 #include "LocalTree.hpp"
+#include "morton.hpp"
+
 #include <map>
 #include <unordered_map>
 

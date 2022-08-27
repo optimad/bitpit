@@ -26,6 +26,7 @@
 // INCLUDES                                                                            //
 // =================================================================================== //
 #include "Octant.hpp"
+#include "morton.hpp"
 
 #include <algorithm>
 #include <cassert>

@@ -25,10 +25,11 @@
 // =================================================================================== //
 // INCLUDES                                                                            //
 // =================================================================================== //
-#include "bitpit_common.hpp"
 #include "bitpit_operators.hpp"
 
+#include "morton.hpp"
 #include "ParaTree.hpp"
+
 #include <climits>
 #include <sstream>
 #include <iomanip>
