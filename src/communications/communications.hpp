@@ -75,6 +75,9 @@ public:
     void setRecvsContinuous(bool enabled);
     bool areRecvsContinuous();
 
+    void discoverSendSizes();
+    void discoverRecvSizes();
+
     void discoverSends();
     void discoverRecvs();
 

@@ -270,6 +270,90 @@ bool DataCommunicator::areRecvsContinuous()
 }
 
 /*!
+    Discover the sizes of sends inspecting the send/receives information already set by the user.
+
+    This functions can be used when we know the ranks involved in the communication (the user has
+    already set both send and receive ranks), but we don't know the size of the messages (the
+    user has only set the sizes of the receives).
+*/
+void DataCommunicator::discoverSendSizes()
+{
+    // Start receives communications
+    int nSends = getSendCount();
+    std::vector<long> sendSizes(nSends, 0);
+    std::vector<MPI_Request> discoverRecvRequests(nSends, MPI_REQUEST_NULL);
+    for (int i = 0; i < nSends; ++i) {
+        int rank = m_sendRanks[i];
+        MPI_Irecv(&sendSizes[i], 1, MPI_LONG_INT, rank, m_discoverTag, m_communicator, &discoverRecvRequests[i]);
+    }
+
+    // Start send communications
+    int nRecvs = getRecvCount();
+    std::vector<MPI_Request> discoverSendRequests(nRecvs, MPI_REQUEST_NULL);
+    for (int i = 0; i < nRecvs; ++i) {
+        int rank = m_recvRanks[i];
+        const RecvBuffer &buffer = getRecvBuffer(rank);
+        long bufferSize = buffer.getSize();
+        MPI_Isend(&bufferSize, 1, MPI_LONG_INT, rank, m_discoverTag, m_communicator, &discoverSendRequests[i]);
+    }
+
+    // Receive the sizes of the sends
+    int nOngoingDiscoverSends = discoverRecvRequests.size();
+    while (nOngoingDiscoverSends != 0) {
+        int requestIndex;
+        MPI_Waitany(discoverRecvRequests.size(), discoverRecvRequests.data(), &requestIndex, MPI_STATUS_IGNORE);
+        --nOngoingDiscoverSends;
+
+        resizeRecv(m_sendRanks[requestIndex], sendSizes[requestIndex]);
+    }
+
+    // Complete send communications
+    MPI_Waitall(discoverSendRequests.size(), discoverSendRequests.data(), MPI_STATUS_IGNORE);
+}
+
+/*!
+    Discover the sizes of receives inspecting the send/receives information already set by the user.
+
+    This functions can be used when we know the ranks involved in the communication (the user has
+    already set both send and receive ranks), but we don't know the size of the messages (the
+    user has only set the sizes of the sends).
+*/
+void DataCommunicator::discoverRecvSizes()
+{
+    // Start receives communications
+    int nRecvs = getRecvCount();
+    std::vector<long> recvSizes(nRecvs, 0);
+    std::vector<MPI_Request> discoverRecvRequests(nRecvs, MPI_REQUEST_NULL);
+    for (int i = 0; i < nRecvs; ++i) {
+        int rank = m_recvRanks[i];
+        MPI_Irecv(&recvSizes[i], 1, MPI_LONG_INT, rank, m_discoverTag, m_communicator, &discoverRecvRequests[i]);
+    }
+
+    // Start send communications
+    int nSends = getSendCount();
+    std::vector<MPI_Request> discoverSendRequests(nSends, MPI_REQUEST_NULL);
+    for (int i = 0; i < nSends; ++i) {
+        int rank = m_sendRanks[i];
+        const SendBuffer &buffer = getSendBuffer(rank);
+        long bufferSize = buffer.getSize();
+        MPI_Isend(&bufferSize, 1, MPI_LONG_INT, rank, m_discoverTag, m_communicator, &discoverSendRequests[i]);
+    }
+
+    // Receive the sizes
+    int nOngoingDiscoverSends = discoverRecvRequests.size();
+    while (nOngoingDiscoverSends != 0) {
+        int requestIndex;
+        MPI_Waitany(discoverRecvRequests.size(), discoverRecvRequests.data(), &requestIndex, MPI_STATUS_IGNORE);
+        --nOngoingDiscoverSends;
+
+        resizeRecv(m_recvRanks[requestIndex], recvSizes[requestIndex]);
+    }
+
+    // Complete send communications
+    MPI_Waitall(discoverSendRequests.size(), discoverSendRequests.data(), MPI_STATUS_IGNORE);
+}
+
+/*!
     Discover the sends inspecting the receives that the user has already set.
 
     This function implements the "Nonblocking Consensus" algorithm proposed
