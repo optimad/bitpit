@@ -107,7 +107,7 @@ class LevelSetObject : public VTKBaseStreamer, public virtual LevelSetObjectInte
 
 # if BITPIT_ENABLE_MPI
     void                                        exchangeGhosts() ;
-    void                                        startExchange( const std::unordered_map<int,std::vector<long>> &, DataCommunicator * );
+    void                                        startExchange( const std::unordered_map<int,std::vector<long>> &, const std::unordered_map<int,std::vector<long>> &, DataCommunicator * );
     void                                        completeExchange( const std::unordered_map<int,std::vector<long>> &, DataCommunicator * );
 # endif
 

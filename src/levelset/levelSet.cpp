@@ -901,7 +901,7 @@ void LevelSet::update( const std::vector<adaption::Info> &adaptionData, const st
 #if BITPIT_ENABLE_MPI
         // Start partitioning update
         if (updatePartitioning) {
-            object->startExchange( partitioningSendList, dataCommunicator.get() );
+            object->startExchange( partitioningSendList, partitioningRecvList, dataCommunicator.get() );
         }
 #endif
 

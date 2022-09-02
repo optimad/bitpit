@@ -724,18 +724,23 @@ void LevelSetObject::exchangeGhosts(){
         return;
     }
 
+    const std::unordered_map<int,std::vector<long>> &ghostSendList = m_kernel->getMesh()->getGhostCellExchangeSources();
+    const std::unordered_map<int,std::vector<long>> &ghostRecvList = m_kernel->getMesh()->getGhostCellExchangeTargets();
+
     std::unique_ptr<DataCommunicator> dataCommunicator = m_kernel->createDataCommunicator();
-    startExchange(m_kernel->getMesh()->getGhostCellExchangeSources(), dataCommunicator.get());
-    completeExchange(m_kernel->getMesh()->getGhostCellExchangeTargets(), dataCommunicator.get());
+    startExchange(ghostSendList, ghostRecvList, dataCommunicator.get());
+    completeExchange(ghostRecvList, dataCommunicator.get());
 }
 
 /*!
  * Start exchange of data structures of kernel and objects.
  * @param[in] sendList list of elements to be send
+ * @param[in] recvList list of elements to be received
  * @param[in,out] dataCommunicator is the data communicator that will be used
  * for the data exchange
  */
 void LevelSetObject::startExchange( const std::unordered_map<int,std::vector<long>> &sendList,
+                                    const std::unordered_map<int,std::vector<long>> &recvList,
                                     DataCommunicator *dataCommunicator){
 
     // Fill the send buffer with the  content from the LevelSetObject base
@@ -750,15 +755,20 @@ void LevelSetObject::startExchange( const std::unordered_map<int,std::vector<lon
         writeCommunicationBuffer(entry.second, buffer);
     }
 
-    // Discover the receives
-    dataCommunicator->discoverRecvs();
+    // Create empty receives
+    for (const auto &entry : recvList) {
+        int rank = entry.first;
+        dataCommunicator->setRecv(rank, 0);
+    }
+
+    // Discover receive sizes
+    dataCommunicator->discoverRecvSizes();
 
     // Start the sends
     dataCommunicator->startAllRecvs();
 
     // Start the sends
     dataCommunicator->startAllSends();
-
 }
 
 /*!
