@@ -1,24 +1,27 @@
 /*!
 \page styleguide Coding Style Guide
 
-Code developed in <B>%bitpit</B> should follow the coding styles described here.  Any deviations from this style
-guide will result in severe berating and other verbal abuse.
+This document describes the set of conventions (sometimes arbitrary) about how to write
+<B>%bitpit</B> code. It is much easier to understand a large codebase when all the code
+in it is in a consistent style.
 
 \section directory_structure bitpit Directory Structure
 <B>%bitpit</B> source code is organized in the following directory structure: \n
  - doc: documentation is put here, along with the input file for Doxygen.  Most <B>%bitpit</B> documentation is doxygen-processed;
  - examples: examples of <B>%bitpit</B> usage, both small and large.  These programs are not meant to be used as unit tests, but
      rather as further documentation on <B>%bitpit</B> usage;
- - src : source code;
+ - external: files taken from external projects;
+ - src: source code;
  - test: all unit test programs should go below this directory.
 
 If you're designing a new class or other code for <B>%bitpit</B> and are not sure where to put it, try to find something similar
-and put it there.  Otherwise, email the <B>%bitpit</B> email list for pointers.  
+and put it there. Otherwise, email the <B>%bitpit</B> email list for pointers.
 
 \section source_style Source Code Style and Best Practices
 
 \subsection indentation Indentation
-Use for indentation 4 characters.
+Indentation should use only spaces and the number of spaces at each indentation
+should be 4.
 
 The preferred way to ease multiple indentation levels in a switch statement is
 to align the "switch" and its subordinate "case" labels in the same column
@@ -141,14 +144,16 @@ statement; in the latter case use braces in both branches:
 \subsection naming Naming
 Class names should be in the CamelBack style, e.g. PatchCartesian or PatchOctree.
 
-Class methods names should be in CamelBack style style but with a starting lower case letter, e.g. Patch::getId()
-or Interface::getArea().
+Class methods names should be in CamelBack style style but with a starting lower case
+letter, e.g. Patch::getId() or Interface::getArea().
 
 Class private member variables should be in the CamelBack style and should have
 the prefix m_, e.g. PatchCartesian::m_cellSize. Each member variable that the
 user can modify, should have set/get functions, e.g. for the variable int
 m_variable it is necessary to define void setVariable(int newval)
 and int getVariable() const.
+
+Static (global) variable names should be prefixed with s_.
 
 Enumeration values should be all captitalized, with underscores avoided if possible.
 The name of the enumeration name should be in the CamelBack style and indicates
@@ -394,11 +399,11 @@ something it would have done anyway.
 
 \subsection conditional-compilation Conditional Compilation
 
-Wherever possible, don't use preprocessor conditionals (\#if, \#ifdef) in .c
+Wherever possible, don't use preprocessor conditionals (\#if, \#ifdef) in .cpp
 files; doing so makes code harder to read and logic harder to follow.  Instead,
-use such conditionals in a header file defining functions for use in those .c
+use such conditionals in a header file defining functions for use in those .cpp
 files, providing no-op stub versions in the \#else case, and then call those
-functions unconditionally from .c files.  The compiler will avoid generating
+functions unconditionally from .cpp files.  The compiler will avoid generating
 any code for the stub calls, producing identical results, but the logic will
 remain easy to follow.
 
@@ -448,9 +453,9 @@ generated documentation. The preferred way to mark a doxygen comment block
 is the JavaDoc style, which consist of a C-style comment block starting with
 two *'s, like this:
 \verbatim
-    \**
-    * ... text ...
-    */
+    /*!
+     * ... text ...
+     */
 \endverbatim
 The doxygen comment block of a class should include a general description of
 the class and a list of its features and possible limitations.
@@ -460,15 +465,15 @@ public and private methos should be commented), this comment block should
 contain a general description of the method and a description of all the
 arguments and the return value of the method. For instance:
 \verbatim
-    /**
-    * \brief Brief description.
-    *        Brief description continued.
-    *
-    *  Detailed description starts here.
-    *
-    *  \param var detailed description of the parameter
-    *  \result Detailed description of the return value.
-    */
+    /*!
+     * \brief Brief description.
+     *        Brief description continued.
+     *
+     *  Detailed description starts here.
+     *
+     *  \param var detailed description of the parameter
+     *  \result Detailed description of the return value.
+     */
 \endverbatim
 
 To document the members of a file, struct, union, class, or enum, it is sometimes
@@ -476,7 +481,7 @@ desired to place the documentation block after the member instead of before.
 For this purpose an additional < marker is required in the comment block.
 Note that this also works for the parameters of a function. For instance:
 \verbatim
-    int var; /**< Detailed description after the member */
+    int var; //! Detailed description after the member
 \endverbatim
 To simplify the documentation of class members, define just one member per
 line (no commas for multiple members declarations).
@@ -486,6 +491,16 @@ Doxygen commands should start with a backslash (\\).
 As a rule of thumb, the code should run through doxygen without generating any
 warnings; in fact, doxygen is sometimes helpful at pointing out inconsistencies
 in your class declaration.
+
+\subsection automatic_formatting Automatic code formatting
+
+<B>%bitpit</B> provides a .clang-format file that can be used by clang-format
+to automatically format the code. Code formatting can be enforced manually by
+calling clang-format directly or automatically through the the CMake targets
+defined by <B>%bitpit</B>. Each <B>%bitpit</B> module provides a CMake target
+called clang-format-<MODULE_NAME> that allows to format all the code of the
+module. There is also a Git pre-commit hook which uses the "clang-format git
+hooks" tool to ensure the changes are properly formatted.
 
 \section git Git Repository Practices
 As most of our code repositories uses git as the revision control system, it is important to decide on a workflow that can be followed by the individual developer. The way that any individual developer interact with the upstream git repository can have an important impact on other developers and the ability to identify and manage individual changes.  This set of guidelines and practices attempts to establish some standards for how developers will interact with the upstream git repository.
