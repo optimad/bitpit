@@ -105,6 +105,9 @@ class PiercedSyncSlave {
 
 friend class PiercedSyncMaster;
 
+public:
+    virtual ~PiercedSyncSlave() = default;
+
 protected:
     PiercedSyncSlave();
 

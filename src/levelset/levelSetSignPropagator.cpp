@@ -140,6 +140,21 @@ void LevelSetSignPropagator::execute(const std::vector<adaption::Info> &adaption
         return;
     }
 
+#if BITPIT_ENABLE_MPI
+    // Initialize sign on ghost cells
+    //
+    // Ghost cells are not tracked by adaption, we need to explicitly initialize the sign
+    // on all ghost cells.
+    VolumeKernel::CellConstIterator cellGhostBegin = m_mesh->ghostCellConstBegin();
+    VolumeKernel::CellConstIterator cellGhostEnd   = m_mesh->ghostCellConstEnd();
+
+    for (VolumeKernel::CellConstIterator cellItr = cellGhostBegin; cellItr != cellGhostEnd; ++cellItr) {
+        std::size_t cellRawId = cellItr.getRawIndex();
+        LevelSetSignStorage::KernelIterator cellStorageItr = storage->rawFind(cellRawId);
+        storage->at(cellStorageItr) = LevelSetSignStorage::SIGN_UNDEFINED;
+    }
+#endif
+
     // Propagate sign
     propagate(object, storage);
 }
@@ -189,6 +204,23 @@ void LevelSetSignPropagator::propagate(const LevelSetObjectInterface *object, Le
         }
     }
 
+    // Check if there are seeds to be used for sign propagation
+    //
+    // We need at least one seed to be able to perform sign propagation (i.e., at least one
+    // cell should be in the levelset narrowband).
+    long nGlobalSeeds   = rawSeeds.size();
+    long nGlobalWaiting = m_nWaiting;
+#if BITPIT_ENABLE_MPI
+    if (m_mesh->isPartitioned()) {
+        MPI_Allreduce(MPI_IN_PLACE, &nGlobalSeeds, 1, MPI_LONG, MPI_SUM, m_mesh->getCommunicator());
+        MPI_Allreduce(MPI_IN_PLACE, &nGlobalWaiting, 1, MPI_LONG, MPI_SUM, m_mesh->getCommunicator());
+    }
+#endif
+
+    if (nGlobalWaiting != 0 && nGlobalSeeds == 0) {
+        throw std::runtime_error("Unable to propagate the sign: the list of seeds is empty!");
+    }
+
     // Use the seeds to propagate the sign
     executeSeedPropagation(rawSeeds, storage);
 
@@ -196,7 +228,7 @@ void LevelSetSignPropagator::propagate(const LevelSetObjectInterface *object, Le
     // If there are cells with an unknown sign, data communication among
     // ghost cells is needed. However it is only possibly to have cells with
     // an unknown sign for partinioned patches.
-    long nGlobalWaiting = m_nWaiting;
+    nGlobalWaiting = m_nWaiting;
     if (m_mesh->isPartitioned()) {
         MPI_Allreduce(MPI_IN_PLACE, &nGlobalWaiting, 1, MPI_LONG, MPI_SUM, m_mesh->getCommunicator());
     }
@@ -414,7 +446,7 @@ void LevelSetSignPropagator::initializePropagation(const LevelSetObjectInterface
             // cannot be external cells
             if (isPatchIntersected) {
                 double geometricTolerance = m_mesh->getTol();
-                const std::array<double,3> &cellCentroid = object->getKernel()->computeCellCentroid(cellId);
+                std::array<double, 3> cellCentroid = object->getKernel()->computeCellCentroid(cellId);
 
                 bool isCentroidInternal = true;
                 for (int i = 0; i < 3; ++i) {

@@ -153,7 +153,7 @@ namespace bitpit {
     {
         ParaTree::restore(stream);
 
-        std::array<double, 3> origin;
+        std::array<double, 3> origin = {{0., 0., 0.}};
         utils::binary::read(stream, origin[0]);
         utils::binary::read(stream, origin[1]);
         utils::binary::read(stream, origin[2]);
@@ -230,7 +230,7 @@ namespace bitpit {
      * \return Size of an octant of input level.
      */
     double
-    PabloUniform::levelToSize(uint8_t level) {
+    PabloUniform::levelToSize(uint8_t level) const {
         double size = ParaTree::levelToSize(level);
         return m_L *size;
     }
@@ -244,8 +244,8 @@ namespace bitpit {
      */
     darray3
     PabloUniform::getCoordinates(uint32_t idx) const {
-        darray3 coords, coords_;
-        coords_ = ParaTree::getCoordinates(idx);
+        darray3 coords  = {{0., 0., 0.}};
+        darray3 coords_ = ParaTree::getCoordinates(idx);
         for (int i=0; i<3; i++){
             coords[i] = m_origin[i] + m_L * coords_[i];
         }
@@ -333,7 +333,8 @@ namespace bitpit {
      */
     darray3
     PabloUniform::getCenter(uint32_t idx) const {
-        darray3 center, center_ = ParaTree::getCenter(idx);
+        darray3 center  = {{0., 0., 0.}};
+        darray3 center_ = ParaTree::getCenter(idx);
         for (int i=0; i<3; i++){
             center[i] = m_origin[i] + m_L * center_[i];
         }
@@ -360,7 +361,8 @@ namespace bitpit {
      */
     darray3
     PabloUniform::getFaceCenter(uint32_t idx, uint8_t iface) const {
-        darray3 center, center_ = ParaTree::getFaceCenter(idx, iface);
+        darray3 center  = {{0., 0., 0.}};
+        darray3 center_ = ParaTree::getFaceCenter(idx, iface);
         for (int i=0; i<3; i++){
             center[i] = m_origin[i] + m_L * center_[i];
         }
@@ -374,7 +376,8 @@ namespace bitpit {
      */
     darray3
     PabloUniform::getNode(uint32_t idx, uint8_t inode) const {
-        darray3 node, node_ = ParaTree::getNode(idx, inode);
+        darray3 node  = {{0., 0., 0.}};
+        darray3 node_ = ParaTree::getNode(idx, inode);
         for (int i=0; i<3; i++){
             node[i] = m_origin[i] + m_L * node_[i];
         }
@@ -454,8 +457,8 @@ namespace bitpit {
      */
     darray3
     PabloUniform::getCoordinates(const Octant* oct) const {
-        darray3 coords, coords_;
-        coords_ = ParaTree::getCoordinates(oct);
+        darray3 coords  = {{0., 0., 0.}};
+        darray3 coords_ = ParaTree::getCoordinates(oct);
         for (int i=0; i<3; i++){
             coords[i] = m_origin[i] + m_L * coords_[i];
         }
@@ -543,7 +546,8 @@ namespace bitpit {
      */
     darray3
     PabloUniform::getCenter(const Octant* oct) const {
-        darray3 center, center_ = ParaTree::getCenter(oct);
+        darray3 center  = {{0., 0., 0.}};
+        darray3 center_ = ParaTree::getCenter(oct);
         for (int i=0; i<3; i++){
             center[i] = m_origin[i] + m_L * center_[i];
         }
@@ -570,7 +574,8 @@ namespace bitpit {
      */
     darray3
     PabloUniform::getFaceCenter(const Octant* oct, uint8_t iface) const {
-        darray3 center, center_ = ParaTree::getFaceCenter(oct, iface);
+        darray3 center  = {{0., 0., 0.}};
+        darray3 center_ = ParaTree::getFaceCenter(oct, iface);
         for (int i=0; i<3; i++){
             center[i] = m_origin[i] + m_L * center_[i];
         }
@@ -584,7 +589,8 @@ namespace bitpit {
      */
     darray3
     PabloUniform::getNode(const Octant* oct, uint8_t inode) const {
-        darray3 node, node_ = ParaTree::getNode(oct, inode);
+        darray3 node  = {{0., 0., 0.}};
+        darray3 node_ = ParaTree::getNode(oct, inode);
         for (int i=0; i<3; i++){
             node[i] = m_origin[i] + m_L * node_[i];
         }
@@ -625,7 +631,8 @@ namespace bitpit {
      */
     darr3vector
     PabloUniform::getNodes(const Octant* oct) const {
-        darray3vector nodes, nodes_ = ParaTree::getNodes(oct);
+        darray3vector nodes  = {{{{0., 0., 0.}}, {{0., 0., 0.}}, {{0., 0., 0.}}}};
+        darray3vector nodes_ = ParaTree::getNodes(oct);
         nodes.resize(ParaTree::getNnodes());
         for (int j=0; j<ParaTree::getNnodes(); j++){
             for (int i=0; i<3; i++){

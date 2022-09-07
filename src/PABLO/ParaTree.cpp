@@ -224,11 +224,9 @@ namespace bitpit {
           m_partitionRangeGlobalIdx(other.m_partitionRangeGlobalIdx),
           m_partitionRangeGlobalIdx0(other.m_partitionRangeGlobalIdx0),
           m_globalNumOctants(other.m_globalNumOctants),
-          m_nproc(other.m_nproc),
           m_maxDepth(other.m_maxDepth),
           m_treeConstants(other.m_treeConstants),
           m_nofGhostLayers(other.m_nofGhostLayers),
-          m_rank(other.m_rank),
           m_octree(other.m_octree),
           m_bordersPerProc(other.m_bordersPerProc),
           m_internals(other.m_internals),
@@ -250,6 +248,8 @@ namespace bitpit {
     {
 #if BITPIT_ENABLE_MPI==1
         _initializeCommunicator(other.m_comm);
+#else
+        _initializeSerialCommunicator();
 #endif
     }
 
@@ -276,6 +276,10 @@ namespace bitpit {
         // Early return if the communicator is a null communicator
         if (communicator == MPI_COMM_NULL) {
             m_comm = MPI_COMM_NULL;
+
+            m_nproc = 1;
+            m_rank  = 0;
+
             return;
         }
 
@@ -285,6 +289,20 @@ namespace bitpit {
         // instead, a duplicate of a user-specified communicator should always
         // be used.
         MPI_Comm_dup(communicator, &m_comm);
+
+        // Get MPI information
+        MPI_Comm_size(m_comm, &m_nproc);
+        MPI_Comm_rank(m_comm, &m_rank);
+    }
+#else
+    /*! Internal function to initialize a dummy communicator to be used
+     * when MPI support is disabled.
+     */
+    void
+    ParaTree::_initializeSerialCommunicator()
+    {
+        m_nproc = 1;
+        m_rank  = 0;
     }
 #endif
 
@@ -294,21 +312,6 @@ namespace bitpit {
      */
     void
     ParaTree::_initializePartitions() {
-#if BITPIT_ENABLE_MPI==1
-        // Set MPI information
-        if (isCommSet()) {
-            MPI_Comm_size(m_comm, &m_nproc);
-            MPI_Comm_rank(m_comm, &m_rank);
-        } else {
-            m_rank  = 0;
-            m_nproc = 1;
-        }
-#else
-        // Set dummy MPI information
-        m_rank  = 0;
-        m_nproc = 1;
-#endif
-
         // Create the data structures for storing partion information
         m_partitionFirstDesc.resize(m_nproc);
         m_partitionLastDesc.resize(m_nproc);
@@ -342,6 +345,9 @@ namespace bitpit {
         // Set the dimension to a dummy value
         setDim(dim);
 
+        // Initialize the global number of octants
+        m_globalNumOctants = 0;
+
         // Initialize the number of ghost layers
         m_nofGhostLayers = 1;
     }
@@ -363,13 +369,16 @@ namespace bitpit {
 #if BITPIT_ENABLE_MPI==1
         // Initialize the communicator
         _initializeCommunicator(comm);
-
+#else
+        // Initialize serial communicator
+        _initializeSerialCommunicator();
 #endif
-        // Initialize partitions
-        _initializePartitions();
 
         // Initialized the tree
         _initialize(0, logfile);
+
+        // Initialize partitions
+        _initializePartitions();
     }
 
     /*! Initialize the octree
@@ -390,10 +399,10 @@ namespace bitpit {
 #if BITPIT_ENABLE_MPI==1
         // Initialize the communicator
         _initializeCommunicator(comm);
-
+#else
+        // Initialize serial communicator
+        _initializeSerialCommunicator();
 #endif
-        // Initialize partitions
-        _initializePartitions();
 
         // Initialized the tree
         if (dim < 2 || dim > 3) {
@@ -401,6 +410,9 @@ namespace bitpit {
         }
 
         _initialize(dim, logfile);
+
+        // Initialize partitions
+        _initializePartitions();
     }
 
     /*! Re-initializes the octree
@@ -409,15 +421,15 @@ namespace bitpit {
      */
     void
     ParaTree::reinitialize(uint8_t dim, const std::string &logfile) {
-        // Initialize partitions
-        _initializePartitions();
-
         // Initialized the tree
         if (dim < 2 || dim > 3) {
             throw std::runtime_error ("Invalid value for the dimension");
         }
 
         _initialize(dim, logfile);
+
+        // Initialize partitions
+        _initializePartitions();
     }
 
     /*! Initialize the logger
@@ -1333,7 +1345,11 @@ namespace bitpit {
      */
     darray3
     ParaTree::getCenter(uint32_t idx) const {
+<<<<<<< HEAD
         darray3 centerCoords;
+=======
+        darray3 centerCoords  = {{0., 0., 0.}};
+>>>>>>> ba67a4ae9f89832d167fdb388f184690a986759b
         darray3 centerCoords_ = m_octree.m_octants[idx].getLogicalCenter();
         m_trans.mapCenter(centerCoords_, centerCoords);
         return centerCoords;
@@ -1346,7 +1362,11 @@ namespace bitpit {
      */
     darray3
     ParaTree::getFaceCenter(uint32_t idx, uint8_t face) const {
+<<<<<<< HEAD
         darray3 centerCoords;
+=======
+        darray3 centerCoords  = {{0., 0., 0.}};
+>>>>>>> ba67a4ae9f89832d167fdb388f184690a986759b
         darray3 centerCoords_ = m_octree.m_octants[idx].getLogicalFaceCenter(face);
         m_trans.mapCenter(centerCoords_, centerCoords);
         return centerCoords;
@@ -1370,7 +1390,11 @@ namespace bitpit {
      */
     darray3
     ParaTree::getNode(uint32_t idx, uint8_t node) const {
+<<<<<<< HEAD
         darray3 nodeCoords;
+=======
+        darray3 nodeCoords    = {{0., 0., 0.}};
+>>>>>>> ba67a4ae9f89832d167fdb388f184690a986759b
         u32array3 nodeCoords_ = m_octree.m_octants[idx].getLogicalNode(node);
         m_trans.mapNode(nodeCoords_, nodeCoords);
         return nodeCoords;
@@ -1430,8 +1454,8 @@ namespace bitpit {
      */
     darray3
     ParaTree::getNormal(uint32_t idx, uint8_t face) const {
-        darray3 normal;
-        i8array3 normal_;
+        darray3 normal   = {{0., 0., 0.}};
+        i8array3 normal_ = {{0, 0, 0}};
         m_octree.m_octants[idx].getNormal(face, normal_, m_treeConstants->normals);
         m_trans.mapNormals(normal_, normal);
         return normal;
@@ -1783,7 +1807,7 @@ namespace bitpit {
      */
     darray3
     ParaTree::getCenter(const Octant* oct) const {
-        darray3 centerCoords;
+        darray3 centerCoords  = {{0., 0., 0.}};
         darray3 centerCoords_ = oct->getLogicalCenter();
         m_trans.mapCenter(centerCoords_, centerCoords);
         return centerCoords;
@@ -1796,7 +1820,7 @@ namespace bitpit {
      */
     darray3
     ParaTree::getFaceCenter(const Octant* oct, uint8_t face) const {
-        darray3 centerCoords;
+        darray3 centerCoords  = {{0., 0., 0.}};
         darray3 centerCoords_ = oct->getLogicalFaceCenter(face);
         m_trans.mapCenter(centerCoords_, centerCoords);
         return centerCoords;
@@ -1820,7 +1844,7 @@ namespace bitpit {
      */
     darray3
     ParaTree::getNode(const Octant* oct, uint8_t node) const {
-        darray3 nodeCoords;
+        darray3 nodeCoords    = {{0., 0., 0.}};
         u32array3 nodeCoords_ = oct->getLogicalNode(node);
         m_trans.mapNode(nodeCoords_, nodeCoords);
         return nodeCoords;
@@ -1880,8 +1904,8 @@ namespace bitpit {
      */
     darray3
     ParaTree::getNormal(const Octant* oct, uint8_t face) const {
-        darray3 normal;
-        i8array3 normal_;
+        darray3 normal   = {{0., 0., 0.}};
+        i8array3 normal_ = {{0, 0, 0}};
         oct->getNormal(face, normal_, m_treeConstants->normals);
         m_trans.mapNormals(normal_, normal);
         return normal;
@@ -2382,13 +2406,18 @@ namespace bitpit {
      */
     darray3
     ParaTree::getCenter(const Intersection* inter) const {
-        darray3 center;
         Octant oct(m_dim);
         if(inter->m_finer && inter->m_isghost)
             oct = m_octree.extractGhostOctant(inter->m_owners[inter->m_finer]);
         else
             oct = m_octree.extractOctant(inter->m_owners[inter->m_finer]);
+<<<<<<< HEAD
         darray3  centerCoords_ = oct.getLogicalCenter();
+=======
+
+        darray3 center = {{0., 0., 0.}};
+        darray3 centerCoords_ = oct.getLogicalCenter();
+>>>>>>> ba67a4ae9f89832d167fdb388f184690a986759b
         int sign = ( int(2*((inter->m_iface)%2)) - 1);
         double deplace = double (sign * int(oct.getLogicalSize())) / 2;
         centerCoords_[inter->m_iface/2] = uint32_t(int(centerCoords_[inter->m_iface/2]) + deplace);
@@ -2427,14 +2456,15 @@ namespace bitpit {
      */
     darray3
     ParaTree::getNormal(const Intersection* inter) const {
-        darray3 normal;
         Octant oct(m_dim);
         if(inter->m_finer && inter->m_isghost)
             oct = m_octree.extractGhostOctant(inter->m_owners[inter->m_finer]);
         else
             oct = m_octree.extractOctant(inter->m_owners[inter->m_finer]);
+
         uint8_t face = inter->m_iface;
-        i8array3 normal_;
+        darray3 normal = {{0., 0., 0.}};
+        i8array3 normal_ = {{0, 0, 0}};
         oct.getNormal(face, normal_, m_treeConstants->normals);
         m_trans.mapNormals(normal_, normal);
         return normal;
@@ -4469,7 +4499,7 @@ namespace bitpit {
      * \return Size of an octant of input level.
      */
     double
-    ParaTree::levelToSize(uint8_t level) {
+    ParaTree::levelToSize(uint8_t level) const {
         uint32_t size = uint32_t(1)<<(m_treeConstants->maxLevel-level);
         return m_trans.mapSize(size);
     }

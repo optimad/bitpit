@@ -56,14 +56,6 @@ namespace bitpit {
  */
 
 /*!
- * Destructor
- */
-RBFKernel::~RBFKernel()
-{
-    m_fPtr = NULL;
-}
-
-/*!
  * Default constructor. RBFBasisFunction is WENDLANDC2 by default. RBFMode is
  * INTERP, by default. Use setFunction and setMode for changing it.
  */

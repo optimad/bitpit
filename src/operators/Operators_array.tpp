@@ -1387,6 +1387,49 @@ out << x[d-1];
 
 return(out); };
 
+namespace bitpit {
+
+// ---------------------------------------------------------------------------------- //
+/*!
+    Insertion operator for std::array.
+
+    Flush the content of std::array to std::ofstream.
+    The content of the input array is flushed with the following format:
+    x[0] x[1] x[2] ... x[d-1] where d = x.size();
+    (i.e. array elements are separated by blank spaces).
+    Template parameter T can be any type such that operator<< is defined.
+
+    \param[in,out] out output file stream
+    \param[in] x argument of insertion operator
+
+    \result reference to the stream (allows concatenation)
+*/
+template <class T, size_t d>
+Logger& operator<< (
+    Logger                                      &out,
+    const std::array<T, d>                      &x
+) {
+
+// ================================================================================== //
+// VARIABLES DECLARATION                                                              //
+// ================================================================================== //
+// none
+
+// ================================================================================== //
+// OUTPUT ARRAY CONTENT                                                               //
+// ================================================================================== //
+if (d == 0) {
+    return(out);
+}
+for (size_t i = 0; i < d-1; i++) {
+    out << x[i] << " ";
+} //next i
+out << x[d-1];
+
+return(out); };
+
+}
+
 // Input operator =================================================================== //
 
 // ---------------------------------------------------------------------------------- //

@@ -28,6 +28,8 @@
 
 #include "vertex.hpp"
 
+namespace bitpit {
+
 /*!
 	Output stream operator for class Vertex. Stream vertex coordinates from
 	object to communication buffer.
@@ -36,7 +38,7 @@
 	\param[in] vertex is the vertex to be streamed
 	\result updated output stream
 */
-bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &out_stream, const bitpit::Vertex &vertex)
+OBinaryStream& operator<<(OBinaryStream &out_stream, const Vertex &vertex)
 {
 	out_stream << vertex.m_id;
 	out_stream << vertex.m_coords;
@@ -53,7 +55,7 @@ bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &out_stream, const bitpi
 	\param[in] vertex is the vertex to be streamed
 	\result updated output stream
 */
-bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &in_stream, bitpit::Vertex &vertex)
+IBinaryStream& operator>>(IBinaryStream &in_stream, Vertex &vertex)
 {
 	in_stream >> vertex.m_id;
 	in_stream >> vertex.m_coords;
@@ -61,9 +63,6 @@ bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &in_stream, bitpit::Vert
 
 	return in_stream;
 }
-
-
-namespace bitpit {
 
 /*!
 	\class Vertex

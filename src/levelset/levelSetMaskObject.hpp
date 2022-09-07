@@ -32,8 +32,6 @@
 # include "bitpit_operators.hpp"
 # include "bitpit_surfunstructured.hpp"
 
-# include "levelSetCartesianKernel.hpp"
-# include "levelSetOctreeKernel.hpp"
 # include "levelSetSegmentationObject.hpp"
 
 namespace bitpit{

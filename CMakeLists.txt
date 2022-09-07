@@ -57,6 +57,9 @@ set(BITPIT_VERSION "1.9.0-devel" CACHE INTERNAL "Version number")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/external/git/cmake")
 include(GetGitRevisionDescription)
 
+include(CheckCCompilerFlag)
+include(CheckCXXCompilerFlag)
+
 #------------------------------------------------------------------------------------#
 # Functions
 #------------------------------------------------------------------------------------#
@@ -446,12 +449,18 @@ function(set_lto_property TARGET_NAME)
 endfunction()
 
 #------------------------------------------------------------------------------------#
+# Sanitize
+#------------------------------------------------------------------------------------#
+
+set(SANITIZE_MODULES "undefined;address")
+
+#------------------------------------------------------------------------------------#
 # Customized build types
 #------------------------------------------------------------------------------------#
 
 # Set build type variable
 if(NOT CMAKE_BUILD_TYPE)
-    set(SUPPORTED_BUILD_TYPE "Coverage" "Debug" "Release" "RelWithDebInfo" "MinSizeRel" "GNUProfiling" "ScalascaProfiling")
+    set(SUPPORTED_BUILD_TYPE "Coverage" "Debug" "Release" "RelWithDebInfo" "RelWithSanitize" "MinSizeRel" "GNUProfiling" "ScalascaProfiling")
 
     # Set default build type to Debug
     string(REPLACE ";" " " SUPPORTED_BUILD_TYPE_STRING "${SUPPORTED_BUILD_TYPE}")
@@ -578,7 +587,7 @@ set(VOLOCTREE_DEPS "common;PABLO;patchkernel")
 set(VOLUNSTRUCTURED_DEPS "common;patchkernel")
 set(RBF_DEPS "operators;IO")
 set(DISCRETIZATION_DEPS "common;containers;LA;patchkernel")
-set(LEVELSET_DEPS "common;communications;SA;CG;surfunstructured;voloctree;volcartesian;IO")
+set(LEVELSET_DEPS "common;communications;SA;CG;surfunstructured;voloctree;volcartesian;volunstructured;IO")
 set(POD_DEPS "IO;common;containers;voloctree")
 
 #------------------------------------------------------------------------------------#
@@ -984,14 +993,42 @@ SET(CMAKE_SHARED_LINKER_FLAGS_SCALASCAPROFILING "" CACHE STRING
     "Flags used by the shared libraries linker during Scalasca builds." FORCE)
 MARK_AS_ADVANCED(CMAKE_SHARED_LINKER_FLAGS_SCALASCAPROFILING)
 
+set(C_SANITIZE_MODULE_FLAGS "")
+foreach(SANITIZE_MODULE IN LISTS SANITIZE_MODULES)
+    check_c_compiler_flag(-fsanitize=${SANITIZE_MODULE} C_COMPILER_SUPPORTS_SANITIZE_MODULE)
+    if (C_COMPILER_SUPPORTS_SANITIZE_MODULE)
+        set(C_SANITIZE_MODULE_FLAGS "${C_SANITIZE_MODULE_FLAGS} -fsanitize=${SANITIZE_MODULE}")
+    endif()
+endforeach()
+if(CMAKE_BUILD_TYPE_LOWER MATCHES "sanitize")
+    if ("${C_SANITIZE_MODULE_FLAGS}" STREQUAL "")
+        message(FATAL_ERROR "The compiler doesn't support sanitize")
+    endif()
+endif()
+
+set(CXX_SANITIZE_MODULE_FLAGS "")
+foreach(SANITIZE_MODULE IN LISTS SANITIZE_MODULES)
+    check_cxx_compiler_flag(-fsanitize=${SANITIZE_MODULE} CXX_COMPILER_SUPPORTS_SANITIZE_MODULE)
+    if (CXX_COMPILER_SUPPORTS_SANITIZE_MODULE)
+        set(CXX_SANITIZE_MODULE_FLAGS "${CXX_SANITIZE_MODULE_FLAGS} -fsanitize=${SANITIZE_MODULE}")
+    endif()
+endforeach()
+if(CMAKE_BUILD_TYPE_LOWER MATCHES "sanitize")
+    if ("${CXX_SANITIZE_MODULE_FLAGS}" STREQUAL "")
+        message(FATAL_ERROR "The compiler doesn't support sanitize")
+    endif()
+endif()
+
 # Standard build types
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0")
 set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
+set(CMAKE_C_FLAGS_RELWITHSANITIZE "-O2 -g -fno-omit-frame-pointer -fno-common ${C_SANITIZE_MODULE_FLAGS}")
 set(CMAKE_C_FLAGS_DEBUG "-O0 -g")
 set(CMAKE_C_FLAGS_RELEASE "-O2")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmessage-length=0")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
+set(CMAKE_CXX_FLAGS_RELWITHSANITIZE "-O2 -g -fno-omit-frame-pointer -fno-common ${CXX_SANITIZE_MODULE_FLAGS}")
 set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O2")
 
@@ -999,6 +1036,8 @@ if (ENABLE_WARNINGS)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 endif()
+
+set(CMAKE_EXE_LINKER_FLAGS_RELWITHSANITIZE "-fno-omit-frame-pointer -fno-common ${CXX_SANITIZE_MODULE_FLAGS}")
 
 if (NOT ("${CMAKE_VERSION}" VERSION_LESS "2.8.12"))
     add_compile_options("-std=c++11")

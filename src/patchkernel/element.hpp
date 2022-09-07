@@ -36,18 +36,16 @@
 #include "element_reference.hpp"
 
 namespace bitpit {
-	class Element;
-}
 
-bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buf, bitpit::Element& element);
-bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &buf, const bitpit::Element& element);
+class Element;
 
-namespace bitpit {
+IBinaryStream & operator>>(IBinaryStream &buf, Element& element);
+OBinaryStream & operator<<(OBinaryStream &buf, const Element& element);
 
 class Element {
 
-friend bitpit::OBinaryStream& (::operator<<) (bitpit::OBinaryStream& buf, const Element& element);
-friend bitpit::IBinaryStream& (::operator>>) (bitpit::IBinaryStream& buf, Element& element);
+friend OBinaryStream& (operator<<) (OBinaryStream& buf, const Element& element);
+friend IBinaryStream& (operator>>) (IBinaryStream& buf, Element& element);
 
 public:
 	/*!

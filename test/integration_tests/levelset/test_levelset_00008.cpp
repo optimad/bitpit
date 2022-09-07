@@ -33,9 +33,8 @@
 #include "bitpit_levelset.hpp"
 #include "bitpit_surfunstructured.hpp"
 #include "bitpit_volcartesian.hpp"
-#include "bitpit_voloctree.hpp"
 
-const int SPACE_DIMENSION = 2;
+const int SPACE_DIMENSION = 3;
 
 /*!
  * Generate segmentation.
@@ -44,10 +43,6 @@ const int SPACE_DIMENSION = 2;
  */
 std::unique_ptr<bitpit::SurfUnstructured> generateSegmentation()
 {
-    const double R = 1.;
-    const long N = 32;
-    const double dtheta = 2. * BITPIT_PI / ((double) N);
-
     // Initialize segmentation
 #if BITPIT_ENABLE_MPI
     std::unique_ptr<bitpit::SurfUnstructured> segmentation(new bitpit::SurfUnstructured(0, SPACE_DIMENSION - 1, MPI_COMM_NULL));
@@ -58,30 +53,68 @@ std::unique_ptr<bitpit::SurfUnstructured> generateSegmentation()
     // Create vertex list
     //
     // Use non-consecutive vertex ids to test if the levelset can handle them.
-    const long vertexIdOffset = 101;
-    const long vertexIdStride = 2;
-
-    std::array<double, 3> point;
-    point[2] = 0.0;
-    for (long i = 0; i < N; ++i) {
-        double theta = i * dtheta;
-        point[0] = R * cos(theta);
-        point[1] = R * sin(theta);
-        segmentation->addVertex(point, vertexIdOffset + vertexIdStride * i);
-    }
+    segmentation->addVertex({{ -0.5, -0.5,  0.5}}, 0);
+    segmentation->addVertex({{  0.5, -0.5,  0.5}}, 1);
+    segmentation->addVertex({{  0.5, -0.5, -0.5}}, 2);
+    segmentation->addVertex({{ -0.5, -0.5, -0.5}}, 3);
+    segmentation->addVertex({{ -0.5,  0.5,  0.5}}, 4);
+    segmentation->addVertex({{  0.5,  0.5,  0.5}}, 5);
+    segmentation->addVertex({{  0.5,  0.5, -0.5}}, 6);
+    segmentation->addVertex({{ -0.5,  0.5, -0.5}}, 7);
+    segmentation->addVertex({{  0.0,  0.6, -0.5}}, 8);
 
     // Create simplex list
     //
     // Use non-consecutive cell ids to test if the levelset can handle them.
-    const long cellIdOffset = 202;
-    const long cellIdStride = 3;
+    std::vector<long> cellConnect(6);
 
-    for (long i = 0; i < N; ++i) {
-        std::vector<long> cellConnect(2, bitpit::Element::NULL_ID);
-        cellConnect[0] = vertexIdOffset + vertexIdStride * i;
-        cellConnect[1] = vertexIdOffset + vertexIdStride * ((i + 1) % N);
-        segmentation->addCell(bitpit::ElementType::LINE, cellConnect, cellIdOffset + cellIdStride * i);
-    }
+    cellConnect[0] = 3;
+    cellConnect[1] = 2;
+    cellConnect[2] = 1;
+    cellConnect[3] = 0;
+    segmentation->addCell(bitpit::ElementType::QUAD, cellConnect);
+
+    cellConnect[0] = 6;
+    cellConnect[1] = 5;
+    cellConnect[2] = 1;
+    cellConnect[3] = 2;
+    segmentation->addCell(bitpit::ElementType::QUAD, cellConnect);
+
+    cellConnect[0] = 7;
+    cellConnect[1] = 3;
+    cellConnect[2] = 0;
+    cellConnect[3] = 4;
+    segmentation->addCell(bitpit::ElementType::QUAD, cellConnect);
+
+    cellConnect[0] = 8;
+    cellConnect[1] = 7;
+    cellConnect[2] = 4;
+    segmentation->addCell(bitpit::ElementType::TRIANGLE, cellConnect);
+    cellConnect[0] = 8;
+    cellConnect[1] = 5;
+    cellConnect[2] = 6;
+    segmentation->addCell(bitpit::ElementType::TRIANGLE, cellConnect);
+    cellConnect[0] = 8;
+    cellConnect[1] = 4;
+    cellConnect[2] = 5;
+    segmentation->addCell(bitpit::ElementType::TRIANGLE, cellConnect);
+
+    cellConnect[0] = 5;
+    cellConnect[1] = 4;
+    cellConnect[2] = 1;
+    segmentation->addCell(bitpit::ElementType::TRIANGLE, cellConnect);
+    cellConnect[0] = 4;
+    cellConnect[1] = 0;
+    cellConnect[2] = 1;
+    segmentation->addCell(bitpit::ElementType::TRIANGLE, cellConnect);
+
+    cellConnect[ 0] = 5;
+    cellConnect[ 1] = 8;
+    cellConnect[ 2] = 6;
+    cellConnect[ 3] = 2;
+    cellConnect[ 4] = 3;
+    cellConnect[ 5] = 7;
+    segmentation->addCell(bitpit::ElementType::POLYGON, cellConnect);
 
     segmentation->initializeAdjacencies();
 
@@ -99,10 +132,10 @@ std::unique_ptr<bitpit::VolCartesian> generateCartesianMesh(const bitpit::SurfUn
     std::array<double, 3> segmentationMax;
     segmentation.getBoundingBox(segmentationMin, segmentationMax);
 
-    std::array<double, 3> length = 1.1 * (segmentationMax - segmentationMin);
+    std::array<double, 3> length = 3. * (segmentationMax - segmentationMin);
     std::array<double, 3> origin = -0.5 * length;
 
-    std::array<int,3> nc = {{128, 128, 0}};
+    std::array<int,3> nc = {{64, 64, 64}};
 
     std::unique_ptr<bitpit::VolCartesian> mesh(new bitpit::VolCartesian(SPACE_DIMENSION, origin, length, nc));
 
@@ -122,12 +155,12 @@ std::unique_ptr<bitpit::VolOctree> generateOctreeMesh(const bitpit::SurfUnstruct
 
     double length = 0.;
     for (int i = 0; i < 3; ++i) {
-        length = std::max(length, 1.1 * (segmentationMax[i] - segmentationMin[i]));
+        length = std::max(length, 3 * (segmentationMax[i] - segmentationMin[i]));
     };
 
-    std::array<double, 3> origin = - 0.5 * std::array<double, 3>{{length, length, 0.}};
+    std::array<double, 3> origin = - 0.5 * std::array<double, 3>{{length, length, length}};
 
-    double dh = length / 128;
+    double dh = length / 64;
 
 #if BITPIT_ENABLE_MPI
     std::unique_ptr<bitpit::VolOctree> mesh(new bitpit::VolOctree(SPACE_DIMENSION, origin, length, dh, MPI_COMM_NULL));
@@ -152,7 +185,7 @@ int subtest_001()
     bitpit::log::cout() << " - Loading geometry" << std::endl;
 
     std::unique_ptr<bitpit::SurfUnstructured> segmentation = generateSegmentation();
-    segmentation->getVTK().setName("geometry_007");
+    segmentation->getVTK().setName("geometry_008");
     segmentation->write();
 
     bitpit::log::cout() << "n. vertex: " << segmentation->getVertexCount() << std::endl;
@@ -167,9 +200,9 @@ int subtest_001()
     mesh->update();
 
     // Initialize test
-    long testCellId0 = 12065;
-    long testCellId1 = 13590;
-    long testCellId2 = 15495;
+    long testCellId0 = 137120;
+    long testCellId1 = 189856;
+    long testCellId2 = 233888;
 
     int objectId = 0;
 
@@ -180,6 +213,7 @@ int subtest_001()
     // Initialize levelset
     bitpit::LevelSet levelsetSparse(bitpit::LevelSetStorageType::SPARSE);
     levelsetSparse.setPropagateSign(true);
+    levelsetSparse.setSizeNarrowBand(0.25);
     levelsetSparse.setMesh(mesh.get());
     levelsetSparse.addObject(segmentation.get(), BITPIT_PI, objectId);
 
@@ -191,7 +225,7 @@ int subtest_001()
     bitpit::log::cout() << "Computation compreted in " << elapsedTimeSparse << " ms" << std::endl;
 
     levelsetSparse.getObject(objectId).enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
-    mesh->getVTK().setName("levelset_007_cartesian_default_sparse");
+    mesh->getVTK().setName("levelset_008_cartesian_default_sparse");
     mesh->write();
 
     double sparseValue0 = levelsetSparse.getObject(objectId).getValue(testCellId0);
@@ -209,6 +243,7 @@ int subtest_001()
     // Initialize levelset
     bitpit::LevelSet levelsetDense(bitpit::LevelSetStorageType::DENSE);
     levelsetDense.setPropagateSign(true);
+    levelsetDense.setSizeNarrowBand(0.25);
     levelsetDense.setMesh(mesh.get());
     levelsetDense.addObject(segmentation.get(), BITPIT_PI, objectId);
 
@@ -220,7 +255,7 @@ int subtest_001()
     bitpit::log::cout() << "Computation compreted in " << elapsedTimeDense << " ms" << std::endl;
 
     levelsetDense.getObject(objectId).enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
-    mesh->getVTK().setName("levelset_007_cartesian_default_dense");
+    mesh->getVTK().setName("levelset_008_cartesian_default_dense");
     mesh->write();
 
     double denseValue0 = levelsetDense.getObject(objectId).getValue(testCellId0);
@@ -272,7 +307,7 @@ int subtest_002()
     bitpit::log::cout() << " - Loading geometry" << std::endl;
 
     std::unique_ptr<bitpit::SurfUnstructured> segmentation = generateSegmentation();
-    segmentation->getVTK().setName("geometry_007");
+    segmentation->getVTK().setName("geometry_008");
     segmentation->write();
 
     bitpit::log::cout() << "n. vertex: " << segmentation->getVertexCount() << std::endl;
@@ -285,9 +320,9 @@ int subtest_002()
     mesh->switchMemoryMode(bitpit::VolCartesian::MEMORY_LIGHT);
 
     // Initialize test
-    long testCellId0 = 12065;
-    long testCellId1 = 13590;
-    long testCellId2 = 15495;
+    long testCellId0 = 137120;
+    long testCellId1 = 189856;
+    long testCellId2 = 233888;
 
     int objectId = 0;
 
@@ -297,6 +332,7 @@ int subtest_002()
 
     // Initialize levelset
     bitpit::LevelSet levelsetSparse(bitpit::LevelSetStorageType::SPARSE);
+    levelsetSparse.setSizeNarrowBand(0.25);
     levelsetSparse.setMesh(mesh.get());
     levelsetSparse.addObject(segmentation.get(), BITPIT_PI, objectId);
 
@@ -312,7 +348,7 @@ int subtest_002()
     mesh->update();
 
     levelsetSparse.getObject(objectId).enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
-    mesh->getVTK().setName("levelset_007_cartesian_light_sparse");
+    mesh->getVTK().setName("levelset_008_cartesian_light_sparse");
     mesh->write();
 
     mesh->switchMemoryMode(bitpit::VolCartesian::MEMORY_LIGHT);
@@ -331,6 +367,7 @@ int subtest_002()
 
     // Initialize levelset
     bitpit::LevelSet levelsetDense(bitpit::LevelSetStorageType::DENSE);
+    levelsetDense.setSizeNarrowBand(0.25);
     levelsetDense.setMesh(mesh.get());
     levelsetDense.addObject(segmentation.get(), BITPIT_PI, objectId);
 
@@ -346,7 +383,7 @@ int subtest_002()
     mesh->update();
 
     levelsetDense.getObject(objectId).enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
-    mesh->getVTK().setName("levelset_007_cartesian_light_dense");
+    mesh->getVTK().setName("levelset_008_cartesian_light_dense");
     mesh->write();
 
     mesh->switchMemoryMode(bitpit::VolCartesian::MEMORY_LIGHT);
@@ -400,7 +437,7 @@ int subtest_003()
     bitpit::log::cout() << " - Loading geometry" << std::endl;
 
     std::unique_ptr<bitpit::SurfUnstructured> segmentation = generateSegmentation();
-    segmentation->getVTK().setName("geometry_007");
+    segmentation->getVTK().setName("geometry_008");
     segmentation->write();
 
     bitpit::log::cout() << "n. vertex: " << segmentation->getVertexCount() << std::endl;
@@ -414,9 +451,9 @@ int subtest_003()
     mesh->update();
 
     // Initialize test
-    long testCellId0 = 9873;
-    long testCellId1 = 10652;
-    long testCellId2 = 10905;
+    long testCellId0 = 173202;
+    long testCellId1 = 174512;
+    long testCellId2 = 182672;
 
     int objectId = 0;
 
@@ -427,6 +464,7 @@ int subtest_003()
     // Initialize levelset
     bitpit::LevelSet levelsetSparse(bitpit::LevelSetStorageType::SPARSE);
     levelsetSparse.setPropagateSign(true);
+    levelsetSparse.setSizeNarrowBand(0.25);
     levelsetSparse.setMesh(mesh.get());
     levelsetSparse.addObject(segmentation.get(), BITPIT_PI, objectId);
 
@@ -438,7 +476,7 @@ int subtest_003()
     bitpit::log::cout() << "Computation compreted in " << elapsedTimeSparse << " ms" << std::endl;
 
     levelsetSparse.getObject(objectId).enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
-    mesh->getVTK().setName("levelset_007_octree_sparse");
+    mesh->getVTK().setName("levelset_008_octree_sparse");
     mesh->write();
 
     double sparseValue0 = levelsetSparse.getObject(objectId).getValue(testCellId0);
@@ -456,6 +494,7 @@ int subtest_003()
     // Initialize levelset
     bitpit::LevelSet levelsetDense(bitpit::LevelSetStorageType::DENSE);
     levelsetDense.setPropagateSign(true);
+    levelsetDense.setSizeNarrowBand(0.25);
     levelsetDense.setMesh(mesh.get());
     levelsetDense.addObject(segmentation.get(), BITPIT_PI, objectId);
 
@@ -467,7 +506,7 @@ int subtest_003()
     bitpit::log::cout() << "Computation compreted in " << elapsedTimeDense << " ms" << std::endl;
 
     levelsetDense.getObject(objectId).enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
-    mesh->getVTK().setName("levelset_007_octree_dense");
+    mesh->getVTK().setName("levelset_008_octree_dense");
     mesh->write();
 
     double denseValue0 = levelsetDense.getObject(objectId).getValue(testCellId0);

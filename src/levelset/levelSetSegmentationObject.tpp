@@ -343,13 +343,15 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand(bool sig
 
     log::cout() << "Computing levelset within the narrow band... " << std::endl;
 
+    // Cartesian patches are handled separately
     if( LevelSetCartesianKernel* lsCartesian = dynamic_cast<LevelSetCartesianKernel*>(this->m_kernel) ){
         computeNarrowBand( lsCartesian, signd) ;
-
-    } else if ( LevelSetOctreeKernel* lsOctree = dynamic_cast<LevelSetOctreeKernel*>(this->m_kernel) ){
-        computeNarrowBand( lsOctree, signd) ;
-
+        return ;
     }
+
+    // All other patches are handled with the same method.
+    computeNarrowBand(this->m_kernel, signd);
+
 }
 
 /*!
@@ -361,19 +363,19 @@ template<typename narrow_band_cache_t>
 void LevelSetSegmentationObject<narrow_band_cache_t>::updateNarrowBand( const std::vector<adaption::Info> &adaptionData, bool signd){
 
     log::cout() << "Updating levelset within the narrow band... " << std::endl;
-    if( LevelSetCartesianKernel* lsCartesian= dynamic_cast<LevelSetCartesianKernel*>(this->m_kernel) ){
 
-        // Update is not implemented for Cartesian patches
+    // Cartesian patches are handled separately
+    //
+    // Update is not implemented for Cartesian patches, the levelset is cleared and
+    // rebuild from scratch.
+    if( LevelSetCartesianKernel* lsCartesian= dynamic_cast<LevelSetCartesianKernel*>(this->m_kernel) ){
         this->clear( ) ;
         computeNarrowBand( lsCartesian, signd) ;
         return;
     }
 
-    if( LevelSetOctreeKernel* lsOctree = dynamic_cast<LevelSetOctreeKernel*>(this->m_kernel) ){
-        updateNarrowBand( lsOctree, adaptionData, signd ) ;
-        return;
-    }
-
+    // All other patches are handled with the same method
+    updateNarrowBand(this->m_kernel, adaptionData, signd);
 
 }
 
@@ -391,10 +393,8 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::updateNarrowBand( const st
 template<typename narrow_band_cache_t>
 void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSetCartesianKernel *levelsetKernel, bool signd){
 
-    log::cout() << " Compute levelset on cartesian mesh"  << std::endl;
-
     // Get mesh information
-    const VolCartesian &mesh = *(levelsetKernel->getCartesianMesh() ) ;
+    const VolCartesian &mesh = *(levelsetKernel->getMesh() ) ;
     int meshDimension = mesh.getDimension();
     VolCartesian::MemoryMode meshMemoryMode = mesh.getMemoryMode();
 
@@ -408,11 +408,11 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
     // Define search radius
     //
     // Search radius should be equal to the maximum between the narrow band
-    // size and the diameter of the circumcircle. This guarantees that, when
+    // size and the radius of the bounding sphere. This guarantees that, when
     // the narrow band size is equal or less than zero, the levelset will be
     // evaluated on the cells that intersect the surface and on all their
     // first neighbours.
-    double searchRadius = std::max(this->m_narrowBandSize, 2 * levelsetKernel->getCellCircumcircle());
+    double searchRadius = std::max(this->m_narrowBandSize, 2 * levelsetKernel->getCellBoundingRadius());
 
     // Define mesh bounding box
     //
@@ -478,10 +478,10 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
     while (!processList.empty()) {
         // Get the cell to process
         long cellId = *(processList.begin());
-        processList.erase(cellId);
+        processList.erase(processList.begin());
 
         // Find segment associated to the cell
-        const std::array<double,3> &cellCentroid = levelsetKernel->computeCellCentroid(cellId);
+        std::array<double,3> cellCentroid = levelsetKernel->computeCellCentroid(cellId);
 
         long segmentId;
         double distance;
@@ -528,7 +528,7 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
 }
 
 /*!
- * Computes the levelset within the narrow band on an octree grid.
+ * Computes the levelset within the narrow band.
  * If the size of the narrow band has been set, the method will compute the
  * levelset values on the cells that intersect the surface, on all their
  * first neighbours and on the cells with a distance from the surface less
@@ -536,21 +536,24 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
  * In case the size of the narrow band has not been set, levelset will be
  * evaluated only on the cells that intersect the surface and on all their
  * first neighbours.
- * \param[in] levelsetKernel the octree LevelSetKernel
+ * \param[in] levelsetKernel the levelset mesh kernel
  * \param[in] signd whether signed distance should be calculated
  */
 template<typename narrow_band_cache_t>
-void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSetOctreeKernel *levelsetKernel, bool signd){
+void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSetKernel *levelsetKernel, bool signd){
 
-    VolumeKernel &mesh = *(levelsetKernel->getMesh()) ;
+    // Get mesh information
+    const VolumeKernel &mesh = *(levelsetKernel->getMesh()) ;
 
-    std::unordered_set<long> intersectedCells;
-
-    // Evaluate levelset information
+    // Get narrowband information
     narrow_band_cache_t *narrowBandCache = this->getNarrowBandCache();
 
-    for( const Cell &cell : mesh.getCells() ){
+    // Evaluate levelset information for intersected cells
+    VolumeKernel::CellConstIterator cellBegin = mesh.cellConstBegin();
+    VolumeKernel::CellConstIterator cellEnd   = mesh.cellConstEnd();
 
+    std::unordered_set<std::size_t> intersectedRawCellIds;
+    for (VolumeKernel::CellConstIterator cellItr = cellBegin; cellItr != cellEnd; ++cellItr) {
         // Identify the segment associated with the cell
         //
         // The search radius is evaluated as the maximum value between the
@@ -561,11 +564,11 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
         // explicitly set by the user.
         //
         // If no segment is identified the cell is not processed.
-        long cellId = cell.getId();
-        const std::array<double,3> &cellCentroid = levelsetKernel->computeCellCentroid(cellId);
-        double cellCircumcircle = levelsetKernel->computeCellCircumcircle(cellId);
+        long cellId = cellItr.getId();
+        std::array<double,3> cellCentroid = levelsetKernel->computeCellCentroid(cellId);
+        double cellBoundingRadius = levelsetKernel->computeCellBoundingRadius(cellId);
 
-        double searchRadius = std::max(this->m_narrowBandSize, cellCircumcircle);
+        double searchRadius = std::max(this->m_narrowBandSize, cellBoundingRadius);
 
         long segmentId;
         double distance;
@@ -591,8 +594,9 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
         // intersects the surface because only cells that intersect the surface
         // are considered, otherwise we need to check if the absolute distance
         // associated with the cell is lower than the intersection distance.
-        if (this->m_narrowBandSize < 0 || cellCircumcircle < std::abs(distance)) {
-            intersectedCells.insert(cellId);
+        if (this->m_narrowBandSize < 0 || cellBoundingRadius < std::abs(distance)) {
+            std::size_t cellRawId = cellItr.getRawIndex();
+            intersectedRawCellIds.insert(cellRawId);
         }
 
     }
@@ -601,14 +605,14 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
     //
     // If a cell intersects the surface, we need to evaluate the levelset
     // of all its neigbours.
-    for( long cellId : intersectedCells){
+    for (std::size_t cellRawId : intersectedRawCellIds) {
+        // Compute cell projection point
+        VolumeKernel::CellConstIterator cellItr = mesh.getCells().rawFind(cellRawId);
+        std::array<double,3> cellProjectionPoint = this->computeProjectionPoint(cellItr.getId());
 
-        Cell const &cell = mesh.getCell(cellId);
-
-        std::array<double,3> cellProjectionPoint = this->computeProjectionPoint(cellId);
-
-        const long *neighbours = cell.getAdjacencies() ;
-        int nNeighbours = cell.getAdjacencyCount() ;
+        // Process cell adjacencies
+        const long *neighbours = cellItr->getAdjacencies() ;
+        int nNeighbours = cellItr->getAdjacencyCount() ;
         for (int n = 0; n < nNeighbours; ++n) {
             // Skip the neighbour if it has already been processed
             //
@@ -622,7 +626,7 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
             }
 
             // Identify the segment associated with the neighbour
-            const std::array<double,3> &neighCentroid = levelsetKernel->computeCellCentroid(neighId);
+            std::array<double,3> neighCentroid = levelsetKernel->computeCellCentroid(neighId);
 
             double searchRadius = 1.05 * norm2(neighCentroid - cellProjectionPoint);
 
@@ -648,8 +652,7 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
 }
 
 /*!
- * Updates the levelset within the narrow band on an octree grid after an grid
- * adaption.
+ * Updates the levelset within the narrow band after a grid adaption.
  * If the size of the narrow band has been set, the method will compute the
  * levelset values on the cells that intersect the surface, on all their
  * first neighbours and on the cells with a distance from the surface less
@@ -662,7 +665,7 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
  * @param[in] signd whether signed distance should be calculated
  */
 template<typename narrow_band_cache_t>
-void LevelSetSegmentationObject<narrow_band_cache_t>::updateNarrowBand( LevelSetOctreeKernel *levelsetKernel, const std::vector<adaption::Info> &adaptionData, bool signd){
+void LevelSetSegmentationObject<narrow_band_cache_t>::updateNarrowBand( LevelSetKernel *levelsetKernel, const std::vector<adaption::Info> &adaptionData, bool signd){
 
     VolumeKernel &mesh = *(levelsetKernel->getMesh()) ;
     narrow_band_cache_t *narrowBandCache = this->getNarrowBandCache();
@@ -698,9 +701,9 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::updateNarrowBand( LevelSet
             // explicitly set by the user.
             //
             // If no segment is identified the cell is not processed.
-            const std::array<double,3> &centroid = levelsetKernel->computeCellCentroid(cellId);
+            std::array<double,3> centroid = levelsetKernel->computeCellCentroid(cellId);
 
-            double searchRadius = std::max(this->m_narrowBandSize, levelsetKernel->computeCellCircumcircle(cellId));
+            double searchRadius = std::max(this->m_narrowBandSize, levelsetKernel->computeCellBoundingRadius(cellId));
 
             long segmentId;
             double distance;
@@ -756,7 +759,7 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::updateNarrowBand( LevelSet
         }
 
         // Identify the segment associated with the cell
-        const std::array<double,3> &cellCentroid = levelsetKernel->computeCellCentroid(cellId);
+        std::array<double,3> cellCentroid = levelsetKernel->computeCellCentroid(cellId);
         std::array<double,3> neighProjectionPoint = this->computeProjectionPoint(intersectedNeighId);
 
         double searchRadius = 1.05 * norm2(cellCentroid - neighProjectionPoint);

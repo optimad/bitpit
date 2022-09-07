@@ -25,6 +25,7 @@
 # ifndef __BITPIT_LEVELSET_OBJECT_FACTORY_TPP__
 # define __BITPIT_LEVELSET_OBJECT_FACTORY_TPP__
 
+#include "levelSetUnstructuredKernel.hpp"
 namespace bitpit {
 
 /*!
@@ -63,7 +64,10 @@ std::unique_ptr<LevelSetObject> LevelSetObjectFactory::createImmutableObject(con
         return _createImmutableObject<LevelSetCartesianKernel, narrow_band_cache_t>(cartesianKernel, storageType, source);
     } else if ( const LevelSetOctreeKernel *octreeKernel = dynamic_cast<const LevelSetOctreeKernel *>(kernel) ){
         return _createImmutableObject<LevelSetOctreeKernel, narrow_band_cache_t>(octreeKernel, storageType, source);
+    } else if ( const LevelSetUnstructuredKernel *unstructuredKernel = dynamic_cast<const LevelSetUnstructuredKernel *>(kernel) ){
+        return _createImmutableObject<LevelSetUnstructuredKernel, narrow_band_cache_t>(unstructuredKernel, storageType, source);
     }
+
 
     BITPIT_UNREACHABLE("Kernel type not supported");
 }
@@ -120,6 +124,8 @@ std::unique_ptr<LevelSetObject> LevelSetObjectFactory::createMaskObject(const Le
         return _createMaskObject<LevelSetCartesianKernel, narrow_band_cache_t, Args...>(cartesianKernel, storageType, std::forward<Args>(args)...);
     } else if ( const LevelSetOctreeKernel *octreeKernel = dynamic_cast<const LevelSetOctreeKernel *>(kernel) ){
         return _createMaskObject<LevelSetOctreeKernel, narrow_band_cache_t, Args...>(octreeKernel, storageType, std::forward<Args>(args)...);
+    } else if ( const LevelSetUnstructuredKernel *unstructuredKernel = dynamic_cast<const LevelSetUnstructuredKernel *>(kernel) ){
+        return _createMaskObject<LevelSetUnstructuredKernel, narrow_band_cache_t, Args...>(unstructuredKernel, storageType, std::forward<Args>(args)...);
     }
 
     BITPIT_UNREACHABLE("Kernel type not supported");
@@ -165,6 +171,8 @@ std::unique_ptr<LevelSetObject> LevelSetObjectFactory::createSegmentationObject(
         return _createSegmentationObject<LevelSetCartesianKernel, narrow_band_cache_t, Args...>(cartesianKernel, storageType, std::forward<Args>(args)...);
     } else if ( const LevelSetOctreeKernel *octreeKernel = dynamic_cast<const LevelSetOctreeKernel *>(kernel) ){
         return _createSegmentationObject<LevelSetOctreeKernel, narrow_band_cache_t, Args...>(octreeKernel, storageType, std::forward<Args>(args)...);
+    } else if ( const LevelSetUnstructuredKernel *unstructuredKernel = dynamic_cast<const LevelSetUnstructuredKernel *>(kernel) ){
+        return _createSegmentationObject<LevelSetUnstructuredKernel, narrow_band_cache_t, Args...>(unstructuredKernel, storageType, std::forward<Args>(args)...);
     }
 
     BITPIT_UNREACHABLE("Kernel type not supported");

@@ -30,8 +30,6 @@
 #include <limits>
 #include <type_traits>
 
-#include "piercedKernel.hpp"
-
 #define  __PSI_REFERENCE__ typename PiercedStorageIterator<value_t, id_t, value_no_cv_t>::reference
 #define  __PSI_POINTER__   typename PiercedStorageIterator<value_t, id_t, value_no_cv_t>::pointer
 

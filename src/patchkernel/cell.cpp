@@ -29,6 +29,8 @@
 #include "vertex.hpp"
 #include "cell.hpp"
 
+namespace bitpit {
+
 /*!
 	Input stream operator for class Cell. Stream cell data from memory
 	input stream to container.
@@ -37,10 +39,10 @@
 	\param[in] cell is the cell object
 	\result Returns the same input stream received in input.
 */
-bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buffer, bitpit::Cell &cell)
+IBinaryStream& operator>>(IBinaryStream &buffer, Cell &cell)
 {
 	// Write connectivity data ---------------------------------------------- //
-	bitpit::Element &element(cell);
+	Element &element(cell);
 	buffer >> element;
 
 	// Write interface data ------------------------------------------------- //
@@ -60,10 +62,10 @@ bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buffer, bitpit::Cell &c
 	\param[in] cell is the cell object
 	\result Returns the same output stream received in input.
 */
-bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream  &buffer, const bitpit::Cell &cell)
+OBinaryStream& operator<<(OBinaryStream  &buffer, const Cell &cell)
 {
 	// Write connectivity data ---------------------------------------------- //
-	const bitpit::Element &element(cell);
+	const Element &element(cell);
 	buffer << element;
 
 	// Write interface data ------------------------------------------------- //
@@ -74,8 +76,6 @@ bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream  &buffer, const bitpit::
 
 	return buffer;
 }
-
-namespace bitpit {
 
 /*!
 	\class Cell
