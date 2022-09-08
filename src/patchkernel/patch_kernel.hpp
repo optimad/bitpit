@@ -265,8 +265,7 @@ public:
 			}
 
 			// Select the first vertex of the first cell
-			std::size_t vertexLocalId_1 = 0;
-			long vertexId_1 = m_patch.getCell(id_1).getVertexId(vertexLocalId_1);
+			long vertexId_1 = m_patch.getCell(id_1).getVertexId(0);
 
 			// The vertex of the second cell is choosen as the first vertex on
 			// that cell not equal to the selected vertex of the first cell.
