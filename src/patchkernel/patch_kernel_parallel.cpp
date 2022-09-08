@@ -3846,7 +3846,7 @@ const std::vector<long> & PatchKernel::getGhostExchangeSources(int rank) const
 	\param id is the id of the ghost vertex
 	\param rank is the rank of the process that owns the ghost vertex
 */
-void PatchKernel::setGhostVertexOwner(int id, int rank)
+void PatchKernel::setGhostVertexOwner(long id, int rank)
 {
 	auto ghostVertexOwnerItr = m_ghostVertexOwners.find(id);
 	if (ghostVertexOwnerItr != m_ghostVertexOwners.end()) {
@@ -3863,7 +3863,7 @@ void PatchKernel::setGhostVertexOwner(int id, int rank)
 
 	\param id is the id of the ghost vertex
 */
-void PatchKernel::unsetGhostVertexOwner(int id)
+void PatchKernel::unsetGhostVertexOwner(long id)
 {
 	auto ghostVertexOwnerItr = m_ghostVertexOwners.find(id);
 	if (ghostVertexOwnerItr == m_ghostVertexOwners.end()) {
@@ -3893,7 +3893,7 @@ void PatchKernel::clearGhostVertexOwners()
 	\param id is the id of the ghost cell
 	\param rank is the rank of the process that owns the ghost cell
 */
-void PatchKernel::setGhostCellOwner(int id, int rank)
+void PatchKernel::setGhostCellOwner(long id, int rank)
 {
 	auto ghostCellOwnerItr = m_ghostCellOwners.find(id);
 	if (ghostCellOwnerItr != m_ghostCellOwners.end()) {
@@ -3910,7 +3910,7 @@ void PatchKernel::setGhostCellOwner(int id, int rank)
 
 	\param id is the id of the ghost cell
 */
-void PatchKernel::unsetGhostCellOwner(int id)
+void PatchKernel::unsetGhostCellOwner(long id)
 {
 	auto ghostCellOwnerItr = m_ghostCellOwners.find(id);
 	if (ghostCellOwnerItr == m_ghostCellOwners.end()) {
