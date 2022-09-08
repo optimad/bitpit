@@ -22,14 +22,7 @@
  *
 \*---------------------------------------------------------------------------*/
 
-
-# include "bitpit_operators.hpp"
-# include "bitpit_CG.hpp"
-# include "bitpit_patchkernel.hpp"
-
-# include "levelSetObject.hpp"
 # include "levelSetKernel.hpp"
-# include "levelSetSignPropagator.hpp"
 
 namespace bitpit {
 
@@ -37,7 +30,6 @@ namespace bitpit {
     @interface  LevelSetKernel
     @ingroup levelset
     @brief  Mesh specific implementation to calculate the levelset function
-
 */
 
 /*!
@@ -76,136 +68,38 @@ LevelSetKernel::~LevelSetKernel(){
  * Returns pointer to underlying mesh.
  * @return pointer to mesh
 */
-VolumeKernel* LevelSetKernel::getMesh() const{
+VolumeKernel * LevelSetKernel::getMesh() const{
     return m_mesh ;
-} 
-
-/*!
- * Clears the geometry cache.
- */
-void LevelSetKernel::clearGeometryCache(  ) {
-
-    std::unordered_map<long, std::array<double,3>>().swap( m_cellCentroids ) ;
-
 }
 
 /*!
- * Updates the geometry cache after an adaption.
+ * Updates the kernel after an adaption.
  *
  * @param[in] adaptionData are the information about the adaption
  */
-void LevelSetKernel::updateGeometryCache( const std::vector<adaption::Info> &adaptionData ) {
+void LevelSetKernel::update( const std::vector<adaption::Info> &adaptionData ) {
 
-    // If there are no cells in the mesh we can just delete all the cache
-    if ( m_mesh->getCellCount() == 0) {
-        clearGeometryCache();
-        return;
-    }
+    BITPIT_UNUSED( adaptionData );
 
-    // Remove the previous cells from the cache
-    for ( const adaption::Info &adaptionInfo : adaptionData ){
-        if( adaptionInfo.entity != adaption::Entity::ENTITY_CELL ){
-            continue;
-        }
-
-        for ( auto & previousId : adaptionInfo.previous){
-            auto centroidItr = m_cellCentroids.find( previousId ) ;
-            if ( centroidItr == m_cellCentroids.end() ) {
-                continue ;
-            }
-
-            m_cellCentroids.erase( previousId ) ;
-        }
-    }
-
+    // Nothing to do
 }
 
 /*!
- * Computes the centroid of the specfified cell.
- *
- * If the centroid of the cell has been already evaluated, the cached value is
- * returned. Otherwise the cell centroid is evaluated and stored in the cache.
- *
+ * Checks if a plane intersects the cell
  * @param[in] id is the index of cell
- * @return The centroid of the cell.
+ * @param[in] root is a point on the plane
+ * @param[in] normal is the normal of the plane
+ * @param[in] tolerance is the tolerance used for distance comparisons
+ * @return true if intersect
  */
-const std::array<double,3> & LevelSetKernel::computeCellCentroid( long id ) const {
+bool LevelSetKernel::intersectCellPlane( long id, const std::array<double,3> &root, const std::array<double,3> &normal, double tolerance ) {
 
-    auto centroidItr = m_cellCentroids.find( id ) ;
-    if ( centroidItr == m_cellCentroids.end() ) {
-        centroidItr = m_cellCentroids.insert( { id, m_mesh->evalCellCentroid( id ) } ).first ;
-    }
+    std::array<double,3> minPoint;
+    std::array<double,3> maxPoint;
+    m_mesh->evalCellBoundingBox(id, &minPoint, &maxPoint);
 
-    return centroidItr->second;
-
-}
-
-/*!
- * Computes the radius of the incircle of the specfified cell.
- * @param[in] id is the index of cell
- * @return radius of incircle
- */
-double LevelSetKernel::computeCellIncircle( long id ) const {
-
-    VolumeKernel *patch = getMesh();
-    Cell &cell = patch->getCell(id);
-
-    const long* interfaceIds = cell.getInterfaces();
-    int interfaceCount = cell.getInterfaceCount();
-    
-    const std::array<double,3> &cellCenter = computeCellCentroid(id);
-
-    double radius = std::numeric_limits<double>::max() ;
-    for (int k = 0; k < interfaceCount; ++k) {
-        long interfaceId = interfaceIds[k];
-        double r = norm2(cellCenter - patch->evalInterfaceCentroid(interfaceId));
-        radius = std::min(radius, r);
-    }
-
-    ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
-    int nCellVertices = cellVertexIds.size();
-    for (int k = 0; k < nCellVertices; ++k) {
-        long vertexId = cellVertexIds[k];
-        double r = norm2(cellCenter - patch->getVertexCoords(vertexId));
-        radius = std::min(radius, r);
-    }
-
-    return radius;
-
-}
-
-/*!
- * Computes the radius of the circumcircle of the specfified cell.
- * @param[in] id is the index of cell
- * @return radius of incircle
- */
-double LevelSetKernel::computeCellCircumcircle( long id ) const {
-
-    VolumeKernel *patch = getMesh();
-    Cell &cell = patch->getCell(id);
-
-    const long* interfaceIds = cell.getInterfaces();
-    int interfaceCount = cell.getInterfaceCount();
-
-    const std::array<double,3> &cellCenter = computeCellCentroid(id);
-
-    double radius = -std::numeric_limits<double>::max() ;
-    for (int k = 0; k < interfaceCount; ++k) {
-        long interfaceId = interfaceIds[k];
-        double r = norm2(cellCenter - patch->evalInterfaceCentroid(interfaceId));
-        radius = std::max(radius, r);
-    }
-
-    ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
-    int nCellVertices = cellVertexIds.size();
-    for (int k = 0; k < nCellVertices; ++k) {
-        long vertexId = cellVertexIds[k];
-        double r = norm2(cellCenter - patch->getVertexCoords(vertexId));
-        radius = std::max(radius, r);
-    }
-
-    return radius;
-
+    int dim = m_mesh->getDimension();
+    return CGElem::intersectPlaneBox( root, normal, minPoint, maxPoint, dim, tolerance);
 }
 
 /*!
@@ -215,7 +109,7 @@ double LevelSetKernel::computeCellCircumcircle( long id ) const {
  * @return true if point is inside, false otherwise
  */
 bool LevelSetKernel::isPointInCell(long id, const std::array<double,3> &pointCoords) const {
-    return getMesh()->isPointInside(id,pointCoords);
+    return m_mesh->isPointInside(id,pointCoords);
 }
 
 /*!
@@ -330,7 +224,7 @@ std::unique_ptr<DataCommunicator> LevelSetKernel::createDataCommunicator( ) cons
 */
 std::unique_ptr<LevelSetSignPropagator> LevelSetKernel::createSignPropagator( ) const {
 
-    return std::unique_ptr<LevelSetSignPropagator>(new LevelSetSignPropagator(getMesh())) ;
+    return std::unique_ptr<LevelSetSignPropagator>(new LevelSetSignPropagator(m_mesh)) ;
 }
 
 }

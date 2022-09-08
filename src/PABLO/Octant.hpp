@@ -37,15 +37,6 @@
 
 namespace bitpit {
 
-class Octant;
-
-}
-
-bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buffer, bitpit::Octant& octant);
-bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &buffer, const bitpit::Octant& octant);
-
-namespace bitpit {
-
 // =================================================================================== //
 // TYPEDEFS
 // =================================================================================== //
@@ -59,6 +50,14 @@ typedef std::array<uint32_t, 3>              u32array3;
 typedef std::vector<std::vector<uint32_t>>   u32vector2D;
 typedef std::vector<std::vector<uint64_t>>   u64vector2D;
 typedef std::vector<u32array3>               u32arr3vector;
+
+// =================================================================================== //
+// STREAM OPERATORS
+// =================================================================================== //
+class Octant;
+
+IBinaryStream & operator>>(IBinaryStream &buffer, Octant& octant);
+OBinaryStream & operator<<(OBinaryStream &buffer, const Octant& octant);
 
 // =================================================================================== //
 // CLASS DEFINITION                                                                    //
@@ -98,8 +97,8 @@ class Octant{
     friend class ParaTree;
     friend class Global;
 
-    friend bitpit::OBinaryStream& (::operator<<) (bitpit::OBinaryStream& buf, const Octant& octant);
-    friend bitpit::IBinaryStream& (::operator>>) (bitpit::IBinaryStream& buf, Octant& octant);
+    friend OBinaryStream& (operator<<) (OBinaryStream& buf, const Octant& octant);
+    friend IBinaryStream& (operator>>) (IBinaryStream& buf, Octant& octant);
 
 
     // =================================================================================== //

@@ -32,7 +32,7 @@
 #include <vector>
 #include <unordered_map>
 
-#include "bitpit_patchkernel.hpp"
+#include "volume_kernel.hpp"
 
 namespace bitpit {
 

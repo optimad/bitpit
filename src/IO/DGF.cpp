@@ -1118,6 +1118,7 @@ err_code = 0;
 // CHECK DATA BLOCK                                                           //
 // ========================================================================== //
 word = "begin";
+current_pos = file_handle.tellg();
 while (!file_handle.eof()
     && ((word.compare("#") != 0)
     &&  (word.compare("VERTEX") != 0)
@@ -1126,8 +1127,8 @@ while (!file_handle.eof()
     &&  (word.compare("SIMPLEXDATA") != 0))) {
 
     // Get current line
-    current_pos = file_handle.tellg();
     getline(file_handle, line);
+    current_pos = file_handle.tellg();
     line = utils::string::trim(line);
     sline.clear();
     sline.str(line);

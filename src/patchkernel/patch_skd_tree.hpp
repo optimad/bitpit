@@ -44,22 +44,19 @@ public:
     const std::vector<std::size_t> & getCellRawIds() const;
     std::size_t getCellRawId(std::size_t n) const;
 
-    const std::array<double, 3> & getCachedCentroid(std::size_t rawId) const;
+    const std::array<std::array<double, 3>, 2> & getCachedBox(std::size_t rawId) const;
 
-    const std::array<double, 3> & getCachedBoxMin(std::size_t rawId) const;
-    const std::array<double, 3> & getCachedBoxMax(std::size_t rawId) const;
     std::array<double, 3> evalCachedBoxMean(std::size_t rawId) const;
+    double evalCachedBoxMean(std::size_t rawId, int direction) const;
 
 protected:
-    typedef PiercedStorage<std::array<double, 3>, long> CentroidCache;
-    typedef PiercedStorage<std::array<double, 3>, long> BoxCache;
+    typedef PiercedStorage<std::array<std::array<double, 3>, 2>, long> BoxCache;
 
     SkdPatchInfo(const PatchKernel *patch, const std::vector<std::size_t> *cellRawIds);
 
     const PatchKernel *m_patch;
     const std::vector<std::size_t> *m_cellRawIds;
 
-    std::unique_ptr<CentroidCache> m_cellCentroids;
     std::unique_ptr<BoxCache> m_cellBoxes;
 
 };
@@ -117,6 +114,7 @@ public:
     const SkdBox & getBoundingBox() const;
 
     std::array<double,3> evalBoxWeightedMean() const;
+    double evalBoxWeightedMean(int direction) const;
 
     bool isLeaf() const;
     bool hasChild(ChildLocation child) const;

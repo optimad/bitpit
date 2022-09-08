@@ -31,21 +31,19 @@
 #include "bitpit_containers.hpp"
 
 namespace bitpit {
-	class Vertex;
-	class PatchKernel;
-}
 
-bitpit::OBinaryStream& operator<< (bitpit::OBinaryStream &out, const bitpit::Vertex &vertex);
-bitpit::IBinaryStream& operator>> (bitpit::IBinaryStream &in, bitpit::Vertex &vertex);
+class Vertex;
+class PatchKernel;
 
-namespace bitpit {
+OBinaryStream& operator<< (OBinaryStream &out, const Vertex &vertex);
+IBinaryStream& operator>> (IBinaryStream &in, Vertex &vertex);
 
 class Vertex {
 
 friend class PatchKernel;
 
-friend bitpit::OBinaryStream& (::operator<<) (bitpit::OBinaryStream&, const Vertex &);
-friend bitpit::IBinaryStream& (::operator>>) (bitpit::IBinaryStream&, Vertex &);
+friend OBinaryStream& (operator<<) (OBinaryStream&, const Vertex &);
+friend IBinaryStream& (operator>>) (IBinaryStream&, Vertex &);
 
 public:
 	enum Coordinate {

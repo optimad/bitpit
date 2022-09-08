@@ -38,6 +38,7 @@
 #include "levelSetKernel.hpp"
 #include "levelSetCartesianKernel.hpp"
 #include "levelSetOctreeKernel.hpp"
+#include "levelSetUnstructuredKernel.hpp"
 
 #include "levelSetObject.hpp"
 #include "levelSetProxyObject.hpp"

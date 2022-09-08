@@ -32,10 +32,7 @@
 
 #include "binary_stream.hpp"
 
-namespace bitpit{
-    template<class T>
-    class FlatVector2D;
-}
+namespace bitpit {
 
 /*!
     Stream operator from class FlatVector2D to communication buffer.
@@ -46,7 +43,7 @@ namespace bitpit{
     \result Returns the same output stream received in input.
 */
 template<class T>
-bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &buffer, const bitpit::FlatVector2D<T> &vector)
+OBinaryStream& operator<<(OBinaryStream &buffer, const FlatVector2D<T> &vector)
 {
     buffer << vector.m_index;
     buffer << vector.m_v;
@@ -63,15 +60,13 @@ bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &buffer, const bitpit::F
     \result Returns the same input stream received in input.
 */
 template<class T>
-bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buffer, bitpit::FlatVector2D<T> &vector)
+IBinaryStream& operator>>(IBinaryStream &buffer, FlatVector2D<T> &vector)
 {
     buffer >> vector.m_index;
     buffer >> vector.m_v;
 
     return buffer;
 }
-
-namespace bitpit{
 
 /*!
     Default constructor.

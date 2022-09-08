@@ -450,6 +450,8 @@ namespace bitpit {
 
 #if BITPIT_ENABLE_MPI==1
         void	_initializeCommunicator(MPI_Comm comm);
+#else
+        void	_initializeSerialCommunicator();
 #endif
         void	_initializePartitions();
         void	_initialize(uint8_t dim, const std::string &logfile);
@@ -544,7 +546,7 @@ namespace bitpit {
         PartitionIntersections evalPartitionIntersections(const uint32_t *schema_A, int rank_A, const uint32_t *schema_B);
 #endif
     public:
-        double		levelToSize(uint8_t level);
+        double		levelToSize(uint8_t level) const;
 
         // =================================================================================== //
         // OTHER INTERSECTION BASED METHODS										     		   //

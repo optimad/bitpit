@@ -26,8 +26,10 @@
 # define __BITPIT_LEVELSET_OBJECT_FACTORY_HPP__
 
 #include "levelSetBooleanObject.hpp"
+#include "levelSetCartesianKernel.hpp"
 #include "levelSetImmutableObject.hpp"
 #include "levelSetMaskObject.hpp"
+#include "levelSetOctreeKernel.hpp"
 #include "levelSetSegmentationObject.hpp"
 
 namespace bitpit {

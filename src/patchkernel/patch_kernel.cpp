@@ -229,12 +229,9 @@ PatchKernel::PatchKernel(const PatchKernel &other)
       m_expert(other.m_expert),
       m_dimension(other.m_dimension),
       m_toleranceCustom(other.m_toleranceCustom),
-      m_tolerance(other.m_tolerance),
-      m_rank(other.m_rank),
-      m_nProcessors(other.m_nProcessors)
+      m_tolerance(other.m_tolerance)
 #if BITPIT_ENABLE_MPI==1
-      , m_communicator(MPI_COMM_NULL),
-      m_partitioningStatus(other.m_partitioningStatus),
+      , m_partitioningStatus(other.m_partitioningStatus),
       m_owner(other.m_owner),
       m_haloSize(other.m_haloSize),
       m_partitioningCellsTag(other.m_partitioningCellsTag),
@@ -251,6 +248,14 @@ PatchKernel::PatchKernel(const PatchKernel &other)
       m_ghostCellExchangeSources(other.m_ghostCellExchangeSources)
 #endif
 {
+#if BITPIT_ENABLE_MPI==1
+	// Initialize the communicator
+	initializeCommunicator(other.getCommunicator());
+#else
+	// Initialize serial communicator
+	initializeSerialCommunicator();
+#endif
+
 	// Create index generators
 	importVertexIndexGenerator(other);
 	importInterfaceIndexGenerator(other);
@@ -261,14 +266,6 @@ PatchKernel::PatchKernel(const PatchKernel &other)
 
 	// Update the VTK streamer
 	replaceVTKStreamer(&other, this);
-
-#if BITPIT_ENABLE_MPI==1
-	// Set the communicator
-	MPI_Comm communicator = other.getCommunicator();
-	if (communicator != MPI_COMM_NULL) {
-		initializeCommunicator(communicator);
-	}
-#endif
 }
 
 /*!
@@ -540,9 +537,8 @@ void PatchKernel::initialize()
 		updatePartitioningInfo(true);
 	}
 #else
-	// Dummy parallel information
-	m_rank        = 0;
-	m_nProcessors = 1;
+	// Initialize serial communicator
+	initializeSerialCommunicator();
 #endif
 
 	// Initialize the geometrical tolerance
@@ -580,6 +576,17 @@ void PatchKernel::initialize()
 	m_vtk.addData<int>("vertexRank", VTKFieldType::SCALAR, VTKLocation::POINT, this);
 #endif
 }
+
+#if BITPIT_ENABLE_MPI!=1
+/*!
+	Initialize a dummy communicator to be used when MPI support is disabled.
+*/
+void PatchKernel::initializeSerialCommunicator()
+{
+	m_rank        = 0;
+	m_nProcessors = 1;
+}
+#endif
 
 /*!
 	Destroys the patch.
@@ -881,8 +888,13 @@ void PatchKernel::finalizeAlterations(bool squeezeStorage)
 #endif
 
 	// Clear alteration flags
-	m_alteredCells.clear();
-	m_alteredInterfaces.clear();
+	if (squeezeStorage) {
+		AlterationFlagsStorage().swap(m_alteredCells);
+		AlterationFlagsStorage().swap(m_alteredInterfaces);
+	} else {
+		m_alteredCells.clear();
+		m_alteredInterfaces.clear();
+	}
 
 	// Synchronize storage
 	m_cells.sync();
@@ -2005,58 +2017,6 @@ bool PatchKernel::deleteVertex(long id)
 }
 
 /*!
-	Deletes a list of vertices.
-
-	\param ids are the ids of the vertices to be deleted
-*/
-bool PatchKernel::deleteVertices(const std::vector<long> &ids)
-{
-	if (!isExpert()) {
-		return false;
-	}
-
-	// Deleting the last vertex requires some additional work. If the ids
-	// of vertices to be deleted contain the last vertex, that vertex is
-	// deleted after deleting all other vertices. In this way we make sure
-	// to delete the last vertex just once (after deleting the last vertex,
-	// another vertex becomes the last one and that vertex may be on the
-	// deletion list as well, and on and so forth). The same applies for
-	// the first ghost.
-	bool deleteLastInternalVertex = false;
-#if BITPIT_ENABLE_MPI==1
-	bool deleteFirstGhostVertex = false;
-#endif
-	std::vector<long>::const_iterator end = ids.cend();
-	for (std::vector<long>::const_iterator i = ids.cbegin(); i != end; ++i) {
-		long vertexId = *i;
-		if (vertexId == m_lastInternalVertexId) {
-			deleteLastInternalVertex = true;
-			continue;
-		}
-#if BITPIT_ENABLE_MPI==1
-		else if (vertexId == m_firstGhostVertexId) {
-			deleteFirstGhostVertex = true;
-			continue;
-		}
-#endif
-
-		deleteVertex(vertexId);
-	}
-
-	if (deleteLastInternalVertex) {
-		deleteVertex(m_lastInternalVertexId);
-	}
-
-#if BITPIT_ENABLE_MPI==1
-	if (deleteFirstGhostVertex) {
-		deleteVertex(m_firstGhostVertexId);
-	}
-#endif
-
-	return true;
-}
-
-/*!
 	Internal function to delete an internal vertex.
 
 	\param id is the id of the vertex
@@ -2089,7 +2049,19 @@ void PatchKernel::_deleteInternalVertex(long id)
 */
 long PatchKernel::countFreeVertices() const
 {
-	std::unordered_set<long> freeVertices;
+	return countBorderVertices();
+}
+
+/*!
+	Counts border vertices within the patch.
+
+	A border vertex is a vertex on a border face.
+
+	\return The number of border vertices.
+*/
+long PatchKernel::countBorderVertices() const
+{
+	std::unordered_set<long> borderVertices;
 	for (const Cell &cell : m_cells) {
 		int nCellFaces = cell.getFaceCount();
 		for (int i = 0; i < nCellFaces; ++i) {
@@ -2100,12 +2072,12 @@ long PatchKernel::countFreeVertices() const
 			int nFaceVertices = cell.getFaceVertexCount(i);
 			for (int k = 0; k < nFaceVertices; ++k) {
 				long faceVertexId = cell.getFaceVertexId(i, k);
-				freeVertices.insert(faceVertexId);
+				borderVertices.insert(faceVertexId);
 			}
 		}
 	}
 
-        return freeVertices.size();
+	return borderVertices.size();
 }
 
 /*!
@@ -2935,7 +2907,15 @@ PatchKernel::CellIterator PatchKernel::_addInternalCell(ElementType type, std::u
 */
 void PatchKernel::setAddedCellAlterationFlags(long id)
 {
-	setCellAlterationFlags(id, FLAG_ADJACENCIES_DIRTY | FLAG_INTERFACES_DIRTY);
+	AlterationFlags flags = FLAG_NONE;
+	if (getAdjacenciesBuildStrategy() != ADJACENCIES_NONE) {
+		flags |= FLAG_ADJACENCIES_DIRTY;
+	}
+	if (getInterfacesBuildStrategy() != INTERFACES_NONE) {
+		flags |= FLAG_INTERFACES_DIRTY;
+	}
+
+	setCellAlterationFlags(id, flags);
 }
 
 #if BITPIT_ENABLE_MPI==0
@@ -3007,7 +2987,15 @@ void PatchKernel::_restoreInternalCell(const CellIterator &iterator, ElementType
 */
 void PatchKernel::setRestoredCellAlterationFlags(long id)
 {
-	setCellAlterationFlags(id, FLAG_ADJACENCIES_DIRTY | FLAG_INTERFACES_DIRTY);
+	AlterationFlags flags = FLAG_NONE;
+	if (getAdjacenciesBuildStrategy() != ADJACENCIES_NONE) {
+		flags |= FLAG_ADJACENCIES_DIRTY;
+	}
+	if (getInterfacesBuildStrategy() != INTERFACES_NONE) {
+		flags |= FLAG_INTERFACES_DIRTY;
+	}
+
+	setCellAlterationFlags(id, flags);
 }
 
 /*!
@@ -3032,58 +3020,6 @@ bool PatchKernel::deleteCell(long id)
 	}
 #else
 	_deleteInternalCell(id);
-#endif
-
-	return true;
-}
-
-/*!
-	Deletes a list of cells.
-
-	\param ids are the ids of the cells to be deleted
- */
-bool PatchKernel::deleteCells(const std::vector<long> &ids)
-{
-	if (!isExpert()) {
-		return false;
-	}
-
-	// Deleteing the last internal cell requires some additional work. If the
-	// ids of cells to be deleted contains the last internal cell, we delete
-	// that cell ater deleting all other cells. In this way we make sure to
-	// deleting the last internal cells just once (after deleting the last
-	// internal, another cells becomes the last one and  that cells may be
-	// on the deletion list, and on and so forth). The same applies for the
-	// first ghost.
-	bool deleteLastInternalCell = false;
-#if BITPIT_ENABLE_MPI==1
-	bool deleteFirstGhostCell = false;
-#endif
-	std::vector<long>::const_iterator end = ids.cend();
-	for (std::vector<long>::const_iterator i = ids.cbegin(); i != end; ++i) {
-		long cellId = *i;
-		if (cellId == m_lastInternalCellId) {
-			deleteLastInternalCell = true;
-			continue;
-		}
-#if BITPIT_ENABLE_MPI==1
-		else if (cellId == m_firstGhostCellId) {
-			deleteFirstGhostCell = true;
-			continue;
-		}
-#endif
-
-		deleteCell(cellId);
-	}
-
-	if (deleteLastInternalCell) {
-		deleteCell(m_lastInternalCellId);
-	}
-
-#if BITPIT_ENABLE_MPI==1
-	if (deleteFirstGhostCell) {
-		deleteCell(m_firstGhostCellId);
-	}
 #endif
 
 	return true;
@@ -3126,13 +3062,21 @@ void PatchKernel::setDeletedCellAlterationFlags(long id)
 	// Set the alteration flags of the cell
 	resetCellAlterationFlags(id, FLAG_DELETED);
 
-	// Set the alteration flags of the adjacencies
+	// Set the alteration flags of the adjacent cells
 	const int nCellAdjacencies = cell.getAdjacencyCount();
 	const long *cellAdjacencies = cell.getAdjacencies();
 	for (int k = 0; k < nCellAdjacencies; ++k) {
 		long adjacencyId = cellAdjacencies[k];
 		if (!testCellAlterationFlags(adjacencyId, FLAG_DELETED)) {
-			setCellAlterationFlags(adjacencyId, FLAG_DANGLING | FLAG_ADJACENCIES_DIRTY | FLAG_INTERFACES_DIRTY);
+			AlterationFlags flags = FLAG_DANGLING;
+			if (getAdjacenciesBuildStrategy() != ADJACENCIES_NONE) {
+				flags |= FLAG_ADJACENCIES_DIRTY;
+			}
+			if (getInterfacesBuildStrategy() != INTERFACES_NONE) {
+				flags |= FLAG_INTERFACES_DIRTY;
+			}
+
+			setCellAlterationFlags(adjacencyId, flags);
 		}
 	}
 
@@ -3156,18 +3100,30 @@ void PatchKernel::setDeletedCellAlterationFlags(long id)
 */
 long PatchKernel::countFreeCells() const
 {
-	double nFreeCells = 0;
+	return countBorderCells();
+}
+
+/*!
+	Counts border cells within the patch.
+
+	A cell is border if contains at least one border face.
+
+	\return The number of border cells.
+*/
+long PatchKernel::countBorderCells() const
+{
+	double nBorderCells = 0;
 	for (const Cell &cell : m_cells) {
 		int nCellFaces = cell.getFaceCount();
 		for (int i = 0; i < nCellFaces; ++i) {
 			if (cell.isFaceBorder(i)) {
-				++nFreeCells;
+				++nBorderCells;
 				break;
 			}
 		}
 	}
 
-	return nFreeCells;
+	return nBorderCells;
 }
 
 /*!
@@ -3179,6 +3135,19 @@ long PatchKernel::countFreeCells() const
 	\return The number of orphan cells.
 */
 long PatchKernel::countOrphanCells() const
+{
+	return findOrphanCells().size();
+}
+
+/*!
+	Finds orphan cells within the patch.
+
+	A cell is orphan if not adjacent to any cell in the patch (neither
+	along an edge, nor at vertex)
+
+	\return The number of orphan cells.
+*/
+std::vector<long> PatchKernel::findOrphanCells() const
 {
 	// Compute vertex valence
 	std::unordered_map<long, short> vertexValence;
@@ -3192,7 +3161,7 @@ long PatchKernel::countOrphanCells() const
 	}
 
 	// Loop over cells
-	long nOrphanCells = 0;
+	std::vector<long> orphanCells;
 	for (const Cell &cell : m_cells) {
 		long isIsolated = true;
 		ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
@@ -3206,11 +3175,87 @@ long PatchKernel::countOrphanCells() const
 		}
 
 		if (isIsolated) {
-			++nOrphanCells;
+			orphanCells.push_back(cell.getId());
 		}
-        }
+	}
 
-	return nOrphanCells;
+	return orphanCells;
+}
+
+/*!
+	Finds duplicate cells within the patch.
+
+	A cell is a duplicate if there is at least one other cell with exactly
+	the same vertices.
+
+	\return The number of duplicate cells.
+*/
+long PatchKernel::countDuplicateCells() const
+{
+	return findDuplicateCells().size();
+}
+
+/*!
+	Finds duplicate cells within the patch.
+
+	A cell is a duplicate if there is at least one other cell with exactly
+	the same vertices.
+
+	\return The list of duplicate cells.
+*/
+std::vector<long> PatchKernel::findDuplicateCells() const
+{
+	// Define the hasher and the predicate to be used for lists of vertex ids
+	//
+	// These operators should be able to identify that two lists of vertex ids
+	// are the same regardless of the order in which the ids are listed.
+	auto hasher = [](const ConstProxyVector<long> &ids)
+	{
+		std::size_t hash = std::hash<long>{}(0);
+		for (long id : ids) {
+			hash = hash + std::hash<long>{}(id);
+		}
+
+		return hash;
+	};
+
+	std::unordered_map<long, std::size_t > counters;
+	auto predicate = [&counters](const ConstProxyVector<long> &ids_A, const ConstProxyVector<long> &ids_B)
+	{
+		counters.clear();
+		for (long id : ids_A) {
+			counters[id]++;
+		}
+		for (long id : ids_B) {
+			counters[id]--;
+		}
+
+		for (const auto &entry : counters) {
+			if (entry.second != 0) {
+				return false;
+			}
+		}
+
+		return true;
+	};
+
+	// Detect if there are cells that share the same list of vertices
+	//
+	// For each cell, the list of vertex ids is added into a set. If a collision
+	// is detected, we have found a duplicate cell.
+	std::vector<long> duplicateCells;
+	std::unordered_set<ConstProxyVector<long>, decltype(hasher), decltype(predicate)> vertexStash(getCellCount(), hasher, predicate);
+	for (const Cell &cell : m_cells) {
+		ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
+		auto vertexStashItr = vertexStash.find(cellVertexIds);
+		if (vertexStashItr == vertexStash.end()) {
+			vertexStash.insert(std::move(cellVertexIds));
+		} else {
+			duplicateCells.push_back(cell.getId());
+		}
+	}
+
+	return duplicateCells;
 }
 
 /*!
@@ -4544,49 +4589,6 @@ void PatchKernel::_deleteInterface(long id)
 }
 
 /*!
-	Deletes a list of interfaces.
-
-	\param ids are the ids of the interfaces to be deleted
-*/
-bool PatchKernel::deleteInterfaces(const std::vector<long> &ids)
-{
-	if (!isExpert()) {
-		return false;
-	}
-
-	// Deleting the last interface requires some additional work. If the ids
-	// of interfaces to be deleted contain the last interface, that interface
-	// is deleted after deleting all other interfaces. In this way we make
-	// sure to delete the last interface just once (after deleting the last
-	// interface, another interface becomes the last one and that interface
-	// may be on the deletion list as well, and on and so forth).
-	std::size_t lastId;
-	if (!m_interfaces.empty()) {
-		lastId = m_interfaces.back().getId();
-	} else {
-		lastId = Interface::NULL_ID;
-	}
-
-	bool deleteLast = false;
-	std::vector<long>::const_iterator end = ids.cend();
-	for (std::vector<long>::const_iterator i = ids.cbegin(); i != end; ++i) {
-		std::size_t interfaceId = *i;
-		if (interfaceId == lastId) {
-			deleteLast = true;
-			continue;
-		}
-
-		deleteInterface(interfaceId);
-	}
-
-	if (deleteLast) {
-		deleteInterface(lastId);
-	}
-
-	return true;
-}
-
-/*!
 	Set the alteration flags for a deleted interface.
 
 	Only alteration flags needed for tracking the status of the patch are set.
@@ -4607,14 +4609,26 @@ void PatchKernel::setDeletedInterfaceAlterationFlags(long id)
 */
 long PatchKernel::countFreeInterfaces() const
 {
-	long nFreeInterfaces = 0;
+	return countBorderInterfaces();
+}
+
+/*!
+	Counts border interfaces within the patch.
+
+	An interface is border if belongs to just one cell.
+
+	\result The number of border interfaces.
+*/
+long PatchKernel::countBorderInterfaces() const
+{
+	long nBorderInterfaces = 0;
 	for (const Interface &interface : m_interfaces) {
 		if (interface.getNeigh() < 0) {
-			++nFreeInterfaces;
+			++nBorderInterfaces;
 		}
         }
 
-	return nFreeInterfaces;
+	return nBorderInterfaces;
 }
 
 /*!
@@ -4737,17 +4751,29 @@ long PatchKernel::countFaces() const
 */
 long PatchKernel::countFreeFaces() const
 {
-	double nFreeFaces = 0;
+	return countBorderFaces();
+}
+
+/*!
+	Counts border faces within the patch.
+
+	A face is border if a cell has no adjacent along that faces.
+
+	\result The number of border faces.
+*/
+long PatchKernel::countBorderFaces() const
+{
+	double nBorderFaces = 0;
 	for (const Cell &cell : m_cells) {
 		int nCellFaces = cell.getFaceCount();
 		for (int i = 0; i < nCellFaces; ++i) {
 			if (cell.isFaceBorder(i)) {
-				++nFreeFaces;
+				++nBorderFaces;
 			}
 		}
 	}
 
-	return nFreeFaces;
+	return nBorderFaces;
 }
 
 /*!
@@ -7404,8 +7430,8 @@ void PatchKernel::extractEnvelope(PatchKernel &envelope) const
 	// ====================================================================== //
 	// RESIZE DATA STRUCTURES                                                 //
 	// ====================================================================== //
-	envelope.reserveVertices(envelope.getVertexCount() + countFreeVertices());
-	envelope.reserveCells(envelope.getCellCount() + countFreeFaces());
+	envelope.reserveVertices(envelope.getVertexCount() + countBorderVertices());
+	envelope.reserveCells(envelope.getCellCount() + countBorderFaces());
 
 	// ====================================================================== //
 	// LOOP OVER CELLS                                                        //
@@ -7463,7 +7489,7 @@ void PatchKernel::displayTopologyStats(std::ostream &out, unsigned int padding) 
 	out << indent<< "Vertices --------------------------------"     << std::endl;
 	out << indent<< "  # vertices        " << getVertexCount()      << std::endl;
 	out << indent<< "  # orphan vertices " << countOrphanVertices() << std::endl;
-	out << indent<< "  # free vertices   " << countFreeVertices()   << std::endl;
+	out << indent<< "  # border vertices " << countBorderVertices()   << std::endl;
         //out << indent<< "  # free vertices   " << countDoubleVertices()   << std::endl;
 
 	// ====================================================================== //
@@ -7471,7 +7497,7 @@ void PatchKernel::displayTopologyStats(std::ostream &out, unsigned int padding) 
 	// ====================================================================== //
 	out << indent<< "Faces -----------------------------------"     << std::endl;
 	out << indent<< "  # faces           " << countFaces()          << std::endl;
-	out << indent<< "  # free faces      " << countFreeFaces()      << std::endl;
+	out << indent<< "  # border faces    " << countBorderFaces()    << std::endl;
 
 	// ====================================================================== //
 	// CELLS STATS                                                            //
@@ -7479,7 +7505,7 @@ void PatchKernel::displayTopologyStats(std::ostream &out, unsigned int padding) 
 	out << indent<< "Cells -----------------------------------"     << std::endl;
 	out << indent<< "  # cells           " << getCellCount()        << std::endl;
 	out << indent<< "  # orphan cells    " << countOrphanCells()    << std::endl;
-	out << indent<< "  # free cells      " << countFreeCells()      << std::endl;
+	out << indent<< "  # border cells    " << countBorderCells()    << std::endl;
         //out << indent<< "  # free vertices   " << countDoubleCells()   << std::endl;
 }
 

@@ -27,22 +27,18 @@
 
 #include "levelSetKernel.hpp"
 
+#include "bitpit_volcartesian.hpp"
+
 namespace bitpit{
 
-class VolCartesian;
 class LevelSetDirectStorageManager;
 class LevelSetInternalPiercedStorageManager;
 
 class LevelSetCartesianKernel : public LevelSetKernel{
 
     private:
-    VolCartesian*                               m_cartesian ;       /**< Pointer to underlying cartesian mesh*/
-
-    double                                      m_cellIncircle ;        /**< Cell incircle*/
-    double                                      m_cellCircumcircle ;    /**< Cell circumcircle*/
-
-    void                                        clearCellCirclesCache();
-    void                                        updateCellCirclesCache();
+    double                                      m_cellTangentRadius ;     /**< Cell tangent radius */
+    double                                      m_cellBoundingRadius ;    /**< Cell bounding radius */
 
     public:
     typedef LevelSetDirectStorageManager          DenseStorageManager;
@@ -50,18 +46,14 @@ class LevelSetCartesianKernel : public LevelSetKernel{
 
     LevelSetCartesianKernel( VolCartesian & );
 
-    VolCartesian *                              getCartesianMesh() const;
+    VolCartesian *                              getMesh() const override;
 
-    double                                      getCellIncircle() const;
-    double                                      getCellCircumcircle() const;
+    double                                      getCellTangentRadius() const;
+    double                                      getCellBoundingRadius() const;
 
-    double                                      computeCellIncircle(long) const override;
-    double                                      computeCellCircumcircle(long) const override;
-
-    void                                        clearGeometryCache() override;
-    void                                        updateGeometryCache(const std::vector<adaption::Info> &) override;
-
-    bool                                        intersectCellPlane(long, const std::array<double,3> &, const std::array<double,3> &, double) override;
+    std::array<double, 3>                       computeCellCentroid(long) const override;
+    double                                      computeCellTangentRadius(long) const override;
+    double                                      computeCellBoundingRadius(long) const override;
 
 };
 

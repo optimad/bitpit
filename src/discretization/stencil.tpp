@@ -25,6 +25,8 @@
 #ifndef __BITPIT_STENCIL_TPP__
 #define __BITPIT_STENCIL_TPP__
 
+namespace bitpit {
+
 /*!
 * Output stream operator from class DiscreteStencil to communication buffer.
 *
@@ -33,7 +35,7 @@
 * \result Returns the same output stream received in input.
 */
 template<typename weight_t>
-bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &buffer, const bitpit::DiscreteStencil<weight_t> &stencil)
+OBinaryStream& operator<<(OBinaryStream &buffer, const DiscreteStencil<weight_t> &stencil)
 {
     buffer << stencil.m_zero;
 
@@ -60,7 +62,7 @@ bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &buffer, const bitpit::D
 * \result Returns the same input stream received in input.
 */
 template<typename weight_t>
-bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buffer, bitpit::DiscreteStencil<weight_t> &stencil)
+IBinaryStream& operator>>(IBinaryStream &buffer, DiscreteStencil<weight_t> &stencil)
 {
     buffer >> stencil.m_zero;
 
@@ -79,8 +81,6 @@ bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buffer, bitpit::Discret
 
     return buffer;
 }
-
-namespace bitpit {
 
 /*!
 * Constructor

@@ -81,9 +81,10 @@ private:
     int m_nodes;                                    /**<Number of RBF nodes.*/
 
 public:
-    ~RBFKernel();
     RBFKernel();
     RBFKernel(const RBFKernel & other);
+
+    virtual ~RBFKernel() = default;
 
     void                    setFunction(RBFBasisFunction);
     void                    setFunction(double (&funct)(double ));

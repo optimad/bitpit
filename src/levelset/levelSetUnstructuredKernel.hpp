@@ -2,7 +2,7 @@
  *
  *  bitpit
  *
- *  Copyright (C) 2015-2021 OPTIMAD engineering Srl
+ *  Copyright (C) 2015-2022 OPTIMAD engineering Srl
  *
  *  -------------------------------------------------------------------------
  *  License
@@ -22,42 +22,38 @@
  *
 \*---------------------------------------------------------------------------*/
 
-# ifndef __BITPIT_LEVELSET_OCTREE_KERNEL_HPP__
-# define __BITPIT_LEVELSET_OCTREE_KERNEL_HPP__
+# ifndef __BITPIT_LEVELSET_UNSTRUCTURED_KERNEL_HPP__
+# define __BITPIT_LEVELSET_UNSTRUCTURED_KERNEL_HPP__
 
 #include "levelSetKernel.hpp"
 
-#include "bitpit_voloctree.hpp"
+# include "bitpit_volunstructured.hpp"
 
 namespace bitpit{
 
 class LevelSetExternalPiercedStorageManager;
 class LevelSetInternalPiercedStorageManager;
 
-struct LevelSetOctreeCellCacheEntry {
+struct LevelSetUnstructuredCellCacheEntry {
 
     std::array<double, 3> centroid;
 
-    LevelSetOctreeCellCacheEntry(const VolumeKernel &patch, long cellId);
+    double tangentRadius;
+    double boundingRadius;
+
+    LevelSetUnstructuredCellCacheEntry(const VolumeKernel &patch, long cellId);
 
 };
 
-class LevelSetOctreeKernel : public LevelSetCachedKernel<LevelSetOctreeCellCacheEntry> {
-
-    private:
-    std::vector<double>                         m_octantTangentRadii ;    /**< Octant tangent radii */
-    std::vector<double>                         m_octantBoundingRadii ;   /**< Octant cellTangadii */
+class LevelSetUnstructuredKernel : public LevelSetCachedKernel<LevelSetUnstructuredCellCacheEntry> {
 
     public:
     typedef LevelSetExternalPiercedStorageManager DenseStorageManager;
     typedef LevelSetInternalPiercedStorageManager SparseStorageManager;
 
-    LevelSetOctreeKernel( VolOctree & );
+    LevelSetUnstructuredKernel( VolUnstructured & );
 
-    VolOctree *                                 getMesh() const override;
-
-    double                                      getOctantTangentRadius(int level) const;
-    double                                      getOctantBoundingRadius(int level) const;
+    VolUnstructured *                           getMesh() const;
 
     std::array<double, 3>                       computeCellCentroid(long) const override;
     double                                      computeCellTangentRadius(long) const override;
@@ -66,7 +62,7 @@ class LevelSetOctreeKernel : public LevelSetCachedKernel<LevelSetOctreeCellCache
 };
 
 // Typdefs for compatibility with older versions
-typedef LevelSetOctreeKernel LevelSetOctree;
+typedef LevelSetUnstructuredKernel LevelSetUnstructured;
 
 }
 

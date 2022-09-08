@@ -30,10 +30,12 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <memory>
 #include <sstream>
 #include <functional>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <type_traits>
 
 #include "fileHandler.hpp"
 #include "logger.hpp"
@@ -50,46 +52,43 @@ namespace bitpit{
 
 /*!
     Creates a new buffer.
+
+    \param nProcesses is the total number of processes in the communicator
+    \param rank is the parallel rank in the communicator
+    \param bufferSize is the size of the internal buffer
 */
-LoggerBuffer::LoggerBuffer(std::size_t bufferSize)
-    : m_buffer(bufferSize + 1), m_context(""), m_padding(""),
-      m_consoleEnabled(false), m_consoleTimestampEnabled(false), m_console(&std::cout), m_consolePrefix(""),
-      m_fileEnabled(false), m_fileTimestampEnabled(true), m_file(nullptr), m_filePrefix("")
+LoggerBuffer::LoggerBuffer(int nProcesses, int rank, std::size_t bufferSize)
+    : m_buffer(bufferSize + 1),
+      m_nProcesses(nProcesses), m_rank(rank),
+      m_consoleEnabled(false), m_console(&std::cout),
+      m_fileEnabled(false), m_file(nullptr),
+      m_settings(std::make_shared<Settings>())
 {
     // Set the buffer
     char *bufferBegin = &m_buffer.front();
     setp(bufferBegin, bufferBegin + m_buffer.size() - 1);
 
-    // Set console data
+    // Initialize console stream
     setConsoleEnabled(true);
 
-    // Set log file data
+    // Initialize file stream
     setFileEnabled(false);
-}
 
-/*!
-    Copy constructor.
+    // Set parallel data
+    if (m_nProcesses > 1) {
+        int nDigits = ceil(log10(m_nProcesses));
+        std::ostringstream convert;
+        convert << std::setw(nDigits) << m_rank;
+        m_rankPrefix = "#" + convert.str();
+    } else {
+        m_rankPrefix = "";
+    }
 
-    \param other is another logger buffer, whose contents will be used to
-    initialize the current logger buffer
-*/
-LoggerBuffer::LoggerBuffer(const LoggerBuffer &other)
-    : std::streambuf(),
-      m_buffer(other.m_buffer),
-      m_context(other.m_context),
-      m_padding(other.m_padding),
-      m_consoleEnabled(other.m_consoleEnabled),
-      m_consoleTimestampEnabled(other.m_consoleTimestampEnabled),
-      m_console(other.m_console),
-      m_consolePrefix(other.m_consolePrefix),
-      m_fileEnabled(other.m_fileEnabled),
-      m_fileTimestampEnabled(other.m_fileTimestampEnabled),
-      m_file(other.m_file),
-      m_filePrefix(other.m_filePrefix)
-{
-    // Set the buffer
-    char *bufferBegin = &m_buffer.front();
-    setp(bufferBegin, bufferBegin + m_buffer.size() - 1);
+    // Default settings
+    m_settings->context = "";
+    m_settings->indentation = 0;
+    m_settings->consoleTimestampEnabled = false;
+    m_settings->fileTimestampEnabled = false;
 }
 
 /*!
@@ -98,6 +97,26 @@ LoggerBuffer::LoggerBuffer(const LoggerBuffer &other)
 LoggerBuffer::~LoggerBuffer()
 {
     sync();
+}
+
+/*!
+    Count the number of processes in the communicator.
+
+    \result The number of processes in the communicator.
+*/
+int LoggerBuffer::getProcessCount() const
+{
+    return m_nProcesses;
+}
+
+/*!
+    Gets the rank in the communicator.
+
+    \result The rank in the communicator.
+*/
+int LoggerBuffer::getRank() const
+{
+    return m_rank;
 }
 
 /*!
@@ -114,8 +133,8 @@ LoggerBuffer::~LoggerBuffer()
 LoggerBuffer::int_type LoggerBuffer::overflow(int_type character)
 {
     if (character != traits_type::eof()) {
-        // Write the charater to the buffer and then increment pptr() by
-        // calling pbump(1). It's always safe to write thecharater to the
+        // Write the character to the buffer and then increment pptr() by
+        // calling pbump(1). It's always safe to write the charater to the
         // buffer because we reserved an extra char at the end of our buffer
         // in the constructor.
         assert(std::less_equal<char *>()(pptr(), epptr()));
@@ -150,92 +169,129 @@ int LoggerBuffer::sync()
 */
 int LoggerBuffer::flush(bool terminate)
 {
-    int status = 0;
-    if (pptr() == pbase()) {
-        return status;
+    // Get buffer information
+    const char *bufferBegin = pbase();
+    const char *bufferEnd   = pptr();
+    if (bufferBegin == bufferEnd) {
+        return 0;
     }
 
-    // Identify line breakers
-    std::vector<char *> linePointers;
-    linePointers.push_back(pbase());
-    for (char *p = pbase(), *e = pptr() - 1; p != e; ++p) {
-        if (*p == '\n') {
-            linePointers.push_back(p + 1);
+    // Flush buffer a line at the time
+    const char *lineBegin = nullptr;
+    const char *lineEnd   = bufferBegin;
+    while (lineEnd != bufferEnd) {
+        // Update line information
+        lineBegin = lineEnd;
+        for (lineEnd = lineBegin; lineEnd != bufferEnd; ++lineEnd) {
+            if (*lineEnd == '\n') {
+                lineEnd += 1;
+                break;
+            }
         }
-    }
-    linePointers.push_back(pptr());
 
-    // Detect if a new line must be added at the end
-    terminate = (terminate && *(linePointers.back() - 1) != '\n');
+        // Detect if a new line must be added at the end of the line
+        bool terminateLine = false;
+        if (terminate && (lineEnd == bufferEnd)) {
+            if (bufferBegin == bufferEnd) {
+                terminateLine = true;
+            } else if (*(bufferEnd - 1) != '\n') {
+                terminateLine = true;
+            }
+        }
 
-    // Move the internal pointer
-    std::ptrdiff_t nCharacters = pptr() - pbase();
-    pbump(- nCharacters);
+        // Get timestamp
+        std::string consoleTimestamp;
+        std::string fileTimestamp;
+        if (m_settings->consoleTimestampEnabled || m_settings->fileTimestampEnabled) {
+            std::string timestamp = getTimestamp();
+            if (m_settings->consoleTimestampEnabled) {
+                consoleTimestamp = timestamp;
+            }
+            if (m_settings->fileTimestampEnabled) {
+                fileTimestamp = timestamp;
+            }
+        }
 
-    // Write all lines
-    for (unsigned int i = 0; i < linePointers.size() - 1; ++i) {
-        char *firstCharacter = linePointers[i];
-        char *lastCharacter  = linePointers[i + 1];
-        std::ptrdiff_t lineSize = lastCharacter - firstCharacter;
-
-        // Write to the console
+        // Flush line to console
         if (m_console && m_consoleEnabled) {
-            if (m_consoleTimestampEnabled) {
-                *m_console << "[" + getTimestamp() + "] ";
-            }
-
-            if (!m_consolePrefix.empty()) {
-                *m_console << m_consolePrefix << " :: ";
-            }
-
-            if (!m_context.empty()) {
-                *m_console << m_context << " :: ";
-            }
-
-            if (!m_padding.empty()) {
-                *m_console << m_padding;
-            }
-
-            m_console->write(firstCharacter, lineSize);
-            if ((m_console->rdstate() & std::ifstream::failbit ) != 0) {
-                status = -1;
-            }
-
-            if (terminate && lastCharacter == linePointers.back()) {
-                *m_console << "\n";
+            int status = flushLine(*m_console, lineBegin, lineEnd, consoleTimestamp, terminateLine);
+            if (status != 0) {
+                return status;
             }
         }
 
-        // Write to file
+        // Flush line to file
         if (m_file && m_fileEnabled && m_file->is_open()) {
-            if (m_fileTimestampEnabled) {
-                *m_file << "[" + getTimestamp() + "] ";
-            }
-
-            if (!m_filePrefix.empty()) {
-                *m_file << m_filePrefix << " :: ";
-            }
-
-            if (!m_context.empty()) {
-                *m_file << m_context + " :: ";
-            }
-
-            if (!m_padding.empty()) {
-                *m_file << m_padding;
-            }
-
-            m_file->write(firstCharacter, lineSize);
-            if ((m_file->rdstate() & std::ifstream::failbit ) != 0) {
-                status = -1;
-            }
-
-            if (terminate && lastCharacter == linePointers.back()) {
-                *m_file << "\n";
+            int status = flushLine(*m_file, lineBegin, lineEnd, fileTimestamp, terminateLine);
+            if (status != 0) {
+                return status;
             }
         }
     }
 
-    return status;
+    // Reset the internal pointer
+    pbump(bufferBegin - bufferEnd);
+
+    return 0;
+}
+
+/*!
+    Flushes stream buffer.
+
+    \param stream is the steam the line will be flushed to
+    \param begin refers to the first character of the line
+    \param end refers to the past-the-last character of the line
+    \param timestamp if the timestamp that will be printed at the beginning
+    of the line, if an empty string is provided, no timestamp information
+    will be printed
+    \param terminate if set to true a new line character will be printed at
+    \the end of the line
+    \return Returns 0 to indicates success, -1 to indicate failure.
+*/
+int LoggerBuffer::flushLine(std::ostream &stream, const char *begin, const char *end,
+                            const std::string &timestamp, bool terminate)
+{
+    if (!timestamp.empty()) {
+        stream << "[" + timestamp + "] ";
+        if ((stream.rdstate() & std::ifstream::failbit) != 0) {
+            return -1;
+        }
+    }
+
+    if (!m_rankPrefix.empty()) {
+        stream << m_rankPrefix << " :: ";
+        if ((stream.rdstate() & std::ifstream::failbit) != 0) {
+            return -1;
+        }
+    }
+
+    if (!m_settings->context.empty()) {
+        stream << m_settings->context + " :: ";
+        if ((stream.rdstate() & std::ifstream::failbit) != 0) {
+            return -1;
+        }
+    }
+
+    for (int i = 0; i < m_settings->indentation; ++i) {
+        stream << " ";
+        if ((stream.rdstate() & std::ifstream::failbit) != 0) {
+            return -1;
+        }
+    }
+
+    stream.write(begin, end - begin);
+    if ((stream.rdstate() & std::ifstream::failbit) != 0) {
+        return -1;
+    }
+
+    if (terminate) {
+        stream << "\n";
+        if ((stream.rdstate() & std::ifstream::failbit) != 0) {
+            return -1;
+        }
+    }
+
+    return 0;
 }
 
 /*!
@@ -252,27 +308,6 @@ void LoggerBuffer::setConsoleEnabled(bool enabled)
     flush(true);
 
     m_consoleEnabled = enabled;
-}
-
-/*!
-    Returns true if the timestamp is enabled on the console, false otherwise.
-
-    \result Returns true if the timestamp is enabled on the console, false
-    otherwise.
-*/
-bool LoggerBuffer::isConsoleTimestampEnabled() const
-{
-    return m_consoleTimestampEnabled;
-}
-
-/*!
-    Enables the timestamp on the console.
-
-    \param enabled if set to true enables the timestamp on the console.
-*/
-void LoggerBuffer::setConsoleTimestampEnabled(bool enabled)
-{
-    m_consoleTimestampEnabled = enabled;
 }
 
 /*!
@@ -298,29 +333,6 @@ std::ostream & LoggerBuffer::getConsoleStream()
 }
 
 /*!
-    Sets the prefix for console output.
-
-    \param prefix is the prefix that will be prepended to every line of the
-    console output
-*/
-void LoggerBuffer::setConsolePrefix(const std::string &prefix)
-{
-    flush(true);
-
-    m_consolePrefix = prefix;
-}
-
-/*!
-    Gets the prefix for console output.
-
-    \result The prefix for console output.
-*/
-std::string LoggerBuffer::getConsolePrefix() const
-{
-    return m_consolePrefix;
-}
-
-/*!
     Enables the output on the log file.
 
     The output on the log file can be enabled only id the log file path has
@@ -338,27 +350,6 @@ void LoggerBuffer::setFileEnabled(bool enabled)
     flush(true);
 
     m_fileEnabled = enabled;
-}
-
-/*!
-    Returns true if the timestamp is enabled on the log file, false otherwise.
-
-    \result Returns true if the timestamp is enabled on the log file, false
-    otherwise.
-*/
-bool LoggerBuffer::isFileTimestampEnabled() const
-{
-    return m_fileTimestampEnabled;
-}
-
-/*!
-    Enables the timestamp on the log file.
-
-    \param enabled if set to true enables the timestamp on the log file
-*/
-void LoggerBuffer::setFileTimestampEnabled(bool enabled)
-{
-    m_fileTimestampEnabled = enabled;
 }
 
 /*!
@@ -384,57 +375,38 @@ std::ofstream & LoggerBuffer::getFileStream()
 }
 
 /*!
-    Sets the prefix for file output.
+    Get a constant pointer to the buffer settings.
 
-    \param prefix is the prefix that will be prepended to every line of the
-    file output
+    \result A constant pointer to the buffer settings.
 */
-void LoggerBuffer::setFilePrefix(const std::string &prefix)
+const LoggerBuffer::Settings * LoggerBuffer::getSettings() const
 {
+    return m_settings.get();
+}
+
+/*!
+    Sets buffer settings.
+
+    \param settings are the buffer settings
+*/
+void LoggerBuffer::setSettings(const std::shared_ptr<Settings> &settings)
+{
+    if (settings.get() == m_settings.get()) {
+        return;
+    }
+
     flush(true);
 
-    m_filePrefix = prefix;
+    m_settings = settings;
 }
 
 /*!
-    Gets the prefix for file output.
-
-    \result The prefix for file output.
+    Get current date/time, format is "YYYY-MM-DD HH:mm:ss".
 */
-std::string LoggerBuffer::getFilePrefix() const
+std::string LoggerBuffer::getTimestamp() const
 {
-    return m_filePrefix;
-}
+    static const std::string TIMESTAMP_FORMAT = "%Y-%m-%d %H:%M:%S";
 
-/*!
-    Sets the context of the output.
-
-    \param context is the context of the output
-*/
-void LoggerBuffer::setContext(const std::string &context)
-{
-    flush(true);
-
-    m_context = context;
-}
-
-/*!
-    Sets the padding to be prepended befor every message.
-
-    \param padding is the padding to be prepended befor every message
-*/
-void LoggerBuffer::setPadding(const std::string &padding)
-{
-    flush(true);
-
-    m_padding = padding;
-}
-
-/*!
-    Get current date/time, format is "YYYY-MM-DD.HH:mm:ss".
-*/
-const std::string LoggerBuffer::getTimestamp() const
-{
     auto currentClock = std::chrono::system_clock::now();
     std::time_t currentTime = std::chrono::system_clock::to_time_t(currentClock);
 
@@ -443,9 +415,9 @@ const std::string LoggerBuffer::getTimestamp() const
     std::ostringstream millisecsConverter;
     millisecsConverter << (millisecs.count());
 
-    char buffer[80];
-    strftime(buffer, 80, "%Y-%m-%d %H:%M:%S", localtime(&currentTime));
-    std::string timestamp(buffer);
+    std::string timestamp;
+    timestamp.resize(TIMESTAMP_FORMAT.size());
+    strftime(&timestamp[0], timestamp.size(), TIMESTAMP_FORMAT.c_str(), localtime(&currentTime));
     timestamp += "." + millisecsConverter.str();
 
     return timestamp;
@@ -466,103 +438,22 @@ const std::string LoggerBuffer::getTimestamp() const
 
     The constructor is private so that it can not be called.
 */
-Logger::Logger(const std::string &name,
-               std::ostream *consoleStream, std::ofstream *fileStream,
-               int nProcessors, int rank)
-    : std::ios(nullptr), std::ostream(&m_buffer),
-      m_name(name), m_nProcessors(nProcessors), m_rank(rank), m_buffer(256),
-      m_indentation(0), m_context(""),
+Logger::Logger(const std::string &name, const std::shared_ptr<LoggerBuffer> &buffer)
+    : std::ios(nullptr), std::ostream(nullptr),
+      m_name(name),
+      m_buffer(buffer), m_bufferSettings(std::make_shared<LoggerBuffer::Settings>()),
       m_defaultSeverity(log::INFO), m_defaultVisibility(log::VISIBILITY_MASTER),
       m_consoleDisabledThreshold(log::NOTSET), m_consoleVerbosityThreshold(log::INFO),
       m_fileDisabledThreshold(log::NOTSET), m_fileVerbosityThreshold(log::INFO)
 {
-    // Set buffer data
-    setConsoleStream(consoleStream);
-    setFileStream(fileStream);
+    // St stream buffer
+    basic_ios<char>::rdbuf(m_buffer.get());
 
-    // Set parallel data
-    if (m_nProcessors > 1) {
-        int nDigits = ceil(log10(m_nProcessors));
-        std::ostringstream convert;
-        convert << std::setw(nDigits) << m_rank;
-        std::string rankPrefix = "#" + convert.str();
-
-        m_buffer.setConsolePrefix(rankPrefix);
-        m_buffer.setFilePrefix(rankPrefix);
-    } else {
-        m_buffer.setConsolePrefix("");
-        m_buffer.setFilePrefix("");
-    }
-
-    // Set default logger properties
-    setConsoleEnabled(m_defaultSeverity, m_defaultVisibility);
-    setFileEnabled(m_defaultSeverity, m_defaultVisibility);
-}
-
-/*!
-    Copy constructor.
-
-    \param other is another logger, whose configuration will be used to
-    initialize the current logger
-*/
-Logger::Logger(const Logger &other)
-    : std::ios(nullptr), std::ostream(&m_buffer),
-      m_name(other.m_name),
-      m_nProcessors(other.m_nProcessors), m_rank(other.m_rank),
-      m_buffer(other.m_buffer),
-      m_indentation(other.m_indentation), m_context(other.m_context),
-      m_defaultSeverity(other.m_defaultSeverity), m_defaultVisibility(other.m_defaultVisibility),
-      m_consoleDisabledThreshold(other.m_consoleDisabledThreshold),
-      m_consoleVerbosityThreshold(other.m_consoleVerbosityThreshold),
-      m_fileDisabledThreshold(other.m_fileDisabledThreshold),
-      m_fileVerbosityThreshold(other.m_fileVerbosityThreshold)
-{
-    // Copy buffer properties
-    copyfmt(other);
-    exceptions(other.exceptions());
-    clear(other.rdstate());
-    basic_ios<char>::rdbuf(other.rdbuf());
-}
-
-/*!
-    Sets the stream to be used for the output on the console.
-
-    \param console is the stream to be used for the output on the console
-*/
-void Logger::setConsoleStream(std::ostream *console)
-{
-    m_buffer.setConsoleStream(console);
-}
-
-/*!
-    Gets the stream to be used for the output on the console.
-
-    \result The stream to be used for the output on the console.
-*/
-std::ostream & Logger::getConsoleStream()
-{
-    return m_buffer.getConsoleStream();
-}
-
-/*!
-    Sets the stream to be used for the output on the file.
-
-    \param file is the stream to be used for the output on the file
-*/
-void Logger::setFileStream(std::ofstream *file)
-{
-    m_buffer.setFileStream(file);
-}
-
-
-/*!
-    Gets the stream to be used for the output on the file.
-
-    \result The stream to be used for the output on the file.
-*/
-std::ofstream & Logger::getFileStream()
-{
-    return m_buffer.getFileStream();
+    // Default settings
+    m_bufferSettings->context = "";
+    m_bufferSettings->indentation = 0;
+    m_bufferSettings->consoleTimestampEnabled = false;
+    m_bufferSettings->fileTimestampEnabled = true;
 }
 
 /*!
@@ -642,10 +533,6 @@ void Logger::setDefaultSeverity(log::Level severity)
     // Set default severity
     assert(severity != log::Level::NOTSET);
     m_defaultSeverity = severity;
-
-    // Set default logger properties
-    setConsoleEnabled(m_defaultSeverity, m_defaultVisibility);
-    setFileEnabled(m_defaultSeverity, m_defaultVisibility);
 }
 
 /*!
@@ -688,10 +575,6 @@ void Logger::setDefaultVisibility(log::Visibility visibility)
     // Set default visibility
     assert(visibility != log::VISIBILITY_NOTSET);
     m_defaultVisibility = visibility;
-
-    // Set default logger properties
-    setConsoleEnabled(m_defaultSeverity, m_defaultVisibility);
-    setFileEnabled(m_defaultSeverity, m_defaultVisibility);
 }
 
 /*!
@@ -760,7 +643,7 @@ void Logger::setTimestampEnabled(bool enabled)
 */
 bool Logger::isConsoleTimestampEnabled() const
 {
-    return m_buffer.isConsoleTimestampEnabled();
+    return m_bufferSettings->consoleTimestampEnabled;
 }
 
 /*!
@@ -770,7 +653,13 @@ bool Logger::isConsoleTimestampEnabled() const
 */
 void Logger::setConsoleTimestampEnabled(bool enabled)
 {
-    m_buffer.setConsoleTimestampEnabled(enabled);
+    if (m_bufferSettings->consoleTimestampEnabled == enabled) {
+        return;
+    }
+
+    m_buffer->flush(true);
+
+    m_bufferSettings->consoleTimestampEnabled = enabled;
 }
 
 /*!
@@ -786,28 +675,37 @@ void Logger::setConsoleVerbosity(log::Level threshold)
 {
     // Set verbosity threshold
     m_consoleVerbosityThreshold = threshold;
-
-    // Set default logger properties
-    setConsoleEnabled(m_defaultSeverity, m_defaultVisibility);
 }
 
 /*!
-    Enable or disable console logging.
+    Enable the buffer streams that will print a message with the specified properties.
 
     \param severity is the severity of the message to be printed
     \param visibility is the visibility of the message to be printed
 */
-void Logger::setConsoleEnabled(log::Level severity, log::Visibility visibility)
+void Logger::enableBufferStreams(log::Level severity, log::Visibility visibility)
 {
+    // Enable console stream
     bool isConsoleEnabled = true;
     if (severity <= m_consoleDisabledThreshold) {
         isConsoleEnabled = false;
-    } else if (visibility == log::VISIBILITY_MASTER && (m_rank != 0)) {
+    } else if (visibility == log::VISIBILITY_MASTER && (m_buffer->getRank() != 0)) {
         isConsoleEnabled = false;
     } else {
         isConsoleEnabled = (severity >= m_consoleVerbosityThreshold);
     }
-    m_buffer.setConsoleEnabled(isConsoleEnabled);
+    m_buffer->setConsoleEnabled(isConsoleEnabled);
+
+    // Enable file stream
+    bool isFileEnabled = true;
+    if (severity <= m_fileDisabledThreshold) {
+        isFileEnabled = false;
+    } else if (visibility == log::VISIBILITY_MASTER && (m_buffer->getRank() != 0)) {
+        isFileEnabled = false;
+    } else {
+        isFileEnabled = (severity >= m_fileVerbosityThreshold);
+    }
+    m_buffer->setFileEnabled(isFileEnabled);
 }
 
 /*!
@@ -825,16 +723,6 @@ log::Level Logger::getConsoleVerbosity()
 }
 
 /*!
-    Gets the prefix for the messages printed on the console.
-
-    \result The prefix for the messages printed on the console.
-*/
-std::string Logger::getConsolePrefix()
-{
-    return m_buffer.getConsolePrefix();
-}
-
-/*!
     Returns true if the timestamp is enabled on the log file, false otherwise.
 
     \result Returns true if the timestamp is enabled on the log file, false
@@ -842,7 +730,7 @@ std::string Logger::getConsolePrefix()
 */
 bool Logger::isFileTimestampEnabled() const
 {
-    return m_buffer.isFileTimestampEnabled();
+    return m_bufferSettings->fileTimestampEnabled;
 }
 
 /*!
@@ -852,7 +740,13 @@ bool Logger::isFileTimestampEnabled() const
 */
 void Logger::setFileTimestampEnabled(bool enabled)
 {
-    m_buffer.setFileTimestampEnabled(enabled);
+    if (m_bufferSettings->fileTimestampEnabled == enabled) {
+        return;
+    }
+
+    m_buffer->flush(true);
+
+    m_bufferSettings->fileTimestampEnabled = enabled;
 }
 
 /*!
@@ -868,9 +762,6 @@ void Logger::setFileVerbosity(log::Level threshold)
 {
     // Set verbosity threshold
     m_fileVerbosityThreshold = threshold;
-
-    // Set default logger properties
-    setConsoleEnabled(m_defaultSeverity, m_defaultVisibility);
 }
 
 /*!
@@ -886,44 +777,19 @@ log::Level Logger::getFileVerbosity()
 }
 
 /*!
-    Enable or disable file logging.
-
-    \param severity is the severity of the message to be printed
-    \param visibility is the visibility of the message to be printed
-*/
-void Logger::setFileEnabled(log::Level severity, log::Visibility visibility)
-{
-    bool isFileEnabled = true;
-    if (severity <= m_fileDisabledThreshold) {
-        isFileEnabled = false;
-    } else if (visibility == log::VISIBILITY_MASTER && (m_rank != 0)) {
-        isFileEnabled = false;
-    } else {
-        isFileEnabled = (severity >= m_fileVerbosityThreshold);
-    }
-    m_buffer.setFileEnabled(isFileEnabled);
-}
-
-/*!
-    Gets the prefix for the messages printed on the log file.
-
-    \result The prefix for the messages printed on the log file.
-*/
-std::string Logger::getFilePrefix()
-{
-    return m_buffer.getFilePrefix();
-}
-
-/*!
     Sets the context used when printing the messages.
 
     \param context is the context used when printing the messages.
 */
 void Logger::setContext(const std::string &context)
 {
-    m_context = context;
+    if (m_bufferSettings->context == context) {
+        return;
+    }
 
-    m_buffer.setContext(m_context);
+    m_buffer->flush(true);
+
+    m_bufferSettings->context = context;
 }
 
 /*!
@@ -933,7 +799,7 @@ void Logger::setContext(const std::string &context)
 */
 std::string Logger::getContext()
 {
-    return m_context;
+    return m_bufferSettings->context;
 }
 
 /*!
@@ -943,10 +809,13 @@ std::string Logger::getContext()
 */
 void Logger::setIndentation(int delta)
 {
-    m_indentation = std::max(m_indentation + delta, 0);
+    if (delta == 0) {
+        return;
+    }
 
-    std::string padding = std::string(m_indentation, ' ');
-    m_buffer.setPadding(padding);
+    m_buffer->flush(true);
+
+    m_bufferSettings->indentation += delta;
 }
 
 /*!
@@ -956,27 +825,7 @@ void Logger::setIndentation(int delta)
 */
 int Logger::getIndentation()
 {
-    return m_indentation;
-}
-
-/*!
-    Count the nuomber of processes in the communicator.
-
-    \result The number of processes in the communicator.
-*/
-int Logger::getProcessorCount()
-{
-    return m_nProcessors;
-}
-
-/*!
-    Gets the rank in the communicator.
-
-    \result The rank in the communicator.
-*/
-int Logger::getRank()
-{
-    return m_rank;
+    return m_bufferSettings->indentation;
 }
 
 /*!
@@ -1040,7 +889,7 @@ void Logger::println(const std::string &line, log::Level severity, log::Visibili
 */
 void Logger::print(const std::string &message)
 {
-    (*this) << message;
+    print(message, getDefaultSeverity(), getDefaultVisibility());
 }
 
 /*!
@@ -1074,20 +923,7 @@ void Logger::print(const std::string &message, log::Visibility visibility)
 */
 void Logger::print(const std::string &message, log::Level severity, log::Visibility visibility)
 {
-    // Set logger properties for the message that need to be printed
-    if (severity != m_defaultSeverity || visibility != m_defaultVisibility) {
-        setConsoleEnabled(severity, visibility);
-        setFileEnabled(severity, visibility);
-    }
-
-    // Print the line
-    (*this) << message;
-
-    // Reset default logger properties
-    if (severity != m_defaultSeverity || visibility != m_defaultVisibility) {
-        setConsoleEnabled(m_defaultSeverity, m_defaultVisibility);
-        setFileEnabled(m_defaultSeverity, m_defaultVisibility);
-    }
+    print<const std::string &>(message, severity, visibility);
 }
 
 /*!
@@ -1095,7 +931,7 @@ void Logger::print(const std::string &message, log::Level severity, log::Visibil
     \ingroup common_logger
     \brief Manager for the loggers.
 
-    This class implements a manager for the loggers. The manager allowes the
+    This class implements a manager for the loggers. The manager allows the
     different loggers to work together.
 */
 
@@ -1160,7 +996,7 @@ LoggerManager & LoggerManager::manager()
     Returns an instance of default logger.
 
     The default severity of the messages will be set to the specified level,
-    if no default severity is specified, the default sevirity will remain
+    if no default severity is specified, the default severity will remain
     unaltered.
 
     The default visibility of the messages will be set to the specified level,
@@ -1183,7 +1019,7 @@ Logger & LoggerManager::cout(log::Level defaultSeverity, log::Visibility default
     does not exists a new instance will be created.
 
     The default severity of the messages will be set to the specified level,
-    if no default severity is specified, the default sevirity will remain
+    if no default severity is specified, the default severity will remain
     unaltered.
 
     The default visibility of the messages will be set to the specified level,
@@ -1420,13 +1256,13 @@ Logger & LoggerManager::debug(const std::string &name, log::Visibility defaultVi
 
     \param mode is the mode that will be set
     \param reset if true the log files will be reset
-    \param nProcessors is the total number of processes in the communicator
+    \param nProcesses is the total number of processes in the communicator
     \param rank is the parallel rank in the communicator
 */
 void LoggerManager::initialize(log::Mode mode, bool reset,
-                            int nProcessors, int rank)
+                            int nProcesses, int rank)
 {
-    initialize(mode, m_defaultName, reset, m_defaultDirectory, nProcessors, rank);
+    initialize(mode, m_defaultName, reset, m_defaultDirectory, nProcesses, rank);
 }
 
 /*!
@@ -1435,13 +1271,13 @@ void LoggerManager::initialize(log::Mode mode, bool reset,
     \param mode is the mode that will be set
     \param reset if true the log files will be reset
     \param directory is the default directory for saving the log files
-    \param nProcessors is the total number of processes in the communicator
+    \param nProcesses is the total number of processes in the communicator
     \param rank is the parallel rank in the communicator
 */
 void LoggerManager::initialize(log::Mode mode, bool reset, const std::string &directory,
-                            int nProcessors, int rank)
+                            int nProcesses, int rank)
 {
-    initialize(mode, m_defaultName, reset, directory, nProcessors, rank);
+    initialize(mode, m_defaultName, reset, directory, nProcesses, rank);
 }
 
 /*!
@@ -1451,12 +1287,12 @@ void LoggerManager::initialize(log::Mode mode, bool reset, const std::string &di
     \param name is the name for the default logger
     \param reset if true the log files will be reset
     \param directory is the default directory for saving the log files
-    \param nProcessors is the total number of processes in the communicator
+    \param nProcesses is the total number of processes in the communicator
     \param rank is the parallel rank in the communicator
 */
 void LoggerManager::initialize(log::Mode mode, const std::string &name, bool reset,
                             const std::string &directory,
-                            int nProcessors, int rank)
+                            int nProcesses, int rank)
 {
     if (isInitialized()) {
         log::cout().println("Logger initialization has to be called before creating the loggers.");
@@ -1471,7 +1307,7 @@ void LoggerManager::initialize(log::Mode mode, const std::string &name, bool res
     m_defaultDirectory = directory;
 
     // Create the logger
-    _create(m_defaultName, reset, directory, nProcessors, rank);
+    _create(m_defaultName, reset, directory, nProcesses, rank);
 }
 
 /*!
@@ -1479,13 +1315,13 @@ void LoggerManager::initialize(log::Mode mode, const std::string &name, bool res
 
     \param name is the name for the logger
     \param reset if true the log files will be reset
-    \param nProcessors is the total number of processes in the communicator
+    \param nProcesses is the total number of processes in the communicator
     \param rank is the parallel rank in the communicator
 */
 void LoggerManager::create(const std::string &name, bool reset,
-                           int nProcessors, int rank)
+                           int nProcesses, int rank)
 {
-    create(name, reset, m_defaultDirectory, nProcessors, rank);
+    create(name, reset, m_defaultDirectory, nProcesses, rank);
 }
 
 /*!
@@ -1494,12 +1330,12 @@ void LoggerManager::create(const std::string &name, bool reset,
     \param name is the name for the logger
     \param reset if true the log files will be reset
     \param directory is the directory for saving the log files
-    \param nProcessors is the total number of processes in the communicator
+    \param nProcesses is the total number of processes in the communicator
     \param rank is the parallel rank in the communicator
 */
 void LoggerManager::create(const std::string &name, bool reset,
                            const std::string &directory,
-                           int nProcessors, int rank)
+                           int nProcesses, int rank)
 {
     // Its not possible to create a log with the default name nor a log
     // with the same name of an existent logger nor a log with an empty
@@ -1521,20 +1357,21 @@ void LoggerManager::create(const std::string &name, bool reset,
 
     // Create the logger
     if (m_mode == log::MODE_SEPARATE) {
-        _create(name, reset, directory, nProcessors, rank);
+        _create(name, reset, directory, nProcesses, rank);
     } else {
-        _create(name, cout(m_defaultName));
+        Logger &defaultLogger = cout(m_defaultName);
+        _create(name, defaultLogger.m_buffer);
     }
 }
 
 /*!
     Destroys the specified logger.
 
-    The logger can be shared among differen users, a logger is destoryed
+    The logger can be shared among different users, a logger is destroyed
     only if it has no users.
 
     \param name is the name of the logger
-    \param force controls if the logger will be destory also if it still
+    \param force controls if the logger will be destroyed also if it still
     has users
     \result True if the logger has been destroyed, false otherwise.
 */
@@ -1585,7 +1422,7 @@ bool LoggerManager::exists(const std::string &name) const
     Checks if the logger manager has been initialized.
 
     Explicit initialization of the manager is done using the function
-    'initialize', implicit initialization happnes the first time a
+    'initialize', implicit initialization happens the first time a
     logger is created.
 
     \result Returns true if the logger manager has been initialized, false
@@ -1637,20 +1474,20 @@ log::Mode LoggerManager::getMode() const
     \param name is the name for the logger
     \param reset if true the log files will be reset
     \param directory is the directory for saving the log files
-    \param nProcessors is the total number of processes in the communicator
+    \param nProcesses is the total number of processes in the communicator
     \param rank is the parallel rank in the communicator
 */
 void LoggerManager::_create(const std::string &name, bool reset,
                             const std::string &directory,
-                            int nProcessors, int rank)
+                            int nProcesses, int rank)
 {
     // Get the file path
     FileHandler fileHandler;
     fileHandler.setDirectory(directory);
     fileHandler.setName(name);
     fileHandler.setAppendix("log");
-    fileHandler.setParallel(nProcessors > 1);
-    if (nProcessors > 1) {
+    fileHandler.setParallel(nProcesses > 1);
+    if (nProcesses > 1) {
         fileHandler.setBlock(rank);
     }
 
@@ -1672,21 +1509,24 @@ void LoggerManager::_create(const std::string &name, bool reset,
     // Use cout as console stream
     std::ostream &consoleStream = std::cout;
 
+    // Create the buffer
+    std::shared_ptr<LoggerBuffer> buffer = std::make_shared<LoggerBuffer>(nProcesses, rank, 256);
+    buffer->setFileStream(&fileStream);
+    buffer->setConsoleStream(&consoleStream);
+
     // Create the logger
-    m_loggers[name]     = std::unique_ptr<Logger>(new Logger(name, &consoleStream, &fileStream, nProcessors, rank));
-    m_loggerUsers[name] = 1;
+    _create(name, buffer);
 }
 
 /*!
     Internal function to create a logger.
 
     \param name is the name for the logger
-    \param master is a reference to the logger from which the settings will
-    be copied from
+    \param buffer is the buffer that will be used for the logger
 */
-void LoggerManager::_create(const std::string &name, Logger &master)
+void LoggerManager::_create(const std::string &name, std::shared_ptr<LoggerBuffer> &buffer)
 {
-    m_loggers[name]     = std::unique_ptr<Logger>(new Logger(master));
+    m_loggers[name]     = std::unique_ptr<Logger>(new Logger(name,  buffer));
     m_loggerUsers[name] = 1;
 }
 
@@ -1845,7 +1685,7 @@ namespace log {
         Returns an instance of the default logger.
 
         The default severity of the messages will be set to the specified
-        level, if no default severity is specified, the default sevirity
+        level, if no default severity is specified, the default severity
         will remain unaltered.
 
         The default visibility of the messages will be set to the specified
@@ -1864,7 +1704,7 @@ namespace log {
         Returns an instance of the specified logger.
 
         The default severity of the messages will be set to the specified
-        level, if no default severity is specified, the default sevirity
+        level, if no default severity is specified, the default severity
         will remain unaltered.
 
         The default visibility of the messages will be set to the specified
@@ -2166,7 +2006,7 @@ namespace log {
     }
 
     /*!
-        Set the visibility ofthe messages.
+        Set the visibility of the messages.
 
         \param logger is a reference pointing to the logger
         \param visibility is the visibility of the messages

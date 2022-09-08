@@ -39,129 +39,110 @@ namespace bitpit {
 /*!
  * Constructor
  */
-LevelSetCartesianKernel::LevelSetCartesianKernel(VolCartesian &patch ): LevelSetKernel( (static_cast<VolumeKernel*>(&patch)) ){
-    m_cartesian = &patch ;
+LevelSetCartesianKernel::LevelSetCartesianKernel(VolCartesian &patch ): LevelSetKernel( &patch ){
 
-    clearCellCirclesCache();
-    updateCellCirclesCache();
+    // Get mesh information
+    const VolCartesian *mesh = getMesh();
+    int dimension = mesh->getDimension();
+    std::array<double, 3> spacing = mesh->getSpacing();
+
+    // Initialize bounding and tangent radii
+    m_cellTangentRadius  = std::numeric_limits<double>::max();
+    m_cellBoundingRadius = 0.;
+    for(int i=0; i<dimension; ++i){
+        m_cellTangentRadius   = std::min(m_cellTangentRadius, spacing[i]);
+        m_cellBoundingRadius += spacing[i] * spacing[i];
+    }
+    m_cellTangentRadius  = 0.5 * m_cellTangentRadius;
+    m_cellBoundingRadius = 0.5 * std::sqrt(m_cellBoundingRadius);
+
 }
 
 /*!
  * Returns a pointer to VolCartesian
  * @return pointer to VolCartesian
  */
-VolCartesian* LevelSetCartesianKernel::getCartesianMesh() const{
-    return m_cartesian ;
-}
+VolCartesian * LevelSetCartesianKernel::getMesh() const{
 
-/*!
- * Get the radius of the incircle of the cells.
- * @return radius of incircle
- */
-double LevelSetCartesianKernel::getCellIncircle() const {
-
-    return m_cellIncircle;
-}
-
-/*!
- * Computes the radius of the incircle of the specfified cell.
- * @param[in] id is the index of cell
- * @return radius of incircle
- */
-double LevelSetCartesianKernel::computeCellIncircle(long id) const {
-
-    BITPIT_UNUSED(id);
-
-    return getCellIncircle();
-}
-
-/*!
- * Get the radius of the circumcircle of the cells.
- * @return radius of circumcircle
- */
-double LevelSetCartesianKernel::getCellCircumcircle() const {
-
-    return m_cellCircumcircle;
-}
-
-/*!
- * Computes the radius of the circumcircle of the specfified cell.
- * @param[in] id is the index of cell
- * @return radius of incircle
- */
-double LevelSetCartesianKernel::computeCellCircumcircle( long id ) const {
-
-    BITPIT_UNUSED(id);
-
-    return getCellCircumcircle();
-}
-
-/*!
- * Checks if a plane intersects the cell
- * @param[in] id is the index of cell
- * @param[in] root is a point on the plane
- * @param[in] normal is the normal of the plane
- * @param[in] tolerance is the tolerance used for distance comparisons
- * @return true if intersect
- */
-bool LevelSetCartesianKernel::intersectCellPlane( long id, const std::array<double,3> &root, const std::array<double,3> &normal, double tolerance ) {
-
-    std::array<double,3> minPoint;
-    std::array<double,3> maxPoint;
-    m_cartesian->evalCellBoundingBox(id, &minPoint, &maxPoint);
-
-    int dim = m_cartesian->getDimension();
-    return CGElem::intersectPlaneBox( root, normal, minPoint, maxPoint, dim, tolerance);
-}
-
-/*!
- * Clears the geometry cache.
- */
-void LevelSetCartesianKernel::clearGeometryCache(  ) {
-
-    LevelSetKernel::clearGeometryCache();
-
-    clearCellCirclesCache();
+    return static_cast<VolCartesian *>(LevelSetKernel::getMesh()) ;
 
 }
 
 /*!
- * Updates the geometry cache after an adaption.
+ * Computes the radius of the tangent sphere associated with the cells of the mesh.
+ *
+ * The tangent sphere is a sphere having the center in the cell centroid and tangent
+ * to the cell.
+ *
+ * @param[in] id is the id of cell
+ * @return The radius of the tangent sphere.
  */
-void LevelSetCartesianKernel::updateGeometryCache( const std::vector<adaption::Info> &adaptionData ) {
+double LevelSetCartesianKernel::getCellTangentRadius( ) const {
 
-    LevelSetKernel::updateGeometryCache(adaptionData);
-
-    updateCellCirclesCache();
+    return m_cellTangentRadius;
 
 }
 
 /*!
- * Clears the cache that hold information about cell incircle and circumcircle.
+ * Get the radius of the bounding sphere associated with the cells of the mesh.
+ *
+ * The bounding sphere is the sphere with the minimum radius that contains all the
+ * cell vertices and has the center in the cell centroid.
+ *
+ * @param[in] id is the id of cell
+ * @return The radius of the bounding sphere.
  */
-void LevelSetCartesianKernel::clearCellCirclesCache(  ) {
+double LevelSetCartesianKernel::getCellBoundingRadius( ) const {
 
-    m_cellIncircle     = 0.;
-    m_cellCircumcircle = 0.;
+    return m_cellBoundingRadius;
 
 }
 
 /*!
- * Updates the cache that hold information about cell incircle and circumcircle.
+ * Computes the centroid of the specfified cell.
+ *
+ * @param[in] id is the id of cell
+ * @return The centroid of the cell.
  */
-void LevelSetCartesianKernel::updateCellCirclesCache(  ) {
+std::array<double, 3> LevelSetCartesianKernel::computeCellCentroid( long id ) const {
 
-    int dimension = m_cartesian->getDimension();
-    std::array<double,3> spacing = m_cartesian->getSpacing();
+    const VolCartesian *mesh = getMesh();
 
-    m_cellIncircle     = std::numeric_limits<double>::max();
-    m_cellCircumcircle = 0.;
-    for(int i=0; i<dimension; ++i){
-        m_cellIncircle      = std::min(m_cellIncircle, spacing[i]);
-        m_cellCircumcircle += spacing[i] * spacing[i];
-    }
-    m_cellIncircle     = 0.5 * m_cellIncircle;
-    m_cellCircumcircle = 0.5 * std::sqrt(m_cellCircumcircle);
+    return mesh->evalCellCentroid( id );
+}
+
+/*!
+ * Computes the radius of the tangent sphere associated with the specified cell.
+ *
+ * The tangent sphere is a sphere having the center in the cell centroid and tangent
+ * to the cell.
+ *
+ * @param[in] id is the id of cell
+ * @return The radius of the tangent sphere.
+ */
+double LevelSetCartesianKernel::computeCellTangentRadius( long id ) const {
+
+    BITPIT_UNUSED( id );
+
+    return getCellTangentRadius();
 
 }
+
+/*!
+ * Computes the radius of the bounding sphere associated with the specified cell.
+ *
+ * The bounding sphere is the sphere with the minimum radius that contains all the
+ * cell vertices and has the center in the cell centroid.
+ *
+ * @param[in] id is the id of cell
+ * @return The radius of the bounding sphere.
+ */
+double LevelSetCartesianKernel::computeCellBoundingRadius( long id ) const {
+
+    BITPIT_UNUSED( id );
+
+    return getCellBoundingRadius();
+
+}
+
 }

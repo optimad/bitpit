@@ -73,7 +73,7 @@ enum class LevelSetBooleanOperation{
 enum class LevelSetIntersectionStatus{
     FALSE=0,                                                            /**< Cell does not intersect zero levelset */
     TRUE=1,                                                             /**< Cell does intersect zero levelset */
-    CLOSE=2                                                             /**< Zero levelset lies within cell incircle and circumcircle */
+    CLOSE=2                                                             /**< Zero levelset lies within tangent and bounding radius of a cell */
 };
 
 /*!
@@ -82,7 +82,7 @@ enum class LevelSetIntersectionStatus{
  * should be computed
  */
 enum class LevelSetIntersectionMode{
-    FAST_FUZZY=0,                   /**< Compares levelset value to cell incircle and circumcircle */
+    FAST_FUZZY=0,                   /**< Compares levelset value to tangent and bounding radius of a cell */
     FAST_GUARANTEE_TRUE=1,          /**< All LevelSetIntersectionStatus::TRUE are accurate but LevelSetIntersectionStatus::FALSE may be wrong */
     FAST_GUARANTEE_FALSE=2,         /**< All LevelSetIntersectionStatus::FALSE are accurate but LevelSetIntersectionStatus::TRUE may be wrong */
     ACCURATE=3                      /**< Accurate but more costly checks */
