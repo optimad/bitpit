@@ -78,10 +78,10 @@ IBinaryStream & operator>>(IBinaryStream &buffer, DiscreteStencil<weight_t> &ste
 template <typename weight_t>
 class DiscreteStencil {
 
-template<typename U>
-friend OBinaryStream & (operator<<) (OBinaryStream &buffer, const DiscreteStencil<U> &stencil);
-template<typename U>
-friend IBinaryStream & (operator>>) (IBinaryStream &buffer, DiscreteStencil<U> &stencil);
+template<typename W>
+friend OBinaryStream & (operator<<) (OBinaryStream &buffer, const DiscreteStencil<W> &stencil);
+template<typename W>
+friend IBinaryStream & (operator>>) (IBinaryStream &buffer, DiscreteStencil<W> &stencil);
 
 public:
     long NULL_ID = - std::numeric_limits<long>::max();
