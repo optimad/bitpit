@@ -992,12 +992,12 @@ private:
 	std::unordered_map<int, std::vector<long>> m_ghostCellExchangeTargets;
 	std::unordered_map<int, std::vector<long>> m_ghostCellExchangeSources;
 
-	void setGhostVertexOwner(int id, int rank);
-	void unsetGhostVertexOwner(int id);
+	void setGhostVertexOwner(long id, int rank);
+	void unsetGhostVertexOwner(long id);
 	void clearGhostVertexOwners();
 
-	void setGhostCellOwner(int id, int rank);
-	void unsetGhostCellOwner(int id);
+	void setGhostCellOwner(long id, int rank);
+	void unsetGhostCellOwner(long id);
 	void clearGhostCellOwners();
 
 	void _partitioningAlter_deleteGhosts();
