@@ -205,7 +205,7 @@ DiscreteStencil<weight_t>::DiscreteStencil(const weight_t &zero)
 }
 
 /*!
-* Initialize the stencil
+* Constructor
 *
 * \param size is the stencil size, expressed in number of elements
 * \param zero is the value to be used as zero
