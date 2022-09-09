@@ -32,6 +32,7 @@
 
 #include "bitpit_common.hpp"
 #include "bitpit_containers.hpp"
+#include "bitpit_operators.hpp"
 
 namespace bitpit {
 
@@ -170,14 +171,32 @@ protected:
     virtual void clearWeights(bool release);
 
 private:
-    static void rawSumValue(const weight_t &value, double factor, weight_t *target);
-    static void rawCopyValue(const weight_t &source, weight_t *destination);
-    static void rawMoveValue(weight_t &&source, weight_t *destination);
+    template<typename W>
+    static void rawSumValue(const W &value, double factor, W *target);
+    template<typename W = weight_t, typename V = typename W::value_type, long unsigned int D = W::size_type, typename std::enable_if<std::is_same<std::array<V, D>, W>::value>::type * = nullptr>
+    static void rawSumValue(const std::array<V, D> &value, double factor, std::array<V, D> *target);
+    template<typename W = weight_t, typename V = typename W::value_type, typename std::enable_if<std::is_same<std::vector<V>, W>::value>::type * = nullptr>
+    static void rawSumValue(const std::vector<V> &value, double factor, std::vector<V> *target);
+
+    template<typename W>
+    static void rawCopyValue(const W &source, W *target);
+    template<typename W = weight_t, typename V = typename W::value_type, long unsigned int D = W::size_type, typename std::enable_if<std::is_same<std::array<V, D>, W>::value>::type * = nullptr>
+    static void rawCopyValue(const std::array<V, D> &source, std::array<V, D> *target);
+    template<typename W = weight_t, typename V = typename W::value_type, typename std::enable_if<std::is_same<std::vector<V>, W>::value>::type * = nullptr>
+    static void rawCopyValue(const std::vector<V> &source, std::vector<V> *target);
+
+    template<typename W>
+    static void rawMoveValue(W &&source, W *target);
 
     weight_t * findWeight(long id);
     const weight_t * findWeight(long id) const;
 
-    bool optimizeWeight(std::size_t pos, double tolerance = 1.e-12);
+    template<typename W>
+    bool optimizeWeight(double tolerance, W *weight);
+    template<typename W = weight_t, typename V = typename W::value_type, long unsigned int D = W::size_type, typename std::enable_if<std::is_same<std::array<V, D>, W>::value>::type * = nullptr>
+    bool optimizeWeight(double tolerance, std::array<V, D> *weight);
+    template<typename W = weight_t, typename V = typename W::value_type, typename std::enable_if<std::is_same<std::vector<V>, W>::value>::type * = nullptr>
+    bool optimizeWeight(double tolerance, std::vector<V> *weight);
 
 };
 
@@ -211,25 +230,6 @@ protected:
     void clearWeights(bool release) override;
 
 };
-
-// Methods for the spcializations
-template<>
-void DiscreteStencil<std::array<double, 3>>::rawSumValue(const std::array<double, 3> &value, double factor, std::array<double, 3> *target);
-
-template<>
-void DiscreteStencil<std::vector<double>>::rawSumValue(const std::vector<double> &value, double factor, std::vector<double> *target);
-
-template<>
-void DiscreteStencil<std::array<double, 3>>::rawCopyValue(const std::array<double, 3> &source, std::array<double, 3> *target);
-
-template<>
-void DiscreteStencil<std::vector<double>>::rawCopyValue(const std::vector<double> &source, std::vector<double> *target);
-
-template<>
-bool DiscreteStencil<std::array<double, 3>>::optimizeWeight(std::size_t pos, double tolerance);
-
-template<>
-bool DiscreteStencil<std::vector<double>>::optimizeWeight(std::size_t pos, double tolerance);
 
 }
 
@@ -285,14 +285,20 @@ extern template class MPDiscreteStencil<std::vector<double>>;
 #endif
 
 // Operators for the specializations
-bitpit::StencilVector operator*(const bitpit::StencilScalar &stencil, const std::array<double,3> &vector);
-bitpit::StencilVector operator*(const std::array<double,3> &vector, const bitpit::StencilScalar &stencil);
+template <typename V>
+bitpit::StencilVector operator*(const typename bitpit::DiscreteStencil<V> &stencil, const std::array<V, 3> &vector);
+template <typename V>
+bitpit::StencilVector operator*(const std::array<V, 3> &vector, const typename bitpit::DiscreteStencil<V> &stencil);
 
 // Functions for the specializations
-bitpit::StencilScalar dotProduct(const bitpit::StencilVector &stencil, const bitpit::StencilVector::weight_type &vector);
-void dotProduct(const bitpit::StencilVector &stencil, const bitpit::StencilVector::weight_type &vector, bitpit::StencilScalar *stencil_dotProduct);
+template <typename V>
+typename bitpit::DiscreteStencil<V> dotProduct(const bitpit::StencilVector &stencil, const typename bitpit::DiscreteStencil<std::array<V, 3>>::weight_type &vector);
+template <typename V>
+void dotProduct(const typename bitpit::DiscreteStencil<std::array<V, 3>> &stencil, const typename bitpit::DiscreteStencil<std::array<V, 3>>::weight_type &vector, typename bitpit::DiscreteStencil<V> *stencil_dotProduct);
 
-bitpit::StencilVector project(const bitpit::StencilVector &stencil, const std::array<double, 3> &direction);
-void project(const bitpit::StencilVector &stencil, const std::array<double, 3> &direction, bitpit::StencilVector *stencil_projection);
+template <typename V>
+typename bitpit::DiscreteStencil<std::array<V, 3>> project(const typename bitpit::DiscreteStencil<std::array<V, 3>> &stencil, const std::array<V, 3> &direction);
+template <typename V>
+void project(const typename bitpit::DiscreteStencil<std::array<V, 3>> &stencil, const std::array<V, 3> &direction, typename bitpit::DiscreteStencil<std::array<V, 3>> *stencil_projection);
 
 #endif

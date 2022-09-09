@@ -732,7 +732,7 @@ void DiscreteStencil<weight_t>::optimize(double tolerance)
 {
     std::size_t nItems = size();
     for (std::size_t n = 0; n < nItems; ++n) {
-        bool isWeightNeglibile = optimizeWeight(n, tolerance);
+        bool isWeightNeglibile = optimizeWeight(tolerance, m_weights.data() + n);
         if (isWeightNeglibile) {
             m_pattern.erase(m_pattern.begin() + n);
             m_weights.erase(m_weights.begin() + n);
@@ -791,17 +791,71 @@ void DiscreteStencil<weight_t>::zero()
 
     setConstant(m_zero);
 }
+
 /*!
 * Optimize the specified weight.
 *
-* \param pos is the position of the weight to check
 * \param tolerance is the tolerance that will be used for the check
+* \param weight is the weight that will be optimized
 * \result Returns true if the whole weight is neglibile
 */
 template<typename weight_t>
-bool DiscreteStencil<weight_t>::optimizeWeight(std::size_t pos, double tolerance)
+template<typename W>
+bool DiscreteStencil<weight_t>::optimizeWeight(double tolerance, W *weight)
 {
-    return (std::abs(m_weights[pos] - m_zero) <= tolerance);
+    return (std::abs(*weight - m_zero) <= tolerance);
+}
+
+/*!
+* Optimize the specified weight.
+*
+* \param tolerance is the tolerance that will be used for the check
+* \param weight is the weight that will be optimized
+* \result Returns true if the whole weight is neglibile
+*/
+template<typename weight_t>
+template<typename W, typename V, long unsigned int D, typename std::enable_if<std::is_same<std::array<V, D>, W>::value>::type *>
+bool DiscreteStencil<weight_t>::optimizeWeight(double tolerance, std::array<V, D> *weight)
+{
+    int nItems = weight->size();
+
+    int nNegligibleItems = 0;
+    for (int k = 0; k < nItems; ++k) {
+        if (std::abs((*weight)[k] - m_zero[k]) > tolerance) {
+            continue;
+        }
+
+        (*weight)[k] = m_zero[k];
+        ++nNegligibleItems;
+    }
+
+    return (nNegligibleItems == nItems);
+}
+
+/*!
+* Optimize the specified weight.
+*
+* \param tolerance is the tolerance that will be used for the check
+* \param weight is the weight that will be optimized
+* \result Returns true if the whole weight is neglibile
+*/
+template<typename weight_t>
+template<typename W, typename V, typename std::enable_if<std::is_same<std::vector<V>, W>::value>::type *>
+bool DiscreteStencil<weight_t>::optimizeWeight(double tolerance, std::vector<V> *weight)
+{
+    int nItems = weight->size();
+
+    int nNegligibleItems = 0;
+    for (int k = 0; k < nItems; ++k) {
+        if (std::abs((*weight)[k] - m_zero[k]) > tolerance) {
+            continue;
+        }
+
+        (*weight)[k] = m_zero[k];
+        ++nNegligibleItems;
+    }
+
+    return (nNegligibleItems == nItems);
 }
 
 /*!
@@ -895,9 +949,62 @@ void DiscreteStencil<weight_t>::clearWeights(bool release)
 * \param target on output will contain the original weight plus the value multiplied by the factor
 */
 template<typename weight_t>
-void DiscreteStencil<weight_t>::rawSumValue(const weight_t &value, double factor, weight_t *target)
+template<typename W>
+void DiscreteStencil<weight_t>::rawSumValue(const W &value, double factor, W *target)
 {
     *target += factor * value;
+}
+
+/*!
+ * Sum the specified value to the target.
+ *
+ * \param value is the value that will be summed
+ * \param factor is the factor the value will be multiplied with
+ * \param target on output will contain the original weight plus the value multiplied by the factor
+ */
+template<typename weight_t>
+template<typename W, typename V, long unsigned int D, typename std::enable_if<std::is_same<std::array<V, D>, W>::value>::type *>
+void DiscreteStencil<weight_t>::rawSumValue(const std::array<V, D> &value, double factor, std::array<V, D> *target)
+{
+    for (long unsigned int i = 0; i < D; ++i) {
+        (*target)[i] += factor * value[i];
+    }
+}
+
+/*!
+ * Sum the specified value to the target.
+ *
+ * The target will be resized to match the size of the value to be summed. If the value size is
+ * greater that the target size, missing target elements will be initialized to zero before
+ * summing the specified value.
+ *
+ * \param value is the value that will be summed
+ * \param factor is the factor the value will be multiplied with
+ * \param target on output will contain the original weight plus the value multiplied by the factor
+ */
+template<typename weight_t>
+template<typename W, typename V, typename std::enable_if<std::is_same<std::vector<V>, W>::value>::type *>
+void DiscreteStencil<weight_t>::rawSumValue(const std::vector<V> &value, double factor, std::vector<V> *target)
+{
+    std::size_t valueSize  = value.size();
+    std::size_t targetSize = target->size();
+    std::size_t commonSize = std::min(valueSize, targetSize);
+
+    for (std::size_t i = 0; i < commonSize; ++i) {
+        (*target)[i] += factor * value[i];
+    }
+
+    if (valueSize > targetSize) {
+        target->insert(target->end(), value.cbegin() + commonSize, value.cend());
+
+        if (factor != 1.) {
+            auto targetBegin = target->begin();
+            auto targetEnd   = target->end();
+            for (auto itr = targetBegin + commonSize; itr != targetEnd; ++itr) {
+                *itr *= factor;
+            }
+        }
+    }
 }
 
 /**
@@ -907,11 +1014,49 @@ void DiscreteStencil<weight_t>::rawSumValue(const weight_t &value, double factor
  * \param[out] target on output will contain the source value
  */
 template<typename weight_t>
-void DiscreteStencil<weight_t>::rawCopyValue(const weight_t &source, weight_t *target)
+template<typename W>
+void DiscreteStencil<weight_t>::rawCopyValue(const W &source, W *target)
 {
     *target = source;
 }
 
+/**
+ * Set the source value into the target.
+ *
+ * \param source is the value that will be set
+ * \param[out] target on output will contain the source value
+ */
+template<typename weight_t>
+template<typename W, typename V, long unsigned int D, typename std::enable_if<std::is_same<std::array<V, D>, W>::value>::type *>
+void DiscreteStencil<weight_t>::rawCopyValue(const std::array<V, D> &source, std::array<V, D> *target)
+{
+    std::copy_n(source.data(), source.size(), target->data());
+}
+
+/**
+ * Copy the source value into the target.
+ *
+ * The target will be resized to match the size of the source.
+ *
+ * \param source is the value that will be set
+ * \param[out] target on output will contain the source value
+ */
+template<typename weight_t>
+template<typename W, typename V, typename std::enable_if<std::is_same<std::vector<V>, W>::value>::type *>
+void DiscreteStencil<weight_t>::rawCopyValue(const std::vector<V> &source, std::vector<V> *target)
+{
+    std::size_t sourceSize = source.size();
+    std::size_t targetSize = target->size();
+    std::size_t commonSize = std::min(sourceSize, targetSize);
+
+    std::copy_n(source.data(), commonSize, target->data());
+
+    if (sourceSize < targetSize) {
+        target->resize(sourceSize);
+    } else if (sourceSize > targetSize) {
+        target->insert(target->end(), source.begin() + commonSize, source.end());
+    }
+}
 /**
  * Move the source value into the target.
  *
@@ -919,7 +1064,8 @@ void DiscreteStencil<weight_t>::rawCopyValue(const weight_t &source, weight_t *t
  * \param[out] target on output will contain the source value
  */
 template<typename weight_t>
-void DiscreteStencil<weight_t>::rawMoveValue(weight_t &&source, weight_t *target)
+template<typename W>
+void DiscreteStencil<weight_t>::rawMoveValue(W &&source, W *target)
 {
     *target = std::move(source);
 }
@@ -1201,6 +1347,120 @@ bitpit::DiscreteStencil<weight_t> operator-(const bitpit::DiscreteStencil<weight
     stencil_result -= stencil_B;
 
     return stencil_result;
+}
+
+/*!
+* The multiplication operator between a scalar stencil and a vector.
+*
+* \param stencil is the stencil
+* \param vector is the vector
+* \result The result fo the multiplication.
+*/
+template <typename V>
+typename bitpit::DiscreteStencil<std::array<V, 3>> operator*(const typename bitpit::DiscreteStencil<V> &stencil, const std::array<double, 3> &vector)
+{
+    return (vector * stencil);
+}
+
+/*!
+* The multiplication operator between a vector and a scalar stencil.
+*
+* \param vector is the vector
+* \param stencil is the stencil
+* \result The result fo the multiplication.
+*/
+template <typename V>
+typename bitpit::DiscreteStencil<std::array<V, 3>> operator*(const std::array<V, 3> &vector, const typename bitpit::DiscreteStencil<V> &stencil)
+{
+    const std::size_t nItems = stencil.size();
+    typename bitpit::DiscreteStencil<std::array<V, 3>> stencil_B;
+    stencil_B.resize(nItems);
+    for (std::size_t n = 0; n < nItems; ++n) {
+        stencil_B.setPattern(n, stencil.getPattern(n));
+        stencil_B.setWeight(n, ::operator*(stencil.getWeight(n), vector));
+    }
+    stencil_B.setConstant(::operator*(stencil.getConstant(), vector));
+
+    return stencil_B;
+}
+
+/*!
+* The dot procduct operator betwee a vector stencil and a vector.
+*
+* \param stencil is the vector stencil
+* \param vector is the vector
+* \result The result fo the dot product.
+*/
+template <typename V>
+typename bitpit::DiscreteStencil<V> dotProduct(const typename bitpit::DiscreteStencil<std::array<V, 3>> &stencil, const typename bitpit::DiscreteStencil<std::array<V, 3>>::weight_type &vector)
+{
+    typename bitpit::DiscreteStencil<V> stencil_dotProduct;
+    dotProduct(stencil, vector, &stencil_dotProduct);
+
+    return stencil_dotProduct;
+}
+
+/*!
+* The dot procduct operator betwee a vector stencil and a vector.
+*
+* \param stencil is the vector stencil
+* \param vector is the vector
+* \param[out] stencil_dotProduct on output will contain the dot product
+*/
+template <typename V>
+void dotProduct(const typename bitpit::DiscreteStencil<std::array<V, 3>> &stencil, const typename bitpit::DiscreteStencil<std::array<V, 3>>::weight_type &vector, typename bitpit::DiscreteStencil<V> *stencil_dotProduct)
+{
+    const std::size_t nItems = stencil.size();
+    stencil_dotProduct->resize(nItems);
+
+    const long *patternData = stencil.patternData();
+    const typename bitpit::DiscreteStencil<std::array<V, 3>>::weight_type *weightData = stencil.weightData();
+    long *patternData_dotProduct = stencil_dotProduct->patternData();
+    typename bitpit::DiscreteStencil<V>::weight_type *weightData_dotProduct = stencil_dotProduct->weightData();
+    for (std::size_t n = 0; n < nItems; ++n) {
+        patternData_dotProduct[n] = patternData[n];
+        weightData_dotProduct[n]  = ::dotProduct(weightData[n], vector);
+    }
+
+    stencil_dotProduct->setConstant(::dotProduct(stencil.getConstant(), vector));
+}
+
+/*!
+* Project the stencil along the specified direction.
+*
+* \param stencil is the vector stencil
+* \param direction is the direction
+* \result The projection of the stencil along the specified direction.
+*/
+template <typename V>
+typename bitpit::DiscreteStencil<std::array<V, 3>> project(const typename bitpit::DiscreteStencil<std::array<V, 3>> &stencil, const std::array<V, 3> &direction)
+{
+    typename bitpit::DiscreteStencil<std::array<V, 3>> stencil_projection;
+    project(stencil, direction, &stencil_projection);
+
+    return stencil_projection;
+}
+
+/*!
+* Project the stencil along the specified direction.
+*
+* \param stencil is the vector stencil
+* \param direction is the direction
+* \param[out] stencil_projection on output will contain the projection
+*/
+template <typename V>
+void project(const typename bitpit::DiscreteStencil<std::array<V, 3>> &stencil, const std::array<V, 3> &direction, typename bitpit::DiscreteStencil<std::array<V, 3>> *stencil_projection)
+{
+    stencil_projection->initialize(stencil);
+    const std::size_t nItems = stencil_projection->size();
+
+    typename bitpit::DiscreteStencil<std::array<V, 3>>::weight_type *weightData_projection = stencil_projection->weightData();
+    for (std::size_t n = 0; n < nItems; ++n) {
+        typename bitpit::DiscreteStencil<std::array<V, 3>>::weight_type &weight = weightData_projection[n];
+        weight = ::dotProduct(weight, direction) * direction;
+    }
+
+    stencil_projection->setConstant(::dotProduct(stencil_projection->getConstant(), direction) * direction);
 }
 
 #endif
