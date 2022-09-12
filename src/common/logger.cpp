@@ -22,10 +22,12 @@
 *
 \*---------------------------------------------------------------------------*/
 
+#include <array>
 #include <cassert>
 #include <cctype>
 #include <cmath>
 #include <chrono>
+#include <cstdio>
 #include <ctime>
 #include <fstream>
 #include <iomanip>
@@ -412,13 +414,16 @@ std::string LoggerBuffer::getTimestamp() const
 
     auto seconds = std::chrono::duration_cast<std::chrono::seconds>(currentClock.time_since_epoch());
     auto millisecs = std::chrono::duration_cast<std::chrono::milliseconds>(currentClock.time_since_epoch() - seconds);
-    std::ostringstream millisecsConverter;
-    millisecsConverter << (millisecs.count());
+    std::array<char, 11> millisecsBuffer;
+    std::snprintf(millisecsBuffer.data(), millisecsBuffer.size(), "%03u", static_cast<uint>(millisecs.count()));
 
     std::string timestamp;
-    timestamp.resize(TIMESTAMP_FORMAT.size());
-    strftime(&timestamp[0], timestamp.size(), TIMESTAMP_FORMAT.c_str(), localtime(&currentTime));
-    timestamp += "." + millisecsConverter.str();
+    timestamp.resize(23);
+    std::strftime(&timestamp[0], timestamp.size(), TIMESTAMP_FORMAT.c_str(), localtime(&currentTime));
+    timestamp[19] = '.';
+    timestamp[20] = millisecsBuffer[0];
+    timestamp[21] = millisecsBuffer[1];
+    timestamp[22] = millisecsBuffer[2];
 
     return timestamp;
 }
