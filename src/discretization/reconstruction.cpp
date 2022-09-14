@@ -493,12 +493,11 @@ void ReconstructionPolynomial::initialize(uint8_t degree, uint8_t dimensions,
     assert(dimensions <= ReconstructionPolynomial::MAX_DIMENSIONS);
     m_dimensions = dimensions;
 
-    int currentStorageSize = m_nCoeffs;
-
-    m_nCoeffs = ReconstructionPolynomial::getCoefficientCount(m_degree, m_dimensions);
-
     if (nFields > 0) {
+        int currentStorageSize = m_nFields * m_nCoeffs;
+
         m_nFields = nFields;
+        m_nCoeffs = ReconstructionPolynomial::getCoefficientCount(m_degree, m_dimensions);
 
         int storageSize = m_nCoeffs * m_nFields;
 
@@ -530,6 +529,7 @@ void ReconstructionPolynomial::clear(bool release)
     m_nFields = 0;
 
     if (release) {
+        m_nCoeffs = 0;
         m_coeffs.reset();
     }
 }
