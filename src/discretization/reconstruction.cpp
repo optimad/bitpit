@@ -826,14 +826,12 @@ void ReconstructionPolynomial::computeValues(int degree, const std::array<double
     }
 
     // Generic polynomial
-    int nCoeffs = ReconstructionPolynomial::getCoefficientCount(degree, m_dimensions);
-
-    BITPIT_CREATE_WORKSPACE(csi, double, nCoeffs, MAX_STACK_WORKSPACE_SIZE);
+    BITPIT_CREATE_WORKSPACE(csi, double, m_nCoeffs, MAX_STACK_WORKSPACE_SIZE);
     ReconstructionPolynomial::evalPointBasisValues(degree, m_dimensions, m_origin, point, csi);
 
     do {
         *fieldValue = fieldCoeffs[0] * csi[0];
-        for (int i = 1; i < nCoeffs; ++i) {
+        for (int i = 1; i < m_nCoeffs; ++i) {
             *fieldValue += fieldCoeffs[i] * csi[i];
         }
 
@@ -1036,10 +1034,9 @@ void ReconstructionPolynomial::computeValuesLimited(int degree, const std::array
     const double *fieldLimiters = limiters;
 
     // Generic polynomial
-    int nCoeffs = ReconstructionPolynomial::getCoefficientCount(degree, m_dimensions);
     const std::vector<uint16_t> &nDegreeCoeffs = ReconstructionPolynomial::getDegreeCoefficientsCount(m_dimensions);
 
-    BITPIT_CREATE_WORKSPACE(csi, double, nCoeffs, MAX_STACK_WORKSPACE_SIZE);
+    BITPIT_CREATE_WORKSPACE(csi, double, nDegreeCoeffs[degree], MAX_STACK_WORKSPACE_SIZE);
     ReconstructionPolynomial::evalPointBasisValues(degree, m_dimensions, m_origin, point, csi);
 
     do {
@@ -1230,13 +1227,12 @@ void ReconstructionPolynomial::computeDerivatives(int degree, const std::array<d
     }
 
     // Generic polynomial
-    int nCoeffs = ReconstructionPolynomial::getCoefficientCount(degree, m_dimensions);
-    BITPIT_CREATE_WORKSPACE(csi, double, nCoeffs, MAX_STACK_WORKSPACE_SIZE);
+    BITPIT_CREATE_WORKSPACE(csi, double, m_nCoeffs, MAX_STACK_WORKSPACE_SIZE);
     ReconstructionPolynomial::evalPointBasisDerivatives(degree, m_dimensions, m_origin, point, direction, csi);
 
     do {
         *fieldDerivative = fieldCoeffs[0] * csi[0];
-        for (int i = 1; i < nCoeffs; ++i) {
+        for (int i = 1; i < m_nCoeffs; ++i) {
             *fieldDerivative += fieldCoeffs[i] * csi[i];
         }
 
@@ -1472,10 +1468,9 @@ void ReconstructionPolynomial::computeDerivativesLimited(int degree, const std::
     }
 
     // Generic polynomial
-    int nCoeffs = ReconstructionPolynomial::getCoefficientCount(degree, m_dimensions);
     const std::vector<uint16_t> &nDegreeCoeffs = ReconstructionPolynomial::getDegreeCoefficientsCount(m_dimensions);
 
-    BITPIT_CREATE_WORKSPACE(dcsi, double, nCoeffs, MAX_STACK_WORKSPACE_SIZE);
+    BITPIT_CREATE_WORKSPACE(dcsi, double, nDegreeCoeffs[degree], MAX_STACK_WORKSPACE_SIZE);
     ReconstructionPolynomial::evalPointBasisDerivatives(degree, m_dimensions, m_origin, point, direction, dcsi);
 
     do {
@@ -1656,22 +1651,20 @@ void ReconstructionPolynomial::computeGradients(int degree, const std::array<dou
     }
 
     // Generic polynomial
-    int nCoeffs = ReconstructionPolynomial::getCoefficientCount(degree, m_dimensions);
-
-    BITPIT_CREATE_WORKSPACE(dcsi, double, static_cast<std::size_t>(m_dimensions * nCoeffs), 3 * MAX_STACK_WORKSPACE_SIZE);
+    BITPIT_CREATE_WORKSPACE(dcsi, double, static_cast<std::size_t>(m_dimensions * m_nCoeffs), 3 * MAX_STACK_WORKSPACE_SIZE);
     ReconstructionPolynomial::evalPointBasisDerivatives(degree, m_dimensions, m_origin, point, {{1., 0., 0.}}, dcsi);
-    ReconstructionPolynomial::evalPointBasisDerivatives(degree, m_dimensions, m_origin, point, {{0., 1., 0.}}, dcsi + nCoeffs);
+    ReconstructionPolynomial::evalPointBasisDerivatives(degree, m_dimensions, m_origin, point, {{0., 1., 0.}}, dcsi + m_nCoeffs);
     if (m_dimensions == 3) {
-        ReconstructionPolynomial::evalPointBasisDerivatives(degree, m_dimensions, m_origin, point, {{0., 0., 1.}}, dcsi + 2 * nCoeffs);
+        ReconstructionPolynomial::evalPointBasisDerivatives(degree, m_dimensions, m_origin, point, {{0., 0., 1.}}, dcsi + 2 * m_nCoeffs);
     }
 
     do {
         // Evaluate gradient
         for (int d = 0; d < m_dimensions; ++d) {
-            const double *dcsi_dimension = dcsi + d * nCoeffs;
+            const double *dcsi_dimension = dcsi + d * m_nCoeffs;
 
             (*fieldGradient)[d] = fieldCoeffs[0] * dcsi_dimension[0];
-            for (int i = 1; i < nCoeffs; ++i) {
+            for (int i = 1; i < m_nCoeffs; ++i) {
                 (*fieldGradient)[d] += fieldCoeffs[i] * dcsi_dimension[i];
             }
         }
@@ -1902,20 +1895,19 @@ void ReconstructionPolynomial::computeGradientsLimited(int degree, const std::ar
     }
 
     // Generic polynomial
-    int nCoeffs = ReconstructionPolynomial::getCoefficientCount(degree, m_dimensions);
     const std::vector<uint16_t> &nDegreeCoeffs = ReconstructionPolynomial::getDegreeCoefficientsCount(m_dimensions);
 
-    BITPIT_CREATE_WORKSPACE(dcsi, double, static_cast<std::size_t>(m_dimensions * nCoeffs), 3 * MAX_STACK_WORKSPACE_SIZE);
+    BITPIT_CREATE_WORKSPACE(dcsi, double, static_cast<std::size_t>(m_dimensions * nDegreeCoeffs[degree]), 3 * MAX_STACK_WORKSPACE_SIZE);
     ReconstructionPolynomial::evalPointBasisDerivatives(degree, m_dimensions, m_origin, point, {{1., 0., 0.}}, dcsi);
-    ReconstructionPolynomial::evalPointBasisDerivatives(degree, m_dimensions, m_origin, point, {{0., 1., 0.}}, dcsi + nCoeffs);
+    ReconstructionPolynomial::evalPointBasisDerivatives(degree, m_dimensions, m_origin, point, {{0., 1., 0.}}, dcsi + nDegreeCoeffs[degree]);
     if (m_dimensions == 3) {
-        ReconstructionPolynomial::evalPointBasisDerivatives(degree, m_dimensions, m_origin, point, {{0., 0., 1.}}, dcsi + 2 * nCoeffs);
+        ReconstructionPolynomial::evalPointBasisDerivatives(degree, m_dimensions, m_origin, point, {{0., 0., 1.}}, dcsi + 2 * nDegreeCoeffs[degree]);
     }
 
     do {
         // Evaluate gradients
         for (int d = 0; d < m_dimensions; ++d) {
-            const double *dcsi_dimension = dcsi + d * nCoeffs;
+            const double *dcsi_dimension = dcsi + d * nDegreeCoeffs[degree];
 
             (*fieldGradient)[d] = fieldCoeffs[0] * dcsi_dimension[0];
         }
@@ -1928,7 +1920,7 @@ void ReconstructionPolynomial::computeGradientsLimited(int degree, const std::ar
             coeffEnd = coeffBegin + nDegreeCoeffs[n];
             for (int i = coeffBegin; i < coeffEnd; ++i) {
                 for (int d = 0; d < m_dimensions; ++d) {
-                    const double *dcsi_dimension = dcsi + d * nCoeffs;
+                    const double *dcsi_dimension = dcsi + d * nDegreeCoeffs[degree];
 
                     (*fieldGradient)[d] += fieldsLimiter * fieldCoeffs[i] * dcsi_dimension[i];
                 }
