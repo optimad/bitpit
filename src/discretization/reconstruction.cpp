@@ -530,6 +530,7 @@ void ReconstructionPolynomial::clear(bool release)
     m_nFields = 0;
 
     if (release) {
+        m_nCoeffs = 0;
         m_coeffs.reset();
     }
 }
