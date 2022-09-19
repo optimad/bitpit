@@ -75,13 +75,17 @@ do {                  \
  */
 #if defined __GNUC__
 #   define BITPIT_DEPRECATED(func) func __attribute__ ((deprecated))
+#   define BITPIT_DEPRECATED_FOR(func, replacement) func __attribute__ ((deprecated(" Use " #replacement)))
 #elif defined __clang__
 #   define BITPIT_DEPRECATED(func) func __attribute__ ((deprecated))
+#   define BITPIT_DEPRECATED_FOR(func, replacement) func __attribute__ ((deprecated(" Use " #replacement)))
 #elif defined(_MSC_VER)
     #define BITPIT_DEPRECATED(func) __declspec(deprecated) func
+    #define BITPIT_DEPRECATED_FOR(func, replacement), replacement __declspec(deprecated(" Use " #replacement)) func
 #else
-#   pragma message("WARNING: You need to implement DEPRECATED for this compiler")
+#   pragma message("WARNING: You need to implement DEPRECATED and DEPRECATED_FOR for this compiler")
 #   define BITPIT_DEPRECATED(func) func
+#   define BITPIT_DEPRECATED_FOR(func, replacement) func
 #endif
 
 
