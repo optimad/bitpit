@@ -1556,7 +1556,6 @@ bool PatchKernel::isPartitioned() const
     if(isCommunicatorSet()){
         int mpiSize = 0;
         MPI_Comm_size(getCommunicator(), &mpiSize);
-        assert(mpiSize == 1);
         return mpiSize > 1;
     } else {
         return false;
