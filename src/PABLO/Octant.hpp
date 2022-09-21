@@ -131,6 +131,10 @@ class Octant{
         INFO_ITEM_COUNT     = 16  /**< Number of items contained in the enum */
     };
 
+    enum OctantInfoExt {
+        EXT_INFO_ITEM_COUNT = 4
+    };
+
 private:
     uint64_t                        m_morton;       /**< Morton number */
     std::bitset<INFO_ITEM_COUNT>    m_info;         /**< -Info[0..5]: true if 0..5 face is a boundary face [bound] \n
@@ -147,6 +151,7 @@ private:
                                                           1 : ghost in the 1-st layer of the halo, \n
                                                           ... \n
                                                           n : ghost in the n-th layer of the halo. */
+    std::bitset<EXT_INFO_ITEM_COUNT>    m_info_ext;  
 
     //TODO add bitset for edge & node
 
@@ -206,6 +211,8 @@ public:
     int         getGhostLayer() const;
     bool        getBalance() const;
     void        setMarker(int8_t marker);
+    bool        getExtInfo(uint8_t item);
+    void        setExtInfo(uint8_t item, bool flag);
 protected:
     void        setBound(uint8_t face);
     void        setBalance(bool balance);
