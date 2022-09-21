@@ -83,7 +83,7 @@ do {                  \
     #define BITPIT_DEPRECATED(func) __declspec(deprecated) func
     #define BITPIT_DEPRECATED_FOR(func, replacement), replacement __declspec(deprecated(" Use " #replacement)) func
 #else
-#   pragma message("WARNING: You need to implement DEPRECATED and DEPRECATED_FOR for this compiler")
+#   pragma message("WARNING: macros to declare functions as deprecated are not implemented for this compiler")
 #   define BITPIT_DEPRECATED(func) func
 #   define BITPIT_DEPRECATED_FOR(func, replacement) func
 #endif
