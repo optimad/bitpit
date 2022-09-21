@@ -80,8 +80,8 @@ do {                  \
 #   define BITPIT_DEPRECATED(func) func __attribute__ ((deprecated))
 #   define BITPIT_DEPRECATED_FOR(func, replacement) func __attribute__ ((deprecated(" Use " #replacement)))
 #elif defined(_MSC_VER)
-    #define BITPIT_DEPRECATED(func) __declspec(deprecated) func
-    #define BITPIT_DEPRECATED_FOR(func, replacement), replacement __declspec(deprecated(" Use " #replacement)) func
+#   define BITPIT_DEPRECATED(func) __declspec(deprecated) func
+#   define BITPIT_DEPRECATED_FOR(func, replacement), replacement __declspec(deprecated(" Use " #replacement)) func
 #else
 #   pragma message("WARNING: macros to declare functions as deprecated are not implemented for this compiler")
 #   define BITPIT_DEPRECATED(func) func
