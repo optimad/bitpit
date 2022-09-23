@@ -646,12 +646,7 @@ void FlatVector2D<T>::pushBack(std::size_t subArraySize, const T *subArray)
     std::size_t previousLastIndex = m_index.back();
     m_index.emplace_back(previousLastIndex + subArraySize);
 
-    m_v.reserve(m_v.size() + subArraySize);
-    for (std::size_t j = 0; j < subArraySize; j++) {
-        m_v.emplace_back();
-        T &storedValue = m_v.back();
-        storedValue = subArray[j];
-    }
+    m_v.insert(m_v.end(), subArray, subArray + subArraySize);
 }
 
 /*!
