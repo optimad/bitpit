@@ -266,8 +266,7 @@ public:
 			}
 
 			// Select the first vertex of the first cell
-			std::size_t vertexLocalId_1 = 0;
-			long vertexId_1 = m_patch.getCell(id_1).getVertexId(vertexLocalId_1);
+			long vertexId_1 = m_patch.getCell(id_1).getVertexId(0);
 
 			// The vertex of the second cell is choosen as the first vertex on
 			// that cell not equal to the selected vertex of the first cell.
@@ -687,7 +686,7 @@ public:
 
 	std::unordered_map<long,long> consecutiveRenumberVertices(long offset = 0);
 	std::unordered_map<long,long> consecutiveRenumberCells(long offset = 0);
-	void consecutiveRenumberInterfaces(long offset = 0);
+	std::unordered_map<long,long> consecutiveRenumberInterfaces(long offset = 0);
 	void consecutiveRenumber(long offsetVertices, long offsetCells, long offsetInterfaces);
 
 #if BITPIT_ENABLE_MPI==1
@@ -1002,12 +1001,12 @@ private:
 	std::unordered_map<int, std::vector<long>> m_ghostCellExchangeTargets;
 	std::unordered_map<int, std::vector<long>> m_ghostCellExchangeSources;
 
-	void setGhostVertexOwner(int id, int rank);
-	void unsetGhostVertexOwner(int id);
+	void setGhostVertexOwner(long id, int rank);
+	void unsetGhostVertexOwner(long id);
 	void clearGhostVertexOwners();
 
-	void setGhostCellOwner(int id, int rank);
-	void unsetGhostCellOwner(int id);
+	void setGhostCellOwner(long id, int rank);
+	void unsetGhostCellOwner(long id);
 	void clearGhostCellOwners();
 
 	void _partitioningAlter_deleteGhosts();
@@ -1069,17 +1068,17 @@ private:
 
 	void dumpVertexAutoIndexing(std::ostream &stream) const;
 	void restoreVertexAutoIndexing(std::istream &stream);
-	void createVertexIndexGenerator();
+	void createVertexIndexGenerator(bool populate);
 	void importVertexIndexGenerator(const PatchKernel &source);
 
 	void dumpCellAutoIndexing(std::ostream &stream) const;
 	void restoreCellAutoIndexing(std::istream &stream);
-	void createCellIndexGenerator();
+	void createCellIndexGenerator(bool populate);
 	void importCellIndexGenerator(const PatchKernel &source);
 
 	void dumpInterfaceAutoIndexing(std::ostream &stream) const;
 	void restoreInterfaceAutoIndexing(std::istream &stream);
-	void createInterfaceIndexGenerator();
+	void createInterfaceIndexGenerator(bool populate);
 	void importInterfaceIndexGenerator(const PatchKernel &source);
 
 	VertexIterator _addInternalVertex(const std::array<double, 3> &coords, long id);

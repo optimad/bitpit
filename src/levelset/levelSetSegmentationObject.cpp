@@ -528,8 +528,10 @@ const std::array<double, 3> & LevelSetSegmentationNarrowBandCache<LevelSetExtern
 LevelSetSegmentationNarrowBandCache<LevelSetInternalPiercedStorageManager>::LevelSetSegmentationNarrowBandCache()
     : LevelSetInternalPiercedStorageManager(), LevelSetNarrowBandCache<LevelSetInternalPiercedStorageManager>(), LevelSetSegmentationNarrowBandCacheBase<LevelSetInternalPiercedStorageManager>()
 {
-    m_supportIds     = this->template addStorage<long>(this->getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_JOURNALED);
-    m_surfaceNormals = this->template addStorage<std::array<double, 3>>(this->getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_JOURNALED);
+    // It is faster to use a concurrent synchronization because items will be added/removed
+    // to the kernel one at the time.
+    m_supportIds     = this->template addStorage<long>(this->getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_CONCURRENT);
+    m_surfaceNormals = this->template addStorage<std::array<double, 3>>(this->getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_CONCURRENT);
 }
 
 /*!

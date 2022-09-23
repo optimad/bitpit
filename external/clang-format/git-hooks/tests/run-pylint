@@ -1,0 +1,17 @@
+#! /bin/bash
+#
+# Copyright (C) 2017-2018 Marco Barisione
+# Copyright (C) 2018 Undo Ltd.
+
+readonly bash_source="${BASH_SOURCE[0]:-$0}"
+
+if [ ! -e "tests/pylintrc" ]; then
+    echo "You should run $bash_source from the top-level directory." >&2
+    exit 1
+fi
+
+python3 -m pylint \
+    --reports=n \
+    --score=n \
+    --rcfile=tests/pylintrc \
+    tests/*.py

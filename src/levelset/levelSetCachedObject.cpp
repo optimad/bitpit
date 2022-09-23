@@ -250,8 +250,10 @@ void LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>::swap(LevelS
 LevelSetNarrowBandCache<LevelSetInternalPiercedStorageManager>::LevelSetNarrowBandCache()
     : LevelSetInternalPiercedStorageManager(), LevelSetNarrowBandCacheBase<LevelSetInternalPiercedStorageManager>()
 {
-    m_values    = addStorage<double>(getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_JOURNALED);
-    m_gradients = addStorage<std::array<double, 3>>(getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_JOURNALED);
+    // It is faster to use a concurrent synchronization because items will be added/removed
+    // to the kernel one at the time.
+    m_values    = addStorage<double>(getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_CONCURRENT);
+    m_gradients = addStorage<std::array<double, 3>>(getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_CONCURRENT);
 }
 
 /*!

@@ -66,10 +66,9 @@ PiercedStorageSyncSlave<id_t>::PiercedStorageSyncSlave(PiercedKernel<id_t> *kern
 *
 * \param other is another container of the same type (i.e., instantiated with
 * the same template parameters) whose content is copied in this container
-* \param kernel is the kernel that will be set
 */
 template<typename id_t>
-PiercedStorageSyncSlave<id_t>::PiercedStorageSyncSlave(const PiercedStorageSyncSlave<id_t> &other, const PiercedKernel<id_t> *kernel)
+PiercedStorageSyncSlave<id_t>::PiercedStorageSyncSlave(const PiercedStorageSyncSlave<id_t> &other)
     : PiercedStorageSyncSlave<id_t>()
 {
     KernelType kernelType = other.getKernelType();
@@ -77,17 +76,14 @@ PiercedStorageSyncSlave<id_t>::PiercedStorageSyncSlave(const PiercedStorageSyncS
 
     case KERNEL_STATIC:
     {
-        if (kernel) {
-            setStaticKernel(kernel);
-        } else {
-            setStaticKernel(other.m_const_kernel);
-        }
+        setStaticKernel(other.m_const_kernel);
         break;
     }
 
     case KERNEL_DYNAMIC:
     {
-        throw std::runtime_error("Unable to set a dynamic kernel. The kernel received in input can be only used to set a static kernel");
+        setDynamicKernel(other.m_kernel, other.getSyncMode());
+        break;
     }
 
     default:
@@ -100,6 +96,28 @@ PiercedStorageSyncSlave<id_t>::PiercedStorageSyncSlave(const PiercedStorageSyncS
 
 /**
 * Constructor.
+*
+* The newly created pierced sync slave will be associated with the given
+* static kernel.
+*
+* \param other is another container of the same type (i.e., instantiated with
+* the same template parameters) whose content is copied in this container
+* \param kernel is the kernel that will be set
+*/
+template<typename id_t>
+PiercedStorageSyncSlave<id_t>::PiercedStorageSyncSlave(const PiercedStorageSyncSlave<id_t> &other, const PiercedKernel<id_t> *kernel)
+    : PiercedStorageSyncSlave<id_t>()
+{
+    BITPIT_UNUSED(other);
+
+    setStaticKernel(kernel);
+}
+
+/**
+* Constructor.
+*
+* The newly created pierced sync slave will be associated with the given
+* dynamic kernel and will use the specified synchronization mode.
 *
 * \param other is another container of the same type (i.e., instantiated with
 * the same template parameters) whose content is copied in this container
@@ -110,35 +128,9 @@ template<typename id_t>
 PiercedStorageSyncSlave<id_t>::PiercedStorageSyncSlave(const PiercedStorageSyncSlave<id_t> &other, PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode)
     : PiercedStorageSyncSlave<id_t>()
 {
-    KernelType kernelType = other.getKernelType();
-    switch (kernelType) {
+    BITPIT_UNUSED(other);
 
-    case KERNEL_STATIC:
-    {
-        if (kernel) {
-            setStaticKernel(kernel);
-        } else {
-            setStaticKernel(other.m_const_kernel);
-        }
-        break;
-    }
-
-    case KERNEL_DYNAMIC:
-    {
-        if (kernel) {
-            setDynamicKernel(kernel, syncMode);
-        } else {
-            setDynamicKernel(other.m_kernel, syncMode);
-        }
-        break;
-    }
-
-    default:
-    {
-        break;
-    }
-
-    }
+    setDynamicKernel(kernel, syncMode);
 }
 
 /**
@@ -146,11 +138,9 @@ PiercedStorageSyncSlave<id_t>::PiercedStorageSyncSlave(const PiercedStorageSyncS
 *
 * \param other is another container of the same type (i.e., instantiated with
 * the same template parameters) whose content is moved in this container
-* \param kernel is the kernel that will be set
-* \param syncMode is the synchronization mode that will be used for the storage
 */
 template<typename id_t>
-PiercedStorageSyncSlave<id_t>::PiercedStorageSyncSlave(PiercedStorageSyncSlave<id_t> &&other, const PiercedKernel<id_t> *kernel)
+PiercedStorageSyncSlave<id_t>::PiercedStorageSyncSlave(PiercedStorageSyncSlave<id_t> &&other)
     : PiercedStorageSyncSlave<id_t>()
 {
     // Set kernel
@@ -159,17 +149,14 @@ PiercedStorageSyncSlave<id_t>::PiercedStorageSyncSlave(PiercedStorageSyncSlave<i
 
     case KERNEL_STATIC:
     {
-        if (kernel) {
-            setStaticKernel(kernel);
-        } else {
-            setStaticKernel(other.m_const_kernel);
-        }
+        setStaticKernel(other.m_const_kernel);
         break;
     }
 
     case KERNEL_DYNAMIC:
     {
-        throw std::runtime_error("Unable to set a dynamic kernel. The kernel received in input can be only used to set a static kernel");
+        setDynamicKernel(other.m_kernel, other.getSyncMode());
+        break;
     }
 
     default:
@@ -186,6 +173,30 @@ PiercedStorageSyncSlave<id_t>::PiercedStorageSyncSlave(PiercedStorageSyncSlave<i
 /**
 * Constructor.
 *
+* The newly created pierced sync slave will be associated with the given
+* static kernel.
+*
+* \param other is another container of the same type (i.e., instantiated with
+* the same template parameters) whose content is moved in this container
+* \param kernel is the kernel that will be set
+*/
+template<typename id_t>
+PiercedStorageSyncSlave<id_t>::PiercedStorageSyncSlave(PiercedStorageSyncSlave<id_t> &&other, const PiercedKernel<id_t> *kernel)
+    : PiercedStorageSyncSlave<id_t>()
+{
+    // Set kernel
+    setStaticKernel(kernel);
+
+    // Unset kernel of other storage slave
+    other.unsetKernel(true);
+}
+
+/**
+* Constructor.
+*
+* The newly created pierced sync slave will be associated with the given
+* dynamic kernel and will use the given synchronization mode.
+*
 * \param other is another container of the same type (i.e., instantiated with
 * the same template parameters) whose content is moved in this container
 * \param kernel is the kernel that will be set
@@ -196,35 +207,7 @@ PiercedStorageSyncSlave<id_t>::PiercedStorageSyncSlave(PiercedStorageSyncSlave<i
     : PiercedStorageSyncSlave<id_t>()
 {
     // Set kernel
-    KernelType kernelType = other.getKernelType();
-    switch (kernelType) {
-
-    case KERNEL_STATIC:
-    {
-        if (kernel) {
-            setStaticKernel(kernel);
-        } else {
-            setStaticKernel(other.m_const_kernel);
-        }
-        break;
-    }
-
-    case KERNEL_DYNAMIC:
-    {
-        if (kernel) {
-            setDynamicKernel(kernel, syncMode);
-        } else {
-            setDynamicKernel(other.m_kernel, syncMode);
-        }
-        break;
-    }
-
-    default:
-    {
-        break;
-    }
-
-    }
+    setDynamicKernel(kernel, syncMode);
 
     // Unset kernel of other storage slave
     other.unsetKernel(true);
@@ -481,6 +464,31 @@ PiercedStorage<value_t, id_t>::PiercedStorage(std::size_t nFields, PiercedKernel
 *
 * \param other is another container of the same type (i.e., instantiated with
 * the same template parameters) whose content is copied in this container
+*/
+template<typename value_t, typename id_t>
+PiercedStorage<value_t, id_t>::PiercedStorage(const PiercedStorage<value_t, id_t> &other)
+    : PiercedStorageSyncSlave<id_t>(other),
+      m_nFields(other.m_nFields), m_fields(other.m_fields)
+{
+    // Base class constructor cannot call virtual functions
+    if (this->getKernel()) {
+        _postSetStaticKernel();
+
+        KernelType kernelType = this->getKernelType();
+        if (kernelType == this->KERNEL_DYNAMIC) {
+            _postSetDynamicKernel();
+        }
+    }
+}
+
+/**
+* Constructor.
+*
+* The newly created pierced sync slave will be associated with the given
+* static kernel.
+*
+* \param other is another container of the same type (i.e., instantiated with
+* the same template parameters) whose content is copied in this container
 * \param kernel is the kernel that will be set
 */
 template<typename value_t, typename id_t>
@@ -497,6 +505,9 @@ PiercedStorage<value_t, id_t>::PiercedStorage(const PiercedStorage<value_t, id_t
 /**
 * Constructor.
 *
+* The newly created pierced storage will be associated with the given
+* dynamic kernel and will use the given synchronization mode.
+*
 * \param other is another container of the same type (i.e., instantiated with
 * the same template parameters) whose content is copied in this container
 * \param kernel is the kernel that will be set
@@ -511,10 +522,7 @@ PiercedStorage<value_t, id_t>::PiercedStorage(const PiercedStorage<value_t, id_t
     if (this->getKernel()) {
         _postSetStaticKernel();
 
-        KernelType kernelType = this->getKernelType();
-        if (kernelType == this->KERNEL_DYNAMIC) {
-            _postSetDynamicKernel();
-        }
+        _postSetDynamicKernel();
     }
 }
 
@@ -530,12 +538,10 @@ PiercedStorage<value_t, id_t>::PiercedStorage(const PiercedStorage<value_t, id_t
 *
 * \param other is another container of the same type (i.e., instantiated with
 * the same template parameters) whose content is moved in this container
-* \param kernel is the kernel that will be set
-* \param syncMode is the synchronization mode that will be used for the storage
 */
 template<typename value_t, typename id_t>
-PiercedStorage<value_t, id_t>::PiercedStorage(PiercedStorage<value_t, id_t> &&other, const PiercedKernel<id_t> *kernel)
-    : PiercedStorageSyncSlave<long>(other, kernel),
+PiercedStorage<value_t, id_t>::PiercedStorage(PiercedStorage<value_t, id_t> &&other)
+    : PiercedStorageSyncSlave<long>(other),
       m_nFields(std::move(other.m_nFields)), m_fields(std::move(other.m_fields))
 {
     // Base class constructor cannot call virtual functions
@@ -548,8 +554,36 @@ PiercedStorage<value_t, id_t>::PiercedStorage(PiercedStorage<value_t, id_t> &&ot
         }
     }
 
-    // Unset the kernel for the other storage
-    other.unsetKernel(true);
+    // Explicitly reset the number of fields of the other storage
+    other.m_nFields = 0;
+}
+
+/**
+* Constructor.
+*
+* The newly created pierced sync slave will be associated with the given
+* static kernel.
+*
+* In the initializer list, the copy constructor of base class
+* PiercedStorageSyncSlave should be called. This prevents the
+* storage to be unregistered before having the chance to move
+* its contents (when a storage is unregistered its contents are
+* cleared). The other storage will be unregistered only after
+* its content is properly moved.
+*
+* \param other is another container of the same type (i.e., instantiated with
+* the same template parameters) whose content is moved in this container
+* \param kernel is the kernel that will be set
+*/
+template<typename value_t, typename id_t>
+PiercedStorage<value_t, id_t>::PiercedStorage(PiercedStorage<value_t, id_t> &&other, const PiercedKernel<id_t> *kernel)
+    : PiercedStorageSyncSlave<long>(other, kernel),
+      m_nFields(std::move(other.m_nFields)), m_fields(std::move(other.m_fields))
+{
+    // Base class constructor cannot call virtual functions
+    if (this->getKernel()) {
+        _postSetStaticKernel();
+    }
 
     // Explicitly reset the number of fields of the other storage
     other.m_nFields = 0;
@@ -557,6 +591,9 @@ PiercedStorage<value_t, id_t>::PiercedStorage(PiercedStorage<value_t, id_t> &&ot
 
 /**
 * Constructor.
+*
+* The newly created pierced storage will be associated with the given
+* dynamic kernel and will use the given synchronization mode.
 *
 * In the initializer list, the copy constructor of base class
 * PiercedStorageSyncSlave should be called. This prevents the
@@ -579,14 +616,8 @@ PiercedStorage<value_t, id_t>::PiercedStorage(PiercedStorage<value_t, id_t> &&ot
     if (this->getKernel()) {
         _postSetStaticKernel();
 
-        KernelType kernelType = this->getKernelType();
-        if (kernelType == this->KERNEL_DYNAMIC) {
-            _postSetDynamicKernel();
-        }
+        _postSetDynamicKernel();
     }
-
-    // Unset the kernel for the other storage
-    other.unsetKernel(true);
 
     // Explicitly reset the number of fields of the other storage
     other.m_nFields = 0;
