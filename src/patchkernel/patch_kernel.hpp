@@ -686,7 +686,7 @@ public:
 
 	std::unordered_map<long,long> consecutiveRenumberVertices(long offset = 0);
 	std::unordered_map<long,long> consecutiveRenumberCells(long offset = 0);
-	std::unordered_map<long,long> consecutiveRenumberInterfaces(long offset = 0);
+	void consecutiveRenumberInterfaces(long offset = 0);
 	void consecutiveRenumber(long offsetVertices, long offsetCells, long offsetInterfaces);
 
 #if BITPIT_ENABLE_MPI==1

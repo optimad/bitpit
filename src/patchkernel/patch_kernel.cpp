@@ -7870,6 +7870,8 @@ std::unordered_map<long,long> PatchKernel::consecutiveRenumberVertices(long offs
 	if (isVertexAutoIndexingEnabled()) {
 		createVertexIndexGenerator(true);
 	}
+
+	return map;
 }	
 
 /*!
@@ -7936,7 +7938,7 @@ std::unordered_map<long,long> PatchKernel::consecutiveRenumberCells(long offset)
  *
  *  \param[in] offset is the starting id
  */
-std::unordered_map<long,long> PatchKernel::consecutiveRenumberInterfaces(long offset)
+void PatchKernel::consecutiveRenumberInterfaces(long offset)
 {
 	// Renumber interfaces
 	std::unordered_map<long, long > map = consecutiveItemRenumbering(m_interfaces, offset);
