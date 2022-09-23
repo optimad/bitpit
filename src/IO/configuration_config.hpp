@@ -58,7 +58,7 @@ public:
     Options & getOptions();
     const Options & getOptions() const;
     bool hasOption(const std::string &key) const;
-    std::string get(const std::string &key) const;
+    const std::string & get(const std::string &key) const;
     std::string get(const std::string &key, const std::string &fallback) const;
     void set(const std::string &key, const std::string &value);
     bool removeOption(const std::string &key);

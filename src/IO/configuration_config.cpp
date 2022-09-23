@@ -151,7 +151,7 @@ bool Config::hasOption(const std::string &key) const
     \param key is the name of the option
     \result The specified option.
 */
-std::string Config::get(const std::string &key) const
+const std::string & Config::get(const std::string &key) const
 {
     return m_options->at(key);
 }
