@@ -7870,8 +7870,6 @@ std::unordered_map<long,long> PatchKernel::consecutiveRenumberVertices(long offs
 	if (isVertexAutoIndexingEnabled()) {
 		createVertexIndexGenerator(true);
 	}
-
-	return map;
 }	
 
 /*!
@@ -7957,8 +7955,6 @@ std::unordered_map<long,long> PatchKernel::consecutiveRenumberInterfaces(long of
 	if (isInterfaceAutoIndexingEnabled()) {
 		createInterfaceIndexGenerator(true);
 	}
-
-	return map;
 }
 
 /*!
