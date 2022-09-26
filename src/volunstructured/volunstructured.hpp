@@ -67,6 +67,10 @@ protected:
 	void _dump(std::ostream &stream) const override;
 	void _restore(std::istream &stream) override;
 
+#if BITPIT_ENABLE_MPI==1
+	std::size_t _getMaxHaloSize() override;
+#endif
+
 private:
 
 };

@@ -342,4 +342,18 @@ long VolUnstructured::locatePoint(const std::array<double, 3> &point) const
 	return Cell::NULL_ID;
 }
 
+#if BITPIT_ENABLE_MPI==1
+/*!
+	Gets the maximum allowed size, expressed in number of layers, of the ghost
+	cells halo.
+
+	\result The maximum allowed size, expressed in number of layers, of the
+	ghost cells halo.
+*/
+std::size_t VolUnstructured::_getMaxHaloSize()
+{
+	return std::numeric_limits<uint32_t>::max();
+}
+#endif
+
 }
