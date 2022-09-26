@@ -284,8 +284,9 @@ void PatchKernel::initializeHaloSize(std::size_t haloSize)
 */
 void PatchKernel::setHaloSize(std::size_t haloSize)
 {
-	if (isPartitioned()) {
-		throw std::runtime_error ("Halo size can only be set before partitionig the patch.");
+
+	if (isDistributed()) {
+		throw std::runtime_error ("Halo size can only be set when the patch is all on a single process");
 	}
 
 	if (m_haloSize == haloSize) {
