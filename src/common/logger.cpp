@@ -415,7 +415,7 @@ std::string LoggerBuffer::getTimestamp() const
     auto seconds = std::chrono::duration_cast<std::chrono::seconds>(currentClock.time_since_epoch());
     auto millisecs = std::chrono::duration_cast<std::chrono::milliseconds>(currentClock.time_since_epoch() - seconds);
     std::array<char, 11> millisecsBuffer;
-    std::snprintf(millisecsBuffer.data(), millisecsBuffer.size(), "%03u", static_cast<uint>(millisecs.count()));
+    std::snprintf(millisecsBuffer.data(), millisecsBuffer.size(), "%03u", static_cast<unsigned int>(millisecs.count()));
 
     std::string timestamp;
     timestamp.resize(23);
