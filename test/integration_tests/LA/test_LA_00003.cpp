@@ -50,9 +50,9 @@ int subtest_001()
     std::vector<double> rowValues(2);
 
 #if BITPIT_ENABLE_MPI==1
-    SparseMatrix matrix(MPI_COMM_WORLD, false, nRows, nCols, nNZ);
+    SparseMatrix<double> matrix(MPI_COMM_WORLD, false, nRows, nCols, nNZ);
 #else
-    SparseMatrix matrix(nRows, nCols, nNZ);
+    SparseMatrix<double> matrix(nRows, nCols, nNZ);
 #endif
     for (int row = 0; row < nRows; ++row) {
         rowPattern[0] = row;

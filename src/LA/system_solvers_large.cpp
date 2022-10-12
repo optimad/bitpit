@@ -53,7 +53,7 @@ namespace bitpit {
  *
  * \param matrix is the matrix
  */
-SystemSparseMatrixAssembler::SystemSparseMatrixAssembler(const SparseMatrix *matrix)
+SystemSparseMatrixAssembler::SystemSparseMatrixAssembler(const SparseMatrix<double> *matrix)
     : SystemMatrixAssembler(), m_matrix(matrix)
 {
 }
@@ -644,7 +644,7 @@ void SystemSolver::resetPermutations()
  *
  * \param matrix is the matrix
  */
-void SystemSolver::assembly(const SparseMatrix &matrix)
+void SystemSolver::assembly(const SparseMatrix<double> &matrix)
 {
     // Check if the matrix is assembled
     if (!matrix.isAssembled()) {
@@ -719,7 +719,7 @@ void SystemSolver::assembly(const SystemMatrixAssembler &assembler)
  *
  * \param elements are the elements that will be used to update the rows
  */
-void SystemSolver::update(const SparseMatrix &elements)
+void SystemSolver::update(const SparseMatrix<double> &elements)
 {
     update(getRowCount(), nullptr, elements);
 }
@@ -734,7 +734,7 @@ void SystemSolver::update(const SparseMatrix &elements)
  * \param rows are the indices of the rows that will be updated
  * \param elements are the elements that will be used to update the rows
  */
-void SystemSolver::update(long nRows, const long *rows, const SparseMatrix &elements)
+void SystemSolver::update(long nRows, const long *rows, const SparseMatrix<double> &elements)
 {
     // Check if the element storage is assembled
     if (!elements.isAssembled()) {

@@ -98,7 +98,7 @@ protected:
 class SystemSparseMatrixAssembler : public SystemMatrixAssembler {
 
 public:
-    SystemSparseMatrixAssembler(const SparseMatrix *matrix);
+    SystemSparseMatrixAssembler(const SparseMatrix<double> *matrix);
 
     long getRowCount() const override;
     long getColCount() const override;
@@ -119,7 +119,7 @@ public:
     void getRowData(long rowIndex, ConstProxyVector<long> *pattern, ConstProxyVector<double> *values) const override;
 
 protected:
-    const SparseMatrix *m_matrix;
+    const SparseMatrix<double> *m_matrix;
 
 };
 
@@ -174,15 +174,15 @@ public:
 
     void setPermutations(long nRows, const long *rowRanks, long nCols, const long *colRanks);
 
-    void assembly(const SparseMatrix &matrix);
+    void assembly(const SparseMatrix<double> &matrix);
     void assembly(const SystemMatrixAssembler &assembler);
 #if BITPIT_ENABLE_MPI==1
     void assembly(MPI_Comm communicator, bool isPartitioned, const SystemMatrixAssembler &assembler);
 #endif
     bool isAssembled() const;
 
-    void update(const SparseMatrix &elements);
-    void update(long nRows, const long *rows, const SparseMatrix &elements);
+    void update(const SparseMatrix<double> &elements);
+    void update(long nRows, const long *rows, const SparseMatrix<double> &elements);
     void update(const SystemMatrixAssembler &assembler);
     void update(long nRows, const long *rows, const SystemMatrixAssembler &assembler);
 

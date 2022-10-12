@@ -59,7 +59,7 @@ int subtest_001(int rank, int nProcs)
     std::vector<long> rowPattern(1);
     std::vector<double> rowValues(1);
 
-    SparseMatrix matrix(MPI_COMM_WORLD, true, nRows, nCols, nNZ);
+    SparseMatrix<double> matrix(MPI_COMM_WORLD, true, nRows, nCols, nNZ);
 
     int rowOffset = matrix.getRowGlobalOffset();
     int colOffset = matrix.getColGlobalOffset();

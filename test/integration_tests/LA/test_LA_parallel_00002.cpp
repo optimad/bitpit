@@ -60,7 +60,7 @@ int subtest_001(int rank, int nProcs)
     // Build matrix
     log::cout() << "Building matrix..." << std::endl;
 
-    SparseMatrix matrix(MPI_COMM_WORLD, true, nRows, nCols, nNZ);
+    SparseMatrix<double> matrix(MPI_COMM_WORLD, true, nRows, nCols, nNZ);
 
     std::vector<long> rowPattern(2);
     std::vector<double> rowValues(2);

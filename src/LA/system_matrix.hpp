@@ -35,6 +35,7 @@
 
 namespace bitpit {
 
+template<typename T = double>
 class SparseMatrix {
 
 public:
@@ -88,16 +89,16 @@ public:
     std::vector<long> extractGhostGlobalCols() const;
 #endif
 
-    void addRow(const std::vector<long> &rowPattern, const std::vector<double> &rowValues);
-    void addRow(long nRowNZ, const long *rowPattern, const double *rowValues);
+    void addRow(const std::vector<long> &rowPattern, const std::vector<T> &rowValues);
+    void addRow(long nRowNZ, const long *rowPattern, const T *rowValues);
 
     ConstProxyVector<long> getRowPattern(long row) const;
     void getRowPattern(long row, ConstProxyVector<long> *pattern) const;
 
-    ConstProxyVector<double> getRowValues(long row) const;
-    void getRowValues(long row, ConstProxyVector<double> *values) const;
+    ConstProxyVector<T> getRowValues(long row) const;
+    void getRowValues(long row, ConstProxyVector<T> *values) const;
 
-    std::unique_ptr<SparseMatrix> computeTranspose() const;
+    std::unique_ptr<SparseMatrix<T>> computeTranspose() const;
 
 protected:
     long m_nRows;
@@ -122,7 +123,7 @@ protected:
 #endif
 
     FlatVector2D<long> m_pattern;
-    std::vector<double> m_values;
+    std::vector<T> m_values;
 
 private:
     void _initialize(long nRows, long nCols, long nNZ = 0);
@@ -136,6 +137,16 @@ private:
 #endif
 
 };
+
+}
+
+// Include templates' implementation
+#include "system_matrix.tpp"
+
+// Explicit instantiation
+namespace bitpit {
+
+extern template class SparseMatrix<double>;
 
 }
 
