@@ -53,7 +53,7 @@ class LevelSetUnstructuredKernel : public LevelSetCachedKernel<LevelSetUnstructu
 
     LevelSetUnstructuredKernel( VolUnstructured & );
 
-    VolUnstructured *                           getMesh() const;
+    VolUnstructured *                           getMesh() const override;
 
     std::array<double, 3>                       computeCellCentroid(long) const override;
     double                                      computeCellTangentRadius(long) const override;
