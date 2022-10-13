@@ -47,16 +47,16 @@ public:
     VolOctreeMapper(VolOctree *referencePatch, VolOctree *mappedPatch);
 #endif
 
-    void adaptionPrepare(const std::vector<adaption::Info> &adaptionInfo, bool reference = true);
-    void adaptionAlter(const std::vector<adaption::Info> &adaptionInfo, bool reference = true, bool inverseFilled = false);
-    void adaptionCleanup();
+    void adaptionPrepare(const std::vector<adaption::Info> &adaptionInfo, bool reference = true) override;
+    void adaptionAlter(const std::vector<adaption::Info> &adaptionInfo, bool reference = true, bool inverseFilled = false) override;
+    void adaptionCleanup() override;
 
 #if BITPIT_ENABLE_MPI
-    bool checkPartition();
+    bool checkPartition() override;
     void clearPartitionMapping();
-    std::map<int, std::vector<long>> getReceivedMappedIds();
-    std::map<int, std::vector<long>> getSentMappedIds();
-    std::map<int, std::vector<long>> getSentReferenceIds();
+    std::map<int, std::vector<long>> getReceivedMappedIds() override;
+    std::map<int, std::vector<long>> getSentMappedIds() override;
+    std::map<int, std::vector<long>> getSentReferenceIds() override;
 #endif
 
 private:
@@ -156,7 +156,7 @@ private:
     PartitionMapper m_partitionIR;  /**< Partitioning info structure. */
 #endif
 
-    void _mapMeshes(bool fillInverse);
+    void _mapMeshes(bool fillInverse) override;
     void _mapMeshesSamePartition(const std::vector<OctantIR> * octantsReference, const std::vector<OctantIR> * octantsMapped,
                                  bool fillInverse, long *indRef);
 
