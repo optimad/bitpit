@@ -777,18 +777,12 @@ if (${_MPI_index} GREATER -1)
         set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${MPI_CXX_LINK_FLAGS}")
     endif()
 
-    get_property (_enabled_languages GLOBAL PROPERTY ENABLED_LANGUAGES)
-    list(FIND _enabled_languages "Fortran" _fortran_language_index)
-    unset(_enabled_languages)
-
     list (INSERT BITPIT_EXTERNAL_DEPENDENCIES 0 "MPI")
     list (INSERT BITPIT_EXTERNAL_VARIABLES_LIBRARIES 0 "MPI_CXX_LIBRARIES")
-    if (${_fortran_language_index} GREATER -1)
+    if ("Fortran" IN_LIST BITPIT_LANGUAGES)
         list (INSERT BITPIT_EXTERNAL_VARIABLES_LIBRARIES 0 "MPI_Fortran_LIBRARIES")
     endif()
     list (INSERT BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS 0 "MPI_CXX_INCLUDE_PATH" )
-
-    unset(_fortran_language_index)
 endif()
 unset(_MPI_index)
 
@@ -1075,15 +1069,9 @@ MARK_AS_ADVANCED(CMAKE_SHARED_LINKER_FLAGS_COVERAGE )
 # to achieve with CMake, so we link with the C++ linker and we pass it the
 # Fortran core library.
 if (CMAKE_C_COMPILER_ID STREQUAL "Intel" OR CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-    get_property (_enabled_languages GLOBAL PROPERTY ENABLED_LANGUAGES)
-    list(FIND _enabled_languages "Fortran" _fortran_language_index)
-    unset(_enabled_languages)
-
-    if (${_fortran_language_index} GREATER -1)
+    if ("Fortran" IN_LIST BITPIT_LANGUAGES)
         set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lifcore")
     endif()
-
-    unset(_fortran_language_index)
 endif()
 
 # Define a preprocessor macro to recognize debug builds
