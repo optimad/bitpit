@@ -24,6 +24,8 @@
 #ifndef __BITPIT_LOGGER_HPP__
 #define __BITPIT_LOGGER_HPP__
 
+#include "compiler.hpp"
+
 #include <memory>
 #include <ostream>
 #include <unordered_map>
