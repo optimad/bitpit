@@ -50,8 +50,8 @@ TreeConstants::instances() {
 	// It is possible to instance only 2D and 3D trees, therefore constants
 	// will be initialized only for these two dimensions.
 	static TreeConstants::Instances instances = {{
-		TreeConstants(0),
-		TreeConstants(0),
+		TreeConstants(2),
+		TreeConstants(2),
 		TreeConstants(2),
 		TreeConstants(3)
 	}};

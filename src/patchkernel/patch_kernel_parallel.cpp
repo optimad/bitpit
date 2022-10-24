@@ -1682,7 +1682,13 @@ void PatchKernel::partitioningCleanup()
 */
 bool PatchKernel::isPartitioned() const
 {
-	return isCommunicatorSet();
+    if(isCommunicatorSet()){
+        int mpiSize = 0;
+        MPI_Comm_size(getCommunicator(), &mpiSize);
+        return mpiSize > 1;
+    } else {
+        return false;
+    }
 }
 
 /*!

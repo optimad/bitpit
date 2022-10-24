@@ -1,0 +1,188 @@
+load("@com_github_optimad_bitpit//:defs.bzl", "bitpit_binary", "bitpit_library")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@rules_license//rules:license.bzl", "license")
+
+package(
+    default_applicable_licenses = [":license"],
+)
+
+license(
+    name = "license",
+    license_kinds = [
+        "@rules_license//licenses/spdx:LGPL-3.0",
+    ],
+    license_text = "LICENSE.md",
+)
+
+exports_files(["LICENSE.md"])
+
+bitpit_binary(
+    name = "bitpit",
+    linkshared = 1,  # LGPL-3.0 restriction
+    visibility = ["//visibility:public"],
+    deps = [
+        ":PABLO",
+        ":levelset",
+        ":volunstructured",
+    ],
+)
+
+cc_library(
+    name = "bitpit_mpi",
+    defines = ["BITPIT_ENABLE_MPI=1"],
+    deps = ["@mpi"],
+)
+
+bitpit_library(
+    name = "communications",
+    deps = [
+        ":IO",
+        ":containers",
+    ],
+)
+
+bitpit_library(
+    name = "common",
+    deps = [":bitpit_mpi"],
+)
+
+bitpit_library(
+    name = "operators",
+    deps = [":bitpit_mpi"],
+)
+
+bitpit_library(
+    name = "containers",
+    deps = [":common"],
+)
+
+bitpit_library(
+    name = "IO",
+    deps = [
+        ":common",
+        ":containers",
+        ":operators",
+        "@libxml2//:libxml",
+    ],
+)
+
+bitpit_library(
+    name = "PABLO",
+    deps = [
+        ":IO",
+        ":common",
+        ":communications",
+        ":containers",
+        ":operators",
+    ],
+)
+
+bitpit_library(
+    name = "levelset",
+    deps = [
+        ":IO",
+        ":common",
+        ":communications",
+        ":containers",
+        ":operators",
+        ":surfunstructured",
+        ":volcartesian",
+        ":voloctree",
+        ":volunstructured",
+    ],
+)
+
+bitpit_library(
+    name = "voloctree",
+    deps = [
+        ":IO",
+        ":PABLO",
+        ":common",
+        ":communications",
+        ":containers",
+        ":operators",
+        ":patchkernel",
+    ],
+)
+
+bitpit_library(
+    name = "volcartesian",
+    deps = [
+        ":IO",
+        ":common",
+        ":communications",
+        ":containers",
+        ":operators",
+        ":patchkernel",
+    ],
+)
+
+bitpit_library(
+    name = "volunstructured",
+    deps = [
+        ":IO",
+        ":common",
+        ":communications",
+        ":containers",
+        ":operators",
+        ":patchkernel",
+    ],
+)
+
+bitpit_library(
+    name = "patchkernel",
+    deps = [
+        ":CG",
+        ":IO",
+        ":common",
+        ":communications",
+        ":containers",
+        ":operators",
+    ],
+)
+
+bitpit_library(
+    name = "CG",
+    deps = [
+        ":IO",
+        ":SA",
+        ":common",
+        ":communications",
+        ":containers",
+        ":operators",
+        "@mkl//:mkl_rt",
+    ],
+)
+
+bitpit_library(
+    name = "SA",
+    deps = [
+        ":IO",
+        ":common",
+        ":communications",
+        ":containers",
+        ":operators",
+    ],
+)
+
+bitpit_library(
+    name = "lineunstructured",
+    deps = [
+        ":IO",
+        ":common",
+        ":patchkernel",
+    ],
+)
+
+bitpit_library(
+    name = "surfunstructured",
+    deps = [
+        ":IO",
+        ":common",
+        ":communications",
+        ":containers",
+        ":lineunstructured",
+        ":operators",
+        ":patchkernel",
+    ],
+)

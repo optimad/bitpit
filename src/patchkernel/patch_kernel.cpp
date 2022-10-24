@@ -7878,7 +7878,7 @@ void PatchKernel::flushData(std::fstream &stream, const std::string &name, VTKFo
  *
  *  \param[in] offset is the starting id
  */
-void PatchKernel::consecutiveRenumberVertices(long offset)
+std::unordered_map<long,long> PatchKernel::consecutiveRenumberVertices(long offset)
 {
 	// Renumber vertices
 	std::unordered_map<long, long > map = consecutiveItemRenumbering(m_vertices, offset);
@@ -7897,6 +7897,8 @@ void PatchKernel::consecutiveRenumberVertices(long offset)
 	if (isVertexAutoIndexingEnabled()) {
 		createVertexIndexGenerator(true);
 	}
+
+	return map;
 }	
 
 /*!
@@ -7904,7 +7906,7 @@ void PatchKernel::consecutiveRenumberVertices(long offset)
  *
  *  \param[in] offset is the starting id
  */
-void PatchKernel::consecutiveRenumberCells(long offset)
+std::unordered_map<long,long> PatchKernel::consecutiveRenumberCells(long offset)
 {
 	// Renumber cells
 	std::unordered_map<long, long > map = consecutiveItemRenumbering(m_cells, offset);
@@ -7954,7 +7956,9 @@ void PatchKernel::consecutiveRenumberCells(long offset)
 		updatePartitioningInfo(true);
 	}
 #endif
-}	
+
+    return map;
+}
 
 /*!
  *  Renumbers interfaces consecutively, starting from a given offset.

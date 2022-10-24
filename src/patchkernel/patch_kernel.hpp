@@ -689,8 +689,8 @@ public:
 	bool dump(std::ostream &stream) const;
 	void restore(std::istream &stream, bool reregister = false);
 
-	void consecutiveRenumberVertices(long offset = 0);
-	void consecutiveRenumberCells(long offset = 0);
+	std::unordered_map<long,long> consecutiveRenumberVertices(long offset = 0);
+	std::unordered_map<long,long> consecutiveRenumberCells(long offset = 0);
 	void consecutiveRenumberInterfaces(long offset = 0);
 	void consecutiveRenumber(long offsetVertices, long offsetCells, long offsetInterfaces);
 

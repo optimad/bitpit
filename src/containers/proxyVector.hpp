@@ -288,7 +288,7 @@ private:
     @tparam thread_safe controls if it is safe to use the container in
     a multi-threaded code
 */
-template<typename value_t, bool thread_safe = false>
+template<typename value_t, bool thread_safe = true>
 class ProxyVector
 {
 
@@ -448,7 +448,7 @@ private:
 };
 
 // Constant proxy vector
-template<typename value_t, bool thread_safe = false>
+template<typename value_t, bool thread_safe = true>
 using ConstProxyVector = ProxyVector<const value_t, thread_safe>;
 
 }
