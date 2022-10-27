@@ -431,8 +431,15 @@ bool _intersectBoxPolygon(array3D const &A0, array3D const &A1, std::size_t nVS,
 
             int intrCount = partialIntr.size();
             for( int i=0; i<intrCount; ++i){
-
+                // Get the intersection point
+                //
+                // Polygon triangulation adds a dummy vertex at the centroid of the polygon (V0).
+                // This vertex should not be taken into account for intersection identification.
                 array3D &candidateCoord = partialIntr[i];
+                if (utils::DoubleFloatingEqual()(norm2(V0 - candidateCoord), 0., distanceTolerance )) {
+                    continue;
+                }
+
                 int candidateFlag = partialFlag[i];
 
                 //prune duplicate points
@@ -2951,6 +2958,10 @@ int polygonEdgesCount( std::size_t nV, array3D const *V)
 
 /*!
  * Gets the number of subtriangles of a polygon
+ *
+ * See subtriangleOfPolygon(int triangle, std::vector<array3D> const &V, array3D &V0, array3D &V1, array3D &V2)
+ * for an explanation of how a polygon is divided in triangles.
+ *
  * \return number of subtriangles
  */
 int polygonSubtriangleCount( std::vector<array3D> const &V)
@@ -2960,6 +2971,10 @@ int polygonSubtriangleCount( std::vector<array3D> const &V)
 
 /*!
  * Gets the number of subtriangles of a polygon
+ *
+ * See subtriangleOfPolygon(int triangle, std::size_t nV, array3D const *V, array3D &V0, array3D &V1, array3D &V2)
+ * for an explanation of how a polygon is divided in triangles.
+ *
  * \param[in] nV number of polygon vertices
  * \param[in] V polygon vertices coordinates
  * \return number of subtriangles
@@ -2968,7 +2983,7 @@ int polygonSubtriangleCount( std::size_t nV, array3D const *V)
 {
     BITPIT_UNUSED(V);
 
-    return (nV - 2);
+    return nV;
 }
 
 /*!
@@ -3002,11 +3017,17 @@ void edgeOfPolygon( int edge, std::size_t nV, array3D const *V, array3D &V0, arr
 
 /*!
  * Gets the subtriangle vertices' coordinates of a convex polygon
+ *
+ * The vertices of the n-th subtriangle are be defined as follows:
+ *   V0: is the centroid of the polygon;
+ *   V1: is the n-th vertex of the polygon;
+ *   V2: is the vertex following the n-th vertex of the polygon.
+ *
  * \param[in] triangle index of triangle
  * \param[in] V polgon vertices
- * \param[in] V0 first vertice coordinates of triangle
- * \param[in] V1 second vertice coordinates of triangle
- * \param[in] V2 third vertice coordinates of triangle
+ * \param[in] V0 coordinates of first triangle's vertex
+ * \param[in] V1 coordinates of second triangle's vertex
+ * \param[in] V2 coordinates of third triangle's vertex
  */
 void subtriangleOfPolygon( int triangle, std::vector<array3D> const &V, array3D &V0, array3D &V1, array3D &V2)
 {
@@ -3015,21 +3036,34 @@ void subtriangleOfPolygon( int triangle, std::vector<array3D> const &V, array3D 
 
 /*!
  * Gets the subtriangle vertices' coordinates of a convex polygon
+ *
+ * The vertices of the n-th subtriangle will be defined as follows:
+ *   V0: is the centroid of the polygon;
+ *   V1: is the n-th vertex of the polygon;
+ *   V2: is the vertex following the n-th vertex of the polygon.
+ *
  * \param[in] triangle index of triangle
  * \param[in] nV number of polygon vertices
  * \param[in] V polgon vertices
- * \param[in] V0 first vertice coordinates of triangle
- * \param[in] V1 second vertice coordinates of triangle
- * \param[in] V2 third vertice coordinates of triangle
+ * \param[in] V0 coordinates of first triangle's vertex
+ * \param[in] V1 coordinates of second triangle's vertex
+ * \param[in] V2 coordinates of third triangle's vertex
  */
 void subtriangleOfPolygon( int triangle, std::size_t nV, array3D const *V, array3D &V0, array3D &V1, array3D &V2)
 {
-    BITPIT_UNUSED(nV);
     assert(triangle<polygonSubtriangleCount(nV, V));
 
-    V0 = V[0];
-    V1 = V[triangle+1];
-    V2 = V[triangle+2];
+    V0 = {0., 0., 0.};
+    for (std::size_t i = 0; i < nV; i++) {
+        for (int d = 0; d < 3; d++) {
+            V0[d] += V[i][d];
+        }
+    }
+    for (int d = 0; d < 3; d++) {
+        V0[d] /= nV;
+    }
+    V1 = V[triangle%nV];
+    V2 = V[(triangle+1)%nV];
     return;
 }
 
