@@ -2927,7 +2927,7 @@ double areaTriangle( array3D const &a, array3D const &b, array3D const &c)
     return 0.5 *norm2(crossProduct(b-a,c-a));
 }
 
-/*
+/*!
  * Gets the number of edges of a polygon
  * \return number of edges
  */
@@ -2936,7 +2936,7 @@ int polygonEdgesCount( std::vector<array3D> const &V)
     return polygonEdgesCount( V.size(), V.data());
 }
 
-/*
+/*!
  * Gets the number of edges of a polygon
  * \param[in] nV number of polygon vertices
  * \param[in] V polygon vertices coordinates
@@ -2949,7 +2949,7 @@ int polygonEdgesCount( std::size_t nV, array3D const *V)
     return nV;
 }
 
-/*
+/*!
  * Gets the number of subtriangles of a polygon
  * \return number of subtriangles
  */
@@ -2958,7 +2958,7 @@ int polygonSubtriangleCount( std::vector<array3D> const &V)
     return polygonSubtriangleCount( V.size(), V.data());
 }
 
-/*
+/*!
  * Gets the number of subtriangles of a polygon
  * \param[in] nV number of polygon vertices
  * \param[in] V polygon vertices coordinates
@@ -2971,7 +2971,7 @@ int polygonSubtriangleCount( std::size_t nV, array3D const *V)
     return (nV - 2);
 }
 
-/*
+/*!
  * Gets the edge coordinates of a convex polygon
  * \param[in] edge index
  * \param[in] V polgon vertices
@@ -2983,7 +2983,7 @@ void edgeOfPolygon( int edge, std::vector<array3D> const &V, array3D &V0, array3
     edgeOfPolygon( edge, V.size(), V.data(), V0, V1);
 }
 
-/*
+/*!
  * Gets the edge coordinates of a convex polygon
  * \param[in] edge index
  * \param[in] nV number of polygon vertices
@@ -3000,7 +3000,7 @@ void edgeOfPolygon( int edge, std::size_t nV, array3D const *V, array3D &V0, arr
     return;
 }
 
-/*
+/*!
  * Gets the subtriangle vertices' coordinates of a convex polygon
  * \param[in] triangle index of triangle
  * \param[in] V polgon vertices
@@ -3013,7 +3013,7 @@ void subtriangleOfPolygon( int triangle, std::vector<array3D> const &V, array3D 
     subtriangleOfPolygon( triangle, V.size(), V.data(), V0, V1, V2);
 }
 
-/*
+/*!
  * Gets the subtriangle vertices' coordinates of a convex polygon
  * \param[in] triangle index of triangle
  * \param[in] nV number of polygon vertices
