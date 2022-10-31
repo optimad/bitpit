@@ -186,10 +186,12 @@ function(addTest TEST_NAME TEST_TYPE TEST_LIBRARIES WORKING_DIRECTORY N_PROCS PA
     endif()
 
     # Configure source formatting
-    set(TEST_CLANG_FORMAT_TARGET "clang-format-${TEST_TARGET_NAME}")
-    ClangFormatAddTarget("${TEST_CLANG_FORMAT_TARGET}")
-    ClangFormatTargetSources("${TEST_CLANG_FORMAT_TARGET}" "${TEST_NAME}.cpp")
-    add_dependencies(${CLANG_FORMAT_TARGET} "${TEST_CLANG_FORMAT_TARGET}")
+    if (CLANG_FORMAT_EXECUTABLE)
+        set(TEST_CLANG_FORMAT_TARGET "clang-format-${TEST_TARGET_NAME}")
+        ClangFormatAddTarget("${TEST_CLANG_FORMAT_TARGET}")
+        ClangFormatTargetSources("${TEST_CLANG_FORMAT_TARGET}" "${TEST_NAME}.cpp")
+        add_dependencies(${CLANG_FORMAT_TARGET} "${TEST_CLANG_FORMAT_TARGET}")
+    endif()
 
     # Add test
     add_test(NAME "${TEST_TARGET_NAME}" COMMAND ${TEST_EXEC} ${TEST_ARGS} WORKING_DIRECTORY "${WORKING_DIRECTORY}")

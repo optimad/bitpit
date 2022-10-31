@@ -80,13 +80,13 @@ endfunction()
 # Specifies sources to be formatted by the target
 function(ClangFormatTargetSources TARGET FILE_PATHS)
     # Early return if clang-formt is not available
-    if (NOT TARGET ${TARGET})
-        message(FATAL_ERROR "Target ${TARGET} is not valid.")
+    if (NOT CLANG_FORMAT_EXECUTABLE)
+        return()
     endif()
 
     # Early return if clang-formt is not available
-    if (NOT CLANG_FORMAT_EXECUTABLE)
-        return()
+    if (NOT TARGET ${TARGET})
+        message(FATAL_ERROR "Target ${TARGET} is not valid.")
     endif()
 
     # Add files to the target

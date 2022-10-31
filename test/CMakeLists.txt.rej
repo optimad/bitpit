@@ -1,0 +1,11 @@
+--- test/CMakeLists.txt	2021-05-17 21:26:50.000000000 +0200
++++ test/CMakeLists.txt	2021-05-30 18:16:59.368296000 +0200
+@@ -142,7 +142,7 @@
+     endif ()
+ 
+     # Test command
+-    if (${N_PROCS} GREATER 1)
++    if (BITPIT_ENABLE_MPI)
+         set(TEST_EXEC ${MPIEXEC})
+         set(TEST_ARGS ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} ${N_PROCS} ${MPIEXEC_POSTFLAGS} "$<TARGET_FILE:${TEST_NAME}>")
+     else()

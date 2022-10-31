@@ -32,7 +32,6 @@
 
 #include "reconstruction.hpp"
 #include "stencil.hpp"
-#include "stencil_solver.hpp"
 
 #include "moduleEnd.hpp"
 #endif

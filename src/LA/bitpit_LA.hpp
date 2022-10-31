@@ -43,7 +43,6 @@
 #include "manipulation.hpp"
 #include "matrix_utilities.hpp"
 #include "multiplication.hpp"
-#include "system_solvers_large.hpp"
 #include "system_solvers_small.hpp"
 
 #include "moduleEnd.hpp"
