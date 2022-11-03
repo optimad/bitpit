@@ -133,7 +133,7 @@ class Octant{
 
 private:
     uint64_t                        m_morton;       /**< Morton number */
-    std::bitset<INFO_ITEM_COUNT>    m_info;         /**< -Info[0..5]: true if 0..5 face is a boundary face [bound] \n
+    std::bitset<EXT_INFO_ITEM_COUNT>    m_info;         /**< -Info[0..5]: true if 0..5 face is a boundary face [bound] \n
                                                          -Info[6..11]: true if 0..6 face is a process boundary face [pbound] \n
                                                          -Info[12/13]: true if octant is new after refinement/coarsening \n
                                                          -Info[14]   : true if balancing is required for this octant \n */
