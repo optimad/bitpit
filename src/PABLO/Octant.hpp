@@ -126,11 +126,9 @@ class Octant{
         INFO_NEW4COARSENING = 13, /**< Identifier to access the bit storing if the octant is new for coarsening */
         INFO_BALANCED       = 14, /**< Identifier to access the bit storing if the octant has to be kept unbalanced */
 
-        INFO_ITEM_COUNT     = 15  /**< Number of items contained in the enum */
-    };
+        INFO_ITEM_COUNT     = 15, /**< Number of items contained in the enum */
 
-    enum OctantInfoExt {
-        EXT_INFO_ITEM_COUNT = 4
+        EXT_INFO_ITEM_COUNT = 64  /** Extended items */
     };
 
 private:
@@ -148,7 +146,6 @@ private:
                                                           1 : ghost in the 1-st layer of the halo, \n
                                                           ... \n
                                                           n : ghost in the n-th layer of the halo. */
-    std::bitset<EXT_INFO_ITEM_COUNT>    m_info_ext;  
 
     //TODO add bitset for edge & node
 

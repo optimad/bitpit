@@ -425,12 +425,12 @@ Octant::setGhostLayer(int ghostLayer){
 
 bool
 Octant::getExtInfo(uint8_t item){
-	return m_info_ext[item];
+    return m_info[item + INFO_ITEM_COUNT];
 };
 
 void
 Octant::setExtInfo(uint8_t item, bool flag){
-	m_info_ext[item] = flag;
+    m_info[item + INFO_ITEM_COUNT] = flag;
 };
 
 // =================================================================================== //
