@@ -640,9 +640,7 @@ void DiscreteStencil<weight_t>::optimize(double tolerance)
 template<typename weight_t>
 void DiscreteStencil<weight_t>::renumber(const std::unordered_map<long, long> &map)
 {
-    const std::size_t nItems = size();
-    for (std::size_t n = 0; n < nItems; ++n) {
-        long &id = m_pattern[n];
+    for (long &id : m_pattern) {
         id = map.at(id);
     }
 }
@@ -661,8 +659,8 @@ void DiscreteStencil<weight_t>::addComplementToZero(long id)
     }
 
     weight_t complement = m_zero;
-    for (std::size_t n = 0; n < nItems; ++n) {
-        rawSumValue(m_weights[n], -1., &complement);
+    for (const weight_t &weight : m_weights) {
+        rawSumValue(weight, -1., &complement);
     }
 
     appendItem(id, complement);
@@ -674,9 +672,8 @@ void DiscreteStencil<weight_t>::addComplementToZero(long id)
 template<typename weight_t>
 void DiscreteStencil<weight_t>::zero()
 {
-    const std::size_t nItems = size();
-    for (std::size_t n = 0; n < nItems; ++n) {
-        rawCopyValue(m_zero, m_weights.data() + n);
+    for (weight_t &weight : m_weights) {
+        rawCopyValue(m_zero, &weight);
     }
 
     setConstant(m_zero);
