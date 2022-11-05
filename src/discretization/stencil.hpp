@@ -146,7 +146,7 @@ private:
     weight_t * findWeight(long id);
     const weight_t * findWeight(long id) const;
 
-    bool optimizeWeight(std::size_t pos, double tolerance = 1.e-12);
+    bool isWeightNegligible(std::size_t pos, double tolerance = 1.e-12) const;
 
 };
 
@@ -164,10 +164,10 @@ template<>
 void DiscreteStencil<std::vector<double>>::rawCopyValue(const std::vector<double> &source, std::vector<double> *target);
 
 template<>
-bool DiscreteStencil<std::array<double, 3>>::optimizeWeight(std::size_t pos, double tolerance);
+bool DiscreteStencil<std::array<double, 3>>::isWeightNegligible(std::size_t pos, double tolerance) const;
 
 template<>
-bool DiscreteStencil<std::vector<double>>::optimizeWeight(std::size_t pos, double tolerance);
+bool DiscreteStencil<std::vector<double>>::isWeightNegligible(std::size_t pos, double tolerance) const;
 
 }
 

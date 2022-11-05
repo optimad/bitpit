@@ -622,7 +622,7 @@ void DiscreteStencil<weight_t>::optimize(double tolerance)
 {
     std::size_t nItems = size();
     for (std::size_t n = 0; n < nItems; ++n) {
-        bool isWeightNeglibile = optimizeWeight(n, tolerance);
+        bool isWeightNeglibile = isWeightNegligible(n, tolerance);
         if (isWeightNeglibile) {
             m_pattern.erase(m_pattern.begin() + n);
             m_weights.erase(m_weights.begin() + n);
@@ -679,14 +679,14 @@ void DiscreteStencil<weight_t>::zero()
     setConstant(m_zero);
 }
 /*!
-* Optimize the specified weight.
+* Check if the specified weight is negligible.
 *
 * \param pos is the position of the weight to check
 * \param tolerance is the tolerance that will be used for the check
 * \result Returns true if the whole weight is neglibile
 */
 template<typename weight_t>
-bool DiscreteStencil<weight_t>::optimizeWeight(std::size_t pos, double tolerance)
+bool DiscreteStencil<weight_t>::isWeightNegligible(std::size_t pos, double tolerance) const
 {
     return (std::abs(m_weights[pos] - m_zero) <= tolerance);
 }
