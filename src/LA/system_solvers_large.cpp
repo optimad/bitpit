@@ -1131,13 +1131,30 @@ void SystemSolver::matrixFill(const SystemMatrixAssembler &assembler)
 void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrixAssembler &assembler)
 {
     // Update element values
-    PetscInt rowGlobalOffset;
-    MatGetOwnershipRange(m_A, &rowGlobalOffset, nullptr);
-
+    //
+    // If the sizes of PETSc data types match the sizes of data types expected by
+    // bitpit a direct update can be performed, otherwise the matrix is updated
+    // using intermediate data storages.
     const long maxRowNZ = std::max(assembler.getMaxRowNZCount(), 0L);
 
-    std::vector<PetscInt> rawRowPattern(maxRowNZ);
-    std::vector<PetscScalar> rawRowValues(maxRowNZ);
+    std::vector<PetscInt> rowPatternStorage(maxRowNZ);
+    std::vector<PetscScalar> rowValuesStorage(maxRowNZ);
+
+    bool patternDirectUpdate = (sizeof(long) == sizeof(PetscInt));
+    bool valuesDirectUpdate = (sizeof(double) == sizeof(PetscScalar));
+
+    const PetscInt *petscRowPattern;
+    if (!patternDirectUpdate) {
+        petscRowPattern = rowPatternStorage.data();
+    }
+
+    const PetscScalar *petscRowValues;
+    if (!valuesDirectUpdate) {
+        petscRowValues = rowValuesStorage.data();
+    }
+
+    PetscInt rowGlobalOffset;
+    MatGetOwnershipRange(m_A, &rowGlobalOffset, nullptr);
 
     ConstProxyVector<long> rowPattern;
     ConstProxyVector<double> rowValues;
@@ -1159,12 +1176,19 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrix
         const PetscInt globalRow = rowGlobalOffset + row;
 
         // Update values
-        for (int k = 0; k < nRowElements; ++k) {
-            rawRowPattern[k] = rowPattern[k];;
-            rawRowValues[k]  = rowValues[k];
+        if (patternDirectUpdate) {
+            petscRowPattern = reinterpret_cast<const PetscInt *>(rowPattern.data());
+        } else {
+            std::copy(rowPattern.cbegin(), rowPattern.cend(), rowPatternStorage.begin());
         }
 
-        MatSetValues(m_A, 1, &globalRow, nRowElements, rawRowPattern.data(), rawRowValues.data(), INSERT_VALUES);
+        if (valuesDirectUpdate) {
+            petscRowValues = reinterpret_cast<const PetscScalar *>(rowValues.data());
+        } else {
+            std::copy(rowValues.cbegin(), rowValues.cend(), rowValuesStorage.begin());
+        }
+
+        MatSetValues(m_A, 1, &globalRow, nRowElements, petscRowPattern, petscRowValues, INSERT_VALUES);
     }
 
     // Let petsc assembly the matrix after the update
