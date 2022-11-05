@@ -124,55 +124,47 @@ void DiscreteStencil<std::vector<double>>::rawCopyValue(const std::vector<double
 }
 
 /*!
-* Optimize the specified weight.
+* Check if the specified weight is negligible.
 *
 * \param pos is the position of the weight to check
 * \param tolerance is the tolerance that will be used for the check
-* \result Returns true if the whole weight is neglibile
+* \result Returns true if the whole weight is negligible
 */
 template<>
-bool DiscreteStencil<std::array<double, 3>>::optimizeWeight(std::size_t pos, double tolerance)
+bool DiscreteStencil<std::array<double, 3>>::isWeightNegligible(std::size_t pos, double tolerance) const
 {
-    std::array<double, 3> &weight = m_weights[pos];
+    const std::array<double, 3> &weight = m_weights[pos];
     int nItems = weight.size();
 
-    int nNegligibleItems = 0;
     for (int k = 0; k < nItems; ++k) {
         if (std::abs(weight[k] - m_zero[k]) > tolerance) {
-            continue;
+            return false;
         }
-
-        weight[k] = m_zero[k];
-        ++nNegligibleItems;
     }
 
-    return (nNegligibleItems == nItems);
+    return true;
 }
 
 /*!
-* Optimize the specified weight.
+* Check if the specified weight is negligible.
 *
 * \param pos is the position of the weight to check
 * \param tolerance is the tolerance that will be used for the check
-* \result Returns true if the whole weight is neglibile
+* \result Returns true if the whole weight is negligible
 */
 template<>
-bool DiscreteStencil<std::vector<double>>::optimizeWeight(std::size_t pos, double tolerance)
+bool DiscreteStencil<std::vector<double>>::isWeightNegligible(std::size_t pos, double tolerance) const
 {
-    std::vector<double> &weight = m_weights[pos];
+    const std::vector<double> &weight = m_weights[pos];
     int nItems = weight.size();
 
-    int nNegligibleItems = 0;
     for (int k = 0; k < nItems; ++k) {
         if (std::abs(weight[k] - m_zero[k]) > tolerance) {
-            continue;
+            return false;
         }
-
-        weight[k] = m_zero[k];
-        ++nNegligibleItems;
     }
 
-    return (nNegligibleItems == nItems);
+    return true;
 }
 
 }
