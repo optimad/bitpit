@@ -809,6 +809,69 @@ size_t DiscreteStencil<weight_t>::getBinarySize() const
 }
 
 /*!
+* Get a reference to a weight associated with an item with the specified index.
+*
+* If there are no items with the specified index, an exception will be thrown.
+* If there are multiple items associated with the specified id, the first one
+* will be returned.
+*
+* \param id is the index associated to the item
+* \return A reference to the weight associated with the item with the specified
+* index.
+*/
+template<typename weight_t>
+weight_t & DiscreteStencil<weight_t>::at(long id)
+{
+    return const_cast<weight_t &>(static_cast<const DiscreteStencil<weight_t> &>(*this).at(id));
+}
+
+/*!
+* Get a constant reference to a weight associated with an item with the specified index.
+*
+* If there are no items with the specified index, an exception will be thrown.
+* If there are multiple items associated with the specified id, the first one
+* will be returned.
+*
+* \param id is the index associated to the item
+* \return A constant reference to the weight associated with the item with the specified
+* index.
+*/
+template<typename weight_t>
+const weight_t & DiscreteStencil<weight_t>::at(long id) const
+{
+    const weight_t *weight = findWeight(id);
+    if (weight) {
+        return *weight;
+    }
+
+    throw("The stencil doens't contain an item with the specified id");
+}
+
+/*!
+* Get a reference to a weight associated with an item with the specified index.
+*
+* If there are no items with the specified id, a new empty item will be added to
+* the stencil and its reference will be returned. If there are multiple items
+* associated with the specified id, the first one will be returned.
+*
+* \param id is the index associated to the item
+* \return A reference to the weight associated with the item with the specified
+* index.
+*/
+template<typename weight_t>
+weight_t & DiscreteStencil<weight_t>::operator[](long id)
+{
+    weight_t *weight = findWeight(id);
+    if (weight) {
+        return *weight;
+    }
+
+    appendItem(id, m_zero);
+
+    return m_weights.back();
+}
+
+/*!
 * The binary multiplication assignment operator.
 *
 * \param factor is the factor of the multiplication
