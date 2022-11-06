@@ -128,6 +128,11 @@ public:
 
     size_t getBinarySize() const;
 
+    weight_t & at(long id);
+    const weight_t & at(long id) const;
+
+    weight_t & operator[](long id);
+
     DiscreteStencil<weight_t> & operator*=(double factor);
     DiscreteStencil<weight_t> & operator/=(double factor);
     DiscreteStencil<weight_t> & operator+=(const DiscreteStencil<weight_t> &other);
