@@ -470,7 +470,9 @@ void DiscreteStencil<weight_t>::sumItem(long id, const weight_t &value, double f
         rawSumValue(value, factor, weight);
     } else {
         appendItem(id, value);
-        m_weights.back() *= factor;
+        if (factor != 1.) {
+            m_weights.back() *= factor;
+        }
     }
 }
 
