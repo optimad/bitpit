@@ -3244,8 +3244,15 @@ void ReconstructionAssembler::updateKernel(ReconstructionKernel *kernel) const
     // Weights are stored according the order in which the equations have been
     // added.
     double *weights = kernel->getPolynomialWeights();
-    for (int i = 0; i < nCoeffs; ++i) {
-        for (int j = 0; j < nEquations; ++j) {
+    for (int j = 0; j < nEquations; ++j) {
+        int equation;
+        if (j < nLeastSquares) {
+            equation = m_leastSquaresOrder[j];
+        } else {
+            equation = m_constraintsOrder[j - nLeastSquares];
+        }
+
+        for (int i = 0; i < nCoeffs; ++i) {
             double value = 0;
             for (int k = 0; k < nUnknowns; ++k) {
                 int l = linearalgebra::linearIndexColMajorSymmetric(i, k, nUnknowns, nUnknowns, 'U');
@@ -3255,13 +3262,6 @@ void ReconstructionAssembler::updateKernel(ReconstructionKernel *kernel) const
                 } else if ((k - nCoeffs) == (j - nLeastSquares)) {
                     value += m_S[l];
                 }
-            }
-
-            int equation;
-            if (j < nLeastSquares) {
-                equation = m_leastSquaresOrder[j];
-            } else {
-                equation = m_constraintsOrder[j - nLeastSquares];
             }
 
             int weightLineraIndex = linearalgebra::linearIndexColMajor(equation, i, nEquations, nCoeffs);
