@@ -2374,21 +2374,22 @@ void ReconstructionKernel::updatePolynomial(uint8_t degree, int nFields, const d
     int nEquations = getEquationCount();
     int nCoeffs    = ReconstructionPolynomial::getCoefficientCount(degree, dimensions);
 
+    BITPIT_CREATE_WORKSPACE(fieldValues, double, nEquations, MAX_STACK_WORKSPACE_SIZE);
+
+    const double *polynomialWeights = getPolynomialWeights();
+
     const double *weights = m_weights.get();
     double *coeffs = polynomial->getCoefficients();
     for (int k = 0; k < nFields; ++k) {
+        for (int j = 0; j < nEquations; ++j) {
+            fieldValues[j] = values[j][k];
+        }
+
         double *fieldCoeffs = coeffs + polynomial->computeFieldCoefficientsOffset(0, k);
 
-        const double *weight = weights;
-        for (int i = 0; i < nCoeffs; ++i) {
-            fieldCoeffs[i] = *weight * values[0][k];
-            ++weight;
-
-            for (int j = 1; j < nEquations; ++j) {
-                fieldCoeffs[i] += *weight * values[j][k];
-                ++weight;
-            }
-        }
+        cblas_dgemv(CBLAS_ORDER::CblasColMajor, CBLAS_TRANSPOSE::CblasTrans,
+                    nEquations, nCoeffs, 1., polynomialWeights, nEquations,
+                    fieldValues, 1, 0, fieldCoeffs, 1);
     }
 }
 
