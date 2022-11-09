@@ -102,23 +102,39 @@ typename std::vector<T>::const_iterator findInOrderedVector(const T &value, cons
 *
 * Order a vector according to a reordering vector.
 *
-* \tparam order_t is the type of data that needs to be reordered
-* \param order is a reference to the reording vector
+* \tparam T is the type of data that needs to be reordered
+* \param order is a reference to the reording vector, on output the contents of
+* the vector will be destroyed
 * \param v is a reference to the vector that will be reordered
 * \param size is the size of the vector that will be reordered
 */
 template<typename T>
-void reorderVector(std::vector<size_t>& order, std::vector<T>& v, std::size_t size)
+void reorderVector(std::vector<size_t> &order, std::vector<T> &v, std::size_t size)
 {
-    for (size_t i = 0; i < size; i++) {
-        size_t j;
+    reorderContainer(order, v, size);
+}
+
+/*!
+* \ingroup common_misc
+*
+* Order a container according to a reordering vector.
+*
+* \tparam OrderContainer is the type of container that stores ordering information
+* \tparam DataContainer is the type of container that stores the data
+* \param order is a reference to the reording container, on output the contents
+* of the container will be destroyed
+* \param v is a reference to the container that will be reordered
+* \param size is the size of the container that will be reordered
+*/
+template<typename OrderContainer, typename DataContainer>
+void reorderContainer(OrderContainer &order, DataContainer &v, std::size_t size)
+{
+    for (std::size_t i = 0; i < size; i++) {
+        std::size_t j;
         while (i != (j = order[i])) {
-            size_t k = order[j];
+            std::size_t k = order[j];
 
-            T temp = std::move(v[j]);
-            v[j] = std::move(v[k]);
-            v[k] = std::move(temp);
-
+            std::swap(v[j], v[k]);
             std::swap(order[i], order[j]);
         }
     }

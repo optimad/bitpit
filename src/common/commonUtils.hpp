@@ -97,6 +97,9 @@ typename std::vector<T>::const_iterator findInOrderedVector(const T &value, cons
 template<typename T>
 void reorderVector(std::vector<size_t>& order, std::vector<T>& v, std::size_t size);
 
+template<typename OrderContainer, typename DataContainer>
+void reorderContainer(OrderContainer &order, DataContainer &v, std::size_t size);
+
 template <class T>
 void eraseValue(std::vector<T> &, const T&);
 
