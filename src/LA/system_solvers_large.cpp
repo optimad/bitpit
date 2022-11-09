@@ -1123,7 +1123,7 @@ void SystemSolver::matrixFill(const SystemMatrixAssembler &assembler)
  * elements.
  *
  * \param nRows is the number of rows that will be updated
- * \param rows are the indices of the rows that will be updated, if a
+ * \param rows are the local indices of the rows that will be updated, if a
  * null pointer is passed, the rows that will be updated are the rows
  * from 0 to (nRows - 1).
  * \param assembler is the matrix assembler for the rows that will be updated
