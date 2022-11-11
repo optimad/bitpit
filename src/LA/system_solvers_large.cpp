@@ -1140,42 +1140,49 @@ void SystemSolver::matrixFill(const SystemMatrixAssembler &assembler)
  */
 void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrixAssembler &assembler)
 {
+    const long nCols = assembler.getColCount();
+    const long maxRowNZ = std::max(assembler.getMaxRowNZCount(), 0L);
+
+    // Initialize permutations
+    const PetscInt *rowRanks = nullptr;
+    if (m_rowPermutation) {
+        ISGetIndices(m_rowPermutation, &rowRanks);
+    }
+
+    IS invColPermutation;
+    const PetscInt *colInvRanks = nullptr;
+    if (m_colPermutation) {
+        ISInvertPermutation(m_colPermutation, nCols, &invColPermutation);
+        ISGetIndices(invColPermutation, &colInvRanks);
+    }
+
+    // Global information
+    PetscInt colGlobalBegin;
+    PetscInt colGlobalEnd;
+    MatGetOwnershipRangeColumn(m_A, &colGlobalBegin, &colGlobalEnd);
+
+    PetscInt rowGlobalOffset;
+    MatGetOwnershipRange(m_A, &rowGlobalOffset, nullptr);
+
     // Update element values
     //
     // If the sizes of PETSc data types match the sizes of data types expected by
     // bitpit a direct update can be performed, otherwise the matrix is updated
     // using intermediate data storages.
-    const long maxRowNZ = std::max(assembler.getMaxRowNZCount(), 0L);
-
-    std::vector<PetscInt> rowPatternStorage(maxRowNZ);
-    std::vector<PetscScalar> rowValuesStorage(maxRowNZ);
-
-    bool patternDirectUpdate = (sizeof(long) == sizeof(PetscInt));
     bool valuesDirectUpdate = (sizeof(double) == sizeof(PetscScalar));
 
-    const PetscInt *petscRowPattern;
-    if (!patternDirectUpdate) {
-        petscRowPattern = rowPatternStorage.data();
-    }
+    std::vector<PetscInt> petscRowPattern(maxRowNZ);
 
+    std::vector<PetscScalar> petscRowValuesStorage(maxRowNZ);
     const PetscScalar *petscRowValues;
     if (!valuesDirectUpdate) {
-        petscRowValues = rowValuesStorage.data();
+        petscRowValues = petscRowValuesStorage.data();
     }
-
-    PetscInt rowGlobalOffset;
-    MatGetOwnershipRange(m_A, &rowGlobalOffset, nullptr);
 
     ConstProxyVector<long> rowPattern;
     ConstProxyVector<double> rowValues;
     for (long n = 0; n < nRows; ++n) {
-        assembler.getRowData(n, &rowPattern, &rowValues);
-        const int nRowElements = rowPattern.size();
-        if (nRowElements == 0) {
-            continue;
-        }
-
-        // Get global row
+        // Get row information
         long row;
         if (rows) {
             row = rows[n];
@@ -1183,27 +1190,57 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrix
             row = n;
         }
 
-        const PetscInt globalRow = rowGlobalOffset + row;
-
-        // Update values
-        if (patternDirectUpdate) {
-            petscRowPattern = reinterpret_cast<const PetscInt *>(rowPattern.data());
-        } else {
-            std::copy(rowPattern.cbegin(), rowPattern.cend(), rowPatternStorage.begin());
+        long assemblerRow = row;
+        if (m_rowPermutation) {
+            assemblerRow = rowRanks[assemblerRow];
         }
 
+        const PetscInt globalRow = rowGlobalOffset + row;
+
+        // Get row data
+        assembler.getRowData(assemblerRow, &rowPattern, &rowValues);
+        const int nRowValues = rowValues.size();
+        if (nRowValues == 0) {
+            continue;
+        }
+
+        // Get values in PETSc format
         if (valuesDirectUpdate) {
             petscRowValues = reinterpret_cast<const PetscScalar *>(rowValues.data());
         } else {
-            std::copy(rowValues.cbegin(), rowValues.cend(), rowValuesStorage.begin());
+            std::copy(rowValues.cbegin(), rowValues.cend(), petscRowValuesStorage.begin());
         }
 
-        MatSetValues(m_A, 1, &globalRow, nRowElements, petscRowPattern, petscRowValues, INSERT_VALUES);
+        // Get pattern in PETSc format
+        for (int k = 0; k < nRowValues; ++k) {
+            long globalCol = rowPattern[k];
+            if (m_colPermutation) {
+                if (globalCol >= colGlobalBegin && globalCol < colGlobalEnd) {
+                    long col = globalCol - colGlobalBegin;
+                    col = colInvRanks[col];
+                    globalCol = colGlobalBegin + col;
+                }
+            }
+
+            petscRowPattern[k] = globalCol;
+        }
+
+        // Set data
+        MatSetValues(m_A, 1, &globalRow, nRowValues, petscRowPattern.data(), petscRowValues, INSERT_VALUES);
     }
 
     // Let petsc assembly the matrix after the update
     MatAssemblyBegin(m_A, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(m_A, MAT_FINAL_ASSEMBLY);
+
+    // Cleanup
+    if (m_rowPermutation) {
+        ISRestoreIndices(m_rowPermutation, &rowRanks);
+    }
+
+    if (m_colPermutation) {
+        ISDestroy(&invColPermutation);
+    }
 }
 
 /*!
