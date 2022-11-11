@@ -59,6 +59,20 @@ SystemSparseMatrixAssembler::SystemSparseMatrixAssembler(const SparseMatrix *mat
 }
 
 /*!
+ * Get the assembly options.
+ *
+ * \result The assembly options that will be used.
+ */
+SystemMatrixAssembler::AssemblyOptions SystemSparseMatrixAssembler::getOptions() const
+{
+    AssemblyOptions options;
+    options.full   = true;
+    options.sorted = false;
+
+    return options;
+}
+
+/*!
  * Get the number of rows of the matrix.
  *
  * \result The number of rows of the matrix.
@@ -1094,6 +1108,24 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrix
     PetscInt rowGlobalOffset;
     MatGetOwnershipRange(m_A, &rowGlobalOffset, nullptr);
 
+    // Get the options for assembling the matrix
+    SystemMatrixAssembler::AssemblyOptions assemblyOptions = assembler.getOptions();
+
+    PetscBool matrixSortedFull = (assemblyOptions.full && assemblyOptions.sorted) ? PETSC_TRUE : PETSC_FALSE;
+
+#if PETSC_VERSION_GE(3, 12, 0)
+    // Check if it is possible to speedup insertion of values
+    //
+    // The option MAT_SORTED_FULL means that each process provides exactly its
+    // local rows; all column indices for a given row are passed in a single call
+    // to MatSetValues(), preallocation is perfect, row oriented, INSERT_VALUES
+    // is used. If this options is set to PETSC_TRUE, the function MatSetValues
+    // will be faster.
+    //
+    // This options needs at least PETSc 3.12.
+    MatSetOption(m_A, MAT_SORTED_FULL, matrixSortedFull);
+#endif
+
     // Update element values
     //
     // If the sizes of PETSc data types match the sizes of data types expected by
@@ -1127,11 +1159,28 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrix
 
         const PetscInt globalRow = rowGlobalOffset + row;
 
+        // Check if it possible to perform a fast update
+        //
+        // A fast update allows to set all the values of a row at once (without
+        // the need to get the row pattern), it can be performed if:
+        //  - the matrix has already been assembled;
+        //  - the assembler is providing all the values of the row;
+        //  - values provided by the assembler are sorted by ascending column.
+        //
+        // If fast update is used, row values will be set using a special PETSc
+        // function (MatSetValuesRow) that allows to set all the values of a
+        // row at once, without requiring the pattern of the row.
+        //
+        // Fast update is not related to the option MAT_SORTED_FULL, that option
+        // is used to speedup the standard function MatSetValues (which still
+        // requires the pattern of the row).
+        bool fastUpdate = isAssembled() && (matrixSortedFull == PETSC_TRUE);
+
         // Get row data
-        assembler.getRowData(assemblerRow, &rowPattern, &rowValues);
-        const int nRowValues = rowValues.size();
-        if (nRowValues == 0) {
-            continue;
+        if (fastUpdate) {
+            assembler.getRowValues(assemblerRow, &rowValues);
+        } else {
+            assembler.getRowData(assemblerRow, &rowPattern, &rowValues);
         }
 
         // Get values in PETSc format
@@ -1141,22 +1190,33 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrix
             std::copy(rowValues.cbegin(), rowValues.cend(), petscRowValuesStorage.begin());
         }
 
-        // Get pattern in PETSc format
-        for (int k = 0; k < nRowValues; ++k) {
-            long globalCol = rowPattern[k];
-            if (m_colPermutation) {
-                if (globalCol >= colGlobalBegin && globalCol < colGlobalEnd) {
-                    long col = globalCol - colGlobalBegin;
-                    col = colInvRanks[col];
-                    globalCol = colGlobalBegin + col;
-                }
+        if (fastUpdate) {
+            // Set values
+            MatSetValuesRow(m_A, globalRow, petscRowValues);
+        } else {
+            // Count the values that will be updated
+            const int nRowValues = rowValues.size();
+            if (nRowValues == 0) {
+                continue;
             }
 
-            petscRowPattern[k] = globalCol;
-        }
+            // Get pattern in PETSc format
+            for (int k = 0; k < nRowValues; ++k) {
+                long globalCol = rowPattern[k];
+                if (m_colPermutation) {
+                    if (globalCol >= colGlobalBegin && globalCol < colGlobalEnd) {
+                        long col = globalCol - colGlobalBegin;
+                        col = colInvRanks[col];
+                        globalCol = colGlobalBegin + col;
+                    }
+                }
 
-        // Set data
-        MatSetValues(m_A, 1, &globalRow, nRowValues, petscRowPattern.data(), petscRowValues, INSERT_VALUES);
+                petscRowPattern[k] = globalCol;
+            }
+
+            // Set data
+            MatSetValues(m_A, 1, &globalRow, nRowValues, petscRowPattern.data(), petscRowValues, INSERT_VALUES);
+        }
     }
 
     // Let petsc assembly the matrix after the update

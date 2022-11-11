@@ -122,6 +122,8 @@ public:
     DiscretizationStencilSolverAssembler(MPI_Comm communicator, bool partitioned, const stencil_container_t *stencils);
 #endif
 
+    AssemblyOptions getOptions() const override;
+
     int getBlockSize() const;
 
     long getRowCount() const override;

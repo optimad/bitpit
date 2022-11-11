@@ -70,7 +70,14 @@ struct KSPStatus {
 class SystemMatrixAssembler {
 
 public:
+    struct AssemblyOptions {
+        bool full; //!< Controls if the assembler is providing all the non-zero values of a row
+        bool sorted; //! Controls if the values provided by the assembler are sorted by ascending column
+    };
+
     virtual ~SystemMatrixAssembler() = default;
+
+    virtual AssemblyOptions getOptions() const = 0;
 
     virtual long getRowCount() const = 0;
     virtual long getColCount() const = 0;
@@ -99,6 +106,8 @@ class SystemSparseMatrixAssembler : public SystemMatrixAssembler {
 
 public:
     SystemSparseMatrixAssembler(const SparseMatrix *matrix);
+
+    AssemblyOptions getOptions() const override;
 
     long getRowCount() const override;
     long getColCount() const override;

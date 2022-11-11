@@ -299,6 +299,21 @@ DiscretizationStencilSolverAssembler<stencil_t>::DiscretizationStencilSolverAsse
 }
 
 /*!
+ * Get the assembly options.
+ *
+ * \result The assembly options that will be used.
+ */
+template<typename stencil_t>
+SystemMatrixAssembler::AssemblyOptions DiscretizationStencilSolverAssembler<stencil_t>::getOptions() const
+{
+    AssemblyOptions options;
+    options.full   = true;
+    options.sorted = false;
+
+    return options;
+}
+
+/*!
  * Set block size.
  *
  * \param blockSize is the block size
