@@ -2768,9 +2768,9 @@ void ReconstructionKernel::computeGradientLimitedWeights(uint8_t degree, const s
 
     // Explicitly zero unused components
     if (dimensions != ReconstructionPolynomial::MAX_DIMENSIONS) {
-        for (int i = 0; i < nEquations; ++i) {
+        for (int j = 0; j < nEquations; ++j) {
             for (int d = dimensions; d < ReconstructionPolynomial::MAX_DIMENSIONS; ++d) {
-                gradientWeights[i][d] = 0.;
+                gradientWeights[j][d] = 0.;
             }
         }
     }
