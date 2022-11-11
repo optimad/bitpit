@@ -1023,6 +1023,16 @@ void SystemSolver::matrixCreate(const SystemMatrixAssembler &assembler)
     MatCreateSeqAIJ(PETSC_COMM_SELF, nRows, nCols, 0, d_nnz.data(), &m_A);
 #endif
 
+    // Each process will only set values for its own rows
+    MatSetOption(m_A, MAT_NO_OFF_PROC_ENTRIES, PETSC_TRUE);
+
+#if PETSC_VERSION_GE(3, 12, 0)
+    // The first assembly will set a superset of the off-process entries
+    // required for all subsequent assemblies. This avoids a rendezvous
+    // step in the MatAssembly functions.
+    MatSetOption(m_A, MAT_SUBSET_OFF_PROC_ENTRIES, PETSC_TRUE);
+#endif
+
     // Cleanup
     if (m_rowPermutation) {
         ISRestoreIndices(m_rowPermutation, &rowRanks);
