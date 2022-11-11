@@ -1046,84 +1046,14 @@ void SystemSolver::matrixCreate(const SystemMatrixAssembler &assembler)
  */
 void SystemSolver::matrixFill(const SystemMatrixAssembler &assembler)
 {
-    const long nRows = assembler.getRowCount();
-    const long nCols = assembler.getColCount();
-    const long maxRowNZ = assembler.getMaxRowNZCount();
-
-    const PetscInt *rowRanks = nullptr;
-    if (m_rowPermutation) {
-        ISGetIndices(m_rowPermutation, &rowRanks);
-    }
-
-    IS invColPermutation;
-    const PetscInt *colInvRanks = nullptr;
-    if (m_colPermutation) {
-        ISInvertPermutation(m_colPermutation, nCols, &invColPermutation);
-        ISGetIndices(invColPermutation, &colInvRanks);
-    }
-
-    // Create the matrix
-    if (maxRowNZ > 0) {
-        std::vector<PetscInt> rowNZGlobalIds(maxRowNZ);
-        std::vector<PetscScalar> rowNZValues(maxRowNZ);
-
-        PetscInt rowGlobalOffset;
-        MatGetOwnershipRangeColumn(m_A, &rowGlobalOffset, nullptr);
-
-        PetscInt colGlobalBegin;
-        PetscInt colGlobalEnd;
-        MatGetOwnershipRangeColumn(m_A, &colGlobalBegin, &colGlobalEnd);
-
-        ConstProxyVector<long> rowPattern;
-        ConstProxyVector<double> rowValues;
-        for (long row = 0; row < nRows; ++row) {
-            long matrixRow = row;
-            if (m_rowPermutation) {
-                matrixRow = rowRanks[matrixRow];
-            }
-
-            assembler.getRowData(matrixRow, &rowPattern, &rowValues);
-
-            const int nRowNZ = rowPattern.size();
-            const PetscInt globalRow = rowGlobalOffset + row;
-            for (int k = 0; k < nRowNZ; ++k) {
-                long matrixGlobalCol = rowPattern[k];
-
-                long globalCol = matrixGlobalCol;
-                if (m_colPermutation) {
-                    if (globalCol >= colGlobalBegin && globalCol < colGlobalEnd) {
-                        long col = globalCol - colGlobalBegin;
-                        col = colInvRanks[col];
-                        globalCol = colGlobalBegin + col;
-                    }
-                }
-
-                rowNZGlobalIds[k] = globalCol;
-                rowNZValues[k]    = rowValues[k];
-            }
-
-            MatSetValues(m_A, 1, &globalRow, nRowNZ, rowNZGlobalIds.data(), rowNZValues.data(), INSERT_VALUES);
-        }
-    }
-
-    // Let petsc build the matrix
-    MatAssemblyBegin(m_A, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(m_A, MAT_FINAL_ASSEMBLY);
+    // Fil matrix
+    matrixUpdate(assembler.getRowCount(), nullptr, assembler);
 
     // No new allocations are now allowed
     //
     // When updating the matrix it will not be possible to alter the pattern,
     // it will be possible to change only the values.
     MatSetOption(m_A, MAT_NEW_NONZERO_LOCATIONS, PETSC_FALSE);
-
-    // Cleanup
-    if (m_rowPermutation) {
-        ISRestoreIndices(m_rowPermutation, &rowRanks);
-    }
-
-    if (m_colPermutation) {
-        ISDestroy(&invColPermutation);
-    }
 }
 
 /*!
