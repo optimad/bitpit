@@ -222,6 +222,7 @@ protected:
     void applyLimiter(uint8_t degree, const double *limiters, double *coeffs) const;
 
 private:
+    static const bool ENABLE_FAST_PATH_OPTIMIZATIONS;
     static const int MAX_STACK_WORKSPACE_SIZE;
 
     std::unique_ptr<double[]> m_weights;

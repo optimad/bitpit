@@ -1976,6 +1976,11 @@ void ReconstructionPolynomial::display(std::ostream &out) const
  */
 
 /*!
+ * Enable fast calculation for some special cases.
+ */
+const bool ReconstructionKernel::ENABLE_FAST_PATH_OPTIMIZATIONS = true;
+
+/*!
  * Maximum size of the workspace that will be allocated on the stack
  */
 const int ReconstructionKernel::MAX_STACK_WORKSPACE_SIZE = 10;
@@ -2326,14 +2331,34 @@ void ReconstructionKernel::updatePolynomial(uint8_t degree, const double *values
 {
     assert(degree <= getDegree());
 
-    uint8_t dimensions = getDimensions();
-
     int nEquations = getEquationCount();
-    int nCoeffs    = ReconstructionPolynomial::getCoefficientCount(degree, dimensions);
+
+    double *polynomialCoeffs = polynomial->getCoefficients();
+
+    // Constant polynomial
+    if (ENABLE_FAST_PATH_OPTIMIZATIONS && degree == 0) {
+        // Since the polynomial weights are stored using a col-major order,
+        // the weights for the constant polynomial are the first nEquation
+        // values.
+        const double *constantPolynomialWeights = getPolynomialWeights();
+
+        polynomialCoeffs[0] = 0.;
+        for (int j = 0; j < nEquations; ++j) {
+            polynomialCoeffs[0] += values[j] * constantPolynomialWeights[j];
+        }
+
+        return;
+    }
+
+    // Generic polynomial
+    uint8_t dimensions = getDimensions();
+    int nCoeffs = ReconstructionPolynomial::getCoefficientCount(degree, dimensions);
+
+    const double *polynomialWeights = getPolynomialWeights();
 
     cblas_dgemv(CBLAS_ORDER::CblasColMajor, CBLAS_TRANSPOSE::CblasTrans,
-                nEquations, nCoeffs, 1., getPolynomialWeights(), nEquations,
-                values, 1, 0, polynomial->getCoefficients(), 1);
+                nEquations, nCoeffs, 1., polynomialWeights, nEquations,
+                values, 1, 0, polynomialCoeffs, 1);
 }
 
 /*!
@@ -2361,23 +2386,40 @@ void ReconstructionKernel::updatePolynomial(uint8_t degree, int nFields, const d
 {
     assert(degree <= getDegree());
 
-    uint8_t dimensions = getDimensions();
-
     int nEquations = getEquationCount();
-    int nCoeffs    = ReconstructionPolynomial::getCoefficientCount(degree, dimensions);
 
+    // Constant polynomial
+    if (ENABLE_FAST_PATH_OPTIMIZATIONS && degree == 0) {
+        // Since the polynomial weights are stored using a col-major order,
+        // the weights for the constant polynomial are the first nEquation
+        // values.
+        const double *constantPolynomialWeights = getPolynomialWeights();
+        for (int k = 0; k < nFields; ++k) {
+            double *fieldCoeffs = polynomial->getCoefficients(k);
+
+            fieldCoeffs[0] = 0.;
+            for (int j = 0; j < nEquations; ++j) {
+                fieldCoeffs[0] += values[j][k] * constantPolynomialWeights[j];
+            }
+        }
+
+        return;
+    }
+
+    // Generic polynomial
     BITPIT_CREATE_WORKSPACE(fieldValues, double, nEquations, MAX_STACK_WORKSPACE_SIZE);
+
+    uint8_t dimensions = getDimensions();
+    int nCoeffs = ReconstructionPolynomial::getCoefficientCount(degree, dimensions);
 
     const double *polynomialWeights = getPolynomialWeights();
 
-    const double *weights = m_weights.get();
-    double *coeffs = polynomial->getCoefficients();
     for (int k = 0; k < nFields; ++k) {
         for (int j = 0; j < nEquations; ++j) {
             fieldValues[j] = values[j][k];
         }
 
-        double *fieldCoeffs = coeffs + polynomial->computeFieldCoefficientsOffset(0, k);
+        double *fieldCoeffs = polynomial->getCoefficients(k);
 
         cblas_dgemv(CBLAS_ORDER::CblasColMajor, CBLAS_TRANSPOSE::CblasTrans,
                     nEquations, nCoeffs, 1., polynomialWeights, nEquations,
@@ -2485,20 +2527,34 @@ void ReconstructionKernel::computeValueLimitedWeights(uint8_t degree, const std:
 {
     assert(degree <= getDegree());
 
-    uint8_t dimensions = getDimensions();
-
     int nEquations = getEquationCount();
+
+    // Constant polynomial
+    if (ENABLE_FAST_PATH_OPTIMIZATIONS && degree == 0) {
+        // Since the polynomial weights are stored using a col-major order,
+        // the weights for the constant polynomial are the first nEquation
+        // values.
+        const double *constantPolynomialWeights = getPolynomialWeights();
+        std::copy_n(constantPolynomialWeights, nEquations, valueWeights);
+
+        return;
+    }
+
+    // Evaluate basis
+    uint8_t dimensions = getDimensions();
     int nCoeffs = ReconstructionPolynomial::getCoefficientCount(degree, dimensions);
 
     BITPIT_CREATE_WORKSPACE(csi, double, nCoeffs, MAX_STACK_WORKSPACE_SIZE);
-
     ReconstructionPolynomial::evalPointBasisValues(degree, dimensions, origin, point, csi);
     if (limiters) {
         applyLimiter(degree, limiters, csi);
     }
 
+    // Generic polynomial
+    const double *polynomialWeights = getPolynomialWeights();
+
     cblas_dgemv(CBLAS_ORDER::CblasColMajor, CBLAS_TRANSPOSE::CblasNoTrans,
-                nEquations, nCoeffs, 1., getPolynomialWeights(), nEquations,
+                nEquations, nCoeffs, 1., polynomialWeights, nEquations,
                 csi, 1, 0, valueWeights, 1);
 }
 
@@ -2618,20 +2674,30 @@ void ReconstructionKernel::computeDerivativeLimitedWeights(uint8_t degree, const
 {
     assert(degree <= getDegree());
 
-    uint8_t dimensions = getDimensions();
-
     int nEquations = getEquationCount();
+
+    // Constant polynomial
+    if (ENABLE_FAST_PATH_OPTIMIZATIONS && degree == 0) {
+        std::fill_n(derivativeWeights, nEquations, 0.);
+
+        return;
+    }
+
+    // Evaluate basis
+    uint8_t dimensions = getDimensions();
     int nCoeffs = ReconstructionPolynomial::getCoefficientCount(degree, dimensions);
 
     BITPIT_CREATE_WORKSPACE(dcsi, double, nCoeffs, MAX_STACK_WORKSPACE_SIZE);
-
     ReconstructionPolynomial::evalPointBasisDerivatives(degree, dimensions, origin, point, direction, dcsi);
     if (limiters) {
         applyLimiter(degree, limiters, dcsi);
     }
 
+    // Generic polynomial
+    const double *polynomialWeights = getPolynomialWeights();
+
     cblas_dgemv(CBLAS_ORDER::CblasColMajor, CBLAS_TRANSPOSE::CblasNoTrans,
-                nEquations, nCoeffs, 1., getPolynomialWeights(), nEquations,
+                nEquations, nCoeffs, 1., polynomialWeights, nEquations,
                 dcsi, 1, 0, derivativeWeights, 1);
 }
 
@@ -2738,24 +2804,36 @@ void ReconstructionKernel::computeGradientLimitedWeights(uint8_t degree, const s
 {
     assert(degree <= getDegree());
 
-    uint8_t dimensions = getDimensions();
-
     int nEquations = getEquationCount();
-    int nCoeffs = ReconstructionPolynomial::getCoefficientCount(degree, dimensions);
 
-    BITPIT_CREATE_WORKSPACE(dcsi, double, nCoeffs, MAX_STACK_WORKSPACE_SIZE);
+    // Constant polynomial
+    if (ENABLE_FAST_PATH_OPTIMIZATIONS && degree == 0) {
+        std::fill_n(gradientWeights[0].data(), 3 * nEquations, 0.);
+
+        return;
+    }
+
+    // Generic polynomial
+    uint8_t dimensions = getDimensions();
+    int nCoeffs = ReconstructionPolynomial::getCoefficientCount(degree, dimensions);
 
     const double *polynomialWeights = getPolynomialWeights();
 
+    BITPIT_CREATE_WORKSPACE(dcsi, double, nCoeffs, MAX_STACK_WORKSPACE_SIZE);
+
     std::array<double, 3> direction = {{0., 0., 0.}};
     for (int d = 0; d < dimensions; ++d) {
+        // Select derivative direction
         direction[d] = 1.;
 
+        // Evaluate basis
         ReconstructionPolynomial::evalPointBasisDerivatives(degree, dimensions, origin, point, direction, dcsi);
         if (limiters) {
             applyLimiter(degree, limiters, dcsi);
         }
 
+        // Generic polynomial
+        //
         // Weights are stored in contiguous three-dimensional arrays, this
         // means we can access the weights of the current dimensions using
         // the dimension as offset and a stride of three elements
@@ -2763,6 +2841,7 @@ void ReconstructionKernel::computeGradientLimitedWeights(uint8_t degree, const s
                     nEquations, nCoeffs, 1., polynomialWeights, nEquations,
                     dcsi, 1, 0, gradientWeights->data() + d, 3);
 
+        // Reset direction
         direction[d] = 0.;
     }
 
