@@ -1109,8 +1109,8 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrix
         petscRowValues = petscRowValuesStorage.data();
     }
 
-    ConstProxyVector<long> rowPattern;
-    ConstProxyVector<double> rowValues;
+    ConstProxyVector<long> rowPattern(maxRowNZ);
+    ConstProxyVector<double> rowValues(maxRowNZ);
     for (long n = 0; n < nRows; ++n) {
         // Get row information
         long row;
