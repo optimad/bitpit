@@ -1676,13 +1676,16 @@ void PatchKernel::partitioningCleanup()
 }
 
 /*!
-	Checks if the patch has been partitioned.
+	Checks if the patch is partitioned.
 
-	\result Returns true if the patch has been partitioned, false otherwise.
+	A patch is considered partitioned if its MPI communicator spans multiple
+	processes.
+
+	\result Returns true if the patch is partitioned, false otherwise.
 */
 bool PatchKernel::isPartitioned() const
 {
-	return isCommunicatorSet();
+	return (getProcessorCount() > 1);
 }
 
 /*!
