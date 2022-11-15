@@ -981,25 +981,13 @@ template<typename stencil_t>
 template<typename stencil_container_t>
 void DiscretizationStencilSolver<stencil_t>::update(std::size_t nRows, const long *rows, const stencil_container_t &stencils)
 {
-    // Update the system
 #if BITPIT_ENABLE_MPI==1
     DiscretizationStencilSolverAssembler<stencil_t> assembler(getCommunicator(), isPartitioned(), &stencils);
 #else
     DiscretizationStencilSolverAssembler<stencil_t> assembler(&stencils);
 #endif
-    SystemSolver::update(nRows, rows, assembler);
 
-    // Update the constants
-    for (std::size_t n = 0; n < nRows; ++n) {
-        long row;
-        if (rows) {
-            row = rows[n];
-        } else {
-            row = n;
-        }
-
-        m_constants[row] = assembler.getRowConstant(n);
-    }
+    update(nRows, rows, assembler);
 }
 
 /*!
