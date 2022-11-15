@@ -80,7 +80,7 @@ std::size_t DiscretizationStencilProxyStorage<stencil_t, stencil_container_t>::s
 /*!
  * Get the stencil associated with the specified row.
  *
- * \param rowIndex is the index of the row in the assembler
+ * \param rowIndex is the index of the row in the storage
  * \result The stencil associated with the specified row.
  */
 template<typename stencil_t, typename stencil_container_t>
@@ -92,7 +92,7 @@ const stencil_t & DiscretizationStencilProxyStorage<stencil_t, stencil_container
 /*!
  * Get the stencil associated with the specified row.
  *
- * \param rowRawIndex is the raw index of the row in the assembler
+ * \param rowRawIndex is the raw index of the row in the storage
  * \result The stencil associated with the specified row.
  */
 template<typename stencil_t, typename stencil_container_t>
@@ -152,7 +152,7 @@ std::size_t DiscretizationStencilProxyStorage<stencil_t, PiercedStorage<stencil_
 /*!
  * Get the stencil associated with the specified row.
  *
- * \param rowIndex is the index of the row in the assembler
+ * \param rowIndex is the index of the row in the storage
  * \result The stencil associated with the specified row.
  */
 template<typename stencil_t>
@@ -164,7 +164,7 @@ const stencil_t & DiscretizationStencilProxyStorage<stencil_t, PiercedStorage<st
 /*!
  * Get the stencil associated with the specified row.
  *
- * \param rowRawIndex is the raw index of the row in the assembler
+ * \param rowRawIndex is the raw index of the row in the storage
  * \result The stencil associated with the specified row.
  */
 template<typename stencil_t>
