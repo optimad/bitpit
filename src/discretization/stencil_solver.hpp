@@ -244,6 +244,9 @@ protected:
 
     std::vector<double> m_constants;
 
+    void assembleConstants(const StencilSolverAssembler &assembler);
+    void updateConstants(std::size_t nRows, const long *rows, const StencilSolverAssembler &assembler);
+
 };
 
 // Specializations
