@@ -33,6 +33,47 @@
 namespace bitpit {
 
 /*!
+ * \class SystemMatrixOrdering
+ * \ingroup system_solver_large
+ *
+ * \brief The SystemMatrixOrdering class provides an interface for defining
+ * classes that allows to reorder the system matrix.
+ *
+ * If the system is partitioned, each process can reorder only it's local
+ * part of the matix.
+ */
+
+/*!
+ * \class NaturalSystemMatrixOrdering
+ * \ingroup system_solver_large
+ *
+ * \brief The NaturalSystemMatrixOrdering class defines allows to use a matrix
+ * natural ordering.
+ */
+
+/*!
+ * Get the rank of the specified local row.
+ *
+ * \param row is the local row
+ * \result The rank of the specified local row.
+ */
+long NaturalSystemMatrixOrdering::getRowRank(long row) const
+{
+    return row;
+}
+
+/*!
+ * Get the rank of the specified local column.
+ *
+ * \param col is the local column
+ * \result The rank of the specified local column.
+ */
+long NaturalSystemMatrixOrdering::getColRank(long col) const
+{
+    return col;
+}
+
+/*!
  * \class SystemMatrixAssembler
  * \ingroup system_solver_large
  *
@@ -515,7 +556,7 @@ SystemSolver::SystemSolver(const std::string &prefix, bool transpose, bool debug
 #if BITPIT_ENABLE_MPI==1
       m_communicator(MPI_COMM_SELF), m_partitioned(false),
 #endif
-      m_rowPermutation(nullptr), m_colPermutation(nullptr),
+      m_rowReordering(PETSC_NULL), m_colReordering(PETSC_NULL),
       m_forceConsistency(false)
 {
     // Initialize PETSc
@@ -548,9 +589,6 @@ SystemSolver::~SystemSolver()
     // Clear the solver
     clear();
 
-    // Reset the permutations
-    resetPermutations();
-
     // Decrease the number of instances
     --m_nInstances;
 }
@@ -578,68 +616,8 @@ void SystemSolver::clear()
 
         m_assembled = false;
     }
-}
 
-/*!
- * Set the permutations that will use internally by the solver.
- *
- * Only local permutations are supported.
- *
- * \param nRows are the rows of the matrix
- * \param rowRanks are the rank of the rows
- * \param nCols are the columns of the matrix
- * \param colRanks are the rank of the columns
- */
-void SystemSolver::setPermutations(long nRows, const long *rowRanks, long nCols, const long *colRanks)
-{
-    // Permutation has to be set before assembling the system
-    if (isAssembled()) {
-        throw std::runtime_error("Unable to set the permutations. The system is already assembled.");
-    }
-
-    // Reset existing permutations
-    resetPermutations();
-
-    // Create new permutations
-    PetscInt *rowPermutationsStorage;
-    PetscMalloc(nRows * sizeof(PetscInt), &rowPermutationsStorage);
-    for (long i = 0; i < nRows; ++i) {
-        rowPermutationsStorage[i] = rowRanks[i];
-    }
-
-#if BITPIT_ENABLE_MPI == 1
-    ISCreateGeneral(m_communicator, nRows, rowPermutationsStorage, PETSC_OWN_POINTER, &m_rowPermutation);
-#else
-    ISCreateGeneral(PETSC_COMM_SELF, nRows, rowPermutationsStorage, PETSC_OWN_POINTER, &m_rowPermutation);
-#endif
-    ISSetPermutation(m_rowPermutation);
-
-    PetscInt *colPermutationsStorage;
-    PetscMalloc(nCols * sizeof(PetscInt), &colPermutationsStorage);
-    for (long j = 0; j < nCols; ++j) {
-        colPermutationsStorage[j] = colRanks[j];
-    }
-
-#if BITPIT_ENABLE_MPI == 1
-    ISCreateGeneral(m_communicator, nCols, colPermutationsStorage, PETSC_OWN_POINTER, &m_colPermutation);
-#else
-    ISCreateGeneral(PETSC_COMM_SELF, nCols, colPermutationsStorage, PETSC_OWN_POINTER, &m_colPermutation);
-#endif
-    ISSetPermutation(m_colPermutation);
-}
-
-/*!
- * Reset the permutations
- */
-void SystemSolver::resetPermutations()
-{
-    if (m_rowPermutation) {
-        ISDestroy(&m_rowPermutation);
-    }
-
-    if (m_colPermutation) {
-        ISDestroy(&m_colPermutation);
-    }
+    clearReordering();
 }
 
 /*!
@@ -649,6 +627,18 @@ void SystemSolver::resetPermutations()
  */
 void SystemSolver::assembly(const SparseMatrix &matrix)
 {
+    assembly(matrix, NaturalSystemMatrixOrdering());
+}
+
+/*!
+ * Assembly the system.
+ *
+ * \param matrix is the matrix
+ * \param reordering is the reordering that will be applied when assemblying the
+ * system
+ */
+void SystemSolver::assembly(const SparseMatrix &matrix, const SystemMatrixOrdering &reordering)
+{
     // Check if the matrix is assembled
     if (!matrix.isAssembled()) {
         throw std::runtime_error("Unable to assembly the system. The matrix is not yet assembled.");
@@ -657,9 +647,9 @@ void SystemSolver::assembly(const SparseMatrix &matrix)
     // Assembly the system matrix
     SystemSparseMatrixAssembler assembler(&matrix);
 #if BITPIT_ENABLE_MPI == 1
-    assembly(matrix.getCommunicator(), matrix.isPartitioned(), assembler);
+    assembly(matrix.getCommunicator(), matrix.isPartitioned(), assembler, reordering);
 #else
-    assembly(assembler);
+    assembly(assembler, reordering);
 #endif
 }
 
@@ -671,7 +661,19 @@ void SystemSolver::assembly(const SparseMatrix &matrix)
  */
 void SystemSolver::assembly(const SystemMatrixAssembler &assembler)
 {
-    assembly(MPI_COMM_SELF, false, assembler);
+    assembly(MPI_COMM_SELF, false, assembler, NaturalSystemMatrixOrdering());
+}
+
+/*!
+ * Assembly the system.
+ *
+ * \param assembler is the matrix assembler
+ * \param reordering is the reordering that will be applied when assemblying the
+ * system
+ */
+void SystemSolver::assembly(const SystemMatrixAssembler &assembler, const SystemMatrixOrdering &reordering)
+{
+    assembly(MPI_COMM_SELF, false, assembler, reordering);
 }
 
 /*!
@@ -683,17 +685,34 @@ void SystemSolver::assembly(const SystemMatrixAssembler &assembler)
  */
 void SystemSolver::assembly(MPI_Comm communicator, bool isPartitioned, const SystemMatrixAssembler &assembler)
 {
+    assembly(communicator, isPartitioned, assembler, NaturalSystemMatrixOrdering());
+}
+
+/*!
+ * Assembly the system.
+ *
+ * \param communicator is the MPI communicator
+ * \param isPartitioned controls if the system is partitioned
+ * \param assembler is the matrix assembler
+ * \param reordering is the reordering that will be applied when assemblying the
+ * system
+ */
+void SystemSolver::assembly(MPI_Comm communicator, bool isPartitioned, const SystemMatrixAssembler &assembler, const SystemMatrixOrdering &reordering)
+{
 #else
 /*!
  * Assembly the system.
  *
  * \param assembler is the matrix assembler
  */
-void SystemSolver::assembly(const SystemMatrixAssembler &assembler)
+void SystemSolver::assembly(const SystemMatrixAssembler &assembler, const SystemMatrixOrdering &reordering)
 {
 #endif
     // Clear the system
     clear();
+
+    // Set reordering
+    setReordering(assembler.getRowCount(), assembler.getColCount(), reordering);
 
 #if BITPIT_ENABLE_MPI == 1
     // Set the communicator
@@ -950,8 +969,8 @@ void SystemSolver::solve(const std::vector<double> &rhs, std::vector<double> *so
  */
 void SystemSolver::preKSPSolveActions()
 {
-    // Apply permutations
-    vectorsPermute(false);
+    // Reorder vectors
+    vectorsReorder(true);
 }
 
 /*!
@@ -959,8 +978,8 @@ void SystemSolver::preKSPSolveActions()
  */
 void SystemSolver::postKSPSolveActions()
 {
-    // Invert permutations
-    vectorsPermute(true);
+    // Reorder vectors
+    vectorsReorder(false);
 }
 
 /*!
@@ -970,9 +989,9 @@ void SystemSolver::postKSPSolveActions()
  */
 void SystemSolver::matrixCreate(const SystemMatrixAssembler &assembler)
 {
-    const PetscInt *rowRanks = nullptr;
-    if (m_rowPermutation) {
-        ISGetIndices(m_rowPermutation, &rowRanks);
+    const PetscInt *rowReordering = nullptr;
+    if (m_rowReordering) {
+        ISGetIndices(m_rowReordering, &rowReordering);
     }
 
     // Set sizes
@@ -995,16 +1014,16 @@ void SystemSolver::matrixCreate(const SystemMatrixAssembler &assembler)
     ConstProxyVector<long> rowPattern;
 #endif
 
-    for (long row = 0; row < nRows; ++row) {
-        long matrixRow = row;
-        if (m_rowPermutation) {
-            matrixRow = rowRanks[matrixRow];
+    for (long n = 0; n < nRows; ++n) {
+        long row = n;
+        if (rowReordering) {
+            row = rowReordering[row];
         }
 
-        d_nnz[row] = assembler.getRowNZCount(matrixRow);
+        d_nnz[row] = assembler.getRowNZCount(n);
 #if BITPIT_ENABLE_MPI == 1
         if (m_partitioned) {
-            assembler.getRowPattern(matrixRow, &rowPattern);
+            assembler.getRowPattern(n, &rowPattern);
 
             int nRowNZ = rowPattern.size();
             for (int k = 0; k < nRowNZ; ++k) {
@@ -1037,8 +1056,8 @@ void SystemSolver::matrixCreate(const SystemMatrixAssembler &assembler)
 #endif
 
     // Cleanup
-    if (m_rowPermutation) {
-        ISRestoreIndices(m_rowPermutation, &rowRanks);
+    if (m_rowReordering) {
+        ISRestoreIndices(m_rowReordering, &rowReordering);
     }
 }
 
@@ -1073,20 +1092,17 @@ void SystemSolver::matrixFill(const SystemMatrixAssembler &assembler)
  */
 void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrixAssembler &assembler)
 {
-    const long nCols = assembler.getColCount();
     const long maxRowNZ = std::max(assembler.getMaxRowNZCount(), 0L);
 
-    // Initialize permutations
-    const PetscInt *rowRanks = nullptr;
-    if (m_rowPermutation) {
-        ISGetIndices(m_rowPermutation, &rowRanks);
+    // Initialize reordering
+    const PetscInt *rowReordering = nullptr;
+    if (m_rowReordering) {
+        ISGetIndices(m_rowReordering, &rowReordering);
     }
 
-    IS invColPermutation;
-    const PetscInt *colInvRanks = nullptr;
-    if (m_colPermutation) {
-        ISInvertPermutation(m_colPermutation, nCols, &invColPermutation);
-        ISGetIndices(invColPermutation, &colInvRanks);
+    const PetscInt *colReordering = nullptr;
+    if (m_colReordering) {
+        ISGetIndices(m_colReordering, &colReordering);
     }
 
     // Global information
@@ -1141,9 +1157,8 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrix
             row = n;
         }
 
-        long assemblerRow = row;
-        if (m_rowPermutation) {
-            assemblerRow = rowRanks[assemblerRow];
+        if (rowReordering) {
+            row = rowReordering[row];
         }
 
         const PetscInt globalRow = rowGlobalOffset + row;
@@ -1167,9 +1182,9 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrix
 
         // Get row data
         if (fastUpdate) {
-            assembler.getRowValues(assemblerRow, &rowValues);
+            assembler.getRowValues(n, &rowValues);
         } else {
-            assembler.getRowData(assemblerRow, &rowPattern, &rowValues);
+            assembler.getRowData(n, &rowPattern, &rowValues);
         }
 
         // Get values in PETSc format
@@ -1192,10 +1207,10 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrix
             // Get pattern in PETSc format
             for (int k = 0; k < nRowValues; ++k) {
                 long globalCol = rowPattern[k];
-                if (m_colPermutation) {
+                if (colReordering) {
                     if (globalCol >= colGlobalBegin && globalCol < colGlobalEnd) {
                         long col = globalCol - colGlobalBegin;
-                        col = colInvRanks[col];
+                        col = colReordering[col];
                         globalCol = colGlobalBegin + col;
                     }
                 }
@@ -1213,12 +1228,12 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrix
     MatAssemblyEnd(m_A, MAT_FINAL_ASSEMBLY);
 
     // Cleanup
-    if (m_rowPermutation) {
-        ISRestoreIndices(m_rowPermutation, &rowRanks);
+    if (rowReordering) {
+        ISRestoreIndices(m_rowReordering, &rowReordering);
     }
 
-    if (m_colPermutation) {
-        ISDestroy(&invColPermutation);
+    if (colReordering) {
+        ISRestoreIndices(m_colReordering, &colReordering);
     }
 }
 
@@ -1269,11 +1284,11 @@ void SystemSolver::vectorsCreate()
 }
 
 /*!
- * Apply permutations to RHS and solution vectors.
+ * Reorder RHS and solution vectors to match the order of the system matrix.
  *
- * \param invert is a flag for inverting the permutation
+ * \param invert is a flag for inverting the ordering
  */
-void SystemSolver::vectorsPermute(bool invert)
+void SystemSolver::vectorsReorder(bool invert)
 {
     PetscBool petscInvert;
     if (invert) {
@@ -1282,12 +1297,12 @@ void SystemSolver::vectorsPermute(bool invert)
         petscInvert = PETSC_FALSE;
     }
 
-    if (m_colPermutation) {
-        VecPermute(m_solution, m_colPermutation, petscInvert);
+    if (m_colReordering) {
+        VecPermute(m_rhs, m_colReordering, petscInvert);
     }
 
-    if (m_rowPermutation) {
-        VecPermute(m_rhs, m_rowPermutation, petscInvert);
+    if (m_rowReordering) {
+        VecPermute(m_solution, m_rowReordering, petscInvert);
     }
 }
 
@@ -1577,6 +1592,79 @@ void SystemSolver::setNullSpace()
 void SystemSolver::unsetNullSpace()
 {
     MatSetNullSpace(m_A, NULL);
+}
+
+/*!
+ * Set the reordering that will be applied when assemblying the matrix.
+ *
+ * Reordering will be applied when the system is assembled and its sole purpose
+ * is to speed up the resolution of the system (e.g., reorder can be used to
+ * reduce the fill-in of the LU factorization).
+ *
+ * Reordering is only applied internally, all public functions expects row
+ * and column indices to be in natural matrix order (i.e., not reordered).
+ *
+ * \param nRows is the number of rows of the system matrix
+ * \param nCols is the number of columns of the system matrix
+ * \param reordering is the reordering that will be applied
+ */
+void SystemSolver::setReordering(long nRows, long nCols, const SystemMatrixOrdering &reordering)
+{
+    // Clear existing reordering
+    clearReordering();
+
+    // Early return if natural ordering is used
+    try {
+        dynamic_cast<const NaturalSystemMatrixOrdering &>(reordering);
+        return;
+    } catch(std::bad_cast exception) {
+        // A reordering other than the natural one has been passed
+    }
+
+    // Set row reordering
+    PetscInt *rowReorderingStorage;
+    PetscMalloc(nRows * sizeof(PetscInt), &rowReorderingStorage);
+    for (long i = 0; i < nRows; ++i) {
+        rowReorderingStorage[reordering.getRowRank(i)] = i;
+    }
+
+#if BITPIT_ENABLE_MPI == 1
+    ISCreateGeneral(m_communicator, nRows, rowReorderingStorage, PETSC_OWN_POINTER, &m_rowReordering);
+#else
+    ISCreateGeneral(PETSC_COMM_SELF, nRows, rowReorderingStorage, PETSC_OWN_POINTER, &m_rowReordering);
+#endif
+    ISSetPermutation(m_rowReordering);
+
+    // Create new permutations
+    PetscInt *colReorderingStorage;
+    PetscMalloc(nCols * sizeof(PetscInt), &colReorderingStorage);
+    for (long j = 0; j < nCols; ++j) {
+        colReorderingStorage[reordering.getColRank(j)] = j;
+    }
+
+#if BITPIT_ENABLE_MPI == 1
+    ISCreateGeneral(m_communicator, nCols, colReorderingStorage, PETSC_OWN_POINTER, &m_colReordering);
+#else
+    ISCreateGeneral(PETSC_COMM_SELF, nCols, colReorderingStorage, PETSC_OWN_POINTER, &m_colReordering);
+#endif
+    ISSetPermutation(m_colReordering);
+}
+
+/*!
+ * Clear the reordering that will be applied when assemblying the matrix.
+ *
+ * The function will clear any reordering preiously set. With no reordering
+ * defined, the matrix will be assembled using its natural ordering.
+ */
+void SystemSolver::clearReordering()
+{
+    if (m_rowReordering) {
+        ISDestroy(&m_rowReordering);
+    }
+
+    if (m_colReordering) {
+        ISDestroy(&m_colReordering);
+    }
 }
 
 /*!
