@@ -926,12 +926,8 @@ void DiscretizationStencilSolver<stencil_t>::assembly(const StencilSolverAssembl
     SystemSolver::assembly(assembler);
 #endif
 
-    // Set constants
-    long nRows = assembler.getRowCount();
-    m_constants.resize(nRows);
-    for (long n = 0; n < nRows; ++n) {
-        m_constants[n] = assembler.getRowConstant(n);
-    }
+    // Assemble constants
+    assembleConstants(assembler);
 }
 
 /*!
@@ -1034,6 +1030,39 @@ void DiscretizationStencilSolver<stencil_t>::update(std::size_t nRows, const lon
     SystemSolver::update(nRows, rows, assembler);
 
     // Update the constants
+    updateConstants(nRows, rows, assembler);
+}
+
+/*!
+ * Assemble the constants associated with stencil solver.
+ *
+ * \param assembler is the solver assembler
+ */
+template<typename stencil_t>
+void DiscretizationStencilSolver<stencil_t>::assembleConstants(const StencilSolverAssembler &assembler)
+{
+    long nRows = assembler.getRowCount();
+
+    // Create the storage
+    m_constants.resize(nRows);
+
+    // Update the constants
+    updateConstants(nRows, nullptr, assembler);
+}
+
+/*!
+ * Update the constants associated with stencil solver.
+ *
+ * \param nRows is the number of stencils that will be updated
+ * \param rows are the rows of the stencils that will be updated,
+ * if a null pointer is passed, the stencils that will be updated are the
+ * stencils from 0 to (nRows - 1).
+ * \param assembler is the solver assembler
+ */
+template<typename stencil_t>
+void DiscretizationStencilSolver<stencil_t>::updateConstants(std::size_t nRows, const long *rows,
+                                                             const StencilSolverAssembler &assembler)
+{
     for (std::size_t n = 0; n < nRows; ++n) {
         long row;
         if (rows) {
