@@ -67,6 +67,66 @@ struct KSPStatus {
     }
 };
 
+class SystemMatrixOrdering
+{
+
+public:
+    virtual ~SystemMatrixOrdering() = default;
+
+    /**
+     * Get the rank of the specified local row.
+     *
+     * The rank defines the position in the assembled matrix, of the specified
+     * local row.
+     *
+     * \param row is the local row
+     * \result The rank of the specified local row.
+     */
+    virtual long getRowRank(long row) const = 0;
+
+    /**
+     * Get the rank of the specified local column.
+     *
+     * The rank defines the position in the assembled matrix, of the specified
+     * local column.
+     *
+     * \param col is the local column
+     * \result The rank of the specified local column.
+     */
+    virtual long getColRank(long col) const = 0;
+
+protected:
+    SystemMatrixOrdering() = default;
+
+};
+
+class NaturalSystemMatrixOrdering : public SystemMatrixOrdering
+{
+
+public:
+    NaturalSystemMatrixOrdering() = default;
+
+    long getRowRank(long row) const override;
+    long getColRank(long col) const override;
+
+};
+
+template<typename RowRankStorage, typename ColRankStorage>
+class ProxySystemMatrixOrdering : public SystemMatrixOrdering
+{
+
+public:
+    ProxySystemMatrixOrdering(const RowRankStorage *rowRankStorage, const ColRankStorage *colRankStorage);
+
+    long getRowRank(long row) const override;
+    long getColRank(long col) const override;
+
+private:
+    const RowRankStorage *m_rowRankStorage;
+    const ColRankStorage *m_colRankStorage;
+
+};
+
 class SystemMatrixAssembler {
 
 public:
@@ -181,12 +241,13 @@ public:
 
     void clear();
 
-    void setPermutations(long nRows, const long *rowRanks, long nCols, const long *colRanks);
-
     void assembly(const SparseMatrix &matrix);
+    void assembly(const SparseMatrix &matrix, const SystemMatrixOrdering &reordering);
     void assembly(const SystemMatrixAssembler &assembler);
+    void assembly(const SystemMatrixAssembler &assembler, const SystemMatrixOrdering &reordering);
 #if BITPIT_ENABLE_MPI==1
     void assembly(MPI_Comm communicator, bool isPartitioned, const SystemMatrixAssembler &assembler);
+    void assembly(MPI_Comm communicator, bool isPartitioned, const SystemMatrixAssembler &assembler, const SystemMatrixOrdering &reordering);
 #endif
     bool isAssembled() const;
 
@@ -252,9 +313,12 @@ protected:
     void matrixUpdate(long nRows, const long *rows, const SystemMatrixAssembler &assembler);
 
     void vectorsCreate();
-    void vectorsPermute(bool invert);
+    void vectorsReorder(bool invert);
     void vectorsFill(const std::vector<double> &rhs, std::vector<double> *solution);
     void vectorsExport(std::vector<double> *solution);
+
+    void clearReordering();
+    void setReordering(long nRows, long nCols, const SystemMatrixOrdering &reordering);
 
     virtual void preKSPSetupActions();
     virtual void postKSPSetupActions();
@@ -282,8 +346,8 @@ private:
     bool m_partitioned;
 #endif
 
-    IS m_rowPermutation;
-    IS m_colPermutation;
+    IS m_rowReordering;
+    IS m_colReordering;
 
     bool m_forceConsistency;
 
@@ -299,5 +363,8 @@ private:
 };
 
 }
+
+// Include template implementations
+#include "system_solvers_large.tpp"
 
 #endif
