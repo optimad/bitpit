@@ -108,10 +108,10 @@ SparseMatrix::SparseMatrix()
 * \param nRows is the number of rows of the matrix
 * \param nCols is the number of columns of the matrix
 * \param nNZ is the number of non-zero elements that the matrix will contain.
-* This is just an optional hint. If the actual number of non-zero elements
-* turns out to be greater than the provided value, the initialization of the
-* matrix pattern will be slower because reallocation of internal data may be
-* needed
+* If this number is unknown, an estimante (or zero) could be passed. If the
+* actual number of non-zero elements turns out to be greater than the provided
+* value, the initialization of the matrix will be slower because reallocation
+* of internal data may be needed
 */
 SparseMatrix::SparseMatrix(long nRows, long nCols, long nNZ)
     : SparseMatrix(MPI_COMM_SELF, false, nRows, nCols, nNZ)
@@ -338,11 +338,12 @@ void SparseMatrix::squeeze()
 *
 * This function should be called after adding all the rows of the matrix.
 * Its purpose is to prepare the matrix for the usage.
-#if BITPIT_ENABLE_MPI==1
-*
-* It's a collective operation, hence it has to be called by all processes.
-#endif
 */
+#if BITPIT_ENABLE_MPI==1
+/*!
+* It's a collective operation, hence it has to be called by all processes.
+*/
+#endif
 void SparseMatrix::assembly()
 {
     // Early return if the matrix is already assembled.
