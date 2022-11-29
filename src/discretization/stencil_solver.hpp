@@ -40,7 +40,7 @@ namespace bitpit {
 class StencilSolverAssembler : public SystemMatrixAssembler {
 
 public:
-    virtual double getRowConstant(long rowIndex) const = 0;
+    virtual void getRowConstant(long rowIndex, bitpit::ConstProxyVector<double> *constant) const = 0;
 
 protected:
     using SystemMatrixAssembler::SystemMatrixAssembler;
@@ -124,17 +124,26 @@ public:
 
     AssemblyOptions getOptions() const override;
 
-    int getBlockSize() const;
+    int getBlockSize() const override;
 
     long getRowCount() const override;
     long getColCount() const override;
+
+    long getRowElementCount() const override;
+    long getColElementCount() const override;
 
 #if BITPIT_ENABLE_MPI==1
     long getRowGlobalCount() const override;
     long getColGlobalCount() const override;
 
+    long getRowGlobalElementCount() const override;
+    long getColGlobalElementCount() const override;
+
     long getRowGlobalOffset() const override;
     long getColGlobalOffset() const override;
+
+    long getRowGlobalElementOffset() const override;
+    long getColGlobalElementOffset() const override;
 #endif
 
     long getRowNZCount(long rowIndex) const override;
@@ -144,7 +153,7 @@ public:
     void getRowValues(long rowIndex, ConstProxyVector<double> *values) const override;
     void getRowData(long rowIndex, ConstProxyVector<long> *pattern, ConstProxyVector<double> *values) const override;
 
-    double getRowConstant(long rowIndex) const override;
+    void getRowConstant(long rowIndex, bitpit::ConstProxyVector<double> *constant) const override;
 
 protected:
     long m_nRows;
@@ -197,10 +206,10 @@ protected:
     void getValues(const stencil_t &stencil, ConstProxyVector<double> *values) const;
 
     template<typename U = typename stencil_t::weight_type, typename std::enable_if<std::is_fundamental<U>::value>::type * = nullptr>
-    double getConstant(const stencil_t &stencil) const;
+    void getConstant(const stencil_t &stencil, bitpit::ConstProxyVector<double> *constant) const;
 
     template<typename U = typename stencil_t::weight_type, typename std::enable_if<!std::is_fundamental<U>::value>::type * = nullptr>
-    double getConstant(const stencil_t &stencil) const;
+    void getConstant(const stencil_t &stencil, bitpit::ConstProxyVector<double> *constant) const;
 
     double getRawValue(const typename stencil_t::weight_type &weight, int item) const;
 
@@ -212,8 +221,10 @@ class DiscretizationStencilSolver : public SystemSolver {
 public:
     DiscretizationStencilSolver(bool debug = false);
     DiscretizationStencilSolver(bool transpose, bool debug);
+    DiscretizationStencilSolver(bool flatten, bool transpose, bool debug);
     DiscretizationStencilSolver(const std::string &prefix, bool debug = false);
     DiscretizationStencilSolver(const std::string &prefix, bool transpose, bool debug = false);
+    DiscretizationStencilSolver(const std::string &prefix, bool flatten, bool transpose, bool debug = false);
 
     void clear(bool release = false);
     template<typename stencil_container_t = std::vector<stencil_t>>

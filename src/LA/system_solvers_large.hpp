@@ -139,15 +139,26 @@ public:
 
     virtual AssemblyOptions getOptions() const = 0;
 
+    virtual int getBlockSize() const = 0;
+
     virtual long getRowCount() const = 0;
     virtual long getColCount() const = 0;
+
+    virtual long getRowElementCount() const = 0;
+    virtual long getColElementCount() const = 0;
 
 #if BITPIT_ENABLE_MPI==1
     virtual long getRowGlobalCount() const = 0;
     virtual long getColGlobalCount() const = 0;
 
+    virtual long getRowGlobalElementCount() const = 0;
+    virtual long getColGlobalElementCount() const = 0;
+
     virtual long getRowGlobalOffset() const = 0;
     virtual long getColGlobalOffset() const = 0;
+
+    virtual long getRowGlobalElementOffset() const = 0;
+    virtual long getColGlobalElementOffset() const = 0;
 #endif
 
     virtual long getRowNZCount(long rowIndex) const = 0;
@@ -169,15 +180,26 @@ public:
 
     AssemblyOptions getOptions() const override;
 
+    int getBlockSize() const override;
+
     long getRowCount() const override;
     long getColCount() const override;
+
+    long getRowElementCount() const override;
+    long getColElementCount() const override;
 
 #if BITPIT_ENABLE_MPI==1
     long getRowGlobalCount() const override;
     long getColGlobalCount() const override;
 
+    long getRowGlobalElementCount() const override;
+    long getColGlobalElementCount() const override;
+
     long getRowGlobalOffset() const override;
     long getColGlobalOffset() const override;
+
+    long getRowGlobalElementOffset() const override;
+    long getColGlobalElementOffset() const override;
 #endif
 
     long getRowNZCount(long rowIndex) const override;
@@ -234,8 +256,10 @@ public:
 
     SystemSolver(bool debug = false);
     SystemSolver(bool transpose, bool debug);
+    SystemSolver(bool flatten, bool transpose, bool debug);
     SystemSolver(const std::string &prefix, bool debug = false);
     SystemSolver(const std::string &prefix, bool transpose, bool debug);
+    SystemSolver(const std::string &prefix, bool flatten, bool transpose, bool debug);
 
     virtual ~SystemSolver();
 
@@ -259,11 +283,17 @@ public:
     void setUp();
     bool isSetUp() const;
 
+    int getBlockSize() const;
+
     long getRowCount() const;
     long getColCount() const;
+    long getRowElementCount() const;
+    long getColElementCount() const;
 #if BITPIT_ENABLE_MPI==1
     long getRowGlobalCount() const;
     long getColGlobalCount() const;
+    long getRowGlobalElementCount() const;
+    long getColGlobalElementCount() const;
 
     bool isPartitioned() const;
 #endif
@@ -298,6 +328,7 @@ public:
     void enableForceConsistency(bool enable);
 
 protected:
+    bool m_flatten;
     bool m_transpose;
 
     Mat m_A;

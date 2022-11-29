@@ -39,17 +39,21 @@ class SparseMatrix {
 
 public:
     SparseMatrix();
-    SparseMatrix(long nRows, long nCols, long nNZ = 0);
+    SparseMatrix(long nRows, long nCols, long nNZ);
+    SparseMatrix(int blockSize, long nRows, long nCols, long nNZ);
 #if BITPIT_ENABLE_MPI==1
     SparseMatrix(MPI_Comm communicator);
-    SparseMatrix(MPI_Comm communicator, bool partitioned, long nRows, long nCols, long nNZ = 0);
+    SparseMatrix(MPI_Comm communicator, bool partitioned, long nRows, long nCols, long nNZ);
+    SparseMatrix(MPI_Comm communicator, bool partitioned, int blockSize, long nRows, long nCols, long nNZ);
 #endif
 
     ~SparseMatrix();
 
-    void initialize(long nRows, long nCols, long nNZ = 0);
+    void initialize(long nRows, long nCols, long nNZ);
+    void initialize(int blockSize, long nRows, long nCols, long nNZ);
 #if BITPIT_ENABLE_MPI==1
-    void initialize(bool partitioned, long nRows, long nCols, long nNZ = 0);
+    void initialize(bool partitioned, long nRows, long nCols, long nNZ);
+    void initialize(bool partitioned, int blockSize, long nRows, long nCols, long nNZ);
 #endif
     void clear(bool release = false);
     void squeeze();
@@ -60,12 +64,21 @@ public:
     long countMissingRows() const;
     long countAddedRows() const;
 
+    int getBlockSize() const;
+
     long getRowCount() const;
     long getColCount() const;
+
+    long getRowElementCount() const;
+    long getColElementCount() const;
 
     long getNZCount() const;
     long getRowNZCount(long row) const;
     long getMaxRowNZCount() const;
+
+    long getNZElementCount() const;
+    long getRowNZElementCount(long row) const;
+    long getMaxRowNZElementCount() const;
 
 #if BITPIT_ENABLE_MPI==1
     bool isPartitioned() const;
@@ -75,11 +88,20 @@ public:
     long getRowGlobalCount() const;
     long getRowGlobalOffset() const;
 
+    long getRowGlobalElementCount() const;
+    long getRowGlobalElementOffset() const;
+
     long getColGlobalCount() const;
     long getColGlobalOffset() const;
 
+    long getColGlobalElementCount() const;
+    long getColGlobalElementOffset() const;
+
     long getNZGlobalCount() const;
     long getMaxRowNZGlobalCount() const;
+
+    long getNZGlobalElementCount() const;
+    long getMaxRowNZGlobalElementCount() const;
 
     std::vector<long> extractLocalGlobalRows() const;
     std::vector<long> extractGhostGlobalRows() const;
@@ -100,6 +122,8 @@ public:
     std::unique_ptr<SparseMatrix> computeTranspose() const;
 
 protected:
+    int m_blockSize;
+
     long m_nRows;
     long m_nCols;
     long m_nNZ;
@@ -125,9 +149,9 @@ protected:
     std::vector<double> m_values;
 
 private:
-    void _initialize(long nRows, long nCols, long nNZ = 0);
+    void _initialize(int blockSize, long nRows, long nCols, long nNZ);
 #if BITPIT_ENABLE_MPI==1
-    void _initialize(bool partitioned, long nRows, long nCols, long nNZ = 0);
+    void _initialize(bool partitioned, int bBlocks, long nRows, long nCols, long nNZ);
 #endif
 
 #if BITPIT_ENABLE_MPI==1
