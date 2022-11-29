@@ -114,9 +114,23 @@ SystemMatrixAssembler::AssemblyOptions SystemSparseMatrixAssembler::getOptions()
 }
 
 /*!
- * Get the number of rows of the matrix.
+ * Get the block size.
  *
- * \result The number of rows of the matrix.
+ * \result The block size.
+ */
+int SystemSparseMatrixAssembler::getBlockSize() const
+{
+    return m_matrix->getBlockSize();
+}
+
+/*!
+ * Get the number of (block) rows handled by the assembler.
+ *
+ * If the matrix is a block matrix (i.e., the block size is greater than one),
+ * this function will return the number of block rows, where a block row is
+ * defined as a group of blockSize matrix rows.
+ *
+ * \result The number of (block) rows handled by the assembler.
  */
 long SystemSparseMatrixAssembler::getRowCount() const
 {
@@ -124,40 +138,112 @@ long SystemSparseMatrixAssembler::getRowCount() const
 }
 
 /*!
- * Get the number of columns of the matrix.
+ * Get the number of (block) columns handled by the assembler.
  *
- * \result The number of columns of the matrix.
+ * If the matrix is a block matrix (i.e., the block size is greater than one),
+ * this function will return the number of block columns, where a block column
+ * is defined as a group of blockSize matrix columns.
+ *
+ * \result The number of (block) columns handled by the assembler.
  */
 long SystemSparseMatrixAssembler::getColCount() const
 {
     return m_matrix->getColCount();
 }
 
-#if BITPIT_ENABLE_MPI==1
 /*!
- * Get the global number of rows of the matrix.
+ * Get the number of elements in the rows handled by the assembler.
  *
- * \result The global number of rows of the matrix.
+ * This function will return the effective number of rows of the matrix that
+ * will be assembled.
+ *
+ * \result The number of rows handled by the assembler.
+ */
+long SystemSparseMatrixAssembler::getRowElementCount() const
+{
+    long nRowElements = getBlockSize() * getRowCount();
+
+    return nRowElements;
+}
+
+/*!
+ * Get the number of elements in the columns handled by the assembler.
+ *
+ * This function will return the effective number of columns of the matrix that
+ * will be assembled.
+ *
+ * \result The number of columns handled by the assembler.
+ */
+long SystemSparseMatrixAssembler::getColElementCount() const
+{
+    long nColElements = getBlockSize() * getColCount();
+
+    return nColElements;
+}
+
+#if BITPIT_ENABLE_MPI==1
+/**
+ * Get number of global (block) rows handled by the assembler.
+ *
+ * If the matrix is a block matrix (i.e., the block size is greater than one),
+ * this function will return the global number of block rows, where a block row
+ * is defined as a group of blockSize matrix rows.
+ *
+ * \result The number of global rows handled by the assembler.
  */
 long SystemSparseMatrixAssembler::getRowGlobalCount() const
 {
     return m_matrix->getRowGlobalCount();
 }
 
-/*!
- * Get the global number of columns of the matrix.
+/**
+ * Get number of global (block) columns handled by the assembler.
  *
- * \result The global number of columns of the matrix.
+ * If the matrix is a block matrix (i.e., the block size is greater than one),
+ * this function will return the global number of block columns, where a block
+ * column is defined as a group of blockSize matrix columns.
+ *
+ * \result The number of global (block) columns handled by the assembler.
  */
 long SystemSparseMatrixAssembler::getColGlobalCount() const
 {
     return m_matrix->getColGlobalCount();
 }
 
-/*!
- * Get global row offset.
+/**
+ * Get the number of global elements in the rows handled by the assembler.
  *
- * \result The global row offset.
+ * This function will return the effective global number of rows of the system
+ * matrix.
+ *
+ * \result The number of global elements in the rows handled by the assembler.
+ */
+long SystemSparseMatrixAssembler::getRowGlobalElementCount() const
+{
+    long nElements = getBlockSize() * getRowGlobalCount();
+
+    return nElements;
+}
+
+/*!
+ * Get the global number of columns handled by the assembler.
+ *
+ * This function will return the effective global number of columns of the
+ * system matrix.
+ *
+ * \result The global number of columns handled by the assembler.
+ */
+long SystemSparseMatrixAssembler::getColGlobalElementCount() const
+{
+    long nElements = getBlockSize() * getColGlobalCount();
+
+    return nElements;
+}
+
+/*!
+ * Get global (block) row offset.
+ *
+ * \result The global (block) row offset.
  */
 long SystemSparseMatrixAssembler::getRowGlobalOffset() const
 {
@@ -165,13 +251,43 @@ long SystemSparseMatrixAssembler::getRowGlobalOffset() const
 }
 
 /*!
- * Get global column offset.
+ * Get global (block) column offset.
  *
- * \result The global column offset.
+ * \result The global (block) column offset.
  */
 long SystemSparseMatrixAssembler::getColGlobalOffset() const
 {
     return m_matrix->getColGlobalOffset();
+}
+
+/*!
+ * Get global offset for the elements of the row.
+ *
+ * This function will return the offset expressed in effective rows of the
+ * system matrix.
+ *
+ * \result The global offset for the elements of the row.
+ */
+long SystemSparseMatrixAssembler::getRowGlobalElementOffset() const
+{
+    long offset = getBlockSize() * getRowGlobalOffset();
+
+    return offset;
+}
+
+/*!
+ * Get global offset for the elements of the column.
+ *
+ * This function will return the offset expressed in effective columns of the
+ * system matrix.
+ *
+ * \result The global offset for the elements of the column.
+ */
+long SystemSparseMatrixAssembler::getColGlobalElementOffset() const
+{
+    long offset = getBlockSize() * getColGlobalOffset();
+
+    return offset;
 }
 #endif
 
@@ -199,8 +315,12 @@ long SystemSparseMatrixAssembler::getMaxRowNZCount() const
 /*!
  * Get the pattern of the specified row.
  *
+ * If the matrix is a block matrix (i.e., the block size is greater than one),
+ * this function will return the global ids of the block columns of the row,
+ * where a block column is defined as a group of blockSize matrix columns.
+ *
  * \param rowIndex is the index of the row in the assembler
- * \param pattern on output will contain the values of the specified row
+ * \param pattern on output will contain the pattern of the specified (block) row
  */
 void SystemSparseMatrixAssembler::getRowPattern(long rowIndex, ConstProxyVector<long> *pattern) const
 {
@@ -210,8 +330,16 @@ void SystemSparseMatrixAssembler::getRowPattern(long rowIndex, ConstProxyVector<
 /*!
  * Get the values of the specified row.
  *
+ * If the matrix is a block matrix (i.e., the block size is greater than one),
+ * this function will return the values of all the elements of a block row,
+ * where a block column is defined as a group of blockSize matrix columns. The
+ * values are returned as a row-oriented logically two-dimensional array of
+ * values.
+ *
  * \param rowIndex is the index of the row in the assembler
- * \param values on output will contain the values of the specified row
+ * \param values on output will contain the values of the specified (block) row.
+ * If the block size is greater than one, values will be stored in a logically
+ * two-dimensional array that uses a col-major order
  */
 void SystemSparseMatrixAssembler::getRowValues(long rowIndex, ConstProxyVector<double> *values) const
 {
@@ -221,9 +349,20 @@ void SystemSparseMatrixAssembler::getRowValues(long rowIndex, ConstProxyVector<d
 /*!
  * Get the data of the specified row.
  *
+ * If the matrix is a block matrix (i.e., the block size is greater than one),
+ * the pattern defines the global ids of the block columns of the row, where a
+ * block column is defined as a group of blockSize matrix columns.
+ *
+ * If the matrix is a block matrix (i.e., the block size is greater than one),
+ * the values contain of all the elements of a block row, where a block column
+ * is defined as a group of blockSize matrix columns. The values are returned
+ * as a row-oriented logically two-dimensional array of values.
+ *
  * \param rowIndex is the index of the row in the assembler
- * \param pattern on output will contain the values of the specified row
- * \param values on output will contain the values of the specified row
+ * \param pattern on output will contain the pattern of the specified (block) row
+ * \param values on output will contain the values of the specified (block) row.
+ * If the block size is greater than one, values will be stored in a logically
+ * two-dimensional array that uses a col-major order
  */
 void SystemSparseMatrixAssembler::getRowData(long rowIndex, ConstProxyVector<long> *pattern, ConstProxyVector<double> *values) const
 {
@@ -503,6 +642,17 @@ bool PetscManager::finalize()
  *
  * \brief The SystemSolver class provides methods for building and solving
  * large linear systems.
+ *
+ * Rather than working with individual elements in the system matrix, it is
+ * possible to employ blocks of elements. The size of the blocks can be defined
+ * during assembly. When a size different that one is provided, the matrix will
+ * store elements by fixed-sized dense nb × nb blocks, where nb is the size of
+ * the blocks. Blocking may be advantageous when solving PDE-based simulations
+ * that leads to matrices with a naturally blocked structure (with a block size
+ * equal to the number of degrees of freedom per cell).
+ *
+ * When blocking is used, row and column indexes will count the number of blocks
+ * in the row/column direction, not the number of rows/columns of the matrix.
  */
 
 PetscManager SystemSolver::m_petscManager = PetscManager();
@@ -515,7 +665,7 @@ int SystemSolver::m_nInstances = 0;
  * \param debug if set to true, debug information will be printed
  */
 SystemSolver::SystemSolver(bool debug)
-    : SystemSolver("", false, debug)
+    : SystemSolver("", false, false, debug)
 {
 }
 
@@ -526,7 +676,21 @@ SystemSolver::SystemSolver(bool debug)
  * \param debug if set to true, debug information will be printed
  */
 SystemSolver::SystemSolver(bool transpose, bool debug)
-    : SystemSolver("", transpose, debug)
+    : SystemSolver("", false, transpose, debug)
+{
+}
+
+
+/*!
+ * Constuctor
+ *
+ * \param flatten if set to true, the system matrix will be created with a
+ * unitary block size, regardless of the blocks size of the assembler
+ * \param transpose if set to true, transposed system will be solved
+ * \param debug if set to true, debug information will be printed
+ */
+SystemSolver::SystemSolver(bool flatten, bool transpose, bool debug)
+    : SystemSolver("", flatten, transpose, debug)
 {
 }
 
@@ -542,16 +706,29 @@ SystemSolver::SystemSolver(const std::string &prefix, bool debug)
 }
 
 /*!
- * Constuctor
+ * Constructor.
  *
  * \param prefix is the prefix string to prepend to all option requests
- * \param transpose if set to true, transposed system will be solved
  * \param debug if set to true, debug information will be printed
  */
 SystemSolver::SystemSolver(const std::string &prefix, bool transpose, bool debug)
-    : m_transpose(transpose),
-      m_A(nullptr), m_rhs(nullptr), m_solution(nullptr),
-      m_KSP(nullptr),
+    : SystemSolver(prefix, false, transpose, debug)
+{
+}
+
+/*!
+ * Constuctor
+ *
+ * \param prefix is the prefix string to prepend to all option requests
+ * \param flatten if set to true, the system matrix will be created with a
+ * unitary block size, regardless of the blocks size of the assembler
+ * \param transpose if set to true, transposed system will be solved
+ * \param debug if set to true, debug information will be printed
+ */
+SystemSolver::SystemSolver(const std::string &prefix, bool flatten, bool transpose, bool debug)
+    : m_flatten(flatten), m_transpose(transpose),
+      m_A(PETSC_NULL), m_rhs(PETSC_NULL), m_solution(PETSC_NULL),
+      m_KSP(PETSC_NULL),
       m_prefix(prefix), m_assembled(false), m_setUp(false),
 #if BITPIT_ENABLE_MPI==1
       m_communicator(MPI_COMM_SELF), m_partitioned(false),
@@ -623,6 +800,11 @@ void SystemSolver::clear()
 /*!
  * Assembly the system.
  *
+ * If the system was created with the flatten flag set to true, the system matrix
+ * will be created with a unitary block size. Otherwise, the block size of the
+ * system matrix will be set equal to the block size of the matrix received in
+ * input.
+ *
  * \param matrix is the matrix
  */
 void SystemSolver::assembly(const SparseMatrix &matrix)
@@ -632,6 +814,11 @@ void SystemSolver::assembly(const SparseMatrix &matrix)
 
 /*!
  * Assembly the system.
+ *
+ * If the system was created with the flatten flag set to true, the system matrix
+ * will be created with a unitary block size. Otherwise, the block size of the
+ * system matrix will be set equal to the block size of the matrix received in
+ * input.
  *
  * \param matrix is the matrix
  * \param reordering is the reordering that will be applied when assemblying the
@@ -657,6 +844,10 @@ void SystemSolver::assembly(const SparseMatrix &matrix, const SystemMatrixOrderi
 /*!
  * Assembly the system.
  *
+ * If the system was created with the flatten flag set to true, the system matrix
+ * will be created with a unitary block size. Otherwise, the block size of the
+ * system matrix will be set equal to the block size specified by the assembler.
+ *
  * \param assembler is the matrix assembler
  */
 void SystemSolver::assembly(const SystemMatrixAssembler &assembler)
@@ -679,6 +870,10 @@ void SystemSolver::assembly(const SystemMatrixAssembler &assembler, const System
 /*!
  * Assembly the system.
  *
+ * If the system was created with the flatten flag set to true, the system matrix
+ * will be created with a unitary block size. Otherwise, the block size of the
+ * system matrix will be set equal to the block size specified by the assembler.
+ *
  * \param communicator is the MPI communicator
  * \param isPartitioned controls if the system is partitioned
  * \param assembler is the matrix assembler
@@ -691,6 +886,10 @@ void SystemSolver::assembly(MPI_Comm communicator, bool isPartitioned, const Sys
 /*!
  * Assembly the system.
  *
+ * If the system was created with the flatten flag set to true, the system matrix
+ * will be created with a unitary block size. Otherwise, the block size of the
+ * system matrix will be set equal to the block size specified by the assembler.
+ *
  * \param communicator is the MPI communicator
  * \param isPartitioned controls if the system is partitioned
  * \param assembler is the matrix assembler
@@ -702,6 +901,10 @@ void SystemSolver::assembly(MPI_Comm communicator, bool isPartitioned, const Sys
 #else
 /*!
  * Assembly the system.
+ *
+ * If the system was created with the flatten flag set to true, the system matrix
+ * will be created with a unitary block size. Otherwise, the block size of the
+ * system matrix will be set equal to the block size specified by the assembler.
  *
  * \param assembler is the matrix assembler
  */
@@ -802,14 +1005,79 @@ void SystemSolver::update(long nRows, const long *rows, const SystemMatrixAssemb
     matrixUpdate(nRows, rows, assembler);
 }
 
+/*!
+ * Get the block size of the system.
+ *
+ * \result The block size of the system.
+ */
+int SystemSolver::getBlockSize() const
+{
+    if (m_A == PETSC_NULL) {
+        return 0;
+    }
+
+    PetscInt blockSize;
+    MatGetBlockSize(m_A, &blockSize);
+
+    return blockSize;
+}
+
 /**
-* Get the number of rows of the system.
-*
-* \result The number of rows of the system.
-*/
+ * Get the number of rows of the system.
+ *
+ * If the matrix is a block matrix (i.e., the block size is greater than one),
+ * this function will return the number of block rows, where a block row is
+ * defined as a group of blockSize matrix rows.
+ *
+ * \result The number of rows of the system.
+ */
 long SystemSolver::getRowCount() const
 {
-    if (!isAssembled()) {
+    if (m_A == PETSC_NULL) {
+        return 0;
+    }
+
+    PetscInt nRows;
+    MatGetLocalSize(m_A, &nRows, NULL);
+    nRows /= getBlockSize();
+
+    return nRows;
+}
+
+/**
+ * Get the number of columns of the system.
+ *
+ * If the matrix is a block matrix (i.e., the block size is greater than one),
+ * this function will return the number of block columns, where a block column
+ * is defined as a group of blockSize matrix columns.
+ *
+ * \result The number of columns of the system.
+ */
+long SystemSolver::getColCount() const
+{
+    if (m_A == PETSC_NULL) {
+        return 0;
+    }
+
+    PetscInt nCols;
+    MatGetLocalSize(m_A, NULL, &nCols);
+    nCols /= getBlockSize();
+
+    return nCols;
+}
+
+/**
+ * Get the number of elements in the rows of the system.
+ *
+ * This function will return the effective number of rows of the system matrix.
+ * This value is the same as the local size used in creating the y vector for
+ * the matrix-vector product y = Ax.
+ *
+ * \result The number of elements in the rows of the system.
+ */
+long SystemSolver::getRowElementCount() const
+{
+    if (m_A == PETSC_NULL) {
         return 0;
     }
 
@@ -820,13 +1088,17 @@ long SystemSolver::getRowCount() const
 }
 
 /**
-* Get the number of columns of the system.
-*
-* \result The number of columns of the system.
-*/
-long SystemSolver::getColCount() const
+ * Get the number of elements in the columns of the system.
+ *
+ * This function will return the effective number of columns of the system
+ * matrix. This value is the same as the local size used in creating the x
+ * vector for the matrix-vector product y = Ax.
+ *
+ * \result The number of elements in the columns of the system.
+ */
+long SystemSolver::getColElementCount() const
 {
-    if (!isAssembled()) {
+    if (m_A == PETSC_NULL) {
         return 0;
     }
 
@@ -838,13 +1110,60 @@ long SystemSolver::getColCount() const
 
 #if BITPIT_ENABLE_MPI==1
 /**
-* Get the number of global rows
-*
-* \result The number of global rows
-*/
+ * Get number of global (block) rows.
+ *
+ * If the matrix is a block matrix (i.e., the block size is greater than one),
+ * this function will return the global number of block rows, where a block row
+ * is defined as a group of blockSize matrix rows.
+ *
+ * \result The number of global rows
+ */
 long SystemSolver::getRowGlobalCount() const
 {
-    if (!isAssembled()) {
+    if (m_A == PETSC_NULL) {
+        return 0;
+    }
+
+    PetscInt nRows;
+    MatGetSize(m_A, &nRows, NULL);
+    nRows /= getBlockSize();
+
+    return nRows;
+}
+
+/**
+ * Get number of global (block) columns.
+ *
+ * If the matrix is a block matrix (i.e., the block size is greater than one),
+ * this function will return the global number of block columns, where a block
+ * column is defined as a group of blockSize matrix columns.
+ *
+ * \result The number of global (block) columns.
+ */
+long SystemSolver::getColGlobalCount() const
+{
+    if (m_A == PETSC_NULL) {
+        return 0;
+    }
+
+    PetscInt nCols;
+    MatGetSize(m_A, NULL, &nCols);
+    nCols /= getBlockSize();
+
+    return nCols;
+}
+
+/**
+ * Get the number of global elements in the rows of the system.
+ *
+ * This function will return the effective global number of rows of the system
+ * matrix.
+ *
+ * \result The number of global elements in the rows of the system.
+ */
+long SystemSolver::getRowGlobalElementCount() const
+{
+    if (m_A == PETSC_NULL) {
         return 0;
     }
 
@@ -855,13 +1174,16 @@ long SystemSolver::getRowGlobalCount() const
 }
 
 /**
-* Get number of global columns.
-*
-* \result The number of global columns.
-*/
-long SystemSolver::getColGlobalCount() const
+ * Get the number of global elements in the columns of the system.
+ *
+ * This function will return the effective global number of columns of the
+ * system matrix.
+ *
+ * \result The number of global elements in the columns of the system.
+ */
+long SystemSolver::getColGlobalElementCount() const
 {
-    if (!isAssembled()) {
+    if (m_A == PETSC_NULL) {
         return 0;
     }
 
@@ -985,6 +1307,10 @@ void SystemSolver::postKSPSolveActions()
 /*!
  * Create the matrix.
  *
+ * If the system was created with the flatten flag set to true, the matrix will
+ * be created with a unitary block size. Otherwise, the block size of the system
+ * matrix will be set equal to the block size specified by the assembler.
+ *
  * \param assembler is the matrix assembler
  */
 void SystemSolver::matrixCreate(const SystemMatrixAssembler &assembler)
@@ -994,56 +1320,140 @@ void SystemSolver::matrixCreate(const SystemMatrixAssembler &assembler)
         ISGetIndices(m_rowReordering, &rowReordering);
     }
 
-    // Set sizes
-    long nRows = assembler.getRowCount();
-    long nCols = assembler.getColCount();
+    // Set block size
+    //
+    // When blocks are ignored, the PETSc matrix will be created with a unitary
+    // block size, regardless of the blocks size of the assembler. If this is
+    // the case, preallociation information provided by the assembler will be
+    // properly expanded to have preallocation information for each matrix row.
+    int assemblerBlockSize = assembler.getBlockSize();
 
-#if BITPIT_ENABLE_MPI == 1
-    long nGlobalRows = assembler.getRowGlobalCount();
-    long nGlobalCols = assembler.getColGlobalCount();
-#endif
-
-    // Preallocation information
-    std::vector<int> d_nnz(nRows, 0);
-#if BITPIT_ENABLE_MPI == 1
-    std::vector<int> o_nnz(nRows, 0);
-
-    long firstColGlobalId = assembler.getColGlobalOffset();
-    long lastColGlobalId  = firstColGlobalId + nCols - 1;
-
-    ConstProxyVector<long> rowPattern;
-#endif
-
-    for (long n = 0; n < nRows; ++n) {
-        long row = n;
-        if (rowReordering) {
-            row = rowReordering[row];
-        }
-
-        d_nnz[row] = assembler.getRowNZCount(n);
-#if BITPIT_ENABLE_MPI == 1
-        if (m_partitioned) {
-            assembler.getRowPattern(n, &rowPattern);
-
-            int nRowNZ = rowPattern.size();
-            for (int k = 0; k < nRowNZ; ++k) {
-                long columnGlobalId = rowPattern[k];
-                if (columnGlobalId < firstColGlobalId || columnGlobalId > lastColGlobalId) {
-                    ++o_nnz[row];
-                }
-            }
-
-            d_nnz[row] -= o_nnz[row];
-        }
-#endif
+    int matrixBlockSize;
+    if (m_flatten) {
+        matrixBlockSize = 1;
+    } else {
+        matrixBlockSize = assembler.getBlockSize();
     }
+
+    int blockExpansionSize = (matrixBlockSize != assemblerBlockSize) ? assemblerBlockSize : 1;
 
     // Create the matrix
 #if BITPIT_ENABLE_MPI == 1
-    MatCreateAIJ(m_communicator, nRows, nCols, nGlobalRows, nGlobalCols, 0, d_nnz.data(), 0, o_nnz.data(), &m_A);
+    MatCreate(m_communicator, &m_A);
 #else
-    MatCreateSeqAIJ(PETSC_COMM_SELF, nRows, nCols, 0, d_nnz.data(), &m_A);
+    MatCreate(PETSC_COMM_SELF, &m_A);
 #endif
+
+    // Set matrix type
+#if BITPIT_ENABLE_MPI == 1
+    if (m_partitioned) {
+        if (matrixBlockSize > 1) {
+            MatSetType(m_A, MATMPIBAIJ);
+        } else {
+            MatSetType(m_A, MATMPIAIJ);
+        }
+    } else
+#endif
+    {
+        if (matrixBlockSize > 1) {
+            MatSetType(m_A, MATSEQBAIJ);
+        } else {
+            MatSetType(m_A, MATSEQAIJ);
+        }
+    }
+
+    // Set block size
+    if (matrixBlockSize > 1) {
+        MatSetBlockSize(m_A, matrixBlockSize);
+    }
+
+    // Get sizes
+    long nAssemblerRows = assembler.getRowCount();
+
+    long nRowsElements = assembler.getRowElementCount();
+    long nColsElements = assembler.getColElementCount();
+
+    long nGlobalRowsElements;
+    long nGlobalColsElements;
+#if BITPIT_ENABLE_MPI == 1
+    nGlobalRowsElements = assembler.getRowGlobalElementCount();
+    nGlobalColsElements = assembler.getColGlobalElementCount();
+#else
+    nGlobalRowsElements = nRowsElements;
+    nGlobalColsElements = nColsElements;
+#endif
+
+    MatSetSizes(m_A, nRowsElements, nColsElements, nGlobalRowsElements, nGlobalColsElements);
+
+    // Preallocation information
+    long nPreallocationRows = blockExpansionSize * nAssemblerRows;
+
+    std::vector<int> d_nnz(nPreallocationRows, 0);
+    for (long n = 0; n < nAssemblerRows; ++n) {
+        long matrixRow = n;
+        if (rowReordering) {
+            matrixRow = rowReordering[matrixRow];
+        }
+
+        int nAssemblerRowNZ = assembler.getRowNZCount(n);
+
+        long matrixRowOffset = matrixRow * blockExpansionSize;
+        for (int i = 0; i < blockExpansionSize; ++i) {
+            d_nnz[matrixRowOffset + i] = blockExpansionSize * nAssemblerRowNZ;
+        }
+    }
+
+
+#if BITPIT_ENABLE_MPI == 1
+    std::vector<int> o_nnz(nPreallocationRows, 0);
+    if (m_partitioned) {
+        long nAssemblerCols = assembler.getColCount();
+
+        long assemblerDiagonalBegin = assembler.getColGlobalOffset();
+        long assemblerDiagonalEnd   = assemblerDiagonalBegin + nAssemblerCols;
+
+        ConstProxyVector<long> assemblerRowPattern(static_cast<std::size_t>(0), assembler.getMaxRowNZCount());
+        for (long n = 0; n < nAssemblerRows; ++n) {
+            long matrixRow = n;
+            if (rowReordering) {
+                matrixRow = rowReordering[matrixRow];
+            }
+
+
+            assembler.getRowPattern(n, &assemblerRowPattern);
+            int nAssemblerRowNZ = assemblerRowPattern.size();
+
+            long matrixRowOffset = matrixRow * blockExpansionSize;
+            for (int k = 0; k < nAssemblerRowNZ; ++k) {
+                long id = assemblerRowPattern[k];
+                if (id < assemblerDiagonalBegin || id >= assemblerDiagonalEnd) {
+                    for (int i = 0; i < blockExpansionSize; ++i) {
+                        o_nnz[matrixRowOffset + i] += blockExpansionSize;
+                        d_nnz[matrixRowOffset + i] -= blockExpansionSize;
+                    }
+                }
+            }
+        }
+    }
+#endif
+
+#if BITPIT_ENABLE_MPI == 1
+    if (m_partitioned) {
+        if (matrixBlockSize == 1) {
+            MatMPIAIJSetPreallocation(m_A, 0, d_nnz.data(), 0, o_nnz.data());
+        } else {
+            MatMPIBAIJSetPreallocation(m_A, matrixBlockSize, 0, d_nnz.data(), 0, o_nnz.data());
+        }
+    } else
+#endif
+    {
+        if (matrixBlockSize == 1) {
+            MatSeqAIJSetPreallocation(m_A, 0, d_nnz.data());
+        } else {
+            MatSeqBAIJSetPreallocation(m_A, matrixBlockSize, 0, d_nnz.data());
+        }
+
+    }
 
     // Each process will only set values for its own rows
     MatSetOption(m_A, MAT_NO_OFF_PROC_ENTRIES, PETSC_TRUE);
@@ -1092,7 +1502,14 @@ void SystemSolver::matrixFill(const SystemMatrixAssembler &assembler)
  */
 void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrixAssembler &assembler)
 {
-    const long maxRowNZ = std::max(assembler.getMaxRowNZCount(), 0L);
+    // Get block size
+    const int matrixBlockSize    = getBlockSize();
+    const int assemblerBlockSize = assembler.getBlockSize();
+    if (assemblerBlockSize != matrixBlockSize && matrixBlockSize != 1) {
+        std::string message = "Unable to update the matrix.";
+        message += " The block size of the assembler is not compatible with the block size of the system matrix.";
+        throw std::runtime_error(message);
+    }
 
     // Initialize reordering
     const PetscInt *rowReordering = nullptr;
@@ -1109,9 +1526,12 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrix
     PetscInt colGlobalBegin;
     PetscInt colGlobalEnd;
     MatGetOwnershipRangeColumn(m_A, &colGlobalBegin, &colGlobalEnd);
+    colGlobalBegin /= assemblerBlockSize;
+    colGlobalEnd /= assemblerBlockSize;
 
     PetscInt rowGlobalOffset;
     MatGetOwnershipRange(m_A, &rowGlobalOffset, nullptr);
+    rowGlobalOffset /= assemblerBlockSize;
 
     // Get the options for assembling the matrix
     SystemMatrixAssembler::AssemblyOptions assemblyOptions = assembler.getOptions();
@@ -1136,18 +1556,23 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrix
     // If the sizes of PETSc data types match the sizes of data types expected by
     // bitpit a direct update can be performed, otherwise the matrix is updated
     // using intermediate data storages.
+    const long maxRowNZ = std::max(assembler.getMaxRowNZCount(), 0L);
     bool valuesDirectUpdate = (sizeof(double) == sizeof(PetscScalar));
 
+    ConstProxyVector<long> rowPattern(static_cast<std::size_t>(0), static_cast<std::size_t>(maxRowNZ));
     std::vector<PetscInt> petscRowPattern(maxRowNZ);
+    std::vector<PetscInt> petscMatrixRowPattern(assemblerBlockSize * maxRowNZ);
 
-    std::vector<PetscScalar> petscRowValuesStorage(maxRowNZ);
+    ConstProxyVector<double> rowValues;
+    std::vector<PetscScalar> petscRowValuesStorage;
     const PetscScalar *petscRowValues;
     if (!valuesDirectUpdate) {
+        long maxRowNZElements = assemblerBlockSize * assemblerBlockSize * maxRowNZ;
+        rowValues.set(ConstProxyVector<double>::INTERNAL_STORAGE, 0, maxRowNZElements);
+        petscRowValuesStorage.resize(maxRowNZElements);
         petscRowValues = petscRowValuesStorage.data();
     }
 
-    ConstProxyVector<long> rowPattern(maxRowNZ);
-    ConstProxyVector<double> rowValues(maxRowNZ);
     for (long n = 0; n < nRows; ++n) {
         // Get row information
         long row;
@@ -1167,7 +1592,8 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrix
         //
         // A fast update allows to set all the values of a row at once (without
         // the need to get the row pattern), it can be performed if:
-        //  - the matrix has already been assembled;
+        //  - the system matrix has already been assembled;
+        //  - the system matrix has a unitary block size;
         //  - the assembler is providing all the values of the row;
         //  - values provided by the assembler are sorted by ascending column.
         //
@@ -1178,7 +1604,7 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrix
         // Fast update is not related to the option MAT_SORTED_FULL, that option
         // is used to speedup the standard function MatSetValues (which still
         // requires the pattern of the row).
-        bool fastUpdate = isAssembled() && (matrixSortedFull == PETSC_TRUE);
+        bool fastUpdate = isAssembled() && (matrixBlockSize == 1) && (matrixSortedFull == PETSC_TRUE);
 
         // Get row data
         if (fastUpdate) {
@@ -1196,16 +1622,28 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrix
 
         if (fastUpdate) {
             // Set values
-            MatSetValuesRow(m_A, globalRow, petscRowValues);
+            if (assemblerBlockSize == 1) {
+                MatSetValuesRow(m_A, globalRow, petscRowValues);
+            } else {
+                const int nMatrixRowValues = rowValues.size() / assemblerBlockSize;
+
+                PetscInt matrixGlobalRow = globalRow * assemblerBlockSize;
+                const PetscScalar *petscMatrixRowValues = petscRowValues;
+                for (int k = 0; k < assemblerBlockSize; ++k) {
+                    MatSetValuesRow(m_A, matrixGlobalRow, petscMatrixRowValues);
+                    ++matrixGlobalRow;
+                    petscMatrixRowValues += nMatrixRowValues;
+                }
+            }
         } else {
-            // Count the values that will be updated
-            const int nRowValues = rowValues.size();
-            if (nRowValues == 0) {
+            // Get the size of the pattern
+            const int rowPatternSize = rowPattern.size();
+            if (rowPatternSize == 0) {
                 continue;
             }
 
             // Get pattern in PETSc format
-            for (int k = 0; k < nRowValues; ++k) {
+            for (int k = 0; k < rowPatternSize; ++k) {
                 long globalCol = rowPattern[k];
                 if (colReordering) {
                     if (globalCol >= colGlobalBegin && globalCol < colGlobalEnd) {
@@ -1219,7 +1657,31 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrix
             }
 
             // Set data
-            MatSetValues(m_A, 1, &globalRow, nRowValues, petscRowPattern.data(), petscRowValues, INSERT_VALUES);
+            if (matrixBlockSize > 1) {
+                MatSetValuesBlocked(m_A, 1, &globalRow, rowPatternSize, petscRowPattern.data(), petscRowValues, INSERT_VALUES);
+            } else {
+                if (assemblerBlockSize == 1) {
+                    MatSetValues(m_A, 1, &globalRow, rowPatternSize, petscRowPattern.data(), petscRowValues, INSERT_VALUES);
+                } else {
+                    // Expand the pattern to get a values for each element
+                    const int matrixRowPatternSize = rowPatternSize * assemblerBlockSize;
+                    for (int k = 0; k < rowPatternSize; ++k) {
+                        int matrixPattenOffset = k * assemblerBlockSize;
+                        for (int n = 0; n < assemblerBlockSize; ++n) {
+                            petscMatrixRowPattern[matrixPattenOffset + n] = assemblerBlockSize * petscRowPattern[k] + n;
+                        }
+                    }
+
+                    // Set data
+                    PetscInt matrixGlobalRow = globalRow * assemblerBlockSize;
+                    const PetscScalar *petscMatrixRowValues = petscRowValues;
+                    for (int k = 0; k < assemblerBlockSize; ++k) {
+                        MatSetValues(m_A, 1, &matrixGlobalRow, matrixRowPatternSize, petscMatrixRowPattern.data(), petscMatrixRowValues, INSERT_VALUES);
+                        ++matrixGlobalRow;
+                        petscMatrixRowValues += matrixRowPatternSize;
+                    }
+                }
+            }
         }
     }
 

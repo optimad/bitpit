@@ -87,27 +87,50 @@ double DiscretizationStencilSolverAssembler<StencilVector>::getRawValue(const St
 
 /*!
  * Initialize block size.
+ *
+ * The block size is set equal to the square root of the weight size; if the
+ * square root of the weight type is not an integer number, an exception is
+ * throw.
+ *
+ * Block size is evaluated from the first weight. If the size of the other
+ * weights don't match the size of the first one, an exception is thrown
+ * only when bitpit is compiled in debug mode, otherwise the error is
+ * silently ignored.
  */
 template<>
 void DiscretizationStencilSolverAssembler<StencilBlock>::setBlockSize()
 {
-    // Set the block size equal to the size of the first weight
+    // Get block size
+    //
+    // Block size is evaluated from the first weight.
+    //
+    // The block size is set equal to the square root of the weight size;
+    // if the square root of the weight type is not an integer number, an
+    // exception is throw.
     m_blockSize = - 1;
     for (long i = 0; i < getRowCount(); ++i) {
         const StencilBlock &stencil = getRowStencil(i);
         std::size_t stencilSize = stencil.size();
         if (stencilSize == 0) {
-            continue;
+            break;
         }
 
         const StencilBlock::weight_type *weightData = stencil.weightData();
-        setBlockSize(weightData[0].size());
+        double blockSize = std::sqrt(weightData[0].size());
+        if (blockSize != std::sqrt(weightData[0].size())) {
+            throw std::runtime_error("Weights size should be a square.");
+        }
+        setBlockSize(static_cast<int>(blockSize));
         break;
     }
 
-    assert(m_blockSize != -1);
+    if (m_blockSize == -1) {
+        throw std::runtime_error("All weights should have a size greater than zero.");
+    }
 
 #ifdef DEBUG
+    // Validate block size
+    //
     // All weight sizes should match
     for (long i = 0; i < getRowCount(); ++i) {
         const StencilBlock &stencil = getRowStencil(i);
@@ -115,10 +138,14 @@ void DiscretizationStencilSolverAssembler<StencilBlock>::setBlockSize()
         std::size_t stencilSize = stencil.size();
 
         for (std::size_t k = 0; k < stencilSize; ++k) {
-            assert((int) weightData[k].size() == m_blockSize);
+            if (weightData[k].size() != m_blockSize)) {
+                throw std::runtime_error("All stencils weights should have the same size.");
+            }
         }
 
-        assert((int) stencil.getConstant().size() == m_blockSize);
+        if (stencil.getConstant().size() != m_blockSize) {
+            throw std::runtime_error("The stencils constant should have the same size of the stencil weights.");
+        }
     }
 #endif
 }

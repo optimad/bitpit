@@ -451,9 +451,13 @@ int DiscretizationStencilSolverAssembler<stencil_t>::getBlockSize() const
 }
 
 /*!
- * Get the number of rows of the matrix.
+ * Get the number of (block) rows handled by the assembler.
  *
- * \result The number of rows of the matrix.
+ * If the matrix is a block matrix (i.e., the block size is greater than one),
+ * this function will return the number of block rows, where a block row is
+ * defined as a group of blockSize matrix rows.
+ *
+ * \result The number of (block) rows handled by the assembler.
  */
 template<typename stencil_t>
 long DiscretizationStencilSolverAssembler<stencil_t>::getRowCount() const
@@ -462,9 +466,13 @@ long DiscretizationStencilSolverAssembler<stencil_t>::getRowCount() const
 }
 
 /*!
- * Get the number of columns of the matrix.
+ * Get the number of (block) columns handled by the assembler.
  *
- * \result The number of columns of the matrix.
+ * If the matrix is a block matrix (i.e., the block size is greater than one),
+ * this function will return the number of block columns, where a block column
+ * is defined as a group of blockSize matrix columns.
+ *
+ * \result The number of (block) columns handled by the assembler.
  */
 template<typename stencil_t>
 long DiscretizationStencilSolverAssembler<stencil_t>::getColCount() const
@@ -472,11 +480,47 @@ long DiscretizationStencilSolverAssembler<stencil_t>::getColCount() const
     return m_nCols;
 }
 
-#if BITPIT_ENABLE_MPI==1
 /*!
- * Get the number of global rows of the matrix.
+ * Get the number of elements in the rows handled by the assembler.
  *
- * \result The number of global rows of the matrix.
+ * This function will return the effective number of rows of the matrix that
+ * will be assembled.
+ *
+ * \result The number of rows handled by the assembler.
+ */
+template<typename stencil_t>
+long DiscretizationStencilSolverAssembler<stencil_t>::getRowElementCount() const
+{
+    long nRowElements = getBlockSize() * getRowCount();
+
+    return nRowElements;
+}
+
+/*!
+ * Get the number of elements in the columns handled by the assembler.
+ *
+ * This function will return the effective number of columns of the matrix that
+ * will be assembled.
+ *
+ * \result The number of columns handled by the assembler.
+ */
+template<typename stencil_t>
+long DiscretizationStencilSolverAssembler<stencil_t>::getColElementCount() const
+{
+    long nColElements = getBlockSize() * getColCount();
+
+    return nColElements;
+}
+
+#if BITPIT_ENABLE_MPI==1
+/**
+ * Get number of global (block) rows handled by the assembler.
+ *
+ * If the matrix is a block matrix (i.e., the block size is greater than one),
+ * this function will return the global number of block rows, where a block row
+ * is defined as a group of blockSize matrix rows.
+ *
+ * \result The number of global rows handled by the assembler.
  */
 template<typename stencil_t>
 long DiscretizationStencilSolverAssembler<stencil_t>::getRowGlobalCount() const
@@ -484,10 +528,14 @@ long DiscretizationStencilSolverAssembler<stencil_t>::getRowGlobalCount() const
     return m_nGlobalRows;
 }
 
-/*!
- * Get the number of global columns of the matrix.
+/**
+ * Get number of global (block) columns handled by the assembler.
  *
- * \result The number of global columns of the matrix.
+ * If the matrix is a block matrix (i.e., the block size is greater than one),
+ * this function will return the global number of block columns, where a block
+ * column is defined as a group of blockSize matrix columns.
+ *
+ * \result The number of global (block) columns handled by the assembler.
  */
 template<typename stencil_t>
 long DiscretizationStencilSolverAssembler<stencil_t>::getColGlobalCount() const
@@ -495,10 +543,42 @@ long DiscretizationStencilSolverAssembler<stencil_t>::getColGlobalCount() const
     return m_nGlobalCols;
 }
 
-/*!
- * Get global row offset.
+/**
+ * Get the number of global elements in the rows handled by the assembler.
  *
- * \result The global row offset.
+ * This function will return the effective global number of rows of the system
+ * matrix.
+ *
+ * \result The number of global elements in the rows handled by the assembler.
+ */
+template<typename stencil_t>
+long DiscretizationStencilSolverAssembler<stencil_t>::getRowGlobalElementCount() const
+{
+    long nElements = getBlockSize() * getRowGlobalCount();
+
+    return nElements;
+}
+
+/*!
+ * Get the global number of columns handled by the assembler.
+ *
+ * This function will return the effective global number of columns of the
+ * system matrix.
+ *
+ * \result The global number of columns handled by the assembler.
+ */
+template<typename stencil_t>
+long DiscretizationStencilSolverAssembler<stencil_t>::getColGlobalElementCount() const
+{
+    long nElements = getBlockSize() * getColGlobalCount();
+
+    return nElements;
+}
+
+/*!
+ * Get global (block) row offset.
+ *
+ * \result The global (block) row offset.
  */
 template<typename stencil_t>
 long DiscretizationStencilSolverAssembler<stencil_t>::getRowGlobalOffset() const
@@ -507,14 +587,46 @@ long DiscretizationStencilSolverAssembler<stencil_t>::getRowGlobalOffset() const
 }
 
 /*!
- * Get global column offset.
+ * Get global (block) column offset.
  *
- * \result The global column offset.
+ * \result The global (block) column offset.
  */
 template<typename stencil_t>
 long DiscretizationStencilSolverAssembler<stencil_t>::getColGlobalOffset() const
 {
     return m_globalColOffset;
+}
+
+/*!
+ * Get global offset for the elements of the row.
+ *
+ * This function will return the offset expressed in effective rows of the
+ * system matrix.
+ *
+ * \result The global offset for the elements of the row.
+ */
+template<typename stencil_t>
+long DiscretizationStencilSolverAssembler<stencil_t>::getRowGlobalElementOffset() const
+{
+    long offset = getBlockSize() * getRowGlobalOffset();
+
+    return offset;
+}
+
+/*!
+ * Get global offset for the elements of the column.
+ *
+ * This function will return the offset expressed in effective columns of the
+ * system matrix.
+ *
+ * \result The global offset for the elements of the column.
+ */
+template<typename stencil_t>
+long DiscretizationStencilSolverAssembler<stencil_t>::getColGlobalElementOffset() const
+{
+    long offset = getBlockSize() * getColGlobalOffset();
+
+    return offset;
 }
 #endif
 
@@ -530,7 +642,7 @@ long DiscretizationStencilSolverAssembler<stencil_t>::getRowNZCount(long rowInde
     const stencil_t &stencil = getRowStencil(rowIndex);
     std::size_t stencilSize = stencil.size();
 
-    return (m_blockSize * stencilSize);
+    return stencilSize;
 }
 
 /**
@@ -545,10 +657,15 @@ long DiscretizationStencilSolverAssembler<stencil_t>::getMaxRowNZCount() const
 }
 
 /*!
- * Get the values of the specified row.
+ * Get the pattern of the specified row.
+ *
+ * If the assembler is a block assembler (i.e., the block size is greater than
+ * one), this function will return the global ids of the block columns of the
+ * row, where a block column is defined as a group of blockSize assembler
+ * columns.
  *
  * \param rowIndex is the index of the row in the assembler
- * \param pattern on output will contain the values of the specified row
+ * \param pattern on output will contain the pattern of the specified row
  */
 template<typename stencil_t>
 void DiscretizationStencilSolverAssembler<stencil_t>::getRowPattern(long rowIndex, ConstProxyVector<long> *pattern) const
@@ -561,10 +678,10 @@ void DiscretizationStencilSolverAssembler<stencil_t>::getRowPattern(long rowInde
 }
 
 /*!
- * Get the values of the specified row.
+ * Get the pattern of the specified stencil.
  *
  * \param stencil is the stencil
- * \param pattern on output will contain the values of the specified stencil
+ * \param pattern on output will contain the pattern of the specified stencil
  */
 template<typename stencil_t>
 void DiscretizationStencilSolverAssembler<stencil_t>::getPattern(const stencil_t &stencil, ConstProxyVector<long> *pattern) const
@@ -572,28 +689,21 @@ void DiscretizationStencilSolverAssembler<stencil_t>::getPattern(const stencil_t
     std::size_t stencilSize = stencil.size();
 
     const long *patternData = stencil.patternData();
-    if (m_blockSize == 1) {
-        pattern->set(patternData, stencilSize);
-    } else {
-        std::size_t expandedPatternSize = m_blockSize * stencilSize;
-        pattern->set(ConstProxyVector<long>::INTERNAL_STORAGE, expandedPatternSize);
-        ConstProxyVector<long>::storage_pointer expandedPatternStorage = pattern->storedData();
-
-        std::size_t expandedPatternIdx = 0;
-        for (std::size_t k = 0; k < stencilSize; ++k) {
-            long patternBlockOffset = patternData[k] * m_blockSize;
-            for (int i = 0; i < m_blockSize; ++i) {
-                expandedPatternStorage[expandedPatternIdx++] = patternBlockOffset + i;
-            }
-        }
-    }
+    pattern->set(patternData, stencilSize);
 }
 
 /*!
- * Get the values of the specified row.
+ * Get the values of the specified (block) row.
  *
- * \param rowIndex is the index of the row in the assembler
- * \param values on output will contain the values of the specified row
+ * If the assembler is a block assembler (i.e., the block size is greater than
+ * one), this function will return the values of all the elements of a block row,
+ * where a block column is defined as a group of blockSize assembler columns. The
+ * values are returned as a row-oriented logically two-dimensional array of
+ * values.
+ *
+ * \param values on output will contain the values of the specified (block) row.
+ * If the block size is greater than one, values will be stored in a logically
+ * two-dimensional array that uses a col-major order
  */
 template<typename stencil_t>
 void DiscretizationStencilSolverAssembler<stencil_t>::getRowValues(long rowIndex, ConstProxyVector<double> *values) const
@@ -609,36 +719,46 @@ void DiscretizationStencilSolverAssembler<stencil_t>::getRowValues(long rowIndex
  * Get the values of the specified stencil.
  *
  * \param stencil is the stencil
- * \param values on output will contain the values of the specified row
+ * \param values on output will contain the values of the specified (block) row.
+ * If the block size is greater than one, values will be stored in a logically
+ * two-dimensional array that uses a col-major order
  */
 template<typename stencil_t>
 template<typename U, typename std::enable_if<std::is_fundamental<U>::value>::type *>
 void DiscretizationStencilSolverAssembler<stencil_t>::getValues(const stencil_t &stencil, ConstProxyVector<double> *values) const
 {
-    values->set(stencil.weightData(), stencil.size());
+    values->set(stencil.weightData(), m_blockSize * stencil.size());
 }
 
 /*!
  * Get the values of the specified stencil.
  *
  * \param stencil is the stencil
- * \param values on output will contain the values of the specified row
+ * \param values on output will contain the values of the specified (block) row.
+ * If the block size is greater than one, values will be stored in a logically
+ * two-dimensional array that uses a col-major order
  */
 template<typename stencil_t>
 template<typename U, typename std::enable_if<!std::is_fundamental<U>::value>::type *>
 void DiscretizationStencilSolverAssembler<stencil_t>::getValues(const stencil_t &stencil, ConstProxyVector<double> *values) const
 {
     std::size_t stencilSize = stencil.size();
-    const typename stencil_t::weight_type *weightData = stencil.weightData();
+    const typename stencil_t::weight_type *stencilWeightData = stencil.weightData();
 
-    std::size_t expandedValuesSize = m_blockSize * stencilSize;
-    values->set(ConstProxyVector<double>::INTERNAL_STORAGE, expandedValuesSize);
+    int nBlockElements = m_blockSize * m_blockSize;
+    std::size_t nRowValues = m_blockSize * stencilSize;
+    std::size_t nValues = nBlockElements * stencilSize;
+    values->set(ConstProxyVector<double>::INTERNAL_STORAGE, nValues);
     ConstProxyVector<double>::storage_pointer expandedValuesStorage = values->storedData();
 
-    std::size_t expandedValuesIdx = 0;
+
     for (std::size_t k = 0; k < stencilSize; ++k) {
+        const double *weightData = stencilWeightData[k].data();
         for (int i = 0; i < m_blockSize; ++i) {
-            expandedValuesStorage[expandedValuesIdx++] = getRawValue(weightData[k], i);
+            int weightOffset = linearalgebra::linearIndexRowMajor(i, 0, m_blockSize, m_blockSize);
+            int valuesOffset = linearalgebra::linearIndexRowMajor(i, m_blockSize * k, m_blockSize, nRowValues);
+
+            std::copy_n(weightData + weightOffset, m_blockSize, expandedValuesStorage + valuesOffset);
         }
     }
 }
@@ -648,7 +768,9 @@ void DiscretizationStencilSolverAssembler<stencil_t>::getValues(const stencil_t 
  *
  * \param rowIndex is the index of the row in the assembler
  * \param pattern on output will contain the values of the specified row
- * \param values on output will contain the values of the specified row
+ * \param values on output will contain the values of the specified (block) row.
+ * If the block size is greater than one, values will be stored in a logically
+ * two-dimensional array that uses a col-major order
  */
 template<typename stencil_t>
 void DiscretizationStencilSolverAssembler<stencil_t>::getRowData(long rowIndex, ConstProxyVector<long> *pattern, ConstProxyVector<double> *values) const
@@ -667,49 +789,63 @@ void DiscretizationStencilSolverAssembler<stencil_t>::getRowData(long rowIndex, 
  * Get the constant associated with the specified row.
  *
  * \param rowIndex is the index of the row in the assembler
- * \result The constant associated with the specified row.
+ * \param constant is the constant associated with the specified (block) row.
+ * If the block size is greater than one, values will be stored in a logically
+ * one-dimensional array
  */
 template<typename stencil_t>
-double DiscretizationStencilSolverAssembler<stencil_t>::getRowConstant(long rowIndex) const
+void DiscretizationStencilSolverAssembler<stencil_t>::getRowConstant(long rowIndex, bitpit::ConstProxyVector<double> *constant) const
 {
     // Get stencil information
     const stencil_t &stencil = getRowStencil(rowIndex);
 
     // Get constant
-    return getConstant(stencil);
+    getConstant(stencil, constant);
 }
 
 /*!
  * Get the constant associated with the specified stencil.
  *
  * \param stencil is the stencil
- * \result The constant associated with the specified stencil.
+ * \param constant is the constant associated with the specified (block) row.
+ * If the block size is greater than one, values will be stored in a logically
+ * one-dimensional array
  */
 template<typename stencil_t>
 template<typename U, typename std::enable_if<std::is_fundamental<U>::value>::type *>
-double DiscretizationStencilSolverAssembler<stencil_t>::getConstant(const stencil_t &stencil) const
+void DiscretizationStencilSolverAssembler<stencil_t>::getConstant(const stencil_t &stencil, bitpit::ConstProxyVector<double> *constant) const
 {
-    return getRawValue(stencil.getConstant(), 0);
+    const typename stencil_t::weight_type &stencilConstant = stencil.getConstant();
+
+    constant->set(ConstProxyVector<double>::INTERNAL_STORAGE, m_blockSize);
+    ConstProxyVector<double>::storage_pointer constantStorage = constant->storedData();
+    std::copy_n(&stencilConstant, m_blockSize, constantStorage);
 }
 
 /*!
  * Get the constant associated with the specified stencil.
  *
  * \param stencil is the stencil
- * \result The constant associated with the specified stencil.
+ * \param constant is the constant associated with the specified (block) row.
+ * If the block size is greater than one, values will be stored in a logically
+ * one-dimensional array
  */
 template<typename stencil_t>
 template<typename U, typename std::enable_if<!std::is_fundamental<U>::value>::type *>
-double DiscretizationStencilSolverAssembler<stencil_t>::getConstant(const stencil_t &stencil) const
+void DiscretizationStencilSolverAssembler<stencil_t>::getConstant(const stencil_t &stencil, bitpit::ConstProxyVector<double> *constant) const
 {
     const typename stencil_t::weight_type &stencilConstant = stencil.getConstant();
 
-    double constant = 0.;
+    constant->set(ConstProxyVector<double>::INTERNAL_STORAGE, m_blockSize);
+    ConstProxyVector<double>::storage_pointer constantStorage = constant->storedData();
     for (int i = 0; i < m_blockSize; ++i) {
-        constant += getRawValue(stencilConstant, i);
-    }
+        int offset_i = linearalgebra::linearIndexRowMajor(i, 0, m_blockSize, m_blockSize);
 
-    return constant;
+        constantStorage[i] = 0;
+        for (int j = 0; j < m_blockSize; ++j) {
+            constantStorage[i] += getRawValue(stencilConstant, offset_i + j);
+        }
+    }
 }
 
 /*!
@@ -740,7 +876,7 @@ const stencil_t & DiscretizationStencilSolverAssembler<stencil_t>::getRowStencil
 */
 template<typename stencil_t>
 DiscretizationStencilSolver<stencil_t>::DiscretizationStencilSolver(bool debug)
-    : DiscretizationStencilSolver<stencil_t>("", false, debug)
+    : DiscretizationStencilSolver<stencil_t>("", false, false, debug)
 {
 }
 
@@ -753,7 +889,22 @@ DiscretizationStencilSolver<stencil_t>::DiscretizationStencilSolver(bool debug)
 */
 template<typename stencil_t>
 DiscretizationStencilSolver<stencil_t>::DiscretizationStencilSolver(bool transpose, bool debug)
-    : DiscretizationStencilSolver<stencil_t>("", transpose, debug)
+    : DiscretizationStencilSolver<stencil_t>("", false, transpose, debug)
+{
+}
+
+/*!
+* Constuctor
+*
+* \param flatten if set to true, the system matrix will be created with a
+* unitary block size, regardless of the blocks size of the assembler
+* \param transpose if set to true, transposed system will be solved
+* \param debug if this parameter is set to true, debug informations will be
+* printed when solving the system
+*/
+template<typename stencil_t>
+DiscretizationStencilSolver<stencil_t>::DiscretizationStencilSolver(bool flatten, bool transpose, bool debug)
+    : DiscretizationStencilSolver<stencil_t>("", flatten, transpose, debug)
 {
 }
 
@@ -766,7 +917,7 @@ DiscretizationStencilSolver<stencil_t>::DiscretizationStencilSolver(bool transpo
 */
 template<typename stencil_t>
 DiscretizationStencilSolver<stencil_t>::DiscretizationStencilSolver(const std::string &prefix, bool debug)
-    : DiscretizationStencilSolver<stencil_t>(prefix, false, debug)
+    : DiscretizationStencilSolver<stencil_t>(prefix, false, false, debug)
 {
 }
 
@@ -779,7 +930,22 @@ DiscretizationStencilSolver<stencil_t>::DiscretizationStencilSolver(const std::s
 */
 template<typename stencil_t>
 DiscretizationStencilSolver<stencil_t>::DiscretizationStencilSolver(const std::string &prefix, bool transpose, bool debug)
-    : SystemSolver(prefix, transpose, debug)
+    : SystemSolver(prefix, false, transpose, debug)
+{
+}
+
+/*!
+* Constuctor
+*
+* \param flatten if set to true, the system matrix will be created with a
+* unitary block size, regardless of the blocks size of the assembler
+* \param prefix is the prefix string to prepend to all option requests
+* \param debug if this parameter is set to true, debug informations will be
+* printed when solving the system
+*/
+template<typename stencil_t>
+DiscretizationStencilSolver<stencil_t>::DiscretizationStencilSolver(const std::string &prefix, bool flatten, bool transpose, bool debug)
+    : SystemSolver(prefix, flatten, transpose, debug)
 {
 }
 
@@ -860,7 +1026,7 @@ void DiscretizationStencilSolver<stencil_t>::assembly(const stencil_container_t 
 template<typename stencil_t>
 void DiscretizationStencilSolver<stencil_t>::assembly(const DiscretizationStencilSolverAssembler<stencil_t> &assembler)
 {
-    assembly(MPI_COMM_SELF, false, static_cast<const StencilSolverAssembler &>(assembler));
+    assembly(MPI_COMM_SELF, false, assembler);
 }
 
 /*!
@@ -1042,9 +1208,10 @@ template<typename stencil_t>
 void DiscretizationStencilSolver<stencil_t>::assembleConstants(const StencilSolverAssembler &assembler)
 {
     long nRows = assembler.getRowCount();
+    int blockSize = assembler.getBlockSize();
 
     // Create the storage
-    m_constants.resize(nRows);
+    m_constants.resize(nRows * blockSize);
 
     // Update the constants
     updateConstants(nRows, nullptr, assembler);
@@ -1063,6 +1230,8 @@ template<typename stencil_t>
 void DiscretizationStencilSolver<stencil_t>::updateConstants(std::size_t nRows, const long *rows,
                                                              const StencilSolverAssembler &assembler)
 {
+    int blockSize = assembler.getBlockSize();
+    ConstProxyVector<double> rowConstant(blockSize);
     for (std::size_t n = 0; n < nRows; ++n) {
         long row;
         if (rows) {
@@ -1071,7 +1240,8 @@ void DiscretizationStencilSolver<stencil_t>::updateConstants(std::size_t nRows, 
             row = n;
         }
 
-        m_constants[row] = assembler.getRowConstant(n);
+        assembler.getRowConstant(n, &rowConstant);
+        std::copy_n(rowConstant.data(), blockSize, m_constants.data() + row * blockSize);
     }
 }
 
@@ -1087,7 +1257,7 @@ void DiscretizationStencilSolver<stencil_t>::solve()
     }
 
     // Subtract constant terms to the RHS
-    long nUnknowns = getRowCount();
+    long nUnknowns = getBlockSize() * getRowCount();
     double *raw_rhs = getRHSRawPtr();
     for (long i = 0; i < nUnknowns; ++i) {
         raw_rhs[i] -= m_constants[i];

@@ -32,11 +32,22 @@ namespace bitpit {
 *
 * \brief Sparse matrix.
 *
+* Rather than working with individual elements in the matrix, it is possible
+* to employ blocks of elements. The size of the blocks can be defined during
+* assembly. When a size different that one is provided, the matrix will store
+* elements by fixed-sized dense nb × nb blocks, where nb is the size of the
+* blocks. Blocking may be advantageous when solving PDE-based simulations
+* that leads to matrices with a naturally blocked structure (with a block size
+* equal to the number of degrees of freedom per cell).
+*
+* When blocking is used, row and column indexes will count the number of blocks
+* in the row/column direction, not the number of rows/columns of the matrix.
 */
 #if BITPIT_ENABLE_MPI==1
 /**
+*
 * The SparseMatrix class mimics the beahviour of the sparse parallel matrix
-* in AIJ format of the PETSc library.
+* in AIJ/BAIJ format of the PETSc library.
 *
 * The parallel matrix is partitioned across processes such that the first
 * m0 rows belong to process 0, the next m1 rows belong to process 1, the
@@ -81,7 +92,7 @@ SparseMatrix::SparseMatrix()
 * \param communicator is the MPI communicator
 */
 SparseMatrix::SparseMatrix(MPI_Comm communicator)
-    : m_nRows(0), m_nCols(0), m_nNZ(0), m_maxRowNZ(0), m_lastRow(-1),
+    : m_blockSize(0), m_nRows(0), m_nCols(0), m_nNZ(0), m_maxRowNZ(0), m_lastRow(-1),
       m_assembled(false),
       m_partitioned(false),
       m_global_nRows(0), m_global_nCols(0), m_global_nNZ(0),
@@ -95,7 +106,7 @@ SparseMatrix::SparseMatrix(MPI_Comm communicator)
 * Default constructor
 */
 SparseMatrix::SparseMatrix()
-    : m_nRows(0), m_nCols(0), m_nNZ(0), m_maxRowNZ(0), m_lastRow(-1),
+    : m_blockSize(0), m_nRows(0), m_nCols(0), m_nNZ(0), m_maxRowNZ(0), m_lastRow(-1),
       m_assembled(false)
 {
 }
@@ -114,7 +125,24 @@ SparseMatrix::SparseMatrix()
 * of internal data may be needed
 */
 SparseMatrix::SparseMatrix(long nRows, long nCols, long nNZ)
-    : SparseMatrix(MPI_COMM_SELF, false, nRows, nCols, nNZ)
+    : SparseMatrix(MPI_COMM_SELF, false, 1, nRows, nCols, nNZ)
+{
+}
+
+/**
+* Constructor
+*
+* \param blockSize is the block size of the matrix
+* \param nRows is the number of rows of the matrix
+* \param nCols is the number of columns of the matrix
+* \param nNZ is the number of non-zero elements that the matrix will contain.
+* If this number is unknown, an estimante (or zero) could be passed. If the
+* actual number of non-zero elements turns out to be greater than the provided
+* value, the initialization of the matrix will be slower because reallocation
+* of internal data may be needed
+*/
+SparseMatrix::SparseMatrix(int blockSize, long nRows, long nCols, long nNZ)
+    : SparseMatrix(MPI_COMM_SELF, false, blockSize, nRows, nCols, nNZ)
 {
 }
 
@@ -128,15 +156,37 @@ SparseMatrix::SparseMatrix(long nRows, long nCols, long nNZ)
 * \param nCols is the number columns of the matrix, if the matrix is partitioned
 * this is the number of local columns
 * \param nNZ is the number of non-zero elements that the matrix will contain.
-* This is just an optional hint. If the actual number of non-zero elements
-* turns out to be greater than the provided value, the initialization of the
-* matrix pattern will be slower because reallocation of internal data may be
-* needed
+* If this number is unknown, an estimante (or zero) could be passed. If the
+* actual number of non-zero elements turns out to be greater than the provided
+* value, the initialization of the matrix will be slower because reallocation
+* of internal data may be needed
 */
 SparseMatrix::SparseMatrix(MPI_Comm communicator, bool partitioned, long nRows, long nCols, long nNZ)
     : SparseMatrix(communicator)
 {
-    _initialize(partitioned, nRows, nCols, nNZ);
+    _initialize(partitioned, 1, nRows, nCols, nNZ);
+}
+
+/**
+* Constructor
+*
+* \param communicator is the MPI communicator
+* \param partitioned controls if the matrix is partitioned
+* \param blockSize is the block size of the matrix
+* \param nRows is the number rows of the matrix, if the matrix is partitioned
+* this is the number of local rows
+* \param nCols is the number columns of the matrix, if the matrix is partitioned
+* this is the number of local columns
+* \param nNZ is the number of non-zero elements that the matrix will contain.
+* If this number is unknown, an estimante (or zero) could be passed. If the
+* actual number of non-zero elements turns out to be greater than the provided
+* value, the initialization of the matrix will be slower because reallocation
+* of internal data may be needed
+*/
+SparseMatrix::SparseMatrix(MPI_Comm communicator, bool partitioned, int blockSize, long nRows, long nCols, long nNZ)
+    : SparseMatrix(communicator)
+{
+    _initialize(partitioned, blockSize, nRows, nCols, nNZ);
 }
 #else
 /**
@@ -145,15 +195,32 @@ SparseMatrix::SparseMatrix(MPI_Comm communicator, bool partitioned, long nRows, 
 * \param nRows is the number of rows of the matrix
 * \param nCols is the number of columns of the matrix
 * \param nNZ is the number of non-zero elements that the matrix will contain.
-* This is just an optional hint. If the actual number of non-zero elements
-* turns out to be greater than the provided value, the initialization of the
-* matrix pattern will be slower because reallocation of internal data may be
-* needed
+* If this number is unknown, an estimante (or zero) could be passed. If the
+* actual number of non-zero elements turns out to be greater than the provided
+* value, the initialization of the matrix will be slower because reallocation
+* of internal data may be needed
 */
 SparseMatrix::SparseMatrix(long nRows, long nCols, long nNZ)
+    : SparseMatrix(1, nRows, nCols, nNZ)
+{
+}
+
+/**
+* Constructor
+*
+* \param blockSize is the block size of the matrix
+* \param nRows is the number of rows of the matrix
+* \param nCols is the number of columns of the matrix
+* \param nNZ is the number of non-zero elements that the matrix will contain.
+* If this number is unknown, an estimante (or zero) could be passed. If the
+* actual number of non-zero elements turns out to be greater than the provided
+* value, the initialization of the matrix will be slower because reallocation
+* of internal data may be needed
+*/
+SparseMatrix::SparseMatrix(int blockSize, long nRows, long nCols, long nNZ)
     : SparseMatrix()
 {
-    _initialize(nRows, nCols, nNZ);
+    _initialize(blockSize, nRows, nCols, nNZ);
 }
 #endif
 
@@ -178,14 +245,34 @@ SparseMatrix::~SparseMatrix()
 * \param nCols is the number columns of the matrix, if the matrix is partitioned
 * this is the number of local columns
 * \param nNZ is the number of non-zero elements that the matrix will contain.
-* This is just an optional hint. If the actual number of non-zero elements
-* turns out to be greater than the provided value, the initialization of the
-* matrix pattern will be slower because reallocation of internal data may be
-* needed
+* If this number is unknown, an estimante (or zero) could be passed. If the
+* actual number of non-zero elements turns out to be greater than the provided
+* value, the initialization of the matrix will be slower because reallocation
+* of internal data may be needed
 */
 void SparseMatrix::initialize(bool partitioned, long nRows, long nCols, long nNZ)
 {
-    _initialize(partitioned, nRows, nCols, nNZ);
+    _initialize(partitioned, 1, nRows, nCols, nNZ);
+}
+
+/**
+* Initialize the pattern.
+*
+* \param partitioned controls if the matrix is partitioned
+* \param blockSize is the block size of the matrix
+* \param nRows is the number rows of the matrix, if the matrix is partitioned
+* this is the number of local rows
+* \param nCols is the number columns of the matrix, if the matrix is partitioned
+* this is the number of local columns
+* \param nNZ is the number of non-zero elements that the matrix will contain.
+* If this number is unknown, an estimante (or zero) could be passed. If the
+* actual number of non-zero elements turns out to be greater than the provided
+* value, the initialization of the matrix will be slower because reallocation
+* of internal data may be needed
+*/
+void SparseMatrix::initialize(bool partitioned, int blockSize, long nRows, long nCols, long nNZ)
+{
+    _initialize(partitioned, blockSize, nRows, nCols, nNZ);
 }
 #endif
 
@@ -195,17 +282,34 @@ void SparseMatrix::initialize(bool partitioned, long nRows, long nCols, long nNZ
 * \param nRows is the number of rows of the matrix
 * \param nCols is the number of columns of the matrix
 * \param nNZ is the number of non-zero elements that the matrix will contain.
-* This is just an optional hint. If the actual number of non-zero elements
-* turns out to be greater than the provided value, the initialization of the
-* matrix pattern will be slower because reallocation of internal data may be
-* needed
+* If this number is unknown, an estimante (or zero) could be passed. If the
+* actual number of non-zero elements turns out to be greater than the provided
+* value, the initialization of the matrix will be slower because reallocation
+* of internal data may be needed
 */
 void SparseMatrix::initialize(long nRows, long nCols, long nNZ)
 {
+    initialize(nRows, nCols, nNZ);
+}
+
+/**
+* Initialize the pattern.
+*
+* \param blockSize is the block size of the matrix
+* \param nRows is the number of rows of the matrix
+* \param nCols is the number of columns of the matrix
+* \param nNZ is the number of non-zero elements that the matrix will contain.
+* If this number is unknown, an estimante (or zero) could be passed. If the
+* actual number of non-zero elements turns out to be greater than the provided
+* value, the initialization of the matrix will be slower because reallocation
+* of internal data may be needed
+*/
+void SparseMatrix::initialize(int blockSize, long nRows, long nCols, long nNZ)
+{
 #if BITPIT_ENABLE_MPI==1
-    _initialize(false, nRows, nCols, nNZ);
+    _initialize(false, blockSize, nRows, nCols, nNZ);
 #else
-    _initialize(nRows, nCols, nNZ);
+    _initialize(blockSize, nRows, nCols, nNZ);
 #endif
 }
 
@@ -214,20 +318,21 @@ void SparseMatrix::initialize(long nRows, long nCols, long nNZ)
 * Internal function to initialize the pattern.
 *
 * \param partitioned controls if the matrix is partitioned
+* \param blockSize is the block size of the matrix
 * \param nRows is the number rows of the matrix, if the matrix is partitioned
 * this is the number of local rows
 * \param nCols is the number columns of the matrix, if the matrix is partitioned
 * this is the number of local columns
 * \param nNZ is the number of non-zero elements that the matrix will contain.
-* This is just an optional hint. If the actual number of non-zero elements
-* turns out to be greater than the provided value, the initialization of the
-* matrix pattern will be slower because reallocation of internal data may be
-* needed
+* If this number is unknown, an estimante (or zero) could be passed. If the
+* actual number of non-zero elements turns out to be greater than the provided
+* value, the initialization of the matrix will be slower because reallocation
+* of internal data may be needed
 */
-void SparseMatrix::_initialize(bool partitioned, long nRows, long nCols, long nNZ)
+void SparseMatrix::_initialize(bool partitioned, int blockSize, long nRows, long nCols, long nNZ)
 {
     // Serial initialization
-    _initialize(nRows, nCols, nNZ);
+    _initialize(blockSize, nRows, nCols, nNZ);
 
     // Parallel initialization
     m_partitioned = partitioned;
@@ -267,24 +372,26 @@ void SparseMatrix::_initialize(bool partitioned, long nRows, long nCols, long nN
 * \param nRows is the number of rows of the matrix
 * \param nCols is the number of columns of the matrix
 * \param nNZ is the number of non-zero elements that the matrix will contain.
-* This is just an optional hint. If the actual number of non-zero elements
-* turns out to be greater than the provided value, the initialization of the
-* matrix pattern will be slower because reallocation of internal data may be
-* needed
+* If this number is unknown, an estimante (or zero) could be passed. If the
+* actual number of non-zero elements turns out to be greater than the provided
+* value, the initialization of the matrix will be slower because reallocation
+* of internal data may be needed
 */
-void SparseMatrix::_initialize(long nRows, long nCols, long nNZ)
+void SparseMatrix::_initialize(int blockSize, long nRows, long nCols, long nNZ)
 {
+    assert(blockSize >= 0);
     assert(nRows >= 0);
     assert(nCols >= 0);
     assert(nNZ >= 0);
 
     clear();
 
-    m_pattern.reserve(nRows, nNZ);
-    m_values.reserve(nNZ);
+    m_blockSize = blockSize;
+    m_nRows     = nRows;
+    m_nCols     = nCols;
 
-    m_nRows = nRows;
-    m_nCols = nCols;
+    m_pattern.reserve(m_nRows, nNZ);
+    m_values.reserve(m_blockSize * m_blockSize * nNZ);
 }
 
 /**
@@ -302,11 +409,12 @@ void SparseMatrix::clear(bool release)
         std::vector<double>().swap(m_values);
     }
 
-    m_nRows    =  0;
-    m_nCols    =  0;
-    m_nNZ      =  0;
-    m_maxRowNZ =  0;
-    m_lastRow  = -1;
+    m_blockSize =  0;
+    m_nRows     =  0;
+    m_nCols     =  0;
+    m_nNZ       =  0;
+    m_maxRowNZ  =  0;
+    m_lastRow   = -1;
 
 #if BITPIT_ENABLE_MPI==1
     m_partitioned = false;
@@ -402,6 +510,16 @@ long SparseMatrix::countAddedRows() const
 }
 
 /**
+* Get the number of blocks of the matrix.
+*
+* \result The number of blocks of the matrix.
+*/
+int SparseMatrix::getBlockSize() const
+{
+    return m_blockSize;
+}
+
+/**
 * Get the number of rows of the matrix.
 *
 * \result The number of rows of the matrix.
@@ -419,6 +537,30 @@ long SparseMatrix::getRowCount() const
 long SparseMatrix::getColCount() const
 {
     return m_nCols;
+}
+
+/**
+* Get the number of rows of the matrix.
+*
+* \result The number of rows of the matrix.
+*/
+long SparseMatrix::getRowElementCount() const
+{
+    long nElements = getBlockSize() * getRowCount();
+
+    return nElements;
+}
+
+/**
+* Get the number of columns of the matrix.
+*
+* \result The number of columns of the matrix.
+*/
+long SparseMatrix::getColElementCount() const
+{
+    long nElements = getBlockSize() * getColCount();
+
+    return nElements;
 }
 
 /**
@@ -449,6 +591,42 @@ long SparseMatrix::getRowNZCount(long row) const
 long SparseMatrix::getMaxRowNZCount() const
 {
     return m_maxRowNZ;
+}
+
+/**
+* Get the number of non-zero elements.
+*
+* \result The number of non-zero elements.
+*/
+long SparseMatrix::getNZElementCount() const
+{
+    long nElements = getBlockSize() * getNZCount();
+
+    return nElements;
+}
+
+/**
+* Get the number of non-zero elements in the specified row.
+*
+* \result The number of non-zero elements in the specified row.
+*/
+long SparseMatrix::getRowNZElementCount(long row) const
+{
+    long nElements = getBlockSize() * getRowNZCount(row);
+
+    return nElements;
+}
+
+/**
+* Get the maximum number of non-zero elements per row.
+*
+* \result The maximum number of non-zero elements per row.
+*/
+long SparseMatrix::getMaxRowNZElementCount() const
+{
+    long nElements = getBlockSize() * getMaxRowNZCount();
+
+    return nElements;
 }
 
 #if BITPIT_ENABLE_MPI==1
@@ -522,6 +700,30 @@ long SparseMatrix::getRowGlobalOffset() const
 }
 
 /**
+* Get the number of global rows
+*
+* \result The number of global rows
+*/
+long SparseMatrix::getRowGlobalElementCount() const
+{
+    long nElements = getBlockSize() * getRowGlobalCount();
+
+    return nElements;
+}
+
+/**
+* Get global row offset.
+*
+* \result The global row offset.
+*/
+long SparseMatrix::getRowGlobalElementOffset() const
+{
+    long offset = getBlockSize() * getRowGlobalOffset();
+
+    return offset;
+}
+
+/**
 * Get number of global columns.
 *
 * \result The number of global columns.
@@ -542,6 +744,30 @@ long SparseMatrix::getColGlobalOffset() const
 }
 
 /**
+* Get the number of global column
+*
+* \result The number of global column
+*/
+long SparseMatrix::getColGlobalElementCount() const
+{
+    long nElements = getBlockSize() * getColGlobalCount();
+
+    return nElements;
+}
+
+/**
+* Get global column offset.
+*
+* \result The global column offset.
+*/
+long SparseMatrix::getColGlobalElementOffset() const
+{
+    long offset = getBlockSize() * getColGlobalOffset();
+
+    return offset;
+}
+
+/**
 * Get the global number of non-zero elements.
 *
 * \result The global number of non-zero elements.
@@ -559,6 +785,30 @@ long SparseMatrix::getNZGlobalCount() const
 long SparseMatrix::getMaxRowNZGlobalCount() const
 {
     return m_global_maxRowNZ;
+}
+
+/**
+* Get the global number of non-zero elements.
+*
+* \result The global number of non-zero elements.
+*/
+long SparseMatrix::getNZGlobalElementCount() const
+{
+    long nElement = getBlockSize() * getNZGlobalCount();
+
+    return nElement;
+}
+
+/**
+* Get the global maximum number of non-zero elements per row.
+*
+* \result The global maximum number of non-zero elements per row.
+*/
+long SparseMatrix::getMaxRowNZGlobalElementCount() const
+{
+    long nElement = getBlockSize() * getMaxRowNZGlobalCount();
+
+    return nElement;
 }
 
 /**
@@ -671,7 +921,10 @@ void SparseMatrix::addRow(long nRowNZ, const long *rowPattern, const double *row
     m_pattern.pushBack(nRowNZ, rowPattern);
 
     // Add row values
-    m_values.insert(m_values.end(), rowValues, rowValues + nRowNZ);
+    const int blockSize = getBlockSize();
+    const int nBlockElements = blockSize * blockSize;
+
+    m_values.insert(m_values.end(), rowValues, rowValues + nBlockElements * nRowNZ);
 
     // Update the non-zero element counters
     m_maxRowNZ = std::max(nRowNZ, m_maxRowNZ);
@@ -705,8 +958,11 @@ void SparseMatrix::getRowPattern(long row, ConstProxyVector<long> *pattern) cons
 {
     const std::size_t *rowExtent = m_pattern.indices(row);
 
-    const long *rowPattern = m_pattern.data() + rowExtent[0];
-    const std::size_t rowPatternSize = rowExtent[1] - rowExtent[0];
+    const std::size_t rowPatternBegin = rowExtent[0];
+    const std::size_t rowPatternEnd   = rowExtent[1];
+    const std::size_t rowPatternSize  = rowPatternEnd - rowPatternBegin;
+
+    const long *rowPattern = m_pattern.data() + rowPatternBegin;
 
     pattern->set(rowPattern, rowPatternSize);
 }
@@ -733,10 +989,16 @@ ConstProxyVector<double> SparseMatrix::getRowValues(long row) const
 */
 void SparseMatrix::getRowValues(long row, ConstProxyVector<double> *values) const
 {
+    const int blockSize = getBlockSize();
+    const int nBlockElements = blockSize * blockSize;
+
     const std::size_t *rowExtent = m_pattern.indices(row);
 
-    const double *rowValues = m_values.data() + rowExtent[0];
-    const std::size_t nRowValues = rowExtent[1] - rowExtent[0];
+    const std::size_t valuesBegin = nBlockElements * rowExtent[0];
+    const std::size_t valuesEnd   = nBlockElements * rowExtent[1];
+    const std::size_t nRowValues  = valuesEnd - valuesBegin;
+
+    const double *rowValues = m_values.data() + valuesBegin;
 
     values->set(rowValues, nRowValues);
 }
@@ -774,7 +1036,7 @@ std::unique_ptr<SparseMatrix> SparseMatrix::computeTranspose() const
     transpose->m_pattern.initialize(transpose->m_nRows, transposeRowSizes.data(), 0.);
 
     // Create the empty storage for the values
-    transpose->m_values.resize(m_nNZ);
+    transpose->m_values.resize(m_blockSize * m_nNZ);
 
     // Set non-zero information
     transpose->m_nNZ = m_nNZ;
