@@ -1242,45 +1242,11 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrix
  */
 void SystemSolver::vectorsCreate()
 {
-    PetscInt nRows;
-    PetscInt nColumns;
-    MatGetLocalSize(m_A, &nRows, &nColumns);
-
-    PetscInt rhsSize;
-    PetscInt solutionSize;
     if (!m_transpose) {
-        rhsSize      = nRows;
-        solutionSize = nColumns;
+        MatCreateVecs(m_A, &m_rhs, &m_solution);
     } else {
-        rhsSize      = nColumns;
-        solutionSize = nRows;
+        MatCreateVecs(m_A, &m_solution, &m_rhs);
     }
-
-#if BITPIT_ENABLE_MPI == 1
-    PetscInt nGlobalRows;
-    PetscInt nGlobalColumns;
-    MatGetSize(m_A, &nGlobalRows, &nGlobalColumns);
-
-    PetscInt rhsGlobalSize;
-    PetscInt solutionGlobalSize;
-    if (!m_transpose) {
-        rhsGlobalSize      = nGlobalRows;
-        solutionGlobalSize = nGlobalColumns;
-    } else {
-        rhsGlobalSize      = nGlobalColumns;
-        solutionGlobalSize = nGlobalRows;
-    }
-
-    PetscInt nGhosts;
-    const PetscInt *ghosts;
-    MatGetGhosts(m_A, &nGhosts, &ghosts);
-
-    VecCreateGhost(m_communicator, solutionSize, solutionGlobalSize, nGhosts, ghosts, &m_solution);
-    VecCreateGhost(m_communicator, rhsSize, rhsGlobalSize, nGhosts, ghosts, &m_rhs);
-#else
-    VecCreateSeq(PETSC_COMM_SELF, solutionSize, &m_solution);
-    VecCreateSeq(PETSC_COMM_SELF, rhsSize, &m_rhs);
-#endif
 }
 
 /*!
