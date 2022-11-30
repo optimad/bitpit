@@ -1152,9 +1152,9 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrix
             row = n;
         }
 
-        long assemblerRow = row;
+        long assemblerRow = n;
         if (m_rowPermutation) {
-            assemblerRow = rowRanks[assemblerRow];
+            row = rowRanks[row];
         }
 
         const PetscInt globalRow = rowGlobalOffset + row;
@@ -1218,7 +1218,6 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrix
             MatSetValues(m_A, 1, &globalRow, nRowValues, petscRowPattern.data(), petscRowValues, INSERT_VALUES);
         }
     }
-
     // Let petsc assembly the matrix after the update
     MatAssemblyBegin(m_A, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(m_A, MAT_FINAL_ASSEMBLY);
