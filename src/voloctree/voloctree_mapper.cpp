@@ -586,8 +586,8 @@ void VolOctreeMapper::_mappingAdaptionMappedUpdate(const std::vector<adaption::I
 
                     for (long idprevious : info.previous) {
                         std::vector<long> *mappedIds;
-                        std::vector<int> *mappedRanks;
 #if BITPIT_ENABLE_MPI
+                        std::vector<int> *mappedRanks;
                         if (checkPart || info.rank == m_rank) {
 #endif
                             mappedIds   = &(m_previousMapping[idprevious].ids);
