@@ -164,8 +164,8 @@ protected:
     void     swap(RBF & x) noexcept;
 
 private:
-    double calcDist(int i, int j);
-    double calcDist(const std::array<double,3> & point, int j);
+    double calcDist(int i, int j) override;
+    double calcDist(const std::array<double,3> & point, int j) override;
 };
 
 /*!
