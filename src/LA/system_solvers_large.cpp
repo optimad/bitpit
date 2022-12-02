@@ -304,7 +304,7 @@ PetscManager::PetscManager()
  */
 PetscManager::~PetscManager()
 {
-    finalize(true);
+    finalize();
 }
 
 /*!
@@ -420,14 +420,10 @@ bool PetscManager::initialize(bool debug)
  */
 #endif
 /*!
- * \param permanent if set to true, the function will try to finalized
- * both PETSc and its related libraries (e.g., MPI). If a permanent
- * finalization is requested, it may not be possible to re-initialize
- * PETSc after the finalization has been performed
  * \result Return true is PETSc has been finalized by this function, false
  * if PETSc was already finalized.
  */
-bool PetscManager::finalize(bool permanent)
+bool PetscManager::finalize()
 {
 #if BITPIT_ENABLE_MPI==1
     // Early return if MPI is already finalized
@@ -452,10 +448,8 @@ bool PetscManager::finalize(bool permanent)
 
 #if BITPIT_ENABLE_MPI==1
     // Finalize MPI
-    if (permanent) {
-        if (!m_externalMPIInitialization) {
-            MPI_Finalize();
-        }
+    if (!m_externalMPIInitialization) {
+        MPI_Finalize();
     }
 #endif
 
@@ -559,11 +553,6 @@ SystemSolver::~SystemSolver()
 
     // Decrease the number of instances
     --m_nInstances;
-
-    // Finalize PETSc
-    if (m_nInstances == 0) {
-        m_petscManager.finalize(false);
-    }
 }
 
 /*!

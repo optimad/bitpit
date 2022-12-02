@@ -142,7 +142,7 @@ public:
     bool areOptionsEditable() const;
 
     bool initialize(bool debug);
-    bool finalize(bool permanent);
+    bool finalize();
 
     void addInitOption(const std::string &option);
     void addInitOptions(int argc, char **args);
