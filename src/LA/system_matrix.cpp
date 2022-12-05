@@ -956,14 +956,8 @@ ConstProxyVector<long> SparseMatrix::getRowPattern(long row) const
 */
 void SparseMatrix::getRowPattern(long row, ConstProxyVector<long> *pattern) const
 {
-    const std::size_t *rowExtent = m_pattern.indices(row);
-
-    const std::size_t rowPatternBegin = rowExtent[0];
-    const std::size_t rowPatternEnd   = rowExtent[1];
-    const std::size_t rowPatternSize  = rowPatternEnd - rowPatternBegin;
-
-    const long *rowPattern = m_pattern.data() + rowPatternBegin;
-
+    const std::size_t rowPatternSize  = getRowNZCount(row);
+    const long *rowPattern = getRowPatternData(row);
     pattern->set(rowPattern, rowPatternSize);
 }
 
@@ -992,15 +986,67 @@ void SparseMatrix::getRowValues(long row, ConstProxyVector<double> *values) cons
     const int blockSize = getBlockSize();
     const int nBlockElements = blockSize * blockSize;
 
-    const std::size_t *rowExtent = m_pattern.indices(row);
+    const std::size_t nRowValues = nBlockElements * getRowNZCount(row);
+    const double *rowValues = getRowValuesData(row);
 
+    values->set(rowValues, nRowValues);
+}
+
+/**
+* Get a constant pointer to the internal pattern of the specified row.
+*
+* \param row is the row
+* \result A constant pointer to the internal pattern of the specified row.
+*/
+long * SparseMatrix::getRowPatternData(long row)
+{
+    return const_cast<long *>(const_cast<const SparseMatrix *>(this)->getRowPatternData(row));
+}
+
+/**
+* Get a constant pointer to the internal pattern of the specified row.
+*
+* \param row is the row
+* \result A constant pointer to the internal pattern of the specified row.
+*/
+const long * SparseMatrix::getRowPatternData(long row) const
+{
+    const std::size_t *rowExtent      = m_pattern.indices(row);
+    const std::size_t rowPatternBegin = rowExtent[0];
+
+    const long *rowPattern = m_pattern.data() + rowPatternBegin;
+
+    return rowPattern;
+}
+
+/**
+* Get a constant pointer to the internal values of the specified row.
+*
+* \param row is the row
+* \result A constant pointer to the internal values of the specified row.
+*/
+double * SparseMatrix::getRowValuesData(long row)
+{
+    return const_cast<double *>(const_cast<const SparseMatrix *>(this)->getRowValuesData(row));
+}
+
+/**
+* Get a constant pointer to the internal values of the specified row.
+*
+* \param row is the row
+* \result A constant pointer to the internal values of the specified row.
+*/
+const double * SparseMatrix::getRowValuesData(long row) const
+{
+    const int blockSize = getBlockSize();
+    const int nBlockElements = blockSize * blockSize;
+
+    const std::size_t *rowExtent  = m_pattern.indices(row);
     const std::size_t valuesBegin = nBlockElements * rowExtent[0];
-    const std::size_t valuesEnd   = nBlockElements * rowExtent[1];
-    const std::size_t nRowValues  = valuesEnd - valuesBegin;
 
     const double *rowValues = m_values.data() + valuesBegin;
 
-    values->set(rowValues, nRowValues);
+    return rowValues;
 }
 
 /**

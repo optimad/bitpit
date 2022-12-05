@@ -148,6 +148,12 @@ protected:
     FlatVector2D<long> m_pattern;
     std::vector<double> m_values;
 
+    long * getRowPatternData(long row);
+    const long * getRowPatternData(long row) const;
+
+    double * getRowValuesData(long row);
+    const double * getRowValuesData(long row) const;
+
 private:
     void _initialize(int blockSize, long nRows, long nCols, long nNZ);
 #if BITPIT_ENABLE_MPI==1
