@@ -125,8 +125,8 @@ int subtest_001()
     //Write the patch
     patch->write();
 
-    auto sourceLists = patch->getGhostExchangeSources();
-    auto targetLists = patch->getGhostExchangeTargets();
+    auto sourceLists = patch->getGhostCellExchangeSources();
+    auto targetLists = patch->getGhostCellExchangeTargets();
 
     // Check results
     for (auto rankSourceList : sourceLists) {
