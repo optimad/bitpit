@@ -56,7 +56,7 @@ public:
     {
     };
 
-    void flushData(std::fstream &stream, const std::string &name, VTKFormat format)
+    void flushData(std::fstream &stream, const std::string &name, VTKFormat format) override
     {
         assert(format == VTKFormat::APPENDED);
         BITPIT_UNUSED(format);
