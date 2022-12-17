@@ -103,6 +103,8 @@ public:
 */
 int subtest_001(int rank)
 {
+    BITPIT_UNUSED(rank);
+
     /**<Instantation of a 3D pablo uniform object.*/
     bitpit::PabloUniform tree(2);
 
