@@ -100,6 +100,12 @@ void reorderVector(std::vector<size_t>& order, std::vector<T>& v, std::size_t si
 template<typename OrderContainer, typename DataContainer>
 void reorderContainer(OrderContainer &order, DataContainer &v, std::size_t size);
 
+template<typename Container, typename Index>
+void swapValue(Container &v, Index i, Index j);
+
+template<>
+void swapValue(std::vector<bool> &v, std::size_t i, std::size_t j);
+
 template <class T>
 void eraseValue(std::vector<T> &, const T&);
 

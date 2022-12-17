@@ -42,6 +42,21 @@ template std::vector<unsigned long>::const_iterator findInOrderedVector<>(const 
 /*!
 * \ingroup common_misc
 *
+* Swap two values stored in the specified std::vector<bool> container.
+*
+* \param v is a reference to the container
+* \param i is the index of the first element that will be swapped
+* \param j is the index of the second element that will be swapped
+*/
+template<>
+void swapValue(std::vector<bool> &v, std::size_t i, std::size_t j)
+{
+    v.swap(v[i], v[j]);
+}
+
+/*!
+* \ingroup common_misc
+*
 * Extract n integers in the interval [0,m] without replacement.
 * if n = m+1, returns a random permutation of {0, 1, 2, ..., m}
 *
