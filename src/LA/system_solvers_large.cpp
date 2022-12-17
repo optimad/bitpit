@@ -2045,7 +2045,7 @@ void SystemSolver::setReordering(long nRows, long nCols, const SystemMatrixOrder
     try {
         dynamic_cast<const NaturalSystemMatrixOrdering &>(reordering);
         return;
-    } catch(std::bad_cast exception) {
+    } catch(const std::bad_cast &exception) {
         // A reordering other than the natural one has been passed
     }
 
