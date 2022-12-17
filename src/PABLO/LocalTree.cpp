@@ -2491,14 +2491,14 @@ namespace bitpit {
 		Intersection 			intersection;
 		u32vector 				neighbours;
 		vector<bool>			isghost;
-		uint32_t 				counter, idx;
+		uint32_t 				idx;
 		uint32_t 				i, nsize;
 		uint8_t 				iface, iface2;
 
 		m_intersections.clear();
 		m_intersections.reserve(2*3*m_octants.size());
 
-		counter = idx = 0;
+		idx = 0;
 
 		// Loop on ghosts
 		obegin = m_ghosts.begin();
@@ -2523,7 +2523,6 @@ namespace bitpit {
 						intersection.m_bound = false;
 						intersection.m_pbound = true;
 						m_intersections.push_back(intersection);
-						counter++;
 					}
 				}
 				else{
@@ -2541,7 +2540,6 @@ namespace bitpit {
 						intersection.m_bound = true;
 						intersection.m_pbound = true;
 						m_intersections.push_back(intersection);
-						counter++;
 					}
 				}
 			}
@@ -2574,7 +2572,6 @@ namespace bitpit {
 								intersection.m_bound = false;
 								intersection.m_pbound = true;
 								m_intersections.push_back(intersection);
-								counter++;
 							}
 							else{
 								intersection.m_dim = m_dim;
@@ -2589,7 +2586,6 @@ namespace bitpit {
 								intersection.m_bound = false;
 								intersection.m_pbound = false;
 								m_intersections.push_back(intersection);
-								counter++;
 							}
 						}
 					}
@@ -2609,7 +2605,6 @@ namespace bitpit {
 								intersection.m_bound = true;
 								intersection.m_pbound = true;
 								m_intersections.push_back(intersection);
-								counter++;
 							}
 							else{
 								intersection.m_dim = m_dim;
@@ -2624,7 +2619,6 @@ namespace bitpit {
 								intersection.m_bound = true;
 								intersection.m_pbound = false;
 								m_intersections.push_back(intersection);
-								counter++;
 							}
 						}
 					}
@@ -2643,7 +2637,6 @@ namespace bitpit {
 					intersection.m_bound = true;
 					intersection.m_pbound = false;
 					m_intersections.push_back(intersection);
-					counter++;
 				}
 				if (it->m_info[iface2+1]){
 					if (!(m_periodic[iface2+1])){
@@ -2660,7 +2653,6 @@ namespace bitpit {
 						intersection.m_bound = true;
 						intersection.m_pbound = false;
 						m_intersections.push_back(intersection);
-						counter++;
 					}
 					else{
 						//Periodic intersection
@@ -2680,7 +2672,6 @@ namespace bitpit {
 								intersection.m_bound = true;
 								intersection.m_pbound = true;
 								m_intersections.push_back(intersection);
-								counter++;
 							}
 							else{
 								intersection.m_dim = m_dim;
@@ -2695,7 +2686,6 @@ namespace bitpit {
 								intersection.m_bound = true;
 								intersection.m_pbound = false;
 								m_intersections.push_back(intersection);
-								counter++;
 							}
 						}
 					}
