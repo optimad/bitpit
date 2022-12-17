@@ -1958,7 +1958,6 @@ void VolOctree::_updateAdjacencies()
 	const uint8_t *oppositeFace = m_tree->getOppface();
 
 	// Count cells with dirty adjacencies
-	long nDirtyAdjacenciesCells = 0;
 	std::vector<std::size_t> nDirtyAdjacenciesCellsByLevel(maxLevel + 1, 0);
 	for (const auto &entry : m_alteredCells) {
 		AlterationFlags cellAlterationFlags = entry.second;
@@ -1969,7 +1968,6 @@ void VolOctree::_updateAdjacencies()
 		long cellId = entry.first;
 		int cellLevel = getCellLevel(cellId);
 
-		++nDirtyAdjacenciesCells;
 		++nDirtyAdjacenciesCellsByLevel[cellLevel];
 	}
 
