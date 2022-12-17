@@ -289,7 +289,7 @@ void SparseMatrix::initialize(bool partitioned, int blockSize, long nRows, long 
 */
 void SparseMatrix::initialize(long nRows, long nCols, long nNZ)
 {
-    initialize(nRows, nCols, nNZ);
+    initialize(1, nRows, nCols, nNZ);
 }
 
 /**
