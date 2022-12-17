@@ -134,10 +134,27 @@ void reorderContainer(OrderContainer &order, DataContainer &v, std::size_t size)
         while (i != (j = order[i])) {
             std::size_t k = order[j];
 
-            std::swap(v[j], v[k]);
+            swapValue(v, j, k);
             std::swap(order[i], order[j]);
         }
     }
+}
+
+/*!
+* \ingroup common_misc
+*
+* Swap two values stored in the specified container.
+*
+* \tparam Container is the type of container that stores the data
+* \tparam Index is the type of the index that allows to identify a value in the container
+* \param v is a reference to the container
+* \param i is the index of the first element that will be swapped
+* \param j is the index of the second element that will be swapped
+*/
+template<typename Container, typename Index>
+void swapValue(Container &v, Index i, Index j)
+{
+    std::swap(v[i], v[j]);
 }
 
 /*!
