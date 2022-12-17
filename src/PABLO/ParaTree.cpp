@@ -3747,7 +3747,6 @@ namespace bitpit {
             if (getNumOctants() > nocts0)
                 globalDone = true;
             (*m_log) << " Number of octants after Refine	:	" + to_string(static_cast<unsigned long long>(getNumOctants())) << endl;
-            nocts0 = getNumOctants();
             updateAdapt();
 
             (*m_log) << " " << endl;
@@ -3771,7 +3770,6 @@ namespace bitpit {
             updateAdapt();
             computeGhostHalo();
             (*m_log) << " Number of octants after Refine	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)) << endl;
-            nocts0 = getNumOctants();
 
             m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI_C_BOOL,MPI_LOR,m_comm);
             (*m_log) << " " << endl;
@@ -3839,9 +3837,8 @@ namespace bitpit {
             if (getNumOctants() < nocts0){
                 globalDone = true;
             }
-            nocts0 = getNumOctants();
 
-            (*m_log) << " Number of octants after Coarse	:	" + to_string(static_cast<unsigned long long>(nocts0)) << endl;
+            (*m_log) << " Number of octants after Coarse	:	" + to_string(static_cast<unsigned long long>(getNumOctants())) << endl;
             (*m_log) << " " << endl;
             (*m_log) << "---------------------------------------------" << endl;
 #if BITPIT_ENABLE_MPI==1
@@ -3870,7 +3867,6 @@ namespace bitpit {
             if (getNumOctants() < nocts0){
                 localDone = true;
             }
-            nocts0 = getNumOctants();
 
             m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI_C_BOOL,MPI_LOR,m_comm);
             (*m_log) << " Number of octants after Coarse	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)) << endl;
@@ -4570,9 +4566,8 @@ namespace bitpit {
             if (getNumOctants() < nocts0){
                 globalDone = true;
             }
-            nocts0 = getNumOctants();
 
-            (*m_log) << " Number of octants after Coarse	:	" + to_string(static_cast<unsigned long long>(nocts0)) << endl;
+            (*m_log) << " Number of octants after Coarse	:	" + to_string(static_cast<unsigned long long>(getNumOctants())) << endl;
             (*m_log) << " " << endl;
             (*m_log) << "---------------------------------------------" << endl;
 #if BITPIT_ENABLE_MPI==1
@@ -4608,7 +4603,6 @@ namespace bitpit {
             if (getNumOctants() < nocts0){
                 localDone = true;
             }
-            nocts0 = getNumOctants();
 
             m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI_C_BOOL,MPI_LOR,m_comm);
             (*m_log) << " Number of octants after Coarse	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)) << endl;
