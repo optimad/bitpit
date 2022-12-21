@@ -45,12 +45,19 @@ void VolOctree::initializeTreePartitioning()
 	// Assigning a null weight to every octant but the last octant and then
 	// doing a load balance will have the effect of moving all the octants
 	// to the first process.
+	std::vector<double> octantWeightStorage;
+	const std::vector<double> *octantWeights;
+
 	std::size_t nOctants = m_tree->getNumOctants();
-	std::vector<double> octantWeights(nOctants, 0.);
-	if (nOctants > 0) {
-		octantWeights[nOctants - 1] = 1.;
+	if (nOctants > 1) {
+		octantWeightStorage.assign(nOctants, 0.);
+		octantWeightStorage[nOctants - 1] = 1.;
+		octantWeights = &octantWeightStorage;
+	} else {
+		octantWeights = nullptr;
 	}
-	m_tree->loadBalance(m_partitioningOctantWeights.get());
+
+	m_tree->loadBalance(octantWeights);
 }
 
 /*!
