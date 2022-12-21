@@ -3046,7 +3046,7 @@ namespace bitpit {
             return numeric_limits<uint32_t>::max();
         uint32_t idxtry = noctants/2;
         uint32_t x, y, z;
-        uint64_t morton, mortontry;
+        uint64_t morton;
         int powner = 0;
         //ParaTree works in [0,1] domain
         if (point[0] > 1+m_tol || point[1] > 1+m_tol || point[2] > 1+m_tol
@@ -3074,7 +3074,7 @@ namespace bitpit {
         int32_t jump = idxtry;
         while(abs(jump) > 0){
 
-            mortontry = m_octree.m_octants[idxtry].getMorton();
+            uint64_t mortontry = m_octree.m_octants[idxtry].getMorton();
             jump = ((mortontry<morton)-(mortontry>morton))*abs(jump)/2;
             idxtry += jump;
             if (idxtry > noctants-1){
@@ -3456,9 +3456,8 @@ namespace bitpit {
 
         //insert first ghost brothers if present
         {
-            int8_t marker;
             for (uint32_t id : m_octree.m_firstGhostBros){
-                marker = m_octree.m_ghosts[id].getMarker();
+                int8_t marker = m_octree.m_ghosts[id].getMarker();
                 idx.push_back(id);
                 markers.push_back(marker);
                 isghost.push_back(true);
@@ -3466,9 +3465,8 @@ namespace bitpit {
         }
 
         {
-            int8_t marker;
             for (uint32_t count = 0; count < m_octree.getNumOctants(); count++){
-                marker = m_octree.m_octants[count].getMarker();
+                int8_t marker = m_octree.m_octants[count].getMarker();
                 if (marker != 0){
                     idx.push_back(count);
                     markers.push_back(marker);
@@ -3479,9 +3477,8 @@ namespace bitpit {
 
         //insert last ghost brothers if present
         {
-            int8_t marker;
             for (uint32_t id : m_octree.m_lastGhostBros){
-                marker = m_octree.m_ghosts[id].getMarker();
+                int8_t marker = m_octree.m_ghosts[id].getMarker();
                 idx.push_back(id);
                 markers.push_back(marker);
                 isghost.push_back(true);
