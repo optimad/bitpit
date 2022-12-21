@@ -954,9 +954,8 @@ void VolOctreeMapper::_mapMeshesSamePartition(const std::vector<OctantIR> *octan
         // reference octants
         uint64_t morton = referencePatch->getTree().getMorton(&octantsIRReference->at(*indRef).octant);
 
-        uint64_t mortonMapLastdesc;
         for (indMap = 0; indMap < nMap; ++indMap) {
-            mortonMapLastdesc = mappedPatch->getTree().getLastDescMorton(&octantsIRMapped->at(indMap).octant);
+            uint64_t mortonMapLastdesc = mappedPatch->getTree().getLastDescMorton(&octantsIRMapped->at(indMap).octant);
             if (mortonMapLastdesc >= morton) {
                 break;
             }
