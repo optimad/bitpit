@@ -531,8 +531,8 @@ namespace bitpit {
         const u32vector & getGhostConnectivity(const Octant* oct) const;
         bool        check21Balance();
 #if BITPIT_ENABLE_MPI==1
-        void 		loadBalance(dvector* weight = NULL);
-        void 		loadBalance(uint8_t & level, dvector* weight = NULL);
+        void 		loadBalance(const dvector* weight = NULL);
+        void 		loadBalance(uint8_t & level, const dvector* weight = NULL);
 
         LoadBalanceRanges evalLoadBalanceRanges(dvector *weights);
         LoadBalanceRanges evalLoadBalanceRanges(uint8_t level, dvector *weights);

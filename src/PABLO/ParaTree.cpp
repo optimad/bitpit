@@ -4133,7 +4133,7 @@ namespace bitpit {
      * \param[in] weight Pointer to a vector of weights of the local octants (weight=NULL is uniform distribution).
      */
     void
-    ParaTree::loadBalance(dvector* weight){
+    ParaTree::loadBalance(const dvector* weight){
 
         //Write info on log
         (*m_log) << "---------------------------------------------" << endl;
@@ -4180,7 +4180,7 @@ namespace bitpit {
      * \param[in] weight Pointer to a vector of weights of the local octants (weight=NULL is uniform distribution).
      */
     void
-    ParaTree::loadBalance(uint8_t & level, dvector* weight){
+    ParaTree::loadBalance(uint8_t & level, const dvector* weight){
 
         //Write info on log
         (*m_log) << "---------------------------------------------" << endl;
