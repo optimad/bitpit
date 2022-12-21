@@ -495,8 +495,8 @@ namespace bitpit {
         uint32_t 	getPointOwnerIdx(const dvector &point, bool & isghost) const;
         uint32_t 	getPointOwnerIdx(const darray3 &point) const;
         uint32_t 	getPointOwnerIdx(const darray3 &point, bool & isghost) const;
-        void 		getMapping(uint32_t & idx, u32vector & mapper, bvector & isghost) const;
-        void 		getMapping(uint32_t & idx, u32vector & mapper, bvector & isghost, ivector & rank) const;
+        void 		getMapping(uint32_t idx, u32vector & mapper, bvector & isghost) const;
+        void 		getMapping(uint32_t idx, u32vector & mapper, bvector & isghost, ivector & rank) const;
         void 		getPreMapping(u32vector & idx, std::vector<int8_t> & markers, std::vector<bool> & isghost);
         bool 		isNodeOnOctant(const Octant* nodeOctant, uint8_t nodeIndex, const Octant* octant) const;
         bool 		isEdgeOnOctant(const Octant* edgeOctant, uint8_t edgeIndex, const Octant* octant) const;

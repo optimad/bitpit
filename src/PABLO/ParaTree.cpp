@@ -3352,7 +3352,7 @@ namespace bitpit {
      * I.e. isghost[i] = true/false -> the mapper[i] = j-th old octant was a local/ghost octant.
      */
     void
-    ParaTree::getMapping(uint32_t & idx, u32vector & mapper, bvector & isghost) const {
+    ParaTree::getMapping(uint32_t idx, u32vector & mapper, bvector & isghost) const {
 
         if (idx >= m_mapIdx.size()){
             throw std::runtime_error ("Invalid value for input index in getMapping");
@@ -3402,7 +3402,7 @@ namespace bitpit {
      * I.e. isghost[i] = true/false -> the mapper[i] = j-th old octant was a local/ghost octant.
      */
     void
-    ParaTree::getMapping(uint32_t & idx, u32vector & mapper, bvector & isghost, ivector & rank) const {
+    ParaTree::getMapping(uint32_t idx, u32vector & mapper, bvector & isghost, ivector & rank) const {
 
         if (m_lastOp == OP_ADAPT_MAPPED){
             getMapping(idx, mapper, isghost);
