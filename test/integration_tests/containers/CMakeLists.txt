@@ -22,9 +22,6 @@
 #
 #---------------------------------------------------------------------------*/
 
-# Specify the version being used as well as the language
-cmake_minimum_required(VERSION 3.10)
-
 # Name of the current module
 get_filename_component(MODULE_NAME ${CMAKE_CURRENT_LIST_DIR} NAME)
 
