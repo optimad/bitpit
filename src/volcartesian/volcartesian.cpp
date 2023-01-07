@@ -252,15 +252,6 @@ void VolCartesian::reset()
 }
 
 /*!
-	Resest the interfaces of the patch.
-*/
-void VolCartesian::resetInterfaces()
-{
-	PatchKernel::resetInterfaces();
-}
-
-
-/*!
 	Internal function to update the adjacencies of the patch.
 
 	The function will always update the adjacencies of all the cells.
