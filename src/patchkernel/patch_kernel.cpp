@@ -1034,9 +1034,6 @@ void PatchKernel::resetInterfaces()
 		return;
 	}
 
-	// Prune stale interfaces
-	pruneStaleInterfaces();
-
 	// Reset the interfaces
 	_resetInterfaces(false);
 
