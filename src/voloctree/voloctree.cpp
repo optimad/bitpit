@@ -950,15 +950,15 @@ int VolOctree::getCellFamilySplitLocalVertex(long id) const
 */
 std::vector<adaption::Info> VolOctree::_spawn(bool trackSpawn)
 {
-	std::vector<adaption::Info> updateInfo;
+	std::vector<adaption::Info> adaptionData;
 
 	// Perform initial import
 	if (empty()) {
 		m_tree->adapt();
-		updateInfo = sync(trackSpawn);
+		adaptionData = sync(trackSpawn);
 	}
 
-	return updateInfo;
+	return adaptionData;
 }
 
 /*!
