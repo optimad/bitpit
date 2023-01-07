@@ -993,11 +993,11 @@ double VolCartesian::getSpacing(int direction) const
 */
 std::vector<adaption::Info> VolCartesian::_spawn(bool trackSpawn)
 {
-	std::vector<adaption::Info> updateInfo;
+	std::vector<adaption::Info> adaptionData;
 
 	// If the patch is in 'normal' mode there is nothing to do.
 	if (getMemoryMode() == MEMORY_NORMAL) {
-		return updateInfo;
+		return adaptionData;
 	}
 
 	// Enable advanced editing
@@ -1012,8 +1012,8 @@ std::vector<adaption::Info> VolCartesian::_spawn(bool trackSpawn)
 
 	// Adaption info
 	if (trackSpawn) {
-		updateInfo.emplace_back();
-		adaption::Info &adaptionCellInfo = updateInfo.back();
+		adaptionData.emplace_back();
+		adaption::Info &adaptionCellInfo = adaptionData.back();
 		adaptionCellInfo.type   = adaption::TYPE_CREATION;
 		adaptionCellInfo.entity = adaption::ENTITY_CELL;
 		adaptionCellInfo.current.reserve(m_cells.size());
@@ -1023,8 +1023,8 @@ std::vector<adaption::Info> VolCartesian::_spawn(bool trackSpawn)
 			cellId = cell.getId();
 		}
 
-		updateInfo.emplace_back();
-		adaption::Info &adaptionInterfaceInfo = updateInfo.back();
+		adaptionData.emplace_back();
+		adaption::Info &adaptionInterfaceInfo = adaptionData.back();
 		adaptionInterfaceInfo.type   = adaption::TYPE_CREATION;
 		adaptionInterfaceInfo.entity = adaption::ENTITY_INTERFACE;
 		adaptionInterfaceInfo.current.reserve(m_interfaces.size());
@@ -1034,14 +1034,14 @@ std::vector<adaption::Info> VolCartesian::_spawn(bool trackSpawn)
 			interfaceId = interface.getId();
 		}
 	} else {
-		updateInfo.emplace_back();
+		adaptionData.emplace_back();
 	}
 
 	// Updating the adaption brings the patch is in normal memory mode
 	setMemoryMode(MemoryMode::MEMORY_NORMAL);
 
 	// Done
-	return updateInfo;
+	return adaptionData;
 }
 
 /*!
