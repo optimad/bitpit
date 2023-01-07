@@ -1070,7 +1070,7 @@ void PatchKernel::resetInterfaces()
 
 	\param release if it's true the memory hold by the interfaces will be
 	released, otherwise the interfaces will be reset but their memory will
-	not be relased
+	not be released
 */
 void PatchKernel::_resetInterfaces(bool release)
 {
@@ -6326,7 +6326,7 @@ void PatchKernel::destroyInterfaces()
 	// Destroy the interfaces
 	_resetInterfaces(true);
 
-	// Clear list of cells with dirty adjacencies
+	// Clear list of cells with dirty interfaces
 	unsetCellAlterationFlags(FLAG_INTERFACES_DIRTY);
 
 	// Clear list of altered interfaces
@@ -6401,7 +6401,6 @@ void PatchKernel::pruneStaleInterfaces()
 */
 void PatchKernel::_updateInterfaces()
 {
-	//
 	// Update interfaces
 	//
 	// Adjacencies and interfaces of a face are paired: the i-th face adjacency
