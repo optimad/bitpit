@@ -98,12 +98,12 @@ void VolOctreeMapper::clearPartitionMappingLists()
  * The adaptation of only one mesh at time is allowed. Calling this method
  * is mandatory to perform an update of the mapper after an adaptation.
  *
- * \param[in] adaptionInfo are the adaptation info that describe the changes
+ * \param[in] adaptionData are the adaptation info that describe the changes
  * of the patch
  * \param[in] reference if set to true the reference mesh will be adapted,
  * is set to false the mapped one will be adapted
  */
-void VolOctreeMapper::adaptionPrepare(const std::vector<adaption::Info> &adaptionInfo, bool reference)
+void VolOctreeMapper::adaptionPrepare(const std::vector<adaption::Info> &adaptionData, bool reference)
 {
     m_previousMapping.clear();
     PiercedStorage<mapping::Info> *pmapper;
@@ -118,7 +118,7 @@ void VolOctreeMapper::adaptionPrepare(const std::vector<adaption::Info> &adaptio
 #if BITPIT_ENABLE_MPI
     m_partitionIR.map_rank_previousMapping.clear();
 #endif
-    for (const adaption::Info &info : adaptionInfo) {
+    for (const adaption::Info &info : adaptionData) {
         if (info.type == adaption::Type::TYPE_PARTITION_SEND ||
                 info.type == adaption::Type::TYPE_PARTITION_RECV ||
                 info.type == adaption::Type::TYPE_PARTITION_NOTICE) {
@@ -139,7 +139,7 @@ void VolOctreeMapper::adaptionPrepare(const std::vector<adaption::Info> &adaptio
  * The adaptationPrepare method of the mapper has to called before the
  * adaptation of the mesh.
  *
- * \param[in] adaptionInfo are the adaptation info that describe the changes of
+ * \param[in] adaptionData are the adaptation info that describe the changes of
  * the patch
  * \param[in] reference if set to true the reference mesh will be adapted,
  * is set to false the mapped one will be adapted
@@ -148,12 +148,12 @@ void VolOctreeMapper::adaptionPrepare(const std::vector<adaption::Info> &adaptio
  * the inverse mapper has to be necessarily filled during the first computation
  * in initialization)
  */
-void VolOctreeMapper::adaptionAlter(const std::vector<adaption::Info> &adaptionInfo, bool reference, bool inverseFilled)
+void VolOctreeMapper::adaptionAlter(const std::vector<adaption::Info> &adaptionData, bool reference, bool inverseFilled)
 {
     if (reference) {
-        _mappingAdaptionReferenceUpdate(adaptionInfo, inverseFilled);
+        _mappingAdaptionReferenceUpdate(adaptionData, inverseFilled);
     } else {
-        _mappingAdaptionMappedUpdate(adaptionInfo);
+        _mappingAdaptionMappedUpdate(adaptionData);
     }
 }
 
@@ -168,14 +168,14 @@ void VolOctreeMapper::adaptionCleanup()
 /**
  * Update the mapper after an adaption of the reference mesh.
  *
- * \param[in] adaptionInfo are the adaptation info that describe the changes of
+ * \param[in] adaptionData are the adaptation info that describe the changes of
  * the patch
  * \param[in] inverseFilled if set to true the inverse mapped was filled
  * during the mesh mapper computing. If the adapted mesh is the mapped one,
  * the inverse mapper has to be necessarily filled during the first computation
  * in initialization)
  */
-void VolOctreeMapper::_mappingAdaptionReferenceUpdate(const std::vector<adaption::Info> &adaptionInfo, bool inverseFilled)
+void VolOctreeMapper::_mappingAdaptionReferenceUpdate(const std::vector<adaption::Info> &adaptionData, bool inverseFilled)
 {
     const VolOctree *adaptedPatch = static_cast<const VolOctree*>(m_referencePatch);
     const VolOctree *mappedPatch  = static_cast<const VolOctree*>(m_mappedPatch);
@@ -193,7 +193,7 @@ void VolOctreeMapper::_mappingAdaptionReferenceUpdate(const std::vector<adaption
 #endif
 
     if (!changedPartition) {
-        for (const adaption::Info &info : adaptionInfo) {
+        for (const adaption::Info &info : adaptionData) {
             if (info.type == adaption::Type::TYPE_PARTITION_SEND ||
                     info.type == adaption::Type::TYPE_PARTITION_RECV ||
                     info.type == adaption::Type::TYPE_PARTITION_NOTICE) {
@@ -456,10 +456,10 @@ void VolOctreeMapper::_mappingAdaptionReferenceUpdate(const std::vector<adaption
 /**
  * Update the mapping after an adaption of the mapped mesh.
  *
- * \param[in] adaptionInfo are the adaptation info that describe the changes of
+ * \param[in] adaptionData are the adaptation info that describe the changes of
  * the patch
  */
-void VolOctreeMapper::_mappingAdaptionMappedUpdate(const std::vector<adaption::Info> &adaptionInfo)
+void VolOctreeMapper::_mappingAdaptionMappedUpdate(const std::vector<adaption::Info> &adaptionData)
 {
     const VolOctree *adaptedPatch   = static_cast<const VolOctree*>(m_mappedPatch);
     const VolOctree *referencePatch = static_cast<const VolOctree*>(m_referencePatch);
@@ -481,18 +481,18 @@ void VolOctreeMapper::_mappingAdaptionMappedUpdate(const std::vector<adaption::I
     }
 
     if (!changedPartition) {
-        std::vector<adaption::Info> adaptionInfoRef;
+        std::vector<adaption::Info> adaptionDataRef;
 #if BITPIT_ENABLE_MPI
         if (!checkPart) {
-            _communicateMappedAdaptionInfo(adaptionInfo, &adaptionInfoRef);
+            _communicateMappedAdaptionInfo(adaptionData, &adaptionDataRef);
         } else {
-            adaptionInfoRef = adaptionInfo;
+            adaptionDataRef = adaptionData;
         }
 #else
-        adaptionInfoRef = adaptionInfo;
+        adaptionDataRef = adaptionData;
 #endif
 
-        for (const adaption::Info &info : adaptionInfoRef) {
+        for (const adaption::Info &info : adaptionDataRef) {
             if (info.type == adaption::Type::TYPE_PARTITION_SEND ||
                     info.type == adaption::Type::TYPE_PARTITION_RECV ||
                     info.type == adaption::Type::TYPE_PARTITION_NOTICE) {
@@ -1596,12 +1596,12 @@ void VolOctreeMapper::_communicateInverseMapperBack()
  * Communicate adaption info of overlapped partitions of the mapped mesh to
  * the processes of reference partitions.
  *
- * \param[in] adaptionInfoMap are the adaptation info that describe the changes
+ * \param[in] adaptionDataMap are the adaptation info that describe the changes
  * of the local mapped partitions
- * \param[out] adaptionInfoRef are the adaptation info that describe the
+ * \param[out] adaptionDataRef are the adaptation info that describe the
  * changes of the local reference partitions
  */
-void VolOctreeMapper::_communicateMappedAdaptionInfo(const std::vector<adaption::Info> &adaptionInfoMap, std::vector<adaption::Info> *adaptionInfoRef)
+void VolOctreeMapper::_communicateMappedAdaptionInfo(const std::vector<adaption::Info> &adaptionDataMap, std::vector<adaption::Info> *adaptionDataRef)
 {
     // Recover mapping elements to send (to partitions of mapped mesh)
     std::set<int> toRanks;
@@ -1609,7 +1609,7 @@ void VolOctreeMapper::_communicateMappedAdaptionInfo(const std::vector<adaption:
     std::map<int, std::vector<long>> toRankId;
 
     std::size_t n = 0;
-    for (auto &info : adaptionInfoMap) {
+    for (auto &info : adaptionDataMap) {
         for (long id : info.previous) {
             auto itPreviousMapping = m_previousMapping.find(id);
             if (itPreviousMapping == m_previousMapping.end()){
@@ -1639,7 +1639,7 @@ void VolOctreeMapper::_communicateMappedAdaptionInfo(const std::vector<adaption:
         buffSize += std::size_t(sizeof(int));
 
         for (long ind : toRankInd[rank]) {
-            const adaption::Info &info = adaptionInfoMap[ind];
+            const adaption::Info &info = adaptionDataMap[ind];
             int currentSize = info.current.size();
             int previousSize = info.previous.size();
             std::size_t infoBytes = std::size_t(5*sizeof(int) + (sizeof(long))*(currentSize+previousSize));
@@ -1670,7 +1670,7 @@ void VolOctreeMapper::_communicateMappedAdaptionInfo(const std::vector<adaption:
 
         sendBuffer << int(toRankInd[rank].size());
         for (long ind : toRankInd[rank]) {
-            const adaption::Info &info = adaptionInfoMap[ind];
+            const adaption::Info &info = adaptionDataMap[ind];
             sendBuffer << int(info.type);
             sendBuffer << int(info.entity);
             int currentSize = info.current.size();
@@ -1738,8 +1738,8 @@ void VolOctreeMapper::_communicateMappedAdaptionInfo(const std::vector<adaption:
             int entity;
             recvBuffer >> entity;
 
-            adaptionInfoRef->emplace_back();
-            adaption::Info &info = adaptionInfoRef->back();
+            adaptionDataRef->emplace_back();
+            adaption::Info &info = adaptionDataRef->back();
             info.type = adaption::Type(type);
             info.entity = adaption::Entity(entity);
             int ncurrent;
