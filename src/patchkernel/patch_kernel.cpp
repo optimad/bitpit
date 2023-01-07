@@ -619,14 +619,14 @@ PatchKernel::~PatchKernel()
 */
 std::vector<adaption::Info> PatchKernel::update(bool trackAdaption, bool squeezeStorage)
 {
-	std::vector<adaption::Info> updateInfo;
+	std::vector<adaption::Info> adaptionData;
 
 	// Early return if the patch is not dirty
 	//
 	// If we need to squeeze the storage we need to perform the update also
 	// if the patch is not dirty.
 	if (!squeezeStorage && !isDirty(true)) {
-		return updateInfo;
+		return adaptionData;
 	}
 
 	// Finalize alterations
@@ -635,16 +635,16 @@ std::vector<adaption::Info> PatchKernel::update(bool trackAdaption, bool squeeze
 	// Spawn
 	bool spawnNeeed = (getSpawnStatus() == SPAWN_NEEDED);
 	if (spawnNeeed) {
-		mergeAdaptionInfo(spawn(trackAdaption), updateInfo);
+		mergeAdaptionInfo(spawn(trackAdaption), adaptionData);
 	}
 
 	// Adaption
 	bool adaptionDirty = (getAdaptionStatus(true) == ADAPTION_DIRTY);
 	if (adaptionDirty) {
-		mergeAdaptionInfo(adaption(trackAdaption, squeezeStorage), updateInfo);
+		mergeAdaptionInfo(adaption(trackAdaption, squeezeStorage), adaptionData);
 	}
 
-	return updateInfo;
+	return adaptionData;
 }
 
 /*!
@@ -676,7 +676,7 @@ void PatchKernel::simulateCellUpdate(const long id, adaption::Marker marker, std
 */
 std::vector<adaption::Info> PatchKernel::spawn(bool trackSpawn)
 {
-	std::vector<adaption::Info> spawnInfo;
+	std::vector<adaption::Info> spawnData;
 
 #if BITPIT_ENABLE_MPI==1
 	// This is a collevtive operation and should be called by all processes
@@ -689,11 +689,11 @@ std::vector<adaption::Info> PatchKernel::spawn(bool trackSpawn)
 	// Check spawn status
 	SpawnStatus spawnStatus = getSpawnStatus();
 	if (spawnStatus == SPAWN_UNNEEDED || spawnStatus == SPAWN_DONE) {
-		return spawnInfo;
+		return spawnData;
 	}
 
 	// Spawn the patch
-	spawnInfo = _spawn(trackSpawn);
+	spawnData = _spawn(trackSpawn);
 
 	// Finalize patch alterations
 	finalizeAlterations(true);
@@ -702,7 +702,7 @@ std::vector<adaption::Info> PatchKernel::spawn(bool trackSpawn)
 	setSpawnStatus(SPAWN_DONE);
 
 	// Done
-	return spawnInfo;
+	return spawnData;
 }
 
 /*!
@@ -717,23 +717,23 @@ std::vector<adaption::Info> PatchKernel::spawn(bool trackSpawn)
 */
 std::vector<adaption::Info> PatchKernel::adaption(bool trackAdaption, bool squeezeStorage)
 {
-	std::vector<adaption::Info> adaptionInfo;
+	std::vector<adaption::Info> adaptionData;
 
 	// Check adaption status
 	AdaptionStatus adaptionStatus = getAdaptionStatus(true);
 	if (adaptionStatus == ADAPTION_UNSUPPORTED || adaptionStatus == ADAPTION_CLEAN) {
-		return adaptionInfo;
+		return adaptionData;
 	} else if (adaptionStatus != ADAPTION_DIRTY) {
 		throw std::runtime_error ("An adaption is already in progress.");
 	}
 
 	adaptionPrepare(false);
 
-	adaptionInfo = adaptionAlter(trackAdaption, squeezeStorage);
+	adaptionData = adaptionAlter(trackAdaption, squeezeStorage);
 
 	adaptionCleanup();
 
-	return adaptionInfo;
+	return adaptionData;
 }
 
 /*!
@@ -751,23 +751,23 @@ std::vector<adaption::Info> PatchKernel::adaption(bool trackAdaption, bool squee
 */
 std::vector<adaption::Info> PatchKernel::adaptionPrepare(bool trackAdaption)
 {
-	std::vector<adaption::Info> adaptionInfo;
+	std::vector<adaption::Info> adaptionData;
 
 	// Check adaption status
 	AdaptionStatus adaptionStatus = getAdaptionStatus(true);
 	if (adaptionStatus == ADAPTION_UNSUPPORTED || adaptionStatus == ADAPTION_CLEAN) {
-		return adaptionInfo;
+		return adaptionData;
 	} else if (adaptionStatus != ADAPTION_DIRTY) {
 		throw std::runtime_error ("An adaption is already in progress.");
 	}
 
 	// Execute the adaption preparation
-	adaptionInfo = _adaptionPrepare(trackAdaption);
+	adaptionData = _adaptionPrepare(trackAdaption);
 
 	// Update the status
 	setAdaptionStatus(ADAPTION_PREPARED);
 
-	return adaptionInfo;
+	return adaptionData;
 }
 
 /*!
@@ -787,18 +787,18 @@ std::vector<adaption::Info> PatchKernel::adaptionPrepare(bool trackAdaption)
 */
 std::vector<adaption::Info> PatchKernel::adaptionAlter(bool trackAdaption, bool squeezeStorage)
 {
-	std::vector<adaption::Info> adaptionInfo;
+	std::vector<adaption::Info> adaptionData;
 
 	// Check adaption status
 	AdaptionStatus adaptionStatus = getAdaptionStatus();
 	if (adaptionStatus == ADAPTION_UNSUPPORTED || adaptionStatus == ADAPTION_CLEAN) {
-		return adaptionInfo;
+		return adaptionData;
 	} else if (adaptionStatus != ADAPTION_PREPARED) {
 		throw std::runtime_error ("The prepare function has not been called.");
 	}
 
 	// Adapt the patch
-	adaptionInfo = _adaptionAlter(trackAdaption);
+	adaptionData = _adaptionAlter(trackAdaption);
 
 	// Finalize patch alterations
 	finalizeAlterations(squeezeStorage);
@@ -806,7 +806,7 @@ std::vector<adaption::Info> PatchKernel::adaptionAlter(bool trackAdaption, bool 
 	// Update the status
 	setAdaptionStatus(ADAPTION_ALTERED);
 
-	return adaptionInfo;
+	return adaptionData;
 }
 
 /*!
