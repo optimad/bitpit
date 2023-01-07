@@ -66,8 +66,6 @@ public:
 
 	void reset() override;
 
-	void resetInterfaces() override;
-
 	long getVertexCount() const override;
 	int getVertexCount(int direction) const;
 
