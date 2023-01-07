@@ -1054,11 +1054,11 @@ void PatchKernel::resetInterfaces()
 	// Reset the interfaces
 	_resetInterfaces(false);
 
-	// All remaining interfaces will be deleted
-	setInterfaceAlterationFlags(FLAG_DELETED);
-
 	// Mark cell interfaces as dirty
 	setCellAlterationFlags(FLAG_INTERFACES_DIRTY);
+
+	// Clear list of altered interfaces
+	m_alteredInterfaces.clear();
 }
 
 /*!
