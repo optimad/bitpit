@@ -1664,7 +1664,7 @@ VolOctree::StitchInfo VolOctree::deleteCells(const std::vector<DeleteInfo> &dele
 	// we need to remove stale adjacencies and interfaces.
 	pruneStaleAdjacencies();
 
-	pruneStaleInterfaces();
+	pruneStaleInterfaces(false);
 
 	// All the vertices belonging to the dangling cells has to be kept
 	//

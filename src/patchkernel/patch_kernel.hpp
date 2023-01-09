@@ -374,7 +374,7 @@ public:
 	virtual void reset();
 	virtual void resetVertices();
 	virtual void resetCells();
-	virtual void resetInterfaces();
+	virtual std::vector<adaption::Info> resetInterfaces(bool trackAdaption = false);
 
 	bool reserveVertices(size_t nVertices);
 	bool reserveCells(size_t nCells);
@@ -647,9 +647,9 @@ public:
 	InterfacesBuildStrategy getInterfacesBuildStrategy() const;
 	bool areInterfacesDirty(bool global = false) const;
 	BITPIT_DEPRECATED(void buildInterfaces());
-	void initializeInterfaces(InterfacesBuildStrategy strategy = INTERFACES_AUTOMATIC);
-	void updateInterfaces(bool forcedUpdated = false);
-	void destroyInterfaces();
+	std::vector<adaption::Info> initializeInterfaces(InterfacesBuildStrategy strategy = INTERFACES_AUTOMATIC, bool trackAdaption = false);
+	std::vector<adaption::Info> updateInterfaces(bool forcedUpdated = false, bool trackAdaption = false);
+	std::vector<adaption::Info> destroyInterfaces(bool trackAdaption = false);
 
 	void getBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint) const;
 	void getBoundingBox(bool global, std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint) const;
@@ -852,9 +852,9 @@ protected:
 	virtual void _updateAdjacencies();
 
 	void setInterfacesBuildStrategy(InterfacesBuildStrategy status);
-	void pruneStaleInterfaces();
-	virtual void _resetInterfaces(bool release);
-	virtual void _updateInterfaces();
+	std::vector<adaption::Info> pruneStaleInterfaces(bool trackAdaption);
+	virtual std::vector<adaption::Info> _resetInterfaces(bool trackAdaption, bool release);
+	virtual std::vector<adaption::Info> _updateInterfaces(bool trackAdaption);
 
 	bool testCellAlterationFlags(long id, AlterationFlags flags) const;
 	AlterationFlags getCellAlterationFlags(long id) const;
@@ -1064,7 +1064,7 @@ private:
     void initializeSerialCommunicator();
 #endif
 
-	void finalizeAlterations(bool squeezeStorage = false);
+	std::vector<adaption::Info> finalizeAlterations(bool trackAdaption, bool squeezeStorage = false);
 
 	InterfaceIterator buildCellInterface(Cell *cell_1, int face_1, Cell *cell_2, int face_2, long interfaceId = Element::NULL_ID);
 
