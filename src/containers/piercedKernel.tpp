@@ -1864,11 +1864,10 @@ void PiercedKernel<id_t>::holesClearPending(bool release)
 template<typename id_t>
 void PiercedKernel<id_t>::holesResize(std::size_t offset, std::size_t nRegulars, std::size_t nPendings, bool release)
 {
+    m_holes.resize(offset + nRegulars + MAX_PENDING_HOLES);
     if (release) {
         m_holes.shrink_to_fit();
     }
-
-    m_holes.resize(offset + nRegulars + MAX_PENDING_HOLES);
 
     m_holes_regular_begin = offset;
     m_holes_regular_end   = m_holes_regular_begin + nRegulars;
