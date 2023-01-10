@@ -2893,7 +2893,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
         // Update adaption info
         //
         if (trackPartitioning) {
-            // Update partition
+            // Track cells that have been sent
             //
             // The ids of the cells send will be stored accordingly to the send
             // order, this is the same order that will be used on the process
