@@ -777,6 +777,17 @@ int RBFKernel::greedy( double tolerance)
 }
 
 /*!
+ * Returns the weights associated to each node.
+ *
+ * @return vector containing interpolated/parameterized weights.
+ *
+ */
+const std::vector<std::vector<double>> & RBFKernel::getWeights() const
+{
+    return m_weight;
+}
+
+/*!
  * Check dimensions of already available data and resize them to current
  * RBFKernel node list dimension. The method resizes all data structures to current RBFKernel
  * node list dimension and does not destroy any previous stored data within such

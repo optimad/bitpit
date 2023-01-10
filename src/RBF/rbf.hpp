@@ -132,6 +132,8 @@ public:
     int                     solve();
     int                     greedy(double);
 
+    const std::vector<std::vector<double>> & getWeights() const;
+
 protected:
     double                  evalError();
     int                     addGreedyPoint();
