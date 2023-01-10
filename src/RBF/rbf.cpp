@@ -180,6 +180,11 @@ void RBFKernel::setFunction( RBFBasisFunction bfunc )
         m_typef = RBFBasisFunction::C2C2;
         break;
 
+    case( RBFBasisFunction::COSINUS):
+        setFunction( rbf::cosinus);
+        m_typef = RBFBasisFunction::COSINUS;
+        break;
+
     default:
         setFunction( rbf::wendlandc2);
         m_typef = RBFBasisFunction::WENDLANDC2;
@@ -1341,5 +1346,20 @@ double rbf::c2c2( double dist )
         return (1.0 -10.0*std::pow(dist,3) +15.0*std::pow(dist,4) -6.0*std::pow(dist,5));
     }
 }
+
+/*!
+ * Cosinusoidal function defined between 0,1. It has a 0 value outside r=1.
+ * It preserves C_\infty.
+ * @param[in] dist distance normalized with respect to support radius
+ * @return rbf value
+ */
+    double rbf::cosinus( double dist )
+    {
+        if( dist > 1) {
+            return 0.;
+        } else{
+            return 0.5 + 0.5 * std::cos(dist*M_PI);
+        }
+    }
 
 }
