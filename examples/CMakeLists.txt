@@ -70,6 +70,7 @@ if(BITPIT_BUILD_EXAMPLES)
     list(APPEND EXAMPLE_LIST "POD_example_00002")
     list(APPEND EXAMPLE_LIST "POD_example_00003")
     list(APPEND EXAMPLE_LIST "POD_application_example_00001")
+    list(APPEND EXAMPLE_LIST "RBF_example_00001")
     list(APPEND EXAMPLE_LIST "voloctree_adaptation_example_00001")
     list(APPEND EXAMPLE_LIST "voloctree_mapper_example_00001")
     list(APPEND EXAMPLE_LIST "voloctree_mapper_example_00002")
@@ -95,6 +96,12 @@ if(BITPIT_BUILD_EXAMPLES)
         TARGET "POD_application_example_00001" "POD_example_00001" "POD_example_00002" "POD_example_00003" PRE_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/data" "${CMAKE_CURRENT_BINARY_DIR}/data"
         COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/pod"
+    )
+
+    add_custom_command(
+        TARGET "RBF_example_00001" PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/RBF_example_00001.param" "${CMAKE_CURRENT_BINARY_DIR}/RBF_example_00001.param"
+        COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/RBF_example_00001.stl" "${CMAKE_CURRENT_BINARY_DIR}/RBF_example_00001.stl"
     )
 
     install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/data" DESTINATION doc/${PROJECT_NAME}-${BITPIT_VERSION}/examples)
