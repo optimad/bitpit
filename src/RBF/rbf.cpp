@@ -776,9 +776,6 @@ void RBFKernel::fitDataToNodes(int id)
     else                            m_weight[id].resize(m_nodes,0.0);
 }
 
-
-//PROTECTED RBFKernel CLASS METHODS IMPLEMENTATION
-
 /*!
  * Evaluates the basis function. Supported in both modes
  * @param[in] dist distance
