@@ -127,6 +127,7 @@ public:
     std::vector<double>     evalRBF(const std::array<double,3> &);
     std::vector<double>     evalRBF(int jnode);
     double                  evalBasis(double);
+    double                  evalBasisPair(int i, int j);
 
     int                     solve();
     int                     greedy(double);

@@ -819,6 +819,21 @@ double RBFKernel::evalBasis( double dist )
 }
 
 /*!
+ * Evaluates the contribution of the node j on the value of the basis at node i
+ *
+ * @param[in] i point at which the basis function contribution is computed
+ * @param[in] j point from which the basis function contribution is computed
+ * @return basis function contribution from j to i
+ *
+ */
+double RBFKernel::evalBasisPair(const int i, const int j)
+{
+    double dist = calcDist(i, j) / getSupportRadius(j);
+    double value = evalBasis(dist);
+    return value;
+}
+
+/*!
  * Determines which node has to be added to active set. Supported only in INTERP mode.
  * @return index with max error; if no index available, or dummy call -1 is returned
  */
