@@ -1918,14 +1918,17 @@ std::vector<adaption::Info> PatchKernel::_partitioningPrepare(const std::unorder
 		}
 
 		// Fill the cell ranks
+		int nCellsForRank = getInternalCellCount() / getProcessorCount();
+
 		int metisId = 0;
 		for (const Cell &cell : m_cells) {
-			int metisRank = elementRanks[metisId];
+			int metisRank = std::min(metisId / nCellsForRank, getProcessorCount() - 1);
 			if (metisRank != getRank()) {
-				cellRanks[cell.getId()] = elementRanks[metisId];
+				cellRanks[cell.getId()] = metisRank;
 			}
 			++metisId;
 		}
+
 	}
 
 	return _partitioningPrepare(cellRanks, trackPartitioning);
