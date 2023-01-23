@@ -742,6 +742,13 @@ std::vector<adaption::Info> PatchKernel::adaption(bool trackAdaption, bool squee
 	track the changes that will be performed to the patch. During this phase
 	no changes will be performed to the patch.
 
+	Tracking will only list changes that may data collection on the internal
+	data structured (e.g., adaption preparation will not track adaption of
+	ghost cells).
+
+	Information available for tracking purposes are the following:
+	 - internal cells that will be coarsened/refined.
+
 	\param trackAdaption if set to true the function will return the changes
 	that will be performed in the alter step
 	\result If the adaption is tracked, returns a vector of adaption::Info that
@@ -774,7 +781,17 @@ std::vector<adaption::Info> PatchKernel::adaptionPrepare(bool trackAdaption)
 
 	The actual modification of the patch takes place during this phase. After
 	this phase the adaption is completed and the patch is in its final state.
-	Optionally the patch can track the changes performed to the patch.
+
+	Optionally, this funciton can track the changes performed to the patch.
+
+	Tracking information will not contain changes that involve data collection
+	on ghost data structured (e.g., ghost cells adaption is not tracked, only
+	deletion and creation of ghost cells will be tracked).
+
+	Information available for tracking purposes are the following:
+	 - internal cells that have been coarsened/refined;
+	 - new ghost cells that have been created;
+	 - ghost cells that have been deleted.
 
 	\param trackAdaption if set to true the function will return the changes
 	done to the patch during the adaption
@@ -5118,6 +5135,9 @@ std::vector<adaption::Info> PatchKernel::_spawn(bool trackSpawn)
 
 	Default implementation is a no-op function.
 
+	See PatchKernel::adaptionPrepare(bool trackPartitioning) for the
+	documentation about the tracking information returned by this function.
+
 	\param trackAdaption if set to true the function will return the changes
 	that will be performed in the alter step
 	\result If the adaption is tracked, returns a vector of adaption::Info that
@@ -5135,6 +5155,9 @@ std::vector<adaption::Info> PatchKernel::_adaptionPrepare(bool trackAdaption)
 	Alter the patch performing the adaption.
 
 	Default implementation is a no-op function.
+
+	See PatchKernel::adaptionAlter(bool trackPartitioning) for the
+	documentation about the tracking information returned by this function.
 
 	\param trackAdaption if set to true the function will return the changes
 	done to the patch during the adaption

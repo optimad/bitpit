@@ -112,6 +112,10 @@ void VolOctree::_setHaloSize(std::size_t haloSize)
 /*!
 	Prepares the patch for performing the partitioning.
 
+	See PatchKernel::partitioningPrepare(bool trackPartitioning) for the
+	documentation about the tracking information that should be returned
+	when re-implmeneting by this function.
+
 	\param cellWeights are the weights of the cells, the weight represents the
 	relative computational cost associated to a specified cell. If no weight
 	is specified for a cell, the default weight will be used

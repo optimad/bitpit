@@ -1030,7 +1030,7 @@ private:
 
 	void computeCellHaloLayer(int id);
 
-	void _partitioningAlter_deleteGhosts();
+	std::vector<adaption::Info> _partitioningAlter_deleteGhosts(bool trackPartitioning);
 
 	std::unordered_map<long, int> _partitioningAlter_evalGhostCellOwnershipChanges();
 	void _partitioningAlter_applyGhostCellOwnershipChanges(int sendRank, std::unordered_map<long, int> *ghostCellOwnershipChanges);
