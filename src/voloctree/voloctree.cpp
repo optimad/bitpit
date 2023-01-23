@@ -929,7 +929,8 @@ int VolOctree::getCellFamilySplitLocalVertex(long id) const
 /*!
 	Prepares the patch for performing the adaption.
 
-	NOTE: only cells are tracked.
+	See PatchKernel::adaptionPrepare(bool trackPartitioning) for the
+	documentation about the tracking information returned by this function.
 
 	\param trackAdaption if set to true the function will return the changes
 	that will be performed in the alter step
@@ -1016,6 +1017,9 @@ std::vector<adaption::Info> VolOctree::_adaptionPrepare(bool trackAdaption)
 /*!
 	Alter the patch performing the adpation.
 
+	See PatchKernel::adaptionAlter(bool trackPartitioning) for the
+	documentation about the tracking information returned by this function.
+
 	\param trackAdaption if set to true the function will return the changes
 	done to the patch during the adaption
 	\result If the adaption is tracked, returns a vector of adaption::Info
@@ -1064,6 +1068,11 @@ void VolOctree::settleAdaptionMarkers()
 
 /*!
 	Syncronizes the patch with the underlying octree.
+
+	Optionally, this function can track the changes performed to the patch. See
+	PatchKernel::partitioningAlter(bool trackPartitioning, bool squeezeStorage)
+	for the documentation about the tracking information returned by this
+	function.
 
 	\param trackChanges if set to true the changes to the patch will be
 	tracked
