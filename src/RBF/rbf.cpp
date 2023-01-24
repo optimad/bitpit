@@ -1384,7 +1384,7 @@ double rbf::c2c2( double dist )
         if( dist > 1) {
             return 0.;
         } else{
-            return 0.5 + 0.5 * std::cos(dist*M_PI);
+            return 0.5 + 0.5 * std::cos(dist*BITPIT_PI);
         }
     }
 
