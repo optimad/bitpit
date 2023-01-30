@@ -1576,7 +1576,8 @@ std::vector<adaption::Info> PatchKernel::partitioningPrepare(MPI_Comm communicat
 
 	Information available on the sender side for tracking purposes are the
 	following:
-	 - internal cells that will be send.
+	 - internal cells that will be send;
+	 - internal vertices that will be send.
 
 	No information about tracking are provided on the receiver side.
 
@@ -1677,16 +1678,24 @@ std::vector<adaption::Info> PatchKernel::partitioningPrepare(const std::unordere
 	Information available on the sender side for tracking purposes are the
 	following:
 	 - internal cells that have been sent;
+	 - internal vertices that have been sent;
 	 - new ghost cells that have been created (some of the internal cells that
 	   have been sent may have become ghosts cells);
-	 - ghost cells that have been deleted.
+	 - new ghost vertices that have been created (some of the internal vertices
+	   that have been sent may have become ghosts vertices);
+	 - ghost cells that have been deleted;
+	 - ghost vertices that have been deleted.
 
 	Information available on the receiver side for tracking purposes are the
 	following:
 	 - internal cells that have been received;
+	 - internal vertices that have been received;
 	 - new ghost cells that have been created;
+	 - new ghost vertices that have been created;
 	 - ghost cells that have been deleted (some ghost cells may have been
-	   replaced by internal cells that have just been received).
+	   replaced by internal cells that have just been received);
+	 - ghost vertices that have been deleted (some ghost vertices may have been
+	   replaced by internal vertices that have just been received).
 
 	\param trackPartitioning if set to true the function will return the changes
 	done to the patch during the partitioning
@@ -2173,6 +2182,13 @@ std::vector<adaption::Info> PatchKernel::_partitioningPrepare(const std::unorder
 
 			// Fill tracking data structures
 			partitioningData.emplace_back();
+			adaption::Info &partitioningVertexInfo = partitioningData.back();
+			partitioningVertexInfo.entity   = adaption::ENTITY_VERTEX;
+			partitioningVertexInfo.type     = adaption::TYPE_PARTITION_SEND;
+			partitioningVertexInfo.rank     = recvRank;
+			partitioningVertexInfo.previous = getOrderedCellsVertices(cellsToSend, true, false);
+
+			partitioningData.emplace_back();
 			adaption::Info &partitioningCellInfo = partitioningData.back();
 			partitioningCellInfo.entity   = adaption::ENTITY_CELL;
 			partitioningCellInfo.type     = adaption::TYPE_PARTITION_SEND;
@@ -2420,6 +2436,15 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_deleteGhosts(bool tr
 
     // Track changes
     if (trackPartitioning) {
+        partitioningData.emplace_back();
+        adaption::Info &partitioningVertexInfo = partitioningData.back();
+        partitioningVertexInfo.entity= adaption::ENTITY_VERTEX;
+        partitioningVertexInfo.type  = adaption::TYPE_DELETION;
+        partitioningVertexInfo.current.reserve(getGhostVertexCount());
+        for (VertexConstIterator itr = ghostVertexConstBegin(); itr != ghostVertexConstEnd(); ++itr) {
+            partitioningVertexInfo.current.push_back(itr.getId());
+        }
+
         partitioningData.emplace_back();
         adaption::Info &partitioningCellInfo = partitioningData.back();
         partitioningCellInfo.entity = adaption::ENTITY_CELL;
@@ -2871,6 +2896,13 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
             // communications (they already know the list of cells for which
             // data is needed and the order in which these data will be sent).
             partitioningData.emplace_back();
+            adaption::Info &partitioningVertexInfo = partitioningData.back();
+            partitioningVertexInfo.entity  = adaption::ENTITY_VERTEX;
+            partitioningVertexInfo.type    = adaption::TYPE_PARTITION_SEND;
+            partitioningVertexInfo.rank    = recvRank;
+            partitioningVertexInfo.current = getOrderedCellsVertices(cellSendList, true, false);
+
+            partitioningData.emplace_back();
             adaption::Info &partitioningCellInfo = partitioningData.back();
             partitioningCellInfo.entity   = adaption::ENTITY_CELL;
             partitioningCellInfo.type     = adaption::TYPE_PARTITION_SEND;
@@ -3149,6 +3181,16 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
             cellCreationInfo.type    = adaption::TYPE_CREATION;
             cellCreationInfo.rank    = getRank();
             cellCreationInfo.current = getOrderedCellsVertices(trackedCreatedGhostCells, false, true);
+
+            std::vector<long> deletedGhostVertices = getOrderedCellsVertices(trackedCreatedGhostCells, false, true);
+            if (!deletedGhostVertices.empty()) {
+                partitioningData.emplace_back();
+                adaption::Info &vertexCreationInfo = partitioningData.back();
+                vertexCreationInfo.entity  = adaption::ENTITY_VERTEX;
+                vertexCreationInfo.type    = adaption::TYPE_CREATION;
+                vertexCreationInfo.rank    = getRank();
+                vertexCreationInfo.current = std::move(deletedGhostVertices);
+            }
         }
 
         // Delete frame cells that are not ghosts
@@ -3247,11 +3289,43 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
         // Prune stale interfaces
         pruneStaleInterfaces();
 
+        // Identify orphan vertices
+        std::vector<long> orphanVertices = findOrphanVertices();
+
+        // Track ghost vertices deletion
+        //
+        // Only ghost vertices need to be tracked, all orphan internal vertex
+        // have already been tracked among the vertices that have been send.
+        if (trackPartitioning && !orphanVertices.empty()) {
+            partitioningData.emplace_back();
+            adaption::Info &vertexDeletionInfo = partitioningData.back();
+            vertexDeletionInfo.entity = adaption::ENTITY_VERTEX;
+            vertexDeletionInfo.type   = adaption::TYPE_DELETION;
+            vertexDeletionInfo.rank   = getRank();
+            for (long vertexId : orphanVertices) {
+                const Vertex &vertex = getVertex(vertexId);
+                if (vertex.isInterior()) {
+                    continue;
+                }
+
+                vertexDeletionInfo.current.push_back(vertexId);
+            }
+        }
+
         // Delete orphan vertices
-        deleteOrphanVertices();
+        deleteVertices(orphanVertices);
     } else {
         // All ghost cells will be deleted
         if (trackPartitioning) {
+            partitioningData.emplace_back();
+            adaption::Info &partitioningVertexInfo = partitioningData.back();
+            partitioningVertexInfo.entity= adaption::ENTITY_VERTEX;
+            partitioningVertexInfo.type  = adaption::TYPE_DELETION;
+            partitioningVertexInfo.current.reserve(getGhostVertexCount());
+            for (VertexConstIterator itr = ghostVertexConstBegin(); itr != ghostVertexConstEnd(); ++itr) {
+                partitioningVertexInfo.current.push_back(itr.getId());
+            }
+
             partitioningData.emplace_back();
             adaption::Info &partitioningCellInfo = partitioningData.back();
             partitioningCellInfo.entity = adaption::ENTITY_CELL;
@@ -3908,6 +3982,13 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
         if (trackPartitioning) {
             if (!trackedReceivedInteriorCells.empty()) {
                 partitioningData.emplace_back();
+                adaption::Info &vertexRecvInfo = partitioningData.back();
+                vertexRecvInfo.entity  = adaption::ENTITY_VERTEX;
+                vertexRecvInfo.type    = adaption::TYPE_PARTITION_RECV;
+                vertexRecvInfo.rank    = sendRank;
+                vertexRecvInfo.current = getOrderedCellsVertices(trackedReceivedInteriorCells, true, false);
+
+                partitioningData.emplace_back();
                 adaption::Info &cellRecvInfo = partitioningData.back();
                 cellRecvInfo.entity = adaption::ENTITY_CELL;
                 cellRecvInfo.type   = adaption::TYPE_PARTITION_RECV;
@@ -3917,6 +3998,14 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
             }
 
             if (!trackedCreatedGhostCells.empty()) {
+                partitioningData.emplace_back();
+                adaption::Info &vertexCreationInfo = partitioningData.back();
+                vertexCreationInfo.entity  = adaption::ENTITY_VERTEX;
+                vertexCreationInfo.type    = adaption::TYPE_CREATION;
+                vertexCreationInfo.rank    = patchRank;
+                vertexCreationInfo.current = getOrderedCellsVertices(trackedCreatedGhostCells, false, true);
+
+
                 partitioningData.emplace_back();
                 adaption::Info &cellCreationInfo = partitioningData.back();
                 cellCreationInfo.entity  = adaption::ENTITY_CELL;
