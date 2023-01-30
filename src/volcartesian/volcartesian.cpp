@@ -1024,6 +1024,17 @@ std::vector<adaption::Info> VolCartesian::_spawn(bool trackSpawn)
 		}
 
 		adaptionData.emplace_back();
+		adaption::Info &adaptionVertexInfo = adaptionData.back();
+		adaptionVertexInfo.type   = adaption::TYPE_CREATION;
+		adaptionVertexInfo.entity = adaption::ENTITY_VERTEX;
+		adaptionVertexInfo.current.reserve(m_cells.size());
+		for (auto &vertex : m_vertices) {
+			adaptionVertexInfo.current.emplace_back();
+			long &vertexId = adaptionVertexInfo.current.back();
+			vertexId = vertex.getId();
+		}
+
+		adaptionData.emplace_back();
 		adaption::Info &adaptionInterfaceInfo = adaptionData.back();
 		adaptionInterfaceInfo.type   = adaption::TYPE_CREATION;
 		adaptionInterfaceInfo.entity = adaption::ENTITY_INTERFACE;

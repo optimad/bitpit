@@ -166,6 +166,13 @@ std::vector<adaption::Info> VolOctree::_partitioningPrepare(const std::unordered
 				long &cellId = partitioningCellInfo.previous.back();
 				cellId = getOctantId(octantInfo);
 			}
+
+			partitioningData.emplace_back();
+			adaption::Info &partitioningVertexInfo = partitioningData.back();
+			partitioningVertexInfo.entity   = adaption::ENTITY_VERTEX;
+			partitioningVertexInfo.type     = adaption::TYPE_PARTITION_SEND;
+			partitioningVertexInfo.rank     = receiver;
+			partitioningVertexInfo.previous = getOrderedCellsVertices(partitioningCellInfo.previous, true, false);
 		}
 	}
 

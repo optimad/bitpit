@@ -267,9 +267,11 @@ private:
 	void renumberCells(const adaption::InfoCollection &treeAdaptionData);
 
 	void createCells(StitchInfo &stitchInfo, std::istream *stream,
-					 adaption::InfoCollection *cellAdaptionData);
+					 adaption::InfoCollection *cellAdaptionData,
+	                 adaption::InfoCollection *vertexAdaptionData = nullptr);
 
-	StitchInfo deleteCells(const adaption::InfoCollection &cellAdaptionData);
+	StitchInfo deleteCells(const adaption::InfoCollection &cellAdaptionData,
+                           adaption::InfoCollection *vertexAdaptionData = nullptr);
 
 	std::vector<adaption::Info> sync(bool trackChanges);
 
