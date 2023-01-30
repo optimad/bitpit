@@ -932,6 +932,9 @@ protected:
 	virtual int findAdjoinNeighFace(const Cell &cell, int cellFace, const Cell &neigh) const;
 	virtual bool isSameFace(const Cell &cell_A, int face_A, const Cell &cell_B, int face_B) const;
 
+	std::vector<long> getOrderedCellsVertices(const std::vector<long> &cellIds, bool interior, bool ghost) const;
+	std::vector<long> getOrderedCellsInterfaces(const std::vector<long> &cellIds) const;
+
 private:
 	struct GhostVertexInfo {
 		int owner;

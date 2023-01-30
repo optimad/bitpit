@@ -5703,6 +5703,86 @@ bool PatchKernel::isSameFace(const Cell &cell_A, int face_A, const Cell &cell_B,
 }
 
 /*!
+ * Get the vertices that are on the specified cells.
+ *
+ * The result will contain a list of unique interfaces that are on the given
+ * cells. The list will be populated iterating the cells and addding the
+ * interfaces as they are encountered.
+ *
+ * \param cellIds are the ids of the cell whose vertices will be gathered
+ * \param interior controls if interior vertices will be gathered
+ * \param ghost controls if ghost vertices will be gathered
+ * \result The vertices that are on the specified cells.
+ */
+std::vector<long> PatchKernel::getOrderedCellsVertices(const std::vector<long> &cellIds,
+                                                       bool interior, bool ghost) const
+{
+    std::vector<long> orderedVertices;
+#if BITPIT_ENABLE_MPI==1
+    if (!interior && (!ghost || !isPartitioned())) {
+        return orderedVertices;
+    }
+#else
+    if (!interior) {
+        return orderedVertices;
+    }
+#endif
+
+    std::unordered_set<long> verticesSet;
+    for (long cellId : cellIds) {
+        const Cell &cell = getCell(cellId);
+        for (long vertexId : cell.getVertexIds()) {
+            if (verticesSet.count(vertexId) == 0) {
+                continue;
+            }
+
+#if BITPIT_ENABLE_MPI==1
+            if (!interior || !ghost) {
+                auto vertexGhostInfoItr = m_ghostVertexInfo.find(vertexId);
+                if (!interior && vertexGhostInfoItr == m_ghostVertexInfo.cend()) {
+                    continue;
+                } else if (!ghost && vertexGhostInfoItr != m_ghostVertexInfo.cend()) {
+                    continue;
+                }
+            }
+#endif
+
+            verticesSet.insert(vertexId);
+            orderedVertices.push_back(vertexId);
+        }
+    }
+
+    return orderedVertices;
+}
+
+/*!
+ * Get the interfaces that are on the specified cells.
+ *
+ * The result will contain a list of unique interfaces that are on the given
+ * cells. The list will be populated iterating the cells and addding the
+ * interfaces as they are encountered.
+ */
+std::vector<long> PatchKernel::getOrderedCellsInterfaces(const std::vector<long> &cellIds) const
+{
+    std::vector<long> orderedInterfaces;
+    std::unordered_set<long> interfacesSet;
+    for (long cellId : cellIds) {
+        const Cell &cell = getCell(cellId);
+        const long *interfaces = cell.getInterfaces();
+        int nCellInterfaces = cell.getInterfaceCount();
+        for (int i = 0; i < nCellInterfaces; ++i) {
+            long interfaceId = interfaces[i];
+            if (interfacesSet.count(interfaceId) == 0) {
+                interfacesSet.insert(interfaceId);
+                orderedInterfaces.push_back(interfaceId);
+            }
+        }
+    }
+
+    return orderedInterfaces;
+}
+
+/*!
 	Returns the current adjacencies build strategy.
 
 	\return The current adjacencies build strategy.
