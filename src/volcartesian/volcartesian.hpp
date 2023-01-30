@@ -151,7 +151,7 @@ protected:
 
 	void _updateAdjacencies() override;
 
-	void _updateInterfaces() override;
+	std::vector<adaption::Info> _updateInterfaces(bool trackAdaption) override;
 
 	int _getDumpVersion() const override;
 	void _dump(std::ostream &stream) const override;
