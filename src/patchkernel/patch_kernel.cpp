@@ -791,8 +791,12 @@ std::vector<adaption::Info> PatchKernel::adaptionPrepare(bool trackAdaption)
 
 	Information available for tracking purposes are the following:
 	 - internal cells that have been coarsened/refined;
+	 - new internal vertices that have been created;
+	 - internal vertices that have been deleted;
 	 - new ghost cells that have been created;
-	 - ghost cells that have been deleted.
+	 - new ghost vertices that have been created;
+	 - ghost cells that have been deleted;
+	 - ghost vertices that have been deleted.
 
 	\param trackAdaption if set to true the function will return the changes
 	done to the patch during the adaption

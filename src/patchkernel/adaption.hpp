@@ -56,7 +56,8 @@ namespace adaption
 	enum Entity {
 		ENTITY_UNKNOWN = -1,
 		ENTITY_CELL,
-		ENTITY_INTERFACE
+		ENTITY_INTERFACE,
+		ENTITY_VERTEX
 	};
 
 	struct Info
