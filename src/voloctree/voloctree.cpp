@@ -1382,9 +1382,9 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 		log::cout() << "  Deleting stale elements..." << std::endl;
 
 		if (trackChanges) {
-			stitchInfo = deleteCells(synchronizationData, &synchronizationData);
+			stitchInfo = deleteCells(synchronizationData, &synchronizationData, &synchronizationData);
 		} else {
-			stitchInfo = deleteCells(synchronizationData, nullptr);
+			stitchInfo = deleteCells(synchronizationData, nullptr, nullptr);
 		}
 
 		log::cout() << "  Stale element successfully deleted." << std::endl;
@@ -1394,9 +1394,9 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 	log::cout() << "  Creating new elements..." << std::endl;
 
 	if (trackChanges) {
-		createCells(stitchInfo, nullptr, &synchronizationData, &synchronizationData);
+		createCells(stitchInfo, nullptr, &synchronizationData, &synchronizationData, &synchronizationData);
 	} else {
-		createCells(stitchInfo, nullptr, &synchronizationData, nullptr);
+		createCells(stitchInfo, nullptr, &synchronizationData, nullptr, nullptr);
 	}
 
 	log::cout() << "  New elements successfully created." << std::endl;
@@ -1486,10 +1486,13 @@ void VolOctree::renumberCells(const adaption::InfoCollection &cellAdaptionData)
 	have been created
 	\param vertexAdaptionData if a valid pointer is provided, on output will
 	contain the changes applied to the vertices
+	\param interfaceAdaptionData if a valid pointer is provided, on output will
+	contain the changes applied to the interfaces
 */
 void VolOctree::createCells(StitchInfo &stitchInfo, std::istream *restoreStream,
 							adaption::InfoCollection *cellAdaptionData,
-							adaption::InfoCollection *vertexAdaptionData)
+							adaption::InfoCollection *vertexAdaptionData,
+							adaption::InfoCollection *interfaceAdaptionData)
 {
 	// Tree information
 	long nOctants       = m_tree->getNumOctants();
@@ -1671,7 +1674,12 @@ void VolOctree::createCells(StitchInfo &stitchInfo, std::istream *restoreStream,
 
 	// Update interfaces
 	if (!restoreStream) {
-		updateInterfaces(false);
+		std::vector<adaption::Info> interfaceUpdateData = updateInterfaces(false, interfaceAdaptionData);
+		if (interfaceAdaptionData) {
+			for (adaption::Info &info : interfaceUpdateData) {
+				interfaceAdaptionData->insert(std::move(info));
+			}
+		}
 	}
 
 #if BITPIT_ENABLE_MPI==1
@@ -1710,12 +1718,15 @@ void VolOctree::createCells(StitchInfo &stitchInfo, std::istream *restoreStream,
 	that need to be performed to the cells
 	\param vertexAdaptionData if a valid pointer is provided, on output will
 	contain the changes applied to the vertices
+	\param interfaceAdaptionData if a valid pointer is provided, on output will
+	contain the changes applied to the interfaces
 	\param stitchInfo if a valid pointer is provided, on output will contain
 	the stitch information that can used to stich the faces created after
 	deleting the octants
 */
 VolOctree::StitchInfo VolOctree::deleteCells(const adaption::InfoCollection &cellAdaptionData,
-											 adaption::InfoCollection *vertexAdaptionData)
+											 adaption::InfoCollection *vertexAdaptionData,
+											 adaption::InfoCollection *interfaceAdaptionData)
 {
 	// Info of the cells
 	int nCellVertices = m_cellTypeInfo->nVertices;
@@ -1791,7 +1802,12 @@ VolOctree::StitchInfo VolOctree::deleteCells(const adaption::InfoCollection &cel
 	// we need to remove stale adjacencies and interfaces.
 	pruneStaleAdjacencies();
 
-	pruneStaleInterfaces();
+	std::vector<adaption::Info> interfacePruneData = pruneStaleInterfaces(interfaceAdaptionData);
+	if (interfaceAdaptionData) {
+		for (adaption::Info &info : interfacePruneData) {
+			interfaceAdaptionData->insert(std::move(info));
+		}
+	}
 
 	// Delete vertices
 	//

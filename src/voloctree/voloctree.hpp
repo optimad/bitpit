@@ -268,10 +268,12 @@ private:
 
 	void createCells(StitchInfo &stitchInfo, std::istream *stream,
 					 adaption::InfoCollection *cellAdaptionData,
-	                 adaption::InfoCollection *vertexAdaptionData = nullptr);
+	                 adaption::InfoCollection *vertexAdaptionData = nullptr,
+	                 adaption::InfoCollection *interfaceAdaptionData = nullptr);
 
 	StitchInfo deleteCells(const adaption::InfoCollection &cellAdaptionData,
-                           adaption::InfoCollection *vertexAdaptionData = nullptr);
+	                       adaption::InfoCollection *vertexAdaptionData = nullptr,
+	                       adaption::InfoCollection *interfaceAdaptionData = nullptr);
 
 	std::vector<adaption::Info> sync(bool trackChanges);
 

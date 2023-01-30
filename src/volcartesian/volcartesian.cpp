@@ -304,8 +304,13 @@ void VolCartesian::_updateAdjacencies()
 
 	It is not possible to partially update the interfaces of this patch.
 	The function will always update all the interfaces.
+
+	\param trackAdaption if set to true the changes to the patch will be tracked
+	\result If the adaption is tracked, returns a vector of adaption::Info
+	with all the changes done to the patch during the adaption, otherwise an
+	empty vector will be returned.
 */
-void VolCartesian::_updateInterfaces()
+std::vector<adaption::Info> VolCartesian::_updateInterfaces(bool trackAdaption)
 {
 	// Partial updates are not supported
 	CellConstIterator beginItr = cellConstBegin();
@@ -326,6 +331,7 @@ void VolCartesian::_updateInterfaces()
 	}
 
 	// Build interfaces
+	adaption::InfoCollection adaptionData;
 	if (getMemoryMode() == MemoryMode::MEMORY_NORMAL) {
 		int nCellFaces = 2 * getDimension();
 
@@ -344,6 +350,8 @@ void VolCartesian::_updateInterfaces()
 		}
 
 		// Build interfaces
+		std::vector<long> createdInterfaces;
+		createdInterfaces.reserve(m_nInterfaces);
 		for (Cell &cell : getCells()) {
 			long cellId = cell.getId();
 			for (int face = 0; face < nCellFaces; ++face) {
@@ -392,12 +400,24 @@ void VolCartesian::_updateInterfaces()
 				} else {
 					interface.unsetNeigh();
 				}
+
+				// Track changes
+				createdInterfaces.push_back(interfaceId);
 			}
 		}
 
 		// Disable advanced editing
 		setExpert(false);
+
+		// Track changes
+		if (trackAdaption) {
+			std::size_t adaptionInfoId = adaptionData.insert(adaption::TYPE_CREATION, adaption::ENTITY_INTERFACE);
+			adaption::Info &adaptionInfo = adaptionData[adaptionInfoId];
+			adaptionInfo.previous = std::move(createdInterfaces);
+		}
 	}
+
+	return adaptionData.dump();
 }
 
 /*!

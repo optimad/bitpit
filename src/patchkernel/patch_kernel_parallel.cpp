@@ -1682,7 +1682,9 @@ std::vector<adaption::Info> PatchKernel::partitioningPrepare(const std::unordere
 	 - new ghost vertices that have been created (some of the internal vertices
 	   that have been sent may have become ghosts vertices);
 	 - ghost cells that have been deleted;
-	 - ghost vertices that have been deleted.
+	 - ghost vertices that have been deleted;
+	 - new interfaces that have been created;
+	 - interfaces that have been deleted.
 
 	Information available on the receiver side for tracking purposes are the
 	following:
@@ -1693,7 +1695,9 @@ std::vector<adaption::Info> PatchKernel::partitioningPrepare(const std::unordere
 	 - ghost cells that have been deleted (some ghost cells may have been
 	   replaced by internal cells that have just been received);
 	 - ghost vertices that have been deleted (some ghost vertices may have been
-	   replaced by internal vertices that have just been received).
+	   replaced by internal vertices that have just been received);
+	 - new interfaces that have been created;
+	 - interfaces that have been deleted.
 
 	\param trackPartitioning if set to true the function will return the changes
 	done to the patch during the partitioning
@@ -1719,10 +1723,10 @@ std::vector<adaption::Info> PatchKernel::partitioningAlter(bool trackPartitionin
 	}
 
 	// Partition the patch
-	partitioningData = _partitioningAlter(trackPartitioning);
+	mergeAdaptionInfo(_partitioningAlter(trackPartitioning), partitioningData);
 
 	// Finalize patch alterations
-	finalizeAlterations(squeezeStorage);
+	mergeAdaptionInfo(finalizeAlterations(trackPartitioning, squeezeStorage), partitioningData);
 
 	// Update the status
 	setPartitioningStatus(PARTITIONING_ALTERED);
@@ -2440,7 +2444,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_deleteGhosts(bool tr
     // Prune stale interfaces
     //
     // Interfaces will be re-created after the partitioning.
-    pruneStaleInterfaces();
+    mergeAdaptionInfo(pruneStaleInterfaces(trackPartitioning), partitioningData);
 
     // Delete vertices no longer used
     deleteOrphanVertices();
@@ -3085,7 +3089,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
         // we need to remove stale adjacencies and interfaces.
         pruneStaleAdjacencies();
 
-        pruneStaleInterfaces();
+        mergeAdaptionInfo(pruneStaleInterfaces(trackPartitioning), partitioningData);
 
         // If we are sending many cells try to reduced the used memory
         bool keepMemoryLimited = (nOutgoingCells > ACTIVATE_MEMORY_LIMIT_THRESHOLD * getInternalCellCount());
@@ -3256,7 +3260,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
         }
 
         // Prune stale interfaces
-        pruneStaleInterfaces();
+        mergeAdaptionInfo(pruneStaleInterfaces(trackPartitioning), partitioningData);
 
         // Identify orphan vertices
         std::vector<long> orphanVertices = findOrphanVertices();
@@ -3996,7 +4000,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
 
     // Update interfaces
     if (getInterfacesBuildStrategy() == INTERFACES_AUTOMATIC) {
-        updateInterfaces();
+        mergeAdaptionInfo(updateInterfaces(false, trackPartitioning), partitioningData);
     }
 
     // Return adaption data
