@@ -1023,7 +1023,7 @@ std::vector<adaption::Info> VolOctree::_adaptionPrepare(bool trackAdaption)
 			}
 
 			if (createAdaption) {
-				std::size_t adaptionInfoId = adaptionData.create(adaptionType, adaption::ENTITY_CELL, currentRank);
+				std::size_t adaptionInfoId = adaptionData.insert(adaptionType, adaption::ENTITY_CELL, currentRank);
 				adaptionInfo = &(adaptionData[adaptionInfoId]);
 			}
 
@@ -1039,7 +1039,7 @@ std::vector<adaption::Info> VolOctree::_adaptionPrepare(bool trackAdaption)
 			CellConstIterator beginItr = ghostCellConstBegin();
 			CellConstIterator endItr   = ghostCellConstEnd();
 
-			std::size_t adaptionInfoId = adaptionData.create(adaption::TYPE_DELETION, adaption::ENTITY_CELL, currentRank);
+			std::size_t adaptionInfoId = adaptionData.insert(adaption::TYPE_DELETION, adaption::ENTITY_CELL, currentRank);
 			adaption::Info &adaptionInfo = adaptionData[adaptionInfoId];
 			adaptionInfo.previous.reserve(getGhostCellCount());
 			for (CellConstIterator itr = beginItr; itr != endItr; ++itr) {
@@ -1298,7 +1298,7 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 #endif
 
 			// Get the adaption info
-			std::size_t infoId = adaptionData.create(adaptionType, adaption::ENTITY_CELL, rank);
+			std::size_t infoId = adaptionData.insert(adaptionType, adaption::ENTITY_CELL, rank);
 			adaption::Info &adaptionInfo = adaptionData[infoId];
 
 			// Current status
@@ -1450,7 +1450,7 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 
 				if (adaptionIsDeletion || adaptionIsSend) {
 					int rank = deleteInfo.rank;
-					std::size_t adaptionInfoId = adaptionData.create(adaptionType, adaption::ENTITY_CELL, rank);
+					std::size_t adaptionInfoId = adaptionData.insert(adaptionType, adaption::ENTITY_CELL, rank);
 					adaption::Info &adaptionInfo = adaptionData[adaptionInfoId];
 					adaptionInfo.previous.emplace_back();
 					long &deletedId = adaptionInfo.previous.back();
@@ -1488,7 +1488,7 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 #endif
 
 			// Adaption info for the deleted interfaces
-			std::size_t adaptionInfoId = adaptionData.create(adaption::TYPE_DELETION, adaption::ENTITY_INTERFACE, currentRank);
+			std::size_t adaptionInfoId = adaptionData.insert(adaption::TYPE_DELETION, adaption::ENTITY_INTERFACE, currentRank);
 			adaption::Info &adaptionInfo = adaptionData[adaptionInfoId];
 			adaptionInfo.previous.reserve(removedInterfaces.size());
 			for (long interfaceId : removedInterfaces) {
@@ -1554,7 +1554,7 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 #if BITPIT_ENABLE_MPI==1
 		// Track created ghosts cells
 		if (nGhostsOctants > 0) {
-			std::size_t adaptionInfoId = adaptionData.create(adaption::TYPE_CREATION, adaption::ENTITY_CELL, currentRank);
+			std::size_t adaptionInfoId = adaptionData.insert(adaption::TYPE_CREATION, adaption::ENTITY_CELL, currentRank);
 			adaption::Info &adaptionInfo = adaptionData[adaptionInfoId];
 
 			adaptionInfo.current.reserve(nGhostsOctants);
@@ -1586,7 +1586,7 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 			}
 
 			// Adaption info
-			std::size_t infoId = adaptionData.create(adaption::TYPE_CREATION, adaption::ENTITY_INTERFACE, currentRank);
+			std::size_t infoId = adaptionData.insert(adaption::TYPE_CREATION, adaption::ENTITY_INTERFACE, currentRank);
 			adaption::Info &adaptionInfo = adaptionData[infoId];
 			adaptionInfo.current.reserve(createdInterfaces.size());
 			for (long interfaceId : createdInterfaces) {
