@@ -844,8 +844,6 @@ void	Octant::buildChildren(Octant *children) const {
 		uint32_t dh = oct.getLogicalSize();
 		oct.m_morton = PABLO::computeMorton(m_dim, coords[0] + dh * dx, coords[1] + dh * dy, coords[2] + dh * dz);
 
-		oct.m_info[OctantInfo::INFO_NEW4REFINEMENT] = true;
-
 		oct.m_info[INFO_BOUNDFACE0 + xf] = false;
 		oct.m_info[INFO_BOUNDFACE0 + yf] = false;
 		oct.m_info[INFO_BOUNDFACE0 + zf] = false;
