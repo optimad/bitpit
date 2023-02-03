@@ -162,20 +162,6 @@ std::unique_ptr<PatchKernel> SurfUnstructured::clone() const
 }
 
 /*!
- * Enables or disables expert mode.
- *
- * When expert mode is enabled, it will be possible to change the
- * patch using low level functions (e.g., it will be possible to
- * add individual cells, add vertices, delete cells, ...).
- *
- * \param expert if true, the expert mode will be enabled
- */
-void SurfUnstructured::setExpert(bool expert)
-{
-	SurfaceKernel::setExpert(expert);
-}
-
-/*!
  *  Get the version associated to the binary dumps.
  *
  *  \result The version associated to the binary dumps.
