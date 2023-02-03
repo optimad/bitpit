@@ -24,6 +24,7 @@
 
 #include <cassert>
 #include <cmath>
+#include <numeric>
 
 #include "bitpit_common.hpp"
 
@@ -1112,7 +1113,7 @@ void VolOctree::settleAdaptionMarkers()
 */
 std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 {
-	log::cout() << ">> Syncing patch..." << std::endl;
+	log::cout() << "Syncing patch..." << std::endl;
 
 	// Detect if we are in import-from-scratch mode
 	//
@@ -1128,17 +1129,17 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 	}
 
 	// Info on the tree
-	long nOctants = m_tree->getNumOctants();
-	long nPreviousOctants = m_octantToCell.size();
+	std::size_t nOctants         = m_tree->getNumOctants();
+	std::size_t nGhostsOctants   = m_tree->getNumGhosts();
+	std::size_t nPreviousOctants = m_octantToCell.size();
 
-	log::cout() << ">> Number of octants : " << nOctants << std::endl;
-
-	// Info on the tree
-	long nGhostsOctants = m_tree->getNumGhosts();
-	long nPreviousGhosts = m_ghostToCell.size();
-
-	// Initialize tracking data
-	adaption::InfoCollection adaptionData;
+	log::cout() << "  Previous number of octants: " << nPreviousOctants << std::endl;
+	log::cout() << "  Current number of octants: " << nOctants << std::endl;
+	if (nOctants > nPreviousOctants) {
+		log::cout() << "  Number of octants that will be created: " << (nOctants - nPreviousOctants) << std::endl;
+	} else if (nOctants < nPreviousOctants) {
+		log::cout() << "  Number of octants that will be deleted: " << (nPreviousOctants - nOctants) << std::endl;
+	}
 
 	// Current rank
 	int currentRank = -1;
@@ -1150,278 +1151,125 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 	//
 	// If there are no cells in the mesh we need to import all
 	// octants.
-	log::cout() << ">> Extract information for transforming the patch...";
+	log::cout() << "  Extract information for transforming the patch...";
 
-	std::vector<bool> unmappedOctants(nPreviousOctants, true);
-	std::vector<OctantInfo> addedOctants;
-	std::vector<RenumberInfo> renumberedOctants;
-	std::vector<DeleteInfo> deletedOctants;
+	adaption::InfoCollection synchronizationData;
+	if (importFromScratch) {
+		std::size_t adaptionId = synchronizationData.insert(adaption::TYPE_CREATION, adaption::ENTITY_CELL);
+		adaption::Info &adaptionInfo = synchronizationData[adaptionId];
+		adaptionInfo.current.resize(nOctants + nGhostsOctants);
+		std::iota(adaptionInfo.current.begin(), adaptionInfo.current.end(), 0);
+	} else {
+		// Identify changes using the tree mapper
+		std::vector<bool> mappedInternalOctants(nPreviousOctants, false);
 
-	addedOctants.reserve(nOctants + nGhostsOctants);
-	if (!importFromScratch) {
-		renumberedOctants.reserve(nPreviousOctants + nPreviousGhosts);
-		deletedOctants.reserve(nPreviousOctants + nPreviousGhosts);
-	}
+		std::vector<uint32_t> mapper_octantMap;
+		std::vector<bool> mapper_ghostFlag;
+		std::vector<int> mapper_octantRank;
 
-	uint32_t treeId = 0;
-	std::vector<uint32_t> mapper_octantMap;
-	std::vector<bool> mapper_ghostFlag;
-	std::vector<int> mapper_octantRank;
-	while (treeId < (uint32_t) nOctants) {
-		// Octant mapping
-		mapper_octantMap.clear();
-		mapper_ghostFlag.clear();
-		mapper_octantRank.clear();
-		if (!importFromScratch) {
-			m_tree->getMapping(treeId, mapper_octantMap, mapper_ghostFlag, mapper_octantRank);
-		}
+		uint32_t treeId = 0;
+		while (treeId < (uint32_t) nOctants) {
+			// Octant mapping
+			mapper_octantMap.clear();
+			mapper_ghostFlag.clear();
+			mapper_octantRank.clear();
+			if (!importFromScratch) {
+				m_tree->getMapping(treeId, mapper_octantMap, mapper_ghostFlag, mapper_octantRank);
+			}
 
-		// Adaption type
-		adaption::Type adaptionType = adaption::TYPE_NONE;
-		if (importFromScratch) {
-			adaptionType = adaption::TYPE_CREATION;
-		} else if (lastTreeOperation == ParaTree::OP_ADAPT_MAPPED) {
-			bool isNewR = m_tree->getIsNewR(treeId);
-			if (isNewR) {
-				adaptionType = adaption::TYPE_REFINEMENT;
-			} else {
-				bool isNewC = m_tree->getIsNewC(treeId);
-				if (isNewC) {
-					adaptionType = adaption::TYPE_COARSENING;
+			// Identify adaption type
+			adaption::Type adaptionType = adaption::TYPE_NONE;
+			if (lastTreeOperation == ParaTree::OP_ADAPT_MAPPED) {
+				bool isNewR = m_tree->getIsNewR(treeId);
+				if (isNewR) {
+					adaptionType = adaption::TYPE_REFINEMENT;
+				} else {
+					bool isNewC = m_tree->getIsNewC(treeId);
+					if (isNewC) {
+						adaptionType = adaption::TYPE_COARSENING;
+					} else if (treeId != mapper_octantMap.front()) {
+						adaptionType = adaption::TYPE_RENUMBERING;
+					}
+				}
+#if BITPIT_ENABLE_MPI==1
+			} else if (lastTreeOperation == ParaTree::OP_LOADBALANCE || lastTreeOperation == ParaTree::OP_LOADBALANCE_FIRST) {
+				if (currentRank != mapper_octantRank.front()) {
+					adaptionType = adaption::TYPE_PARTITION_RECV;
 				} else if (treeId != mapper_octantMap.front()) {
 					adaptionType = adaption::TYPE_RENUMBERING;
 				}
-			}
-#if BITPIT_ENABLE_MPI==1
-		} else if (lastTreeOperation == ParaTree::OP_LOADBALANCE || lastTreeOperation == ParaTree::OP_LOADBALANCE_FIRST) {
-			if (currentRank != mapper_octantRank.front()) {
-				adaptionType = adaption::TYPE_PARTITION_RECV;
-			} else if (treeId != mapper_octantMap.front()) {
-				adaptionType = adaption::TYPE_RENUMBERING;
-			}
 #endif
-		}
-
-		// If the octant cell has not been modified we can skip to the next
-		// octant.
-		if (adaptionType == adaption::TYPE_NONE) {
-			unmappedOctants[treeId] = false;
-			++treeId;
-			continue;
-		}
-
-		// Re-numbered cells just need to be added to the proper list.
-		//
-		// Renumbered cells are not tracked, because the re-numbering
-		// only happens inside VolOctree.
-		if (adaptionType == adaption::TYPE_RENUMBERING) {
-			uint32_t previousTreeId = mapper_octantMap.front();
-			OctantInfo previousOctantInfo(previousTreeId, !mapper_ghostFlag.front());
-			long cellId = getOctantId(previousOctantInfo);
-			renumberedOctants.emplace_back(cellId, treeId);
-			unmappedOctants[previousTreeId] = false;
-
-			// No more work needed, skip to the next octant
-			++treeId;
-			continue;
-		}
-
-		// Handle other kind of adaption
-		//
-		// New octants need to be imported into the patch,
-		// whereas cells associated to previous octants
-		// need to be removed.
-		//
-		// If the user want to track adaption, adaption
-		// data needs to be filled.
-
-		// Current tree ids that will be imported
-		long nCurrentTreeIds;
-		if (importFromScratch) {
-			nCurrentTreeIds = nOctants - treeId;
-		} else if (adaptionType == adaption::TYPE_REFINEMENT) {
-			nCurrentTreeIds = pow(2, getDimension());
-		} else {
-			nCurrentTreeIds = 1;
-		}
-
-		const long lastCurrentTreeId = treeId + nCurrentTreeIds;
-		for (int currentTreeId = treeId; currentTreeId < lastCurrentTreeId; ++currentTreeId) {
-			addedOctants.emplace_back(currentTreeId, true);
-		}
-
-		// Cells that will be removed
-		//
-		// Mark the cells associated to previous local octants for deletion.
-		if (!importFromScratch) {
-			int nPreviousTreeIds = mapper_octantMap.size();
-			for (int k = 0; k < nPreviousTreeIds; ++k) {
-#if BITPIT_ENABLE_MPI==1
-				// Only local cells can be deleted
-				if (mapper_octantRank[k] != currentRank) {
-					continue;
-				}
-#endif
-
-				// Ghost octants will be processed later
-				if (mapper_ghostFlag[k]) {
-					continue;
-				}
-
-				// Mark previous octant for deletion
-				uint32_t previousTreeId = mapper_octantMap[k];
-				OctantInfo previousOctantInfo(previousTreeId, !mapper_ghostFlag[k]);
-				long cellId = getOctantId(previousOctantInfo);
-				deletedOctants.emplace_back(cellId, adaptionType);
-
-				unmappedOctants[previousTreeId] = false;
-			}
-		}
-
-		// Adaption tracking
-		//
-		// The adaption info associated to the octants that has been received
-		// from external partitions will contain the current octants sorted by
-		// their tree id (we are looping over the octants in that order), this
-		// is the same order that will be used on the process that has sent
-		// the octants. Since the order is the same, the two processes are able
-		// to exchange cell data without any additional extra communication
-		// (they already know the list of cells for which data is needed and
-		// the order in which these data will be sent).
-		if (trackChanges) {
-			// Rank assocated to the adaption info
-			int rank = currentRank;
-#if BITPIT_ENABLE_MPI==1
-			if (adaptionType == adaption::TYPE_PARTITION_RECV) {
-				rank = mapper_octantRank[0];
-			}
-#endif
-
-			// Get the adaption info
-			std::size_t infoId = adaptionData.insert(adaptionType, adaption::ENTITY_CELL, rank);
-			adaption::Info &adaptionInfo = adaptionData[infoId];
-
-			// Current status
-			//
-			// We don't know the id of the current status, because those
-			// cells are not yet in the mesh. Store the trre id, and
-			// make the translation later.
-			//
-			// WARNING: tree id are uint32_t wherase adaptionInfo stores
-			//          id as long.
-			adaptionInfo.current.reserve(nCurrentTreeIds);
-			auto addedOctantsIter = addedOctants.cend() - nCurrentTreeIds;
-			while (addedOctantsIter != addedOctants.cend()) {
-				adaptionInfo.current.emplace_back();
-				long &adaptionId = adaptionInfo.current.back();
-				adaptionId = (*addedOctantsIter).id;
-
-				addedOctantsIter++;
 			}
 
-			// Previous cells
-			//
-			// A coarsening can merge togheter cells of different processes.
-			// However, since the coarsening is limited to one level, the
-			// previous cells will always be internal or among the ghost of
-			// the current process.
-			int nPreviousCellIds = mapper_octantMap.size();
-			adaptionInfo.previous.reserve(nPreviousCellIds);
-			for (int k = 0; k < nPreviousCellIds; ++k) {
-				long previousCellId;
-#if BITPIT_ENABLE_MPI==1
-				if (mapper_octantRank[k] != currentRank) {
-					previousCellId = Cell::NULL_ID;
-				} else
-#endif
-				{
-					OctantInfo previousOctantInfo(mapper_octantMap[k], !mapper_ghostFlag[k]);
-					previousCellId = getOctantId(previousOctantInfo);
-				}
-
-				adaptionInfo.previous.emplace_back();
-				long &adaptionId = adaptionInfo.previous.back();
-				adaptionId = previousCellId;
-			}
-		}
-
-		// Incremente tree id
-		treeId += nCurrentTreeIds;
-	}
-
-	log::cout() << " Done" << std::endl;
-
-#if BITPIT_ENABLE_MPI==1
-	// New ghost octants need to be added
-	for (uint32_t treeId = 0; treeId < (uint32_t) nGhostsOctants; ++treeId) {
-		addedOctants.emplace_back(treeId, false);
-	}
-#endif
-
-	// Remove octants that are no more in the tree
-	if (!importFromScratch) {
-#if BITPIT_ENABLE_MPI==1
-		// Cells that have been send to other processes need to be removed
-		PabloUniform::LoadBalanceRanges loadBalanceRanges = m_tree->getLoadBalanceRanges();
-		for (const auto &rankEntry : loadBalanceRanges.sendRanges) {
-			int rank = rankEntry.first;
-			if (rank == currentRank) {
+			// Skip to the next octant if no changes have been detected
+			if (adaptionType == adaption::TYPE_NONE) {
+				mappedInternalOctants[treeId] = true;
+				++treeId;
 				continue;
 			}
 
-			adaption::Type deletionType;
-			if (loadBalanceRanges.sendAction == PabloUniform::LoadBalanceRanges::ACTION_DELETE) {
-				deletionType = adaption::TYPE_DELETION;
-			} else {
-				deletionType = adaption::TYPE_PARTITION_SEND;
+			// Rank assocated with the adaption
+			int adaptionRank = currentRank;
+#if BITPIT_ENABLE_MPI==1
+			if (adaptionType == adaption::TYPE_PARTITION_RECV) {
+				adaptionRank = mapper_octantRank[0];
 			}
-
-			uint32_t beginTreeId = rankEntry.second[0];
-			uint32_t endTreeId   = rankEntry.second[1];
-			for (uint32_t treeId = beginTreeId; treeId < endTreeId; ++treeId) {
-				OctantInfo octantInfo(treeId, true);
-				long cellId = getOctantId(octantInfo);
-				deletedOctants.emplace_back(cellId, deletionType, rank);
-				unmappedOctants[treeId] = false;
-			}
-		}
-
-		// Previous ghosts cells need to be removed
-		if (nPreviousGhosts > 0) {
-			for (uint32_t ghostTreeId = 0; ghostTreeId < nPreviousGhosts; ++ghostTreeId) {
-				OctantInfo ghostOctantInfo(ghostTreeId, false);
-				long ghostCellId = getOctantId(ghostOctantInfo);
-				deletedOctants.emplace_back(ghostCellId, adaption::TYPE_DELETION);
-			}
-		}
 #endif
 
-		// Remove unmapped octants
-		//
-		// A coarsening that merges cells from different processes, can leave, on
-		// the processes which own the ghost octants involved in the coarsening,
-		// some octants that are not mapped.
-		for (uint32_t previousTreeId = 0; previousTreeId < nPreviousOctants; ++previousTreeId) {
-			if (unmappedOctants[previousTreeId]) {
-				OctantInfo octantInfo = OctantInfo(previousTreeId, true);
-				long cellId = getOctantId(octantInfo);
-				deletedOctants.emplace_back(cellId, adaption::TYPE_DELETION);
+			// Get adaption information
+			std::size_t adaptionInfoId = synchronizationData.insert(adaptionType, adaption::ENTITY_CELL, adaptionRank);
+			adaption::Info &adaptionInfo = synchronizationData[adaptionInfoId];
+
+			// Fill adaption information about current status
+			//
+			// Current status of the adaption information is filled with dummy ids set equal
+			// to the tree ids. During cell creation, these dummy will define the octant to
+			// cell association.
+			long nCurrentTreeIds;
+			if (adaptionType == adaption::TYPE_REFINEMENT) {
+				nCurrentTreeIds = m_tree->getNchildren();
+			} else if (adaptionType == adaption::TYPE_DELETION) {
+				nCurrentTreeIds = 0;
+			} else if (adaptionType == adaption::TYPE_PARTITION_SEND) {
+				nCurrentTreeIds = 0;
+			} else {
+				nCurrentTreeIds = 1;
 			}
+
+			for (int k = 0; k < nCurrentTreeIds; ++k) {
+				adaptionInfo.current.push_back(treeId + k);
+			}
+
+			// Fill adaption information about previous status
+			int nPreviousTreeIds = mapper_octantMap.size();
+			for (int k = 0; k < nPreviousTreeIds; ++k) {
+#if BITPIT_ENABLE_MPI==1
+				// Previous information should be filled only for local octants
+				if (mapper_octantRank[k] != currentRank) {
+					continue;
+				}
+#endif
+
+				// Idenfity cell id
+				uint32_t previousTreeId = mapper_octantMap[k];
+				OctantInfo previousOctantInfo(previousTreeId, !mapper_ghostFlag[k]);
+				long previousCellId = getOctantId(previousOctantInfo);
+
+				// Update information on previous status
+				adaptionInfo.previous.push_back(previousCellId);
+
+				// Previous octant has been mapped
+				if (previousOctantInfo.internal) {
+					mappedInternalOctants[previousTreeId] = true;
+				}
+			}
+
+			// Incremente tree id
+			treeId += std::max(nCurrentTreeIds, 1L);
 		}
-	}
 
-	// Enable advanced editing
-	setExpert(true);
-
-	// Renumber cells
-	renumberCells(renumberedOctants);
-
-	// Remove deleted cells
-	StitchInfo stitchInfo;
-	if (deletedOctants.size() > 0) {
-		log::cout() << ">> Removing non-existing cells...";
-
-		// Track changes
+#if BITPIT_ENABLE_MPI==1
+		// Identify cells sent to other partitions
 		//
 		// The adaption info associated to the octants that has been sent
 		// to external partitions will contain the current octants sorted by
@@ -1431,231 +1279,437 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 		// processes are able to exchange cell data without any additional
 		// extra communication (they already know the list of cells for which
 		// data is needed and the order in which these data will be sent).
-		if (trackChanges) {
-			// Track deleted cells
-			std::unordered_set<long> sendAdaptionInfo;
-			std::unordered_set<long> removedInterfaces;
-			for (const DeleteInfo &deleteInfo : deletedOctants) {
-				// Cell id
-				long cellId = deleteInfo.cellId;
-
-				// Adaption tracking
-				//
-				// Only cells deleted from a real deletion or a partition send
-				// needs to be tracked here, the other cells will be tracked
-				// where the adaption that deleted the cell is tracked.
-				adaption::Type adaptionType = deleteInfo.trigger;
-				bool adaptionIsDeletion = (adaptionType == adaption::TYPE_DELETION);
-				bool adaptionIsSend = (adaptionType == adaption::TYPE_PARTITION_SEND);
-
-				if (adaptionIsDeletion || adaptionIsSend) {
-					int rank = deleteInfo.rank;
-					std::size_t adaptionInfoId = adaptionData.insert(adaptionType, adaption::ENTITY_CELL, rank);
-					adaption::Info &adaptionInfo = adaptionData[adaptionInfoId];
-					adaptionInfo.previous.emplace_back();
-					long &deletedId = adaptionInfo.previous.back();
-					deletedId = cellId;
-
-					// Keep track of adaption info for the send cells
-					if (adaptionIsSend) {
-						sendAdaptionInfo.insert(adaptionInfoId);
-					}
-				}
-
-				// List of deleted interfaces
-				const Cell &cell = m_cells.at(cellId);
-				long nCellInterfaces = cell.getInterfaceCount();
-				const long *interfaces = cell.getInterfaces();
-				for (int k = 0; k < nCellInterfaces; ++k) {
-					long interfaceId = interfaces[k];
-					if (interfaceId >= 0) {
-						removedInterfaces.insert(interfaceId);
-					}
-				}
-			}
-
-#if BITPIT_ENABLE_MPI==1
-			// Sort sent cells
+		PabloUniform::LoadBalanceRanges loadBalanceRanges = m_tree->getLoadBalanceRanges();
+		for (const auto &rankEntry : loadBalanceRanges.sendRanges) {
+			// Consider only cells sent to other partitions
 			//
-			// We cannot use native functions to evaluate the position of the
-			// cells because the octants associated to the cells no longer
-			// exist on the octree. The cells are still there, therefore we
-			// can evaluate the cell positions using generic patch functions.
-			for (int adaptionInfoId : sendAdaptionInfo) {
-				adaption::Info &adaptionInfo = adaptionData[adaptionInfoId];
-				std::sort(adaptionInfo.previous.begin(), adaptionInfo.previous.end(), CellPositionLess(*this, false));
+			// During first tree load balance, cells are deleted and not sent
+			// to other processes (because all processes contain the whole
+			// tree).
+			if (loadBalanceRanges.sendAction != PabloUniform::LoadBalanceRanges::ACTION_SEND) {
+				continue;
 			}
-#endif
 
-			// Adaption info for the deleted interfaces
-			std::size_t adaptionInfoId = adaptionData.insert(adaption::TYPE_DELETION, adaption::ENTITY_INTERFACE, currentRank);
-			adaption::Info &adaptionInfo = adaptionData[adaptionInfoId];
-			adaptionInfo.previous.reserve(removedInterfaces.size());
-			for (long interfaceId : removedInterfaces) {
-				adaptionInfo.previous.emplace_back();
-				long &deletedInterfaceId = adaptionInfo.previous.back();
-				deletedInterfaceId = interfaceId;
+			int receiverRank = rankEntry.first;
+			if (receiverRank == currentRank) {
+				continue;
+			}
+
+			// Get adaption information
+			std::size_t adaptionId = synchronizationData.insert(adaption::TYPE_PARTITION_SEND, adaption::ENTITY_CELL, receiverRank);
+			adaption::Info &adaptionInfo = synchronizationData[adaptionId];
+
+			// Fill adaption information about previous status
+			uint32_t beginPreviousTreeId = rankEntry.second[0];
+			uint32_t endPreviousTreeId   = rankEntry.second[1];
+			for (uint32_t previousTreeId = beginPreviousTreeId; previousTreeId < endPreviousTreeId; ++previousTreeId) {
+				// Idenfity cell id
+				OctantInfo octantInfo(previousTreeId, true);
+				long previousCellId = getOctantId(octantInfo);
+
+				// Update information on previous status
+				adaptionInfo.previous.push_back(previousCellId);
+
+				// Previous octant has been mapped
+				mappedInternalOctants[previousTreeId] = true;
 			}
 		}
 
-		// Delete cells
-		stitchInfo = deleteCells(deletedOctants);
+		// Cells previously associated with ghost octants should be deleted
+		std::size_t ghostDeletionAdaptionId = synchronizationData.insert(adaption::TYPE_CREATION, adaption::ENTITY_CELL);
+		adaption::Info &ghostDeletionAdaptionInfo = synchronizationData[ghostDeletionAdaptionId];
+		for (auto ghostItr = ghostCellConstBegin(); ghostItr != ghostCellConstEnd(); ++ghostItr) {
+			ghostDeletionAdaptionInfo.previous.emplace_back(ghostItr.getId());
+		}
 
-		log::cout() << " Done" << std::endl;
-		log::cout() << ">> Cells removed: " <<  deletedOctants.size() << std::endl;
+		// Cells associated with current ghost octants should be created
+		//
+		// Current status of the adaption information is filled with dummy ids set equal
+		// to the tree ids incremented by the number of octants. During cell creation,
+		// these dummy will define the octant to cell association.
+		std::size_t ghostCreationInfoId = synchronizationData.insert(adaption::TYPE_CREATION, adaption::ENTITY_CELL);
+		adaption::Info &ghostCreationInfo = synchronizationData[ghostCreationInfoId];
+		for (uint32_t treeId = 0; treeId < (uint32_t) nGhostsOctants; ++treeId) {
+			ghostCreationInfo.current.emplace_back(nOctants + treeId);
+		}
+#endif
+
+		// Cells associated with unmapped octants should be removed
+		//
+		// A coarsening that merges cells from different processes, can leave, on
+		// the processes which own the ghost octants involved in the coarsening,
+		// some octants that are not mapped.
+		//
+		// During first tree load balance, cells are deleted and not sent to
+		// other processes (because all processes contain the whole tree).
+		// These cells were not mapped and need to be deleted.
+		std::size_t unmappedDeletionInfoId = synchronizationData.insert(adaption::TYPE_DELETION, adaption::ENTITY_CELL);
+		adaption::Info &unmappedDeletionInfo = synchronizationData[unmappedDeletionInfoId];
+		for (uint32_t previousTreeId = 0; previousTreeId < nPreviousOctants; ++previousTreeId) {
+			if (mappedInternalOctants[previousTreeId]) {
+				continue;
+			}
+
+			// Identify cell id
+			OctantInfo octantInfo = OctantInfo(previousTreeId, true);
+			long cellId = getOctantId(octantInfo);
+
+			// Update information on previous status
+			unmappedDeletionInfo.previous.push_back(cellId);
+		}
 	}
 
-	std::vector<DeleteInfo>().swap(deletedOctants);
+	log::cout() << " Done" << std::endl;
+
+	// Enable advanced editing
+	setExpert(true);
+
+	// Renumber cells
+	renumberCells(synchronizationData);
+
+	// Remove deleted cells
+	StitchInfo stitchInfo;
+	if (!importFromScratch) {
+		log::cout() << "  Deleting stale elements..." << std::endl;
+
+		stitchInfo = deleteCells(synchronizationData);
+
+		log::cout() << "  Stale element successfully deleted." << std::endl;
+	}
 
 	// Import added cells
-	std::vector<long> createdCells;
-	if (addedOctants.size() > 0) {
-		log::cout() << ">> Importing new octants...";
+	log::cout() << "  Creating new elements..." << std::endl;
 
-		createdCells = importCells(addedOctants, stitchInfo);
+	createCells(stitchInfo, nullptr, &synchronizationData);
 
-		log::cout() << " Done" << std::endl;
-		log::cout() << ">> Octants imported: " <<  addedOctants.size() << std::endl;
-	}
+	log::cout() << "  New elements successfully created." << std::endl;
 
 	StitchInfo().swap(stitchInfo);
 
 	// Disable advanced editing
 	setExpert(false);
 
-	// Track mesh adaption
+	// Remove renumberings from adaption data
+	//
+	// Renumbering is only needed for synchronizing the tree with the patch.
+	synchronizationData.erase(adaption::TYPE_RENUMBERING);
+
+	// Done
+	log::cout() << "  Synchronization completed successfully." << std::endl;
+
 	if (trackChanges) {
-		// Complete mesh adaption info for the cells
-		for (auto &adaptionInfo : adaptionData.data()) {
-			if (adaptionInfo.entity != adaption::ENTITY_CELL) {
-				continue;
-			}
+		return synchronizationData.dump();
+	} else {
+		return std::vector<adaption::Info>();
+	}
+}
 
-			// Map ids of the added cells
-			int nCurrentIds = adaptionInfo.current.size();
-			for (int k = 0; k < nCurrentIds; ++k) {
-				long cellId = m_octantToCell.at(adaptionInfo.current[k]);
-				adaptionInfo.current[k] = cellId;
-			}
+/*!
+	Renumber the specified cells.
 
-#if BITPIT_ENABLE_MPI==1
-			// Sort received cells
-			//
-			// To match the sorting done on the procesor that sent the cells,
-			// we don't use the native functions to evaluate the position of
-			// the cells.
-			adaption::Type adaptionType = adaptionInfo.type;
-			if (adaptionType == adaption::TYPE_PARTITION_RECV) {
-				std::sort(adaptionInfo.current.begin(), adaptionInfo.current.end(), CellPositionLess(*this, false));
-			}
-#endif
+	\param cellAdaptionData are the information that describe the changes
+	that need to be performed to the cells
+*/
+void VolOctree::renumberCells(const adaption::InfoCollection &cellAdaptionData)
+{
+	// Remove old patch-to-tree and tree-to-patch associations
+	for (const adaption::Info &adaptionInfo : cellAdaptionData) {
+		if (adaptionInfo.type != adaption::TYPE_RENUMBERING) {
+			continue;
 		}
 
-#if BITPIT_ENABLE_MPI==1
-		// Track created ghosts cells
-		if (nGhostsOctants > 0) {
-			std::size_t adaptionInfoId = adaptionData.insert(adaption::TYPE_CREATION, adaption::ENTITY_CELL, currentRank);
-			adaption::Info &adaptionInfo = adaptionData[adaptionInfoId];
-
-			adaptionInfo.current.reserve(nGhostsOctants);
-			auto cellIterator = m_cellToGhost.cbegin();
-			while (cellIterator != m_cellToGhost.cend()) {
-				adaptionInfo.current.emplace_back();
-				long &adaptionId = adaptionInfo.current.back();
-				adaptionId = cellIterator->first;
-
-				cellIterator++;
-			}
-		}
-#endif
-
-		// Track created interfaces
-		if (createdCells.size() > 0) {
-			// List of unique interfaces that have been created
-			std::unordered_set<long> createdInterfaces;
-			for (const auto &cellId : createdCells) {
-				const Cell &cell = m_cells.at(cellId);
-				long nCellInterfaces = cell.getInterfaceCount();
-				const long *interfaces = cell.getInterfaces();
-				for (int k = 0; k < nCellInterfaces; ++k) {
-					long interfaceId = interfaces[k];
-					if (interfaceId >= 0) {
-						createdInterfaces.insert(interfaceId);
-					}
-				}
-			}
-
-			// Adaption info
-			std::size_t infoId = adaptionData.insert(adaption::TYPE_CREATION, adaption::ENTITY_INTERFACE, currentRank);
-			adaption::Info &adaptionInfo = adaptionData[infoId];
-			adaptionInfo.current.reserve(createdInterfaces.size());
-			for (long interfaceId : createdInterfaces) {
-				adaptionInfo.current.emplace_back();
-				long &createdInterfaceId = adaptionInfo.current.back();
-				createdInterfaceId = interfaceId;
+		for (long cellId : adaptionInfo.previous) {
+			const OctantInfo &previousOctantInfo = getCellOctant(cellId);
+			if (previousOctantInfo.internal) {
+				m_octantToCell.erase(previousOctantInfo.id);
+			} else {
+				m_ghostToCell.erase(previousOctantInfo.id);
 			}
 		}
 	}
 
-	// Done
-	return adaptionData.dump();
+	// Create new patch-to-tree and tree-to-patch associations
+	std::size_t nOctants = m_tree->getNumOctants();
+	for (const adaption::Info &adaptionInfo : cellAdaptionData) {
+		if (adaptionInfo.type != adaption::TYPE_RENUMBERING) {
+			continue;
+		}
+
+		std::size_t nRenumberedCells = adaptionInfo.previous.size();
+		for (std::size_t i = 0; i < nRenumberedCells; ++i) {
+			long cellId = adaptionInfo.previous[i];
+
+			auto treeIdItr = m_cellToOctant.find(cellId);
+			if (treeIdItr != m_cellToOctant.end()) {
+				uint32_t currentTreeId = adaptionInfo.current[i];
+				treeIdItr->second = currentTreeId;
+				m_octantToCell[currentTreeId] = cellId;
+			} else {
+				uint32_t currentTreeId = adaptionInfo.current[i] - nOctants;
+				treeIdItr = m_cellToGhost.find(cellId);
+				assert(treeIdItr != m_cellToGhost.end());
+				treeIdItr->second = currentTreeId;
+				m_ghostToCell[currentTreeId] = cellId;
+			}
+		}
+	}
 }
 
+/*!
+	Imports a list of octants into the patch.
+
+	\param stitchInfo is the list of vertices that will be used to stitch the
+	the new octants
+	\param restoreStream if a is an optional stream from which the information about
+	the restore will be read. If no restore stream is given the the cells will
+	be created from scratch
+	\param[in,out] cellAdaptionData are the information that describe the changes
+	that need to be performed to the cells, on output the dummy ids contained in
+	the current statuses will be replaced with the actual ids of the cells that
+	have been created
+*/
+void VolOctree::createCells(StitchInfo &stitchInfo, std::istream *restoreStream,
+							adaption::InfoCollection *cellAdaptionData)
+{
+	// Tree information
+	long nOctants       = m_tree->getNumOctants();
+	long nGhostsOctants = m_tree->getNumGhosts();
+
+	int nOctantVertices = m_tree->getNnodes();
+
+	// Create the new vertices
+	std::vector<long> trackedCreatedVertices;
+	for (const adaption::Info &adaptionInfo : *cellAdaptionData) {
+		if (adaptionInfo.type == adaption::TYPE_RENUMBERING) {
+			continue;
+		}
+
+		for (long currentId : adaptionInfo.current) {
+			// Octant
+			bool isInternal = (currentId < nOctants);
+
+			std::size_t treeId = currentId;
+			if (!isInternal) {
+				treeId -= nOctants;
+			}
+
+			const OctantInfo octantInfo(treeId, isInternal);
+			Octant *octant = getOctantPointer(octantInfo);
+
+			// Create vertices
+			for (int k = 0; k < nOctantVertices; ++k) {
+				uint64_t vertexTreeKey = m_tree->computeNodePersistentKey(octant, k);
+				if (stitchInfo.count(vertexTreeKey) == 0) {
+					// Vertex coordinates
+					std::array<double, 3> nodeCoords = m_tree->getNode(octant, k);
+
+					// Create the vertex
+					long vertexId;
+					if (!restoreStream) {
+#if BITPIT_ENABLE_MPI==1
+						VertexIterator vertexIterator = addVertex(std::move(nodeCoords));
+#else
+						VertexIterator vertexIterator = addVertex(std::move(nodeCoords));
+#endif
+						vertexId = vertexIterator.getId();
+					} else {
+						utils::binary::read(*restoreStream, vertexId);
+
+#if BITPIT_ENABLE_MPI==1
+						int rank;
+						utils::binary::read(*restoreStream, rank);
+
+						restoreVertex(std::move(nodeCoords), rank, vertexId);
+#else
+						int dummtRank;
+						utils::binary::read(*restoreStream, dummtRank);
+
+						restoreVertex(std::move(nodeCoords), vertexId);
+#endif
+					}
+
+					// Add the vertex to the stitching info
+					stitchInfo[vertexTreeKey] = vertexId;
+				}
+			}
+		}
+	}
+
+	// Reserve space for the maps
+	m_cellToOctant.reserve(nOctants);
+	m_octantToCell.reserve(nOctants);
+
+	m_cellToGhost.reserve(nGhostsOctants);
+	m_ghostToCell.reserve(nGhostsOctants);
+
+	// Add the cells
+	std::size_t updatedCellCount = m_cells.size();
+	for (const adaption::Info &adaptionInfo : *cellAdaptionData) {
+		if (adaptionInfo.type == adaption::TYPE_RENUMBERING) {
+			continue;
+		}
+
+		updatedCellCount += adaptionInfo.current.size();
+	}
+	m_cells.reserve(updatedCellCount);
+
+	for (adaption::Info &adaptionInfo : *cellAdaptionData) {
+		if (adaptionInfo.type == adaption::TYPE_RENUMBERING) {
+			continue;
+		}
+
+		for (long &currentId : adaptionInfo.current) {
+			// Octant
+			bool isInternal = (currentId < nOctants);
+
+			std::size_t treeId = currentId;
+			if (!isInternal) {
+				treeId -= nOctants;
+			}
+
+			const OctantInfo octantInfo(treeId, isInternal);
+			Octant *octant = getOctantPointer(octantInfo);
+
+			// Cell connectivity
+			std::unique_ptr<long[]> cellConnect = std::unique_ptr<long[]>(new long[nOctantVertices]);
+			for (int k = 0; k < nOctantVertices; ++k) {
+				uint64_t vertexTreeKey = m_tree->computeNodePersistentKey(octant, k);
+				cellConnect[k] = stitchInfo.at(vertexTreeKey);
+			}
+
+#if BITPIT_ENABLE_MPI==1
+			// Cell owner
+			int owner;
+			if (octantInfo.internal) {
+				owner = getRank();
+			} else {
+				uint64_t globalTreeId = m_tree->getGhostGlobalIdx(octantInfo.id);
+				owner = m_tree->getOwnerRank(globalTreeId);
+			}
+
+			// Cell halo layer
+			int haloLayer = m_tree->getGhostLayer(octant);
+#endif
+
+			// Add cell
+			long cellId;
+			if (!restoreStream) {
+#if BITPIT_ENABLE_MPI==1
+				CellIterator cellIterator = addCell(m_cellTypeInfo->type, std::move(cellConnect), owner, haloLayer);
+#else
+				CellIterator cellIterator = addCell(m_cellTypeInfo->type, std::move(cellConnect));
+#endif
+				cellId = cellIterator.getId();
+			} else {
+				utils::binary::read(*restoreStream, cellId);
+
+#if BITPIT_ENABLE_MPI==1
+				restoreCell(m_cellTypeInfo->type, std::move(cellConnect), owner, haloLayer, cellId);
+#else
+				restoreCell(m_cellTypeInfo->type, std::move(cellConnect), cellId);
+#endif
+			}
+
+			// Create patch-tree associations
+			if (octantInfo.internal) {
+				m_cellToOctant.insert({{cellId, octantInfo.id}});
+				m_octantToCell.insert({{octantInfo.id, cellId}});
+			} else {
+				m_cellToGhost.insert({{cellId, octantInfo.id}});
+				m_ghostToCell.insert({{octantInfo.id, cellId}});
+			}
+
+			// Replace current id with the actual cell id
+			currentId = cellId;
+		}
+	}
+
+	// Update first ghost and last internal information
+	if (restoreStream) {
+		updateLastInternalCellId();
+#if BITPIT_ENABLE_MPI==1
+		updateFirstGhostCellId();
+#endif
+	}
+
+	// Update cell PIDs
+	if (restoreStream) {
+		for (Cell &cell : getCells()) {
+			int PID;
+			utils::binary::read(*restoreStream, PID);
+			cell.setPID(PID);
+		}
+	}
+
+	// Update adjacencies
+	updateAdjacencies();
+
+	// Update interfaces
+	if (!restoreStream) {
+		updateInterfaces(false);
+	}
+}
 
 /*!
 	Delete the specified cells.
 
-	\param deletedOctants contains a list with the information about the
-	deleted octants
-	\result Returns the stitch information that can  the faces created
-	after deleting the octants.
+	\param cellAdaptionData are the information that describe the changes
+	that need to be performed to the cells
+	\param stitchInfo if a valid pointer is provided, on output will contain
+	the stitch information that can used to stich the faces created after
+	deleting the octants
 */
-VolOctree::StitchInfo VolOctree::deleteCells(const std::vector<DeleteInfo> &deletedOctants)
+VolOctree::StitchInfo VolOctree::deleteCells(const adaption::InfoCollection &cellAdaptionData)
 {
 	// Info of the cells
 	int nCellVertices = m_cellTypeInfo->nVertices;
 	int nCellFaces    = m_cellTypeInfo->nFaces;
 
-	// Delete the cells
-	std::unordered_set<long> deadVertices;
-
+	// Delete cells
 	std::vector<long> deadCells;
-	deadCells.reserve(deletedOctants.size());
-	for (const DeleteInfo &deleteInfo : deletedOctants) {
-		long cellId = deleteInfo.cellId;
-		const Cell &cell = m_cells[cellId];
-
-		// List vertices to remove
-		//
-		// For now, all cell vertices will be listed. Later, the vertex of
-		// the dangling faces will be removed from the list.
-		ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
-		deadVertices.insert(cellVertexIds.cbegin(), cellVertexIds.cend());
-
-		// Remove patch-tree associations
-		const OctantInfo &octantInfo = getCellOctant(cellId);
-		uint32_t treeId = octantInfo.id;
-
-		if (cell.isInterior()) {
-			m_cellToOctant.erase(cellId);
-
-			auto octantToCellItr = m_octantToCell.find(treeId);
-			if (octantToCellItr->second == cellId) {
-				m_octantToCell.erase(octantToCellItr);
-			}
-		} else {
-			m_cellToGhost.erase(cellId);
-
-			auto ghostToCellItr = m_ghostToCell.find(treeId);
-			if (ghostToCellItr->second == cellId) {
-				m_ghostToCell.erase(ghostToCellItr);
-			}
+	std::unordered_set<long> deadVertices;
+	for (const adaption::Info &adaptionInfo : cellAdaptionData) {
+		if (adaptionInfo.type == adaption::TYPE_RENUMBERING) {
+			continue;
 		}
 
-		// Cell needs to be removed
-		deadCells.push_back(cellId);
+		// Add previous cells to the list of dead cells
+		deadCells.insert(deadCells.begin(), adaptionInfo.previous.begin(), adaptionInfo.previous.end());
+
+		// Prepare cell deletion
+		for (long cellId : adaptionInfo.previous) {
+			const Cell &cell = m_cells[cellId];
+
+			const OctantInfo &octantInfo = getCellOctant(cellId);
+			uint32_t treeId = octantInfo.id;
+
+			// List vertices to remove
+			//
+			// For now, all cell vertices will be listed. Later, the vertex of
+			// the dangling faces will be removed from the list.
+			ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
+			deadVertices.insert(cellVertexIds.cbegin(), cellVertexIds.cend());
+
+			// Remove patch-tree associations
+			if (cell.isInterior()) {
+				m_cellToOctant.erase(cellId);
+
+				auto octantToCellItr = m_octantToCell.find(treeId);
+				if (octantToCellItr->second == cellId) {
+					m_octantToCell.erase(octantToCellItr);
+				}
+			} else {
+				m_cellToGhost.erase(cellId);
+
+				auto ghostToCellItr = m_ghostToCell.find(treeId);
+				if (ghostToCellItr->second == cellId) {
+					m_ghostToCell.erase(ghostToCellItr);
+				}
+			}
+		}
 	}
 
+	log::cout() << "    " << deadCells.size() << " cell will be removed." << std::endl;
 	PatchKernel::deleteCells(deadCells);
 
 	// Prune cell adjacencies and interfaces
@@ -1666,7 +1720,9 @@ VolOctree::StitchInfo VolOctree::deleteCells(const std::vector<DeleteInfo> &dele
 
 	pruneStaleInterfaces();
 
-	// All the vertices belonging to the dangling cells has to be kept
+	// Delete vertices
+	//
+	// All the vertices belonging to the dangling cells has to be kept.
 	//
 	// We need to keep all the vertices that lie on a dangling face and belong
 	// to cells that were not deleted. These are the vertices of the dangling
@@ -1689,7 +1745,7 @@ VolOctree::StitchInfo VolOctree::deleteCells(const std::vector<DeleteInfo> &dele
 	// octree numbering of the vertices of the dangling cells. This map will
 	// be used when imprting the octants to stitch the imported octants to
 	// the existing cells.
-	StitchInfo stitchVertices;
+	StitchInfo stitchInfo;
 	for (const auto &entry: m_alteredCells) {
 		// Consider only dangling faces
 		if (!testAlterationFlags(entry.second, FLAG_DANGLING)) {
@@ -1707,7 +1763,7 @@ VolOctree::StitchInfo VolOctree::deleteCells(const std::vector<DeleteInfo> &dele
 		for (int k = 0; k < nCellVertices; ++k) {
 			long vertexId = cellVertexIds[k];
 			uint64_t vertexTreeKey = m_tree->computeNodePersistentKey(octant, k);
-			stitchVertices.insert({vertexTreeKey, vertexId});
+			stitchInfo.insert({vertexTreeKey, vertexId});
 			deadVertices.erase(vertexId);
 		}
 
@@ -1737,209 +1793,17 @@ VolOctree::StitchInfo VolOctree::deleteCells(const std::vector<DeleteInfo> &dele
 				for (std::size_t k = 0; k < nFaceVertexIds; ++k) {
 					long vertexId = faceVertexIds[k];
 					uint64_t vertexTreeKey = m_tree->computeNodePersistentKey(neighOctant, localNeighFaceConnect[k]);
-					stitchVertices.insert({vertexTreeKey, vertexId});
+					stitchInfo.insert({vertexTreeKey, vertexId});
 					deadVertices.erase(vertexId);
 				}
 			}
 		}
 	}
 
-	// Delete the vertices
+	log::cout() << "    " << deadVertices.size() << " vertices will be removed." << std::endl;
 	PatchKernel::deleteVertices(deadVertices);
 
-	// Done
-	return stitchVertices;
-}
-
-/*!
-	Renumber the specified cells.
-
-	\param renumberedOctants contains the information about the renumbered
-	octants
-*/
-void VolOctree::renumberCells(const std::vector<RenumberInfo> &renumberedOctants)
-{
-	// Remove old patch-to-tree and tree-to-patch associations
-	for (const RenumberInfo &renumberInfo : renumberedOctants) {
-		long cellId = renumberInfo.cellId;
-		if (!m_cells[cellId].isInterior()) {
-			continue;
-		}
-
-		const OctantInfo &previousOctantInfo = getCellOctant(cellId);
-		uint32_t previousTreeId = previousOctantInfo.id;
-
-		m_octantToCell.erase(previousTreeId);
-	}
-
-	// Create new patch-to-tree and tree-to-patch associations
-	for (const RenumberInfo &renumberInfo : renumberedOctants) {
-		long cellId = renumberInfo.cellId;
-		if (!m_cells[cellId].isInterior()) {
-			continue;
-		}
-
-		uint32_t treeId = renumberInfo.newTreeId;
-
-		m_cellToOctant[cellId] = treeId;
-		m_octantToCell[treeId] = cellId;
-	}
-}
-
-/*!
-	Imports a list of octants into the patch.
-
-	\param octantInfoList is the list of octant to import
-	\param stitchInfo is the list of vertices that will be used to stitch the
-	the new octants
-	\param restoreStream is an optional stream from which the information about
-	the restore will be read. If no restore stream is given the the cells will
-	be created from scratch
-*/
-std::vector<long> VolOctree::importCells(const std::vector<OctantInfo> &octantInfoList,
-                                         StitchInfo &stitchInfo, std::istream *restoreStream)
-{
-	// Create the new vertices
-	int nCellVertices = m_cellTypeInfo->nVertices;
-	for (const OctantInfo &octantInfo : octantInfoList) {
-		Octant *octant = getOctantPointer(octantInfo);
-		for (int k = 0; k < nCellVertices; ++k) {
-			uint64_t vertexTreeKey = m_tree->computeNodePersistentKey(octant, k);
-			if (stitchInfo.count(vertexTreeKey) == 0) {
-				// Vertex coordinates
-				std::array<double, 3> nodeCoords = m_tree->getNode(octant, k);
-
-				// Create the vertex
-				long vertexId;
-				if (!restoreStream) {
-#if BITPIT_ENABLE_MPI==1
-					VertexIterator vertexIterator = addVertex(std::move(nodeCoords));
-#else
-					VertexIterator vertexIterator = addVertex(std::move(nodeCoords));
-#endif
-					vertexId = vertexIterator.getId();
-				} else {
-					utils::binary::read(*restoreStream, vertexId);
-
-#if BITPIT_ENABLE_MPI==1
-					int rank;
-					utils::binary::read(*restoreStream, rank);
-
-					restoreVertex(std::move(nodeCoords), rank, vertexId);
-#else
-					int dummtRank;
-					utils::binary::read(*restoreStream, dummtRank);
-
-					restoreVertex(std::move(nodeCoords), vertexId);
-#endif
-				}
-
-				// Add the vertex to the stitching info
-				stitchInfo[vertexTreeKey] = vertexId;
-			}
-		}
-	}
-
-	// Reserve space for the maps
-	long nOctants = m_tree->getNumOctants();
-	m_cellToOctant.reserve(nOctants);
-	m_octantToCell.reserve(nOctants);
-
-	long nGhostsOctants = m_tree->getNumGhosts();
-	m_cellToGhost.reserve(nGhostsOctants);
-	m_ghostToCell.reserve(nGhostsOctants);
-
-	// Add the cells
-	size_t octantInfoListSize = octantInfoList.size();
-	m_cells.reserve(m_cells.size() + octantInfoListSize);
-
-	std::vector<long> createdCells(octantInfoListSize);
-	for (size_t i = 0; i < octantInfoListSize; ++i) {
-		const OctantInfo &octantInfo = octantInfoList[i];
-
-		// Octant connectivity
-		Octant *octant = getOctantPointer(octantInfo);
-
-		// Cell connectivity
-		std::unique_ptr<long[]> cellConnect = std::unique_ptr<long[]>(new long[nCellVertices]);
-		for (int k = 0; k < nCellVertices; ++k) {
-			uint64_t vertexTreeKey = m_tree->computeNodePersistentKey(octant, k);
-			cellConnect[k] = stitchInfo.at(vertexTreeKey);
-		}
-
-#if BITPIT_ENABLE_MPI==1
-		// Cell owner
-		int owner;
-		if (octantInfo.internal) {
-			owner = getRank();
-		} else {
-			uint64_t globalTreeId = m_tree->getGhostGlobalIdx(octantInfo.id);
-			owner = m_tree->getOwnerRank(globalTreeId);
-		}
-
-		// Cell halo layer
-		int haloLayer = m_tree->getGhostLayer(octant);
-#endif
-
-		// Add cell
-		long cellId;
-		if (!restoreStream) {
-#if BITPIT_ENABLE_MPI==1
-			CellIterator cellIterator = addCell(m_cellTypeInfo->type, std::move(cellConnect), owner, haloLayer);
-#else
-			CellIterator cellIterator = addCell(m_cellTypeInfo->type, std::move(cellConnect));
-#endif
-			cellId = cellIterator.getId();
-		} else {
-			utils::binary::read(*restoreStream, cellId);
-
-#if BITPIT_ENABLE_MPI==1
-			restoreCell(m_cellTypeInfo->type, std::move(cellConnect), owner, haloLayer, cellId);
-#else
-			restoreCell(m_cellTypeInfo->type, std::move(cellConnect), cellId);
-#endif
-		}
-
-		// Create patch-tree associations
-		if (octantInfo.internal) {
-			m_cellToOctant.insert({{cellId, octantInfo.id}});
-			m_octantToCell.insert({{octantInfo.id, cellId}});
-		} else {
-			m_cellToGhost.insert({{cellId, octantInfo.id}});
-			m_ghostToCell.insert({{octantInfo.id, cellId}});
-		}
-
-		// Add the cell to the list of created cells
-		createdCells[i] = cellId;
-	}
-
-	// Update first ghost and last internal information
-	if (restoreStream) {
-		updateLastInternalCellId();
-#if BITPIT_ENABLE_MPI==1
-		updateFirstGhostCellId();
-#endif
-	}
-
-	// Update cell PIDs
-	if (restoreStream) {
-		for (Cell &cell : getCells()) {
-			int PID;
-			utils::binary::read(*restoreStream, PID);
-			cell.setPID(PID);
-		}
-	}
-
-	// Update adjacencies
-	updateAdjacencies();
-
-	// Update interfaces
-	if (!restoreStream) {
-		updateInterfaces();
-	}
-
-	// Done
-	return createdCells;
+	return stitchInfo;
 }
 
 /*!
@@ -2371,16 +2235,13 @@ void VolOctree::_restore(std::istream &stream)
 
 	StitchInfo stitchInfo;
 
-	std::vector<OctantInfo> octantInfoList;
-	octantInfoList.reserve(nOctants + nGhostsOctants);
-	for (std::size_t n = 0; n < nOctants; ++n) {
-		octantInfoList.emplace_back(n, true);
-	}
-	for (std::size_t n = 0; n < nGhostsOctants; ++n) {
-		octantInfoList.emplace_back(n, false);
-	}
+	adaption::InfoCollection adaptionData;
+	std::size_t adaptionId = adaptionData.insert(adaption::TYPE_CREATION, adaption::ENTITY_CELL);
+	adaption::Info &adaptionInfo = adaptionData[adaptionId];
+	adaptionInfo.current.resize(nOctants + nGhostsOctants);
+	std::iota(adaptionInfo.current.begin(), adaptionInfo.current.end(), 0);
 
-	importCells(octantInfoList, stitchInfo, &stream);
+	createCells(stitchInfo, &stream, &adaptionData);
 
 	// Restore interfaces
 	restoreInterfaces(stream);
