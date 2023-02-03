@@ -40,18 +40,18 @@ namespace bitpit {
 	will be created
 	\param haloSize is the size, expressed in number of layers, of the ghost
 	cells halo
-	\param expert if true, the expert mode will be enabled
+	\param adaptionMode is the adaption mode that will be used for the patch
 */
-LineKernel::LineKernel(MPI_Comm communicator, std::size_t haloSize, bool expert)
-	: PatchKernel(communicator, haloSize, expert)
+LineKernel::LineKernel(MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode)
+	: PatchKernel(communicator, haloSize, adaptionMode)
 #else
 /*!
 	Creates a patch.
 
-	\param expert if true, the expert mode will be enabled
+	\param adaptionMode is the adaption mode that will be used for the patch
 */
-LineKernel::LineKernel(bool expert)
-	: PatchKernel(expert)
+LineKernel::LineKernel(AdaptionMode adaptionMode)
+	: PatchKernel(adaptionMode)
 #endif
 {
 	initialize();
@@ -71,19 +71,19 @@ LineKernel::LineKernel(bool expert)
 	will be created
 	\param haloSize is the size, expressed in number of layers, of the ghost
 	cells halo
-	\param expert if true, the expert mode will be enabled
+	\param adaptionMode is the adaption mode that will be used for the patch
 */
-LineKernel::LineKernel(int dimension, MPI_Comm communicator, std::size_t haloSize, bool expert)
-	: PatchKernel(dimension, communicator, haloSize, expert)
+LineKernel::LineKernel(int dimension, MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode)
+	: PatchKernel(dimension, communicator, haloSize, adaptionMode)
 #else
 /*!
 	Creates a patch.
 
 	\param dimension is the dimension of the patch
-	\param expert if true, the expert mode will be enabled
+	\param adaptionMode is the adaption mode that will be used for the patch
 */
-LineKernel::LineKernel(int dimension, bool expert)
-	: PatchKernel(dimension, expert)
+LineKernel::LineKernel(int dimension, AdaptionMode adaptionMode)
+	: PatchKernel(dimension, adaptionMode)
 #endif
 {
     initialize();
@@ -104,20 +104,20 @@ LineKernel::LineKernel(int dimension, bool expert)
 	will be created
 	\param haloSize is the size, expressed in number of layers, of the ghost
 	cells halo
-	\param expert if true, the expert mode will be enabled
+	\param adaptionMode is the adaption mode that will be used for the patch
 */
-LineKernel::LineKernel(int id, int dimension, MPI_Comm communicator, std::size_t haloSize, bool expert)
-	: PatchKernel(id, dimension, communicator, haloSize, expert)
+LineKernel::LineKernel(int id, int dimension, MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode)
+	: PatchKernel(id, dimension, communicator, haloSize, adaptionMode)
 #else
 /*!
 	Creates a patch.
 
 	\param id is the id that will be assigned to the patch
 	\param dimension is the dimension of the patch
-	\param expert if true, the expert mode will be enabled
+	\param adaptionMode is the adaption mode that will be used for the patch
 */
-LineKernel::LineKernel(int id, int dimension, bool expert)
-	: PatchKernel(id, dimension, expert)
+LineKernel::LineKernel(int id, int dimension, AdaptionMode adaptionMode)
+	: PatchKernel(id, dimension, adaptionMode)
 #endif
 {
 }

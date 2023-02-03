@@ -37,18 +37,18 @@ namespace bitpit {
 	\param communicator is the communicator to be used for exchanging data
 	among the processes. If a null comunicator is provided, a serial patch
 	will be created
-	\param expert if true, the expert mode will be enabled
+	\param adaptionMode is the adaption mode that will be used for the patch
 */
-PointKernel::PointKernel(MPI_Comm communicator, bool expert)
-	: PatchKernel(communicator, 0, expert)
+PointKernel::PointKernel(MPI_Comm communicator, AdaptionMode adaptionMode)
+	: PatchKernel(communicator, 0, adaptionMode)
 #else
 /*!
 	Creates a patch.
 
-	\param expert if true, the expert mode will be enabled
+	\param adaptionMode is the adaption mode that will be used for the patch
 */
-PointKernel::PointKernel(bool expert)
-	: PatchKernel(expert)
+PointKernel::PointKernel(AdaptionMode adaptionMode)
+	: PatchKernel(adaptionMode)
 #endif
 {
 	initialize();
@@ -66,19 +66,19 @@ PointKernel::PointKernel(bool expert)
 	\param communicator is the communicator to be used for exchanging data
 	among the processes. If a null comunicator is provided, a serial patch
 	will be created
-	\param expert if true, the expert mode will be enabled
+	\param adaptionMode is the adaption mode that will be used for the patch
 */
-PointKernel::PointKernel(int dimension, MPI_Comm communicator, bool expert)
-	: PatchKernel(dimension, communicator, 0, expert)
+PointKernel::PointKernel(int dimension, MPI_Comm communicator, AdaptionMode adaptionMode)
+	: PatchKernel(dimension, communicator, 0, adaptionMode)
 #else
 /*!
 	Creates a patch.
 
 	\param dimension is the dimension of the patch
-	\param expert if true, the expert mode will be enabled
+	\param adaptionMode is the adaption mode that will be used for the patch
 */
-PointKernel::PointKernel(int dimension, bool expert)
-	: PatchKernel(dimension, expert)
+PointKernel::PointKernel(int dimension, AdaptionMode adaptionMode)
+	: PatchKernel(dimension, adaptionMode)
 #endif
 {
     initialize();
@@ -97,20 +97,20 @@ PointKernel::PointKernel(int dimension, bool expert)
 	\param communicator is the communicator to be used for exchanging data
 	among the processes. If a null comunicator is provided, a serial patch
 	will be created
-	\param expert if true, the expert mode will be enabled
+	\param adaptionMode is the adaption mode that will be used for the patch
 */
-PointKernel::PointKernel(int id, int dimension, MPI_Comm communicator, bool expert)
-	: PatchKernel(id, dimension, communicator, 0, expert)
+PointKernel::PointKernel(int id, int dimension, MPI_Comm communicator, AdaptionMode adaptionMode)
+	: PatchKernel(id, dimension, communicator, 0, adaptionMode)
 #else
 /*!
 	Creates a patch.
 
 	\param id is the id that will be assigned to the patch
 	\param dimension is the dimension of the patch
-	\param expert if true, the expert mode will be enabled
+	\param adaptionMode is the adaption mode that will be used for the patch
 */
-PointKernel::PointKernel(int id, int dimension, bool expert)
-	: PatchKernel(id, dimension, expert)
+PointKernel::PointKernel(int id, int dimension, AdaptionMode adaptionMode)
+	: PatchKernel(id, dimension, adaptionMode)
 #endif
 {
 }

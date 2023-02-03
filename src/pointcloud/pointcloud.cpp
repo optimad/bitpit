@@ -49,13 +49,13 @@ namespace bitpit {
     among the processes
 */
 PointCloud::PointCloud(MPI_Comm communicator)
-    : PointKernel(communicator, true)
+    : PointKernel(communicator, ADAPTION_MANUAL)
 #else
 /*!
     Creates an uninitialized serial patch.
 */
 PointCloud::PointCloud()
-    : PointKernel(true)
+    : PointKernel(ADAPTION_MANUAL)
 #endif
 {
 }
@@ -73,7 +73,7 @@ PointCloud::PointCloud()
     among the processes
 */
 PointCloud::PointCloud(int dimension, MPI_Comm communicator)
-    : PointKernel(PatchManager::AUTOMATIC_ID, dimension, communicator, true)
+    : PointKernel(PatchManager::AUTOMATIC_ID, dimension, communicator, ADAPTION_MANUAL)
 #else
 /*!
     Creates a patch.
@@ -81,7 +81,7 @@ PointCloud::PointCloud(int dimension, MPI_Comm communicator)
     \param dimension is the dimension of the patch
 */
 PointCloud::PointCloud(int dimension)
-    : PointKernel(PatchManager::AUTOMATIC_ID, dimension, true)
+    : PointKernel(PatchManager::AUTOMATIC_ID, dimension, ADAPTION_MANUAL)
 #endif
 {
 }
@@ -100,7 +100,7 @@ PointCloud::PointCloud(int dimension)
     among the processes
 */
 PointCloud::PointCloud(int id, int dimension, MPI_Comm communicator)
-    : PointKernel(id, dimension, communicator, true)
+    : PointKernel(id, dimension, communicator, ADAPTION_MANUAL)
 #else
 /*!
     Creates a patch.
@@ -109,7 +109,7 @@ PointCloud::PointCloud(int id, int dimension, MPI_Comm communicator)
     \param dimension is the dimension of the patch
 */
 PointCloud::PointCloud(int id, int dimension)
-    : PointKernel(id, dimension, true)
+    : PointKernel(id, dimension, ADAPTION_MANUAL)
 #endif
 {
 }
@@ -126,7 +126,7 @@ PointCloud::PointCloud(int id, int dimension)
     among the processes
 */
 PointCloud::PointCloud(std::istream &stream, MPI_Comm communicator)
-    : PointKernel(communicator, false)
+    : PointKernel(communicator, ADAPTION_MANUAL)
 #else
 /*!
     Creates a patch restoring the patch saved in the specified stream.
@@ -134,7 +134,7 @@ PointCloud::PointCloud(std::istream &stream, MPI_Comm communicator)
     \param stream is the stream to read from
 */
 PointCloud::PointCloud(std::istream &stream)
-    : PointKernel(false)
+    : PointKernel(ADAPTION_MANUAL)
 #endif
 {
     // Restore the patch
@@ -149,20 +149,6 @@ PointCloud::PointCloud(std::istream &stream)
 std::unique_ptr<PatchKernel> PointCloud::clone() const
 {
     return std::unique_ptr<PointCloud>(new PointCloud(*this));
-}
-
-/*!
- * Enables or disables expert mode.
- *
- * When expert mode is enabled, it will be possible to change the
- * patch using low level functions (e.g., it will be possible to
- * add individual cells, add vertices, delete cells, ...).
- *
- * \param expert if true, the expert mode will be enabled
- */
-void PointCloud::setExpert(bool expert)
-{
-    PointKernel::setExpert(expert);
 }
 
 /*!

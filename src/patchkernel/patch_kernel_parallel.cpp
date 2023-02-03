@@ -349,7 +349,7 @@ void PatchKernel::_setHaloSize(std::size_t haloSize)
 */
 PatchKernel::VertexIterator PatchKernel::internalVertex2GhostVertex(long id, int owner)
 {
-	if (!isExpert()) {
+	if (getAdaptionMode() != ADAPTION_MANUAL) {
 		return m_vertices.end();
 	}
 
@@ -390,7 +390,7 @@ PatchKernel::VertexIterator PatchKernel::internalVertex2GhostVertex(long id, int
 */
 PatchKernel::VertexIterator PatchKernel::ghostVertex2InternalVertex(long id)
 {
-	if (!isExpert()) {
+	if (getAdaptionMode() != ADAPTION_MANUAL) {
 		return m_vertices.end();
 	}
 
@@ -469,7 +469,7 @@ const Vertex & PatchKernel::getFirstGhostVertex() const
 */
 PatchKernel::VertexIterator PatchKernel::restoreVertex(const std::array<double, 3> &coords, int owner, long id)
 {
-	if (!isExpert()) {
+	if (getAdaptionMode() != ADAPTION_MANUAL) {
 		return vertexEnd();
 	}
 
@@ -616,7 +616,7 @@ void PatchKernel::updateFirstGhostVertexId()
 */
 PatchKernel::CellIterator PatchKernel::internalCell2GhostCell(long id, int owner, int haloLayer)
 {
-	if (!isExpert()) {
+	if (getAdaptionMode() != ADAPTION_MANUAL) {
 		return m_cells.end();
 	}
 
@@ -657,7 +657,7 @@ PatchKernel::CellIterator PatchKernel::internalCell2GhostCell(long id, int owner
 */
 PatchKernel::CellIterator PatchKernel::ghostCell2InternalCell(long id)
 {
-	if (!isExpert()) {
+	if (getAdaptionMode() != ADAPTION_MANUAL) {
 		return m_cells.end();
 	}
 
@@ -1010,7 +1010,7 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementType type, const std::vect
 PatchKernel::CellIterator PatchKernel::addCell(ElementType type, std::unique_ptr<long[]> &&connectStorage,
 											   int owner, int haloLayer, long id)
 {
-	if (!isExpert()) {
+	if (getAdaptionMode() != ADAPTION_MANUAL) {
 		return cellEnd();
 	}
 
@@ -1109,7 +1109,7 @@ PatchKernel::CellIterator PatchKernel::_addGhostCell(ElementType type, std::uniq
 PatchKernel::CellIterator PatchKernel::restoreCell(ElementType type, std::unique_ptr<long[]> &&connectStorage,
 												   int owner, int haloLayer, long id)
 {
-	if (!isExpert()) {
+	if (getAdaptionMode() != ADAPTION_MANUAL) {
 		return cellEnd();
 	}
 
