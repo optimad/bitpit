@@ -399,8 +399,8 @@ public:
 
 	virtual void simulateCellUpdate(const long id, adaption::Marker marker, std::vector<Cell> *virtualCells, PiercedVector<Vertex, long> *virtualVertices) const;
 
-	SpawnStatus getSpawnStatus() const;
-	std::vector<adaption::Info> spawn(bool trackSpawn);
+	BITPIT_DEPRECATED(SpawnStatus getSpawnStatus() const);
+	BITPIT_DEPRECATED(std::vector<adaption::Info> spawn(bool trackSpawn));
 
 	bool isAdaptionSupported() const;
 	AdaptionMode getAdaptionMode() const;
@@ -891,9 +891,6 @@ protected:
 
 	bool testAlterationFlags(AlterationFlags availableFlags, AlterationFlags requestedFlags) const;
 
-	void setSpawnStatus(SpawnStatus status);
-	virtual std::vector<adaption::Info> _spawn(bool trackAdaption);
-
 	void setAdaptionMode(AdaptionMode mode);
 	void setAdaptionStatus(AdaptionStatus status);
 	virtual std::vector<adaption::Info> _adaptionPrepare(bool trackAdaption);
@@ -1000,8 +997,6 @@ private:
 	AdjacenciesBuildStrategy m_adjacenciesBuildStrategy;
 
 	InterfacesBuildStrategy m_interfacesBuildStrategy;
-
-	SpawnStatus m_spawnStatus;
 
 	AdaptionMode m_adaptionMode;
 	AdaptionStatus m_adaptionStatus;

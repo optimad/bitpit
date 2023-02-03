@@ -481,9 +481,6 @@ void VolCartesian::initialize()
 	// Set the bounding box as frozen
 	setBoundingBoxFrozen(true);
 
-	// This patch need to be spawn
-	setSpawnStatus(SPAWN_NEEDED);
-
 	// Set the light memory mode
 	setMemoryMode(MemoryMode::MEMORY_LIGHT);
 
@@ -949,7 +946,6 @@ void VolCartesian::switchMemoryMode(MemoryMode mode)
 	switch (mode) {
 
 	case MemoryMode::MEMORY_NORMAL:
-		// Spawn the patch to activate normal memory mode
 		spawn(false);
 
 		break;
@@ -959,9 +955,6 @@ void VolCartesian::switchMemoryMode(MemoryMode mode)
 		// of the patch, therefore we can call the 'reset' implementation of
 		// the kernel.
 		VolumeKernel::reset();
-
-		// Now the patch needs to be spawn
-		setSpawnStatus(SPAWN_NEEDED);
 
 		// Set the light memory mode
 		setMemoryMode(mode);
@@ -1012,7 +1005,7 @@ double VolCartesian::getSpacing(int direction) const
 	\result Returns a vector of adaption::Info that can be used to track
 	the changes done during the update.
 */
-std::vector<adaption::Info> VolCartesian::_spawn(bool trackSpawn)
+std::vector<adaption::Info> VolCartesian::spawn(bool trackSpawn)
 {
 	std::vector<adaption::Info> adaptionData;
 
@@ -1195,9 +1188,6 @@ void VolCartesian::_dump(std::ostream &stream) const
  */
 void VolCartesian::_restore(std::istream &stream)
 {
-	// This patch need to be spawn
-	setSpawnStatus(SPAWN_NEEDED);
-
 	// Origin
 	std::array<double, 3> origin;
 	utils::binary::read(stream, origin[0]);

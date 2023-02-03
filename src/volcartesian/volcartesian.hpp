@@ -146,7 +146,7 @@ public:
 	long getCellFaceNeighsLinearId(long id, int face) const;
 
 protected:
-	std::vector<adaption::Info> _spawn(bool trackSpawn) override;
+	std::vector<adaption::Info> spawn(bool trackSpawn);
 
 	void _updateAdjacencies() override;
 

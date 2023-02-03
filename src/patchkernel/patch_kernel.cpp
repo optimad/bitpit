@@ -242,7 +242,6 @@ PatchKernel::PatchKernel(const PatchKernel &other)
       m_boxMaxCounter(other.m_boxMaxCounter),
       m_adjacenciesBuildStrategy(other.m_adjacenciesBuildStrategy),
       m_interfacesBuildStrategy(other.m_interfacesBuildStrategy),
-      m_spawnStatus(other.m_spawnStatus),
       m_adaptionMode(other.m_adaptionMode),
       m_adaptionStatus(other.m_adaptionStatus),
       m_dimension(other.m_dimension),
@@ -329,7 +328,6 @@ PatchKernel::PatchKernel(PatchKernel &&other)
       m_boxMaxCounter(std::move(other.m_boxMaxCounter)),
       m_adjacenciesBuildStrategy(std::move(other.m_adjacenciesBuildStrategy)),
       m_interfacesBuildStrategy(std::move(other.m_interfacesBuildStrategy)),
-      m_spawnStatus(std::move(other.m_spawnStatus)),
       m_adaptionMode(std::move(other.m_adaptionMode)),
       m_adaptionStatus(std::move(other.m_adaptionStatus)),
       m_id(std::move(other.m_id)),
@@ -419,7 +417,6 @@ PatchKernel & PatchKernel::operator=(PatchKernel &&other)
 	m_boxMaxCounter = std::move(other.m_boxMaxCounter);
 	m_adjacenciesBuildStrategy = std::move(other.m_adjacenciesBuildStrategy);
 	m_interfacesBuildStrategy = std::move(other.m_interfacesBuildStrategy);
-	m_spawnStatus = std::move(other.m_spawnStatus);
 	m_adaptionMode = std::move(other.m_adaptionMode);
 	m_adaptionStatus = std::move(other.m_adaptionStatus);
 	m_id = std::move(other.m_id);
@@ -523,13 +520,10 @@ void PatchKernel::initialize()
 	// Set interfaces build strategy
 	setInterfacesBuildStrategy(INTERFACES_NONE);
 
-	// Set the spawn as unneeded
-	//
-	// Specific implementation will set the appropriate status during their
-	// initialization.
-	setSpawnStatus(SPAWN_UNNEEDED);
-
 	// Set the adaption as clean
+	//
+	// Setting the adaptation as dirty guarantees that, at the first patch
+	// updated, all the data structures will be properly initialized.
 	setAdaptionStatus(ADAPTION_CLEAN);
 
 #if BITPIT_ENABLE_MPI==1
@@ -645,12 +639,6 @@ std::vector<adaption::Info> PatchKernel::update(bool trackAdaption, bool squeeze
 	// Finalize alterations
 	mergeAdaptionInfo(finalizeAlterations(trackAdaption, squeezeStorage), adaptionData);
 
-	// Spawn
-	bool spawnNeeed = (getSpawnStatus() == SPAWN_NEEDED);
-	if (spawnNeeed) {
-		mergeAdaptionInfo(spawn(trackAdaption), adaptionData);
-	}
-
 	// Adaption
 	bool adaptionDirty = (getAdaptionStatus(true) == ADAPTION_DIRTY);
 	if (adaptionDirty) {
@@ -689,33 +677,7 @@ void PatchKernel::simulateCellUpdate(const long id, adaption::Marker marker, std
 */
 std::vector<adaption::Info> PatchKernel::spawn(bool trackSpawn)
 {
-	std::vector<adaption::Info> spawnData;
-
-#if BITPIT_ENABLE_MPI==1
-	// This is a collevtive operation and should be called by all processes
-	if (isPartitioned()) {
-		const auto &communicator = getCommunicator();
-		MPI_Barrier(communicator);
-	}
-#endif
-
-	// Check spawn status
-	SpawnStatus spawnStatus = getSpawnStatus();
-	if (spawnStatus == SPAWN_UNNEEDED || spawnStatus == SPAWN_DONE) {
-		return spawnData;
-	}
-
-	// Spawn the patch
-	spawnData = _spawn(trackSpawn);
-
-	// Finalize patch alterations
-	finalizeAlterations(true);
-
-	// Spwan is done
-	setSpawnStatus(SPAWN_DONE);
-
-	// Done
-	return spawnData;
+	return adaption(trackSpawn);
 }
 
 /*!
@@ -1347,22 +1309,8 @@ void PatchKernel::write(VTKWriteMode mode)
 */
 PatchKernel::SpawnStatus PatchKernel::getSpawnStatus() const
 {
-	// There is no need to check the spawn status globally because the spawn
-	// status will always be the same on all the processes.
-
-	return m_spawnStatus;
+	return SPAWN_UNNEEDED;
 }
-
-/*!
-	Set the current spawn status.
-
-	\param status is the spawn status that will be set
-*/
-void PatchKernel::setSpawnStatus(SpawnStatus status)
-{
-	m_spawnStatus = status;
-}
-
 
 /*!
 	Checks if the patch supports adaption.
@@ -1470,10 +1418,6 @@ bool PatchKernel::isDirty(bool global) const
 	if (!isDirty) {
 		isDirty |= areInterfacesDirty(false);
 		assert(isDirty || m_alteredInterfaces.empty());
-	}
-
-	if (!isDirty) {
-		isDirty |= (getSpawnStatus() == SPAWN_NEEDED);
 	}
 
 	if (!isDirty) {
@@ -5238,24 +5182,6 @@ void PatchKernel::restoreInterfaces(std::istream &stream)
 }
 
 /*!
-	Generates the patch.
-
-	Default implementation is a no-op function.
-
-	\param trackSpawn if set to true the changes to the patch will be tracked
-	\result Returns a vector of adaption::Info that can be used to track
-	the changes done during the spawn.
-*/
-std::vector<adaption::Info> PatchKernel::_spawn(bool trackSpawn)
-{
-	BITPIT_UNUSED(trackSpawn);
-
-	assert(false && "The patch needs to implement _spawn");
-
-	return std::vector<adaption::Info>();
-}
-
-/*!
 	Prepares the patch for performing the adaption.
 
 	Default implementation is a no-op function.
@@ -8341,9 +8267,6 @@ bool PatchKernel::dump(std::ostream &stream) const
 	utils::binary::write(stream, 0);
 #endif
 
-	// Spawn status
-	utils::binary::write(stream, m_spawnStatus);
-
 	// Adaption information
 	utils::binary::write(stream, m_adaptionMode);
 	utils::binary::write(stream, m_adaptionStatus);
@@ -8441,9 +8364,6 @@ void PatchKernel::restore(std::istream &stream, bool reregister)
 	int dummyHaloSize;
 	utils::binary::read(stream, dummyHaloSize);
 #endif
-
-	// Spawn status
-	utils::binary::read(stream, m_spawnStatus);
 
 	// Adaption information
 	utils::binary::read(stream, m_adaptionMode);
