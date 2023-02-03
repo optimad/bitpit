@@ -49,9 +49,9 @@ private:
 
 protected:
 #if BITPIT_ENABLE_MPI==1
-    LineKernel(MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode);
-    LineKernel(int dimension, MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode);
-    LineKernel(int id, int dimension, MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode);
+    LineKernel(MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode, PartitioningMode partitioningMode);
+    LineKernel(int dimension, MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode, PartitioningMode partitioningMode);
+    LineKernel(int id, int dimension, MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode, PartitioningMode partitioningMode);
 #else
     LineKernel(AdaptionMode adaptionMode);
     LineKernel(int dimension, AdaptionMode adaptionMode);

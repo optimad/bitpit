@@ -43,9 +43,9 @@ public:
 
 protected:
 #if BITPIT_ENABLE_MPI==1
-    PointKernel(MPI_Comm communicator, AdaptionMode adaptionMode);
-    PointKernel(int dimension, MPI_Comm communicator, AdaptionMode adaptionMode);
-    PointKernel(int id, int dimension, MPI_Comm communicator, AdaptionMode adaptionMode);
+    PointKernel(MPI_Comm communicator, AdaptionMode adaptionMode, PartitioningMode partitioningMode);
+    PointKernel(int dimension, MPI_Comm communicator, AdaptionMode adaptionMode, PartitioningMode partitioningMode);
+    PointKernel(int id, int dimension, MPI_Comm communicator, AdaptionMode adaptionMode, PartitioningMode partitioningMode);
 #else
     PointKernel(AdaptionMode adaptionMode);
     PointKernel(int dimension, AdaptionMode adaptionMode);
