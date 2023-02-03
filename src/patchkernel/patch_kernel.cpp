@@ -65,8 +65,11 @@ namespace bitpit {
 	\param haloSize is the size, expressed in number of layers, of the ghost
 	cells halo
 	\param adaptionMode is the adaption mode that will be used for the patch
+	\param partitioningMode is the partitioning mode that will be used for the
+	patch
 */
-PatchKernel::PatchKernel(MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode)
+PatchKernel::PatchKernel(MPI_Comm communicator, std::size_t haloSize,
+                         AdaptionMode adaptionMode, PartitioningMode partitioningMode)
 #else
 /*!
 	Creates a patch.
@@ -76,6 +79,9 @@ PatchKernel::PatchKernel(MPI_Comm communicator, std::size_t haloSize, AdaptionMo
 PatchKernel::PatchKernel(AdaptionMode adaptionMode)
 #endif
 	: m_adaptionMode(adaptionMode)
+#if BITPIT_ENABLE_MPI==1
+	  , m_partitioningMode(partitioningMode)
+#endif
 {
 	// Initialize the patch
 #if BITPIT_ENABLE_MPI==1
@@ -107,8 +113,11 @@ PatchKernel::PatchKernel(AdaptionMode adaptionMode)
 	\param haloSize is the size, expressed in number of layers, of the ghost
 	cells halo
 	\param adaptionMode is the adaption mode that will be used for the patch
+	\param partitioningMode is the partitioning mode that will be used for the
+	patch
 */
-PatchKernel::PatchKernel(int dimension, MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode)
+PatchKernel::PatchKernel(int dimension, MPI_Comm communicator, std::size_t haloSize,
+                         AdaptionMode adaptionMode, PartitioningMode partitioningMode)
 #else
 /*!
 	Creates a patch.
@@ -119,6 +128,9 @@ PatchKernel::PatchKernel(int dimension, MPI_Comm communicator, std::size_t haloS
 PatchKernel::PatchKernel(int dimension, AdaptionMode adaptionMode)
 #endif
 	: m_adaptionMode(adaptionMode)
+#if BITPIT_ENABLE_MPI==1
+	  , m_partitioningMode(partitioningMode)
+#endif
 {
 	// Initialize the patch
 #if BITPIT_ENABLE_MPI==1
@@ -154,8 +166,11 @@ PatchKernel::PatchKernel(int dimension, AdaptionMode adaptionMode)
 	\param haloSize is the size, expressed in number of layers, of the ghost
 	cells halo
 	\param adaptionMode is the adaption mode that will be used for the patch
+	\param partitioningMode is the partitioning mode that will be used for the
+	patch
 */
-PatchKernel::PatchKernel(int id, int dimension, MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode)
+PatchKernel::PatchKernel(int id, int dimension, MPI_Comm communicator, std::size_t haloSize,
+                         AdaptionMode adaptionMode, PartitioningMode partitioningMode)
 #else
 /*!
 	Creates a patch.
@@ -167,6 +182,9 @@ PatchKernel::PatchKernel(int id, int dimension, MPI_Comm communicator, std::size
 PatchKernel::PatchKernel(int id, int dimension, AdaptionMode adaptionMode)
 #endif
 	: m_adaptionMode(adaptionMode)
+#if BITPIT_ENABLE_MPI==1
+	  , m_partitioningMode(partitioningMode)
+#endif
 {
 	// Initialize the patch
 #if BITPIT_ENABLE_MPI==1
@@ -231,7 +249,8 @@ PatchKernel::PatchKernel(const PatchKernel &other)
       m_toleranceCustom(other.m_toleranceCustom),
       m_tolerance(other.m_tolerance)
 #if BITPIT_ENABLE_MPI==1
-      , m_partitioningStatus(other.m_partitioningStatus),
+      , m_partitioningMode(other.m_partitioningMode),
+      m_partitioningStatus(other.m_partitioningStatus),
       m_owner(other.m_owner),
       m_haloSize(other.m_haloSize),
       m_partitioningCellsTag(other.m_partitioningCellsTag),
@@ -321,6 +340,7 @@ PatchKernel::PatchKernel(PatchKernel &&other)
       m_nProcessors(std::move(other.m_nProcessors))
 #if BITPIT_ENABLE_MPI==1
       , m_communicator(std::move(MPI_COMM_NULL)),
+      m_partitioningMode(other.m_partitioningMode),
       m_partitioningStatus(std::move(other.m_partitioningStatus)),
       m_owner(std::move(other.m_owner)),
       m_haloSize(std::move(other.m_haloSize)),
@@ -410,6 +430,7 @@ PatchKernel & PatchKernel::operator=(PatchKernel &&other)
 	m_nProcessors = std::move(other.m_nProcessors);
 #if BITPIT_ENABLE_MPI==1
 	m_communicator = std::move(MPI_COMM_NULL);
+	m_partitioningMode = std::move(other.m_partitioningMode);
 	m_partitioningStatus = std::move(other.m_partitioningStatus);
 	m_owner = std::move(other.m_owner);
 	m_haloSize = std::move(other.m_haloSize);
@@ -519,11 +540,7 @@ void PatchKernel::initialize()
 	initializeHaloSize(haloSize);
 
 	// Mark patch as partioned
-	if (isPartitioned()) {
-		setPartitioningStatus(PARTITIONING_CLEAN);
-	} else {
-		setPartitioningStatus(PARTITIONING_UNSUPPORTED);
-	}
+	setPartitioningStatus(PARTITIONING_CLEAN);
 
 	// Initialize partitioning tags
 	m_partitioningCellsTag    = -1;
@@ -8331,11 +8348,13 @@ bool PatchKernel::dump(std::ostream &stream) const
 	utils::binary::write(stream, m_adaptionMode);
 	utils::binary::write(stream, m_adaptionStatus);
 
-	// Partition status
+	// Partition information
 #if BITPIT_ENABLE_MPI==1
+	utils::binary::write(stream, m_partitioningMode);
 	utils::binary::write(stream, m_partitioningStatus);
 #else
-	utils::binary::write(stream, PARTITIONING_UNSUPPORTED);
+	utils::binary::write(stream, PARTITIONING_DISABLED);
+	utils::binary::write(stream, PARTITIONING_CLEAN);
 #endif
 
 	// Adjacencies build strategy
@@ -8430,10 +8449,14 @@ void PatchKernel::restore(std::istream &stream, bool reregister)
 	utils::binary::read(stream, m_adaptionMode);
 	utils::binary::read(stream, m_adaptionStatus);
 
-	// Partition status
+	// Partition information
 #if BITPIT_ENABLE_MPI==1
+	utils::binary::read(stream, m_partitioningMode);
 	utils::binary::read(stream, m_partitioningStatus);
 #else
+	PartitioningStatus dummyPartitioningMode;
+	utils::binary::read(stream, dummyPartitioningMode);
+
 	PartitioningStatus dummyPartitioningStatus;
 	utils::binary::read(stream, dummyPartitioningStatus);
 #endif
