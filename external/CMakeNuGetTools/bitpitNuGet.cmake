@@ -24,7 +24,7 @@ macro(bitpitNuGet)
         PACKAGE libiconv VERSION 1.14.0.11 CMAKE_PREFIX_PATHS build/native
         PACKAGE zlib_native.redist VERSION 1.2.11 CMAKE_PREFIX_PATHS build/native
         PACKAGE tencent.rapidjson VERSION 1.1.1 CMAKE_PREFIX_PATHS lib/native
-        PACKAGE intelmkl.devel.win-x64 VERSION 2022.0.0.115 CMAKE_PREFIX_PATHS lib/native;lib/native/win-x64
+#        PACKAGE intelmkl.devel.win-x64 VERSION 2022.0.0.115 CMAKE_PREFIX_PATHS lib/native;lib/native/win-x64
     )
 
     ## add C library missing GNU libiconv header
