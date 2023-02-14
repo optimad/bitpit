@@ -27,6 +27,7 @@
 #include <memory>
 #include <map>
 #include <vector>
+#include <string>
 
 namespace bitpit {
 

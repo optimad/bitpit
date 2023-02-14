@@ -25,6 +25,7 @@
 #define __BITPIT_CONFIGURATION_HPP__
 
 #include <memory>
+#include <string>
 #include <unordered_map>
 
 #include "configuration_config.hpp"
