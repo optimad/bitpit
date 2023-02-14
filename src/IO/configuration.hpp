@@ -30,6 +30,7 @@
 
 #include "bitpit_api.hpp"
 #include "configuration_config.hpp"
+#include <string>
 
 namespace bitpit {
 
