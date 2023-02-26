@@ -123,13 +123,22 @@ int LevelSetProxyObject::getReferenceObjectId(long id) const{
  */
 int LevelSetProxyObject::getReferencePrimaryObjectId(long id) const{
 
-    const LevelSetObject *referencePrimaryObject = getReferenceObject(id);
-    if (!referencePrimaryObject) {
+    const LevelSetObject *referenceObject = getReferenceObject(id);
+    if (!referenceObject) {
         return levelSetDefaults::OBJECT;
     }
 
-    return referencePrimaryObject->getId();
+    if (referenceObject->isPrimary()) {
+        return referenceObject->getId();
+    }
 
+
+    const LevelSetProxyObject *referenceProxyObject = dynamic_cast<const LevelSetProxyObject *>(referenceObject);
+    if (!referenceProxyObject) {
+        return levelSetDefaults::OBJECT;
+    }
+
+    return referenceProxyObject->getReferencePrimaryObjectId(id);
 }
 
 /*!
