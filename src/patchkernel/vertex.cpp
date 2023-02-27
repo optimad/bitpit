@@ -24,6 +24,7 @@
 
 #include <limits>
 
+#include "bitpit_CG.hpp"
 #include "bitpit_common.hpp"
 
 #include "vertex.hpp"
@@ -279,6 +280,36 @@ void Vertex::translate(const std::array<double, 3> &translation)
 void Vertex::translate(double sx, double sy, double sz)
 {
 	translate({{sx, sy, sz}});
+}
+
+/*!
+	Rotates the vertex.
+
+	\param[in] n0 is a first point on the rotation axis
+	\param[in] n1 is a second point on the rotation axis
+	\param[in] angle is the rotation angle, expressed in radiants and positive
+	for counterclockwise rotations
+*/
+void Vertex::rotate(const std::array<double, 3> &n0, const std::array<double, 3> &n1, double angle)
+{
+	m_coords = CGElem::rotatePoint(m_coords, n0, n1, angle);
+}
+
+/*!
+	Rotates the vertex.
+
+	\param[in] n0x is the x-component of a first point on the rotation axis
+	\param[in] n0y is the y-component of a first point on the rotation axis
+	\param[in] n0z is the z-component of a first point on the rotation axis
+	\param[in] n1x is the x-component of a second point on the rotation axis
+	\param[in] n1y is the y-component of a second point on the rotation axis
+	\param[in] n1z is the z-component of a second point on the rotation axis
+	\param[in] angle is the rotation angle, expressed in radiants and positive
+	for counterclockwise rotations
+ */
+void Vertex::rotate(double n0x, double n0y, double n0z, double n1x, double n1y, double n1z, double angle)
+{
+	rotate({{n0x, n0y, n0z}}, {{n1x, n1y, n1z}}, angle);
 }
 
 /*!

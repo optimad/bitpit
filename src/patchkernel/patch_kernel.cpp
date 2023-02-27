@@ -30,6 +30,7 @@
 #	include <mpi.h>
 #endif
 
+#include "bitpit_CG.hpp"
 #include "bitpit_common.hpp"
 
 #include "patch_info.hpp"
@@ -7333,6 +7334,67 @@ void PatchKernel::translate(const std::array<double, 3> &translation)
 void PatchKernel::translate(double sx, double sy, double sz)
 {
 	translate({{sx, sy, sz}});
+}
+
+/*!
+	Rotates the patch.
+
+	\param[in] n0 is a first point on the rotation axis
+	\param[in] n1 is a second point on the rotation axis
+	\param[in] angle is the rotation angle, expressed in radiants and positive
+	for counterclockwise rotations
+*/
+void PatchKernel::rotate(const std::array<double, 3> &n0, const std::array<double, 3> &n1, double angle)
+{
+	// Translate the patch
+	for (auto &vertex : m_vertices) {
+		vertex.rotate(n0, n1, angle);
+	}
+
+	// Update the bounding box
+	if (!isBoundingBoxFrozen() && !isBoundingBoxDirty()) {
+		// Save current bounding box
+		std::array<std::array<double, 3>, 3> originalBox = {{m_boxMinPoint, m_boxMaxPoint}};
+
+		// Clear bounding box
+		clearBoundingBox();
+
+		// Unset the dirty flag in order to be able to update the bounding box
+		setBoundingBoxDirty(false);
+
+		// Evaluate rotated bounding box
+		for (int i = 0; i < 2; ++i) {
+			double xCorner = originalBox[i][0];
+			for (int j = 0; j < 2; ++j) {
+				double yCorner = originalBox[j][1];
+				for (int k = 0; k < 2; ++k) {
+					double zCorner = originalBox[k][2];
+
+					std::array<double, 3> corner = {{xCorner, yCorner, zCorner}};
+					corner = CGElem::rotatePoint(corner, n0, n1, angle);
+					addPointToBoundingBox(corner);
+				}
+			}
+		}
+	}
+}
+
+/*!
+	Rotates the patch.
+
+	\param[in] n0x is the x-component of a first point on the rotation axis
+	\param[in] n0y is the y-component of a first point on the rotation axis
+	\param[in] n0z is the z-component of a first point on the rotation axis
+	\param[in] n1x is the x-component of a second point on the rotation axis
+	\param[in] n1y is the y-component of a second point on the rotation axis
+	\param[in] n1z is the z-component of a second point on the rotation axis
+	\param[in] angle is the rotation angle, expressed in radiants.
+	Counterclockwise rotations are considered positive.
+*/
+void PatchKernel::rotate(double n0x, double n0y, double n0z, double n1x,
+						 double n1y, double n1z, double angle)
+{
+	rotate({{n0x, n0y, n0z}}, {{n1x, n1y, n1z}}, angle);
 }
 
 /*!

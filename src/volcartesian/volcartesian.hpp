@@ -123,6 +123,7 @@ public:
 	std::array<double, 3> getOrigin() const;
 	void setOrigin(const std::array<double, 3> &origin);
 	void translate(const std::array<double, 3> &translation) override;
+	void rotate(const std::array<double, 3> &n0, const std::array<double, 3> &n1, double angle) override;
 	std::array<double, 3> getLengths() const;
 	void setLengths(const std::array<double, 3> &lengths);
 	void scale(const std::array<double, 3> &scaling, const std::array<double, 3> &center) override;
