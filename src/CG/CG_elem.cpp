@@ -883,6 +883,48 @@ array3D reconstructPointFromBarycentricTriangle(array3D const &Q0, array3D const
 }
 
 /*!
+	Rotates the point.
+
+	If the axis points are coincident, the function will return the given point with no
+	rotation applied.
+
+	\param[in] P is the point that will be rotated
+	\param[in] n0 is a first point on the rotation axis
+	\param[in] n1 is a second point on the rotation axis
+	\param[in] angle is the rotation angle, expressed in radiants and positive
+	for counterclockwise rotations
+	\result The rotated point.
+*/
+array3D rotatePoint(const array3D &P, const array3D &n0, const array3D &n1, double angle)
+{
+    // Check if the axis is valid
+    double axisNorm = norm2(n1 - n0);
+    if (utils::DoubleFloatingEqual()(axisNorm, 0.)) {
+        return P;
+    }
+
+    // Transform point to a coordinates system centered in n0
+    array3D Q = P - n0;
+
+    // Rotate the point
+    std::array<double, 3> axis = (n1 - n0) / axisNorm;
+    double axis_dot = dotProduct(axis, Q);
+    std::array<double, 3> axis_cross = crossProduct(axis, Q);
+
+    double angle_cos = std::cos(angle);
+    double angle_sin = std::sin(angle);
+
+    Q[0] = Q[0] * angle_cos + axis[0] * axis_dot * (1. - angle_cos) + axis_cross[0] * angle_sin;
+    Q[1] = Q[1] * angle_cos + axis[1] * axis_dot * (1. - angle_cos) + axis_cross[1] * angle_sin;
+    Q[2] = Q[2] * angle_cos + axis[2] * axis_dot * (1. - angle_cos) + axis_cross[2] * angle_sin;
+
+    // Transform point back to the original coordinate system
+    Q = Q + n0;
+
+    return Q;
+}
+
+/*!
  * Reconstructs a point from barycentric coordinates of a polygon
  * \param[in] V vertices of simplex
  * \param[in] lambda barycentric coordinates
