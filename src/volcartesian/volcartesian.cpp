@@ -1899,6 +1899,23 @@ void VolCartesian::translate(const std::array<double, 3> &translation)
 }
 
 /*!
+	Rotates the patch.
+
+	\param[in] n0 is a first point on the rotation axis
+	\param[in] n1 is a second point on the rotation axis
+	\param[in] angle is the rotation angle, expressed in radiants and positive
+	for counterclockwise rotations
+ */
+void VolCartesian::rotate(const std::array<double, 3> &n0, const std::array<double, 3> &n1, double angle)
+{
+	BITPIT_UNUSED(n0);
+	BITPIT_UNUSED(n1);
+	BITPIT_UNUSED(angle);
+
+	throw std::runtime_error("It is not possible to rotate a Cartesian patch.");
+}
+
+/*!
 	Gets the lengths of the sides of the box that defines the patch domain.
 
 	\return The lengths of the sides of the box that defines the patch domain.

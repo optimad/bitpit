@@ -114,6 +114,8 @@ public:
 
 	void translate(const std::array<double, 3> &translation);
 	void translate(double sx, double sy, double sz);
+	void rotate(const std::array<double, 3> &n0, const std::array<double, 3> &n1, double angle);
+	void rotate(double n0x, double n0y, double n0z, double n1x, double n1y, double n1z, double angle);
 	void scale(const std::array<double, 3> &scaling, const std::array<double, 3> &center);
 	void scale(double sx, double sy, double sz, double cx, double cy, double cz);
 
