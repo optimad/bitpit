@@ -1099,6 +1099,45 @@ bool testFaceOfBox(){
     
 }
 
+/*!
+ * \return true, test rotatePoint passed
+ */
+bool testRotatePoint(){
+
+    bool check(true);
+
+    // Check rotation with valid axis
+    {
+        array3D n0 = {{1., 5., 1.}};
+        array3D n1 = {{1., 5., 2.}};
+
+        double angle = 90. / 180. * BITPIT_PI;
+
+        array3D P = {{0., 0., 0.}};
+        array3D Q = rotatePoint(P, n0, n1, angle);
+
+        array3D expectedQ = {{6., 4., 0.}};
+        check &= (norm2(Q - expectedQ) < 1.E-12);
+    }
+
+    // Check rotation with invalid axis
+    {
+        array3D n0 = {{1., 5., 1.}};
+        array3D n1 = {{1., 5., 1.}};
+
+        double angle = 90. / 180. * BITPIT_PI;
+
+        array3D P = {{0., 0., 0.}};
+        array3D Q = rotatePoint(P, n0, n1, angle);
+
+        array3D expectedQ = P;
+        check &= (norm2(Q - expectedQ) < 1.E-12);
+    }
+
+    return check;
+
+}
+
 // ========================================================================== //
 // MAIN                                                                       //
 // ========================================================================== //
@@ -1550,6 +1589,15 @@ int main(int argc, char *argv[])
 
         pass = testFaceOfBox();
         std::cout << "Testing faceOfBox...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testRotatePoint();
+        std::cout << "Testing rotatePoint...";
         if (!pass) {
             std::cout << " Failed" << std::endl;
             return 1;

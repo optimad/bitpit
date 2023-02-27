@@ -109,6 +109,8 @@ array3D reconstructPointFromBarycentricPolygon( std::vector<array3D> const &, st
 array3D reconstructPointFromBarycentricPolygon( std::size_t, array3D const *, std::vector<double> const & );
 array3D reconstructPointFromBarycentricPolygon( std::size_t, array3D const *, double const * );
 
+array3D rotatePoint( const array3D &P, const array3D &n0, const array3D &n1, double angle );
+
 array3D projectPointLine( array3D const &, array3D const &, array3D const & );
 array3D projectPointPlane( array3D const &, array3D const &, array3D const & );
 array3D projectPointSegment( array3D const &, array3D const &, array3D const & );
