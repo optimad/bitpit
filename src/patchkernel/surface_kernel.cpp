@@ -279,9 +279,9 @@ double SurfaceKernel::evalCellArea(long id) const
         double                  coeff = 0.25;
         double                  area = 0.0;
         for (int i = 0; i < nvert; ++i) {
-            int prevVertex = getOrderedLocalVertexIds(*cell_, (nvert + i - 1) % nvert);
-            int vertex     = getOrderedLocalVertexIds(*cell_, i);
-            int nextVertex = getOrderedLocalVertexIds(*cell_, (i + 1) % nvert);
+            int prevVertex = getFacetOrderedLocalVertex(*cell_, (nvert + i - 1) % nvert);
+            int vertex     = getFacetOrderedLocalVertex(*cell_, i);
+            int nextVertex = getFacetOrderedLocalVertex(*cell_, (i + 1) % nvert);
 
             const std::array<double, 3> &prevVertexCoords = m_vertices[cellVertexIds[prevVertex]].getCoords();
             const std::array<double, 3> &vertexCoords     = m_vertices[cellVertexIds[vertex]].getCoords();
@@ -457,8 +457,8 @@ double SurfaceKernel::evalAngleAtVertex(long id, int vertex) const
     ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
     int nCellVertices = cellVertexIds.size();
 
-    int prevVertex = getOrderedLocalVertexIds(cell, (vertex - 1 + nCellVertices) % nCellVertices);
-    int nextVertex = getOrderedLocalVertexIds(cell, (vertex + 1) % nCellVertices);
+    int prevVertex = getFacetOrderedLocalVertex(cell, (vertex - 1 + nCellVertices) % nCellVertices);
+    int nextVertex = getFacetOrderedLocalVertex(cell, (vertex + 1) % nCellVertices);
 
     const std::array<double, 3> &prevVertexCoords = m_vertices[cellVertexIds[prevVertex]].getCoords();
     const std::array<double, 3> &vertexCoords     = m_vertices[cellVertexIds[vertex]].getCoords();
@@ -651,9 +651,9 @@ std::array<double, 3> SurfaceKernel::evalFacetNormal(long id, const std::array<d
         int                             i, nvert = cellVertexIds.size();
         double                          coeff = 1.0/double(nvert);
         for (i = 0; i < nvert; ++i) {
-            int prevVertex = getOrderedLocalVertexIds(*cell_, (nvert + i - 1) % nvert);
-            int vertex     = getOrderedLocalVertexIds(*cell_, i);
-            int nextVertex = getOrderedLocalVertexIds(*cell_, (i + 1) % nvert);
+            int prevVertex = getFacetOrderedLocalVertex(*cell_, (nvert + i - 1) % nvert);
+            int vertex     = getFacetOrderedLocalVertex(*cell_, i);
+            int nextVertex = getFacetOrderedLocalVertex(*cell_, (i + 1) % nvert);
 
             const std::array<double, 3> &prevVertexCoords = m_vertices[cellVertexIds[prevVertex]].getCoords();
             const std::array<double, 3> &vertexCoords     = m_vertices[cellVertexIds[vertex]].getCoords();
@@ -1158,16 +1158,16 @@ bool SurfaceKernel::haveSameOrientation(const Cell &cell_A, int face_A, const Ce
     // orientation, if the vertices appear in reversed order, the facets have
     // the same orientation.
     for (std::size_t i = 0; i < nCellVertices_A; ++i) {
-        long vertexId_A = cellVertexIds_A[getOrderedLocalVertexIds(cell_A, i)];
+        long vertexId_A = cellVertexIds_A[getFacetOrderedLocalVertex(cell_A, i)];
         for (std::size_t j = 0; j < nCellVertices_B; ++j) {
-            long vertexId_B = cellVertexIds_B[getOrderedLocalVertexIds(cell_B, j)];
+            long vertexId_B = cellVertexIds_B[getFacetOrderedLocalVertex(cell_B, j)];
             if (vertexId_A == vertexId_B) {
                 if (cellDimension == 2) {
-                    long previousVertexId_A = cellVertexIds_A[getOrderedLocalVertexIds(cell_A, (i - 1 + nCellVertices_A) % nCellVertices_A)];
-                    long previousVertexId_B = cellVertexIds_B[getOrderedLocalVertexIds(cell_B, (j - 1 + nCellVertices_B) % nCellVertices_B)];
+                    long previousVertexId_A = cellVertexIds_A[getFacetOrderedLocalVertex(cell_A, (i - 1 + nCellVertices_A) % nCellVertices_A)];
+                    long previousVertexId_B = cellVertexIds_B[getFacetOrderedLocalVertex(cell_B, (j - 1 + nCellVertices_B) % nCellVertices_B)];
 
-                    long nextVertexId_A = cellVertexIds_A[getOrderedLocalVertexIds(cell_A, (i + 1) % nCellVertices_A)];
-                    long nextVertexId_B = cellVertexIds_B[getOrderedLocalVertexIds(cell_B, (j + 1) % nCellVertices_B)];
+                    long nextVertexId_A = cellVertexIds_A[getFacetOrderedLocalVertex(cell_A, (i + 1) % nCellVertices_A)];
+                    long nextVertexId_B = cellVertexIds_B[getFacetOrderedLocalVertex(cell_B, (j + 1) % nCellVertices_B)];
 
                     if (nextVertexId_A == nextVertexId_B || previousVertexId_A == previousVertexId_B) {
                         return false;
@@ -1662,17 +1662,61 @@ bool SurfaceKernel::compareSelectedTypes(unsigned short mask_, ElementType type_
 }
 
 /*!
- * Get the local index of the n-th vertex in the anti-clockwise ordered list of
- * vertex ids.
- *
- * \param[in] cell is the cell
- * \param[in] n is the index of the requested vertex
- * \result The the local index of the n-th vertex in the anti-clockwise ordered
- * list of vertex ids.
+	Get the anti-clockwise ordered list of vertex for the specified facet.
+
+	\param facet is the facet
+	\result The anti-clockwise ordered list of vertex for the specified facet.
 */
-int SurfaceKernel::getOrderedLocalVertexIds(const Cell &cell, long n) const
+ConstProxyVector<long> SurfaceKernel::getFacetOrderedVertexIds(const Cell &facet) const
 {
-    switch (cell.getType()) {
+    ConstProxyVector<long> vertexIds = facet.getVertexIds();
+    if (areFacetVerticesOrdered(facet)) {
+        return vertexIds;
+    }
+
+    std::size_t nVertices = vertexIds.size();
+    ConstProxyVector<long> orderedVertexIds(ConstProxyVector<long>::INTERNAL_STORAGE, nVertices);
+    ConstProxyVector<long>::storage_pointer orderedVertexIdsStorage = orderedVertexIds.storedData();
+    for (std::size_t k = 0; k < nVertices; ++k) {
+        int vertex = getFacetOrderedLocalVertex(facet, k);
+        orderedVertexIdsStorage[k] = vertexIds[vertex];
+    }
+
+    return orderedVertexIds;
+}
+
+/*!
+ * Check if the vertices of the specified facet are anti-clockwise ordered.
+ *
+ * \param[in] facet is the facet
+ * \result Return true if the vertices of the specified facet are anti-clockwise ordered,
+ * false otherwise.
+*/
+bool SurfaceKernel::areFacetVerticesOrdered(const Cell &facet) const
+{
+    switch (facet.getType()) {
+
+    case ElementType::PIXEL:
+        return false;
+
+    default:
+        return true;
+
+    }
+}
+
+/*!
+ * Get the local index of the vertex occupying the n-th position in the anti-clockwise ordered
+ * list of vertex ids.
+ *
+ * \param[in] facet is the facet
+ * \param[in] n is the requested position
+ * \result The local index of the vertex occupying the n-th position in the anti-clockwise
+ * ordered list of vertex ids.
+*/
+int SurfaceKernel::getFacetOrderedLocalVertex(const Cell &facet, std::size_t n) const
+{
+    switch (facet.getType()) {
 
     case ElementType::PIXEL:
         if (n == 2) {
@@ -1684,6 +1728,7 @@ int SurfaceKernel::getOrderedLocalVertexIds(const Cell &cell, long n) const
         }
 
     default:
+        assert(areFacetVerticesOrdered(facet));
         return n;
 
     }

@@ -73,6 +73,8 @@ public:
     bool adjustCellOrientation(long id, bool invert = false);
     void flipCellOrientation(long id);
 
+    ConstProxyVector<long> getFacetOrderedVertexIds(const Cell &facet) const;
+
     void displayQualityStats(std::ostream&, unsigned int padding = 0) const;
     std::vector<double> computeHistogram(eval_f_ funct_, std::vector<double> &bins, long &count, int n_intervals = 8, unsigned short mask = SELECT_ALL) const;
 
@@ -97,7 +99,8 @@ protected:
     SurfaceKernel(int id, int dimension, bool expert);
 #endif
 
-    int getOrderedLocalVertexIds(const Cell &cell, long n) const;
+    bool areFacetVerticesOrdered(const Cell &facet) const;
+    int getFacetOrderedLocalVertex(const Cell &facet, std::size_t n) const;
 
 };
 
