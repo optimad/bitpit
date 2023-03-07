@@ -189,8 +189,9 @@ int SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords,
 
     default:
     {
+        ConstProxyVector<long> elementVertexIds = m_surface->getFacetOrderedVertexIds(segment);
         BITPIT_CREATE_WORKSPACE(segmentVertexCoors, std::array<double BITPIT_COMMA 3>, nSegmentVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
-        m_surface->getElementVertexCoordinates(segment, segmentVertexCoors);
+        m_surface->getVertexCoords(elementVertexIds.size(), elementVertexIds.data(), segmentVertexCoors);
         pointProjectionVector -= CGElem::projectPointPolygon( pointCoords, nSegmentVertices, segmentVertexCoors, lambda );
 
         break;
