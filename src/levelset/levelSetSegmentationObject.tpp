@@ -94,8 +94,8 @@ void LevelSetSegmentationNarrowBandCacheBase<storage_manager_t>::swap(LevelSetSe
  */
 template<typename narrow_band_cache_t>
 LevelSetSegmentationObject<narrow_band_cache_t>::LevelSetSegmentationObject(int id)
-    : LevelSetCachedObject<narrow_band_cache_t>(id),
-      m_segmentation(nullptr)
+    : LevelSetSegmentationKernel(),
+      LevelSetCachedObject<narrow_band_cache_t>(id)
 {
 }
 
@@ -106,8 +106,10 @@ LevelSetSegmentationObject<narrow_band_cache_t>::LevelSetSegmentationObject(int 
  * @param[in] featureAngle feature angle. If the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge
  */
 template<typename narrow_band_cache_t>
-LevelSetSegmentationObject<narrow_band_cache_t>::LevelSetSegmentationObject( int id, std::unique_ptr<const SurfUnstructured> &&STL, double featureAngle) :LevelSetSegmentationObject(id) {
-    setSegmentation( std::move(STL), featureAngle );
+LevelSetSegmentationObject<narrow_band_cache_t>::LevelSetSegmentationObject( int id, std::unique_ptr<const SurfUnstructured> &&STL, double featureAngle)
+    : LevelSetSegmentationKernel(std::move(STL), featureAngle),
+      LevelSetCachedObject<narrow_band_cache_t>(id)
+{
 }
 
 /*!
@@ -117,8 +119,10 @@ LevelSetSegmentationObject<narrow_band_cache_t>::LevelSetSegmentationObject( int
  * @param[in] featureAngle feature angle; if the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge.
  */
 template<typename narrow_band_cache_t>
-LevelSetSegmentationObject<narrow_band_cache_t>::LevelSetSegmentationObject( int id, const SurfUnstructured *STL, double featureAngle) :LevelSetSegmentationObject(id) {
-    setSegmentation( STL, featureAngle );
+LevelSetSegmentationObject<narrow_band_cache_t>::LevelSetSegmentationObject( int id, const SurfUnstructured *STL, double featureAngle)
+    : LevelSetSegmentationKernel(STL, featureAngle),
+      LevelSetCachedObject<narrow_band_cache_t>(id)
+{
 }
 
 /*!
@@ -128,37 +132,6 @@ LevelSetSegmentationObject<narrow_band_cache_t>::LevelSetSegmentationObject( int
 template<typename narrow_band_cache_t>
 LevelSetSegmentationObject<narrow_band_cache_t> * LevelSetSegmentationObject<narrow_band_cache_t>::clone() const {
     return new LevelSetSegmentationObject( *this );
-}
-
-/*!
- * Set the segmentation
- * @param[in] surface pointer to surface
- * @param[in] featureAngle feature angle. If the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge
- */
-template<typename narrow_band_cache_t>
-void LevelSetSegmentationObject<narrow_band_cache_t>::setSegmentation( const SurfUnstructured *surface, double featureAngle){
-
-    m_segmentation = std::make_shared<const SegmentationKernel>(surface, featureAngle);
-}
-
-/*!
- * Set the segmentation
- * @param[in,out] surface pointer to surface
- * @param[in] featureAngle feature angle. If the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge
- */
-template<typename narrow_band_cache_t>
-void LevelSetSegmentationObject<narrow_band_cache_t>::setSegmentation( std::unique_ptr<const SurfUnstructured> &&surface, double featureAngle){
-
-    m_segmentation = std::make_shared<const SegmentationKernel>(std::move(surface), featureAngle);
-}
-
-/*!
- * Get a constant refernce to the segmentation
- * @return constant reference to the segmentation
- */
-template<typename narrow_band_cache_t>
-const SegmentationKernel & LevelSetSegmentationObject<narrow_band_cache_t>::getSegmentation() const {
-    return *m_segmentation ;
 }
 
 /*!
@@ -172,7 +145,7 @@ int LevelSetSegmentationObject<narrow_band_cache_t>::getPart( long id ) const{
     long supportId = getSupport(id);
 
     if( supportId != levelSetDefaults::SUPPORT){
-        const SurfUnstructured &m_surface = m_segmentation->getSurface();
+        const SurfUnstructured &m_surface = getSurface();
         return m_surface.getCell(supportId).getPID();
     } else {
         return levelSetDefaults::PART ;
@@ -230,7 +203,7 @@ double LevelSetSegmentationObject<narrow_band_cache_t>::getSurfaceFeatureSize( l
         return (- levelSetDefaults::SIZE);
     }
 
-    return getSegmentation().getSegmentSize(support);
+    return getSegmentSize(support);
 }
 
 /*!
@@ -239,7 +212,7 @@ double LevelSetSegmentationObject<narrow_band_cache_t>::getSurfaceFeatureSize( l
  */template<typename narrow_band_cache_t>
 double LevelSetSegmentationObject<narrow_band_cache_t>::getMinSurfaceFeatureSize( ) const {
 
-    return getSegmentation().getMinSegmentSize();
+    return getMinSegmentSize();
 }
 
 /*!
@@ -249,7 +222,7 @@ double LevelSetSegmentationObject<narrow_band_cache_t>::getMinSurfaceFeatureSize
 template<typename narrow_band_cache_t>
 double LevelSetSegmentationObject<narrow_band_cache_t>::getMaxSurfaceFeatureSize( ) const {
 
-    return getSegmentation().getMaxSegmentSize();
+    return getMaxSegmentSize();
 }
 
 /*!
@@ -259,7 +232,7 @@ double LevelSetSegmentationObject<narrow_band_cache_t>::getMaxSurfaceFeatureSize
  */
 template<typename narrow_band_cache_t>
 void LevelSetSegmentationObject<narrow_band_cache_t>::getBoundingBox( std::array<double,3> &minP, std::array<double,3> &maxP ) const {
-    const SurfUnstructured &m_surface = m_segmentation->getSurface();
+    const SurfUnstructured &m_surface = getSurface();
     m_surface.getBoundingBox(minP,maxP) ;
 }
 
@@ -356,7 +329,7 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
     int meshCellFaceCount = meshCellTypeInfo.nFaces;
 
     // Get surface information
-    const SurfUnstructured &surface = m_segmentation->getSurface();
+    const SurfUnstructured &surface = getSurface();
 
     // Define search radius
     //
@@ -441,7 +414,7 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
 
         long segmentId;
         double distance;
-        m_segmentation->getSearchTree().findPointClosestCell(cellCentroid, searchRadius, &segmentId, &distance);
+        getSearchTree().findPointClosestCell(cellCentroid, searchRadius, &segmentId, &distance);
         if(segmentId < 0){
             outsideNarrowBand.insert(cellId);
             continue;
@@ -450,7 +423,7 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
         // Evaluate levelset information
         std::array<double, 3> gradient;
         std::array<double, 3> normal;
-        int error = m_segmentation->getSegmentInfo(cellCentroid, segmentId, signd, distance, gradient, normal);
+        int error = getSegmentInfo(cellCentroid, segmentId, signd, distance, gradient, normal);
         if (error) {
             throw std::runtime_error ("Unable to extract the levelset information from segment " + std::to_string(segmentId) + ".");
         }
@@ -528,7 +501,7 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
 
         long segmentId;
         double distance;
-        m_segmentation->getSearchTree().findPointClosestCell(cellCentroid, searchRadius, &segmentId, &distance);
+        getSearchTree().findPointClosestCell(cellCentroid, searchRadius, &segmentId, &distance);
         if(segmentId < 0){
             continue;
         }
@@ -536,7 +509,7 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
         // Evaluate levelset information
         std::array<double,3> gradient;
         std::array<double,3> normal;
-        int error = m_segmentation->getSegmentInfo(cellCentroid, segmentId, signd, distance, gradient, normal);
+        int error = getSegmentInfo(cellCentroid, segmentId, signd, distance, gradient, normal);
         if (error) {
             throw std::runtime_error ("Unable to extract the levelset information from segment " + std::to_string(segmentId) + ".");
         }
@@ -588,7 +561,7 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
 
             long segmentId;
             double distance;
-            m_segmentation->getSearchTree().findPointClosestCell(neighCentroid, searchRadius, &segmentId, &distance);
+            getSearchTree().findPointClosestCell(neighCentroid, searchRadius, &segmentId, &distance);
             if (segmentId < 0) {
                 assert(false && "Should not pass here");
             }
@@ -596,7 +569,7 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
             // Evaluate negihbour leveset information
             std::array<double,3> gradient;
             std::array<double,3> normal;
-            int error = m_segmentation->getSegmentInfo(neighCentroid, segmentId, signd, distance, gradient, normal);
+            int error = getSegmentInfo(neighCentroid, segmentId, signd, distance, gradient, normal);
             if (error) {
                 throw std::runtime_error ("Unable to extract the levelset information from segment " + std::to_string(segmentId) + ".");
             }
@@ -663,7 +636,7 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::updateNarrowBand( LevelSet
 
             long segmentId;
             double distance;
-            m_segmentation->getSearchTree().findPointClosestCell(centroid, searchRadius, &segmentId, &distance);
+            getSearchTree().findPointClosestCell(centroid, searchRadius, &segmentId, &distance);
             if (segmentId < 0) {
                 cellsOutsideNarrowband.push_back(cellId);
                 continue;
@@ -672,7 +645,7 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::updateNarrowBand( LevelSet
             // Evaluate levelset information
             std::array<double,3> gradient;
             std::array<double,3> normal;
-            int error = m_segmentation->getSegmentInfo(centroid, segmentId, signd, distance, gradient, normal);
+            int error = getSegmentInfo(centroid, segmentId, signd, distance, gradient, normal);
             if (error) {
                 throw std::runtime_error ("Unable to extract the levelset information from segment " + std::to_string(segmentId) + ".");
             }
@@ -722,7 +695,7 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::updateNarrowBand( LevelSet
 
         long segmentId;
         double distance;
-        m_segmentation->getSearchTree().findPointClosestCell(cellCentroid, searchRadius, &segmentId, &distance);
+        getSearchTree().findPointClosestCell(cellCentroid, searchRadius, &segmentId, &distance);
         if (segmentId < 0) {
             assert(false && "Should not pass here");
             continue;
@@ -731,7 +704,7 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::updateNarrowBand( LevelSet
         // Evaluate levelset information for the cell
         std::array<double,3> gradient;
         std::array<double,3> normal;
-        int error = m_segmentation->getSegmentInfo(cellCentroid, segmentId, signd, distance, gradient, normal);
+        int error = getSegmentInfo(cellCentroid, segmentId, signd, distance, gradient, normal);
         if (error) {
             throw std::runtime_error ("Unable to extract the levelset information from segment " + std::to_string(segmentId) + ".");
         }
@@ -754,9 +727,9 @@ LevelSetInfo LevelSetSegmentationObject<narrow_band_cache_t>::computeLevelSetInf
     std::array<double,3> gradient;
     std::array<double,3> normal;
 
-    m_segmentation->getSearchTree().findPointClosestCell(coords, &segmentId, &distance);
+    getSearchTree().findPointClosestCell(coords, &segmentId, &distance);
 
-    int error = m_segmentation->getSegmentInfo(coords, segmentId, false, distance, gradient, normal);
+    int error = getSegmentInfo(coords, segmentId, false, distance, gradient, normal);
     if (error) {
         throw std::runtime_error ("Unable to extract the levelset information from segment " + std::to_string(segmentId) + ".");
     }
