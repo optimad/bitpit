@@ -52,53 +52,6 @@ class SurfaceSkdTree;
 class SendBuffer;
 class RecvBuffer;
 
-class SegmentationKernel {
-
-public:
-    SegmentationKernel();
-    SegmentationKernel(const SurfUnstructured *surface, double featureAngle);
-    SegmentationKernel(std::unique_ptr<const SurfUnstructured> &&surface, double featureAngle);
-
-    const SurfUnstructured & getSurface() const;
-    double getFeatureAngle() const;
-
-    const SurfaceSkdTree & getSearchTree() const ;
-
-    int getSegmentInfo( const std::array<double,3> &pointCoords, long segmentId, bool signd, double &distance, std::array<double,3> &gradient, std::array<double,3> &normal ) const;
-
-    double getSegmentSize(long segmentId) const;
-    double getMinSegmentSize() const;
-    double getMaxSegmentSize() const;
-
-private:
-    typedef std::pair<long, int> SegmentVertexKey;
-
-    const SurfUnstructured *m_surface;
-    std::unique_ptr<const SurfUnstructured> m_ownedSurface;
-    double m_featureAngle;
-
-    std::unique_ptr<SurfaceSkdTree> m_searchTree;
-
-    PiercedStorage<std::size_t> m_segmentVertexOffset;
-
-    mutable PiercedStorage<bool> m_segmentNormalsValid;
-    mutable PiercedStorage<std::array<double,3>> m_segmentNormalsStorage;
-    mutable PiercedStorage<bool> m_unlimitedVertexNormalsValid;
-    mutable PiercedStorage<std::array<double,3>> m_unlimitedVertexNormalsStorage;
-    mutable std::vector<bool> m_limitedSegmentVertexNormalValid;
-    mutable std::unordered_map<SegmentVertexKey, std::array<double,3>, utils::hashing::hash<SegmentVertexKey>> m_limitedSegmentVertexNormalStorage;
-
-    void setSurface( const SurfUnstructured *surface, double featureAngle);
-
-    std::array<double,3> computePseudoNormal( const SurfUnstructured::CellConstIterator &segmentIterator, const double *lambda ) const;
-    std::array<double,3> computeSurfaceNormal( const SurfUnstructured::CellConstIterator &segmentIterator, const double *lambda ) const;
-
-    std::array<double,3> computeSegmentNormal( const SurfUnstructured::CellConstIterator &segmentIterator ) const;
-    std::array<double,3> computeSegmentEdgeNormal( const SurfUnstructured::CellConstIterator &segmentIterator, int edge ) const;
-    std::array<double,3> computeSegmentVertexNormal( const SurfUnstructured::CellConstIterator &segmentIterator, int vertex, bool limited ) const;
-
-};
-
 template<typename storage_manager_t>
 class LevelSetSegmentationNarrowBandCacheBase : public virtual LevelSetNarrowBandCacheBase<storage_manager_t>
 {
@@ -197,11 +150,60 @@ public:
 
 };
 
-template<typename narrow_band_cache_t>
-class LevelSetSegmentationObject : public LevelSetCachedObject<narrow_band_cache_t>, public LevelSetBoundedObject {
+class LevelSetSegmentationKernel {
 
-    private:
-    std::shared_ptr<const SegmentationKernel> m_segmentation;
+public:
+    LevelSetSegmentationKernel();
+    LevelSetSegmentationKernel(const LevelSetSegmentationKernel &other);
+    LevelSetSegmentationKernel(LevelSetSegmentationKernel &&other);
+    LevelSetSegmentationKernel(const SurfUnstructured *surface, double featureAngle);
+    LevelSetSegmentationKernel(std::unique_ptr<const SurfUnstructured> &&surface, double featureAngle);
+
+    virtual ~LevelSetSegmentationKernel() = default;
+
+    const SurfUnstructured & getSurface() const;
+    void setSurface(std::unique_ptr<const SurfUnstructured> &&surface, double featureAngle = 2. * BITPIT_PI);
+    void setSurface(const SurfUnstructured *surface, double featureAngle = 2. * BITPIT_PI);
+
+    double getFeatureAngle() const;
+
+    const SurfaceSkdTree & getSearchTree() const;
+
+    int getSegmentInfo( const std::array<double,3> &pointCoords, long segmentId, bool signd, double &distance, std::array<double,3> &gradient, std::array<double,3> &normal ) const;
+
+    double getSegmentSize(long segmentId) const;
+    double getMinSegmentSize() const;
+    double getMaxSegmentSize() const;
+
+private:
+    typedef std::pair<long, int> SegmentVertexKey;
+
+    const SurfUnstructured *m_surface;
+    std::unique_ptr<const SurfUnstructured> m_ownedSurface;
+    double m_featureAngle;
+
+    std::unique_ptr<SurfaceSkdTree> m_searchTree;
+
+    PiercedStorage<std::size_t> m_segmentVertexOffset;
+
+    mutable PiercedStorage<bool> m_segmentNormalsValid;
+    mutable PiercedStorage<std::array<double,3>> m_segmentNormalsStorage;
+    mutable PiercedStorage<bool> m_unlimitedVertexNormalsValid;
+    mutable PiercedStorage<std::array<double,3>> m_unlimitedVertexNormalsStorage;
+    mutable std::vector<bool> m_limitedSegmentVertexNormalValid;
+    mutable std::unordered_map<SegmentVertexKey, std::array<double,3>, utils::hashing::hash<SegmentVertexKey>> m_limitedSegmentVertexNormalStorage;
+
+    std::array<double,3> computePseudoNormal( const SurfUnstructured::CellConstIterator &segmentIterator, const double *lambda ) const;
+    std::array<double,3> computeSurfaceNormal( const SurfUnstructured::CellConstIterator &segmentIterator, const double *lambda ) const;
+
+    std::array<double,3> computeSegmentNormal( const SurfUnstructured::CellConstIterator &segmentIterator ) const;
+    std::array<double,3> computeSegmentEdgeNormal( const SurfUnstructured::CellConstIterator &segmentIterator, int edge ) const;
+    std::array<double,3> computeSegmentVertexNormal( const SurfUnstructured::CellConstIterator &segmentIterator, int vertex, bool limited ) const;
+
+};
+
+template<typename narrow_band_cache_t>
+class LevelSetSegmentationObject : public LevelSetSegmentationKernel, public LevelSetCachedObject<narrow_band_cache_t>, public LevelSetBoundedObject {
 
     protected:
 
@@ -223,10 +225,6 @@ class LevelSetSegmentationObject : public LevelSetCachedObject<narrow_band_cache
     LevelSetSegmentationObject(int, const SurfUnstructured*, double featureAngle = 2. * BITPIT_PI);
 
     LevelSetSegmentationObject *                clone() const override ;
-
-    void                                        setSegmentation(std::unique_ptr<const SurfUnstructured> &&patch, double featureAngle = 2. * BITPIT_PI) ;
-    void                                        setSegmentation(const SurfUnstructured *patch, double featureAngle = 2. * BITPIT_PI) ;
-    const SegmentationKernel &                  getSegmentation() const ;
 
     virtual int                                 getPart(long ) const override;
     virtual std::array<double,3>                getNormal(long ) const override;

@@ -62,7 +62,7 @@ LevelSetMaskObject<storage_manager_t>::LevelSetMaskObject(int id, const std::uno
         throw std::runtime_error ("Error in LevelSetMaskObject");
     }
 
-    this->setSegmentation(std::move(segmentation));
+    this->setSurface(std::move(segmentation));
 }
 
 /*!
@@ -90,7 +90,7 @@ LevelSetMaskObject<storage_manager_t>::LevelSetMaskObject(int id, const std::vec
         throw std::runtime_error ("Error in LevelSetMaskObject");
     }
 
-    this->setSegmentation(std::move(segmentation));
+    this->setSurface(std::move(segmentation));
 }
 
 /*!
