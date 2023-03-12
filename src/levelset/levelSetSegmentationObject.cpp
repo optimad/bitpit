@@ -269,6 +269,64 @@ int SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords,
 }
 
 /*!
+ * Get the size of a segment
+ * @param[in] segmentId is the id of the segment
+ * @return charcteristic size of the segment
+ */
+double SegmentationKernel::getSegmentSize(long segmentId) const {
+
+    int surfaceDimension = m_surface->getDimension();
+    if (surfaceDimension == 1) {
+        return m_surface->evalCellArea(segmentId); //TODO check
+    } else if (surfaceDimension == 2) {
+        int dummy;
+        return m_surface->evalMinEdgeLength(segmentId, dummy);
+    }
+
+    return (- levelSetDefaults::SIZE);
+}
+
+/*!
+ * Get the size of the smallest segment
+ * @return the size of the smallest segment
+ */
+double SegmentationKernel::getMinSegmentSize() const {
+
+    bool   minimumValid = false;
+    double minimumSize  = levelSetDefaults::SIZE;
+    for( const Cell &cell : m_surface->getCells() ){
+        double segmentSize = getSegmentSize(cell.getId());
+        if (segmentSize < 0) {
+            continue;
+        }
+
+        minimumValid = true;
+        minimumSize  = std::min(segmentSize, minimumSize);
+    }
+
+    if (!minimumValid) {
+        minimumSize = - levelSetDefaults::SIZE;
+    }
+
+    return minimumSize;
+}
+
+/*!
+ * Get the size of the largest segment
+ * @return the size of the largest segment
+ */
+double SegmentationKernel::getMaxSegmentSize() const {
+
+    double maximumSize = - levelSetDefaults::SIZE;
+    for( const Cell &cell : m_surface->getCells() ){
+        double segmentSize = getSegmentSize(cell.getId());
+        maximumSize = std::max(segmentSize, maximumSize);
+    }
+
+    return maximumSize;
+}
+
+/*!
  * Compute the pseudo-normal at specified point of the given triangle.
  *
  * The algorithm used to evaluate the pseudo-normal depends on the location
