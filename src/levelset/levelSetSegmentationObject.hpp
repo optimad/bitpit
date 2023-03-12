@@ -66,6 +66,10 @@ public:
 
     int getSegmentInfo( const std::array<double,3> &pointCoords, long segmentId, bool signd, double &distance, std::array<double,3> &gradient, std::array<double,3> &normal ) const;
 
+    double getSegmentSize(long segmentId) const;
+    double getMinSegmentSize() const;
+    double getMaxSegmentSize() const;
+
 private:
     typedef std::pair<long, int> SegmentVertexKey;
 
@@ -198,8 +202,6 @@ class LevelSetSegmentationObject : public LevelSetCachedObject<narrow_band_cache
 
     private:
     std::shared_ptr<const SegmentationKernel> m_segmentation;
-
-    double                                      getSegmentSize( long ) const;
 
     protected:
 
