@@ -230,28 +230,7 @@ double LevelSetSegmentationObject<narrow_band_cache_t>::getSurfaceFeatureSize( l
         return (- levelSetDefaults::SIZE);
     }
 
-    return getSegmentSize(support);
-}
-
-/*!
- * Get the sie of a segment
- * @param[in] id is the id of the segment
- * @return charcteristic size of the segment
- */
-template<typename narrow_band_cache_t>
-double LevelSetSegmentationObject<narrow_band_cache_t>::getSegmentSize( long id ) const {
-
-    const SurfUnstructured &m_surface = m_segmentation->getSurface();
-
-    int surfaceDimension = m_surface.getDimension();
-    if (surfaceDimension == 1) {
-        return m_surface.evalCellArea(id); //TODO check
-    } else if (surfaceDimension == 2) {
-        int dummy;
-        return m_surface.evalMinEdgeLength(id, dummy);
-    }
-
-    return (- levelSetDefaults::SIZE);
+    return getSegmentation().getSegmentSize(support);
 }
 
 /*!
@@ -260,25 +239,7 @@ double LevelSetSegmentationObject<narrow_band_cache_t>::getSegmentSize( long id 
  */template<typename narrow_band_cache_t>
 double LevelSetSegmentationObject<narrow_band_cache_t>::getMinSurfaceFeatureSize( ) const {
 
-    const SurfUnstructured &m_surface = m_segmentation->getSurface();
-
-    bool   minimumValid = false;
-    double minimumSize  = levelSetDefaults::SIZE;
-    for( const Cell &cell : m_surface.getCells() ){
-        double segmentSize = getSegmentSize(cell.getId());
-        if (segmentSize < 0) {
-            continue;
-        }
-
-        minimumValid = true;
-        minimumSize  = std::min(segmentSize, minimumSize);
-    }
-
-    if (!minimumValid) {
-        minimumSize = - levelSetDefaults::SIZE;
-    }
-
-    return minimumSize;
+    return getSegmentation().getMinSegmentSize();
 }
 
 /*!
@@ -288,15 +249,7 @@ double LevelSetSegmentationObject<narrow_band_cache_t>::getMinSurfaceFeatureSize
 template<typename narrow_band_cache_t>
 double LevelSetSegmentationObject<narrow_band_cache_t>::getMaxSurfaceFeatureSize( ) const {
 
-    const SurfUnstructured &m_surface = m_segmentation->getSurface();
-
-    double maximumSize = - levelSetDefaults::SIZE;
-    for( const Cell &cell : m_surface.getCells() ){
-        double segmentSize = getSegmentSize(cell.getId());
-        maximumSize = std::max(segmentSize, maximumSize);
-    }
-
-    return maximumSize;
+    return getSegmentation().getMaxSegmentSize();
 }
 
 /*!
