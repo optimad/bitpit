@@ -1446,9 +1446,11 @@ ConstProxyVector<int> Element::getEdgeLocalVertexIds(int edge) const
 	remain unchanged.
 
 	\param map is the map that will be used for the renumbering
+	\result The number of vertices that have been renumbered
 */
-void Element::renumberVertices(const std::unordered_map<long, long> &map)
+int Element::renumberVertices(const std::unordered_map<long, long> &map)
 {
+	int nRenumberedVertices = 0;
 	switch (m_type) {
 
 	case ElementType::POLYGON:
@@ -1459,6 +1461,7 @@ void Element::renumberVertices(const std::unordered_map<long, long> &map)
 			auto mapItr = map.find(connectivity[k]);
 			if (mapItr != map.end()) {
 				connectivity[k] = mapItr->second;
+				++nRenumberedVertices;
 			}
 		}
 
@@ -1479,6 +1482,7 @@ void Element::renumberVertices(const std::unordered_map<long, long> &map)
 				auto mapItr = map.find(connectivity[k]);
 				if (mapItr != map.end()) {
 					connectivity[k] = mapItr->second;
+					++nRenumberedVertices;
 				}
 			}
 		}
@@ -1496,6 +1500,7 @@ void Element::renumberVertices(const std::unordered_map<long, long> &map)
 			auto mapItr = map.find(connectivity[k]);
 			if (mapItr != map.end()) {
 				connectivity[k] = mapItr->second;
+				++nRenumberedVertices;
 			}
 		}
 
@@ -1503,6 +1508,8 @@ void Element::renumberVertices(const std::unordered_map<long, long> &map)
 	}
 
 	}
+
+	return nRenumberedVertices;
 }
 
 /*!
