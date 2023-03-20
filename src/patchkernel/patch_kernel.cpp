@@ -2243,6 +2243,12 @@ std::vector<long> PatchKernel::collapseCoincidentVertices()
 			updateAdjacencies();
 		}
 
+		// Update interface
+		for (Interface &interface : m_interfaces) {
+			// Renumber interface vertices
+			interface.renumberVertices(vertexMap);
+		}
+
 		// Create the list of collapsed vertices
 		collapsedVertices.resize(vertexMap.size());
 
