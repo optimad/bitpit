@@ -2214,9 +2214,33 @@ std::vector<long> PatchKernel::collapseCoincidentVertices()
 
 	// Collapse vertices
 	if (!vertexMap.empty()) {
-		// Renumber cell vertices
+		// Update cells
+		//
+		// If the adjacencies are currently up-to-date, they should kept up-to-date.
+		AdjacenciesBuildStrategy adjacenciesBuildStrategy = getAdjacenciesBuildStrategy();
+
+		bool keepAdjacenciesUpToDate;
+		if (adjacenciesBuildStrategy != ADJACENCIES_NONE) {
+			keepAdjacenciesUpToDate = (!areAdjacenciesDirty());
+		} else {
+			keepAdjacenciesUpToDate = false;
+		}
+
 		for (Cell &cell : m_cells) {
-			cell.renumberVertices(vertexMap);
+			// Renumber cell vertices
+			int nRenumberedVertices = cell.renumberVertices(vertexMap);
+
+			// Mark adjacencies are dirty
+			//
+			// If some vertices have been renumbered, the adjacencies of the cells
+			// are now dirty.
+			if ((adjacenciesBuildStrategy != ADJACENCIES_NONE) && (nRenumberedVertices > 0)) {
+				setCellAlterationFlags(cell.getId(), FLAG_ADJACENCIES_DIRTY);
+			}
+		}
+
+		if (keepAdjacenciesUpToDate) {
+			updateAdjacencies();
 		}
 
 		// Create the list of collapsed vertices
