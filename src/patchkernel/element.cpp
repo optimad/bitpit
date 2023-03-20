@@ -1695,12 +1695,15 @@ std::array<double, 3> Element::evalNormal(const std::array<double, 3> *coordinat
 
 	case ElementType::POLYGON:
 	{
+		// The normal of a polygonal element is evaluated as the weighted average of the
+		// normals of its tiles. The resulting vector should be normalized in order to
+		// obtain a versor (because of triangular inequality it is not possible
+		// to evaluate the weights in order to automatically obtain a versor).
 		int dimension = getDimension();
 
 		Tesselation tesselation = generateTesselation(coordinates);
 		int nTiles = tesselation.getTileCount();
 
-		double surfaceArea = 0.;
 		std::array<double, 3> normal = {{0., 0., 0.}};
 		for (int i = 0; i < nTiles; ++i) {
 			ElementType tileType = tesselation.getTileType(i);
@@ -1718,10 +1721,9 @@ std::array<double, 3> Element::evalNormal(const std::array<double, 3> *coordinat
 				tileNormal = orientation;
 			}
 
-			normal      += tileArea * tileNormal;
-			surfaceArea += tileArea;
+			normal += tileArea * tileNormal;
 		}
-		normal = (1. / surfaceArea) * normal;
+		normal /= norm2(normal);
 
 		return normal;
 	}
