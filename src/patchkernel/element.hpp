@@ -141,7 +141,7 @@ public:
 	ConstProxyVector<int> getEdgeLocalVertexIds(int edge) const;
 
 	int getVertexCount() const;
-	void renumberVertices(const std::unordered_map<long, long> &map);
+	int renumberVertices(const std::unordered_map<long, long> &map);
 	ConstProxyVector<long> getVertexIds() const;
 	long getVertexId(int vertex) const;
 	int findVertex(long vertexId) const;
