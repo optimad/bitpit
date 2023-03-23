@@ -2700,9 +2700,9 @@ void VolOctree::findOctantCodimensionNeighs(const OctantInfo &octantInfo, int in
 /*!
 	Finds the face of the supposed neighbour that adjoins the target face.
 
-	\param cellId is the id of the cell
+	\param cell is the cell
 	\param cellFace is the target face of the cell
-	\param neighId is the id of a supposed neighbour of the cell
+	\param neigh is a supposed neighbour of the cell
 	\result The face of the neighbour which adjoins the target face. If the
 	two cells are not neighbours, a negative number is returned.
  */
