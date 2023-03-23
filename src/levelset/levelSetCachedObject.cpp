@@ -509,7 +509,7 @@ void LevelSetNarrowBandCache<LevelSetDirectStorageManager>::swap(LevelSetNarrowB
 /*!
  * Create the narrow band cache.
  *
- * @param ojbect is the levelset object for which the ache will be created
+ * @param object is the levelset object for which the ache will be created
  */
 std::shared_ptr<LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>> LevelSetNarrowBandCacheFactory<LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>>::create(LevelSetCachedObjectInterface<LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>> *object)
 {
@@ -522,7 +522,7 @@ std::shared_ptr<LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>> 
 /*!
  * Create the narrow band cache.
  *
- * @param ojbect is the levelset object for which the ache will be created
+ * @param object is the levelset object for which the ache will be created
  */
 std::shared_ptr<LevelSetNarrowBandCache<LevelSetDirectStorageManager>> LevelSetNarrowBandCacheFactory<LevelSetNarrowBandCache<LevelSetDirectStorageManager>>::create(LevelSetCachedObjectInterface<LevelSetNarrowBandCache<LevelSetDirectStorageManager>> *object)
 {

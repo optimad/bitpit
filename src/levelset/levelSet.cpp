@@ -703,8 +703,8 @@ void LevelSet::compute( const std::vector<int> &ids ){
  * objects.
  * Levelset and associated information will be computed on both internal and
  * ghost cells.
- * @param[in] nObjects identifiers of objects.
- * @param[in] objectIds identifiers of objects.
+ * @param[in] objectProcessList are the objects for which the levelset will be
+ * computed
  */
 void LevelSet::compute( const std::unordered_set<LevelSetObject *> &objectProcessList ){
 
@@ -804,6 +804,7 @@ void LevelSet::update( const std::vector<adaption::Info> &adaptionData, const st
  * Levelset and associated information will be updated on both internal and
  * ghost cells.
  * @param[in] adaptionData are the information about the adaption
+ * @param[in] objectProcessList are the objects that will be updated
  */
 void LevelSet::update( const std::vector<adaption::Info> &adaptionData, const std::unordered_set<LevelSetObject *> &objectProcessList ){
 
