@@ -679,13 +679,9 @@ std::size_t ReconstructionPolynomial::computeFieldCoefficientsOffset(uint8_t deg
 }
 
 /*!
- * Gets the offset for accessing the coefficient of the given order for the
- * specified field.
+ * Gets the stride the should be used when accessing field coefficients.
  *
- * \param degree is the requested degree
- * \param field is the field associated with the coefficients
- * \result The offset for accessing the coefficient of the given order for the
- * specified field.
+ * \result The stride the should be used when accessing field coefficients.
  */
 std::size_t ReconstructionPolynomial::getFieldCoefficientsStride() const
 {
