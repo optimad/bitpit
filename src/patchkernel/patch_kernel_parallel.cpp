@@ -3865,7 +3865,6 @@ std::vector<int> PatchKernel::getNeighbourRanks()
 	same criterion is used on all the partitions), in this way the n-th source
 	on a partition will correspond to the n-th target on the other partition.
 
-	\param rank is the rank data will be received from
 	\result A constant reference to the vertices that define the "targets" for
 	the exchange of data on ghost vertices.
 */
@@ -3909,7 +3908,6 @@ const std::vector<long> & PatchKernel::getGhostVertexExchangeTargets(int rank) c
 	same criterion is used on all the partitions), in this way the n-th source
 	on a partition will correspond to the n-th target on the other partition.
 
-	\param rank is the rank data will be send to
 	\result A constant reference to the vertices that define the "sources" for
 	the exchange of data on ghost vertices with the specified process.
 */
@@ -3953,7 +3951,6 @@ const std::vector<long> & PatchKernel::getGhostVertexExchangeSources(int rank) c
 	criterion is used on all the partitions), in this way the n-th source on a
 	partition will correspond to the n-th target on the other partition.
 
-	\param rank is the rank data will be received from
 	\result A constant reference to the cells that define the "targets" for the
 	exchange of data on ghost cells.
 */
@@ -3975,7 +3972,6 @@ const std::unordered_map<int, std::vector<long>> & PatchKernel::getGhostCellExch
 	criterion is used on all the partitions), in this way the n-th source on a
 	partition will correspond to the n-th target on the other partition.
 
-	\param rank is the rank data will be received from
 	\result A constant reference to the cells that define the "targets" for the
 	exchange of data on ghost cells.
 */
@@ -4149,8 +4145,6 @@ void PatchKernel::unsetGhostVertexInfo(long id)
 
 /*!
 	Clear the owners of all the ghost vertices.
-
-	\param updateExchangeInfo if set to true exchange info will be updated
 */
 void PatchKernel::clearGhostVerticesInfo()
 {

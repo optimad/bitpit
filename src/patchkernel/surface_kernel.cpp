@@ -439,7 +439,7 @@ double SurfaceKernel::evalMaxEdgeLength(long id, int &edge_id) const
  * ElementType::LINE and the codimension of the surface with respect to the
  * space in which it is embedded is not one.
  * 
- * \param[in] cellId is the cell id
+ * \param[in] id is the cell id
  * \param[in] vertex is the local vertex id
 */
 double SurfaceKernel::evalAngleAtVertex(long id, int vertex) const
