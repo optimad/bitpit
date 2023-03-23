@@ -803,7 +803,7 @@ PiercedStorage<double> PODVolOctree::mapFieldsToPOD(const PiercedStorage<double>
  * \param[out] fields Output Fields storage
  * \param[in] mesh Pointer to input field mesh
  * \param[in] targetCells Pointer to set of target cells of input field mesh mesh (cells with mapped values as result)
- * \param[in]mappedFields  Fields storage on POD mesh to be mapped.
+ * \param[in] mappedFields Fields storage on POD mesh to be mapped.
  * \param[in] scalarIds Ids of scalar fields in PiercedStorage.
  * \param[in] vectorIds Ids of vector fields in PiercedStorage.
  */
