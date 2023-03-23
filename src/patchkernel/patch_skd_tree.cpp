@@ -39,7 +39,7 @@ namespace bitpit {
 */
 
 /*!
-* Constructor
+* Constructor.
 *
 * \param patch is the patch
 * \param cellRawIds is the list of cell raw ids
@@ -738,8 +738,7 @@ void SkdNode::updatePointClosestCell(const std::array<double, 3> &point, bool in
 * the specified point and its projection onto the cell will be chosen.
 *
 * \param point is the point
-* \param cellId is the cell id
-* \param cellDistance is the cell distance
+* \param cell is the cell
 * \param[in,out] closestId is the index of the closest cell, on output it will
 * be updated if the specified cell is closer than the current closest cell
 * \param[in,out] closestDistance is the distance of the closest cell, on output
