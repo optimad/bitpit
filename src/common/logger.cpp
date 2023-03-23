@@ -248,7 +248,7 @@ int LoggerBuffer::flush(bool terminate)
     of the line, if an empty string is provided, no timestamp information
     will be printed
     \param terminate if set to true a new line character will be printed at
-    \the end of the line
+    the end of the line
     \return Returns 0 to indicates success, -1 to indicate failure.
 */
 int LoggerBuffer::flushLine(std::ostream &stream, const char *begin, const char *end,
@@ -1699,6 +1699,7 @@ namespace log {
         will remain unaltered.
 
         \param defaultSeverity is the default severity of the messages.
+        \param defaultVisibility is the default visibility of the messages.
         \result An instance of the default logger.
     */
     Logger & cout(log::Level defaultSeverity, log::Visibility defaultVisibility)
