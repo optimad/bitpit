@@ -74,7 +74,6 @@ VolCartesian * LevelSetCartesianKernel::getMesh() const{
  * The tangent sphere is a sphere having the center in the cell centroid and tangent
  * to the cell.
  *
- * @param[in] id is the id of cell
  * @return The radius of the tangent sphere.
  */
 double LevelSetCartesianKernel::getCellTangentRadius( ) const {
@@ -89,7 +88,6 @@ double LevelSetCartesianKernel::getCellTangentRadius( ) const {
  * The bounding sphere is the sphere with the minimum radius that contains all the
  * cell vertices and has the center in the cell centroid.
  *
- * @param[in] id is the id of cell
  * @return The radius of the bounding sphere.
  */
 double LevelSetCartesianKernel::getCellBoundingRadius( ) const {
