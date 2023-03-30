@@ -58,10 +58,13 @@ int subtest_001()
     patch_2D.addVertex({{0.00000000, 1.00000000, 0.00000000}},  2);
     patch_2D.addVertex({{1.00000000, 1.00000000, 0.00000000}},  3);
     patch_2D.addVertex({{1.00000000, 0.00000000, 0.00000000}},  4);
+    patch_2D.addVertex({{0.00000000, 0.50000000, 0.00000000}},  5);
+    patch_2D.addVertex({{1.00000000, 0.50000000, 0.00000000}},  6);
 
     patch_2D.addCell(ElementType::QUAD,     std::vector<long>({{ 1, 2, 3, 4}}));
     patch_2D.addCell(ElementType::PIXEL,    std::vector<long>({{ 1, 2, 4, 3}}));
     patch_2D.addCell(ElementType::TRIANGLE, std::vector<long>({{ 1, 2, 4}}));
+    patch_2D.addCell(ElementType::POLYGON,  std::vector<long>({{ 6, 1, 5, 2, 3, 6, 4}}));
 
     // Write patch
     patch_2D.write();
@@ -71,11 +74,13 @@ int subtest_001()
     expectedAreas[0] = 1.;
     expectedAreas[1] = 1.;
     expectedAreas[2] = 0.5;
+    expectedAreas[3] = 1.;
 
     std::unordered_map<long, double> expectedSizes(patch_2D.getCellCount());
     expectedSizes[0] = 1.;
     expectedSizes[1] = 1.;
     expectedSizes[2] = 3. / (2. + std::sqrt(2.));
+    expectedSizes[3] = 1.;
 
     std::vector<std::array<double, 3>> cellVertexCoordinates;
 
@@ -138,12 +143,26 @@ int subtest_002()
     patch_3D.addVertex({{1.00000000, 0.00000000,  1.00000000}},  6);
     patch_3D.addVertex({{1.00000000, 1.00000000,  1.00000000}},  7);
     patch_3D.addVertex({{0.00000000, 1.00000000,  1.00000000}},  8);
+    patch_3D.addVertex({{0.00000000, 0.00000000,  0.50000000}},  9);
+    patch_3D.addVertex({{1.00000000, 0.00000000,  0.50000000}}, 10);
+    patch_3D.addVertex({{1.00000000, 1.00000000,  0.50000000}}, 11);
+    patch_3D.addVertex({{0.00000000, 1.00000000,  0.50000000}}, 12);
 
     patch_3D.addCell(ElementType::TETRA,      std::vector<long>({{1, 2, 4, 5}}));
     patch_3D.addCell(ElementType::WEDGE,      std::vector<long>({{5, 6, 8, 1, 2, 4}}));
     patch_3D.addCell(ElementType::PYRAMID,    std::vector<long>({{1, 2, 3, 4, 5}}));
     patch_3D.addCell(ElementType::VOXEL,      std::vector<long>({{1, 2, 4, 3, 5, 6, 8, 7}}));
     patch_3D.addCell(ElementType::HEXAHEDRON, std::vector<long>({{1, 2, 3, 4, 5, 6, 7, 8}}));
+    patch_3D.addCell(ElementType::POLYHEDRON, std::vector<long>({{8,
+                                                                   4, 1, 4, 3, 2,
+                                                                   6, 2, 3, 11, 7, 6, 10,
+                                                                   4, 5, 6, 7, 8,
+                                                                   6, 1, 9, 5, 8, 12, 4,
+                                                                   4, 1, 2, 10, 9,
+                                                                   4, 5, 9, 10, 6,
+                                                                   4, 3, 4, 12, 11,
+                                                                   4, 11, 12, 8, 7
+                                                                 }}));
 
     patch_3D.initializeAdjacencies();
     patch_3D.initializeInterfaces();
@@ -158,6 +177,7 @@ int subtest_002()
     expectedVolumes[2] = 1. / 3.;
     expectedVolumes[3] = 1.;
     expectedVolumes[4] = 1.;
+    expectedVolumes[5] = 1.;
 
     std::unordered_map<long, double> expectedSizes(patch_3D.getCellCount());
     expectedSizes[0] = 4. / (std::sqrt(2.) * (1. + std::sqrt(3.)));
@@ -165,6 +185,7 @@ int subtest_002()
     expectedSizes[2] = 1. / 3.;
     expectedSizes[3] = 1.;
     expectedSizes[4] = 1.;
+    expectedSizes[5] = 1.;
 
     std::vector<std::array<double, 3>> cellVertexCoordinates;
 
