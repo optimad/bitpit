@@ -1543,8 +1543,79 @@ double Element::evalSize(const std::array<double, 3> *coordinates) const
 {
 	switch (m_type) {
 
-	case ElementType::POLYGON:
 	case ElementType::POLYHEDRON:
+	{
+		// The characteristics size of a polyhedron is evaluated as the
+		// volume divided by the mean area of the faces.
+		int nFaces = getFaceCount();
+		BITPIT_CREATE_WORKSPACE(faceVertexCoords, std::array<double BITPIT_COMMA 3>, getVertexCount(), ReferenceElementInfo::MAX_ELEM_VERTICES);
+
+		double volume = evalVolume(coordinates);
+
+		double area = 0;
+		for (int face = 0; face < nFaces; ++face) {
+			ElementType faceType = getFaceType(face);
+			bool faceHasReferenceInfo = ReferenceElementInfo::hasInfo(faceType);
+
+			double faceArea;
+			if (faceHasReferenceInfo) {
+				ConstProxyVector<int> faceLocalVertexIds = getFaceLocalVertexIds(face);
+				for (int n = 0; n < getFaceVertexCount(face); ++n) {
+					faceVertexCoords[n] = coordinates[faceLocalVertexIds[face][n]];
+				}
+
+				const Reference2DElementInfo &faceInfo = static_cast<const Reference2DElementInfo &>(ReferenceElementInfo::getInfo(faceType));
+				faceArea = faceInfo.evalArea(faceVertexCoords);
+			} else {
+				ConstProxyVector<int> faceConnect = getFaceConnect(face);
+				std::size_t faceConnectSize = faceConnect.size();
+
+				Element faceElement(0, faceType, faceConnect.size());
+				long *faceElementConnect = faceElement.getConnect();
+				for (std::size_t i = 0; i < faceConnectSize; ++i) {
+					faceElementConnect[i] = faceConnect[i];
+				}
+
+				faceArea = faceElement.evalArea();
+			}
+			area += faceArea;
+		}
+		double meanFaceArea = area / nFaces;
+
+		double size = volume / meanFaceArea;
+
+		return size;
+	}
+
+	case ElementType::POLYGON:
+	{
+		// The characteristics size of a polygon is evaluated as the
+		// area divided by the mean length of the faces.
+		int nFaces = getFaceCount();
+		BITPIT_CREATE_WORKSPACE(faceVertexCoords, std::array<double BITPIT_COMMA 3>, getVertexCount(), ReferenceElementInfo::MAX_ELEM_VERTICES);
+
+		double area = evalArea(coordinates);
+
+		double perimeter = 0;
+		for (int face = 0; face < nFaces; ++face) {
+			ElementType faceType = getFaceType(face);
+			assert(ReferenceElementInfo::hasInfo(faceType));
+
+			ConstProxyVector<int> faceLocalVertexIds = getFaceLocalVertexIds(face);
+			for (int n = 0; n < getFaceVertexCount(face); ++n) {
+				faceVertexCoords[n] = coordinates[faceLocalVertexIds[face][n]];
+			}
+
+			const Reference1DElementInfo &faceInfo = static_cast<const Reference1DElementInfo &>(ReferenceElementInfo::getInfo(faceType));
+			double facePerimeter = faceInfo.evalLength(faceVertexCoords);
+		}
+		double meanFacePerimeter = perimeter / nFaces;
+
+		double size = area / meanFacePerimeter;
+
+		return size;
+	}
+
 	case ElementType::UNDEFINED:
 	{
 		return 0.;
