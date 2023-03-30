@@ -23,6 +23,7 @@
 \*---------------------------------------------------------------------------*/
 
 #include <cassert>
+#include <cstdint>
 #include <cstring>
 
 #include "bitpit_common.hpp"
