@@ -78,9 +78,14 @@ protected:
 class Reference3DElementInfo : public ReferenceElementInfo {
 
 public:
+    double evalSize(const std::array<double, 3> *vertexCoords) const override;
+
     virtual double evalVolume(const std::array<double, 3> *vertexCoords) const = 0;
     double evalSurfaceArea(const std::array<double, 3> *vertexCoords) const;
     double evalEdgePerimeter(const std::array<double, 3> *vertexCoords) const;
+
+    double evalFaceArea(int face, const std::array<double, 3> *vertexCoords) const;
+    double evalEdgeLength(int edge, const std::array<double, 3> *vertexCoords) const;
 
     void evalPointProjection(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords, std::array<double, 3> *projection, double *distance) const override;
     double evalPointDistance(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords) const override;
@@ -133,8 +138,6 @@ class ReferenceHexahedronInfo : public Reference3DElementInfo {
 friend class ReferenceElementInfo;
 
 public:
-    double evalSize(const std::array<double, 3> *vertexCoords) const override;
-
     double evalVolume(const std::array<double, 3> *vertexCoords) const override;
 
     const static ReferenceHexahedronInfo info;
@@ -152,8 +155,6 @@ class ReferencePyramidInfo : public Reference3DElementInfo {
 friend class ReferenceElementInfo;
 
 public:
-    double evalSize(const std::array<double, 3> *vertexCoords) const override;
-
     double evalVolume(const std::array<double, 3> *vertexCoords) const override;
 
     const static ReferencePyramidInfo info;
@@ -171,8 +172,6 @@ class ReferenceWedgeInfo : public Reference3DElementInfo {
 friend class ReferenceElementInfo;
 
 public:
-    double evalSize(const std::array<double, 3> *vertexCoords) const override;
-
     double evalVolume(const std::array<double, 3> *vertexCoords) const override;
 
     const static ReferenceWedgeInfo info;
@@ -188,8 +187,12 @@ protected:
 class Reference2DElementInfo : public ReferenceElementInfo {
 
 public:
+    double evalSize(const std::array<double, 3> *vertexCoords) const override;
+
     virtual double evalArea(const std::array<double, 3> *vertexCoords) const = 0;
     double evalPerimeter(const std::array<double, 3> *vertexCoords) const;
+
+    double evalFaceLength(int face, const std::array<double, 3> *vertexCoords) const;
 
     virtual std::array<double, 3> evalNormal(const std::array<double, 3> *vertexCoords, const std::array<double, 3> &point = {{0.5, 0.5, 0.5}}) const = 0;
 
@@ -262,8 +265,6 @@ friend class ReferencePyramidInfo;
 friend class ReferenceWedgeInfo;
 
 public:
-    double evalSize(const std::array<double, 3> *vertexCoords) const override;
-
     double evalArea(const std::array<double, 3> *vertexCoords) const override;
 
     std::array<double, 3> evalNormal(const std::array<double, 3> *vertexCoords, const std::array<double, 3> &point = {{0.5, 0.5, 0.5}}) const override;

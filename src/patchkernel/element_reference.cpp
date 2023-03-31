@@ -220,6 +220,31 @@ Reference3DElementInfo::Reference3DElementInfo(ElementType type, int nVertices, 
 }
 
 /*!
+    Evaluates the characteristics size of an element with the specified vertex
+    coordinates.
+
+    The characteristics size is evaluated as the volume divided by the area of
+    the largest face.
+
+    \param vertexCoords are the coordinate of the vertices
+    \result The length of the line.
+*/
+double Reference3DElementInfo::evalSize(const std::array<double, 3> *vertexCoords) const
+{
+    double volume = evalVolume(vertexCoords);
+
+    double faceMaxArea = 0;
+    for (int face = 0; face < nFaces; ++face) {
+        double faceArea = evalFaceArea(face, vertexCoords);
+        faceMaxArea = std::max(faceArea, faceMaxArea);
+    }
+
+    double length = volume / faceMaxArea;
+
+    return length;
+}
+
+/*!
     Evaluates the surface area of a three-dimensional element with the
     specified vertex coordinates. The surface area is a measure of the
     total area that the surface of the object occupies.
@@ -229,17 +254,9 @@ Reference3DElementInfo::Reference3DElementInfo(ElementType type, int nVertices, 
 */
 double Reference3DElementInfo::evalSurfaceArea(const std::array<double, 3> *vertexCoords) const
 {
-    std::array<std::array<double, 3>, MAX_ELEM_VERTICES> faceVertexCoords;
-
     double area = 0;
     for (int i = 0; i < nFaces; ++i) {
-        ElementType faceType = faceTypeStorage[i];
-        const Reference2DElementInfo &faceInfo = static_cast<const Reference2DElementInfo &>(getInfo(faceType));
-        for (int n = 0; n < faceInfo.nVertices; ++n) {
-            faceVertexCoords[n] = vertexCoords[faceConnectStorage[i][n]];
-        }
-
-        area += faceInfo.evalArea(faceVertexCoords.data());
+        area += evalFaceArea(i, vertexCoords);
     }
 
     return area;
@@ -254,19 +271,53 @@ double Reference3DElementInfo::evalSurfaceArea(const std::array<double, 3> *vert
 */
 double Reference3DElementInfo::evalEdgePerimeter(const std::array<double, 3> *vertexCoords) const
 {
-    std::array<std::array<double, 3>, MAX_ELEM_VERTICES> edgeVertexCoords;
-    const ReferenceLineInfo &edgeInfo = static_cast<const ReferenceLineInfo &>(getInfo(ElementType::LINE));
-
     double perimeter = 0;
     for (int i = 0; i < nEdges; ++i) {
-        for (int n = 0; n < edgeInfo.nVertices; ++n) {
-            edgeVertexCoords[n] = vertexCoords[edgeConnectStorage[i][n]];
-        }
-
-        perimeter += edgeInfo.evalLength(edgeVertexCoords.data());
+        perimeter += evalEdgeLength(i, vertexCoords);
     }
 
     return perimeter;
+}
+
+/*!
+    Evaluates the area of the specified face of a three-dimensional element with the
+    given vertex coordinates.
+
+    \param face is the face
+    \param vertexCoords are the coordinate of the vertices
+    \result The area of the specified face.
+*/
+double Reference3DElementInfo::evalFaceArea(int face, const std::array<double, 3> *vertexCoords) const
+{
+    ElementType faceType = faceTypeStorage[face];
+    const Reference2DElementInfo &faceInfo = static_cast<const Reference2DElementInfo &>(getInfo(faceType));
+
+    std::array<std::array<double, 3>, MAX_ELEM_VERTICES> faceVertexCoords;
+    for (int n = 0; n < faceInfo.nVertices; ++n) {
+        faceVertexCoords[n] = vertexCoords[faceConnectStorage[face][n]];
+    }
+
+    return faceInfo.evalArea(faceVertexCoords.data());
+}
+
+/*!
+    Evaluates the length of the specified edge of a three-dimensional element with the
+    given vertex coordinates.
+
+    \param edge is the edge
+    \param vertexCoords are the coordinate of the vertices
+    \result The perimeter of the element.
+*/
+double Reference3DElementInfo::evalEdgeLength(int edge, const std::array<double, 3> *vertexCoords) const
+{
+    const ReferenceLineInfo &edgeInfo = static_cast<const ReferenceLineInfo &>(getInfo(ElementType::LINE));
+
+    std::array<std::array<double, 3>, MAX_ELEM_VERTICES> edgeVertexCoords;
+    for (int n = 0; n < edgeInfo.nVertices; ++n) {
+        edgeVertexCoords[n] = vertexCoords[edgeConnectStorage[edge][n]];
+    }
+
+    return edgeInfo.evalLength(edgeVertexCoords.data());
 }
 
 /*!
@@ -569,7 +620,7 @@ double ReferenceVoxelInfo::evalVolume(const std::array<double, 3> *vertexCoords)
     Evaluates the characteristics size of an element with the specified vertex
     coordinates.
 
-    The characteristics size of the voxel is evaluated as the mean side length.
+    The characteristics size of the voxel is evaluated as length of the the shortest side.
 
     \param vertexCoords are the coordinate of the vertices
     \result The length of the line.
@@ -585,7 +636,7 @@ double ReferenceVoxelInfo::evalSize(const std::array<double, 3> *vertexCoords) c
     double sideLength_y = norm2(V_C - V_A);
     double sideLength_z = norm2(V_D - V_A);
 
-    double size = (sideLength_x + sideLength_y + sideLength_z) / 3.;
+    double size = std::min({sideLength_x, sideLength_y, sideLength_z});
 
     return size;
 }
@@ -734,28 +785,6 @@ double ReferenceHexahedronInfo::evalVolume(const std::array<double, 3> *vertexCo
 }
 
 /*!
-    Evaluates the characteristics size of an element with the specified vertex
-    coordinates.
-
-    The characteristics size of the hexahedron is evaluated as the volume
-    divied by the mean side area.
-
-    \param vertexCoords are the coordinate of the vertices
-    \result The length of the line.
-*/
-double ReferenceHexahedronInfo::evalSize(const std::array<double, 3> *vertexCoords) const
-{
-    double volume = evalVolume(vertexCoords);
-    double area   = evalSurfaceArea(vertexCoords);
-
-    double meanFaceArea = area / nFaces;
-
-    double length = volume / meanFaceArea;
-
-    return length;
-}
-
-/*!
     \class ReferencePyramidInfo
     \ingroup patchelements
 
@@ -845,28 +874,6 @@ ReferencePyramidInfo::ReferencePyramidInfo()
     faceConnectStorage[4][2] = 4;
 
     initializeFaceEdges(facesInfo, edgesInfo);
-}
-
-/*!
-    Evaluates the characteristics size of an element with the specified vertex
-    coordinates.
-
-    The characteristics size of the pyramid is the height of the regular
-    pyramid with a square base having the same inscribed sphere.
-
-    \param vertexCoords are the coordinate of the vertices
-    \result The length of the line.
-*/
-double ReferencePyramidInfo::evalSize(const std::array<double, 3> *vertexCoords) const
-{
-    double volume = evalVolume(vertexCoords);
-    double area   = evalSurfaceArea(vertexCoords);
-
-    double inscribedRadius = 3 * volume / area;
-
-    double length = inscribedRadius / (sqrt(5.) + 1.);
-
-    return length;
 }
 
 /*!
@@ -989,28 +996,6 @@ ReferenceWedgeInfo::ReferenceWedgeInfo()
 }
 
 /*!
-    Evaluates the characteristics size of an element with the specified vertex
-    coordinates.
-
-    The characteristics size of the wedge is evaluated as the volume divied by
-    the mean side area.
-
-    \param vertexCoords are the coordinate of the vertices
-    \result The length of the line.
-*/
-double ReferenceWedgeInfo::evalSize(const std::array<double, 3> *vertexCoords) const
-{
-    double volume = evalVolume(vertexCoords);
-    double area   = evalSurfaceArea(vertexCoords);
-
-    double meanFaceArea = area / nFaces;
-
-    double length = volume / meanFaceArea;
-
-    return length;
-}
-
-/*!
     Evaluates the volume of an element with the specified vertex coordinates.
 
     The wedge is divided into three pyramids and two tetrahedron with a common
@@ -1089,6 +1074,31 @@ Reference2DElementInfo::Reference2DElementInfo(ElementType type, int nVertices)
 }
 
 /*!
+    Evaluates the characteristics size of an element with the specified vertex
+    coordinates.
+
+    The characteristics size is evaluated as the area divided by the length of
+    the longest face.
+
+    \param vertexCoords are the coordinate of the vertices
+    \result The length of the line.
+*/
+double Reference2DElementInfo::evalSize(const std::array<double, 3> *vertexCoords) const
+{
+    double area = evalArea(vertexCoords);
+
+    double faceMaxLength = 0;
+    for (int face = 0; face < nFaces; ++face) {
+        double faceLength = evalFaceLength(face, vertexCoords);
+        faceMaxLength = std::max(faceLength, faceMaxLength);
+    }
+
+    double length = area / faceMaxLength;
+
+    return length;
+}
+
+/*!
     Evaluates the perimeter of a two-dimensional element with the specified
     vertex coordinates.
 
@@ -1097,19 +1107,32 @@ Reference2DElementInfo::Reference2DElementInfo(ElementType type, int nVertices)
 */
 double Reference2DElementInfo::evalPerimeter(const std::array<double, 3> *vertexCoords) const
 {
-    std::array<std::array<double, 3>, MAX_ELEM_VERTICES> sideVertexCoords;
-    const ReferenceLineInfo &sideInfo = static_cast<const ReferenceLineInfo &>(getInfo(ElementType::LINE));
-
     double perimeter = 0;
     for (int i = 0; i < nFaces; ++i) {
-        for (int n = 0; n < sideInfo.nVertices; ++n) {
-            sideVertexCoords[n] = vertexCoords[faceConnectStorage[i][n]];
-        }
-
-        perimeter += sideInfo.evalLength(sideVertexCoords.data());
+        perimeter += evalFaceLength(i, vertexCoords);
     }
 
     return perimeter;
+}
+
+/*!
+    Evaluates the length of the specified face of a two-dimensional element with the
+    given vertex coordinates.
+
+    \param face is the face
+    \param vertexCoords are the coordinate of the vertices
+    \result The length of the specified face.
+*/
+double Reference2DElementInfo::evalFaceLength(int face, const std::array<double, 3> *vertexCoords) const
+{
+    const ReferenceLineInfo &sideInfo = static_cast<const ReferenceLineInfo &>(getInfo(ElementType::LINE));
+
+    std::array<std::array<double, 3>, MAX_ELEM_VERTICES> sideVertexCoords;
+    for (int n = 0; n < sideInfo.nVertices; ++n) {
+        sideVertexCoords[n] = vertexCoords[faceConnectStorage[face][n]];
+    }
+
+    return sideInfo.evalLength(sideVertexCoords.data());
 }
 
 /*!
@@ -1364,7 +1387,7 @@ ReferencePixelInfo::ReferencePixelInfo()
     Evaluates the characteristics size of an element with the specified vertex
     coordinates.
 
-    The characteristics size of the pixel is evaluated as the mean side length.
+    The characteristics size of the pixel is evaluated as the length of the shortest side.
 
     \param vertexCoords are the coordinate of the vertices
     \result The length of the line.
@@ -1378,7 +1401,7 @@ double ReferencePixelInfo::evalSize(const std::array<double, 3> *vertexCoords) c
     double sideLength_x = norm2(V_B - V_A);
     double sideLength_y = norm2(V_C - V_A);
 
-    double size = (sideLength_x + sideLength_y) / 2.;
+    double size = std::min(sideLength_x, sideLength_y);
 
     return size;
 }
@@ -1489,28 +1512,6 @@ ReferenceQuadInfo::ReferenceQuadInfo()
     }
 
     initializeFaceEdges(facesInfo, edgesInfo);
-}
-
-/*!
-    Evaluates the characteristics size of an element with the specified vertex
-    coordinates.
-
-    The characteristics size of the quadrangle is evaluated as the area divied
-    by the mean side length.
-
-    \param vertexCoords are the coordinate of the vertices
-    \result The length of the line.
-*/
-double ReferenceQuadInfo::evalSize(const std::array<double, 3> *vertexCoords) const
-{
-    double area      = evalArea(vertexCoords);
-    double perimeter = evalPerimeter(vertexCoords);
-
-    double meanSideLength = perimeter / nFaces;
-
-    double length = area / meanSideLength;
-
-    return length;
 }
 
 /*!
