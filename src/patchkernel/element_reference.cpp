@@ -558,9 +558,9 @@ double ReferenceVoxelInfo::evalVolume(const std::array<double, 3> *vertexCoords)
     const std::array<double, 3> &V_A = vertexCoords[0];
     const std::array<double, 3> &V_B = vertexCoords[1];
     const std::array<double, 3> &V_C = vertexCoords[2];
-    const std::array<double, 3> &V_D = vertexCoords[3];
+    const std::array<double, 3> &V_D = vertexCoords[4];
 
-    double volume = std::abs(dotProduct(V_A - V_D, crossProduct(V_B - V_D, V_C - V_D))) / 6.;
+    double volume = std::abs(dotProduct(V_D - V_A, crossProduct(V_B - V_A, V_C - V_A)));
 
     return volume;
 }
