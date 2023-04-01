@@ -121,6 +121,7 @@ public:
     virtual bool checkPartition() = 0;
     virtual std::unordered_map<int, std::vector<long> > getReceivedMappedIds() = 0;
     virtual std::unordered_map<int, std::vector<long> > getSentMappedIds() = 0;
+    virtual std::unordered_map<int, std::vector<long> > getReceivedReferenceIds() = 0;
     virtual std::unordered_map<int, std::vector<long> > getSentReferenceIds() = 0;
 #endif
 

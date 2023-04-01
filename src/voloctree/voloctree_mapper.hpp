@@ -56,6 +56,7 @@ public:
     void clearPartitionMapping();
     std::unordered_map<int, std::vector<long>> getReceivedMappedIds() override;
     std::unordered_map<int, std::vector<long>> getSentMappedIds() override;
+    std::unordered_map<int, std::vector<long>> getReceivedReferenceIds() override;
     std::unordered_map<int, std::vector<long>> getSentReferenceIds() override;
 #endif
 

@@ -797,6 +797,43 @@ std::unordered_map<int, std::vector<long>> VolOctreeMapper::getSentReferenceIds(
 }
 
 /**
+ * Get the list of the octants of the partitions of the reference mesh, different
+ * from the local rank, overlapped to the local partition of the mapped mesh.
+ *
+ * \result Returns the map with for each rank (key) the list of the octants
+ * (argument) of the reference mesh overlapped with the local partition of the
+ * mapped mesh.
+ */
+std::unordered_map<int, std::vector<long>> VolOctreeMapper::getReceivedReferenceIds()
+{
+    std::unordered_map<int, std::vector<long>> received;
+
+    // Use set to retrieve ordered ids from senders using volume mapper mapping
+    // We loop over the cells of the reference mesh, we ask the mapping for the
+    // mapped mesh ids of cells overlapping the current cell, we checks for ranks
+    // and saves non-matching rank cells in the set, rank-by-rank.
+
+    std::unordered_map<int, std::set<long>> rankIdRecv;
+
+    for (Cell & cell : m_mappedPatch->getCells()) {
+        long id = cell.getId();
+        auto info = m_inverseMapping.at(id);
+        std::size_t idsSize = info.ids.size();
+        for (std::size_t i = 0; i < idsSize; ++i) {
+            if (info.ranks[i] != m_mappedPatch->getRank()) {
+                rankIdRecv[info.ranks[i]].insert(info.ids[i]);
+            }
+        }
+    }
+
+    for (const auto & rankId : rankIdRecv) {
+        received[rankId.first].assign(rankId.second.begin(), rankId.second.end());
+    }
+
+    return received;
+}
+
+/**
  * Get the list of the octants of the local partition of the mapped mesh
  * overlapped to a different partition of the reference mesh.
  *
