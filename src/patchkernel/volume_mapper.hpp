@@ -119,9 +119,9 @@ public:
 
 #if BITPIT_ENABLE_MPI
     virtual bool checkPartition() = 0;
-    virtual std::map<int, std::vector<long> > getReceivedMappedIds() = 0;
-    virtual std::map<int, std::vector<long> > getSentMappedIds() = 0;
-    virtual std::map<int, std::vector<long> > getSentReferenceIds() = 0;
+    virtual std::unordered_map<int, std::vector<long> > getReceivedMappedIds() = 0;
+    virtual std::unordered_map<int, std::vector<long> > getSentMappedIds() = 0;
+    virtual std::unordered_map<int, std::vector<long> > getSentReferenceIds() = 0;
 #endif
 
 protected:
