@@ -789,10 +789,6 @@ std::map<int, std::vector<long>> VolOctreeMapper::getSentReferenceIds()
         }
     }
 
-    for (int rank = 0; rank < m_nProcs; rank++) {
-        sent[rank].reserve(rankIdSend[rank].size());
-    }
-
     for (std::map<int, std::set<long>>::iterator it=rankIdSend.begin(); it!=rankIdSend.end(); ++it) {
         for (long id : it->second) {
             sent[it->first].push_back(id);
