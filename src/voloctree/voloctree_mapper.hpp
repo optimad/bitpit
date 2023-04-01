@@ -54,9 +54,9 @@ public:
 #if BITPIT_ENABLE_MPI
     bool checkPartition() override;
     void clearPartitionMapping();
-    std::map<int, std::vector<long>> getReceivedMappedIds() override;
-    std::map<int, std::vector<long>> getSentMappedIds() override;
-    std::map<int, std::vector<long>> getSentReferenceIds() override;
+    std::unordered_map<int, std::vector<long>> getReceivedMappedIds() override;
+    std::unordered_map<int, std::vector<long>> getSentMappedIds() override;
+    std::unordered_map<int, std::vector<long>> getSentReferenceIds() override;
 #endif
 
 private:

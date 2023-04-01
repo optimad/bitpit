@@ -1304,8 +1304,8 @@ void PODVolOctree::communicatePODField(const pod::PODField & field, std::map<int
         std::size_t nsf = field.scalar->getFieldCount();
         std::size_t nvf = field.vector->getFieldCount();
 
-        std::map<int, std::vector<long> > rankIDrec = m_meshmap->getReceivedMappedIds();
-        std::map<int, std::vector<long> > rankIDsend = m_meshmap->getSentMappedIds();
+        std::unordered_map<int, std::vector<long> > rankIDrec = m_meshmap->getReceivedMappedIds();
+        std::unordered_map<int, std::vector<long> > rankIDsend = m_meshmap->getSentMappedIds();
 
         //build send buffers
         DataCommunicator dataCommunicator(m_communicator);
@@ -1370,7 +1370,7 @@ void PODVolOctree::communicatePODFieldFromPOD(const pod::PODField & field, std::
         std::size_t nsf = field.scalar->getFieldCount();
         std::size_t nvf = field.vector->getFieldCount();
 
-        std::map<int, std::vector<long> > rankIDsend = m_meshmap->getSentReferenceIds();
+        std::unordered_map<int, std::vector<long> > rankIDsend = m_meshmap->getSentReferenceIds();
 
         //build send buffers
         DataCommunicator dataCommunicator(m_communicator);
@@ -1437,8 +1437,8 @@ void PODVolOctree::communicatePODFieldFromPOD(const pod::PODField & field, std::
 void PODVolOctree::communicateBoolField(const PiercedStorage<bool> & field, std::map<int, std::map<long, bool> > & dataBrec)
 {
 
-    std::map<int, std::vector<long> > rankIDrec = m_meshmap->getReceivedMappedIds();
-    std::map<int, std::vector<long> > rankIDsend = m_meshmap->getSentMappedIds();
+    std::unordered_map<int, std::vector<long> > rankIDrec = m_meshmap->getReceivedMappedIds();
+    std::unordered_map<int, std::vector<long> > rankIDsend = m_meshmap->getSentMappedIds();
 
     //build send buffers
     DataCommunicator dataCommunicator(m_communicator);
@@ -1477,8 +1477,8 @@ void PODVolOctree::communicateField(const PiercedStorage<double> & field, const 
 
     std::size_t nf = field.getFieldCount();
 
-    std::map<int, std::vector<long> > rankIDrec = m_meshmap->getReceivedMappedIds();
-    std::map<int, std::vector<long> > rankIDsend = m_meshmap->getSentMappedIds();
+    std::unordered_map<int, std::vector<long> > rankIDrec = m_meshmap->getReceivedMappedIds();
+    std::unordered_map<int, std::vector<long> > rankIDsend = m_meshmap->getSentMappedIds();
 
     //build send buffers
     DataCommunicator dataCommunicator(m_communicator);
@@ -1522,7 +1522,7 @@ void PODVolOctree::communicateFieldFromPOD(const PiercedStorage<double> & field,
 
     std::size_t nf = field.getFieldCount();
 
-    std::map<int, std::vector<long> > rankIDsend = m_meshmap->getSentReferenceIds();
+    std::unordered_map<int, std::vector<long> > rankIDsend = m_meshmap->getSentReferenceIds();
 
     //build send buffers
     DataCommunicator dataCommunicator(m_communicator);

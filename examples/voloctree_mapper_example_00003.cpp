@@ -276,8 +276,8 @@ void run()
         //Communicate needed data for mapping
         std::map<int, std::map<long, double> > datarec;
         {
-            std::map<int, std::vector<long> > rankIDrec = mapobject.getReceivedMappedIds();
-            std::map<int, std::vector<long> > rankIDsend = mapobject.getSentMappedIds();
+            std::unordered_map<int, std::vector<long> > rankIDrec = mapobject.getReceivedMappedIds();
+            std::unordered_map<int, std::vector<long> > rankIDsend = mapobject.getSentMappedIds();
 
             //build send buffers
             MPI_Comm comm = MPI_COMM_WORLD;

@@ -749,9 +749,9 @@ void VolOctreeMapper::_mappingAdaptionMappedUpdate(const std::vector<adaption::I
  * (argument) of the mapped mesh overlapped with the local partition of the
  * reference mesh.
  */
-std::map<int, std::vector<long>> VolOctreeMapper::getReceivedMappedIds()
+std::unordered_map<int, std::vector<long>> VolOctreeMapper::getReceivedMappedIds()
 {
-    std::map<int, std::vector<long>> received;
+    std::unordered_map<int, std::vector<long>> received;
 
     for (OctantIR octir : m_partitionIR.list_rec_octantIR_before) {
         received[octir.rank].push_back(octir.id);
@@ -772,12 +772,12 @@ std::map<int, std::vector<long>> VolOctreeMapper::getReceivedMappedIds()
  * (argument) of the reference mesh overlapped with the partition (rank) of
  * the mapped mesh.
  */
-std::map<int, std::vector<long>> VolOctreeMapper::getSentReferenceIds()
+std::unordered_map<int, std::vector<long>> VolOctreeMapper::getSentReferenceIds()
 {
-    std::map<int, std::vector<long>> sent;
+    std::unordered_map<int, std::vector<long>> sent;
 
     // Recover id to be recv/send
-    std::map<int, std::set<long>> rankIdSend;
+    std::unordered_map<int, std::set<long>> rankIdSend;
 
     for (Cell &cell : m_referencePatch->getCells()) {
         long id = cell.getId();
@@ -789,10 +789,8 @@ std::map<int, std::vector<long>> VolOctreeMapper::getSentReferenceIds()
         }
     }
 
-    for (std::map<int, std::set<long>>::iterator it=rankIdSend.begin(); it!=rankIdSend.end(); ++it) {
-        for (long id : it->second) {
-            sent[it->first].push_back(id);
-        }
+    for (const auto & rankId : rankIdSend) {
+            sent[rankId.first].assign(rankId.second.begin(), rankId.second.end());
     }
 
     return sent;
@@ -806,9 +804,9 @@ std::map<int, std::vector<long>> VolOctreeMapper::getSentReferenceIds()
  * (argument) of the mapped mesh overlapped with the partition (rank) of the
  * reference mesh.
  */
-std::map<int, std::vector<long>> VolOctreeMapper::getSentMappedIds()
+std::unordered_map<int, std::vector<long>> VolOctreeMapper::getSentMappedIds()
 {
-    std::map<int, std::vector<long>> sent;
+    std::unordered_map<int, std::vector<long>> sent;
 
     for (OctantIR octir : m_partitionIR.list_sent_octantIR) {
         sent[octir.rank].push_back(octir.id);
