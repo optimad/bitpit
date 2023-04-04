@@ -50,13 +50,13 @@ namespace bitpit {
     among the processes
 */
 LineUnstructured::LineUnstructured(MPI_Comm communicator)
-    : LineKernel(communicator, 1, true)
+    : LineKernel(communicator, 1, ADAPTION_MANUAL, PARTITIONING_ENABLED)
 #else
 /*!
     Creates an uninitialized serial patch.
 */
 LineUnstructured::LineUnstructured()
-    : LineKernel(true)
+    : LineKernel(ADAPTION_MANUAL)
 #endif
 {
 }
@@ -74,7 +74,7 @@ LineUnstructured::LineUnstructured()
     among the processes
 */
 LineUnstructured::LineUnstructured(int dimension, MPI_Comm communicator)
-    : LineKernel(PatchManager::AUTOMATIC_ID, dimension, communicator, 1, true)
+    : LineKernel(PatchManager::AUTOMATIC_ID, dimension, communicator, 1, ADAPTION_MANUAL, PARTITIONING_ENABLED)
 #else
 /*!
     Creates a patch.
@@ -82,7 +82,7 @@ LineUnstructured::LineUnstructured(int dimension, MPI_Comm communicator)
     \param dimension is the dimension of the patch
 */
 LineUnstructured::LineUnstructured(int dimension)
-    : LineKernel(PatchManager::AUTOMATIC_ID, dimension, true)
+    : LineKernel(PatchManager::AUTOMATIC_ID, dimension, ADAPTION_MANUAL)
 #endif
 {
 }
@@ -101,7 +101,7 @@ LineUnstructured::LineUnstructured(int dimension)
     among the processes
 */
 LineUnstructured::LineUnstructured(int id, int dimension, MPI_Comm communicator)
-    : LineKernel(id, dimension, communicator, 1, true)
+    : LineKernel(id, dimension, communicator, 1, ADAPTION_MANUAL, PARTITIONING_ENABLED)
 #else
 /*!
     Creates a patch.
@@ -110,7 +110,7 @@ LineUnstructured::LineUnstructured(int id, int dimension, MPI_Comm communicator)
     \param dimension is the dimension of the patch
 */
 LineUnstructured::LineUnstructured(int id, int dimension)
-    : LineKernel(id, dimension, true)
+    : LineKernel(id, dimension, ADAPTION_MANUAL)
 #endif
 {
 }
@@ -127,7 +127,7 @@ LineUnstructured::LineUnstructured(int id, int dimension)
     among the processes
 */
 LineUnstructured::LineUnstructured(std::istream &stream, MPI_Comm communicator)
-    : LineKernel(communicator, 1, false)
+    : LineKernel(communicator, 1, ADAPTION_MANUAL, PARTITIONING_ENABLED)
 #else
 /*!
     Creates a patch restoring the patch saved in the specified stream.
@@ -135,7 +135,7 @@ LineUnstructured::LineUnstructured(std::istream &stream, MPI_Comm communicator)
     \param stream is the stream to read from
 */
 LineUnstructured::LineUnstructured(std::istream &stream)
-    : LineKernel(false)
+    : LineKernel(ADAPTION_MANUAL)
 #endif
 {
     // Restore the patch
@@ -150,20 +150,6 @@ LineUnstructured::LineUnstructured(std::istream &stream)
 std::unique_ptr<PatchKernel> LineUnstructured::clone() const
 {
     return std::unique_ptr<LineUnstructured>(new LineUnstructured(*this));
-}
-
-/*!
- * Enables or disables expert mode.
- *
- * When expert mode is enabled, it will be possible to change the
- * patch using low level functions (e.g., it will be possible to
- * add individual cells, add vertices, delete cells, ...).
- *
- * \param expert if true, the expert mode will be enabled
- */
-void LineUnstructured::setExpert(bool expert)
-{
-    LineKernel::setExpert(expert);
 }
 
 /*!

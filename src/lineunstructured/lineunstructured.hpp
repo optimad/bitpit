@@ -55,7 +55,7 @@ public:
     std::unique_ptr<PatchKernel> clone() const override;
 
     // Setters
-    void setExpert(bool expert);
+    using LineKernel::setExpert;
 
     // Search algorithms
     long locatePoint(const std::array<double, 3> &point) const override;

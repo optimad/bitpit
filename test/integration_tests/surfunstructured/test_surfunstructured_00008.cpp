@@ -64,7 +64,6 @@ int subtest_001(
 #else
     SurfUnstructured *mesh = new SurfUnstructured(2);
 #endif
-    mesh->setExpert(true);
 
     std::vector<array<double,3>> verts(5);
     verts[0] = {{0,0,0}};

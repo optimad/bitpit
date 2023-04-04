@@ -339,10 +339,18 @@ public:
 	};
 
 	/*!
+		Adaption mode
+	*/
+	enum AdaptionMode {
+		ADAPTION_DISABLED  = -1,
+		ADAPTION_AUTOMATIC,
+		ADAPTION_MANUAL,
+	};
+
+	/*!
 		Adaption status
 	*/
 	enum AdaptionStatus {
-		ADAPTION_UNSUPPORTED = -1,
 		ADAPTION_CLEAN,
 		ADAPTION_DIRTY,
 		ADAPTION_PREPARED,
@@ -350,10 +358,17 @@ public:
 	};
 
 	/*!
+		Partitioning mode
+	*/
+	enum PartitioningMode {
+		PARTITIONING_DISABLED = -1,
+		PARTITIONING_ENABLED
+	};
+
+	/*!
 		Partitioning status
 	*/
 	enum PartitioningStatus {
-		PARTITIONING_UNSUPPORTED = -1,
 		PARTITIONING_CLEAN,
 		PARTITIONING_PREPARED,
 		PARTITIONING_ALTERED
@@ -374,7 +389,7 @@ public:
 	virtual void reset();
 	virtual void resetVertices();
 	virtual void resetCells();
-	virtual void resetInterfaces();
+	virtual std::vector<adaption::Info> resetInterfaces(bool trackAdaption = false);
 
 	bool reserveVertices(size_t nVertices);
 	bool reserveCells(size_t nCells);
@@ -388,6 +403,7 @@ public:
 	std::vector<adaption::Info> spawn(bool trackSpawn);
 
 	bool isAdaptionSupported() const;
+	AdaptionMode getAdaptionMode() const;
 	AdaptionStatus getAdaptionStatus(bool global = false) const;
 	std::vector<adaption::Info> adaption(bool trackAdaption = true, bool squeezeStorage = false);
 	std::vector<adaption::Info> adaptionPrepare(bool trackAdaption = true);
@@ -403,7 +419,7 @@ public:
 	void enableCellBalancing(long id, bool enabled);
 
 	bool isDirty(bool global = false) const;
-	bool isExpert() const;
+	BITPIT_DEPRECATED(bool isExpert() const);
 
 	int getId() const;
 	int getDimension() const;
@@ -647,9 +663,9 @@ public:
 	InterfacesBuildStrategy getInterfacesBuildStrategy() const;
 	bool areInterfacesDirty(bool global = false) const;
 	BITPIT_DEPRECATED(void buildInterfaces());
-	void initializeInterfaces(InterfacesBuildStrategy strategy = INTERFACES_AUTOMATIC);
-	void updateInterfaces(bool forcedUpdated = false);
-	void destroyInterfaces();
+	std::vector<adaption::Info> initializeInterfaces(InterfacesBuildStrategy strategy = INTERFACES_AUTOMATIC, bool trackAdaption = false);
+	std::vector<adaption::Info> updateInterfaces(bool forcedUpdated = false, bool trackAdaption = false);
+	std::vector<adaption::Info> destroyInterfaces(bool trackAdaption = false);
 
 	void getBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint) const;
 	void getBoundingBox(bool global, std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint) const;
@@ -734,6 +750,7 @@ public:
 	bool isPartitioned() const;
 	bool isPartitioningSupported() const;
 	bool arePartitioningInfoDirty(bool global = true) const;
+	PartitioningMode getPartitioningMode() const;
 	PartitioningStatus getPartitioningStatus(bool global = false) const;
 	double evalPartitioningUnbalance() const;
 	double evalPartitioningUnbalance(const std::unordered_map<long, double> &cellWeights) const;
@@ -781,13 +798,13 @@ protected:
 	AlterationFlagsStorage m_alteredInterfaces;
 
 #if BITPIT_ENABLE_MPI==1
-	PatchKernel(MPI_Comm communicator, std::size_t haloSize, bool expert);
-	PatchKernel(int dimension, MPI_Comm communicator, std::size_t haloSize, bool expert);
-	PatchKernel(int id, int dimension, MPI_Comm communicator, std::size_t haloSize, bool expert);
+	PatchKernel(MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode, PartitioningMode partitioningMode);
+	PatchKernel(int dimension, MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode, PartitioningMode partitioningMode);
+	PatchKernel(int id, int dimension, MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode, PartitioningMode partitioningMode);
 #else
-	PatchKernel(bool expert);
-	PatchKernel(int dimension, bool expert);
-	PatchKernel(int id, int dimension, bool expert);
+	PatchKernel(AdaptionMode adaptionMode);
+	PatchKernel(int dimension, AdaptionMode adaptionMode);
+	PatchKernel(int id, int dimension, AdaptionMode adaptionMode);
 #endif
 	PatchKernel(const PatchKernel &other);
 	PatchKernel & operator=(const PatchKernel &other) = delete;
@@ -854,9 +871,9 @@ protected:
 	virtual void _updateAdjacencies();
 
 	void setInterfacesBuildStrategy(InterfacesBuildStrategy status);
-	void pruneStaleInterfaces();
-	virtual void _resetInterfaces(bool release);
-	virtual void _updateInterfaces();
+	std::vector<adaption::Info> pruneStaleInterfaces(bool trackAdaption);
+	virtual std::vector<adaption::Info> _resetInterfaces(bool trackAdaption, bool release);
+	virtual std::vector<adaption::Info> _updateInterfaces(bool trackAdaption);
 
 	bool testCellAlterationFlags(long id, AlterationFlags flags) const;
 	AlterationFlags getCellAlterationFlags(long id) const;
@@ -879,6 +896,7 @@ protected:
 	void setSpawnStatus(SpawnStatus status);
 	virtual std::vector<adaption::Info> _spawn(bool trackAdaption);
 
+	void setAdaptionMode(AdaptionMode mode);
 	void setAdaptionStatus(AdaptionStatus status);
 	virtual std::vector<adaption::Info> _adaptionPrepare(bool trackAdaption);
 	virtual std::vector<adaption::Info> _adaptionAlter(bool trackAdaption);
@@ -903,7 +921,7 @@ protected:
 	virtual void _findCellEdgeNeighs(long id, int edge, const std::vector<long> *blackList, std::vector<long> *neighs) const;
 	virtual void _findCellVertexNeighs(long id, int vertex, const std::vector<long> *blackList, std::vector<long> *neighs) const;
 
-	void setExpert(bool expert);
+	BITPIT_DEPRECATED(void setExpert(bool expert));
 
 	void extractEnvelope(PatchKernel &envelope) const;
 
@@ -914,6 +932,7 @@ protected:
 	virtual void _setHaloSize(std::size_t haloSize);
 
 	void setPartitioned(bool partitioned);
+	void setPartitioningMode(PartitioningMode mode);
 	void setPartitioningStatus(PartitioningStatus status);
 	virtual std::vector<adaption::Info> _partitioningPrepare(const std::unordered_map<long, double> &cellWeights, double defaultWeight, bool trackPartitioning);
 	virtual std::vector<adaption::Info> _partitioningPrepare(const std::unordered_map<long, int> &cellRanks, bool trackPartitioning);
@@ -931,6 +950,9 @@ protected:
 
 	virtual int findAdjoinNeighFace(const Cell &cell, int cellFace, const Cell &neigh) const;
 	virtual bool isSameFace(const Cell &cell_A, int face_A, const Cell &cell_B, int face_B) const;
+
+	std::vector<long> getOrderedCellsVertices(const std::vector<long> &cellIds, bool interior, bool ghost) const;
+	std::vector<long> getOrderedCellsInterfaces(const std::vector<long> &cellIds) const;
 
 private:
 	struct GhostVertexInfo {
@@ -983,9 +1005,8 @@ private:
 
 	SpawnStatus m_spawnStatus;
 
+	AdaptionMode m_adaptionMode;
 	AdaptionStatus m_adaptionStatus;
-
-	bool m_expert;
 
 	int m_id;
 	int m_dimension;
@@ -997,6 +1018,7 @@ private:
 	int m_nProcessors;
 #if BITPIT_ENABLE_MPI==1
 	MPI_Comm m_communicator;
+	PartitioningMode m_partitioningMode;
 	PartitioningStatus m_partitioningStatus;
 
 	int m_owner;
@@ -1029,7 +1051,7 @@ private:
 
 	void computeCellHaloLayer(int id);
 
-	void _partitioningAlter_deleteGhosts();
+	std::vector<adaption::Info> _partitioningAlter_deleteGhosts(bool trackPartitioning);
 
 	std::unordered_map<long, int> _partitioningAlter_evalGhostCellOwnershipChanges();
 	void _partitioningAlter_applyGhostCellOwnershipChanges(int sendRank, std::unordered_map<long, int> *ghostCellOwnershipChanges);
@@ -1066,7 +1088,7 @@ private:
     void initializeSerialCommunicator();
 #endif
 
-	void finalizeAlterations(bool squeezeStorage = false);
+	std::vector<adaption::Info> finalizeAlterations(bool trackAdaption, bool squeezeStorage = false);
 
 	InterfaceIterator buildCellInterface(Cell *cell_1, int face_1, Cell *cell_2, int face_2, long interfaceId = Element::NULL_ID);
 
