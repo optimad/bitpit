@@ -23,6 +23,7 @@
 \*---------------------------------------------------------------------------*/
 #if BITPIT_ENABLE_MPI==1
 
+#include <memory>
 #include <mpi.h>
 #include <unordered_set>
 
@@ -263,7 +264,7 @@ void VolOctree::computePartitioningOctantWeights(const std::unordered_map<long, 
 	CellConstIterator endItr   = internalCellConstEnd();
 
 	std::size_t nOctants = m_tree->getNumOctants();
-	m_partitioningOctantWeights = std::unique_ptr<std::vector<double>>(new std::vector<double>(nOctants, defaultWeight));
+	m_partitioningOctantWeights = std::make_unique<std::vector<double>>(nOctants, defaultWeight);
 	for (CellConstIterator cellItr = beginItr; cellItr != endItr; ++cellItr) {
 		long cellId = cellItr.getId();
 		auto weightItr = cellWeights.find(cellId);
