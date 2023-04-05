@@ -1189,7 +1189,11 @@ void PatchKernel::write(VTKWriteMode mode)
 #endif
 	}
 
-	// Set the dimensinos of the mesh
+	// Set the dimensions of the mesh
+	//
+	// Even if there is just a single process that needs to write the VTK face stream, than
+	// all the processes need to write the face stream as well (even the processes whose
+	// local cells don't require the face steam).
 	PiercedStorage<bool, long> vertexWriteFlag(1, &m_vertices);
 	vertexWriteFlag.fill(false);
 
@@ -1200,6 +1204,13 @@ void PatchKernel::write(VTKWriteMode mode)
 			break;
 		}
 	}
+
+#if BITPIT_ENABLE_MPI==1
+	if (isPartitioned()) {
+		const auto &communicator = getCommunicator();
+		MPI_Allreduce(MPI_IN_PLACE, &vtkFaceStreamNeeded, 1, MPI_C_BOOL, MPI_LOR, communicator);
+	}
+#endif
 
 	long vtkConnectSize    = 0;
 	long vtkFaceStreamSize = 0;
