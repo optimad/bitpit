@@ -249,8 +249,16 @@ void VTKUnstructuredGrid::setElementType( VTKElementType elementType ){
 }
 
 /*!  
- *  sets the size of the unstructured grid. 
- *  If VTKUnstructuredGrid::setElementType(VTKElelementType) has been called the last argument can be omitted and the connectivity size will be calculated within the method.
+ *  Sets the size of the unstructured grid.
+ *
+ *  If VTKUnstructuredGrid::setElementType(VTKElelementType) has been called the size of the
+ *  connectivity can be omitted and the connectivity size will be calculated within the method.
+ *
+ *  When writing a parallel mesh, even if there is just a single process that needs to write the
+ *  face stream information, than all the processes need to write the face stream as well (even
+ *  the processes whose local cells don't require the face steam). It's up to the caller of this
+ *  function to ensure that all processes will provide the correct size of the face stream.
+ *
  *  @param[in] ncells number of cells
  *  @param[in] npoints number of points
  *  @param[in] nconn size of the connectivity information;
