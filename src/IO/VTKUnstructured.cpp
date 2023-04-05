@@ -558,7 +558,6 @@ void VTKUnstructuredGrid::writeCollection( ){
     //Wring Geometry Information
     str << "      <PPoints>" << std::endl;
     writePDataArray( str, m_geometry[getFieldGeomId(VTKUnstructuredField::POINTS)] ) ;
-    str << std::endl ;
     str << "      </PPoints>" << std::endl;
 
 
