@@ -560,6 +560,15 @@ void VTKUnstructuredGrid::writeCollection( ){
     writePDataArray( str, m_geometry[getFieldGeomId(VTKUnstructuredField::POINTS)] ) ;
     str << "      </PPoints>" << std::endl;
 
+    str << "      <PCells>" << std::endl;
+    writePDataArray( str, m_geometry[getFieldGeomId(VTKUnstructuredField::OFFSETS)] ) ;
+    writePDataArray( str, m_geometry[getFieldGeomId(VTKUnstructuredField::TYPES)] ) ;
+    writePDataArray( str, m_geometry[getFieldGeomId(VTKUnstructuredField::CONNECTIVITY)] ) ;
+    if (m_nFaceStreamEntries) {
+        writePDataArray( str, m_geometry[getFieldGeomId(VTKUnstructuredField::FACE_STREAMS)] ) ;
+        writePDataArray( str, m_geometry[getFieldGeomId(VTKUnstructuredField::FACE_OFFSETS)] ) ;
+    }
+    str << "      </PCells>" << std::endl;
 
     for( int i=0; i<m_procs; i++){
         fho.setBlock(i) ;
