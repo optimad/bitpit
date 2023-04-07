@@ -519,6 +519,11 @@ namespace bitpit {
                 uint32_t firstChildIdx = futureIdx - (nChildren - 1);
                 fatherOctant.buildChildren(m_octants.data() + firstChildIdx);
 
+                // Set children information
+                for (int i = 0; i < nChildren; ++i) {
+                    m_octants[firstChildIdx + i].m_info[Octant::INFO_NEW4REFINEMENT] = true;
+                }
+
                 // Update the mapping
                 if(!mapidx.empty()){
                     for (uint8_t i=0; i<nChildren; i++){

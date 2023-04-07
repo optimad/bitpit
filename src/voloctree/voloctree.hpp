@@ -133,8 +133,6 @@ protected:
 	void setCommunicator(MPI_Comm communicator) override;
 #endif
 
-	std::vector<adaption::Info> _spawn(bool trackSpawn) override;
-
 	void _updateAdjacencies() override;
 
 	std::vector<adaption::Info> _adaptionPrepare(bool trackAdaption) override;
@@ -264,9 +262,16 @@ private:
 
 	OctantHash evaluateOctantHash(const OctantInfo &octantInfo);
 
-	StitchInfo deleteCells(const std::vector<DeleteInfo> &deletedOctants);
-	void renumberCells(const std::vector<RenumberInfo> &renumberedOctants);
-	std::vector<long> importCells(const std::vector<OctantInfo> &octantTreeIds, StitchInfo &stitchInfo, std::istream *stream = nullptr);
+	void renumberCells(const adaption::InfoCollection &treeAdaptionData);
+
+	void createCells(StitchInfo &stitchInfo, std::istream *stream,
+					 adaption::InfoCollection *cellAdaptionData,
+	                 adaption::InfoCollection *vertexAdaptionData = nullptr,
+	                 adaption::InfoCollection *interfaceAdaptionData = nullptr);
+
+	StitchInfo deleteCells(const adaption::InfoCollection &cellAdaptionData,
+	                       adaption::InfoCollection *vertexAdaptionData = nullptr,
+	                       adaption::InfoCollection *interfaceAdaptionData = nullptr);
 
 	std::vector<adaption::Info> sync(bool trackChanges);
 

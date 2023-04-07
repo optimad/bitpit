@@ -47,8 +47,8 @@ public:
     VolOctreeMapper(VolOctree *referencePatch, VolOctree *mappedPatch);
 #endif
 
-    void adaptionPrepare(const std::vector<adaption::Info> &adaptionInfo, bool reference = true) override;
-    void adaptionAlter(const std::vector<adaption::Info> &adaptionInfo, bool reference = true, bool inverseFilled = false) override;
+    void adaptionPrepare(const std::vector<adaption::Info> &adaptionData, bool reference = true) override;
+    void adaptionAlter(const std::vector<adaption::Info> &adaptionData, bool reference = true, bool inverseFilled = false) override;
     void adaptionCleanup() override;
 
 #if BITPIT_ENABLE_MPI
@@ -160,8 +160,8 @@ private:
     void _mapMeshesSamePartition(const std::vector<OctantIR> * octantsReference, const std::vector<OctantIR> * octantsMapped,
                                  bool fillInverse, long *indRef);
 
-    void _mappingAdaptionReferenceUpdate(const std::vector<adaption::Info> &adaptionInfo, bool fillInverse = false);
-    void _mappingAdaptionMappedUpdate(const std::vector<adaption::Info> &adaptionInfo);
+    void _mappingAdaptionReferenceUpdate(const std::vector<adaption::Info> &adaptionData, bool fillInverse = false);
+    void _mappingAdaptionMappedUpdate(const std::vector<adaption::Info> &adaptionData);
 
 #if BITPIT_ENABLE_MPI
     void clearPartitionMappingLists();
@@ -176,7 +176,7 @@ private:
 
     void _communicateInverseMapperBack();
 
-    void _communicateMappedAdaptionInfo(const std::vector<adaption::Info> &adaptionInfoMap, std::vector<adaption::Info> *adaptionInfoRef);
+    void _communicateMappedAdaptionInfo(const std::vector<adaption::Info> &adaptionDataMap, std::vector<adaption::Info> *adaptionDataRef);
 #endif
 
 };

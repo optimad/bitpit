@@ -54,13 +54,13 @@ namespace bitpit {
 	cells halo
 */
 VolUnstructured::VolUnstructured(MPI_Comm communicator, std::size_t haloSize)
-	: VolumeKernel(communicator, haloSize, true)
+	: VolumeKernel(communicator, haloSize, ADAPTION_MANUAL, PARTITIONING_ENABLED)
 #else
 /*!
 	Creates an uninitialized serial patch.
 */
 VolUnstructured::VolUnstructured()
-	: VolumeKernel(true)
+	: VolumeKernel(ADAPTION_MANUAL)
 #endif
 {
 }
@@ -111,7 +111,7 @@ VolUnstructured::VolUnstructured(int dimension)
 	cells halo
 */
 VolUnstructured::VolUnstructured(int id, int dimension, MPI_Comm communicator, std::size_t haloSize)
-	: VolumeKernel(id, dimension, communicator, haloSize, true)
+	: VolumeKernel(id, dimension, communicator, haloSize, ADAPTION_MANUAL, PARTITIONING_ENABLED)
 #else
 /*!
 	Creates a patch.
@@ -120,7 +120,7 @@ VolUnstructured::VolUnstructured(int id, int dimension, MPI_Comm communicator, s
 	\param dimension is the dimension of the patch
 */
 VolUnstructured::VolUnstructured(int id, int dimension)
-	: VolumeKernel(id, dimension, true)
+	: VolumeKernel(id, dimension, ADAPTION_MANUAL)
 #endif
 {
 }
@@ -133,20 +133,6 @@ VolUnstructured::VolUnstructured(int id, int dimension)
 std::unique_ptr<PatchKernel> VolUnstructured::clone() const
 {
 	return std::unique_ptr<VolUnstructured>(new VolUnstructured(*this));
-}
-
-/*!
- * Enables or disables expert mode.
- *
- * When expert mode is enabled, it will be possible to change the
- * patch using low level functions (e.g., it will be possible to
- * add individual cells, add vertices, delete cells, ...).
- *
- * \param expert if true, the expert mode will be enabled
- */
-void VolUnstructured::setExpert(bool expert)
-{
-	VolumeKernel::setExpert(expert);
 }
 
 /*!

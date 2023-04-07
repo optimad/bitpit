@@ -50,7 +50,7 @@ public:
 
 	std::unique_ptr<PatchKernel> clone() const override;
 
-	void setExpert(bool expert);
+	using VolumeKernel::setExpert;
 
 	double evalCellVolume(long id) const override;
 	double evalCellSize(long id) const override;

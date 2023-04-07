@@ -66,8 +66,6 @@ public:
 
 	void reset() override;
 
-	void resetInterfaces() override;
-
 	long getVertexCount() const override;
 	int getVertexCount(int direction) const;
 
@@ -149,11 +147,11 @@ public:
 	long getCellFaceNeighsLinearId(long id, int face) const;
 
 protected:
-	std::vector<adaption::Info> _spawn(bool trackSpawn) override;
+	std::vector<adaption::Info> spawn(bool trackSpawn);
 
 	void _updateAdjacencies() override;
 
-	void _updateInterfaces() override;
+	std::vector<adaption::Info> _updateInterfaces(bool trackAdaption) override;
 
 	int _getDumpVersion() const override;
 	void _dump(std::ostream &stream) const override;

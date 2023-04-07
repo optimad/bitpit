@@ -65,9 +65,9 @@ namespace bitpit {
 */
 VolCartesian::VolCartesian()
 #if BITPIT_ENABLE_MPI==1
-	: VolumeKernel(MPI_COMM_NULL, 0, false)
+	: VolumeKernel(MPI_COMM_NULL, 0, ADAPTION_DISABLED, PARTITIONING_DISABLED)
 #else
-	: VolumeKernel(false)
+	: VolumeKernel(ADAPTION_DISABLED)
 #endif
 {
 	initialize();
@@ -103,9 +103,9 @@ VolCartesian::VolCartesian(int id, int dimension,
                                const std::array<double, 3> &lengths,
                                const std::array<int, 3> &nCells)
 #if BITPIT_ENABLE_MPI==1
-	: VolumeKernel(id, dimension, MPI_COMM_NULL, 0, false)
+	: VolumeKernel(id, dimension, MPI_COMM_NULL, 0, ADAPTION_DISABLED, PARTITIONING_DISABLED)
 #else
-	: VolumeKernel(id, dimension, false)
+	: VolumeKernel(id, dimension, ADAPTION_DISABLED)
 #endif
 {
 	initialize();
@@ -144,9 +144,9 @@ VolCartesian::VolCartesian(int id, int dimension,
                                const std::array<double, 3> &origin,
                                double length, int nCells)
 #if BITPIT_ENABLE_MPI==1
-	: VolumeKernel(id, dimension, MPI_COMM_NULL, 0, false)
+	: VolumeKernel(id, dimension, MPI_COMM_NULL, 0, ADAPTION_DISABLED, PARTITIONING_DISABLED)
 #else
-	: VolumeKernel(id, dimension, false)
+	: VolumeKernel(id, dimension, ADAPTION_DISABLED)
 #endif
 {
 	initialize();
@@ -185,9 +185,9 @@ VolCartesian::VolCartesian(int id, int dimension,
                                const std::array<double, 3> &origin,
                                double length, double dh)
 #if BITPIT_ENABLE_MPI==1
-	: VolumeKernel(id, dimension, MPI_COMM_NULL, 0, false)
+	: VolumeKernel(id, dimension, MPI_COMM_NULL, 0, ADAPTION_DISABLED, PARTITIONING_DISABLED)
 #else
-	: VolumeKernel(id, dimension, false)
+	: VolumeKernel(id, dimension, ADAPTION_DISABLED)
 #endif
 {
 	initialize();
@@ -206,9 +206,9 @@ VolCartesian::VolCartesian(int id, int dimension,
 */
 VolCartesian::VolCartesian(std::istream &stream)
 #if BITPIT_ENABLE_MPI==1
-	: VolumeKernel(MPI_COMM_NULL, 0, false)
+	: VolumeKernel(MPI_COMM_NULL, 0, ADAPTION_DISABLED, PARTITIONING_DISABLED)
 #else
-	: VolumeKernel(false)
+	: VolumeKernel(ADAPTION_DISABLED)
 #endif
 {
 	initialize();
@@ -250,15 +250,6 @@ void VolCartesian::reset()
 	m_nCells      = 0;
 	m_nInterfaces = 0;
 }
-
-/*!
-	Resest the interfaces of the patch.
-*/
-void VolCartesian::resetInterfaces()
-{
-	PatchKernel::resetInterfaces();
-}
-
 
 /*!
 	Internal function to update the adjacencies of the patch.
@@ -313,8 +304,13 @@ void VolCartesian::_updateAdjacencies()
 
 	It is not possible to partially update the interfaces of this patch.
 	The function will always update all the interfaces.
+
+	\param trackAdaption if set to true the changes to the patch will be tracked
+	\result If the adaption is tracked, returns a vector of adaption::Info
+	with all the changes done to the patch during the adaption, otherwise an
+	empty vector will be returned.
 */
-void VolCartesian::_updateInterfaces()
+std::vector<adaption::Info> VolCartesian::_updateInterfaces(bool trackAdaption)
 {
 	// Partial updates are not supported
 	CellConstIterator beginItr = cellConstBegin();
@@ -335,6 +331,7 @@ void VolCartesian::_updateInterfaces()
 	}
 
 	// Build interfaces
+	adaption::InfoCollection adaptionData;
 	if (getMemoryMode() == MemoryMode::MEMORY_NORMAL) {
 		int nCellFaces = 2 * getDimension();
 
@@ -344,8 +341,9 @@ void VolCartesian::_updateInterfaces()
 		const ReferenceElementInfo &interfaceTypeInfo = ReferenceElementInfo::getInfo(interfaceType);
 		const int nInterfaceVertices = interfaceTypeInfo.nVertices;
 
-		// Enable advanced editing
-		setExpert(true);
+		// Enable manual adaption
+		AdaptionMode previousAdaptionMode = getAdaptionMode();
+		setAdaptionMode(ADAPTION_MANUAL);
 
 		// Initialize interfaces
 		for (Cell &cell : getCells()) {
@@ -353,6 +351,8 @@ void VolCartesian::_updateInterfaces()
 		}
 
 		// Build interfaces
+		std::vector<long> createdInterfaces;
+		createdInterfaces.reserve(m_nInterfaces);
 		for (Cell &cell : getCells()) {
 			long cellId = cell.getId();
 			for (int face = 0; face < nCellFaces; ++face) {
@@ -401,12 +401,24 @@ void VolCartesian::_updateInterfaces()
 				} else {
 					interface.unsetNeigh();
 				}
+
+				// Track changes
+				createdInterfaces.push_back(interfaceId);
 			}
 		}
 
-		// Disable advanced editing
-		setExpert(false);
+		// Restore previous adaption mode
+		setAdaptionMode(previousAdaptionMode);
+
+		// Track changes
+		if (trackAdaption) {
+			std::size_t adaptionInfoId = adaptionData.insert(adaption::TYPE_CREATION, adaption::ENTITY_INTERFACE);
+			adaption::Info &adaptionInfo = adaptionData[adaptionInfoId];
+			adaptionInfo.previous = std::move(createdInterfaces);
+		}
 	}
+
+	return adaptionData.dump();
 }
 
 /*!
@@ -468,9 +480,6 @@ void VolCartesian::initialize()
 
 	// Set the bounding box as frozen
 	setBoundingBoxFrozen(true);
-
-	// This patch need to be spawn
-	setSpawnStatus(SPAWN_NEEDED);
 
 	// Set the light memory mode
 	setMemoryMode(MemoryMode::MEMORY_LIGHT);
@@ -937,7 +946,6 @@ void VolCartesian::switchMemoryMode(MemoryMode mode)
 	switch (mode) {
 
 	case MemoryMode::MEMORY_NORMAL:
-		// Spawn the patch to activate normal memory mode
 		spawn(false);
 
 		break;
@@ -947,9 +955,6 @@ void VolCartesian::switchMemoryMode(MemoryMode mode)
 		// of the patch, therefore we can call the 'reset' implementation of
 		// the kernel.
 		VolumeKernel::reset();
-
-		// Now the patch needs to be spawn
-		setSpawnStatus(SPAWN_NEEDED);
 
 		// Set the light memory mode
 		setMemoryMode(mode);
@@ -1000,29 +1005,30 @@ double VolCartesian::getSpacing(int direction) const
 	\result Returns a vector of adaption::Info that can be used to track
 	the changes done during the update.
 */
-std::vector<adaption::Info> VolCartesian::_spawn(bool trackSpawn)
+std::vector<adaption::Info> VolCartesian::spawn(bool trackSpawn)
 {
-	std::vector<adaption::Info> updateInfo;
+	std::vector<adaption::Info> adaptionData;
 
 	// If the patch is in 'normal' mode there is nothing to do.
 	if (getMemoryMode() == MEMORY_NORMAL) {
-		return updateInfo;
+		return adaptionData;
 	}
 
-	// Enable advanced editing
-	setExpert(true);
+	// Enable manual adaption
+	AdaptionMode previousAdaptionMode = getAdaptionMode();
+	setAdaptionMode(ADAPTION_MANUAL);
 
 	// Definition of the mesh
 	addVertices();
 	addCells();
 
-	// Disable advanced editing
-	setExpert(false);
+	// Restore previous adaption mode
+	setAdaptionMode(previousAdaptionMode);
 
 	// Adaption info
 	if (trackSpawn) {
-		updateInfo.emplace_back();
-		adaption::Info &adaptionCellInfo = updateInfo.back();
+		adaptionData.emplace_back();
+		adaption::Info &adaptionCellInfo = adaptionData.back();
 		adaptionCellInfo.type   = adaption::TYPE_CREATION;
 		adaptionCellInfo.entity = adaption::ENTITY_CELL;
 		adaptionCellInfo.current.reserve(m_cells.size());
@@ -1032,8 +1038,19 @@ std::vector<adaption::Info> VolCartesian::_spawn(bool trackSpawn)
 			cellId = cell.getId();
 		}
 
-		updateInfo.emplace_back();
-		adaption::Info &adaptionInterfaceInfo = updateInfo.back();
+		adaptionData.emplace_back();
+		adaption::Info &adaptionVertexInfo = adaptionData.back();
+		adaptionVertexInfo.type   = adaption::TYPE_CREATION;
+		adaptionVertexInfo.entity = adaption::ENTITY_VERTEX;
+		adaptionVertexInfo.current.reserve(m_cells.size());
+		for (auto &vertex : m_vertices) {
+			adaptionVertexInfo.current.emplace_back();
+			long &vertexId = adaptionVertexInfo.current.back();
+			vertexId = vertex.getId();
+		}
+
+		adaptionData.emplace_back();
+		adaption::Info &adaptionInterfaceInfo = adaptionData.back();
 		adaptionInterfaceInfo.type   = adaption::TYPE_CREATION;
 		adaptionInterfaceInfo.entity = adaption::ENTITY_INTERFACE;
 		adaptionInterfaceInfo.current.reserve(m_interfaces.size());
@@ -1043,14 +1060,14 @@ std::vector<adaption::Info> VolCartesian::_spawn(bool trackSpawn)
 			interfaceId = interface.getId();
 		}
 	} else {
-		updateInfo.emplace_back();
+		adaptionData.emplace_back();
 	}
 
 	// Updating the adaption brings the patch is in normal memory mode
 	setMemoryMode(MemoryMode::MEMORY_NORMAL);
 
 	// Done
-	return updateInfo;
+	return adaptionData;
 }
 
 /*!
@@ -1171,9 +1188,6 @@ void VolCartesian::_dump(std::ostream &stream) const
  */
 void VolCartesian::_restore(std::istream &stream)
 {
-	// This patch need to be spawn
-	setSpawnStatus(SPAWN_NEEDED);
-
 	// Origin
 	std::array<double, 3> origin;
 	utils::binary::read(stream, origin[0]);

@@ -65,18 +65,24 @@ namespace bitpit {
 	will be created
 	\param haloSize is the size, expressed in number of layers, of the ghost
 	cells halo
-	\param expert if true, the expert mode will be enabled
+	\param adaptionMode is the adaption mode that will be used for the patch
+	\param partitioningMode is the partitioning mode that will be used for the
+	patch
 */
-PatchKernel::PatchKernel(MPI_Comm communicator, std::size_t haloSize, bool expert)
+PatchKernel::PatchKernel(MPI_Comm communicator, std::size_t haloSize,
+                         AdaptionMode adaptionMode, PartitioningMode partitioningMode)
 #else
 /*!
 	Creates a patch.
 
-	\param expert if true, the expert mode will be enabled
+	\param adaptionMode is the adaption mode that will be used for the patch
 */
-PatchKernel::PatchKernel(bool expert)
+PatchKernel::PatchKernel(AdaptionMode adaptionMode)
 #endif
-	: m_expert(expert)
+	: m_adaptionMode(adaptionMode)
+#if BITPIT_ENABLE_MPI==1
+	  , m_partitioningMode(partitioningMode)
+#endif
 {
 	// Initialize the patch
 #if BITPIT_ENABLE_MPI==1
@@ -107,19 +113,25 @@ PatchKernel::PatchKernel(bool expert)
 	will be created
 	\param haloSize is the size, expressed in number of layers, of the ghost
 	cells halo
-	\param expert if true, the expert mode will be enabled
+	\param adaptionMode is the adaption mode that will be used for the patch
+	\param partitioningMode is the partitioning mode that will be used for the
+	patch
 */
-PatchKernel::PatchKernel(int dimension, MPI_Comm communicator, std::size_t haloSize, bool expert)
+PatchKernel::PatchKernel(int dimension, MPI_Comm communicator, std::size_t haloSize,
+                         AdaptionMode adaptionMode, PartitioningMode partitioningMode)
 #else
 /*!
 	Creates a patch.
 
 	\param dimension is the dimension of the patch
-	\param expert if true, the expert mode will be enabled
+	\param adaptionMode is the adaption mode that will be used for the patch
 */
-PatchKernel::PatchKernel(int dimension, bool expert)
+PatchKernel::PatchKernel(int dimension, AdaptionMode adaptionMode)
 #endif
-	: m_expert(expert)
+	: m_adaptionMode(adaptionMode)
+#if BITPIT_ENABLE_MPI==1
+	  , m_partitioningMode(partitioningMode)
+#endif
 {
 	// Initialize the patch
 #if BITPIT_ENABLE_MPI==1
@@ -154,20 +166,26 @@ PatchKernel::PatchKernel(int dimension, bool expert)
 	will be created
 	\param haloSize is the size, expressed in number of layers, of the ghost
 	cells halo
-	\param expert if true, the expert mode will be enabled
+	\param adaptionMode is the adaption mode that will be used for the patch
+	\param partitioningMode is the partitioning mode that will be used for the
+	patch
 */
-PatchKernel::PatchKernel(int id, int dimension, MPI_Comm communicator, std::size_t haloSize, bool expert)
+PatchKernel::PatchKernel(int id, int dimension, MPI_Comm communicator, std::size_t haloSize,
+                         AdaptionMode adaptionMode, PartitioningMode partitioningMode)
 #else
 /*!
 	Creates a patch.
 
 	\param id is the id that will be assigned to the patch
 	\param dimension is the dimension of the patch
-	\param expert if true, the expert mode will be enabled
+	\param adaptionMode is the adaption mode that will be used for the patch
 */
-PatchKernel::PatchKernel(int id, int dimension, bool expert)
+PatchKernel::PatchKernel(int id, int dimension, AdaptionMode adaptionMode)
 #endif
-	: m_expert(expert)
+	: m_adaptionMode(adaptionMode)
+#if BITPIT_ENABLE_MPI==1
+	  , m_partitioningMode(partitioningMode)
+#endif
 {
 	// Initialize the patch
 #if BITPIT_ENABLE_MPI==1
@@ -225,14 +243,14 @@ PatchKernel::PatchKernel(const PatchKernel &other)
       m_boxMaxCounter(other.m_boxMaxCounter),
       m_adjacenciesBuildStrategy(other.m_adjacenciesBuildStrategy),
       m_interfacesBuildStrategy(other.m_interfacesBuildStrategy),
-      m_spawnStatus(other.m_spawnStatus),
+      m_adaptionMode(other.m_adaptionMode),
       m_adaptionStatus(other.m_adaptionStatus),
-      m_expert(other.m_expert),
       m_dimension(other.m_dimension),
       m_toleranceCustom(other.m_toleranceCustom),
       m_tolerance(other.m_tolerance)
 #if BITPIT_ENABLE_MPI==1
-      , m_partitioningStatus(other.m_partitioningStatus),
+      , m_partitioningMode(other.m_partitioningMode),
+      m_partitioningStatus(other.m_partitioningStatus),
       m_owner(other.m_owner),
       m_haloSize(other.m_haloSize),
       m_partitioningCellsTag(other.m_partitioningCellsTag),
@@ -311,9 +329,8 @@ PatchKernel::PatchKernel(PatchKernel &&other)
       m_boxMaxCounter(std::move(other.m_boxMaxCounter)),
       m_adjacenciesBuildStrategy(std::move(other.m_adjacenciesBuildStrategy)),
       m_interfacesBuildStrategy(std::move(other.m_interfacesBuildStrategy)),
-      m_spawnStatus(std::move(other.m_spawnStatus)),
+      m_adaptionMode(std::move(other.m_adaptionMode)),
       m_adaptionStatus(std::move(other.m_adaptionStatus)),
-      m_expert(std::move(other.m_expert)),
       m_id(std::move(other.m_id)),
       m_dimension(std::move(other.m_dimension)),
       m_toleranceCustom(std::move(other.m_toleranceCustom)),
@@ -322,6 +339,7 @@ PatchKernel::PatchKernel(PatchKernel &&other)
       m_nProcessors(std::move(other.m_nProcessors))
 #if BITPIT_ENABLE_MPI==1
       , m_communicator(std::move(MPI_COMM_NULL)),
+      m_partitioningMode(other.m_partitioningMode),
       m_partitioningStatus(std::move(other.m_partitioningStatus)),
       m_owner(std::move(other.m_owner)),
       m_haloSize(std::move(other.m_haloSize)),
@@ -400,9 +418,8 @@ PatchKernel & PatchKernel::operator=(PatchKernel &&other)
 	m_boxMaxCounter = std::move(other.m_boxMaxCounter);
 	m_adjacenciesBuildStrategy = std::move(other.m_adjacenciesBuildStrategy);
 	m_interfacesBuildStrategy = std::move(other.m_interfacesBuildStrategy);
-	m_spawnStatus = std::move(other.m_spawnStatus);
+	m_adaptionMode = std::move(other.m_adaptionMode);
 	m_adaptionStatus = std::move(other.m_adaptionStatus);
-	m_expert = std::move(other.m_expert);
 	m_id = std::move(other.m_id);
 	m_dimension = std::move(other.m_dimension);
 	m_toleranceCustom = std::move(other.m_toleranceCustom);
@@ -411,6 +428,7 @@ PatchKernel & PatchKernel::operator=(PatchKernel &&other)
 	m_nProcessors = std::move(other.m_nProcessors);
 #if BITPIT_ENABLE_MPI==1
 	m_communicator = std::move(MPI_COMM_NULL);
+	m_partitioningMode = std::move(other.m_partitioningMode);
 	m_partitioningStatus = std::move(other.m_partitioningStatus);
 	m_owner = std::move(other.m_owner);
 	m_haloSize = std::move(other.m_haloSize);
@@ -503,17 +521,11 @@ void PatchKernel::initialize()
 	// Set interfaces build strategy
 	setInterfacesBuildStrategy(INTERFACES_NONE);
 
-	// Set the spawn as unneeded
+	// Set the adaption as clean
 	//
-	// Specific implementation will set the appropriate status during their
-	// initialization.
-	setSpawnStatus(SPAWN_UNNEEDED);
-
-	// Set the adaption as unsupported
-	//
-	// Specific implementation will set the appropriate status during their
-	// initialization.
-	setAdaptionStatus(ADAPTION_UNSUPPORTED);
+	// Setting the adaptation as dirty guarantees that, at the first patch
+	// updated, all the data structures will be properly initialized.
+	setAdaptionStatus(ADAPTION_CLEAN);
 
 #if BITPIT_ENABLE_MPI==1
 	// Initialize communicator
@@ -523,11 +535,7 @@ void PatchKernel::initialize()
 	initializeHaloSize(haloSize);
 
 	// Mark patch as partioned
-	if (isPartitioned()) {
-		setPartitioningStatus(PARTITIONING_CLEAN);
-	} else {
-		setPartitioningStatus(PARTITIONING_UNSUPPORTED);
-	}
+	setPartitioningStatus(PARTITIONING_CLEAN);
 
 	// Initialize partitioning tags
 	m_partitioningCellsTag    = -1;
@@ -619,32 +627,26 @@ PatchKernel::~PatchKernel()
 */
 std::vector<adaption::Info> PatchKernel::update(bool trackAdaption, bool squeezeStorage)
 {
-	std::vector<adaption::Info> updateInfo;
+	std::vector<adaption::Info> adaptionData;
 
 	// Early return if the patch is not dirty
 	//
 	// If we need to squeeze the storage we need to perform the update also
 	// if the patch is not dirty.
 	if (!squeezeStorage && !isDirty(true)) {
-		return updateInfo;
+		return adaptionData;
 	}
 
 	// Finalize alterations
-	finalizeAlterations(squeezeStorage);
-
-	// Spawn
-	bool spawnNeeed = (getSpawnStatus() == SPAWN_NEEDED);
-	if (spawnNeeed) {
-		mergeAdaptionInfo(spawn(trackAdaption), updateInfo);
-	}
+	mergeAdaptionInfo(finalizeAlterations(trackAdaption, squeezeStorage), adaptionData);
 
 	// Adaption
 	bool adaptionDirty = (getAdaptionStatus(true) == ADAPTION_DIRTY);
 	if (adaptionDirty) {
-		mergeAdaptionInfo(adaption(trackAdaption, squeezeStorage), updateInfo);
+		mergeAdaptionInfo(adaption(trackAdaption, squeezeStorage), adaptionData);
 	}
 
-	return updateInfo;
+	return adaptionData;
 }
 
 /*!
@@ -676,33 +678,7 @@ void PatchKernel::simulateCellUpdate(const long id, adaption::Marker marker, std
 */
 std::vector<adaption::Info> PatchKernel::spawn(bool trackSpawn)
 {
-	std::vector<adaption::Info> spawnInfo;
-
-#if BITPIT_ENABLE_MPI==1
-	// This is a collevtive operation and should be called by all processes
-	if (isPartitioned()) {
-		const auto &communicator = getCommunicator();
-		MPI_Barrier(communicator);
-	}
-#endif
-
-	// Check spawn status
-	SpawnStatus spawnStatus = getSpawnStatus();
-	if (spawnStatus == SPAWN_UNNEEDED || spawnStatus == SPAWN_DONE) {
-		return spawnInfo;
-	}
-
-	// Spawn the patch
-	spawnInfo = _spawn(trackSpawn);
-
-	// Finalize patch alterations
-	finalizeAlterations(true);
-
-	// Spwan is done
-	setSpawnStatus(SPAWN_DONE);
-
-	// Done
-	return spawnInfo;
+	return adaption(trackSpawn);
 }
 
 /*!
@@ -717,23 +693,29 @@ std::vector<adaption::Info> PatchKernel::spawn(bool trackSpawn)
 */
 std::vector<adaption::Info> PatchKernel::adaption(bool trackAdaption, bool squeezeStorage)
 {
-	std::vector<adaption::Info> adaptionInfo;
+	std::vector<adaption::Info> adaptionData;
 
-	// Check adaption status
+	// Early return if adaption cannot be performed
+	AdaptionMode adaptionMode = getAdaptionMode();
+	if (adaptionMode == ADAPTION_DISABLED) {
+		return adaptionData;
+	}
+
 	AdaptionStatus adaptionStatus = getAdaptionStatus(true);
-	if (adaptionStatus == ADAPTION_UNSUPPORTED || adaptionStatus == ADAPTION_CLEAN) {
-		return adaptionInfo;
+	if (adaptionStatus == ADAPTION_CLEAN) {
+		return adaptionData;
 	} else if (adaptionStatus != ADAPTION_DIRTY) {
 		throw std::runtime_error ("An adaption is already in progress.");
 	}
 
+	// Run adaption
 	adaptionPrepare(false);
 
-	adaptionInfo = adaptionAlter(trackAdaption, squeezeStorage);
+	adaptionData = adaptionAlter(trackAdaption, squeezeStorage);
 
 	adaptionCleanup();
 
-	return adaptionInfo;
+	return adaptionData;
 }
 
 /*!
@@ -743,6 +725,13 @@ std::vector<adaption::Info> PatchKernel::adaption(bool trackAdaption, bool squee
 	track the changes that will be performed to the patch. During this phase
 	no changes will be performed to the patch.
 
+	Tracking will only list changes that may data collection on the internal
+	data structured (e.g., adaption preparation will not track adaption of
+	ghost cells).
+
+	Information available for tracking purposes are the following:
+	 - internal cells that will be coarsened/refined.
+
 	\param trackAdaption if set to true the function will return the changes
 	that will be performed in the alter step
 	\result If the adaption is tracked, returns a vector of adaption::Info that
@@ -751,23 +740,28 @@ std::vector<adaption::Info> PatchKernel::adaption(bool trackAdaption, bool squee
 */
 std::vector<adaption::Info> PatchKernel::adaptionPrepare(bool trackAdaption)
 {
-	std::vector<adaption::Info> adaptionInfo;
+	std::vector<adaption::Info> adaptionData;
 
-	// Check adaption status
+	// Early return if adaption cannot be performed
+	AdaptionMode adaptionMode = getAdaptionMode();
+	if (adaptionMode == ADAPTION_DISABLED) {
+		return adaptionData;
+	}
+
 	AdaptionStatus adaptionStatus = getAdaptionStatus(true);
-	if (adaptionStatus == ADAPTION_UNSUPPORTED || adaptionStatus == ADAPTION_CLEAN) {
-		return adaptionInfo;
+	if (adaptionStatus == ADAPTION_CLEAN) {
+		return adaptionData;
 	} else if (adaptionStatus != ADAPTION_DIRTY) {
 		throw std::runtime_error ("An adaption is already in progress.");
 	}
 
 	// Execute the adaption preparation
-	adaptionInfo = _adaptionPrepare(trackAdaption);
+	adaptionData = _adaptionPrepare(trackAdaption);
 
 	// Update the status
 	setAdaptionStatus(ADAPTION_PREPARED);
 
-	return adaptionInfo;
+	return adaptionData;
 }
 
 /*!
@@ -775,7 +769,23 @@ std::vector<adaption::Info> PatchKernel::adaptionPrepare(bool trackAdaption)
 
 	The actual modification of the patch takes place during this phase. After
 	this phase the adaption is completed and the patch is in its final state.
-	Optionally the patch can track the changes performed to the patch.
+
+	Optionally, this funciton can track the changes performed to the patch.
+
+	Tracking information will not contain changes that involve data collection
+	on ghost data structured (e.g., ghost cells adaption is not tracked, only
+	deletion and creation of ghost cells will be tracked).
+
+	Information available for tracking purposes are the following:
+	 - internal cells that have been coarsened/refined;
+	 - new internal vertices that have been created;
+     - internal vertices that have been deleted;
+	 - new ghost cells that have been created;
+	 - new ghost vertices that have been created;
+	 - ghost cells that have been deleted;
+	 - ghost vertices that have been deleted;
+	 - new interfaces that have been created;
+	 - interfaces that have been deleted.
 
 	\param trackAdaption if set to true the function will return the changes
 	done to the patch during the adaption
@@ -787,26 +797,31 @@ std::vector<adaption::Info> PatchKernel::adaptionPrepare(bool trackAdaption)
 */
 std::vector<adaption::Info> PatchKernel::adaptionAlter(bool trackAdaption, bool squeezeStorage)
 {
-	std::vector<adaption::Info> adaptionInfo;
+	std::vector<adaption::Info> adaptionData;
 
-	// Check adaption status
+	// Early return if adaption cannot be performed
+	AdaptionMode adaptionMode = getAdaptionMode();
+	if (adaptionMode == ADAPTION_DISABLED) {
+		return adaptionData;
+	}
+
 	AdaptionStatus adaptionStatus = getAdaptionStatus();
-	if (adaptionStatus == ADAPTION_UNSUPPORTED || adaptionStatus == ADAPTION_CLEAN) {
-		return adaptionInfo;
+	if (adaptionStatus == ADAPTION_CLEAN) {
+		return adaptionData;
 	} else if (adaptionStatus != ADAPTION_PREPARED) {
 		throw std::runtime_error ("The prepare function has not been called.");
 	}
 
 	// Adapt the patch
-	adaptionInfo = _adaptionAlter(trackAdaption);
+	mergeAdaptionInfo(_adaptionAlter(trackAdaption), adaptionData);
 
 	// Finalize patch alterations
-	finalizeAlterations(squeezeStorage);
+	mergeAdaptionInfo(finalizeAlterations(trackAdaption, squeezeStorage), adaptionData);
 
 	// Update the status
 	setAdaptionStatus(ADAPTION_ALTERED);
 
-	return adaptionInfo;
+	return adaptionData;
 }
 
 /*!
@@ -816,8 +831,14 @@ std::vector<adaption::Info> PatchKernel::adaptionAlter(bool trackAdaption, bool 
 */
 void PatchKernel::adaptionCleanup()
 {
+	// Early return if adaption cannot be performed
+	AdaptionMode adaptionMode = getAdaptionMode();
+	if (adaptionMode == ADAPTION_DISABLED) {
+		return;
+	}
+
 	AdaptionStatus adaptionStatus = getAdaptionStatus();
-	if (adaptionStatus == ADAPTION_UNSUPPORTED || adaptionStatus == ADAPTION_CLEAN) {
+	if (adaptionStatus == ADAPTION_CLEAN) {
 		return;
 	} else if (adaptionStatus == ADAPTION_PREPARED) {
 		throw std::runtime_error ("It is not yet possible to abort an adaption.");
@@ -844,11 +865,15 @@ void PatchKernel::settleAdaptionMarkers()
 /*!
 	Finalize patch alterations.
 
+	\param trackAdaption if set to true the function will return the changes
+	that will be performed in the alter step
 	\param squeezeStorage if set to true patch data structures will be
 	squeezed
 */
-void PatchKernel::finalizeAlterations(bool squeezeStorage)
+std::vector<adaption::Info> PatchKernel::finalizeAlterations(bool trackAdaption, bool squeezeStorage)
 {
+	std::vector<adaption::Info> adaptionData;
+
 	// Flush vertex data structures
 	m_vertices.flush();
 
@@ -870,7 +895,7 @@ void PatchKernel::finalizeAlterations(bool squeezeStorage)
 	// Update interfaces
 	bool interfacesDirty = areInterfacesDirty();
 	if (interfacesDirty) {
-		updateInterfaces();
+		mergeAdaptionInfo(updateInterfaces(false, trackAdaption), adaptionData);
 	}
 
 	// Flush interfaces data structures
@@ -897,6 +922,8 @@ void PatchKernel::finalizeAlterations(bool squeezeStorage)
 	m_cells.sync();
 	m_interfaces.sync();
 	m_vertices.sync();
+
+	return adaptionData;
 }
 
 /*!
@@ -1043,25 +1070,29 @@ void PatchKernel::resetCells()
 
 	This function doesn't change the build strategy, it only resets the
 	existing interface.
+
+	\param trackAdaption if set to true the changes to the patch will be
+	tracked
 */
-void PatchKernel::resetInterfaces()
+std::vector<adaption::Info> PatchKernel::resetInterfaces(bool trackAdaption)
 {
+	std::vector<adaption::Info> adaptionData;
+
 	// Early return if no interfaces have been built
 	if (getInterfacesBuildStrategy() == INTERFACES_NONE) {
-		return;
+		return adaptionData;
 	}
 
-	// Prune stale interfaces
-	pruneStaleInterfaces();
-
 	// Reset the interfaces
-	_resetInterfaces(false);
-
-	// All remaining interfaces will be deleted
-	setInterfaceAlterationFlags(FLAG_DELETED);
+	adaptionData = _resetInterfaces(trackAdaption, false);
 
 	// Mark cell interfaces as dirty
 	setCellAlterationFlags(FLAG_INTERFACES_DIRTY);
+
+	// Clear list of altered interfaces
+	m_alteredInterfaces.clear();
+
+	return adaptionData;
 }
 
 /*!
@@ -1069,20 +1100,49 @@ void PatchKernel::resetInterfaces()
 
 	This function doesn't change the alteration flags.
 
+	\param trackAdaption if set to true the changes to the patch will be
+	tracked
 	\param release if it's true the memory hold by the interfaces will be
 	released, otherwise the interfaces will be reset but their memory will
-	not be relased
+	not be released
 */
-void PatchKernel::_resetInterfaces(bool release)
+std::vector<adaption::Info> PatchKernel::_resetInterfaces(bool trackAdaption, bool release)
 {
+	// Reset cell interfaces
 	for (auto &cell : m_cells) {
 		cell.resetInterfaces(!release);
 	}
 
+	// Track deleted interfaces
+	adaption::InfoCollection adaptionData;
+	if (trackAdaption) {
+		// Identify interior interfaces
+		std::unordered_set<long> internalInterfaces;
+		for (CellConstIterator cellItr = internalCellBegin(); cellItr != internalCellEnd(); ++cellItr) {
+			const Cell &cell = *cellItr;
+			const int nCellInterfaces = cell.getInterfaceCount();
+			const long *cellInterfaces = cell.getInterfaces();
+			for (int k = 0; k < nCellInterfaces; ++k) {
+				long interfaceId = cellInterfaces[k];
+				internalInterfaces.insert(interfaceId);
+			}
+		}
+
+		// Track interfaces that will be deleted
+		//
+		// Only interfaces on interior cells will be tracked.
+		std::size_t adaptionInfoId = adaptionData.insert(adaption::TYPE_DELETION, adaption::ENTITY_INTERFACE);
+		adaption::Info &adaptionInfo = adaptionData[adaptionInfoId];
+		adaptionInfo.previous = std::vector<long>(internalInterfaces.begin(), internalInterfaces.end());
+	}
+
+	// Delete interfaces
 	m_interfaces.clear(release);
 	if (m_interfaceIdGenerator) {
 		m_interfaceIdGenerator->reset();
 	}
+
+	return adaptionData.dump();
 }
 
 /*!
@@ -1100,7 +1160,7 @@ void PatchKernel::_resetInterfaces(bool release)
 */
 bool PatchKernel::reserveVertices(size_t nVertices)
 {
-	if (!isExpert()) {
+	if (getAdaptionMode() != ADAPTION_MANUAL) {
 		return false;
 	}
 
@@ -1123,7 +1183,7 @@ bool PatchKernel::reserveVertices(size_t nVertices)
 */
 bool PatchKernel::reserveCells(size_t nCells)
 {
-	if (!isExpert()) {
+	if (getAdaptionMode() != ADAPTION_MANUAL) {
 		return false;
 	}
 
@@ -1148,7 +1208,7 @@ bool PatchKernel::reserveCells(size_t nCells)
 */
 bool PatchKernel::reserveInterfaces(size_t nInterfaces)
 {
-	if (!isExpert()) {
+	if (getAdaptionMode() != ADAPTION_MANUAL) {
 		return false;
 	}
 
@@ -1254,26 +1314,15 @@ void PatchKernel::write(VTKWriteMode mode)
 /*!
 	Returns the current spawn status.
 
+	Span functionality is obsolete. The patch dosn't need to be spawned
+	anymore.
+
 	\return The current spawn status.
 */
 PatchKernel::SpawnStatus PatchKernel::getSpawnStatus() const
 {
-	// There is no need to check the spawn status globally because the spawn
-	// status will always be the same on all the processes.
-
-	return m_spawnStatus;
+	return SPAWN_UNNEEDED;
 }
-
-/*!
-	Set the current spawn status.
-
-	\param status is the spawn status that will be set
-*/
-void PatchKernel::setSpawnStatus(SpawnStatus status)
-{
-	m_spawnStatus = status;
-}
-
 
 /*!
 	Checks if the patch supports adaption.
@@ -1282,11 +1331,47 @@ void PatchKernel::setSpawnStatus(SpawnStatus status)
 */
 bool PatchKernel::isAdaptionSupported() const
 {
-    return (getAdaptionStatus() != ADAPTION_UNSUPPORTED);
+    return (getAdaptionMode() != ADAPTION_DISABLED);
+}
+
+/*!
+	Returns the adaption mode.
+
+	Adaption mode tells if the patch can be adapted and which strategies can
+	be used to adapt the patch.
+
+	The following adaption modes are supported:
+	 - disabled, no adaption can be performed;
+	 - automatic, adaption is performed specifying which cells should be
+	   refiend/coarsen and then the patch will perform all the alterations
+	   needed to fulfill the adaption requests;
+	 - manual, this modes allows to use low level function to add and delete
+	   individual cells and vertices. It's up to the user to guarantee the
+	   consistency of the patch.
+
+	\return The adaption mode.
+*/
+PatchKernel::AdaptionMode PatchKernel::getAdaptionMode() const
+{
+	return m_adaptionMode;
+}
+
+/*!
+	Set the adaption mode.
+
+	See PatchKernel::getAdaptionMode() for a list of supported adaption modes.
+
+	\param mode is the adaption mode that will be set
+*/
+void PatchKernel::setAdaptionMode(AdaptionMode mode)
+{
+	m_adaptionMode = mode;
 }
 
 /*!
 	Returns the current adaption status.
+
+	Adaption mode tells which stage of the adaption process
 
 	\param global if set to true, the adaption status will be evaluated
 	globally across all the partitions
@@ -1348,10 +1433,6 @@ bool PatchKernel::isDirty(bool global) const
 	}
 
 	if (!isDirty) {
-		isDirty |= (getSpawnStatus() == SPAWN_NEEDED);
-	}
-
-	if (!isDirty) {
 		isDirty |= (getAdaptionStatus(false) == ADAPTION_DIRTY);
 	}
 
@@ -1399,11 +1480,13 @@ bool PatchKernel::isDirty(bool global) const
 */
 void PatchKernel::setExpert(bool expert)
 {
-	if (isExpert() == expert) {
-		return;
+	static AdaptionMode initialAdaptionMode;
+	if (!expert) {
+		initialAdaptionMode = m_adaptionMode;
+		m_adaptionMode = ADAPTION_MANUAL;
+	} else {
+		m_adaptionMode = initialAdaptionMode;
 	}
-
-	m_expert = expert;
 }
 
 /*!
@@ -1418,7 +1501,7 @@ void PatchKernel::setExpert(bool expert)
 */
 bool PatchKernel::isExpert() const
 {
-	return m_expert;
+	return (m_adaptionMode == ADAPTION_MANUAL);
 }
 
 /*!
@@ -1879,7 +1962,7 @@ PatchKernel::VertexIterator PatchKernel::addVertex(Vertex &&source, long id)
 */
 PatchKernel::VertexIterator PatchKernel::addVertex(const std::array<double, 3> &coords, long id)
 {
-	if (!isExpert()) {
+	if (getAdaptionMode() != ADAPTION_MANUAL) {
 		return vertexEnd();
 	}
 
@@ -1969,7 +2052,7 @@ PatchKernel::VertexIterator PatchKernel::_addInternalVertex(const std::array<dou
 */
 PatchKernel::VertexIterator PatchKernel::restoreVertex(const std::array<double, 3> &coords, long id)
 {
-	if (!isExpert()) {
+	if (getAdaptionMode() != ADAPTION_MANUAL) {
 		return vertexEnd();
 	}
 
@@ -2011,7 +2094,7 @@ void PatchKernel::_restoreInternalVertex(const VertexIterator &iterator, const s
 */
 bool PatchKernel::deleteVertex(long id)
 {
-	if (!isExpert()) {
+	if (getAdaptionMode() != ADAPTION_MANUAL) {
 		return false;
 	}
 
@@ -2169,7 +2252,7 @@ std::vector<long> PatchKernel::findOrphanVertices()
 */
 bool PatchKernel::deleteOrphanVertices()
 {
-	if (!isExpert()) {
+	if (getAdaptionMode() != ADAPTION_MANUAL) {
 		return false;
 	}
 
@@ -2189,7 +2272,7 @@ bool PatchKernel::deleteOrphanVertices()
 std::vector<long> PatchKernel::collapseCoincidentVertices()
 {
 	std::vector<long> collapsedVertices;
-	if (!isExpert()) {
+	if (getAdaptionMode() != ADAPTION_MANUAL) {
 		return collapsedVertices;
 	}
 
@@ -2278,7 +2361,7 @@ std::vector<long> PatchKernel::collapseCoincidentVertices()
 */
 bool PatchKernel::deleteCoincidentVertices()
 {
-	if (!isExpert()) {
+	if (getAdaptionMode() != ADAPTION_MANUAL) {
 		return false;
 	}
 
@@ -2863,7 +2946,7 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementType type, const std::vect
 PatchKernel::CellIterator PatchKernel::addCell(ElementType type, std::unique_ptr<long[]> &&connectStorage,
 											   long id)
 {
-	if (!isExpert()) {
+	if (getAdaptionMode() != ADAPTION_MANUAL) {
 		return cellEnd();
 	}
 
@@ -2986,7 +3069,7 @@ void PatchKernel::setAddedCellAlterationFlags(long id)
 PatchKernel::CellIterator PatchKernel::restoreCell(ElementType type, std::unique_ptr<long[]> &&connectStorage,
 												   long id)
 {
-	if (!isExpert()) {
+	if (getAdaptionMode() != ADAPTION_MANUAL) {
 		return cellEnd();
 	}
 
@@ -3057,7 +3140,7 @@ void PatchKernel::setRestoredCellAlterationFlags(long id)
 */
 bool PatchKernel::deleteCell(long id)
 {
-	if (!isExpert()) {
+	if (getAdaptionMode() != ADAPTION_MANUAL) {
 		return false;
 	}
 
@@ -4476,7 +4559,7 @@ PatchKernel::InterfaceIterator PatchKernel::addInterface(ElementType type,
 														 std::unique_ptr<long[]> &&connectStorage,
 														 long id)
 {
-	if (!isExpert()) {
+	if (getAdaptionMode() != ADAPTION_MANUAL) {
 		return interfaceEnd();
 	}
 
@@ -4558,7 +4641,7 @@ PatchKernel::InterfaceIterator PatchKernel::restoreInterface(ElementType type,
 															 std::unique_ptr<long[]> &&connectStorage,
 															 long id)
 {
-	if (!isExpert()) {
+	if (getAdaptionMode() != ADAPTION_MANUAL) {
 		return interfaceEnd();
 	}
 
@@ -4619,7 +4702,7 @@ void PatchKernel::setRestoredInterfaceAlterationFlags(long id)
 */
 bool PatchKernel::deleteInterface(long id)
 {
-	if (!isExpert()) {
+	if (getAdaptionMode() != ADAPTION_MANUAL) {
 		return false;
 	}
 
@@ -4739,7 +4822,7 @@ std::vector<long> PatchKernel::findOrphanInterfaces() const
 */
 bool PatchKernel::deleteOrphanInterfaces()
 {
-	if (!isExpert()) {
+	if (getAdaptionMode() != ADAPTION_MANUAL) {
 		return false;
 	}
 
@@ -4881,9 +4964,9 @@ void PatchKernel::restoreVertices(std::istream &stream)
 	// Restore kernel
 	m_vertices.restoreKernel(stream);
 
-	// Enable advanced editing
-	bool originalExpertStatus = isExpert();
-	setExpert(true);
+	// Enable manual adaption
+	AdaptionMode previousAdaptionMode = getAdaptionMode();
+	setAdaptionMode(ADAPTION_MANUAL);
 
 	// Restore vertices
 	long nVertices = m_vertices.size();
@@ -4922,8 +5005,8 @@ void PatchKernel::restoreVertices(std::istream &stream)
 	utils::binary::read(stream, dummyLastInternalVertexId);
 #endif
 
-	// Set original advanced editing status
-	setExpert(originalExpertStatus);
+	// Restore previous adaption mode
+	setAdaptionMode(previousAdaptionMode);
 }
 
 /*!
@@ -4982,9 +5065,9 @@ void PatchKernel::restoreCells(std::istream &stream)
 	// Restore kernel
 	m_cells.restoreKernel(stream);
 
-	// Enable advanced editing
-	bool originalExpertStatus = isExpert();
-	setExpert(true);
+	// Enable manual adaption
+	AdaptionMode previousAdaptionMode = getAdaptionMode();
+	setAdaptionMode(ADAPTION_MANUAL);
 
 	// Restore cells
 	long nCells = m_cells.size();
@@ -5043,8 +5126,8 @@ void PatchKernel::restoreCells(std::istream &stream)
 	// Update adjacencies
 	updateAdjacencies();
 
-	// Set original advanced editing status
-	setExpert(originalExpertStatus);
+	// Restore previous adaption mode
+	setAdaptionMode(previousAdaptionMode);
 }
 
 /*!
@@ -5097,9 +5180,9 @@ void PatchKernel::restoreInterfaces(std::istream &stream)
 	// Restore kernel
 	m_interfaces.restoreKernel(stream);
 
-	// Enable advanced editing
-	bool originalExpertStatus = isExpert();
-	setExpert(true);
+	// Enable manual adaption
+	AdaptionMode previousAdaptionMode = getAdaptionMode();
+	setAdaptionMode(ADAPTION_MANUAL);
 
 	// Restore interfaces
 	long nInterfaces = m_interfaces.size();
@@ -5136,32 +5219,17 @@ void PatchKernel::restoreInterfaces(std::istream &stream)
 	unsetCellAlterationFlags(FLAG_INTERFACES_DIRTY);
 	m_alteredInterfaces.clear();
 
-	// Set original advanced editing status
-	setExpert(originalExpertStatus);
-}
-
-/*!
-	Generates the patch.
-
-	Default implementation is a no-op function.
-
-	\param trackSpawn if set to true the changes to the patch will be tracked
-	\result Returns a vector of adaption::Info that can be used to track
-	the changes done during the spawn.
-*/
-std::vector<adaption::Info> PatchKernel::_spawn(bool trackSpawn)
-{
-	BITPIT_UNUSED(trackSpawn);
-
-	assert(false && "The patch needs to implement _spawn");
-
-	return std::vector<adaption::Info>();
+	// Restore previous adaption mode
+	setAdaptionMode(previousAdaptionMode);
 }
 
 /*!
 	Prepares the patch for performing the adaption.
 
 	Default implementation is a no-op function.
+
+	See PatchKernel::adaptionPrepare(bool trackPartitioning) for the
+	documentation about the tracking information returned by this function.
 
 	\param trackAdaption if set to true the function will return the changes
 	that will be performed in the alter step
@@ -5180,6 +5248,9 @@ std::vector<adaption::Info> PatchKernel::_adaptionPrepare(bool trackAdaption)
 	Alter the patch performing the adaption.
 
 	Default implementation is a no-op function.
+
+	See PatchKernel::adaptionAlter(bool trackPartitioning) for the
+	documentation about the tracking information returned by this function.
 
 	\param trackAdaption if set to true the function will return the changes
 	done to the patch during the adaption
@@ -5287,7 +5358,7 @@ bool PatchKernel::_enableCellBalancing(long id, bool enabled)
 */
 bool PatchKernel::sortVertices()
 {
-	if (!isExpert()) {
+	if (getAdaptionMode() != ADAPTION_MANUAL) {
 		return false;
 	}
 
@@ -5318,7 +5389,7 @@ bool PatchKernel::sortVertices()
 */
 bool PatchKernel::sortCells()
 {
-	if (!isExpert()) {
+	if (getAdaptionMode() != ADAPTION_MANUAL) {
 		return false;
 	}
 
@@ -5347,7 +5418,7 @@ bool PatchKernel::sortCells()
 */
 bool PatchKernel::sortInterfaces()
 {
-	if (!isExpert()) {
+	if (getAdaptionMode() != ADAPTION_MANUAL) {
 		return false;
 	}
 
@@ -5380,7 +5451,7 @@ bool PatchKernel::sort()
 */
 bool PatchKernel::squeezeVertices()
 {
-	if (!isExpert()) {
+	if (getAdaptionMode() != ADAPTION_MANUAL) {
 		return false;
 	}
 
@@ -5400,7 +5471,7 @@ bool PatchKernel::squeezeVertices()
 */
 bool PatchKernel::squeezeCells()
 {
-	if (!isExpert()) {
+	if (getAdaptionMode() != ADAPTION_MANUAL) {
 		return false;
 	}
 
@@ -5420,7 +5491,7 @@ bool PatchKernel::squeezeCells()
 */
 bool PatchKernel::squeezeInterfaces()
 {
-	if (!isExpert()) {
+	if (getAdaptionMode() != ADAPTION_MANUAL) {
 		return false;
 	}
 
@@ -5703,6 +5774,86 @@ bool PatchKernel::isSameFace(const Cell &cell_A, int face_A, const Cell &cell_B,
 	std::sort(faceVertexIds_B.begin(), faceVertexIds_B.end());
 
 	return (faceVertexIds_A == faceVertexIds_B);
+}
+
+/*!
+ * Get the vertices that are on the specified cells.
+ *
+ * The result will contain a list of unique interfaces that are on the given
+ * cells. The list will be populated iterating the cells and addding the
+ * interfaces as they are encountered.
+ *
+ * \param cellIds are the ids of the cell whose vertices will be gathered
+ * \param interior controls if interior vertices will be gathered
+ * \param ghost controls if ghost vertices will be gathered
+ * \result The vertices that are on the specified cells.
+ */
+std::vector<long> PatchKernel::getOrderedCellsVertices(const std::vector<long> &cellIds,
+                                                       bool interior, bool ghost) const
+{
+    std::vector<long> orderedVertices;
+#if BITPIT_ENABLE_MPI==1
+    if (!interior && (!ghost || !isPartitioned())) {
+        return orderedVertices;
+    }
+#else
+    if (!interior) {
+        return orderedVertices;
+    }
+#endif
+
+    std::unordered_set<long> verticesSet;
+    for (long cellId : cellIds) {
+        const Cell &cell = getCell(cellId);
+        for (long vertexId : cell.getVertexIds()) {
+            if (verticesSet.count(vertexId) == 0) {
+                continue;
+            }
+
+#if BITPIT_ENABLE_MPI==1
+            if (!interior || !ghost) {
+                auto vertexGhostInfoItr = m_ghostVertexInfo.find(vertexId);
+                if (!interior && vertexGhostInfoItr == m_ghostVertexInfo.cend()) {
+                    continue;
+                } else if (!ghost && vertexGhostInfoItr != m_ghostVertexInfo.cend()) {
+                    continue;
+                }
+            }
+#endif
+
+            verticesSet.insert(vertexId);
+            orderedVertices.push_back(vertexId);
+        }
+    }
+
+    return orderedVertices;
+}
+
+/*!
+ * Get the interfaces that are on the specified cells.
+ *
+ * The result will contain a list of unique interfaces that are on the given
+ * cells. The list will be populated iterating the cells and addding the
+ * interfaces as they are encountered.
+ */
+std::vector<long> PatchKernel::getOrderedCellsInterfaces(const std::vector<long> &cellIds) const
+{
+    std::vector<long> orderedInterfaces;
+    std::unordered_set<long> interfacesSet;
+    for (long cellId : cellIds) {
+        const Cell &cell = getCell(cellId);
+        const long *interfaces = cell.getInterfaces();
+        int nCellInterfaces = cell.getInterfaceCount();
+        for (int i = 0; i < nCellInterfaces; ++i) {
+            long interfaceId = interfaces[i];
+            if (interfacesSet.count(interfaceId) == 0) {
+                interfacesSet.insert(interfaceId);
+                orderedInterfaces.push_back(interfaceId);
+            }
+        }
+    }
+
+    return orderedInterfaces;
 }
 
 /*!
@@ -6273,9 +6424,12 @@ void PatchKernel::buildInterfaces()
 	adjacencies are not yet initialized an exception is thrown.
 
 	\param strategy is the build strategy that will be used
+	\param trackAdaption if set to true the changes to the patch will be tracked
 */
-void PatchKernel::initializeInterfaces(InterfacesBuildStrategy strategy)
+std::vector<adaption::Info> PatchKernel::initializeInterfaces(InterfacesBuildStrategy strategy, bool trackAdaption)
 {
+	std::vector<adaption::Info> adaptionData;
+
 	// Interfaces need adjacencies
 	if (getAdjacenciesBuildStrategy() == ADJACENCIES_NONE) {
 		throw std::runtime_error ("Adjacencies are mandatory for building the interfaces.");
@@ -6287,10 +6441,10 @@ void PatchKernel::initializeInterfaces(InterfacesBuildStrategy strategy)
 	// Early return if we don't need interfaces
 	if (strategy == INTERFACES_NONE) {
 		if (currentStrategy != INTERFACES_NONE) {
-			destroyInterfaces();
+			mergeAdaptionInfo(destroyInterfaces(trackAdaption), adaptionData);
 		}
 
-		return;
+		return adaptionData;
 	}
 
 	// Update the build strategy
@@ -6299,10 +6453,12 @@ void PatchKernel::initializeInterfaces(InterfacesBuildStrategy strategy)
 	}
 
 	// Reset interfaces
-	resetInterfaces();
+	mergeAdaptionInfo(resetInterfaces(trackAdaption), adaptionData);
 
 	// Update the interfaces
-	updateInterfaces();
+	mergeAdaptionInfo(updateInterfaces(false, trackAdaption), adaptionData);
+
+	return adaptionData;
 }
 
 /*!
@@ -6310,19 +6466,22 @@ void PatchKernel::initializeInterfaces(InterfacesBuildStrategy strategy)
 
 	\param forcedUpdated if set to true, bounding box information will be
 	updated also if they are not marked as dirty
+	\param trackAdaption if set to true the changes to the patch will be tracked
 */
-void PatchKernel::updateInterfaces(bool forcedUpdated)
+std::vector<adaption::Info> PatchKernel::updateInterfaces(bool forcedUpdated, bool trackAdaption)
 {
+	std::vector<adaption::Info> adaptionData;
+
 	// Early return if interfaces are not built
 	InterfacesBuildStrategy currentStrategy = getInterfacesBuildStrategy();
 	if (currentStrategy == INTERFACES_NONE) {
-		return;
+		return adaptionData;
 	}
 
 	// Check if the interfaces are dirty
 	bool interfacesDirty = areInterfacesDirty();
 	if (!interfacesDirty && !forcedUpdated) {
-		return;
+		return adaptionData;
 	}
 
 	// Interfaces need up-to-date adjacencies
@@ -6331,25 +6490,27 @@ void PatchKernel::updateInterfaces(bool forcedUpdated)
 
 	// Update interfaces
 	if (interfacesDirty) {
-		// Enable advanced editing
-		bool originalExpertStatus = isExpert();
-		setExpert(true);
+		// Enable manual adaption
+		AdaptionMode previousAdaptionMode = getAdaptionMode();
+		setAdaptionMode(ADAPTION_MANUAL);
 
 		// Prune stale interfaces
-		pruneStaleInterfaces();
+		mergeAdaptionInfo(pruneStaleInterfaces(trackAdaption), adaptionData);
 
 		// Update interfaces
-		_updateInterfaces();
+		mergeAdaptionInfo(_updateInterfaces(trackAdaption), adaptionData);
 
 		// Interfaces are now updated
 		unsetCellAlterationFlags(FLAG_INTERFACES_DIRTY);
 		m_alteredInterfaces.clear();
 
-		// Set original advanced editing status
-		setExpert(originalExpertStatus);
+		// Restore previous adaption mode
+		setAdaptionMode(previousAdaptionMode);
 	} else {
-		initializeInterfaces(currentStrategy);
+		mergeAdaptionInfo(initializeInterfaces(currentStrategy, trackAdaption), adaptionData);
 	}
+
+	return adaptionData;
 }
 
 /*!
@@ -6357,18 +6518,23 @@ void PatchKernel::updateInterfaces(bool forcedUpdated)
 
 	After deleting the interfaces, this function changes the build strategy
 	to "None".
+
+	\param trackAdaption if set to true the changes to the patch will be
+	tracked
 */
-void PatchKernel::destroyInterfaces()
+std::vector<adaption::Info> PatchKernel::destroyInterfaces(bool trackAdaption)
 {
+	std::vector<adaption::Info> adaptionData;
+
 	// Early return if no interfaces have been built
 	if (getInterfacesBuildStrategy() == INTERFACES_NONE) {
-		return;
+		return adaptionData;
 	}
 
-	// Destroy the interfaces
-	_resetInterfaces(true);
+	// Reset the interfaces
+	adaptionData = _resetInterfaces(trackAdaption, true);
 
-	// Clear list of cells with dirty adjacencies
+	// Clear list of cells with dirty interfaces
 	unsetCellAlterationFlags(FLAG_INTERFACES_DIRTY);
 
 	// Clear list of altered interfaces
@@ -6376,6 +6542,8 @@ void PatchKernel::destroyInterfaces()
 
 	// Set interface build strategy
 	setInterfacesBuildStrategy(INTERFACES_NONE);
+
+	return adaptionData;
 }
 
 /*!
@@ -6383,12 +6551,17 @@ void PatchKernel::destroyInterfaces()
 
 	The list of cells to process and the list of stale interfaces are filled
 	during cell deletion.
+
+	\param trackAdaption if set to true the changes to the patch will be tracked
+	\result If the adaption is tracked, returns a vector of adaption::Info
+	with all the changes done to the patch during the adaption, otherwise an
+	empty vector will be returned.
 */
-void PatchKernel::pruneStaleInterfaces()
+std::vector<adaption::Info> PatchKernel::pruneStaleInterfaces(bool trackAdaption)
 {
 	// Early return if no interfaces have been built
 	if (getInterfacesBuildStrategy() == INTERFACES_NONE) {
-		return;
+		return std::vector<adaption::Info>();
 	}
 
 	// Remove dangling interfaces from cells
@@ -6433,6 +6606,16 @@ void PatchKernel::pruneStaleInterfaces()
 		danglingInterfaces.push_back(interfaceId);
 	}
 	deleteInterfaces(danglingInterfaces);
+
+	// Track changes
+	adaption::InfoCollection adaptionData;
+	if (trackAdaption) {
+		std::size_t adaptionInfoId = adaptionData.insert(adaption::TYPE_DELETION, adaption::ENTITY_INTERFACE);
+		adaption::Info &adaptionInfo = adaptionData[adaptionInfoId];
+		adaptionInfo.previous = std::move(danglingInterfaces);
+	}
+
+	return adaptionData.dump();
 }
 
 /*!
@@ -6440,10 +6623,11 @@ void PatchKernel::pruneStaleInterfaces()
 
 	The function will process the cells whose interfaces have been marked as
 	dirty.
+
+	\param trackAdaption if set to true the changes to the patch will be tracked
 */
-void PatchKernel::_updateInterfaces()
+std::vector<adaption::Info> PatchKernel::_updateInterfaces(bool trackAdaption)
 {
-	//
 	// Update interfaces
 	//
 	// Adjacencies and interfaces of a face are paired: the i-th face adjacency
@@ -6455,6 +6639,7 @@ void PatchKernel::_updateInterfaces()
 	//
 	// On border faces of internal cells we need to build an interface, also
 	// if there are no adjacencies.
+	std::vector<long> createdInterfaces;
 	for (const auto &entry : m_alteredCells) {
 		AlterationFlags cellAlterationFlags = entry.second;
 		if (!testAlterationFlags(cellAlterationFlags, FLAG_INTERFACES_DIRTY)) {
@@ -6484,14 +6669,35 @@ void PatchKernel::_updateInterfaces()
 
 					int neighFace = findAdjoinNeighFace(cell, face, *neigh);
 
-					buildCellInterface(&cell, face, neigh, neighFace);
+					// Build the interface
+					InterfaceIterator interfaceIterator = buildCellInterface(&cell, face, neigh, neighFace);
+
+					// Track changes
+					if (trackAdaption) {
+						createdInterfaces.push_back(interfaceIterator.getId());
+					}
 				}
 			} else if (nFaceInterfaces == 0) {
 				// Internal borderes need an interface
-				buildCellInterface(&cell, face, nullptr, -1);
+				InterfaceIterator interfaceIterator = buildCellInterface(&cell, face, nullptr, -1);
+
+				// Track changes
+				if (trackAdaption) {
+					createdInterfaces.push_back(interfaceIterator.getId());
+				}
 			}
 		}
 	}
+
+	// Track changes
+	adaption::InfoCollection adaptionData;
+	if (trackAdaption) {
+		std::size_t adaptionInfoId = adaptionData.insert(adaption::TYPE_CREATION, adaption::ENTITY_INTERFACE);
+		adaption::Info &adaptionInfo = adaptionData[adaptionInfoId];
+		adaptionInfo.current = std::move(createdInterfaces);
+	}
+
+	return adaptionData.dump();
 }
 
 /*!
@@ -8164,17 +8370,17 @@ bool PatchKernel::dump(std::ostream &stream) const
 	utils::binary::write(stream, 0);
 #endif
 
-	// Spawn status
-	utils::binary::write(stream, m_spawnStatus);
-
-	// Adaption status
+	// Adaption information
+	utils::binary::write(stream, m_adaptionMode);
 	utils::binary::write(stream, m_adaptionStatus);
 
-	// Partition status
+	// Partition information
 #if BITPIT_ENABLE_MPI==1
+	utils::binary::write(stream, m_partitioningMode);
 	utils::binary::write(stream, m_partitioningStatus);
 #else
-	utils::binary::write(stream, PARTITIONING_UNSUPPORTED);
+	utils::binary::write(stream, PARTITIONING_DISABLED);
+	utils::binary::write(stream, PARTITIONING_CLEAN);
 #endif
 
 	// Adjacencies build strategy
@@ -8262,16 +8468,18 @@ void PatchKernel::restore(std::istream &stream, bool reregister)
 	utils::binary::read(stream, dummyHaloSize);
 #endif
 
-	// Spawn status
-	utils::binary::read(stream, m_spawnStatus);
-
-	// Adaption status
+	// Adaption information
+	utils::binary::read(stream, m_adaptionMode);
 	utils::binary::read(stream, m_adaptionStatus);
 
-	// Partition status
+	// Partition information
 #if BITPIT_ENABLE_MPI==1
+	utils::binary::read(stream, m_partitioningMode);
 	utils::binary::read(stream, m_partitioningStatus);
 #else
+	PartitioningStatus dummyPartitioningMode;
+	utils::binary::read(stream, dummyPartitioningMode);
+
 	PartitioningStatus dummyPartitioningStatus;
 	utils::binary::read(stream, dummyPartitioningStatus);
 #endif
@@ -8342,12 +8550,15 @@ void PatchKernel::mergeAdaptionInfo(std::vector<adaption::Info> &&source, std::v
 {
 	if (source.empty()) {
 		return;
-	} else if (destination.empty()) {
+	}
+
+	if (destination.empty()) {
 		destination.swap(source);
 		return;
 	}
 
-	throw std::runtime_error ("Unable to merge the adaption info.");
+	destination.insert(destination.end(), std::make_move_iterator(source.begin()), std::make_move_iterator(source.end()));
+	source.clear();
 }
 
 }
