@@ -1026,10 +1026,9 @@ std::vector<adaption::Info> VolOctree::_adaptionPrepare(bool trackAdaption)
 				std::size_t adaptionInfoId = adaptionData.create(adaptionType, adaption::ENTITY_CELL, currentRank);
 				adaptionInfo = &(adaptionData[adaptionInfoId]);
 			}
-
-			if (adaptionInfo) {
-				adaptionInfo->previous.emplace_back(getOctantId(octantInfo));
-			}
+			
+			assert(adaptionInfo);
+			adaptionInfo->previous.emplace_back(getOctantId(octantInfo));
 		}
 
 #if BITPIT_ENABLE_MPI==1
