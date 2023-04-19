@@ -1026,7 +1026,7 @@ std::vector<adaption::Info> VolOctree::_adaptionPrepare(bool trackAdaption)
 				std::size_t adaptionInfoId = adaptionData.create(adaptionType, adaption::ENTITY_CELL, currentRank);
 				adaptionInfo = &(adaptionData[adaptionInfoId]);
 			}
-			
+
 			assert(adaptionInfo);
 			adaptionInfo->previous.emplace_back(getOctantId(octantInfo));
 		}
