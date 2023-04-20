@@ -1823,12 +1823,12 @@ std::vector<long> VolOctree::importCells(const std::vector<OctantInfo> &octantIn
 					int rank;
 					utils::binary::read(*restoreStream, rank);
 
-					restoreVertex(std::move(nodeCoords), rank, vertexId);
+					restoreVertex(nodeCoords, rank, vertexId);
 #else
-					int dummtRank;
-					utils::binary::read(*restoreStream, dummtRank);
+					int dummyRank;
+					utils::binary::read(*restoreStream, dummyRank);
 
-					restoreVertex(std::move(nodeCoords), vertexId);
+					restoreVertex(nodeCoords, vertexId);
 #endif
 				}
 
