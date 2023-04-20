@@ -1182,7 +1182,7 @@ void PatchSkdTree::clear(bool release)
     m_nMaxLeafCells = 0;
 
     if (release) {
-        std::vector<SkdNode, SkdNode::Allocator>().swap(m_nodes);
+        std::vector<SkdNode>().swap(m_nodes);
         std::vector<std::size_t>().swap(m_cellRawIds);
     } else {
         m_nodes.clear();

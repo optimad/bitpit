@@ -107,6 +107,9 @@ public:
         CHILD_END   = 2
     };
 
+    SkdNode();
+    SkdNode(const SkdPatchInfo *patchInfo, std::size_t cellRangeBegin, std::size_t cellRangeEnd);
+
     std::size_t getCellCount() const;
     std::vector<long> getCells() const;
     long getCell(std::size_t n) const;
@@ -124,22 +127,6 @@ public:
 
     void findPointClosestCell(const std::array<double, 3> &point, bool interiorCellsOnly, long *closestId, double *closestDistance) const;
     void updatePointClosestCell(const std::array<double, 3> &point, bool interiorCellsOnly, long *closestId, double *closestDistance) const;
-
-protected:
-    struct Allocator : std::allocator<SkdNode>
-    {
-        template<typename U, typename... Args>
-        void construct(U* p, Args&&... args)
-        {
-            ::new((void *)p) U(std::forward<Args>(args)...);
-        }
-
-        template<typename U> struct rebind { typedef Allocator other; };
-
-    };
-
-    SkdNode();
-    SkdNode(const SkdPatchInfo *patchInfo, std::size_t cellRangeBegin, std::size_t cellRangeEnd);
 
 private:
     const SkdPatchInfo *m_patchInfo;
@@ -218,7 +205,7 @@ protected:
     std::size_t m_nMinLeafCells;
     std::size_t m_nMaxLeafCells;
 
-    std::vector<SkdNode, SkdNode::Allocator> m_nodes;
+    std::vector<SkdNode> m_nodes;
 
     bool m_interiorCellsOnly;
 
