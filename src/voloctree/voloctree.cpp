@@ -1028,9 +1028,7 @@ std::vector<adaption::Info> VolOctree::_adaptionPrepare(bool trackAdaption)
 			}
 
 			assert(adaptionInfo);
-			adaptionInfo->previous.emplace_back();
-			long &cellId = adaptionInfo->previous.back();
-			cellId = getOctantId(octantInfo);
+			adaptionInfo->previous.emplace_back(getOctantId(octantInfo));
 		}
 
 #if BITPIT_ENABLE_MPI==1
