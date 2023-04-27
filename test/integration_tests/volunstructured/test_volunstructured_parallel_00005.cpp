@@ -52,7 +52,7 @@ int subtest_001()
     //
     // Create the patch
     //
-    int haloLayers = 2;
+    std::size_t haloLayers = 2;
     std::unique_ptr<VolUnstructured> patch = std::unique_ptr<VolUnstructured>(new VolUnstructured(2, MPI_COMM_WORLD, haloLayers));
     patch->getVTK().setName("test_00005_mesh");
     patch->setVertexAutoIndexing(false);
