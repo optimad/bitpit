@@ -800,6 +800,11 @@ void ReconstructionPolynomial::computeValues(int degree, const std::array<double
         return;
     }
 
+    // Early return if the polynomial is not initialized
+    if (m_dimensions == 0) {
+        return;
+    }
+
     // Get values
     const std::size_t fieldValuesStride = 1;
     double *fieldValue = values;
@@ -1004,6 +1009,11 @@ void ReconstructionPolynomial::computeValuesLimited(int degree, const std::array
         return;
     }
 
+    // Early return if the polynomial is not initialized
+    if (m_dimensions == 0) {
+        return;
+    }
+
     // Get values
     std::size_t fieldValuesStride = 1;
     double *fieldValue = values;
@@ -1184,6 +1194,11 @@ void ReconstructionPolynomial::computeDerivatives(int degree, const std::array<d
 
     // Early return if there are no field to process
     if (nFields == 0) {
+        return;
+    }
+
+    // Early return if the polynomial is not initialized
+    if (m_dimensions == 0) {
         return;
     }
 
@@ -1421,6 +1436,11 @@ void ReconstructionPolynomial::computeDerivativesLimited(int degree, const std::
         return;
     }
 
+    // Early return if the polynomial is not initialized
+    if (m_dimensions == 0) {
+        return;
+    }
+
     // Get derivatives
     std::size_t fieldDerivativeStride = 1;
     double *fieldDerivative = derivatives;
@@ -1602,6 +1622,11 @@ void ReconstructionPolynomial::computeGradients(int degree, const std::array<dou
 
     // Early return if there are no field to process
     if (nFields == 0) {
+        return;
+    }
+
+    // Early return if the polynomial is not initialized
+    if (m_dimensions == 0) {
         return;
     }
 
@@ -1841,6 +1866,11 @@ void ReconstructionPolynomial::computeGradientsLimited(int degree, const std::ar
 
     // Early return if there are no field to process
     if (nFields == 0) {
+        return;
+    }
+
+    // Early return if the polynomial is not initialized
+    if (m_dimensions == 0) {
         return;
     }
 
