@@ -208,7 +208,9 @@ void IBinaryArchive::open(const std::string &name, const std::string &extension,
     BinaryArchive::open(name, extension, std::ios::in | std::ios_base::binary, block);
 
     // Read the header
-    utils::binary::read(*this, m_header);
+    std::vector<char> rawHeader(HEADER_SIZE);
+    utils::binary::read(*this, rawHeader.data(), rawHeader.size());
+    m_header = std::string(rawHeader.begin(), rawHeader.end());
 
     // Read the version
     utils::binary::read(*this, m_version);
@@ -373,9 +375,13 @@ void OBinaryArchive::open(const std::string &name, const std::string &extension,
     BinaryArchive::open(name, extension, std::ios::out | std::ios_base::binary, block);
 
     // Write the header
+    //
+    // The header should be written using the write overload that takes in
+    // input characters, because the one that takes in input strings would
+    // write into the archive also the string length.
     std::string archiveHeader(header);
     archiveHeader.resize(HEADER_SIZE, ' ');
-    utils::binary::write(*this, archiveHeader);
+    utils::binary::write(*this, archiveHeader.data(), archiveHeader.size());
 
     // Write the version
     utils::binary::write(*this, version);
