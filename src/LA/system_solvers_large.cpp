@@ -907,6 +907,8 @@ void SystemSolver::assembly(MPI_Comm communicator, bool isPartitioned, const Sys
  * system matrix will be set equal to the block size specified by the assembler.
  *
  * \param assembler is the matrix assembler
+ * \param reordering is the reordering that will be applied when assemblying the
+ * system
  */
 void SystemSolver::assembly(const SystemMatrixAssembler &assembler, const SystemMatrixOrdering &reordering)
 {
