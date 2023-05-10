@@ -848,32 +848,6 @@ void SystemSolver::assembly(const SparseMatrix &matrix, const SystemMatrixOrderi
  * will be created with a unitary block size. Otherwise, the block size of the
  * system matrix will be set equal to the block size specified by the assembler.
  *
- * \param assembler is the matrix assembler
- */
-void SystemSolver::assembly(const SystemMatrixAssembler &assembler)
-{
-    assembly(MPI_COMM_SELF, false, assembler, NaturalSystemMatrixOrdering());
-}
-
-/*!
- * Assembly the system.
- *
- * \param assembler is the matrix assembler
- * \param reordering is the reordering that will be applied when assemblying the
- * system
- */
-void SystemSolver::assembly(const SystemMatrixAssembler &assembler, const SystemMatrixOrdering &reordering)
-{
-    assembly(MPI_COMM_SELF, false, assembler, reordering);
-}
-
-/*!
- * Assembly the system.
- *
- * If the system was created with the flatten flag set to true, the system matrix
- * will be created with a unitary block size. Otherwise, the block size of the
- * system matrix will be set equal to the block size specified by the assembler.
- *
  * \param communicator is the MPI communicator
  * \param isPartitioned controls if the system is partitioned
  * \param assembler is the matrix assembler
@@ -899,6 +873,20 @@ void SystemSolver::assembly(MPI_Comm communicator, bool isPartitioned, const Sys
 void SystemSolver::assembly(MPI_Comm communicator, bool isPartitioned, const SystemMatrixAssembler &assembler, const SystemMatrixOrdering &reordering)
 {
 #else
+/*!
+ * Assembly the system.
+ *
+ * If the system was created with the flatten flag set to true, the system matrix
+ * will be created with a unitary block size. Otherwise, the block size of the
+ * system matrix will be set equal to the block size specified by the assembler.
+ *
+ * \param assembler is the matrix assembler
+ */
+void SystemSolver::assembly(const SystemMatrixAssembler &assembler)
+{
+    assembly(assembler, NaturalSystemMatrixOrdering());
+}
+
 /*!
  * Assembly the system.
  *
