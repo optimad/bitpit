@@ -267,11 +267,12 @@ public:
 
     void assembly(const SparseMatrix &matrix);
     void assembly(const SparseMatrix &matrix, const SystemMatrixOrdering &reordering);
-    void assembly(const SystemMatrixAssembler &assembler);
-    void assembly(const SystemMatrixAssembler &assembler, const SystemMatrixOrdering &reordering);
 #if BITPIT_ENABLE_MPI==1
     void assembly(MPI_Comm communicator, bool isPartitioned, const SystemMatrixAssembler &assembler);
     void assembly(MPI_Comm communicator, bool isPartitioned, const SystemMatrixAssembler &assembler, const SystemMatrixOrdering &reordering);
+#else
+    void assembly(const SystemMatrixAssembler &assembler);
+    void assembly(const SystemMatrixAssembler &assembler, const SystemMatrixOrdering &reordering);
 #endif
     bool isAssembled() const;
 
