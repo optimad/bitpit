@@ -496,7 +496,7 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
         std::array<double, 3> normal;
         int error = m_segmentation->getSegmentInfo(cellCentroid, segmentId, signd, distance, gradient, normal);
         if (error) {
-            throw std::runtime_error ("Unable to extract the levelset information from segment.");
+            throw std::runtime_error ("Unable to extract the levelset information from segment " + std::to_string(segmentId) + ".");
         }
 
 
@@ -582,7 +582,7 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
         std::array<double,3> normal;
         int error = m_segmentation->getSegmentInfo(cellCentroid, segmentId, signd, distance, gradient, normal);
         if (error) {
-            throw std::runtime_error ("Unable to extract the levelset information from segment.");
+            throw std::runtime_error ("Unable to extract the levelset information from segment " + std::to_string(segmentId) + ".");
         }
 
         typename narrow_band_cache_t::KernelIterator narrowBandCacheItr = narrowBandCache->insert(cellId, true) ;
@@ -642,7 +642,7 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
             std::array<double,3> normal;
             int error = m_segmentation->getSegmentInfo(neighCentroid, segmentId, signd, distance, gradient, normal);
             if (error) {
-                throw std::runtime_error ("Unable to extract the levelset information from segment.");
+                throw std::runtime_error ("Unable to extract the levelset information from segment " + std::to_string(segmentId) + ".");
             }
 
             typename narrow_band_cache_t::KernelIterator narrowBandCacheItr = narrowBandCache->insert(neighId, true) ;
@@ -718,7 +718,7 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::updateNarrowBand( LevelSet
             std::array<double,3> normal;
             int error = m_segmentation->getSegmentInfo(centroid, segmentId, signd, distance, gradient, normal);
             if (error) {
-                throw std::runtime_error ("Unable to extract the levelset information from segment.");
+                throw std::runtime_error ("Unable to extract the levelset information from segment " + std::to_string(segmentId) + ".");
             }
 
             typename narrow_band_cache_t::KernelIterator narrowBandCacheItr = narrowBandCache->insert(cellId, true) ;
@@ -777,7 +777,7 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::updateNarrowBand( LevelSet
         std::array<double,3> normal;
         int error = m_segmentation->getSegmentInfo(cellCentroid, segmentId, signd, distance, gradient, normal);
         if (error) {
-            throw std::runtime_error ("Unable to extract the levelset information from segment.");
+            throw std::runtime_error ("Unable to extract the levelset information from segment " + std::to_string(segmentId) + ".");
         }
 
         typename narrow_band_cache_t::KernelIterator narrowBandCacheItr = narrowBandCache->insert(cellId, true) ;
@@ -802,7 +802,7 @@ LevelSetInfo LevelSetSegmentationObject<narrow_band_cache_t>::computeLevelSetInf
 
     int error = m_segmentation->getSegmentInfo(coords, segmentId, false, distance, gradient, normal);
     if (error) {
-        throw std::runtime_error ("Unable to extract the levelset information from segment.");
+        throw std::runtime_error ("Unable to extract the levelset information from segment " + std::to_string(segmentId) + ".");
     }
 
     return LevelSetInfo(distance,gradient);
