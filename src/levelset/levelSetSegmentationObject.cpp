@@ -230,8 +230,21 @@ int SegmentationKernel::getSegmentInfo( const std::array<double,3> &pointCoords,
     // on the segmentation or on the normal plane. In the latter case the sign
     // must be evaluated taking into account the the curvature of the surface.
     // However, this is not yet implemented.
+    //
+    // The sign should be evaluated with the same tolerance used when checking
+    // if the point lies on the segmentation.
     std::array<double, 3> pseudoNormal = computePseudoNormal(segmentIterator, lambda);
-    int s = sign( dotProduct(pointProjectionVector, pseudoNormal) );
+    double pointProjectionNormalComponent = dotProduct(pointProjectionVector, pseudoNormal);
+
+    int s;
+    if (utils::DoubleFloatingEqual()(pointProjectionNormalComponent, 0., distanceTolerance, distanceTolerance)) {
+        s = 0;
+    } else if (pointProjectionNormalComponent > 0) {
+        s = 1;
+    } else {
+        s = -1;
+    }
+
     if (!pointOnSegmentation && s == 0) {
         distance = levelSetDefaults::VALUE;
         gradient = levelSetDefaults::GRADIENT;
