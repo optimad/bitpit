@@ -48,8 +48,8 @@ namespace CGElem{
 /*!
  * \private
  * Projects points on a triangle.
- * Transcribed from Christer Ericson's Real-Time Collision Detection book,
- * it's effectively Cramer's rule for solving a linear system.
+ * See "Computing the Barycentric Coordinates of a Projected Point", W. Heidrich,
+ * Journal of Graphics, GPU, and Game Tools,Volume 10, Issue 3, 2005.
  * Projection points are the closest points to the original points within the triangle.
  *
  * \param[in] nPoints number of points
@@ -68,21 +68,15 @@ void _projectPointsTriangle( int nPoints, array3D const *points, array3D const &
     array3D v0 = Q1 - Q0;
     array3D v1 = Q2 - Q0;
 
-    double d00 = dotProduct(v0, v0);
-    double d01 = dotProduct(v0, v1);
-    double d11 = dotProduct(v1, v1);
-
-    double denom = d00 * d11 - d01 * d01;
+    array3D n = crossProduct(v0, v1);
+    double n2 = dotProduct(n, n);
 
     for( int i=0; i<nPoints; ++i){
         array3D v2 = points[i] - Q0;
 
-        double d20 = dotProduct(v2, v0);
-        double d21 = dotProduct(v2, v1);
-
         double *pointLambda = lambda + 3 * i;
-        pointLambda[1] = (d11 * d20 - d01 * d21) / denom;
-        pointLambda[2] = (d00 * d21 - d01 * d20) / denom;
+        pointLambda[2] = dotProduct(crossProduct(v0, v2), n) / n2;
+        pointLambda[1] = dotProduct(crossProduct(v2, v1), n) / n2;
         pointLambda[0] = 1. - pointLambda[1] - pointLambda[2];
 
         array3D *pointProjections = proj + i;
