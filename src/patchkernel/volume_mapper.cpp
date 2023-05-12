@@ -120,7 +120,7 @@ void VolumeMapper::clearInverseMapping()
 /**
  * Get direct mapping
  */
-const bitpit::PiercedStorage<mapping::Info> & VolumeMapper::getMapping()
+const bitpit::PiercedStorage<mapping::Info> & VolumeMapper::getMapping() const
 {
     return m_mapping;
 }
@@ -128,7 +128,7 @@ const bitpit::PiercedStorage<mapping::Info> & VolumeMapper::getMapping()
 /**
  * Get inverse mapping
  */
-const bitpit::PiercedStorage<mapping::Info> & VolumeMapper::getInverseMapping()
+const bitpit::PiercedStorage<mapping::Info> & VolumeMapper::getInverseMapping() const
 {
     return m_inverseMapping;
 }
