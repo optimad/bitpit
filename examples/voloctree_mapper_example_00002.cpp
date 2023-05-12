@@ -164,7 +164,11 @@ void run()
     patch_2D->write();
 
     /** Create mapper object */
+#if BITPIT_ENABLE_MPI==1
+    VolOctreeMapper mapobject(patch_2D_original, patch_2D, patch_2D_original->getCommunicator());
+#else
     VolOctreeMapper mapobject(patch_2D_original, patch_2D);
+#endif
 
     /** Map the two meshes */
     mapobject.initialize(true);

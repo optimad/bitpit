@@ -42,7 +42,7 @@ class VolOctreeMapper: public VolumeMapper {
 
 public:
 #if BITPIT_ENABLE_MPI
-    VolOctreeMapper(VolOctree *referencePatch, VolOctree *mappedPatch, MPI_Comm communicator = MPI_COMM_WORLD);
+    VolOctreeMapper(VolOctree *referencePatch, VolOctree *mappedPatch, MPI_Comm communicator);
 #else
     VolOctreeMapper(VolOctree *referencePatch, VolOctree *mappedPatch);
 #endif
