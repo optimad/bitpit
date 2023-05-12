@@ -144,7 +144,7 @@ protected:
 #endif
 
 #if BITPIT_ENABLE_MPI
-    VolumeMapper(VolumeKernel *referencePatch, VolumeKernel *mappedPatch, MPI_Comm communicator = MPI_COMM_WORLD);
+    VolumeMapper(VolumeKernel *referencePatch, VolumeKernel *mappedPatch, MPI_Comm communicator);
 #else
     VolumeMapper(VolumeKernel *referencePatch, VolumeKernel *mappedPatch);
 #endif

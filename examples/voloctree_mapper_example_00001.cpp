@@ -239,7 +239,11 @@ void run()
     log::cout() << "Vertex count: " << patch_2D->getVertexCount() << std::endl;
 
     /** Create mapper object */
+#if BITPIT_ENABLE_MPI==1
+    VolOctreeMapper mapobject(patch_2D, patch_2D_original, patch_2D->getCommunicator());
+#else
     VolOctreeMapper mapobject(patch_2D, patch_2D_original);
+#endif
 
     /** Map the two meshes */
     mapobject.initialize(true);
