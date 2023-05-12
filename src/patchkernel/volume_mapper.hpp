@@ -108,8 +108,8 @@ public:
     void clearMapping();
     void clearInverseMapping();
 
-    const bitpit::PiercedStorage<mapping::Info> & getMapping();
-    const bitpit::PiercedStorage<mapping::Info> & getInverseMapping();
+    const bitpit::PiercedStorage<mapping::Info> & getMapping() const;
+    const bitpit::PiercedStorage<mapping::Info> & getInverseMapping() const;
 
     void initialize(bool fillInv = false);
 
@@ -119,10 +119,10 @@ public:
 
 #if BITPIT_ENABLE_MPI
     virtual bool checkPartition() = 0;
-    virtual std::unordered_map<int, std::vector<long> > getReceivedMappedIds() = 0;
-    virtual std::unordered_map<int, std::vector<long> > getSentMappedIds() = 0;
-    virtual std::unordered_map<int, std::vector<long> > getReceivedReferenceIds() = 0;
-    virtual std::unordered_map<int, std::vector<long> > getSentReferenceIds() = 0;
+    virtual std::unordered_map<int, std::vector<long> > getReceivedMappedIds() const = 0;
+    virtual std::unordered_map<int, std::vector<long> > getSentMappedIds() const = 0;
+    virtual std::unordered_map<int, std::vector<long> > getReceivedReferenceIds() const = 0;
+    virtual std::unordered_map<int, std::vector<long> > getSentReferenceIds() const = 0;
 #endif
 
 protected:

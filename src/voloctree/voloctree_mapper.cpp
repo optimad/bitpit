@@ -749,7 +749,7 @@ void VolOctreeMapper::_mappingAdaptionMappedUpdate(const std::vector<adaption::I
  * (argument) of the mapped mesh overlapped with the local partition of the
  * reference mesh.
  */
-std::unordered_map<int, std::vector<long>> VolOctreeMapper::getReceivedMappedIds()
+std::unordered_map<int, std::vector<long>> VolOctreeMapper::getReceivedMappedIds() const
 {
     std::unordered_map<int, std::vector<long>> received;
 
@@ -772,7 +772,7 @@ std::unordered_map<int, std::vector<long>> VolOctreeMapper::getReceivedMappedIds
  * (argument) of the reference mesh overlapped with the partition (rank) of
  * the mapped mesh.
  */
-std::unordered_map<int, std::vector<long>> VolOctreeMapper::getSentReferenceIds()
+std::unordered_map<int, std::vector<long>> VolOctreeMapper::getSentReferenceIds() const
 {
     std::unordered_map<int, std::vector<long>> sent;
 
@@ -804,7 +804,7 @@ std::unordered_map<int, std::vector<long>> VolOctreeMapper::getSentReferenceIds(
  * (argument) of the reference mesh overlapped with the local partition of the
  * mapped mesh.
  */
-std::unordered_map<int, std::vector<long>> VolOctreeMapper::getReceivedReferenceIds()
+std::unordered_map<int, std::vector<long>> VolOctreeMapper::getReceivedReferenceIds() const
 {
     std::unordered_map<int, std::vector<long>> received;
 
@@ -841,7 +841,7 @@ std::unordered_map<int, std::vector<long>> VolOctreeMapper::getReceivedReference
  * (argument) of the mapped mesh overlapped with the partition (rank) of the
  * reference mesh.
  */
-std::unordered_map<int, std::vector<long>> VolOctreeMapper::getSentMappedIds()
+std::unordered_map<int, std::vector<long>> VolOctreeMapper::getSentMappedIds() const
 {
     std::unordered_map<int, std::vector<long>> sent;
 
