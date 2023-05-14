@@ -67,7 +67,7 @@ int subtest_001(int rank)
 
 	// Refine the mesh to obtain a non-uniform mesh
 	for(const Cell &cell : patch_2D->getCells()){
-		long consecutiveId = patchNumberingInfo.getCellConsecutiveId(cell.getId());
+		std::size_t consecutiveId = patchNumberingInfo.getCellConsecutiveId(cell.getId());
 		if (((consecutiveId + 2) % 4) == 0) {
 			patch_2D->markCellForRefinement(cell.getId());
 		}
@@ -150,7 +150,7 @@ int subtest_002(int rank)
 
 	// Refine the mesh to obtain a non-uniform mesh
 	for(const Cell &cell : patch_3D->getCells()){
-		long consecutiveId = patchNumberingInfo.getCellConsecutiveId(cell.getId());
+		std::size_t consecutiveId = patchNumberingInfo.getCellConsecutiveId(cell.getId());
 		if (((consecutiveId + 2) % 8) == 0) {
 			patch_3D->markCellForRefinement(cell.getId());
 		}

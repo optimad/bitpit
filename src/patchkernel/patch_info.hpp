@@ -64,21 +64,21 @@ class PatchNumberingInfo : public PatchInfo {
 public:
 	PatchNumberingInfo(PatchKernel const *patch = nullptr);
 
-	long getCellConsecutiveOffset() const;
-	long getCellConsecutiveId(long id) const;
-	const std::unordered_map<long, long> & getCellConsecutiveMap() const;
+	std::size_t getCellConsecutiveOffset() const;
+	std::size_t getCellConsecutiveId(long id) const;
+	const std::unordered_map<long, std::size_t> & getCellConsecutiveMap() const;
 
 #if BITPIT_ENABLE_MPI==1
-	long getCellGlobalCount() const;
-	long getCellGlobalCountOffset() const;
-	long getCellGlobalCountOffset(int rank) const;
+	std::size_t getCellGlobalCount() const;
+	std::size_t getCellGlobalCountOffset() const;
+	std::size_t getCellGlobalCountOffset(int rank) const;
 
-	BITPIT_DEPRECATED_FOR(long getCellGlobalId(long id) const, long getCellConsecutiveId(long id) const);
-	BITPIT_DEPRECATED_FOR(const std::unordered_map<long BITPIT_COMMA long> & getCellGlobalMap() const, const std::unordered_map<long BITPIT_COMMA long> & getCellConsecutiveMap() const);
+	BITPIT_DEPRECATED_FOR(std::size_t getCellGlobalId(long id) const, long getCellConsecutiveId(std::size_t id) const);
+	BITPIT_DEPRECATED_FOR(const std::unordered_map<long BITPIT_COMMA std::size_t> & getCellGlobalMap() const, const std::unordered_map<long BITPIT_COMMA std::size_t> & getCellConsecutiveMap() const);
 
 	int getCellOwnerFromLocal(long id) const;
-	int getCellOwnerFromConsecutive(long id) const;
-	BITPIT_DEPRECATED_FOR(int getCellOwnerFromGlobal(long id) const, int getCellOwnerFromConsecutive(long id) const);
+	int getCellOwnerFromConsecutive(std::size_t id) const;
+	BITPIT_DEPRECATED_FOR(int getCellOwnerFromGlobal(std::size_t id) const, int getCellOwnerFromConsecutive(std::size_t id) const);
 #endif
 
 protected:
@@ -87,10 +87,10 @@ protected:
 	void _extract() override;
 
 private:
-	long m_cellConsecutiveOffset;
-	std::unordered_map<long, long> m_cellLocalToConsecutiveMap;
+	std::size_t m_cellConsecutiveOffset;
+	std::unordered_map<long, std::size_t> m_cellLocalToConsecutiveMap;
 #if BITPIT_ENABLE_MPI==1
-	std::vector<long> m_nGlobalInternalCells;
+	std::vector<size_t> m_nGlobalInternalCells;
 #endif
 
 };

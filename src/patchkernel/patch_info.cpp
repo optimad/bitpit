@@ -171,7 +171,7 @@ void PatchNumberingInfo::_reset()
 */
 void PatchNumberingInfo::_extract()
 {
-	long consecutiveId;
+	std::size_t consecutiveId;
 
 #if BITPIT_ENABLE_MPI==1
 	// Initialize communications
@@ -197,8 +197,8 @@ void PatchNumberingInfo::_extract()
 	// Get the internal cell count of all the partitions
 	if (m_patch->isPartitioned()) {
 		m_nGlobalInternalCells.resize(m_patch->getProcessorCount());
-		long nLocalInternalCells = m_patch->getInternalCellCount();
-		MPI_Allgather(&nLocalInternalCells, 1, MPI_LONG, m_nGlobalInternalCells.data(), 1, MPI_LONG, m_patch->getCommunicator());
+		std::size_t nLocalInternalCells = m_patch->getInternalCellCount();
+		MPI_Allgather(&nLocalInternalCells, sizeof(std::size_t), MPI_CHAR, m_nGlobalInternalCells.data(), sizeof(std::size_t), MPI_CHAR, m_patch->getCommunicator());
 	} else {
 		m_nGlobalInternalCells.resize(1);
 		m_nGlobalInternalCells[0] = m_patch->getInternalCellCount();
@@ -214,7 +214,7 @@ void PatchNumberingInfo::_extract()
 		PatchKernel::CellConstIterator endItr   = m_patch->internalCellConstEnd();
 
 		std::size_t index = 0;
-		std::vector<std::pair<long, long>> nativeIds(m_patch->getInternalCellCount());
+		std::vector<std::pair<long, std::size_t>> nativeIds(m_patch->getInternalCellCount());
 		for (PatchKernel::CellConstIterator itr = beginItr; itr != endItr; ++itr) {
 			long id = itr.getId();
 			long nativeId = m_patch->_getCellNativeIndex(id);
@@ -288,7 +288,7 @@ void PatchNumberingInfo::_extract()
 
 	\return The consecutive offset for the local cells.
 */
-long PatchNumberingInfo::getCellConsecutiveOffset() const
+std::size_t PatchNumberingInfo::getCellConsecutiveOffset() const
 {
 	return m_cellConsecutiveOffset;
 }
@@ -299,7 +299,7 @@ long PatchNumberingInfo::getCellConsecutiveOffset() const
 	\param id is the local id of the cell
 	\return The consecutive id of the specified cell.
 */
-long PatchNumberingInfo::getCellConsecutiveId(long id) const
+std::size_t PatchNumberingInfo::getCellConsecutiveId(long id) const
 {
 	return m_cellLocalToConsecutiveMap.at(id);
 }
@@ -309,7 +309,7 @@ long PatchNumberingInfo::getCellConsecutiveId(long id) const
 
 	\result The map between local indexes and consecutive indexes.
 */
-const std::unordered_map<long, long> & PatchNumberingInfo::getCellConsecutiveMap() const
+const std::unordered_map<long, std::size_t> & PatchNumberingInfo::getCellConsecutiveMap() const
 {
 	return m_cellLocalToConsecutiveMap;
 }
@@ -321,10 +321,10 @@ const std::unordered_map<long, long> & PatchNumberingInfo::getCellConsecutiveMap
 
 	\return The global number of cells.
 */
-long PatchNumberingInfo::getCellGlobalCount() const
+std::size_t PatchNumberingInfo::getCellGlobalCount() const
 {
-	long nGlobalCells = 0;
-	for (long count : m_nGlobalInternalCells) {
+	std::size_t nGlobalCells = 0;
+	for (std::size_t count : m_nGlobalInternalCells) {
 		nGlobalCells += count;
 	}
 
@@ -336,7 +336,7 @@ long PatchNumberingInfo::getCellGlobalCount() const
 
 	\result The offset of the global cell count for the current parition.
 */
-long PatchNumberingInfo::getCellGlobalCountOffset() const
+std::size_t PatchNumberingInfo::getCellGlobalCountOffset() const
 {
 	return getCellGlobalCountOffset(m_patch->getRank());
 }
@@ -347,9 +347,9 @@ long PatchNumberingInfo::getCellGlobalCountOffset() const
 	\param rank is the rank
 	\result The offset of the global cell count for the specified parition.
 */
-long PatchNumberingInfo::getCellGlobalCountOffset(int rank) const
+std::size_t PatchNumberingInfo::getCellGlobalCountOffset(int rank) const
 {
-	long offset = 0;
+	std::size_t offset = 0;
 	for (int i = 0; i < rank; ++i) {
 		offset += m_nGlobalInternalCells[i];
 	}
@@ -363,7 +363,7 @@ long PatchNumberingInfo::getCellGlobalCountOffset(int rank) const
 	\param id is the local id of the cell
 	\return The global id of the specified cell.
 */
-long PatchNumberingInfo::getCellGlobalId(long id) const
+std::size_t PatchNumberingInfo::getCellGlobalId(long id) const
 {
     // Global ids and consecutive ids are the same
 	return m_cellLocalToConsecutiveMap.at(id);
@@ -374,7 +374,7 @@ long PatchNumberingInfo::getCellGlobalId(long id) const
 
 	\result The map between local indexes and global indexes.
 */
-const std::unordered_map<long, long> & PatchNumberingInfo::getCellGlobalMap() const
+const std::unordered_map<long, std::size_t> & PatchNumberingInfo::getCellGlobalMap() const
 {
     // Global ids and consecutive ids are the same
 	return m_cellLocalToConsecutiveMap;
@@ -403,13 +403,13 @@ int PatchNumberingInfo::getCellOwnerFromLocal(long id) const
 	\param id is the consecutive id of the cell
 	\return The rank of the specified cell.
 */
-int PatchNumberingInfo::getCellOwnerFromConsecutive(long id) const
+int PatchNumberingInfo::getCellOwnerFromConsecutive(std::size_t id) const
 {
 	if (!m_patch->isPartitioned()) {
 		return m_patch->getRank();
 	}
 
-	long offset = 0;
+	std::size_t offset = 0;
 	for (int k = 0; k < m_patch->getProcessorCount(); ++k) {
 		offset += m_nGlobalInternalCells[k];
 		if (id < offset) {
@@ -426,7 +426,7 @@ int PatchNumberingInfo::getCellOwnerFromConsecutive(long id) const
 	\param id is the global id of the cell
 	\return The rank of the specified cell.
 */
-int PatchNumberingInfo::getCellOwnerFromGlobal(long id) const
+int PatchNumberingInfo::getCellOwnerFromGlobal(std::size_t id) const
 {
     // Global ids and consecutive ids are the same
     return getCellOwnerFromConsecutive(id);

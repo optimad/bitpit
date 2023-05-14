@@ -572,7 +572,7 @@ void PatchKernel::initialize()
 	m_vtk.addData<int>("PID", VTKFieldType::SCALAR, VTKLocation::CELL, this);
 	m_vtk.addData<long>("vertexIndex", VTKFieldType::SCALAR, VTKLocation::POINT, this);
 #if BITPIT_ENABLE_MPI==1
-	m_vtk.addData<long>("cellConsecutiveIndex", VTKFieldType::SCALAR, VTKLocation::CELL, this);
+	m_vtk.addData<std::size_t>("cellConsecutiveIndex", VTKFieldType::SCALAR, VTKLocation::CELL, this);
 	m_vtk.addData<int>("cellRank", VTKFieldType::SCALAR, VTKLocation::CELL, this);
 	m_vtk.addData<int>("cellHaloLayer", VTKFieldType::SCALAR, VTKLocation::CELL, this);
 	m_vtk.addData<int>("vertexRank", VTKFieldType::SCALAR, VTKLocation::POINT, this);
