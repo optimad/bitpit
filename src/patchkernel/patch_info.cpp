@@ -128,6 +128,14 @@ void PatchInfo::update()
 	\class PatchNumberingInfo
 
 	\brief Numbering information about the patch.
+
+	For each cell it is possible to define different numberings:
+	 - cell id; is the id assigned to each cell at its creation. The id is unique inside the
+	   partition, but different partitions may have cells with the same local id;
+	 - consecutive id; is an id that consecutively numbers the cells. The numbering is global
+	   across the partitions, it starts from zero and reaches (nGlobalCells - 1). Inside each
+	   partition, the numbering is still consecutive;
+	 - global id; this numbering is deprecated and coincides with the consecutive numbering.
 */
 
 /*!
@@ -284,7 +292,7 @@ void PatchNumberingInfo::_extract()
 }
 
 /*!
-	Return the consecutive offset for the local ells
+	Return the consecutive offset for the local cells.
 
 	\return The consecutive offset for the local cells.
 */
@@ -294,7 +302,7 @@ std::size_t PatchNumberingInfo::getCellConsecutiveOffset() const
 }
 
 /*!
-	Return the consecutive id of the cell with the specified local id
+	Return the consecutive id of the cell with the specified local id.
 
 	\param id is the local id of the cell
 	\return The consecutive id of the specified cell.
@@ -314,7 +322,6 @@ const std::unordered_map<long, std::size_t> & PatchNumberingInfo::getCellConsecu
 	return m_cellLocalToConsecutiveMap;
 }
 
-
 #if BITPIT_ENABLE_MPI==1
 /*!
 	Gets the global number of cells.
@@ -332,9 +339,9 @@ std::size_t PatchNumberingInfo::getCellGlobalCount() const
 }
 
 /*!
-	Return the offset of the global cell count for the current parition.
+	Return the offset of the global cell count for the current partition.
 
-	\result The offset of the global cell count for the current parition.
+	\result The offset of the global cell count for the current partition.
 */
 std::size_t PatchNumberingInfo::getCellGlobalCountOffset() const
 {
@@ -342,10 +349,10 @@ std::size_t PatchNumberingInfo::getCellGlobalCountOffset() const
 }
 
 /*!
-	Return the offset of the global cell count for the specified parition.
+	Return the offset of the global cell count for the specified partition.
 
 	\param rank is the rank
-	\result The offset of the global cell count for the specified parition.
+	\result The offset of the global cell count for the specified partition.
 */
 std::size_t PatchNumberingInfo::getCellGlobalCountOffset(int rank) const
 {
@@ -358,7 +365,7 @@ std::size_t PatchNumberingInfo::getCellGlobalCountOffset(int rank) const
 }
 
 /*!
-	Return the global id of the cell with the specified local id
+	Return the global id of the cell with the specified local id.
 
 	\param id is the local id of the cell
 	\return The global id of the specified cell.
@@ -382,7 +389,7 @@ const std::unordered_map<long, std::size_t> & PatchNumberingInfo::getCellGlobalM
 
 
 /*!
-	Gets the rank of the cell with the specified local id
+	Gets the rank of the cell with the specified local id.
 
 	\param id is the local id of the cell
 	\return The rank of the specified cell.
@@ -398,7 +405,7 @@ int PatchNumberingInfo::getCellOwnerFromLocal(long id) const
 }
 
 /*!
-	Gets the rank of the cell with the specified consecutive id
+	Gets the rank of the cell with the specified consecutive id.
 
 	\param id is the consecutive id of the cell
 	\return The rank of the specified cell.
@@ -421,7 +428,7 @@ int PatchNumberingInfo::getCellOwnerFromConsecutive(std::size_t id) const
 }
 
 /*!
-	Gets the rank of the cell with the specified global id
+	Gets the rank of the cell with the specified global id.
 
 	\param id is the global id of the cell
 	\return The rank of the specified cell.
