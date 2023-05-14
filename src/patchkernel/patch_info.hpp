@@ -25,6 +25,8 @@
 #ifndef __BITPIT_PATCH_INFO_HPP__
 #define __BITPIT_PATCH_INFO_HPP__
 
+#include "bitpit_common.hpp"
+
 #include <unordered_map>
 #include <vector>
 
@@ -71,12 +73,12 @@ public:
 	long getCellGlobalCountOffset() const;
 	long getCellGlobalCountOffset(int rank) const;
 
-	long getCellGlobalId(long id) const;
-	const std::unordered_map<long, long> & getCellGlobalMap() const;
+	BITPIT_DEPRECATED_FOR(long getCellGlobalId(long id) const, long getCellConsecutiveId(long id) const);
+	BITPIT_DEPRECATED_FOR(const std::unordered_map<long BITPIT_COMMA long> & getCellGlobalMap() const, const std::unordered_map<long BITPIT_COMMA long> & getCellConsecutiveMap() const);
 
 	int getCellOwnerFromLocal(long id) const;
 	int getCellOwnerFromConsecutive(long id) const;
-	int getCellOwnerFromGlobal(long id) const;
+	BITPIT_DEPRECATED_FOR(int getCellOwnerFromGlobal(long id) const, int getCellOwnerFromConsecutive(long id) const);
 #endif
 
 protected:
