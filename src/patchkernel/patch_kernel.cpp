@@ -572,7 +572,7 @@ void PatchKernel::initialize()
 	m_vtk.addData<int>("PID", VTKFieldType::SCALAR, VTKLocation::CELL, this);
 	m_vtk.addData<long>("vertexIndex", VTKFieldType::SCALAR, VTKLocation::POINT, this);
 #if BITPIT_ENABLE_MPI==1
-	m_vtk.addData<long>("cellGlobalIndex", VTKFieldType::SCALAR, VTKLocation::CELL, this);
+	m_vtk.addData<long>("cellConsecutiveIndex", VTKFieldType::SCALAR, VTKLocation::CELL, this);
 	m_vtk.addData<int>("cellRank", VTKFieldType::SCALAR, VTKLocation::CELL, this);
 	m_vtk.addData<int>("cellHaloLayer", VTKFieldType::SCALAR, VTKLocation::CELL, this);
 	m_vtk.addData<int>("vertexRank", VTKFieldType::SCALAR, VTKLocation::POINT, this);
@@ -7946,12 +7946,12 @@ void PatchKernel::flushData(std::fstream &stream, const std::string &name, VTKFo
 				flushValue(stream, format,vertexId);
 			}
 		}
-#if BITPIT_ENABLE_MPI==1
-	} else if (name == "cellGlobalIndex") {
+	} else if (name == "cellConsecutiveIndex") {
 		PatchNumberingInfo numberingInfo(this);
 		for (const Cell &cell : getVTKCellWriteRange()) {
-			flushValue(stream, format,numberingInfo.getCellGlobalId(cell.getId()));
+			flushValue(stream, format,numberingInfo.getCellConsecutiveId(cell.getId()));
 		}
+#if BITPIT_ENABLE_MPI==1
 	} else if (name == "cellRank") {
 		for (const Cell &cell : getVTKCellWriteRange()) {
 			flushValue(stream, format,getCellOwner(cell.getId()));
