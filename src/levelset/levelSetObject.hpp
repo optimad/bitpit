@@ -144,6 +144,8 @@ class LevelSetObject : public VTKBaseStreamer, public virtual LevelSetObjectInte
     std::array<double,3>                        computeProjectionPoint(long ) const;
     std::array<double,3>                        computeVertexProjectionPoint(long ) const;
 
+    BITPIT_DEPRECATED(LevelSetInfo              getLevelSetInfo(long ) const override);
+    BITPIT_DEPRECATED(double                    getLS(long ) const override);
     virtual int                                 getPart(long ) const ;
     virtual std::array<double,3>                getNormal(long ) const;
     virtual LevelSetInfo                        computeLevelSetInfo(const std::array<double,3> &) const =0;
