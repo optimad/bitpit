@@ -160,33 +160,6 @@ LevelSetBooleanObject::LevelSetBooleanObject( const LevelSetBooleanObject &other
 }
 
 /*!
- * Returns LevelSetInfo 
- * @param[in] id cell id
- * @return LevelSetInfo
-*/
-LevelSetInfo LevelSetBooleanObject::getLevelSetInfo( long id)const{
-    LevelSetBooleanResult result = computeBooleanResult( id ) ;
-    const LevelSetObject *resultObject = result.getObject();
-    if ( resultObject ) {
-        double value = result.getValue();
-        std::array<double, 3> gradient = static_cast<double>(result.getObjectSign()) * resultObject->getGradient( id ) ;
-
-        return LevelSetInfo(value, gradient) ;
-    }
-
-    return LevelSetInfo() ;
-} 
-
-/*!
- * Get the levelset value
- * @param[in] id cell id
- * @return levelset value in cell
- */
-double LevelSetBooleanObject::getLS( long id)const {
-    return getValue(id) ;
-}
-
-/*!
  * Get the levelset value
  * @param[in] id cell id
  * @return levelset value in cell

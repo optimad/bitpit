@@ -52,8 +52,6 @@ public:
 
     LevelSetImmutableObject * clone() const override;
 
-    LevelSetInfo getLevelSetInfo(long id) const override;
-    double getLS(long id) const override;
     double getValue(long id) const override;
     short getSign(long id) const override;
     std::array<double,3> getGradient(long id) const override;
