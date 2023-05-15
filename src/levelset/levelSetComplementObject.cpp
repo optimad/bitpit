@@ -65,28 +65,6 @@ LevelSetComplementObject::LevelSetComplementObject(const LevelSetComplementObjec
 }
 
 /*!
- * Returns LevelSetInfo.
- *
- * \param[in] id cell id
- * \return LevelSetInfo
-*/
-LevelSetInfo LevelSetComplementObject::getLevelSetInfo(long id) const
-{
-    return LevelSetInfo(getValue(id), getGradient(id));
-} 
-
-/*!
- * Get the levelset value.
- *
- * \param[in] id cell id
- * \return levelset value in cell
- */
-double LevelSetComplementObject::getLS(long id) const
-{
-    return getValue(id);
-}
-
-/*!
  * Get the levelset value.
  *
  * \param[in] id cell id

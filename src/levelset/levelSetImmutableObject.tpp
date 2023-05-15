@@ -118,39 +118,6 @@ LevelSetImmutableObject<narrow_band_cache_t>::LevelSetImmutableObject(LevelSetCa
 }
 
 /*!
- * Get LevelSetInfo of cell
- * @param[in] i cell idex
- * @return LevelSetInfo of cell
-*/
-template<typename narrow_band_cache_t>
-LevelSetInfo LevelSetImmutableObject<narrow_band_cache_t>::getLevelSetInfo(long id)const{
-
-    const narrow_band_cache_t *narrowBandCache = this->getNarrowBandCache();
-    typename narrow_band_cache_t::KernelIterator narrowBandCacheItr = narrowBandCache->find(id);
-    if(narrowBandCacheItr != narrowBandCache->end()){
-        double value = narrowBandCache->getValue(narrowBandCacheItr);
-        const std::array<double, 3> &gradient = narrowBandCache->getGradient(narrowBandCacheItr);
-
-        return LevelSetInfo(value, gradient);
-    }
-
-    return LevelSetInfo();
-
-}
-
-/*!
- * Get the levelset value of cell
- * @param[in] id cell id
- * @return levelset value in cell
- */
-template<typename narrow_band_cache_t>
-double LevelSetImmutableObject<narrow_band_cache_t>::getLS(long id)const {
-
-    return getValue(id);
-
-}
-
-/*!
  * Get the levelset value of cell
  * @param[in] id cell id
  * @return levelset value in cell

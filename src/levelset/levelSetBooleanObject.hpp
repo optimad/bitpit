@@ -88,8 +88,6 @@ class LevelSetBooleanObject: public LevelSetProxyObject {
 
     LevelSetBooleanObject*                      clone() const override;
 
-    LevelSetInfo                                getLevelSetInfo(long ) const override;
-    double                                      getLS(long ) const override;
     double                                      getValue(long ) const override;
     std::array<double,3>                        getGradient(long ) const override;
 
