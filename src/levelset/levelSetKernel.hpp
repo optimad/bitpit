@@ -72,7 +72,7 @@ class LevelSetKernel {
     virtual bool                                intersectCellPlane(long, const std::array<double,3> &, const std::array<double,3> &, double);
 
     BITPIT_DEPRECATED(bool                      isPointInCell(long, const std::array<double,3> &) const);
-    BITPIT_DEPRECATED(double                    isCellInsideBoundingBox(long, const std::array<double,3> &, const std::array<double,3> & ) const);
+    BITPIT_DEPRECATED(double                    isCellInsideBoundingBox(long, const std::array<double BITPIT_COMMA 3> &, const std::array<double,3> & ) const);
 
 # if BITPIT_ENABLE_MPI
     void                                        initializeCommunicator();
