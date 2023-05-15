@@ -214,6 +214,28 @@ std::array<double,3> LevelSetObject::computeVertexProjectionPoint(long vertexId)
 }
 
 /*!
+ * Get LevelSetInfo of cell
+ * @param[in] cellId cell idex
+ * @return LevelSetInfo of cell
+*/
+LevelSetInfo LevelSetObject::getLevelSetInfo(long cellId) const {
+
+    return LevelSetInfo(getValue(cellId), getGradient(cellId));
+
+}
+
+/*!
+ * Get the levelset value of cell
+ * @param[in] cellId cell id
+ * @return levelset value in cell
+ */
+double LevelSetObject::getLS(long cellId) const {
+
+    return getValue(cellId);
+
+}
+
+/*!
  * Get the part id of projection point
  * @param[in] id cell id
  * @return part id 
