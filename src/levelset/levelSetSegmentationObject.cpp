@@ -306,6 +306,17 @@ std::array<double,3> SegmentationKernel::computePseudoNormal( const SurfUnstruct
     } else {
         int nSegmentVertices = segment.getVertexCount();
         positionFlag = CGElem::convertBarycentricToFlagPolygon(nSegmentVertices, lambda, m_surface->getTol());
+        if (positionFlag > 0) {
+            int polygonVertex = positionFlag - 1;
+            int elementVertex = m_surface->getFacetOrderedLocalVertex(segment, polygonVertex);
+
+            positionFlag = elementVertex + 1;
+        } else if (positionFlag < 0) {
+            int polygonEdge = (- positionFlag) - 1;
+            int elementEdge = m_surface->getFacetOrderedLocalEdge(segment, polygonEdge);
+
+            positionFlag = - (elementEdge + 1);
+        }
     }
 
     std::array<double,3> pseudoNormal;
