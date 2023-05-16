@@ -193,7 +193,7 @@ long LevelSetSegmentationObject<narrow_band_cache_t>::getSupport( long id ) cons
 /*!
  * Get size of support triangle
  * @param[in] id cell id
- * @return charcteristic size of support triangle
+ * @return characteristic size of support triangle
  */
 template<typename narrow_band_cache_t>
 double LevelSetSegmentationObject<narrow_band_cache_t>::getSurfaceFeatureSize( long id ) const {
@@ -207,8 +207,8 @@ double LevelSetSegmentationObject<narrow_band_cache_t>::getSurfaceFeatureSize( l
 }
 
 /*!
- * Get the smallest characterstic size within the triangultaion
- * @return smallest charcteristic size within the triangulation
+ * Get the smallest characteristic size within the triangulation
+ * @return smallest characteristic size within the triangulation
  */template<typename narrow_band_cache_t>
 double LevelSetSegmentationObject<narrow_band_cache_t>::getMinSurfaceFeatureSize( ) const {
 
@@ -216,8 +216,8 @@ double LevelSetSegmentationObject<narrow_band_cache_t>::getMinSurfaceFeatureSize
 }
 
 /*!
- * Get the largest characterstic size within the triangultaion
- * @return largest charcteristic size within the triangulation
+ * Get the largest characteristic size within the triangulation
+ * @return largest characteristic size within the triangulation
  */
 template<typename narrow_band_cache_t>
 double LevelSetSegmentationObject<narrow_band_cache_t>::getMaxSurfaceFeatureSize( ) const {
