@@ -26,32 +26,32 @@
 # define __BITPIT_LEVELSET_UNSTRUCTURED_KERNEL_HPP__
 
 #include "levelSetKernel.hpp"
+#include "levelSetCache.hpp"
 
 # include "bitpit_volunstructured.hpp"
 
+#include <memory>
+#include <vector>
+
 namespace bitpit{
 
-class LevelSetExternalPiercedStorageManager;
-class LevelSetInternalPiercedStorageManager;
+class LevelSetUnstructuredKernel : public LevelSetCachedKernel {
 
-struct LevelSetUnstructuredCellCacheEntry {
-
-    std::array<double, 3> centroid;
-
-    double tangentRadius;
-    double boundingRadius;
-
-    LevelSetUnstructuredCellCacheEntry(const VolumeKernel &patch, long cellId);
-
-};
-
-class LevelSetUnstructuredKernel : public LevelSetCachedKernel<LevelSetUnstructuredCellCacheEntry> {
+    private:
+    std::size_t                                 m_cellCentroidCacheId;
+    std::size_t                                 m_cellTangentRadiusCacheId;
+    std::size_t                                 m_cellBoundingRadiusCacheId;
 
     public:
     typedef LevelSetExternalPiercedStorageManager DenseStorageManager;
     typedef LevelSetInternalPiercedStorageManager SparseStorageManager;
 
-    LevelSetUnstructuredKernel( VolUnstructured & );
+    template<typename value_t>
+    using CellSparseCacheContainer = std::unordered_map<long, value_t>;
+    template<typename value_t>
+    using CellDenseCacheContainer = bitpit::PiercedStorage<value_t, long>;
+
+    LevelSetUnstructuredKernel( VolUnstructured &patch, LevelSetFillIn fillIn );
 
     VolUnstructured *                           getMesh() const override;
 
@@ -65,5 +65,8 @@ class LevelSetUnstructuredKernel : public LevelSetCachedKernel<LevelSetUnstructu
 typedef LevelSetUnstructuredKernel LevelSetUnstructured;
 
 }
+
+// Include template implementations
+#include "levelSetUnstructuredKernel.tpp"
 
 #endif

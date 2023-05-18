@@ -31,10 +31,7 @@
 
 namespace bitpit{
 
-class LevelSetDirectStorageManager;
-class LevelSetInternalPiercedStorageManager;
-
-class LevelSetCartesianKernel : public LevelSetKernel{
+class LevelSetCartesianKernel : public LevelSetCachedKernel {
 
     private:
     double                                      m_cellTangentRadius ;     /**< Cell tangent radius */
@@ -44,7 +41,12 @@ class LevelSetCartesianKernel : public LevelSetKernel{
     typedef LevelSetDirectStorageManager          DenseStorageManager;
     typedef LevelSetInternalPiercedStorageManager SparseStorageManager;
 
-    LevelSetCartesianKernel( VolCartesian & );
+    template<typename value_t>
+    using CellSparseCacheContainer = std::unordered_map<long, value_t>;
+    template<typename value_t>
+    using CellDenseCacheContainer = std::vector<value_t>;
+
+    LevelSetCartesianKernel( VolCartesian &patch, LevelSetFillIn fillIn );
 
     VolCartesian *                              getMesh() const override;
 

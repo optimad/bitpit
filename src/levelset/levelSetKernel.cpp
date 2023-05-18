@@ -38,7 +38,8 @@ namespace bitpit {
  * Default constructor.
  */
 LevelSetKernel::LevelSetKernel() {
-    m_mesh = NULL ;
+    m_mesh   = NULL ;
+    m_fillIn = LevelSetFillIn::SPARSE ;
 
 #if BITPIT_ENABLE_MPI
     m_communicator = MPI_COMM_NULL;
@@ -49,9 +50,11 @@ LevelSetKernel::LevelSetKernel() {
 /*!
  * Constructor
  * @param[in] patch underlying mesh
+ * @param[in] fillIn expected kernel fill-in
  */
-LevelSetKernel::LevelSetKernel( VolumeKernel *patch): LevelSetKernel() {
-    m_mesh = patch ;
+LevelSetKernel::LevelSetKernel( VolumeKernel *patch, LevelSetFillIn fillIn ): LevelSetKernel() {
+    m_mesh   = patch ;
+    m_fillIn = fillIn ;
 
 #if BITPIT_ENABLE_MPI
     // Initialize the communicator
@@ -79,6 +82,16 @@ LevelSetKernel::~LevelSetKernel(){
 */
 VolumeKernel * LevelSetKernel::getMesh() const{
     return m_mesh ;
+}
+
+/*!
+ * Get the expected kernel fill-in.
+ *
+ * \result The expected kernel fill-in.
+*/
+LevelSetFillIn LevelSetKernel::getFillIn() const
+{
+    return m_fillIn;
 }
 
 /*!
@@ -241,6 +254,109 @@ std::unique_ptr<DataCommunicator> LevelSetKernel::createDataCommunicator( ) cons
 std::unique_ptr<LevelSetSignPropagator> LevelSetKernel::createSignPropagator( ) const {
 
     return std::unique_ptr<LevelSetSignPropagator>(new LevelSetSignPropagator(m_mesh)) ;
+}
+
+/*!
+    @interface  LevelSetCachedKernel
+    @ingroup levelset
+    @brief Base class for defining kernels that need to cache data.
+*/
+
+/*!
+ * Constructor
+ * @param[in] patch underlying mesh
+ * @param[in] fillIn expected kernel fill-in
+ */
+LevelSetCachedKernel::LevelSetCachedKernel( VolumeKernel *patch, LevelSetFillIn fillIn)
+    : LevelSetKernel(patch, fillIn),
+      m_cellCacheCollection(std::unique_ptr<CellCacheCollection>(new CellCacheCollection(&(patch->getCells()))))
+{
+}
+
+/*!
+ * Clear the cache used for caching mesh information.
+ *
+ * \param release if set to true the memory hold by the cache will be released, otherwise
+ * the cache will be cleared but its memory may not be released
+ */
+void LevelSetCachedKernel::clearCache(bool release)
+{
+    for (CellCacheCollection::Item &cacheItem : *m_cellCacheCollection) {
+        if (!cacheItem.hasCache()) {
+            continue;
+        }
+
+        if (release) {
+            cacheItem.destroyCache();
+        } else {
+            cacheItem.getCache()->clear();
+        }
+    }
+}
+
+/*!
+ * Get a reference to the cell cache collection.
+ *
+ * Attempting to access cache collection when cache is disabled results in undefined behavior.
+ *
+ * \result A reference to the cell cache collection.
+ */
+LevelSetCachedKernel::CellCacheCollection & LevelSetCachedKernel::getCellCacheCollection()
+{
+    return *m_cellCacheCollection;
+}
+
+/*!
+ * Get a constant reference to the cell cache collection.
+ *
+ * Attempting to access cache collection when cache is disabled results in undefined behavior.
+ *
+ * \result A constant reference to the cell cache collection.
+ */
+const LevelSetCachedKernel::CellCacheCollection & LevelSetCachedKernel::getCellCacheCollection() const
+{
+    return *m_cellCacheCollection;
+}
+
+/*!
+ * Updates the kernel after an adaption.
+ *
+ * @param[in] adaptionData are the information about the adaption
+ */
+void LevelSetCachedKernel::update( const std::vector<adaption::Info> &adaptionData ) {
+
+    // Update base class
+    LevelSetKernel::update( adaptionData );
+
+    // Update cell cache collection
+    for (const adaption::Info &adaptionInfo : adaptionData) {
+        if (adaptionInfo.entity != adaption::Entity::ENTITY_CELL) {
+            continue;
+        }
+
+        for (CellCacheCollection::Item &cacheItem : *m_cellCacheCollection) {
+            if (!cacheItem.hasCache()) {
+                continue;
+            }
+
+            CellCacheCollection::Cache *cache = cacheItem.getCache();
+            cache->erase(adaptionInfo.previous);
+        }
+    }
+
+    for (CellCacheCollection::Item &cacheItem : *m_cellCacheCollection) {
+        if (!cacheItem.hasCache()) {
+            continue;
+        }
+
+        CellCacheCollection::Cache *cache = cacheItem.getCache();
+        if (m_fillIn == LevelSetFillIn::DENSE) {
+            cache->reserve(getMesh()->getCells().size());
+        } else {
+            cache->shrink_to_fit();
+        }
+    }
+
 }
 
 }
