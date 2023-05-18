@@ -85,7 +85,8 @@ class LevelSet{
 
     LevelSetStorageType     getStorageType() const ;
 
-    void                    setMesh( VolumeKernel* ) ;
+    void                    setMesh( VolumeKernel* mesh, LevelSetFillIn fillIn = LevelSetFillIn::SPARSE ) ;
+    void                    clearMeshCache() ;
 
     int                     addObjectComplement( int, int id=levelSetDefaults::OBJECT ) ;
 

@@ -37,8 +37,13 @@ namespace bitpit {
 
 /*!
  * Constructor
+ *
+ * \param patch is the underlying mesh
+ * \param fillIn is the expected levelset fill-in
  */
-LevelSetCartesianKernel::LevelSetCartesianKernel(VolCartesian &patch ): LevelSetKernel( &patch ){
+LevelSetCartesianKernel::LevelSetCartesianKernel(VolCartesian &patch, LevelSetFillIn fillIn ): LevelSetCachedKernel( &patch, fillIn ){
+
+    BITPIT_UNUSED(fillIn);
 
     // Get mesh information
     const VolCartesian *mesh = getMesh();

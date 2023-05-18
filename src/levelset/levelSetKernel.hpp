@@ -38,6 +38,7 @@
 # include "bitpit_common.hpp"
 # include "bitpit_patchkernel.hpp"
 
+# include "levelSetCache.hpp"
 # include "levelSetObject.hpp"
 # include "levelSetSignPropagator.hpp"
 
@@ -59,6 +60,7 @@ class LevelSetKernel {
 
     protected:
     VolumeKernel*                               m_mesh;        /**< Pointer to underlying mesh*/
+    LevelSetFillIn                              m_fillIn;      /**< Expected kernel fit-in */
 # if BITPIT_ENABLE_MPI
     MPI_Comm                                    m_communicator; /**< MPI communicator */
 # endif
@@ -66,9 +68,11 @@ class LevelSetKernel {
     public:
     virtual ~LevelSetKernel() ;
     LevelSetKernel() ;
-    LevelSetKernel( VolumeKernel *) ;
+    LevelSetKernel( VolumeKernel *mesh, LevelSetFillIn fillIn ) ;
 
     virtual VolumeKernel *                      getMesh() const;
+
+    LevelSetFillIn                              getFillIn() const;
 
     virtual std::array<double, 3>               computeCellCentroid(long) const = 0;
     virtual double                              computeCellTangentRadius(long) const = 0;
@@ -92,28 +96,25 @@ class LevelSetKernel {
 
 };
 
-template<typename CellCacheEntry>
 class LevelSetCachedKernel : public LevelSetKernel {
 
-    private:
-    mutable std::unordered_map<long, CellCacheEntry>  m_cellCache;  /**< Cell cache */
-
-    protected:
-    const CellCacheEntry &                      computeCellCacheEntry( long id ) const;
-
-    virtual void                                pruneCellCache(const std::vector<adaption::Info> &);
-
     public:
-    LevelSetCachedKernel() ;
-    LevelSetCachedKernel( VolumeKernel *) ;
+    typedef ElementCacheCollection CellCacheCollection;
+
+    LevelSetCachedKernel( VolumeKernel *, LevelSetFillIn fillIn ) ;
+
+    void                                        clearCache(bool release = false);
 
     void                                        update(const std::vector<adaption::Info> &) override;
+
+    protected:
+    mutable std::unique_ptr<CellCacheCollection> m_cellCacheCollection;  /**< Cell cache collection */
+
+    CellCacheCollection &                       getCellCacheCollection();
+    const CellCacheCollection &                 getCellCacheCollection() const;
 
 };
 
 }
-
-// Include template implementations
-#include "levelSetKernel.tpp"
 
 #endif
