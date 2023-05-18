@@ -109,8 +109,9 @@ LevelSetStorageType LevelSet::getStorageType() const{
  * mesh type is not among the supported types, an exception is thrown.
  *
  * @param[in] mesh computational mesh
+ * @param[in] fillIn expected kernel fill-in
  */
-void LevelSet::setMesh( VolumeKernel* mesh ) {
+void LevelSet::setMesh( VolumeKernel* mesh, LevelSetFillIn fillIn ) {
 
     // Mesh can be set only once
     if (m_kernel) {
@@ -119,11 +120,11 @@ void LevelSet::setMesh( VolumeKernel* mesh ) {
 
     // Create the kernel
     if (VolCartesian *cartesian = dynamic_cast<VolCartesian *>(mesh)) {
-        m_kernel = std::unique_ptr<LevelSetKernel>(new LevelSetCartesianKernel(*cartesian));
+        m_kernel = std::unique_ptr<LevelSetKernel>(new LevelSetCartesianKernel(*cartesian, fillIn));
     } else if (VolOctree *octree = dynamic_cast<VolOctree *>(mesh)) {
-        m_kernel = std::unique_ptr<LevelSetKernel>(new LevelSetOctreeKernel(*octree));
+        m_kernel = std::unique_ptr<LevelSetKernel>(new LevelSetOctreeKernel(*octree, fillIn));
     } else if (VolUnstructured *unstructured = dynamic_cast<VolUnstructured*>(mesh)) {
-        m_kernel = std::unique_ptr<LevelSetKernel>(new LevelSetUnstructuredKernel(*unstructured));
+        m_kernel = std::unique_ptr<LevelSetKernel>(new LevelSetUnstructuredKernel(*unstructured, fillIn));
     } else {
         throw std::runtime_error ("Unable to create the levelset kernel. Mesh type non supported.");
     }
@@ -134,6 +135,21 @@ void LevelSet::setMesh( VolumeKernel* mesh ) {
     }
 
 }
+
+/*!
+ * Clear the cache that stores mesh information.
+ */
+void LevelSet::clearMeshCache( ) {
+
+    LevelSetCachedKernel *cachedKernel = dynamic_cast<LevelSetCachedKernel *>(m_kernel.get());
+    if (!cachedKernel) {
+        return;
+    }
+
+    cachedKernel->clearCache();
+
+}
+
 
 /*!
  * Adds a segmentation object

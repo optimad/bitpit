@@ -30,70 +30,35 @@ namespace bitpit {
 
 /*!
  *  @ingroup    levelset
- *  @class      LevelSetUnstructuredCellCacheEntry
- *  @brief      Cache entry associated with cells of unstructured patches, the entry will
- *              store cell information needed to evaluate the levelset.
- */
-
-/*!
- * Constructor
- *
- * @param[in] patch is the patch the cell belongs to
- * @param[in] cellId is the id of the cell
- */
-LevelSetUnstructuredCellCacheEntry::LevelSetUnstructuredCellCacheEntry(const VolumeKernel &patch, long cellId) {
-
-    // Get mesh information
-    assert(dynamic_cast<const VolUnstructured *>(&patch)) ;
-    const VolUnstructured &unstructuredPatch = static_cast<const VolUnstructured &>(patch) ;
-
-    // Cell information
-    const Cell &cell = unstructuredPatch.getCell(cellId);
-    ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
-    int nCellVertices = cellVertexIds.size();
-
-    BITPIT_CREATE_WORKSPACE(vertexCoordinates, std::array<double BITPIT_COMMA 3>, nCellVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
-    unstructuredPatch.getVertexCoords(nCellVertices, cellVertexIds.data(), vertexCoordinates);
-
-    // Evaluate centroid
-    centroid = cell.evalCentroid(vertexCoordinates);
-
-    // Evaluate the radius of the tangent sphere
-    //
-    // Since the center of the tangent sphere is the cell centroid, its
-    // radius can be evaluated as distance between the cell centroid and
-    // the cell.
-    tangentRadius = cell.evalPointDistance(centroid, vertexCoordinates);
-
-    // Evaluate the radius of the bounding sphere
-    //
-    // Since the center of the bounding sphere is the cell centroid, its
-    // radius can be evaluated as distance between the cell centroid and
-    // the farthest vertex.
-    boundingRadius = 0.;
-    for (int k = 0; k < nCellVertices; ++k) {
-        double vertexDistance = 0.;
-        for (int d = 0; d < 3; ++d) {
-            vertexDistance += uipow(centroid[d] - vertexCoordinates[k][d], 2);
-        }
-
-        boundingRadius = std::max(vertexDistance, boundingRadius);
-    }
-    boundingRadius = std::sqrt(boundingRadius);
-
-}
-
-/*!
- *  @ingroup    levelset
  *  @class      LevelSetUnstructuredKernel
  *  @brief      Implements LevelSetKernel for unstructured meshes
  */
 
 /*!
  * Constructor
+ *
+ * \param patch is the underlying mesh
+ * \param fillIn expected kernel fill-in
  */
-LevelSetUnstructuredKernel::LevelSetUnstructuredKernel(VolUnstructured & patch ): LevelSetCachedKernel<LevelSetUnstructuredCellCacheEntry>( &patch ){
+LevelSetUnstructuredKernel::LevelSetUnstructuredKernel(VolUnstructured &patch, LevelSetFillIn fillIn ): LevelSetCachedKernel( &patch, fillIn ){
 
+    CellCacheCollection &cacheCollection = getCellCacheCollection();
+    if (fillIn == LevelSetFillIn::SPARSE) {
+        m_cellCentroidCacheId       = cacheCollection.insert<CellSparseCacheContainer<std::array<double, 3>>>();
+        m_cellTangentRadiusCacheId  = cacheCollection.insert<CellSparseCacheContainer<double>>();
+        m_cellBoundingRadiusCacheId = cacheCollection.insert<CellSparseCacheContainer<double>>();
+    } else if (fillIn == LevelSetFillIn::DENSE) {
+        PiercedVector<Cell, long> *cacheKernel = &(getMesh()->getCells());
+        PiercedSyncMaster::SyncMode cacheSyncMode = PiercedSyncMaster::SyncMode::SYNC_MODE_JOURNALED;
+
+        m_cellCentroidCacheId       = cacheCollection.insert<CellDenseCacheContainer<std::array<double, 3>>>(cacheKernel, cacheSyncMode);
+        m_cellTangentRadiusCacheId  = cacheCollection.insert<CellDenseCacheContainer<double>>(cacheKernel, cacheSyncMode);
+        m_cellBoundingRadiusCacheId = cacheCollection.insert<CellDenseCacheContainer<double>>(cacheKernel, cacheSyncMode);
+    } else {
+        m_cellCentroidCacheId       = CellCacheCollection::NULL_ID;
+        m_cellTangentRadiusCacheId  = CellCacheCollection::NULL_ID;
+        m_cellBoundingRadiusCacheId = CellCacheCollection::NULL_ID;
+    }
 }
 
 /*!
@@ -110,11 +75,26 @@ VolUnstructured * LevelSetUnstructuredKernel::getMesh() const{
  * @param[in] id is the id of cell
  * @return The centroid of the cell.
  */
-std::array<double, 3> LevelSetUnstructuredKernel::computeCellCentroid(long id) const {
+std::array<double, 3> LevelSetUnstructuredKernel::computeCellCentroid( long id ) const {
 
-    const LevelSetUnstructuredCellCacheEntry &cacheEntry = computeCellCacheEntry( id );
+    // Try fetching the value from the cache
+    CellValueCache<std::array<double, 3>> *cache = m_cellCacheCollection->at<std::array<double, 3>>(m_cellCentroidCacheId);
+    if (cache) {
+        typename CellValueCache<std::array<double, 3>>::Entry cacheEntry = cache->findEntry(id);
+        if (cacheEntry.isValid()) {
+            return *cacheEntry;
+        }
+    }
 
-    return cacheEntry.centroid;
+    // Evaluate the centroid
+    std::array<double, 3> centroid = getMesh()->evalCellCentroid(id);
+
+    // Update the cache
+    if (cache) {
+        cache->insertEntry(id, centroid);
+    }
+
+    return centroid;
 
 }
 
@@ -129,9 +109,40 @@ std::array<double, 3> LevelSetUnstructuredKernel::computeCellCentroid(long id) c
  */
 double LevelSetUnstructuredKernel::computeCellTangentRadius(long id) const {
 
-    const LevelSetUnstructuredCellCacheEntry &cacheEntry = computeCellCacheEntry( id );
+    // Try fetching the value from the cache
+    CellValueCache<double> *cache = m_cellCacheCollection->at<double>(m_cellTangentRadiusCacheId);
+    if (cache) {
+        typename CellValueCache<double>::Entry cacheEntry = cache->findEntry(id);
+        if (cacheEntry.isValid()) {
+            return *cacheEntry;
+        }
+    }
 
-    return cacheEntry.tangentRadius;
+    // Get mesh information
+    const VolUnstructured &unstructuredPatch = *(this->getMesh()) ;
+
+    // Cell information
+    const Cell &cell = unstructuredPatch.getCell(id);
+    ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
+    int nCellVertices = cellVertexIds.size();
+    std::array<double, 3> centroid = computeCellCentroid(id);
+
+    BITPIT_CREATE_WORKSPACE(vertexCoordinates, std::array<double BITPIT_COMMA 3>, nCellVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
+    unstructuredPatch.getVertexCoords(nCellVertices, cellVertexIds.data(), vertexCoordinates);
+
+    // Evaluate the radius of the tangent sphere
+    //
+    // Since the center of the tangent sphere is the cell centroid, its
+    // radius can be evaluated as distance between the cell centroid and
+    // the cell.
+    double tangentRadius = cell.evalPointDistance(centroid, vertexCoordinates);
+
+    // Update the cache
+    if (cache) {
+        cache->insertEntry(id, tangentRadius);
+    }
+
+    return tangentRadius;
 
 }
 
@@ -146,9 +157,49 @@ double LevelSetUnstructuredKernel::computeCellTangentRadius(long id) const {
  */
 double LevelSetUnstructuredKernel::computeCellBoundingRadius( long id ) const {
 
-    const LevelSetUnstructuredCellCacheEntry &cacheEntry = computeCellCacheEntry( id );
+    // Try fetching the value from the cache
+    CellValueCache<double> *cache = m_cellCacheCollection->at<double>(m_cellBoundingRadiusCacheId);
+    if (cache) {
+        typename CellValueCache<double>::Entry cacheEntry = cache->findEntry(id);
+        if (cacheEntry.isValid()) {
+            return *cacheEntry;
+        }
+    }
 
-    return cacheEntry.boundingRadius;
+    // Get mesh information
+    const VolUnstructured &unstructuredPatch = *(this->getMesh()) ;
+
+    // Cell information
+    const Cell &cell = unstructuredPatch.getCell(id);
+    ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
+    int nCellVertices = cellVertexIds.size();
+    std::array<double, 3> centroid = computeCellCentroid(id);
+
+    BITPIT_CREATE_WORKSPACE(vertexCoordinates, std::array<double BITPIT_COMMA 3>, nCellVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
+    unstructuredPatch.getVertexCoords(nCellVertices, cellVertexIds.data(), vertexCoordinates);
+
+    // Evaluate the radius of the bounding sphere
+    //
+    // Since the center of the bounding sphere is the cell centroid, its
+    // radius can be evaluated as distance between the cell centroid and
+    // the farthest vertex.
+    double boundingRadius = 0.;
+    for (int k = 0; k < nCellVertices; ++k) {
+        double vertexDistance = 0.;
+        for (int d = 0; d < 3; ++d) {
+            vertexDistance += uipow(centroid[d] - vertexCoordinates[k][d], 2);
+        }
+
+        boundingRadius = std::max(vertexDistance, boundingRadius);
+    }
+    boundingRadius = std::sqrt(boundingRadius);
+
+    // Update the cache
+    if (cache) {
+        cache->insertEntry(id, boundingRadius);
+    }
+
+    return boundingRadius;
 
 }
 

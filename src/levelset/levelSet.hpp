@@ -85,7 +85,8 @@ class LevelSet{
 
     LevelSetStorageType     getStorageType() const ;
 
-    void                    setMesh( VolumeKernel* ) ;
+    void                    setMesh( VolumeKernel* mesh, LevelSetFillIn fillIn = LevelSetFillIn::SPARSE ) ;
+    void                    clearMeshCache() ;
 
     int                     addObject( std::unique_ptr<SurfaceKernel> &&, double, int id = levelSetDefaults::OBJECT ) ;
     int                     addObject( SurfaceKernel *, double, int id = levelSetDefaults::OBJECT ) ;
