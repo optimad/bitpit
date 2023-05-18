@@ -101,6 +101,17 @@ enum class LevelSetStorageType{
 
 /*!
  * @ingroup levelsetEnums
+ * Enum class containing the possible fill-in modes for the levelset.
+ */
+enum class LevelSetFillIn{
+    SPARSE,                         /**< Sparse fill-in, to be used when the levelset will be evaluated on a small portion of the domain */
+    DENSE,                          /**< Dense fill-in, to be used when the levelset will be evaluated on almost all the domain */
+};
+
+typedef LevelSetFillIn LevelSetCacheType;
+
+/*!
+ * @ingroup levelsetEnums
  * Enum class containing the possible level set fields
  */
 enum class LevelSetField{

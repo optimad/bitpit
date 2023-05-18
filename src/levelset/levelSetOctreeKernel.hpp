@@ -31,20 +31,11 @@
 
 namespace bitpit{
 
-class LevelSetExternalPiercedStorageManager;
-class LevelSetInternalPiercedStorageManager;
-
-struct LevelSetOctreeCellCacheEntry {
-
-    std::array<double, 3> centroid;
-
-    LevelSetOctreeCellCacheEntry(const VolumeKernel &patch, long cellId);
-
-};
-
-class LevelSetOctreeKernel : public LevelSetCachedKernel<LevelSetOctreeCellCacheEntry> {
+class LevelSetOctreeKernel : public LevelSetCachedKernel {
 
     private:
+    std::size_t                                 m_cellCentroidCacheId;
+
     std::vector<double>                         m_octantTangentRadii ;    /**< Octant tangent radii */
     std::vector<double>                         m_octantBoundingRadii ;   /**< Octant cellTangadii */
 
@@ -52,7 +43,12 @@ class LevelSetOctreeKernel : public LevelSetCachedKernel<LevelSetOctreeCellCache
     typedef LevelSetExternalPiercedStorageManager DenseStorageManager;
     typedef LevelSetInternalPiercedStorageManager SparseStorageManager;
 
-    LevelSetOctreeKernel( VolOctree & );
+    template<typename value_t>
+    using CellSparseCacheContainer = std::unordered_map<long, value_t>;
+    template<typename value_t>
+    using CellDenseCacheContainer = bitpit::PiercedStorage<value_t, long>;
+
+    LevelSetOctreeKernel( VolOctree &patch, LevelSetFillIn fillIn );
 
     VolOctree *                                 getMesh() const override;
 
@@ -69,5 +65,8 @@ class LevelSetOctreeKernel : public LevelSetCachedKernel<LevelSetOctreeCellCache
 typedef LevelSetOctreeKernel LevelSetOctree;
 
 }
+
+// Include template implementations
+#include "levelSetOctreeKernel.tpp"
 
 #endif

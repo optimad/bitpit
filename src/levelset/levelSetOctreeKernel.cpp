@@ -31,38 +31,27 @@ namespace bitpit {
 
 /*!
  *  @ingroup    levelset
- *  @class      LevelSetOctreeCellCacheEntry
- *  @brief      Cache entry associated with cells of octree patches, the entry will
- *              store cell information needed to evaluate the levelset.
- */
-
-/*!
- * Constructor
- *
- * @param[in] patch is the patch the cell belongs to
- * @param[in] cellId is the id of the cell
- */
-LevelSetOctreeCellCacheEntry::LevelSetOctreeCellCacheEntry(const VolumeKernel &patch, long cellId) {
-
-    // Get mesh information
-    assert(dynamic_cast<const VolOctree *>(&patch)) ;
-    const VolOctree &octreePatch = static_cast<const VolOctree &>(patch) ;
-
-    // Evaluate cell centroid
-    centroid = octreePatch.evalCellCentroid(cellId) ;
-
-}
-
-/*!
- *  @ingroup    levelset
  *  @class      LevelSetOctreeKernel
  *  @brief      Implements LevelSetKernel for octree meshes
  */
 
 /*!
  * Constructor
+ *
+ * \param patch is the underlying mesh
+ * \param fillIn expected kernel fill-in
  */
-LevelSetOctreeKernel::LevelSetOctreeKernel(VolOctree & patch ): LevelSetCachedKernel<LevelSetOctreeCellCacheEntry>( &patch ){
+LevelSetOctreeKernel::LevelSetOctreeKernel(VolOctree &patch, LevelSetFillIn fillIn ) : LevelSetCachedKernel(&patch, fillIn) {
+
+    // Initialize cache
+    CellCacheCollection &cacheCollection = getCellCacheCollection();
+    if (fillIn == LevelSetFillIn::SPARSE) {
+        m_cellCentroidCacheId = cacheCollection.insert<CellSparseCacheContainer<std::array<double, 3>>>();
+    } else if (fillIn == LevelSetFillIn::DENSE) {
+        m_cellCentroidCacheId = cacheCollection.insert<CellDenseCacheContainer<std::array<double, 3>>>();
+    } else {
+        m_cellCentroidCacheId = CellCacheCollection::NULL_CACHE_ID;
+    }
 
     // Mesh information
     VolOctree *mesh = getMesh();
@@ -127,9 +116,24 @@ double LevelSetOctreeKernel::getOctantBoundingRadius( int level ) const {
  */
 std::array<double, 3> LevelSetOctreeKernel::computeCellCentroid( long id ) const {
 
-    const LevelSetOctreeCellCacheEntry &cellCacheEntry = computeCellCacheEntry( id );
+    // Try fetching the value from the cache
+    CellCacheCollection::ValueCache<std::array<double, 3>> *cache = (*m_cellCacheCollection)[m_cellCentroidCacheId].getCache<std::array<double, 3>>();
+    if (cache) {
+        typename CellCacheCollection::ValueCache<std::array<double, 3>>::Entry cacheEntry = cache->findEntry(id);
+        if (cacheEntry.isValid()) {
+            return *cacheEntry;
+        }
+    }
 
-    return cellCacheEntry.centroid;
+    // Evaluate the centroid
+    std::array<double, 3> centroid = getMesh()->evalCellCentroid(id);
+
+    // Update the cache
+    if (cache) {
+        cache->insertEntry(id, centroid);
+    }
+
+    return centroid;
 
 }
 
