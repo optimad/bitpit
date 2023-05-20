@@ -24,6 +24,8 @@
 
 # include "levelSetKernel.hpp"
 
+# include "bitpit_CG.hpp"
+
 namespace bitpit {
 
 /*!

@@ -23,7 +23,6 @@
 \*---------------------------------------------------------------------------*/
 
 # include "bitpit_volcartesian.hpp"
-# include "bitpit_CG.hpp"
 
 # include "levelSetKernel.hpp"
 # include "levelSetCartesianKernel.hpp"
