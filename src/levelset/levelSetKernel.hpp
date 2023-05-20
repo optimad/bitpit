@@ -31,23 +31,17 @@
 # include <vector>
 # include <unordered_map>
 
-# include "bitpit_CG.hpp"
 # if BITPIT_ENABLE_MPI
 # include <mpi.h>
 # include "bitpit_communications.hpp"
 # endif
 # include "bitpit_common.hpp"
-# include "bitpit_operators.hpp"
 # include "bitpit_patchkernel.hpp"
 
 # include "levelSetObject.hpp"
 # include "levelSetSignPropagator.hpp"
 
 namespace bitpit{
-
-namespace adaption{
-    struct Info;
-}
 
 class VolumeKernel ;
 
