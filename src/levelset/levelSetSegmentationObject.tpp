@@ -356,7 +356,10 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
     std::vector<std::array<double,3>> segmentVertexCoords;
     for (const Cell &segment : surface.getCells()) {
         // Get segment info
-        ConstProxyVector<long> segmentVertexIds = segment.getVertexIds();
+        //
+        // Since vertex information will be passed to the CG module, we need to get the
+        // vertices in the proper order.
+        ConstProxyVector<long> segmentVertexIds = surface.getFacetOrderedVertexIds(segment);
         std::size_t nSegmentVertices = segmentVertexIds.size();
 
         // Get segment coordinates
