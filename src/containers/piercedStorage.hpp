@@ -355,8 +355,6 @@ public:
     PiercedStorage & operator=(const PiercedStorage &other);
     PiercedStorage & operator=(PiercedStorage &&other);
 
-
-
     // Methods for accessing container properties
     std::size_t getFieldCount() const;
 
