@@ -1,0 +1,119 @@
+name: Continuous integration
+
+on:
+  workflow_dispatch:
+    inputs:
+  pull_request:
+    branches: [ "master" ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  setup:
+    runs-on: ubuntu
+    name: Setup
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build environment
+        shell: bash
+        run: |
+          DOCKER_BUILDKIT=1 docker buildx build \
+          --builder=container \
+          --cache-from type=local,src=/home/bob/products/bitpit/ubuntu-cache \
+          --cache-to type=local,dest=/home/bob/products/bitpit/ubuntu-cache \
+          --rm \
+          --target bitpit-environment \
+          -f environments/ubuntu/Dockerfile .
+      - name: Remove temporary docker images and containers
+        shell: bash
+        run: |
+          for CONTAINER in $(docker ps -a -q)
+          do
+            LABEL=$(docker inspect --format '{{ index .Config.Labels "stage"}}' ${CONTAINER})
+            if [[ ${LABEL} == "bitpit-"* && ${LABEL} != "bitpit-environment" ]]; then
+              [ -z "$(docker ps --format '{{.ID}}' | grep "${CONTAINER}" -w)" ] || docker stop ${CONTAINER}
+              docker rm ${CONTAINER}
+            fi
+          done
+          for IMAGE in $(docker images -q --filter dangling=true)
+          do
+            LABEL=$(docker inspect --format '{{ index .Config.Labels "stage"}}' ${IMAGE})
+            if [[ ${LABEL} == "bitpit-"* && ${LABEL} != "bitpit-environment" ]]; then
+              docker rmi ${IMAGE}
+            fi
+          done
+  tests:
+    runs-on: ubuntu
+    needs: setup
+    name: (${{ matrix.compiler }}) MPI ${{ matrix.mpi }} - Debug ${{ matrix.debug }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - compiler: gcc
+            mpi: ON
+            debug: ON
+          - compiler: gcc
+            mpi: ON
+            debug: OFF
+          - compiler: gcc
+            mpi: OFF
+            debug: ON
+          - compiler: gcc
+            mpi: OFF
+            debug: OFF
+          - compiler: clang
+            mpi: ON
+            debug: OFF
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build bitpit
+        shell: bash
+        run: |
+          DOCKER_BUILDKIT=1 docker buildx build \
+          --builder=container \
+          --cache-from type=local,src=/home/bob/products/bitpit/ubuntu-cache \
+          --rm \
+          --build-arg COMPILER=${{ matrix.compiler }} \
+          --build-arg MPI=${{ matrix.mpi }} \
+          --build-arg DEBUG=${{ matrix.debug }} \
+          --target bitpit-build \
+          -f environments/ubuntu/Dockerfile .
+      - name: Run bitpit tests
+        shell: bash
+        run: |
+          DOCKER_BUILDKIT=1 docker buildx build \
+          --builder=container \
+          --cache-from type=local,src=/home/bob/products/bitpit/ubuntu-cache \
+          --rm \
+          --build-arg COMPILER=${{ matrix.compiler }} \
+          --build-arg MPI=${{ matrix.mpi }} \
+          --build-arg DEBUG=${{ matrix.debug }} \
+          --target bitpit-test \
+          -f environments/ubuntu/Dockerfile .
+  cleanup:
+    runs-on: ubuntu
+    needs: tests
+    name: Cleanup
+    if: always()
+    steps:
+      - name: Remove docker images and containers
+        shell: bash
+        run: |
+          for CONTAINER in $(docker ps -a -q)
+          do
+            LABEL=$(docker inspect --format '{{ index .Config.Labels "stage"}}' ${CONTAINER})
+            if [[ ${LABEL} == "bitpit-"* ]]; then
+              [ -z "$(docker ps --format '{{.ID}}' | grep "${CONTAINER}" -w)" ] || docker stop ${CONTAINER}
+              docker rm ${CONTAINER}
+            fi
+          done
+          for IMAGE in $(docker images -q --filter dangling=true)
+          do
+            LABEL=$(docker inspect --format '{{ index .Config.Labels "stage"}}' ${IMAGE})
+            if [[ ${LABEL} == "bitpit-"* ]]; then
+              docker rmi ${IMAGE}
+            fi
+          done
