@@ -225,7 +225,9 @@ void run(std::string filename,
     mesh.initializeInterfaces();
     mesh.update();
     mesh.getVTK().setName("RBF_" + filename);
+#if BITPIT_ENABLE_MPI
     mesh.setVTKWriteTarget(PatchKernel::WriteTarget::WRITE_TARGET_CELLS_INTERNAL);
+#endif
 
     timers_values.push_back(MPI_Wtime() - time_start);
     timers_name.push_back("compute_levelset");
@@ -350,7 +352,11 @@ void run(std::string filename,
     bitpit::log::cout() << "Training RBFObject" << std::endl;
     // Initializing the matrix and vector
     int nNZ = nP_total*(1+(2*(int)ceil(radius_ratio)^dimensions));
+#if BITPIT_ENABLE_MPI==1
     SparseMatrix A(MPI_COMM_WORLD, true, nP_total, nP_total, nNZ);
+#else
+    SparseMatrix A(nP_total, nP_total, nNZ);
+#endif
 
     std::vector<long> rowPattern;
     std::vector<double> rowValues;
