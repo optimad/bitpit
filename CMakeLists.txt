@@ -48,6 +48,7 @@ set_property(CACHE BITPIT_LTO_STRATEGY PROPERTY STRINGS "Auto" "Enabled" "Disabl
 # Internal variables
 #------------------------------------------------------------------------------------#
 set(BITPIT_VERSION "1.9.0-devel" CACHE INTERNAL "Version number")
+set(BITPIT_INSTALL_CMAKEDIR "${CMAKE_INSTALL_DATAROOTDIR}/${CMAKE_PROJECT_NAME}/cmake" CACHE INTERNAL "Directory in which cmake modules will be installed")
 
 #------------------------------------------------------------------------------------#
 # External utilities
@@ -536,11 +537,6 @@ if (NOT CMAKE_MATCH_2 STREQUAL "")
 else ()
     set(BITPIT_TAG_VERSION "")
 endif ()
-
-#------------------------------------------------------------------------------------#
-# Initialize installation directory for CMake files
-#------------------------------------------------------------------------------------#
-set(BITPIT_INSTALL_CMAKEDIR "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}-${BITPIT_MAJOR_VERSION}.${BITPIT_MINOR_VERSION}" CACHE INTERNAL "Directory in which cmake modules will be installed")
 
 #------------------------------------------------------------------------------------#
 # List of all avilable modules
