@@ -33,9 +33,12 @@ list(APPEND TESTS "test_volcartesian_vertices")
 list(APPEND TESTS "test_volcartesian_cells")
 list(APPEND TESTS "test_volcartesian_interfaces")
 
+# Test extra modules
+set(TEST_EXTRA_MODULES "")
+
 # Test extra libraries
 set(TEST_EXTRA_LIBRARIES "")
 
 # Add tests
-addModuleUnitTests(${MODULE_NAME} "${TESTS}" "${TEST_EXTRA_LIBRARIES}")
+addModuleUnitTests(${MODULE_NAME} "${TESTS}" "${TEST_EXTRA_MODULES}" "${TEST_EXTRA_LIBRARIES}")
 unset(TESTS)

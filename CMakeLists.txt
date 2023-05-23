@@ -121,7 +121,7 @@ function(hideModule MODULE_NAME)
     endif ()
 endfunction()
 
-function(addModuleIncludeDirectories MODULE_NAME)
+function(addModuleIncludeDirectories TARGET_NAME MODULE_NAME)
     set (EXTRA_ARGUMENTS ${ARGN})
     list(LENGTH EXTRA_ARGUMENTS EXTRA_ARGUMENT_COUNT)
     if (${EXTRA_ARGUMENT_COUNT} GREATER 0)
@@ -132,18 +132,19 @@ function(addModuleIncludeDirectories MODULE_NAME)
 
     # External includes
     if (INCLUDE_EXTERNAL)
-        include_directories("${BITPIT_EXTERNAL_INCLUDE_DIRS}")
+        target_include_directories(${TARGET_NAME} PRIVATE "${BITPIT_EXTERNAL_INCLUDE_DIRS}")
     endif ()
 
     # Add dependiecies
     string(TOUPPER ${MODULE_NAME} UPPER_MODULE_NAME)
     foreach (DEPENDENCY_NAME IN LISTS ${UPPER_MODULE_NAME}_DEPS)
-        addModuleIncludeDirectories(${DEPENDENCY_NAME} "FALSE")
+        addModuleIncludeDirectories(${TARGET_NAME} ${DEPENDENCY_NAME} "FALSE")
     endforeach()
     unset(UPPER_MODULE_NAME)
 
     # Add module directory
-    include_directories("${PROJECT_SOURCE_DIR}/src/${MODULE_NAME}" "${PROJECT_BINARY_DIR}/src/${MODULE_NAME}")
+    target_include_directories(${TARGET_NAME} PRIVATE "${PROJECT_SOURCE_DIR}/src/${MODULE_NAME}")
+    target_include_directories(${TARGET_NAME} PRIVATE "${PROJECT_BINARY_DIR}/src/${MODULE_NAME}")
 endfunction()
 
 # Define an experimental feature
@@ -198,37 +199,7 @@ function(defineFeature FEATURE_NAME FEATURE_DESCRIPTION DEFAULT_STATUS)
     else ()
         set(FEATURE_DEFINITION "${FEATURE_DEFINITION}=0")
     endif()
-    addPublicDefinitions("${FEATURE_DEFINITION}")
-endfunction()
-
-# Add a private definition
-#
-# Only targets defined after this call will make use of the given definitions.
-function(addPrivateDefinitions DEFINITIONS)
-    set_property(DIRECTORY "${PROJECT_SOURCE_DIR}" APPEND PROPERTY COMPILE_DEFINITIONS ${DEFINITIONS})
-endfunction()
-
-# Get the description for the variable holding public definitions
-function(getPublicDefinitionVariableDescription DESCRIPTION)
-    set (${DESCRIPTION} "Public pre-processor definitions needed by bitpit Library" PARENT_SCOPE)
-endfunction()
-
-# Initialize the list of public definitions
-function(initializePublicDefinitions)
-    getPublicDefinitionVariableDescription(DESCRIPTION)
-    set (BITPIT_DEFINITIONS_PUBLIC "" CACHE INTERNAL "${DESCRIPTION}" FORCE)
-endfunction()
-
-# Add a public definition
-#
-# Only targets defined after this call will make use of the given definitions.
-#
-# Public definitions are made available to external programs through the
-# variables set by the find_BITPIT module.
-function(addPublicDefinitions DEFINITIONS)
-    getPublicDefinitionVariableDescription(DESCRIPTION)
-    set (BITPIT_DEFINITIONS_PUBLIC "${BITPIT_DEFINITIONS_PUBLIC};${DEFINITIONS}" CACHE INTERNAL "${DESCRIPTION}" FORCE)
-    addPrivateDefinitions("${DEFINITIONS}")
+    target_compile_definitions(${BITPIT_LIBRARY} PUBLIC "${FEATURE_DEFINITION}")
 endfunction()
 
 # Add coverage analysis
@@ -390,11 +361,6 @@ function(addCoverageAnalysis GENERATE_GCOVR_REPORTS GENERATE_LCOV_REPORTS EXCLUD
 
 
 endfunction()
-
-#------------------------------------------------------------------------------------#
-# Initialize public definitions
-#------------------------------------------------------------------------------------#
-initializePublicDefinitions()
 
 #------------------------------------------------------------------------------------#
 # Initialize library target
@@ -793,6 +759,8 @@ list(FIND EXTERNAL_DEPS "MPI" _MPI_index)
 if (${_MPI_index} GREATER -1)
     find_package(MPI)
 
+    target_compile_definitions(${BITPIT_LIBRARY} PUBLIC "BITPIT_ENABLE_MPI=1")
+
     if(MPI_CXX_COMPILE_FLAGS)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MPI_CXX_COMPILE_FLAGS}")
     endif()
@@ -807,6 +775,8 @@ if (${_MPI_index} GREATER -1)
         list (INSERT BITPIT_EXTERNAL_VARIABLES_LIBRARIES 0 "MPI_Fortran_LIBRARIES")
     endif()
     list (INSERT BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS 0 "MPI_CXX_INCLUDE_PATH" )
+else()
+    target_compile_definitions(${BITPIT_LIBRARY} PUBLIC "BITPIT_ENABLE_MPI=0")
 endif()
 unset(_MPI_index)
 
@@ -880,15 +850,17 @@ if (${_RapidJSON_index} GREATER -1)
 
     if (RapidJSON_FOUND)
         # RapidJSON library has been found
-        addPrivateDefinitions("HAS_RAPIDJSON_LIB=1")
+        target_compile_definitions(${BITPIT_LIBRARY} PRIVATE "HAS_RAPIDJSON_LIB=1")
+
         list (INSERT BITPIT_EXTERNAL_DEPENDENCIES 0 "RapidJSON")
         list (INSERT BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS 0 "RAPIDJSON_INCLUDE_DIRS")
 
         # Activate std::string RapidJSON compliancy
-        addPrivateDefinitions("RAPIDJSON_HAS_STDSTRING=1")
+        target_compile_definitions(${BITPIT_LIBRARY} PRIVATE "RAPIDJSON_HAS_STDSTRING=1")
     else()
         # RapidJSON library has not been found
-        addPrivateDefinitions("HAS_RAPIDJSON_LIB=0")
+        target_compile_definitions(${BITPIT_LIBRARY} PRIVATE "HAS_RAPIDJSON_LIB=0")
+
         message(STATUS "RapidJSON library not found, JSON support will be disabled.")
     endif()
 endif()
@@ -943,12 +915,14 @@ if (${_METIS_index} GREATER -1)
     find_package(METIS)
 
     if (METIS_FOUND)
+        target_compile_definitions(${BITPIT_LIBRARY} PRIVATE "BITPIT_ENABLE_METIS=1")
+
         list (APPEND BITPIT_EXTERNAL_DEPENDENCIES "METIS")
         list (APPEND BITPIT_EXTERNAL_VARIABLES_LIBRARIES "METIS_LIBRARIES")
         list (APPEND BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS "METIS_INCLUDE_DIRS")
-        addPrivateDefinitions("BITPIT_ENABLE_METIS=1")
     else()
-        addPrivateDefinitions("BITPIT_ENABLE_METIS=0")
+        target_compile_definitions(${BITPIT_LIBRARY} PRIVATE "BITPIT_ENABLE_METIS=0")
+
         message(STATUS "METIS library not found, default patch partitioning support will be disabled.")
     endif()
 endif()
@@ -975,13 +949,6 @@ endif()
 string(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWER)
 
 set(CMAKE_CXX_STANDARD 11)
-
-# Compiler definitions
-if (BITPIT_ENABLE_MPI)
-    addPublicDefinitions("BITPIT_ENABLE_MPI=1")
-else ()
-    addPublicDefinitions("BITPIT_ENABLE_MPI=0")
-endif()
 
 # GNU profiling build type
 SET(CMAKE_CXX_FLAGS_GNUPROFILING "-pg" CACHE STRING
@@ -1119,13 +1086,13 @@ endif()
 
 # Define a preprocessor macro to recognize debug builds
 IF(CMAKE_BUILD_TYPE_LOWER MATCHES "debug" OR CMAKE_BUILD_TYPE_LOWER MATCHES "debinfo")
-    addPrivateDefinitions("BITPIT_ENABLE_DEBUG=1")
+    target_compile_definitions(${BITPIT_LIBRARY} PRIVATE "BITPIT_ENABLE_DEBUG=1")
 else ()
-    addPrivateDefinitions("BITPIT_ENABLE_DEBUG=0")
+    target_compile_definitions(${BITPIT_LIBRARY} PRIVATE "BITPIT_ENABLE_DEBUG=0")
 endif ()
 
 IF(NOT CMAKE_BUILD_TYPE_LOWER MATCHES "debug")
-    addPrivateDefinitions("NDEBUG")
+    target_compile_definitions(${BITPIT_LIBRARY} PRIVATE "NDEBUG")
 endif ()
 
 # Define an alias for building with scalasca
@@ -1164,7 +1131,7 @@ include(CheckCXXSourceCompiles)
 
 CHECK_CXX_SOURCE_COMPILES("int main() {__builtin_unreachable();}" HAVE___BUILTIN_UNREACHABLE)
 if(HAVE___BUILTIN_UNREACHABLE)
-    addPrivateDefinitions("HAVE___BUILTIN_UNREACHABLE")
+    target_compile_definitions(${BITPIT_LIBRARY} PRIVATE "HAVE___BUILTIN_UNREACHABLE")
 endif()
 
 #------------------------------------------------------------------------------------#

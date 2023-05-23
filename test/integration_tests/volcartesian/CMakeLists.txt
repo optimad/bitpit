@@ -33,9 +33,12 @@ list(APPEND TESTS "test_volcartesian_00003")
 list(APPEND TESTS "test_volcartesian_00004")
 list(APPEND TESTS "test_volcartesian_00005")
 
+# Test extra modules
+set(TEST_EXTRA_MODULES "")
+
 # Test extra libraries
 set(TEST_EXTRA_LIBRARIES "")
 
 # Add tests
-addModuleIntegrationTests(${MODULE_NAME} "${TESTS}" "${TEST_EXTRA_LIBRARIES}")
+addModuleIntegrationTests(${MODULE_NAME} "${TESTS}" "${TEST_EXTRA_MODULES}" "${TEST_EXTRA_LIBRARIES}")
 unset(TESTS)

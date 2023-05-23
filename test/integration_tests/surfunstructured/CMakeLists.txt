@@ -47,11 +47,14 @@ if (BITPIT_ENABLE_MPI)
     list(APPEND TESTS "test_surfunstructured_parallel_00008:3")
 endif ()
 
+# Test extra modules
+set(TEST_EXTRA_MODULES "")
+
 # Test extra libraries
 set(TEST_EXTRA_LIBRARIES "")
 
 # Add tests
-addModuleIntegrationTests(${MODULE_NAME} "${TESTS}" "${TEST_EXTRA_LIBRARIES}")
+addModuleIntegrationTests(${MODULE_NAME} "${TESTS}" "${TEST_EXTRA_MODULES}" "${TEST_EXTRA_LIBRARIES}")
 unset(TESTS)
 
 # Data files

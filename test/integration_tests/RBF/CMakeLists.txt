@@ -31,9 +31,12 @@ list(APPEND TESTS "test_RBF_00001")
 list(APPEND TESTS "test_RBF_00002")
 list(APPEND TESTS "test_RBF_00003")
 
+# Test extra modules
+set(TEST_EXTRA_MODULES "")
+
 # Test extra libraries
 set(TEST_EXTRA_LIBRARIES "")
 
 # Add tests
-addModuleIntegrationTests(${MODULE_NAME} "${TESTS}" "${TEST_EXTRA_LIBRARIES}")
+addModuleIntegrationTests(${MODULE_NAME} "${TESTS}" "${TEST_EXTRA_MODULES}" "${TEST_EXTRA_LIBRARIES}")
 unset(TESTS)

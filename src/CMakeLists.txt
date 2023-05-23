@@ -43,9 +43,6 @@
 function(configureModule MODULE_NAME)
     string(TOUPPER ${MODULE_NAME} UPPER_MODULE_NAME)
 
-    # Configure compilation
-    addModuleIncludeDirectories(${MODULE_NAME})
-
     # Configure headers
     file(GLOB CONFIGURABLE_HEADER_FILES "*.hpp.in" "*.tpp.in")
     foreach(CONFIGURABLE_HEADER_FILE IN LISTS CONFIGURABLE_HEADER_FILES)
@@ -64,6 +61,10 @@ function(configureModule MODULE_NAME)
         add_library(${UPPER_MODULE_NAME}_TARGET_OBJECT OBJECT ${${UPPER_MODULE_NAME}_SOURCES})
         set_target_properties(${UPPER_MODULE_NAME}_TARGET_OBJECT PROPERTIES POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS})
         set_lto_property(${UPPER_MODULE_NAME}_TARGET_OBJECT)
+        addModuleIncludeDirectories(${UPPER_MODULE_NAME}_TARGET_OBJECT ${MODULE_NAME})
+
+        get_target_property(BITPIT_COMPILE_DEFINITIONS ${BITPIT_LIBRARY} COMPILE_DEFINITIONS)
+        target_compile_definitions(${UPPER_MODULE_NAME}_TARGET_OBJECT PUBLIC ${BITPIT_COMPILE_DEFINITIONS})
 
         target_sources(${BITPIT_LIBRARY} PRIVATE $<TARGET_OBJECTS:${UPPER_MODULE_NAME}_TARGET_OBJECT>)
     endif ()
