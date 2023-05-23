@@ -33,9 +33,10 @@ project("bitpit" CXX)
 # Variables visible to the user
 #------------------------------------------------------------------------------------#
 
+set(BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libraries")
+
 set(BITPIT_ENABLE_DOC OFF CACHE BOOL "If set, the HTML-based API documentation will be created (requires Doxygen)")
 set(BITPIT_ENABLE_MPI OFF CACHE BOOL "If set, the program is compiled with MPI support")
-set(BITPIT_BUILD_SHARED_LIBS OFF CACHE BOOL "Build Shared Libraries")
 
 set(BITPIT_ENABLE_UNIT_TESTS OFF CACHE BOOL "If set, the unit tests will be built")
 mark_as_advanced(${BITPIT_ENABLE_UNIT_TESTS})
@@ -405,7 +406,7 @@ if(DEFINED BITPIT_LTO_STRATEGY)
         include(CheckIPOSupported)
 
         if ("${BITPIT_LTO_STRATEGY}" STREQUAL "Enabled")
-            if (NOT BITPIT_BUILD_SHARED_LIBS)
+            if (NOT BUILD_SHARED_LIBS)
                 message(FATAL_ERROR "LTO can be enabled only when building a shared library." )
             endif()
             if (MSYS OR MINGW)
@@ -415,7 +416,7 @@ if(DEFINED BITPIT_LTO_STRATEGY)
             set(ENABLE_LTO TRUE)
         elseif ("${BITPIT_LTO_STRATEGY}" STREQUAL "Auto")
             if (NOT MSYS AND NOT MINGW)
-                if (BITPIT_BUILD_SHARED_LIBS)
+                if (BUILD_SHARED_LIBS)
                     check_ipo_supported(RESULT LTO_SUPPORTED)
                     if (${LTO_SUPPORTED} AND "${CMAKE_BUILD_TYPE}" STREQUAL "Release")
                         set(ENABLE_LTO TRUE)
