@@ -1019,21 +1019,43 @@ if(CMAKE_BUILD_TYPE_LOWER MATCHES "sanitize")
 endif()
 
 # Standard build types
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0 -Wsuggest-override")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0")
 set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
 set(CMAKE_C_FLAGS_RELWITHSANITIZE "-O2 -g -fno-omit-frame-pointer -fno-common ${C_SANITIZE_MODULE_FLAGS}")
 set(CMAKE_C_FLAGS_DEBUG "-O0 -g")
 set(CMAKE_C_FLAGS_RELEASE "-O2")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmessage-length=0 -Wsuggest-override")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmessage-length=0")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
 set(CMAKE_CXX_FLAGS_RELWITHSANITIZE "-O2 -g -fno-omit-frame-pointer -fno-common ${CXX_SANITIZE_MODULE_FLAGS}")
 set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O2")
 
 if (ENABLE_WARNINGS)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+    CHECK_CXX_COMPILER_FLAG("-Wall" CXX_SUPPORTS_WALL)
+    if (CXX_SUPPORTS_WALL)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+    endif()
+
+    CHECK_CXX_COMPILER_FLAG("-Wextra" CXX_SUPPORTS_WEXTRA)
+    if (CXX_SUPPORTS_WEXTRA)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
+    endif()
+
+    CHECK_CXX_COMPILER_FLAG("-Wsuggest-override" CXX_SUPPORTS_WSUGGEST_OVERRIDE)
+    if (CXX_SUPPORTS_WSUGGEST_OVERRIDE)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wsuggest-override")
+    endif()
+
+    CHECK_C_COMPILER_FLAG("-Wall" C_SUPPORTS_WALL)
+    if (C_SUPPORTS_WALL)
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
+    endif()
+
+    CHECK_C_COMPILER_FLAG("-Wextra" C_SUPPORTS_WEXTRA)
+    if (C_SUPPORTS_WEXTRA)
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wextra")
+    endif()
 endif()
 
 set(CMAKE_EXE_LINKER_FLAGS_RELWITHSANITIZE "-fno-omit-frame-pointer -fno-common ${CXX_SANITIZE_MODULE_FLAGS}")
