@@ -32,6 +32,8 @@ project("bitpit" CXX)
 #------------------------------------------------------------------------------------#
 # Variables visible to the user
 #------------------------------------------------------------------------------------#
+
+set(BITPIT_ENABLE_DOC 0 CACHE BOOL "If set, the HTML-based API documentation will be created (requires Doxygen)")
 set(BITPIT_ENABLE_MPI 0 CACHE BOOL "If set, the program is compiled with MPI support")
 set(BITPIT_BUILD_SHARED_LIBS 0 CACHE BOOL "Build Shared Libraries")
 
@@ -1165,7 +1167,9 @@ get_property(BITPIT_LANGUAGES GLOBAL PROPERTY ENABLED_LANGUAGES)
 add_subdirectory(src)
 
 # Docs
-add_subdirectory(doc)
+if (BITPIT_ENABLE_DOC)
+    add_subdirectory(doc)
+endif()
 
 # CMake
 add_subdirectory(cmake)
