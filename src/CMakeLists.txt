@@ -23,11 +23,6 @@
 #----------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------------#
-# CMake settings
-#------------------------------------------------------------------------------------#
-initialize_lto_property()
-
-#------------------------------------------------------------------------------------#
 # Functions
 #------------------------------------------------------------------------------------#
 
@@ -69,7 +64,6 @@ function(configureModule MODULE_NAME)
         set(${UPPER_MODULE_NAME}_TARGET_OBJECT "${UPPER_MODULE_NAME}_TARGET_OBJECT")
         add_library(${${UPPER_MODULE_NAME}_TARGET_OBJECT} OBJECT ${${UPPER_MODULE_NAME}_SOURCES})
 
-        initialize_lto_property()
         set_lto_property(${${UPPER_MODULE_NAME}_TARGET_OBJECT})
     endif ()
 

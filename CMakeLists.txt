@@ -25,7 +25,7 @@
 #------------------------------------------------------------------------------------#
 # CMake settings
 #------------------------------------------------------------------------------------#
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.13)
 
 project("bitpit" CXX)
 
@@ -41,10 +41,8 @@ mark_as_advanced(${BITPIT_ENABLE_UNIT_TESTS})
 set(BITPIT_ENABLE_INTEGRATION_TESTS 1 CACHE BOOL "If set, the integration tests will be built")
 mark_as_advanced(${BITPIT_ENABLE_INTEGRATION_TESTS})
 
-if(${CMAKE_VERSION} VERSION_EQUAL "3.9.0" OR ${CMAKE_VERSION} VERSION_GREATER "3.9.0")
-    set(BITPIT_LTO_STRATEGY "Auto" CACHE STRING "Choose the Link Time Optimization (LTO) strategy, options are: Auto (i.e., optimiziation is enabled only in release build and only for some tested configurations) Enabled Disabled.")
-    set_property(CACHE BITPIT_LTO_STRATEGY PROPERTY STRINGS "Auto" "Enabled" "Disabled")
-endif()
+set(BITPIT_LTO_STRATEGY "Auto" CACHE STRING "Choose the Link Time Optimization (LTO) strategy, options are: Auto (i.e., optimiziation is enabled only in release build and only for some tested configurations) Enabled Disabled.")
+set_property(CACHE BITPIT_LTO_STRATEGY PROPERTY STRINGS "Auto" "Enabled" "Disabled")
 
 #------------------------------------------------------------------------------------#
 # Internal variables
@@ -400,7 +398,6 @@ initializePublicDefinitions()
 # Detect if LTO can be enabled
 if(DEFINED BITPIT_LTO_STRATEGY)
     if (NOT "${BITPIT_LTO_STRATEGY}" STREQUAL "Disabled")
-        cmake_policy(SET CMP0069 NEW)
         include(CheckIPOSupported)
 
         if ("${BITPIT_LTO_STRATEGY}" STREQUAL "Enabled")
@@ -436,13 +433,6 @@ if(DEFINED BITPIT_LTO_STRATEGY)
 else()
     set(ENABLE_LTO FALSE)
 endif()
-
-# Initialize LTO property
-function(initialize_lto_property)
-    if (${ENABLE_LTO})
-        cmake_policy(SET CMP0069 NEW)
-    endif()
-endfunction()
 
 # Set LTO property for the specified target
 function(set_lto_property TARGET_NAME)
@@ -1060,11 +1050,7 @@ endif()
 
 set(CMAKE_EXE_LINKER_FLAGS_RELWITHSANITIZE "-fno-omit-frame-pointer -fno-common ${CXX_SANITIZE_MODULE_FLAGS}")
 
-if (NOT ("${CMAKE_VERSION}" VERSION_LESS "2.8.12"))
-    add_compile_options("-std=c++11")
-else ()
-    add_definitions("-std=c++11")
-endif ()
+add_definitions("-std=c++11")
 
 # Coverage build type
 SET(CMAKE_C_FLAGS_COVERAGE "-g -O0 -fprofile-arcs -ftest-coverage" CACHE STRING
