@@ -33,13 +33,13 @@ project("bitpit" CXX)
 # Variables visible to the user
 #------------------------------------------------------------------------------------#
 
-set(BITPIT_ENABLE_DOC 0 CACHE BOOL "If set, the HTML-based API documentation will be created (requires Doxygen)")
-set(BITPIT_ENABLE_MPI 0 CACHE BOOL "If set, the program is compiled with MPI support")
-set(BITPIT_BUILD_SHARED_LIBS 0 CACHE BOOL "Build Shared Libraries")
+set(BITPIT_ENABLE_DOC OFF CACHE BOOL "If set, the HTML-based API documentation will be created (requires Doxygen)")
+set(BITPIT_ENABLE_MPI OFF CACHE BOOL "If set, the program is compiled with MPI support")
+set(BITPIT_BUILD_SHARED_LIBS OFF CACHE BOOL "Build Shared Libraries")
 
-set(BITPIT_ENABLE_UNIT_TESTS 0 CACHE BOOL "If set, the unit tests will be built")
+set(BITPIT_ENABLE_UNIT_TESTS OFF CACHE BOOL "If set, the unit tests will be built")
 mark_as_advanced(${BITPIT_ENABLE_UNIT_TESTS})
-set(BITPIT_ENABLE_INTEGRATION_TESTS 1 CACHE BOOL "If set, the integration tests will be built")
+set(BITPIT_ENABLE_INTEGRATION_TESTS ON CACHE BOOL "If set, the integration tests will be built")
 mark_as_advanced(${BITPIT_ENABLE_INTEGRATION_TESTS})
 
 set(BITPIT_LTO_STRATEGY "Auto" CACHE STRING "Choose the Link Time Optimization (LTO) strategy, options are: Auto (i.e., optimiziation is enabled only in release build and only for some tested configurations) Enabled Disabled.")
@@ -680,11 +680,11 @@ unset(CHECK_DEPS)
 # The modules 'common' and 'operators' has to be always built
 getModuleEnableName("common" COMMON_MODULE_ENABLED)
 unset(${COMMON_MODULE_ENABLED} CACHE)
-set(${COMMON_MODULE_ENABLED} 1 CACHE INTERNAL "Request building common module" FORCE)
+set(${COMMON_MODULE_ENABLED} ON CACHE INTERNAL "Request building common module" FORCE)
 
 getModuleEnableName("operators" OPERATORS_MODULE_ENABLED)
 unset(${OPERATORS_MODULE_ENABLED} CACHE)
-set(${OPERATORS_MODULE_ENABLED} 1 CACHE INTERNAL "Request building operators module" FORCE)
+set(${OPERATORS_MODULE_ENABLED} ON CACHE INTERNAL "Request building operators module" FORCE)
 
 #------------------------------------------------------------------------------------#
 # External dependecies
@@ -1146,10 +1146,10 @@ if (CMAKE_BUILD_TYPE STREQUAL "Coverage")
         message(FATAL_ERROR "Code coverage analysis requires gcc! Aborting...")
     endif()
 
-    set(BITPIT_COVERAGE_GCOVR_REPORTS 1 CACHE BOOL "If set, coverage analysis will generate gcov reports")
+    set(BITPIT_COVERAGE_GCOVR_REPORTS ON CACHE BOOL "If set, coverage analysis will generate gcov reports")
     mark_as_advanced(${BITPIT_COVERAGE_GCOVR_REPORTS})
 
-    set(BITPIT_COVERAGE_LCOV_REPORTS 1 CACHE BOOL "If set, coverage analysis will generate lcov reports")
+    set(BITPIT_COVERAGE_LCOV_REPORTS ON CACHE BOOL "If set, coverage analysis will generate lcov reports")
     mark_as_advanced(${BITPIT_COVERAGE_LCOV_REPORTS})
 
     addCoverageAnalysis(${BITPIT_COVERAGE_GCOVR_REPORTS} ${BITPIT_COVERAGE_LCOV_REPORTS} "${PROJECT_SOURCE_DIR}/examples/*;${PROJECT_SOURCE_DIR}/test/*")
