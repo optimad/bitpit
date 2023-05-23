@@ -31,6 +31,9 @@ project("bitpit" CXX)
 
 #------------------------------------------------------------------------------------#
 # Variables visible to the user
+#
+# NOTE: to generate Windows lib files, both BUILD_SHARED_LIBS and CMAKE_GNUtoMS flags
+#       should be enabled.
 #------------------------------------------------------------------------------------#
 
 set(BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libraries")
@@ -394,6 +397,29 @@ endfunction()
 initializePublicDefinitions()
 
 #------------------------------------------------------------------------------------#
+# Initialize library target
+#------------------------------------------------------------------------------------#
+set(BITPIT_LIBRARY ${PROJECT_NAME} CACHE INTERNAL "bitpit library name" FORCE)
+
+add_library(${BITPIT_LIBRARY})
+
+if (BITPIT_ENABLE_MPI)
+    set_target_properties(${BITPIT_LIBRARY} PROPERTIES DEBUG_POSTFIX "_MPI_D")
+    set_target_properties(${BITPIT_LIBRARY} PROPERTIES RELWITHDEBINFO_POSTFIX "_MPI_D")
+    set_target_properties(${BITPIT_LIBRARY} PROPERTIES RELEASE_POSTFIX "_MPI")
+else()
+    set_target_properties(${BITPIT_LIBRARY} PROPERTIES DEBUG_POSTFIX "_D")
+    set_target_properties(${BITPIT_LIBRARY} PROPERTIES RELWITHDEBINFO_POSTFIX "_D")
+endif()
+
+install(TARGETS ${BITPIT_LIBRARY}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+       )
+
+#------------------------------------------------------------------------------------#
 # Link Time Optimization (LTO)
 #------------------------------------------------------------------------------------#
 
@@ -442,6 +468,12 @@ function(set_lto_property TARGET_NAME)
         set_target_properties(${TARGET_NAME} PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
     endif()
 endfunction()
+
+# Set LTO property for the main library
+#
+# Here LTO property is set only for the main library, each module may need
+# to set its own LTO property.
+set_lto_property(${BITPIT_LIBRARY})
 
 #------------------------------------------------------------------------------------#
 # Sanitize
@@ -536,6 +568,10 @@ if (NOT CMAKE_MATCH_2 STREQUAL "")
 else ()
     set(BITPIT_TAG_VERSION "")
 endif ()
+
+# Set library version
+set_target_properties(${BITPIT_LIBRARY} PROPERTIES   VERSION "${BITPIT_MAJOR_VERSION}.${BITPIT_MINOR_VERSION}.${BITPIT_PATCH_VERSION}"
+                                                   SOVERSION "${BITPIT_MAJOR_VERSION}")
 
 #------------------------------------------------------------------------------------#
 # List of all avilable modules
@@ -927,6 +963,11 @@ set(BITPIT_EXTERNAL_INCLUDE_DIRS "")
 foreach (VARIABLE_NAME IN LISTS BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS)
     list (APPEND BITPIT_EXTERNAL_INCLUDE_DIRS "${${VARIABLE_NAME}}")
 endforeach ()
+
+# Windows shared libraries have to be linked against their dependencies.
+if (MINGW AND BUILD_SHARED_LIBS)
+    target_link_libraries(${BITPIT_LIBRARY} ${BITPIT_EXTERNAL_LIBRARIES})
+endif()
 
 #------------------------------------------------------------------------------------#
 # Compiler settings

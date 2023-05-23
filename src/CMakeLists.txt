@@ -61,11 +61,11 @@ function(configureModule MODULE_NAME)
     unset(SOURCE_FILES)
 
     if (NOT "${${UPPER_MODULE_NAME}_SOURCES}" STREQUAL "")
-        set(${UPPER_MODULE_NAME}_TARGET_OBJECT "${UPPER_MODULE_NAME}_TARGET_OBJECT")
-        add_library(${${UPPER_MODULE_NAME}_TARGET_OBJECT} OBJECT ${${UPPER_MODULE_NAME}_SOURCES})
-        set_target_properties(${UPPERCASE_MODULE_NAME}_TARGET_OBJECT PROPERTIES POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS})
+        add_library(${UPPER_MODULE_NAME}_TARGET_OBJECT OBJECT ${${UPPER_MODULE_NAME}_SOURCES})
+        set_target_properties(${UPPER_MODULE_NAME}_TARGET_OBJECT PROPERTIES POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS})
+        set_lto_property(${UPPER_MODULE_NAME}_TARGET_OBJECT)
 
-        set_lto_property(${${UPPER_MODULE_NAME}_TARGET_OBJECT})
+        target_sources(${BITPIT_LIBRARY} PRIVATE $<TARGET_OBJECTS:${UPPER_MODULE_NAME}_TARGET_OBJECT>)
     endif ()
 
     # Configure installation
@@ -94,59 +94,16 @@ endfunction()
 # Subdirectories
 #------------------------------------------------------------------------------------#
 
-if (DEFINED MODULE_SOURCES)
-    unset(${MODULE_SOURCES})
-endif ()
-
 # Modules
 foreach(MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
     isModuleEnabled(${MODULE_NAME} MODULE_ENABLED)
     if (MODULE_ENABLED)
-        string(TOUPPER ${MODULE_NAME} UPPERCASE_MODULE_NAME)
         add_subdirectory(${MODULE_NAME})
-        if (TARGET ${UPPERCASE_MODULE_NAME}_TARGET_OBJECT)
-            set(MODULE_SOURCES ${MODULE_SOURCES} $<TARGET_OBJECTS:${UPPERCASE_MODULE_NAME}_TARGET_OBJECT>)
-        endif ()
     endif ()
 endforeach()
 
 #------------------------------------------------------------------------------------#
-# Library
-#------------------------------------------------------------------------------------#
-
-# NOTE: to get lib files, enable both BUILD_SHARED_LIBS and CMAKE_GNUtoMS flags.
-
-set(BITPIT_LIBRARY ${PROJECT_NAME} CACHE INTERNAL "bitpit Base Library" FORCE)
-
-add_library(${BITPIT_LIBRARY} ${MODULE_SOURCES})
-
-set_lto_property(${BITPIT_LIBRARY})
-
-if (BITPIT_ENABLE_MPI)
-    set_target_properties(${BITPIT_LIBRARY} PROPERTIES DEBUG_POSTFIX "_MPI_D")
-    set_target_properties(${BITPIT_LIBRARY} PROPERTIES RELWITHDEBINFO_POSTFIX "_MPI_D")
-    set_target_properties(${BITPIT_LIBRARY} PROPERTIES RELEASE_POSTFIX "_MPI")
-else()
-    set_target_properties(${BITPIT_LIBRARY} PROPERTIES DEBUG_POSTFIX "_D")
-    set_target_properties(${BITPIT_LIBRARY} PROPERTIES RELWITHDEBINFO_POSTFIX "_D")
-endif()
-
-set_target_properties(${BITPIT_LIBRARY} PROPERTIES VERSION "${BITPIT_MAJOR_VERSION}.${BITPIT_MINOR_VERSION}.${BITPIT_PATCH_VERSION}"
-                                                 SOVERSION "${BITPIT_MAJOR_VERSION}")
-
-# Windows shared libraries have to be linked against their dependencies.
-if (MINGW AND BUILD_SHARED_LIBS)
-    target_link_libraries(${BITPIT_LIBRARY} ${BITPIT_EXTERNAL_LIBRARIES})
-endif()
-
-# Install target
-install(TARGETS ${BITPIT_LIBRARY}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-       )
-
 # Targets
+#------------------------------------------------------------------------------------#
 add_custom_target(library DEPENDS ${BASE_LIBRARY})
 add_custom_target(clean-library COMMAND ${CMAKE_MAKE_PROGRAM} clean WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
