@@ -36,14 +36,6 @@ else ()
     return()
 endif ()
 
-# Add a target to generate the examples
-foreach (MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
-    isModuleEnabled(${MODULE_NAME} MODULE_ENABLED)
-    if (MODULE_ENABLED)
-        addModuleIncludeDirectories(${MODULE_NAME})
-    endif()
-endforeach ()
-
 if(BITPIT_BUILD_EXAMPLES)
     # List of examples
     set(EXAMPLE_LIST "")
@@ -83,6 +75,13 @@ if(BITPIT_BUILD_EXAMPLES)
         target_link_libraries(${EXAMPLE_NAME} ${BITPIT_LIBRARY})
         target_link_libraries(${EXAMPLE_NAME} ${BITPIT_EXTERNAL_LIBRARIES})
         install(TARGETS ${EXAMPLE_NAME} DESTINATION doc/${PROJECT_NAME}-${BITPIT_VERSION}/examples)
+
+        foreach (MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
+            isModuleEnabled(${MODULE_NAME} MODULE_ENABLED)
+            if (MODULE_ENABLED)
+                addModuleIncludeDirectories(${EXAMPLE_NAME} ${MODULE_NAME})
+            endif()
+        endforeach ()
     endforeach()
 
     add_custom_target(examples DEPENDS ${EXAMPLE_LIST})

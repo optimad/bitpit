@@ -70,7 +70,11 @@ unset(BITPIT_INSTALL_PREFIX_CODE)
 # Generate BITPITConfigVersion.cmake.in
 #------------------------------------------------------------------------------------#
 
+get_target_property(BITPIT_INTERFACE_COMPILE_DEFINITIONS ${BITPIT_LIBRARY} INTERFACE_COMPILE_DEFINITIONS)
+
 configure_file("BITPITConfigVersion.cmake.in"  "${CMAKE_CURRENT_BINARY_DIR}/BITPITConfigVersion.cmake" @ONLY)
+
+unset(BITPIT_INTERFACE_COMPILE_DEFINITIONS)
 
 #------------------------------------------------------------------------------------#
 # CMake targets

@@ -102,7 +102,7 @@ else ()
 endif ()
 
 # bitpit Definitions
-set(BITPIT_DEFINITIONS "@BITPIT_DEFINITIONS_PUBLIC@")
+set(BITPIT_DEFINITIONS "@BITPIT_INTERFACE_COMPILE_DEFINITIONS@")
 
 # List of currently enabled bitpit modules
 set(BITPIT_ENABLED_MODULE_LIST "@BITPIT_ENABLED_MODULE_LIST@")

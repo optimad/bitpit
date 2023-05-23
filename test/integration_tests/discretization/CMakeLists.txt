@@ -25,21 +25,23 @@
 # Name of the current module
 get_filename_component(MODULE_NAME ${CMAKE_CURRENT_LIST_DIR} NAME)
 
-# Check dependencies
-isModuleEnabled("volcartesian" MODULE_VOLCARTESIAN_ENABLED)
-if (MODULE_VOLCARTESIAN_ENABLED)
-    addModuleIncludeDirectories("volcartesian")
-endif()
-
 # List of tests
 set(TESTS "")
 if (MODULE_VOLCARTESIAN_ENABLED)
     list(APPEND TESTS "test_discretization_00001")
 endif()
 
+# Test extra modules
+set(TEST_EXTRA_MODULES "")
+
+isModuleEnabled("volcartesian" MODULE_VOLCARTESIAN_ENABLED)
+if (MODULE_VOLCARTESIAN_ENABLED)
+    LIST(APPEND TEST_EXTRA_MODULES "volcartesian")
+endif()
+
 # Test extra libraries
 set(TEST_EXTRA_LIBRARIES "")
 
 # Add tests
-addModuleIntegrationTests(${MODULE_NAME} "${TESTS}" "${TEST_EXTRA_LIBRARIES}")
+addModuleIntegrationTests(${MODULE_NAME} "${TESTS}" "${TEST_EXTRA_MODULES}" "${TEST_EXTRA_LIBRARIES}")
 unset(TESTS)
