@@ -158,13 +158,12 @@ if (MINGW AND BITPIT_BUILD_SHARED_LIBS)
 endif()
 
 # Install target
-#
-# On Windows, shared libraries have to be installed in the binary directory.
-if (WIN32)
-    install(TARGETS ${BITPIT_LIBRARY} ARCHIVE DESTINATION lib LIBRARY DESTINATION lib RUNTIME DESTINATION bin)
-else()
-    install(TARGETS ${BITPIT_LIBRARY} DESTINATION lib)
-endif()
+install(TARGETS ${BITPIT_LIBRARY}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+       )
 
 # Definitions
 set(BITPIT_DEFINITIONS ${MODULE_DEFINITIONS} CACHE INTERNAL "Pre-processor definitions needed by the Base Library" FORCE)

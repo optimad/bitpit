@@ -6,9 +6,9 @@
 
 # If a different UseBITPIT.cmake was previoulsy loaded a reconfiguration
 # is needed
-if(NOT ("@BITPIT_CMAKE_CONFIG_DIR@" STREQUAL BITPIT_CMAKE_CONFIG_PATH_LAST))
+if(NOT ("@BITPIT_INSTALL_CMAKEDIR@" STREQUAL BITPIT_INSTALL_CMAKEDIR_PREVIOUS))
     set(BITPIT_RECONFIGURE 1)
-    set(BITPIT_CMAKE_CONFIG_PATH_LAST "@BITPIT_CMAKE_CONFIG_DIR@" CACHE INTERNAL "Defines the last bitpit CMake configuration file loaded")
+    set(BITPIT_INSTALL_CMAKEDIR_PREVIOUS "@BITPIT_INSTALL_CMAKEDIR@" CACHE INTERNAL "Defines the previous bitpit CMake configuration file loaded")
 endif()
 
 # Compute the installation prefix from this BITPITConfig.cmake file location.
@@ -28,7 +28,7 @@ SET(BITPIT_PATCH_VERSION "@BITPIT_PATCH_VERSION@")
 SET(BITPIT_VERSION "@BITPIT_VERSION@")
 
 # The location of the UseBITPIT.cmake file.
-SET(BITPIT_CMAKE_DIR "@BITPIT_CONFIG_CMAKE_DIR@")
+SET(BITPIT_CMAKE_DIR "${BITPIT_INSTALL_PREFIX}/@BITPIT_INSTALL_CMAKEDIR@")
 SET(BITPIT_USE_FILE "${BITPIT_CMAKE_DIR}/UseBITPIT.cmake")
 
 # Include macros for finding packages
@@ -46,7 +46,7 @@ if(BITPIT_RECONFIGURE)
 endif()
 
 find_path(BITPIT_INCLUDE_DIR "@PROJECT_NAME@.hpp"
-          HINTS "${BITPIT_INSTALL_PREFIX}/include/bitpit")
+          HINTS "${BITPIT_INSTALL_PREFIX}/@CMAKE_INSTALL_INCLUDEDIR@/@PROJECT_NAME@/")
 
 mark_as_advanced(BITPIT_INCLUDE_DIR)
 
@@ -58,11 +58,11 @@ endif()
 
 find_library(BITPIT_LIBRARY_RELEASE
              NAMES @PROJECT_NAME@@BITPIT_RELEASE_POSTFIX@ @PROJECT_NAME@
-             HINTS "${BITPIT_INSTALL_PREFIX}/lib")
+             HINTS "${BITPIT_INSTALL_PREFIX}/@CMAKE_INSTALL_LIBDIR@")
 
 find_library(BITPIT_LIBRARY_DEBUG
              NAMES @PROJECT_NAME@@BITPIT_DEBUG_POSTFIX@ @PROJECT_NAME@
-             HINTS "${BITPIT_INSTALL_PREFIX}/lib")
+             HINTS "${BITPIT_INSTALL_PREFIX}/@CMAKE_INSTALL_LIBDIR@")
 
 mark_as_advanced(BITPIT_LIBRARY_RELEASE)
 mark_as_advanced(BITPIT_LIBRARY_DEBUG)
