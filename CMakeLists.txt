@@ -939,6 +939,9 @@ endforeach ()
 #------------------------------------------------------------------------------------#
 string(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWER)
 
+set(CMAKE_CXX_STANDARD 11)
+
+# Compiler definitions
 if (BITPIT_ENABLE_MPI)
     addPublicDefinitions("BITPIT_ENABLE_MPI=1")
 else ()
@@ -979,6 +982,7 @@ SET(CMAKE_SHARED_LINKER_FLAGS_SCALASCAPROFILING "" CACHE STRING
     "Flags used by the shared libraries linker during Scalasca builds." FORCE)
 MARK_AS_ADVANCED(CMAKE_SHARED_LINKER_FLAGS_SCALASCAPROFILING)
 
+# Standard build types
 if ("C" IN_LIST BITPIT_LANGUAGES)
     set(C_SANITIZE_MODULE_FLAGS "")
     foreach(SANITIZE_MODULE IN LISTS SANITIZE_MODULES)
@@ -1007,7 +1011,6 @@ if(CMAKE_BUILD_TYPE_LOWER MATCHES "sanitize")
     endif()
 endif()
 
-# Standard build types
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0")
 set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
 set(CMAKE_C_FLAGS_RELWITHSANITIZE "-O2 -g -fno-omit-frame-pointer -fno-common ${C_SANITIZE_MODULE_FLAGS}")
@@ -1046,8 +1049,6 @@ if (C_SUPPORTS_WEXTRA)
 endif()
 
 set(CMAKE_EXE_LINKER_FLAGS_RELWITHSANITIZE "-fno-omit-frame-pointer -fno-common ${CXX_SANITIZE_MODULE_FLAGS}")
-
-set(CMAKE_CXX_STANDARD 11)
 
 # Coverage build type
 SET(CMAKE_C_FLAGS_COVERAGE "-g -O0 -fprofile-arcs -ftest-coverage" CACHE STRING
@@ -1166,11 +1167,6 @@ get_property(BITPIT_LANGUAGES GLOBAL PROPERTY ENABLED_LANGUAGES)
 # Main library
 add_subdirectory(src)
 
-# Docs
-if (BITPIT_ENABLE_DOC)
-    add_subdirectory(doc)
-endif()
-
 # CMake
 add_subdirectory(cmake)
 
@@ -1179,6 +1175,11 @@ add_subdirectory(examples)
 
 # External
 add_subdirectory(external)
+
+# Docs
+if (BITPIT_ENABLE_DOC)
+    add_subdirectory(doc)
+endif()
 
 # Tests
 if (BITPIT_ENABLE_UNIT_TESTS OR BITPIT_ENABLE_INTEGRATION_TESTS)
