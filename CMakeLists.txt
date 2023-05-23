@@ -1050,7 +1050,7 @@ endif()
 
 set(CMAKE_EXE_LINKER_FLAGS_RELWITHSANITIZE "-fno-omit-frame-pointer -fno-common ${CXX_SANITIZE_MODULE_FLAGS}")
 
-add_definitions("-std=c++11")
+set(CMAKE_CXX_STANDARD 11)
 
 # Coverage build type
 SET(CMAKE_C_FLAGS_COVERAGE "-g -O0 -fprofile-arcs -ftest-coverage" CACHE STRING
