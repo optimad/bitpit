@@ -15,7 +15,12 @@ jobs:
     runs-on: ubuntu
     name: Setup
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout build environment information
+        uses: actions/checkout@v3
+        with:
+          path: bitpit
+          sparse-checkout: |
+            environments
       - name: Build environment
         shell: bash
         run: |
@@ -25,25 +30,10 @@ jobs:
           --cache-to type=local,dest=/home/bob/products/bitpit/ubuntu-cache \
           --rm \
           --target bitpit-environment \
-          -f environments/ubuntu/Dockerfile .
-      - name: Remove temporary docker images and containers
-        shell: bash
+          -f bitpit/environments/ubuntu/Dockerfile .
+      - name: Cleanup build environment information
         run: |
-          for CONTAINER in $(docker ps -a -q)
-          do
-            LABEL=$(docker inspect --format '{{ index .Config.Labels "stage"}}' ${CONTAINER})
-            if [[ ${LABEL} == "bitpit-"* && ${LABEL} != "bitpit-environment" ]]; then
-              [ -z "$(docker ps --format '{{.ID}}' | grep "${CONTAINER}" -w)" ] || docker stop ${CONTAINER}
-              docker rm ${CONTAINER}
-            fi
-          done
-          for IMAGE in $(docker images -q --filter dangling=true)
-          do
-            LABEL=$(docker inspect --format '{{ index .Config.Labels "stage"}}' ${IMAGE})
-            if [[ ${LABEL} == "bitpit-"* && ${LABEL} != "bitpit-environment" ]]; then
-              docker rmi ${IMAGE}
-            fi
-          done
+          rm -rf bitpit
   tests:
     runs-on: ubuntu
     needs: setup
@@ -68,7 +58,8 @@ jobs:
             mpi: ON
             debug: OFF
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout bitpit
+        uses: actions/checkout@v3
       - name: Build bitpit
         shell: bash
         run: |
@@ -93,27 +84,3 @@ jobs:
           --build-arg DEBUG=${{ matrix.debug }} \
           --target bitpit-test \
           -f environments/ubuntu/Dockerfile .
-  cleanup:
-    runs-on: ubuntu
-    needs: tests
-    name: Cleanup
-    if: always()
-    steps:
-      - name: Remove docker images and containers
-        shell: bash
-        run: |
-          for CONTAINER in $(docker ps -a -q)
-          do
-            LABEL=$(docker inspect --format '{{ index .Config.Labels "stage"}}' ${CONTAINER})
-            if [[ ${LABEL} == "bitpit-"* ]]; then
-              [ -z "$(docker ps --format '{{.ID}}' | grep "${CONTAINER}" -w)" ] || docker stop ${CONTAINER}
-              docker rm ${CONTAINER}
-            fi
-          done
-          for IMAGE in $(docker images -q --filter dangling=true)
-          do
-            LABEL=$(docker inspect --format '{{ index .Config.Labels "stage"}}' ${IMAGE})
-            if [[ ${LABEL} == "bitpit-"* ]]; then
-              docker rmi ${IMAGE}
-            fi
-          done

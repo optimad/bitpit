@@ -1,6 +1,3 @@
-ARG MPI=ON
-ARG DEBUG=OFF
-
 FROM ubuntu:20.04 AS bitpit-ubuntu-base
 LABEL stage=bitpit-ubuntu-base
 ENV DEBIAN_FRONTEND noninteractive
@@ -111,8 +108,7 @@ RUN cd /opt/bitpit && \
         -DBITPIT_ENABLE_INTEGRATION_TESTS=ON \
         -DBITPIT_ENABLE_MPI=${MPI} \
         -DBITPIT_ENABLE_UNIT_TESTS=ON \
-        -DBITPIT_BUILD_EXAMPLES=ON \
-        -DBITPIT_VERBOSE_MAKE=ON \
+        -DBUILD_TESTING=ON \
         -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
         -DCMAKE_C_COMPILER=${C_COMPILER} \
         -DCMAKE_CXX_COMPILER=${CXX_COMPILER} \

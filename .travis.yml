@@ -30,52 +30,6 @@ env:
 
 jobs:
   include:
-    - if: branch != coverity
-      os: linux
-      env:
-        - BUILD_TYPE="Release" BITPIT_ENABLE_MPI="True"
-
-    - if: branch != coverity
-      os: linux
-      env:
-        - BUILD_TYPE="Release" BITPIT_ENABLE_MPI="False"
-
-    - if: branch != coverity
-      os: linux
-      env:
-        - BUILD_TYPE="Debug" BITPIT_ENABLE_MPI="True"
-
-    - if: branch != coverity
-      os: linux
-      env:
-        - BUILD_TYPE="Debug" BITPIT_ENABLE_MPI="False"
-
-    - if: branch != coverity
-      os: linux
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - clang
-            - g++-7
-            - gfortran-7
-            - cmake
-            - libblas-dev
-            - liblapack-dev
-            - liblapacke-dev
-            - openmpi-bin
-            - libboost-all-dev
-            - libopenmpi-dev
-            - libpetsc3.6
-            - libpetsc3.6.2-dev
-
-      env:
-        - C_COMPILER="clang"
-        - CXX_COMPILER="clang++"
-        - Fortran_COMPILER="gfortran-7"
-        - BUILD_TYPE="Release" BITPIT_ENABLE_MPI="True"
-
     - if: branch = coverity
       os: linux
       addons:
