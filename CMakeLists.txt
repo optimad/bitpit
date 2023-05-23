@@ -33,7 +33,6 @@ project("bitpit" CXX)
 # Variables visible to the user
 #------------------------------------------------------------------------------------#
 set(BITPIT_ENABLE_MPI 0 CACHE BOOL "If set, the program is compiled with MPI support")
-set(BITPIT_VERBOSE_MAKE 0 CACHE BOOL "Set appropriate compiler and cmake flags to enable verbose output from compilation")
 set(BITPIT_BUILD_SHARED_LIBS 0 CACHE BOOL "Build Shared Libraries")
 
 set(BITPIT_ENABLE_UNIT_TESTS 0 CACHE BOOL "If set, the unit tests will be built")
@@ -937,10 +936,6 @@ endforeach ()
 # Compiler settings
 #------------------------------------------------------------------------------------#
 string(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWER)
-
-if (BITPIT_VERBOSE_MAKE)
-    set(CMAKE_VERBOSE_MAKEFILE ON)
-endif()
 
 if (BITPIT_ENABLE_MPI)
     addPublicDefinitions("BITPIT_ENABLE_MPI=1")
