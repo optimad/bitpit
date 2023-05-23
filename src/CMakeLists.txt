@@ -63,6 +63,7 @@ function(configureModule MODULE_NAME)
     if (NOT "${${UPPER_MODULE_NAME}_SOURCES}" STREQUAL "")
         set(${UPPER_MODULE_NAME}_TARGET_OBJECT "${UPPER_MODULE_NAME}_TARGET_OBJECT")
         add_library(${${UPPER_MODULE_NAME}_TARGET_OBJECT} OBJECT ${${UPPER_MODULE_NAME}_SOURCES})
+        set_target_properties(${UPPERCASE_MODULE_NAME}_TARGET_OBJECT PROPERTIES POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS})
 
         set_lto_property(${${UPPER_MODULE_NAME}_TARGET_OBJECT})
     endif ()
@@ -90,19 +91,6 @@ function(configureModule MODULE_NAME)
 endfunction()
 
 #------------------------------------------------------------------------------------#
-# Library properties
-#------------------------------------------------------------------------------------#
-
-# Library type
-if (BITPIT_BUILD_SHARED_LIBS)
-    set(LIBRARY_TYPE "SHARED")
-    set(PIC_FLAG TRUE)
-else()
-    set(LIBRARY_TYPE "STATIC")
-    set(PIC_FLAG FALSE)
-endif()
-
-#------------------------------------------------------------------------------------#
 # Subdirectories
 #------------------------------------------------------------------------------------#
 
@@ -119,7 +107,6 @@ foreach(MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
         add_subdirectory(${MODULE_NAME})
         if (TARGET ${UPPERCASE_MODULE_NAME}_TARGET_OBJECT)
             set(MODULE_SOURCES ${MODULE_SOURCES} $<TARGET_OBJECTS:${UPPERCASE_MODULE_NAME}_TARGET_OBJECT>)
-            set_target_properties(${UPPERCASE_MODULE_NAME}_TARGET_OBJECT PROPERTIES POSITION_INDEPENDENT_CODE ${PIC_FLAG})
         endif ()
         if (DEFINED ${UPPERCASE_MODULE_NAME}_DEFINITIONS)
             set(MODULE_DEFINITIONS ${MODULE_DEFINITIONS} ${${UPPERCASE_MODULE_NAME}_DEFINITIONS})
@@ -131,11 +118,11 @@ endforeach()
 # Library
 #------------------------------------------------------------------------------------#
 
-# NOTE: to get lib files, enable both BITPIT_BUILD_SHARED_LIBS and CMAKE_GNUtoMS flags.
+# NOTE: to get lib files, enable both BUILD_SHARED_LIBS and CMAKE_GNUtoMS flags.
 
 set(BITPIT_LIBRARY ${PROJECT_NAME} CACHE INTERNAL "bitpit Base Library" FORCE)
 
-add_library(${BITPIT_LIBRARY} ${LIBRARY_TYPE} ${MODULE_SOURCES})
+add_library(${BITPIT_LIBRARY} ${MODULE_SOURCES})
 
 set_lto_property(${BITPIT_LIBRARY})
 
@@ -148,12 +135,11 @@ else()
     set_target_properties(${BITPIT_LIBRARY} PROPERTIES RELWITHDEBINFO_POSTFIX "_D")
 endif()
 
-set_target_properties(${BITPIT_LIBRARY} PROPERTIES POSITION_INDEPENDENT_CODE ${PIC_FLAG})
 set_target_properties(${BITPIT_LIBRARY} PROPERTIES VERSION "${BITPIT_MAJOR_VERSION}.${BITPIT_MINOR_VERSION}.${BITPIT_PATCH_VERSION}"
                                                  SOVERSION "${BITPIT_MAJOR_VERSION}")
 
 # Windows shared libraries have to be linked against their dependencies.
-if (MINGW AND BITPIT_BUILD_SHARED_LIBS)
+if (MINGW AND BUILD_SHARED_LIBS)
     target_link_libraries(${BITPIT_LIBRARY} ${BITPIT_EXTERNAL_LIBRARIES})
 endif()
 
