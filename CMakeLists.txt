@@ -61,6 +61,8 @@ include(CheckCXXCompilerFlag)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/external/clang-format/cmake")
 include(ClangFormat)
 
+include(GNUInstallDirs)
+
 #------------------------------------------------------------------------------------#
 # Functions
 #------------------------------------------------------------------------------------#
@@ -534,6 +536,11 @@ if (NOT CMAKE_MATCH_2 STREQUAL "")
 else ()
     set(BITPIT_TAG_VERSION "")
 endif ()
+
+#------------------------------------------------------------------------------------#
+# Initialize installation directory for CMake files
+#------------------------------------------------------------------------------------#
+set(BITPIT_INSTALL_CMAKEDIR "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}-${BITPIT_MAJOR_VERSION}.${BITPIT_MINOR_VERSION}" CACHE INTERNAL "Directory in which cmake modules will be installed")
 
 #------------------------------------------------------------------------------------#
 # List of all avilable modules
