@@ -31,6 +31,9 @@ SET(BITPIT_VERSION "@BITPIT_VERSION@")
 SET(BITPIT_CMAKE_DIR "${BITPIT_INSTALL_PREFIX}/@BITPIT_INSTALL_CMAKEDIR@")
 SET(BITPIT_USE_FILE "${BITPIT_CMAKE_DIR}/UseBITPIT.cmake")
 
+# Flag for shared build
+SET(BITPIT_SHARED "@BUILD_SHARED_LIBS@")
+
 # Include macros for finding packages
 list(APPEND CMAKE_MODULE_PATH ${BITPIT_CMAKE_DIR})
 include(LibFindMacros)
@@ -199,3 +202,21 @@ endforeach ()
 # Set programming languages
 #-----------------------------------------------------------------------------
 set(BITPIT_LANGUAGES "@BITPIT_LANGUAGES@")
+
+#-----------------------------------------------------------------------------
+# Create imported target
+#-----------------------------------------------------------------------------
+if(BITPIT_SHARED)
+    set(LIBRARY_TYPE SHARED)
+else()
+    set(LIBRARY_TYPE STATIC)
+endif()
+
+add_library(bitpit::bitpit ${LIBRARY_TYPE} IMPORTED GLOBAL)
+
+set_target_properties(bitpit::bitpit
+    PROPERTIES
+    IMPORTED_LOCATION "${BITPIT_LIBRARY}"
+    INTERFACE_INCLUDE_DIRECTORIES "${BITPIT_INCLUDE_DIRS}"
+    INTERFACE_LINK_LIBRARIES "${BITPIT_LIBRARIES}"
+    INTERFACE_COMPILE_DEFINITIONS "${BITPIT_DEFINITIONS}")

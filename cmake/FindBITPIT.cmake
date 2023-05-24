@@ -12,6 +12,12 @@
 #  BITPIT_DEFINITIONS  - Compiler switches required for using bitpit
 #  BITPIT_LANGUAGES    - Programming languages used by the bitpit library
 #
+# The imported target allows external projects to use the bitpit library
+# by simply calling target_link_libraries:
+#
+#     find_package(bitpit)
+#     target_link_libraries(external_target PRIVATE bitpit::bitpit)
+#
 # The following cache entries must be set by the user to locate bitpit:
 #
 #  BITPIT_DIR - The directory containing BITPITConfig.cmake.
