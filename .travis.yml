@@ -148,6 +148,7 @@ before_script:
         -DPETSC_DIR=/usr/lib/petscdir/3.6.2/x86_64-linux-gnu-real
         -DPETSC_ARCH=
         -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
+        -DBITPIT_BUILD_EXAMPLES=True
         -DBITPIT_ENABLE_MPI=${BITPIT_ENABLE_MPI}
         -DBITPIT_ENABLE_UNIT_TESTS=True
         -DBITPIT_VERBOSE_MAKE=True
