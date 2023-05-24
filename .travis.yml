@@ -107,6 +107,7 @@ jobs:
               -DPETSC_ARCH= \
               -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
               -DBITPIT_ENABLE_MPI=${BITPIT_ENABLE_MPI} \
+              -DBUILD_TESTING=False \
               ..;
           build_command: >
             make -j2
@@ -150,6 +151,7 @@ before_script:
         -DBITPIT_BUILD_EXAMPLES=True
         -DBITPIT_ENABLE_MPI=${BITPIT_ENABLE_MPI}
         -DBITPIT_ENABLE_UNIT_TESTS=True
+        -DBUILD_TESTING=True
         ..;
     fi
 

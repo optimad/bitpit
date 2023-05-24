@@ -23,7 +23,15 @@
 #---------------------------------------------------------------------------*/
 
 #------------------------------------------------------------------------------------#
-# Variables
+# Variables visible to the user
+#------------------------------------------------------------------------------------#
+set(BITPIT_ENABLE_UNIT_TESTS OFF CACHE BOOL "If set, the unit tests will be built")
+mark_as_advanced(${BITPIT_ENABLE_UNIT_TESTS})
+set(BITPIT_ENABLE_INTEGRATION_TESTS ON CACHE BOOL "If set, the integration tests will be built")
+mark_as_advanced(${BITPIT_ENABLE_INTEGRATION_TESTS})
+
+#------------------------------------------------------------------------------------#
+# Internal variables
 #------------------------------------------------------------------------------------#
 set(BITPIT_SOURCE_TEST_DIR ${CMAKE_CURRENT_LIST_DIR})
 
@@ -72,6 +80,7 @@ endfunction()
 
 # Add a unit test for a module
 function(addModuleUnitTests MODULE_NAME TEST_ENTRIES TEST_LIBRARIES)
+    set(TEST_LIBRARIES ${TEST_LIBRARIES} Boost::unit_test_framework)
     addModuleTests(${MODULE_NAME} "unit" "${TEST_ENTRIES}" "${TEST_LIBRARIES}")
 endfunction()
 
@@ -197,6 +206,13 @@ function(addTest TEST_NAME TEST_TYPE TEST_LIBRARIES WORKING_DIRECTORY N_PROCS PA
     endif()
 
 endfunction()
+
+#------------------------------------------------------------------------------------#
+# Subdirectories
+#------------------------------------------------------------------------------------#
+if (BITPIT_ENABLE_UNIT_TESTS)
+    find_package(Boost 1.40 COMPONENTS "unit_test_framework" REQUIRED)
+endif()
 
 #------------------------------------------------------------------------------------#
 # Subdirectories

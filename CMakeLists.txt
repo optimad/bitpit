@@ -38,11 +38,6 @@ set(BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libraries")
 set(BITPIT_ENABLE_DOC OFF CACHE BOOL "If set, the HTML-based API documentation will be created (requires Doxygen)")
 set(BITPIT_ENABLE_MPI OFF CACHE BOOL "If set, the program is compiled with MPI support")
 
-set(BITPIT_ENABLE_UNIT_TESTS OFF CACHE BOOL "If set, the unit tests will be built")
-mark_as_advanced(${BITPIT_ENABLE_UNIT_TESTS})
-set(BITPIT_ENABLE_INTEGRATION_TESTS ON CACHE BOOL "If set, the integration tests will be built")
-mark_as_advanced(${BITPIT_ENABLE_INTEGRATION_TESTS})
-
 set(BITPIT_LTO_STRATEGY "Auto" CACHE STRING "Choose the Link Time Optimization (LTO) strategy, options are: Auto (i.e., optimiziation is enabled only in release build and only for some tested configurations) Enabled Disabled.")
 set_property(CACHE BITPIT_LTO_STRATEGY PROPERTY STRINGS "Auto" "Enabled" "Disabled")
 
@@ -65,6 +60,8 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/external/clang-format/cmake")
 include(ClangFormat)
 
 include(GNUInstallDirs)
+
+include(CTest)
 
 #------------------------------------------------------------------------------------#
 # Functions
@@ -703,10 +700,6 @@ endif()
 
 set(EXTERNAL_DEPS_PROCESS_LIST "")
 
-if(BITPIT_ENABLE_UNIT_TESTS)
-    LIST(APPEND EXTERNAL_DEPS_PROCESS_LIST "BoostTest")
-endif()
-
 foreach(MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
     isModuleEnabled(${MODULE_NAME} MODULE_ENABLED)
     if(MODULE_ENABLED)
@@ -1183,7 +1176,7 @@ if (BITPIT_ENABLE_DOC)
 endif()
 
 # Tests
-if (BITPIT_ENABLE_UNIT_TESTS OR BITPIT_ENABLE_INTEGRATION_TESTS)
+if (BUILD_TESTING)
     enable_testing()
     add_subdirectory(test)
 endif()
