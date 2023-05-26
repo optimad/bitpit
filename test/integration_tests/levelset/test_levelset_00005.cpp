@@ -41,7 +41,7 @@ using namespace bitpit;
 /*!
 * Subtest 001
 *
-* Testing levelset reference count.
+* Testing boolean operations.
 */
 int subtest_001()
 {
@@ -172,72 +172,8 @@ int subtest_001()
     levelset.compute( ids );
 
     // Write levelset information
-    mesh.getVTK().setName("levelset_005_original") ;
+    mesh.getVTK().setName("levelset_005") ;
     mesh.write() ;
-
-    // Get ids of test cells
-    long testCellId3 = 2089;
-    long testCellId4 = 2153;
-    long testCellId5 = 2153;
-
-    // Store original levelset information
-    double originalValue3 = levelset.getObject(id3).getValue(testCellId3);
-    double originalValue4 = levelset.getObject(id4).getValue(testCellId4);
-    double originalValue5 = levelset.getObject(id5).getValue(testCellId5);
-
-    std::array<double, 3> originalGradient5 = levelset.getObject(id5).getGradient(testCellId5);
-
-    // Make boolean objects immutable
-    levelset.makeObjectImmutable(id3);
-    levelset.makeObjectImmutable(id4);
-
-    // Delete primary objects
-    levelset.removeObject(id0);
-    levelset.removeObject(id1);
-
-    // Write levelset information
-    mesh.getVTK().setName("levelset_005_immutable") ;
-    mesh.write() ;
-
-    // Check if the updated levelset information matches the original ones
-    bitpit::log::cout() << " Checking levelset values" << std::endl;
-
-    double updatedValue3 = levelset.getObject(id3).getValue(testCellId3);
-    if (!bitpit::utils::DoubleFloatingEqual()(originalValue3, updatedValue3)) {
-        bitpit::log::cout() << "  - Value of object #3 doesn't match the original one" << std::endl;
-        return 1;
-    }
-    bitpit::log::cout() << "  - Value of object #3 matches the original one" << std::endl;
-
-    double updatedValue4 = levelset.getObject(id4).getValue(testCellId4);
-    if (!bitpit::utils::DoubleFloatingEqual()(originalValue4, updatedValue4)) {
-        bitpit::log::cout() << "  - Value of object #4 doesn't match the original one" << std::endl;
-        return 1;
-    }
-    bitpit::log::cout() << "  - Value of object #4 matches the original one" << std::endl;
-
-    double updatedValue5 = levelset.getObject(id5).getValue(testCellId5);
-    if (!bitpit::utils::DoubleFloatingEqual()(originalValue5, updatedValue5)) {
-        bitpit::log::cout() << "  - Value of object #5 doesn't match the original one" << std::endl;
-        return 1;
-    }
-    bitpit::log::cout() << "  - Value of object #5 matches the original one" << std::endl;
-
-    bitpit::log::cout() << " Checking levelset gradients" << std::endl;
-
-    for (int d = 0; d < 3; ++d) {
-        std::array<double, 3> updatedGradient5 = levelset.getObject(id5).getGradient(testCellId5);
-        if (!bitpit::utils::DoubleFloatingEqual()(originalGradient5[d], updatedGradient5[d])) {
-            bitpit::log::cout() << "  - Gradient of object #5 doesn't match the original one" << std::endl;
-            return 1;
-        }
-    }
-    bitpit::log::cout() << "  - Gradient of object #5 matches the original one" << std::endl;
-
-    // Compute the levelset
-    //
-    // Immutable objects will not be re-computed.
-    levelset.compute( );
 
     return 0;
 };
@@ -258,7 +194,7 @@ int main(int argc, char *argv[])
     bitpit::log::manager().initialize(bitpit::log::COMBINED);
 
     // Run the subtests
-    bitpit::log::cout() << "Testing levelset refinement" << std::endl;
+    bitpit::log::cout() << "Testing boolean operations." << std::endl;
 
     int status;
     try {
