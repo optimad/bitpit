@@ -67,66 +67,6 @@ std::unique_ptr<LevelSetObject> LevelSetObjectFactory::createComplementObject(co
 }
 
 /*!
- * Create a new immutable object for the specified kernel.
- *
- * \param kernel is the kernel
- * \param storageType is the storage type
- * \param source is the source for the immutable object
- */
-template<template<typename> class narrow_band_cache_t>
-std::unique_ptr<LevelSetObject> LevelSetObjectFactory::createImmutableObject(const LevelSetKernel *kernel, LevelSetStorageType storageType, LevelSetObject *source)
-{
-    if( const LevelSetCartesianKernel *cartesianKernel = dynamic_cast<const LevelSetCartesianKernel *>(kernel) ){
-        return _createImmutableObject<LevelSetCartesianKernel, narrow_band_cache_t>(cartesianKernel, storageType, source);
-    } else if ( const LevelSetOctreeKernel *octreeKernel = dynamic_cast<const LevelSetOctreeKernel *>(kernel) ){
-        return _createImmutableObject<LevelSetOctreeKernel, narrow_band_cache_t>(octreeKernel, storageType, source);
-    } else if ( const LevelSetUnstructuredKernel *unstructuredKernel = dynamic_cast<const LevelSetUnstructuredKernel *>(kernel) ){
-        return _createImmutableObject<LevelSetUnstructuredKernel, narrow_band_cache_t>(unstructuredKernel, storageType, source);
-    }
-
-
-    BITPIT_UNREACHABLE("Kernel type not supported");
-}
-
-/*!
- * Create a new immutable object for the specified kernel.
- *
- * \param kernel is the kernel
- * \param storageType is the storage type
- * \param source is the source for the immutable object
- */
-template<typename kernel_t, template<typename> class narrow_band_cache_t>
-std::unique_ptr<LevelSetObject> LevelSetObjectFactory::_createImmutableObject(const kernel_t *kernel, LevelSetStorageType storageType, LevelSetObject *source)
-{
-    BITPIT_UNUSED(kernel);
-
-    switch (storageType) {
-
-    case LevelSetStorageType::SPARSE:
-        if (LevelSetCachedObject<narrow_band_cache_t<typename kernel_t::SparseStorageManager>> *cachedSource = dynamic_cast<LevelSetCachedObject<narrow_band_cache_t<typename kernel_t::SparseStorageManager>> *>(source)) {
-            return std::unique_ptr<LevelSetObject>(new LevelSetImmutableObject<narrow_band_cache_t<typename kernel_t::SparseStorageManager>>(cachedSource));
-        } else {
-            return std::unique_ptr<LevelSetObject>(new LevelSetImmutableObject<narrow_band_cache_t<typename kernel_t::SparseStorageManager>>(source));
-        }
-        break;
-
-    case LevelSetStorageType::DENSE:
-        if (LevelSetCachedObject<narrow_band_cache_t<typename kernel_t::DenseStorageManager>> *cachedSource = dynamic_cast<LevelSetCachedObject<narrow_band_cache_t<typename kernel_t::DenseStorageManager>> *>(source)) {
-            return std::unique_ptr<LevelSetObject>(new LevelSetImmutableObject<narrow_band_cache_t<typename kernel_t::DenseStorageManager>>(cachedSource));
-        } else {
-            return std::unique_ptr<LevelSetObject>(new LevelSetImmutableObject<narrow_band_cache_t<typename kernel_t::DenseStorageManager>>(source));
-        }
-        break;
-
-    default:
-        BITPIT_UNREACHABLE("Storage type not supported");
-
-    }
-
-    BITPIT_UNREACHABLE("Unable to create an immutable object from the specified object.");
-}
-
-/*!
  * Create a new mask object for the specified kernel.
  *
  * \param kernel is the kernel

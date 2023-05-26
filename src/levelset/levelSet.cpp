@@ -36,7 +36,6 @@
 # include "levelSetObject.hpp"
 # include "levelSetProxyObject.hpp"
 # include "levelSetCachedObject.hpp"
-# include "levelSetImmutableObject.hpp"
 # include "levelSetBooleanObject.hpp"
 # include "levelSetSegmentationObject.hpp"
 # include "levelSetSignedObject.hpp"
@@ -405,72 +404,16 @@ bool LevelSet::isObjectRemovable(int id) {
 }
 
 /*!
- * Convert the specified objct into an immutable object.
- *
- * The original object will be deleted and replaced with an immutable
- * object.
- *
- * @param[in] id the id of the object
- */
-void LevelSet::makeObjectImmutable( int id ) {
-
-    LevelSetObject *object = getObjectPtr( id ) ;
-
-    // Get the list of referring objects
-    //
-    // Referring objects are objects for which this object is a source.
-    std::vector<int> referringProxyObjectIds;
-    if( object->getReferenceCount() > 0 ) {
-        for( const auto &entry : m_objects ) {
-            const LevelSetProxyObject *proxyObject = dynamic_cast<const LevelSetProxyObject*>(entry.second.get());
-            if (!proxyObject) {
-                continue;
-            }
-
-            std::vector<const LevelSetObject *> sourceObjects = proxyObject->getSourceObjects() ;
-            std::size_t nSourceObjects = sourceObjects.size() ;
-            for ( std::size_t i = 0; i < nSourceObjects; ++i ){
-                const LevelSetObject *sourceObject = sourceObjects[i];
-                if (sourceObject == object) {
-                    referringProxyObjectIds.push_back(proxyObject->getId());
-                }
-            }
-        }
-    }
-
-    // Create the immutable object
-    std::unique_ptr<LevelSetObject> immutableObject = LevelSetObjectFactory::createImmutableObject<LevelSetImmutableNarrowBandCache>( m_kernel.get(), m_storageType, object ) ;
-    assert( immutableObject );
-
-    // Update referring objects
-    for (int referringProxyObjectId : referringProxyObjectIds) {
-        LevelSetProxyObject *referringProxyObject = static_cast<LevelSetProxyObject *>(getObjectPtr( referringProxyObjectId ));
-        referringProxyObject->replaceSourceObject(object, immutableObject.get());
-    }
-
-    // Replace the object with the newly created immutable object
-    removeObject(id, true);
-    addObject(std::move(immutableObject));
-}
-
-/*!
  * Set the processing order of the specified object.
  *
  * The insertion order determines the processing order, however priority is
  * given to primary objects.
- *
- * Immutable objects doesn't need to be processed.
  *
  * This function must be called when a new object is added.
  *
  * @param[in] id the id of the object
  */
 void LevelSet::setObjectProcessingOrder( int id ) {
-
-    // Immutable objects are not processed.
-    if (dynamic_cast<const LevelSetImmutableObjectBase*>(getObjectPtr(id))) {
-        return;
-    }
 
     // Define the processing order for the object
     //
@@ -498,16 +441,10 @@ void LevelSet::setObjectProcessingOrder( int id ) {
 
 /*!
  * Unset the processing order of the specified object.
- * Immutable objects are not processed.
  * This function must be called whan a object is removed.
  * @param[in] id the id of the object
  */
 void LevelSet::unsetObjectProcessingOrder(int id){
-
-    // Immutable objects are not processed.
-    if (dynamic_cast<const LevelSetImmutableObjectBase*>(getObjectPtr(id))) {
-        return;
-    }
 
     // Remove the object from the list of processed objects
     std::vector<int>::iterator processingOrderBegin = m_objectsProcessingOrder.begin();
