@@ -103,8 +103,6 @@ class LevelSet{
 
     bool                    isObjectRemovable(int);
 
-    void                    makeObjectImmutable(int);
-
     LevelSetObject &  getObject( int ) const ;
     LevelSetObject *  getObjectPtr( int ) const ;
     std::vector<LevelSetObject *> getObjectPtrs( ) const ;

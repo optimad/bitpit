@@ -27,7 +27,6 @@
 
 #include "levelSetBooleanObject.hpp"
 #include "levelSetCartesianKernel.hpp"
-#include "levelSetImmutableObject.hpp"
 #include "levelSetMaskObject.hpp"
 #include "levelSetOctreeKernel.hpp"
 #include "levelSetSegmentationObject.hpp"
@@ -40,9 +39,6 @@ public:
     template<typename... Args>
     static std::unique_ptr<LevelSetObject> createBooleanObject(const LevelSetKernel *kernel, LevelSetStorageType storageType, Args&&... args);
 
-    template<template<typename> class narrow_band_cache_t>
-    static std::unique_ptr<LevelSetObject> createImmutableObject(const LevelSetKernel *kernel, LevelSetStorageType storageType, LevelSetObject *source);
-
     template<template<typename> class narrow_band_cache_t, typename... Args>
     static std::unique_ptr<LevelSetObject> createMaskObject(const LevelSetKernel *kernel, LevelSetStorageType storageType, Args&&... args);
 
@@ -50,9 +46,6 @@ public:
     static std::unique_ptr<LevelSetObject> createSegmentationObject(const LevelSetKernel *kernel, LevelSetStorageType storageType, Args&&... args);
 
 private:
-    template<typename kernel_t, template<typename> class narrow_band_cache_t>
-    static std::unique_ptr<LevelSetObject> _createImmutableObject(const kernel_t *kernel, LevelSetStorageType storageType, LevelSetObject *source);
-
     template<typename kernel_t, template<typename> class narrow_band_cache_t, typename... Args>
     static std::unique_ptr<LevelSetObject> _createMaskObject(const kernel_t *kernel, LevelSetStorageType storageType, Args&&... args);
 
