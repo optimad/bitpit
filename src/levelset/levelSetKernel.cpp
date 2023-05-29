@@ -38,8 +38,8 @@ namespace bitpit {
  * Default constructor.
  */
 LevelSetKernel::LevelSetKernel() {
-    m_mesh   = NULL ;
-    m_fillIn = LevelSetFillIn::SPARSE ;
+    m_mesh           = NULL ;
+    m_expectedFillIn = LevelSetFillIn::SPARSE ;
 
 #if BITPIT_ENABLE_MPI
     m_communicator = MPI_COMM_NULL;
@@ -50,11 +50,11 @@ LevelSetKernel::LevelSetKernel() {
 /*!
  * Constructor
  * @param[in] patch underlying mesh
- * @param[in] fillIn expected kernel fill-in
+ * @param[in] expectedFillIn expected kernel fill-in
  */
-LevelSetKernel::LevelSetKernel( VolumeKernel *patch, LevelSetFillIn fillIn ): LevelSetKernel() {
-    m_mesh   = patch ;
-    m_fillIn = fillIn ;
+LevelSetKernel::LevelSetKernel( VolumeKernel *patch, LevelSetFillIn expectedFillIn ): LevelSetKernel() {
+    m_mesh           = patch ;
+    m_expectedFillIn = expectedFillIn ;
 
 #if BITPIT_ENABLE_MPI
     // Initialize the communicator
@@ -89,9 +89,9 @@ VolumeKernel * LevelSetKernel::getMesh() const{
  *
  * \result The expected kernel fill-in.
 */
-LevelSetFillIn LevelSetKernel::getFillIn() const
+LevelSetFillIn LevelSetKernel::getExpectedFillIn() const
 {
-    return m_fillIn;
+    return m_expectedFillIn;
 }
 
 /*!
@@ -244,19 +244,6 @@ std::unique_ptr<DataCommunicator> LevelSetKernel::createDataCommunicator( ) cons
 #endif
 
 /*!
-    Create the sign propagator.
-
-    The sign propagator allow to propagate the levelset sign from the narrow
-    band to the rest of the domain.
-
-    \result The newlycreated sign propagator.
-*/
-std::unique_ptr<LevelSetSignPropagator> LevelSetKernel::createSignPropagator( ) const {
-
-    return std::unique_ptr<LevelSetSignPropagator>(new LevelSetSignPropagator(m_mesh)) ;
-}
-
-/*!
     @interface  LevelSetCachedKernel
     @ingroup levelset
     @brief Base class for defining kernels that need to cache data.
@@ -353,7 +340,7 @@ void LevelSetCachedKernel::update( const std::vector<adaption::Info> &adaptionDa
             continue;
         }
 
-        if (m_fillIn == LevelSetFillIn::DENSE) {
+        if (m_expectedFillIn == LevelSetFillIn::DENSE) {
             cache->reserve(getMesh()->getCells().size());
         } else {
             cache->shrink_to_fit();

@@ -281,6 +281,12 @@ int subtest_001()
     levelset.setMesh(mesh.get());
     levelset.addObject(segmentation.get(), BITPIT_PI, objectId);
 
+    bitpit::LevelSetFieldset levelsetFields;
+    levelsetFields.insert(bitpit::LevelSetField::VALUE);
+
+    bitpit::LevelSetObject *object = static_cast<bitpit::LevelSetObject *>(levelset.getObjectPtr(objectId));
+    object->setFieldCache(levelsetFields, bitpit::LevelSetCacheMode::NARROW_BAND);
+
     // Compute levelset
     bitpit::log::cout() << " - Evaluating levelset" << std::endl;
 
@@ -337,6 +343,12 @@ int subtest_002()
     levelset.setPropagateSign(false);
     levelset.setMesh(mesh.get());
     levelset.addObject(segmentation.get(), BITPIT_PI, objectId);
+
+    bitpit::LevelSetFieldset levelsetFields;
+    levelsetFields.insert(bitpit::LevelSetField::VALUE);
+
+    bitpit::LevelSetObject *object = static_cast<bitpit::LevelSetObject *>(levelset.getObjectPtr(objectId));
+    object->setFieldCache(levelsetFields, bitpit::LevelSetCacheMode::NARROW_BAND);
 
     // Compute levelset
     bitpit::log::cout() << " - Evaluating levelset" << std::endl;
@@ -396,6 +408,12 @@ int subtest_003()
     levelset.setMesh(mesh.get());
     levelset.addObject(segmentation.get(), BITPIT_PI, objectId);
 
+    bitpit::LevelSetFieldset levelsetFields;
+    levelsetFields.insert(bitpit::LevelSetField::VALUE);
+
+    bitpit::LevelSetObject *object = static_cast<bitpit::LevelSetObject *>(levelset.getObjectPtr(objectId));
+    object->setFieldCache(levelsetFields, bitpit::LevelSetCacheMode::NARROW_BAND);
+
     // Compute levelset
     bitpit::log::cout() << " - Evaluating levelset" << std::endl;
 
@@ -453,6 +471,12 @@ int subtest_004()
     levelset.setPropagateSign(true);
     levelset.setMesh(mesh.get());
     levelset.addObject(segmentation.get(), BITPIT_PI, objectId);
+
+    bitpit::LevelSetFieldset levelsetFields;
+    levelsetFields.insert(bitpit::LevelSetField::VALUE);
+
+    bitpit::LevelSetObject *object = static_cast<bitpit::LevelSetObject *>(levelset.getObjectPtr(objectId));
+    object->setFieldCache(levelsetFields, bitpit::LevelSetCacheMode::NARROW_BAND);
 
     // Compute levelset
     bitpit::log::cout() << " - Evaluating levelset" << std::endl;

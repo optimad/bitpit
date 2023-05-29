@@ -36,7 +36,13 @@
 # if BITPIT_ENABLE_MPI
 # include "bitpit_communications.hpp"
 # endif
+# include "bitpit_containers.hpp"
 # include "levelSetCommon.hpp"
+# include "levelSetCache.hpp"
+# include "levelSetKernel.hpp"
+# include "levelSetCartesianKernel.hpp"
+# include "levelSetOctreeKernel.hpp"
+# include "levelSetUnstructuredKernel.hpp"
 
 namespace bitpit{
 
@@ -46,92 +52,29 @@ namespace adaption{
 class SendBuffer;
 class RecvBuffer;
 
-class LevelSet;
-class LevelSetKernel;
+class LevelSetObject : public VTKBaseStreamer {
 
-class LevelSetObjectInterface {
+friend class LevelSet;
 
-    public:
-    virtual ~LevelSetObjectInterface() = default;
+public:
+    typedef LevelSetCachedKernel::CellCacheKey CellCacheKey;
+    typedef LevelSetCachedKernel::CellCache CellCache;
+    typedef LevelSetCachedKernel::CellCacheCollection CellCacheCollection;
 
-    virtual LevelSetKernel *                    getKernel() = 0;
-    virtual const LevelSetKernel *              getKernel() const = 0;
-    virtual void                                setKernel(LevelSetKernel *) = 0;
+    template<typename value_t>
+    using CellValueCache = LevelSetCachedKernel::CellValueCache<value_t>;
 
-    BITPIT_DEPRECATED(virtual LevelSetInfo      getLevelSetInfo(long ) const) = 0;
-    BITPIT_DEPRECATED(virtual double            getLS(long ) const) = 0;
-    virtual double                              getValue(long ) const = 0;
-    virtual short                               getSign(long ) const = 0 ;
-    virtual std::array<double,3>                getGradient(long ) const = 0 ;
-
-    virtual bool                                isInNarrowBand(long ) const = 0;
-
-};
-
-class LevelSetObject : public VTKBaseStreamer, public virtual LevelSetObjectInterface {
-
-    friend LevelSet;
-
-    private:
-    int                                         m_id;           /**< identifier of object */
-
-    std::size_t                                 m_nReferences;
-
-    void                                        setId(int id);
-
-    std::size_t                                 incrementReferenceCount();
-    std::size_t                                 decrementReferenceCount();
-
-    protected:
-    LevelSetFieldMap<std::string>               m_enabledOutputFields;
-
-    LevelSetObject(int);
-    LevelSetObject(const LevelSetObject &other);
-    LevelSetObject(LevelSetObject &&other);
-
-    void                                        setKernel(LevelSetKernel *) override;
-    LevelSetKernel *                            getKernel() override;
-
-    void                                        clear();
-
-    virtual void                                computeNarrowBand(bool signd, double narrowBandSize);
-    virtual void                                updateNarrowBand(const std::vector<adaption::Info> &, bool);
-    void                                        clearAfterMeshAdaption(const std::vector<adaption::Info>&);
-
-    short                                       evalValueSign(double) const ;
-
-    void                                        dump(std::ostream &);
-    void                                        restore(std::istream &);
-
-# if BITPIT_ENABLE_MPI
-    void                                        exchangeGhosts() ;
-    void                                        startExchange( const std::unordered_map<int,std::vector<long>> &, DataCommunicator * );
-    void                                        completeExchange( const std::unordered_map<int,std::vector<long>> &, DataCommunicator * );
-# endif
-
-
-    LevelSetKernel*                             m_kernel;           /**< Levelset kernel */
-
-    virtual void                                _clear();
-    virtual void                                _clearAfterMeshAdaption(const std::vector<adaption::Info>&) ;
-    virtual void                                _dump(std::ostream &);
-    virtual void                                _restore( std::istream &);
-
-# if BITPIT_ENABLE_MPI
-    virtual void                                writeCommunicationBuffer( const std::vector<long> &, SendBuffer & ) ; 
-    virtual void                                _writeCommunicationBuffer(const std::vector<long>&, SendBuffer&)  ;
-    virtual void                                readCommunicationBuffer( const std::vector<long> &, RecvBuffer & ) ; 
-    virtual void                                _readCommunicationBuffer(const std::vector<long>&, RecvBuffer&)  ;
-# endif 
-
-    virtual void                                flushField(LevelSetField field, std::fstream &stream, VTKFormat format) const;
-
-    public:
     virtual ~LevelSetObject();
 
-    const LevelSetKernel *                      getKernel() const override;
-
     virtual LevelSetObject*                     clone() const =0;
+
+    virtual const LevelSetKernel *              getKernel() const;
+
+    void                                        setFieldCache(const LevelSetFieldset &fieldset, LevelSetCacheMode cacheMode);
+    virtual void                                setFieldCache(LevelSetField field, LevelSetCacheMode cacheMode);
+    void                                        fillCache();
+    void                                        updateCache(const std::vector<adaption::Info> &adaptionData);
+    void                                        clearCache(bool release = false);
 
     virtual LevelSetFieldset                    getSupportedFields() const;
 
@@ -140,17 +83,22 @@ class LevelSetObject : public VTKBaseStreamer, public virtual LevelSetObjectInte
 
     std::size_t                                 getReferenceCount() const ;
 
-    short                                       getSign(long ) const override;
-
-    std::array<double,3>                        computeProjectionPoint(long ) const;
-    std::array<double,3>                        computeVertexProjectionPoint(long ) const;
-
-    BITPIT_DEPRECATED(LevelSetInfo              getLevelSetInfo(long ) const override);
-    BITPIT_DEPRECATED(double                    getLS(long ) const override);
-    virtual LevelSetInfo                        computeLevelSetInfo(const std::array<double,3> &) const =0;
-    std::array<double,3>                        computeProjectionPoint(const std::array<double,3> &) const;
-
     LevelSetIntersectionStatus                  intersectSurface(long, LevelSetIntersectionMode=LevelSetIntersectionMode::FAST_FUZZY) const;
+
+    virtual void                                setNarrowBandSize(double size);
+    virtual double                              getNarrowBandSize() const;
+    virtual bool                                isCellInNarrowBand(long id) const;
+    virtual bool                                isInNarrowBand(const std::array<double,3> &point) const;
+
+    virtual short                               evalCellSign(long id) const;
+    virtual double                              evalCellValue(long id, bool signedLevelSet) const;
+    virtual std::array<double,3>                evalCellGradient(long id, bool signedLevelSet) const;
+    virtual std::array<double,3>                evalCellProjectionPoint(long id) const;
+
+    virtual short                               evalSign(const std::array<double,3> &point) const;
+    virtual double                              evalValue(const std::array<double,3> &point, bool signedLevelSet) const;
+    virtual std::array<double,3>                evalGradient(const std::array<double,3> &point, bool signedLevelSet) const;
+    virtual std::array<double,3>                evalProjectionPoint(const std::array<double,3> &point) const;
 
     void                                        enableVTKOutput(LevelSetWriteField field, bool enable=true);
     void                                        enableVTKOutput(const LevelSetFieldset &fieldset, bool enable=true);
@@ -160,9 +108,116 @@ class LevelSetObject : public VTKBaseStreamer, public virtual LevelSetObjectInte
     void                                        enableVTKOutput(LevelSetField field, const std::string &objectName, bool enable=true);
     void                                        flushData(std::fstream &, const std::string &, VTKFormat) override;
 
+    BITPIT_DEPRECATED(std::array<double BITPIT_COMMA 3>   computeProjectionPoint(long cellId) const);
+
+    BITPIT_DEPRECATED(std::array<double BITPIT_COMMA 3>   computeProjectionPoint(const std::array<double,3> &point) const);
+
+    BITPIT_DEPRECATED(short                               getSign(long cellId) const);
+    BITPIT_DEPRECATED(double                              getValue(long cellId) const);
+    BITPIT_DEPRECATED(std::array<double BITPIT_COMMA 3>   getGradient(long cellId) const);
+
+    BITPIT_DEPRECATED(LevelSetInfo                        getLevelSetInfo(long cellId) const);
+    BITPIT_DEPRECATED(double                              getLS(long cellId) const);
+
+    BITPIT_DEPRECATED(double                              getSizeNarrowBand() const);
+
+protected:
+    LevelSetKernel*                             m_kernel;           /**< Levelset kernel */
+
+    double                                      m_narrowBandSize; //!< Size of narrow band
+    std::size_t                                 m_cellNarrowBandCacheId; //!< Id of the cache that will keep track if a cell is inside the narrow band
+
+    bool                                        m_defaultSignedLevelSet;
+
+    LevelSetFieldMap<std::string>               m_enabledOutputFields;
+
+    LevelSetObject(int);
+    LevelSetObject(const LevelSetObject &other);
+    LevelSetObject(LevelSetObject &&other);
+
+    virtual void                                setKernel(LevelSetKernel *);
+    virtual LevelSetKernel *                    getKernel();
+
+    void                                        setDefaultLevelSetSigned(bool signedLevelSet);
+
+    void                                        dump(std::ostream &);
+    virtual void                                _dump(std::ostream &);
+    void                                        restore(std::istream &);
+    virtual void                                _restore( std::istream &);
+
+    virtual bool                                _isCellInNarrowBand(long id, bool checkNeighbours, double *maximumDistance = nullptr) const;
+
+    virtual short                               _evalCellSign(long id) const = 0;
+    virtual double                              _evalCellValue(long id, bool signedLevelSet) const = 0;
+    virtual std::array<double,3>                _evalCellGradient(long id, bool signedLevelSet) const = 0;
+
+    virtual short                               _evalSign(const std::array<double,3> &point) const = 0;
+    virtual double                              _evalValue(const std::array<double,3> &point, bool signedLevelSet) const = 0;
+    virtual std::array<double,3>                _evalGradient(const std::array<double,3> &point, bool signedLevelSet) const = 0;
+
+# if BITPIT_ENABLE_MPI
+    void                                        exchangeGhosts() ;
+    void                                        startExchange( const std::unordered_map<int,std::vector<long>> &, DataCommunicator * );
+    void                                        completeExchange( const std::unordered_map<int,std::vector<long>> &, DataCommunicator * );
+
+    virtual void                                writeCommunicationBuffer( const std::vector<long> &, SendBuffer & ) ;
+    virtual void                                _writeCommunicationBuffer(const std::vector<long>&, SendBuffer&)  ;
+    virtual void                                readCommunicationBuffer( const std::vector<long> &, RecvBuffer & ) ;
+    virtual void                                _readCommunicationBuffer(const std::vector<long>&, RecvBuffer&)  ;
+# endif
+
+    virtual void                                fillFullCellCaches();
+    virtual void                                fillFullCellCaches(const std::vector<adaption::Info> &adaptionData);
+    virtual void                                fillFullCellSignCache();
+    virtual void                                fillFullCellSignCache(const std::vector<adaption::Info> &adaptionData);
+    virtual void                                fillNarrowBandCellCaches();
+    virtual void                                fillNarrowBandCellCaches(const std::vector<adaption::Info> &adaptionData);
+
+    LevelSetFieldset                            getCachedFields(LevelSetCacheMode cacheMode) const;
+
+    template<typename value_t>
+    CellValueCache<value_t> *                   getFieldCellCache(LevelSetField field) const;
+    CellCache *                                 getFieldCellCache(LevelSetField field) const;
+    LevelSetCacheMode                           getFieldCellCacheMode(LevelSetField field) const;
+    template<typename value_t>
+    std::size_t                                 registerFieldCellCache(LevelSetField field, LevelSetCacheMode cacheMode);
+    void                                        unregisterFieldCellCache(LevelSetField field);
+    virtual void                                fillFieldCellCache(long id, LevelSetField field, double searchRadius = std::numeric_limits<double>::max());
+
+    template<typename value_t>
+    CellValueCache<value_t> *                   getCellCache(std::size_t cacheId) const;
+    CellCache *                                 getCellCache(std::size_t cacheId) const;
+    template<typename value_t>
+    std::size_t                                 registerCellCache(LevelSetCacheMode cacheMode);
+    void                                        unregisterCellCache(std::size_t cacheId);
+
+    virtual void                                flushField(LevelSetField field, std::fstream &stream, VTKFormat format) const;
+
+    BITPIT_DEPRECATED(void                      setSizeNarrowBand(double));
+
+private:
+    int                                          m_id;           /**< identifier of object */
+
+    std::size_t                                  m_nReferences;
+
+    mutable std::unique_ptr<CellCacheCollection> m_cellCacheCollection; //!< Cell cache collection
+    std::vector<std::size_t>                     m_cellFieldCacheIds; //!< Ids of the cell caches
+    std::vector<LevelSetCacheMode>               m_cellFieldCacheModes; //!< Modes of the cell caches
+
+    void                                         setId(int id);
+
+    std::size_t                                  incrementReferenceCount();
+    std::size_t                                  decrementReferenceCount();
+
+    void                                         fillNarrowBandCellCaches(LevelSetKernel *levelsetKernel);
+    void                                         fillNarrowBandCellCaches(LevelSetKernel *levelsetKernel, const std::vector<adaption::Info> &adaptionData);
+    void                                         fillNarrowBandCellCaches(LevelSetCartesianKernel *levelsetKernel);
 
 };
 
 }
+
+// Include template implementations
+#include "levelSetObject.tpp"
 
 #endif

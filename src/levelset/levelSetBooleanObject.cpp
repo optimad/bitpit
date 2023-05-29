@@ -160,12 +160,25 @@ LevelSetBooleanObject::LevelSetBooleanObject( const LevelSetBooleanObject &other
 }
 
 /*!
- * Get the levelset value
- * @param[in] id cell id
- * @return levelset value in cell
+ * Evaluate levelset sign at the specified point.
+ *
+ * \param id is the id of the cell
+ * \result The sign of the levelset at the specified point.
  */
-double LevelSetBooleanObject::getValue( long id)const {
-    const LevelSetBooleanResult result = computeBooleanResult( id ) ;
+short LevelSetBooleanObject::_evalCellSign(long id) const
+{
+    return static_cast<short>(sign(evalCellValue(id, true)));
+}
+
+/*!
+ * Evaluate levelset value at the specified cell.
+ *
+ * \param id is the id of the cell
+ * \param signedLevelSet controls if signed levelset function will be used
+ * \result The value of the levelset at the specified cell.
+ */
+double LevelSetBooleanObject::_evalCellValue(long id, bool signedLevelSet) const {
+    const LevelSetBooleanResult result = computeBooleanResult( id, signedLevelSet ) ;
     const LevelSetObject *resultObject = result.getObject();
     if ( resultObject ) {
         double value = result.getValue();
@@ -177,15 +190,16 @@ double LevelSetBooleanObject::getValue( long id)const {
 }
 
 /*!
- * Get the levelset gradient
- * @param[in] id cell id
- * @return levelset gradient in cell 
+ * Evaluate levelset gradient at the specified cell.
+ *
+ * \param id is the id of the cell
+ * \result The gradient of the levelset at the specified cell.
  */
-std::array<double,3> LevelSetBooleanObject::getGradient(long id) const {
-    const LevelSetBooleanResult result = computeBooleanResult( id ) ;
+std::array<double,3> LevelSetBooleanObject::_evalCellGradient(long id, bool signedLevelSet) const {
+    const LevelSetBooleanResult result = computeBooleanResult( id, signedLevelSet ) ;
     const LevelSetObject *resultObject = result.getObject();
     if ( resultObject ) {
-        std::array<double, 3> gradient = static_cast<double>(result.getObjectSign()) * resultObject->getGradient( id ) ;
+        std::array<double, 3> gradient = static_cast<double>(result.getObjectSign()) * resultObject->evalCellGradient( id, signedLevelSet ) ;
 
         return gradient ;
     }
@@ -194,22 +208,52 @@ std::array<double,3> LevelSetBooleanObject::getGradient(long id) const {
 }
 
 /*!
- * Computes the LevelSetInfo in a point
- * @param[in] coords point coordinates
- * @return LevelSetInfo
-*/
-LevelSetInfo LevelSetBooleanObject::computeLevelSetInfo( const std::array<double,3> &coords) const{
-    const LevelSetBooleanResult result = computeBooleanResult( coords ) ;
-    const LevelSetObject *componentObject = result.getObject();
-    if ( componentObject ) {
-        LevelSetInfo levelSetInfo = componentObject->computeLevelSetInfo( coords ) ;
-        levelSetInfo.value    *= result.getObjectSign();
-        levelSetInfo.gradient *= static_cast<double>(result.getObjectSign());
+ * Evaluate levelset sign at the specified point.
+ *
+ * \param point are the coordinates of the point
+ * \result The sign of the levelset at the specified point.
+ */
+short LevelSetBooleanObject::_evalSign(const std::array<double,3> &point) const
+{
+    return static_cast<short>(sign(evalValue(point, true)));
+}
 
-        return levelSetInfo;
+/*!
+ * Evaluate levelset value at the specified cell.
+ *
+ * \param point are the coordinates of the point
+ * \param signedLevelSet controls if signed levelset function will be used
+ * \result The value of the levelset at the specified cell.
+ */
+double LevelSetBooleanObject::_evalValue(const std::array<double,3> &point, bool signedLevelSet) const {
+    const LevelSetBooleanResult result = computeBooleanResult( point, signedLevelSet ) ;
+    const LevelSetObject *resultObject = result.getObject();
+    if ( resultObject ) {
+        double value = result.getValue();
+
+        return value ;
     }
 
-    return LevelSetInfo() ;
+    return levelSetDefaults::VALUE ;
+}
+
+/*!
+ * Evaluate levelset gradient at the specified cell.
+ *
+ * \param point are the coordinates of the point
+ * \param signedLevelSet controls if signed levelset function will be used
+ * \result The gradient of the levelset at the specified cell.
+ */
+std::array<double,3> LevelSetBooleanObject::_evalGradient(const std::array<double,3> &point, bool signedLevelSet) const {
+    const LevelSetBooleanResult result = computeBooleanResult( point, signedLevelSet ) ;
+    const LevelSetObject *resultObject = result.getObject();
+    if ( resultObject ) {
+        std::array<double, 3> gradient = static_cast<double>(result.getObjectSign()) * resultObject->evalGradient( point, signedLevelSet ) ;
+
+        return gradient ;
+    }
+
+    return levelSetDefaults::GRADIENT ;
 }
 
 /*!
@@ -271,7 +315,7 @@ LevelSetBooleanOperation LevelSetBooleanObject::getBooleanOperation() const{
  */
 const LevelSetObject * LevelSetBooleanObject::getReferenceObject(long id) const{
 
-    const LevelSetBooleanResult result = computeBooleanResult(id) ;
+    const LevelSetBooleanResult result = computeBooleanResult(id, true) ;
 
     return result.getObject();
 
@@ -291,9 +335,10 @@ std::vector<const LevelSetObject*> LevelSetBooleanObject::getSourceObjects() con
 /*!
  * Compute the result of the boolean operation.
  * @param[in] id cell index
+ * @param[in] signedLevelSet controls if signed levelset function will be used
  * @return result of the boolean operation.
  */
-LevelSetBooleanResult LevelSetBooleanObject::computeBooleanResult( long id ) const{
+LevelSetBooleanResult LevelSetBooleanObject::computeBooleanResult( long id, bool signedLevelSet ) const{
 
     // Early return if the are no objects
     if (m_sourceObjects.empty()) {
@@ -301,9 +346,9 @@ LevelSetBooleanResult LevelSetBooleanObject::computeBooleanResult( long id ) con
     }
 
     // Identify informaiton about the source
-    LevelSetBooleanResult result( getBooleanOperation(), m_sourceObjects[0], m_sourceObjects[0]->getValue(id) ) ;
+    LevelSetBooleanResult result( getBooleanOperation(), m_sourceObjects[0], m_sourceObjects[0]->evalCellValue(id, signedLevelSet) ) ;
     for( size_t n=1; n<m_sourceObjects.size(); ++n){
-        result.update(m_sourceObjects[n], m_sourceObjects[n]->getValue(id));
+        result.update(m_sourceObjects[n], m_sourceObjects[n]->evalCellValue(id, signedLevelSet));
     }
 
     return result;
@@ -311,10 +356,11 @@ LevelSetBooleanResult LevelSetBooleanObject::computeBooleanResult( long id ) con
 
 /*!
  * Compute the result of the boolean operation.
- * @param[in] coords point coordinates
+ * @param[in] point are the coordinates of the point
+ * @param[in] signedLevelSet controls if signed levelset function will be used
  * @return result of the boolean operation.
  */
-LevelSetBooleanResult LevelSetBooleanObject::computeBooleanResult( const std::array<double,3> &coords ) const{
+LevelSetBooleanResult LevelSetBooleanObject::computeBooleanResult( const std::array<double,3> &point, bool signedLevelSet  ) const{
 
     // Early return if the are no objects
     if (m_sourceObjects.empty()) {
@@ -322,9 +368,9 @@ LevelSetBooleanResult LevelSetBooleanObject::computeBooleanResult( const std::ar
     }
 
     // Identify informaiton about the source
-    LevelSetBooleanResult result( getBooleanOperation(), m_sourceObjects[0], m_sourceObjects[0]->computeLevelSetInfo(coords).value);
+    LevelSetBooleanResult result( getBooleanOperation(), m_sourceObjects[0], m_sourceObjects[0]->evalValue(point, signedLevelSet));
     for( size_t n=1; n<m_sourceObjects.size(); ++n){
-        result.update(m_sourceObjects[n], m_sourceObjects[n]->computeLevelSetInfo( coords ).value );
+        result.update(m_sourceObjects[n], m_sourceObjects[n]->evalValue(point, signedLevelSet));
     }
 
     return result;

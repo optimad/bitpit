@@ -30,6 +30,9 @@
 
 # include "bitpit_volunstructured.hpp"
 
+#include <memory>
+#include <vector>
+
 namespace bitpit{
 
 class LevelSetUnstructuredKernel : public LevelSetCachedKernel {
@@ -40,9 +43,6 @@ class LevelSetUnstructuredKernel : public LevelSetCachedKernel {
     std::size_t                                 m_cellBoundingRadiusCacheId;
 
     public:
-    typedef LevelSetExternalPiercedStorageManager DenseStorageManager;
-    typedef LevelSetInternalPiercedStorageManager SparseStorageManager;
-
     template<typename value_t>
     using CellSparseCacheContainer = std::unordered_map<long, value_t>;
     template<typename value_t>

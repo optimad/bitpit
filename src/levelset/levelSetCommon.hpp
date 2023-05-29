@@ -92,15 +92,6 @@ enum class LevelSetIntersectionMode{
 
 /*!
  * @ingroup levelsetEnums
- * Enum class containing the possible sotrage modes.
- */
-enum class LevelSetStorageType{
-    SPARSE=0,                       /**< Sparse storage, to be used when only a small portion of the domain is inside the narrow band */
-    DENSE=1,                        /**< Dense storage, to be used when almost all the domain is inside the narrow band */
-};
-
-/*!
- * @ingroup levelsetEnums
  * Enum class containing the possible fill-in modes for the levelset.
  */
 enum class LevelSetFillIn{
@@ -112,12 +103,41 @@ typedef LevelSetFillIn LevelSetCacheType;
 
 /*!
  * @ingroup levelsetEnums
+ * Enum class containing the possible modes for caching object information.
+ */
+enum class LevelSetCacheMode{
+    NONE=-1,                        /**< No caching will be performed */
+    ON_DEMAND=0,                    /**< Cache is filled only on the portions of the domain for which fields are explicitly evaluated */
+    NARROW_BAND=1,                  /**< Cache is pre-loaded on the portion of the domain that defines the narrow band */
+    FULL=2,                         /**< Cache is pre-loaded on all the domain */
+};
+
+/*!
+ * Hasher for the LevelSetCacheMode enum.
+ */
+struct LevelSetCacheModeHasher
+{
+    std::size_t operator()(const LevelSetCacheMode &cacheMode) const
+    {
+        return static_cast<int>(cacheMode);
+    }
+};
+
+/*!
+ * Map of write fields.
+ */
+template<typename value_t>
+using LevelSetCacheModeMap = std::unordered_map<LevelSetCacheMode, value_t, LevelSetCacheModeHasher>;
+
+/*!
+ * @ingroup levelsetEnums
  * Enum class containing the possible level set fields
  */
 enum class LevelSetField{
     BEGIN = 0,
     VALUE = BEGIN,                  /**< level set value */
     GRADIENT,                       /**< level set gradient */
+    SIGN,                           /**< level set value */
     SUPPORT,                        /**< facet that contains the projection point */
     PART,                           /**< part identifier at projection point */
     NORMAL,                         /**< body normal at projection point */

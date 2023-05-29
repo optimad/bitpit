@@ -42,9 +42,8 @@
 
 #include "levelSetObject.hpp"
 #include "levelSetProxyObject.hpp"
-#include "levelSetCachedObject.hpp"
+#include "levelSetCache.hpp"
 #include "levelSetSegmentationObject.hpp"
-#include "levelSetSignedObject.hpp"
 #include "levelSetBooleanObject.hpp"
 #include "levelSetMaskObject.hpp"
 

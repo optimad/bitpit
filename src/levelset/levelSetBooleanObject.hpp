@@ -72,11 +72,19 @@ class LevelSetBooleanObject: public LevelSetProxyObject {
 
     LevelSetBooleanOperation                    getBooleanOperation() const;
 
-    LevelSetBooleanResult                       computeBooleanResult( long ) const ;
-    LevelSetBooleanResult                       computeBooleanResult( const std::array<double,3> &coords ) const ;
+    LevelSetBooleanResult                       computeBooleanResult( long, bool signedLevelSet  ) const ;
+    LevelSetBooleanResult                       computeBooleanResult( const std::array<double,3> &point, bool signedLevelSet  ) const ;
 
     protected:
     void                                        replaceSourceObject(const LevelSetObject *current, const LevelSetObject *updated) override ;
+
+    short                                       _evalCellSign(long id) const override;
+    double                                      _evalCellValue(long id, bool signedLevelSet) const override;
+    std::array<double,3>                        _evalCellGradient(long id, bool signedLevelSet) const override;
+
+    short                                       _evalSign(const std::array<double,3> &point) const override;
+    double                                      _evalValue(const std::array<double,3> &point, bool signedLevelSet) const override;
+    std::array<double,3>                        _evalGradient(const std::array<double,3> &point, bool signedLevelSet) const override;
 
     void                                        _dump( std::ostream &) override;
     void                                        _restore( std::istream &) override;
@@ -87,11 +95,6 @@ class LevelSetBooleanObject: public LevelSetProxyObject {
     LevelSetBooleanObject(const LevelSetBooleanObject &);
 
     LevelSetBooleanObject*                      clone() const override;
-
-    double                                      getValue(long ) const override;
-    std::array<double,3>                        getGradient(long ) const override;
-
-    LevelSetInfo                                computeLevelSetInfo(const std::array<double,3> &) const override;
 
     const LevelSetObject *                      getReferenceObject( long ) const override;
 

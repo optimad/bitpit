@@ -211,7 +211,7 @@ int subtest_001()
     //
 
     // Initialize levelset
-    bitpit::LevelSet levelsetSparse(bitpit::LevelSetStorageType::SPARSE);
+    bitpit::LevelSet levelsetSparse(bitpit::LevelSetCacheType::SPARSE);
     levelsetSparse.setPropagateSign(true);
     levelsetSparse.setSizeNarrowBand(0.25);
     levelsetSparse.setMesh(mesh.get());
@@ -241,7 +241,7 @@ int subtest_001()
     //
 
     // Initialize levelset
-    bitpit::LevelSet levelsetDense(bitpit::LevelSetStorageType::DENSE);
+    bitpit::LevelSet levelsetDense(bitpit::LevelSetCacheType::DENSE);
     levelsetDense.setPropagateSign(true);
     levelsetDense.setSizeNarrowBand(0.25);
     levelsetDense.setMesh(mesh.get());
@@ -331,7 +331,7 @@ int subtest_002()
     //
 
     // Initialize levelset
-    bitpit::LevelSet levelsetSparse(bitpit::LevelSetStorageType::SPARSE);
+    bitpit::LevelSet levelsetSparse(bitpit::LevelSetCacheType::SPARSE);
     levelsetSparse.setSizeNarrowBand(0.25);
     levelsetSparse.setMesh(mesh.get());
     levelsetSparse.addObject(segmentation.get(), BITPIT_PI, objectId);
@@ -366,7 +366,7 @@ int subtest_002()
     //
 
     // Initialize levelset
-    bitpit::LevelSet levelsetDense(bitpit::LevelSetStorageType::DENSE);
+    bitpit::LevelSet levelsetDense(bitpit::LevelSetCacheType::DENSE);
     levelsetDense.setSizeNarrowBand(0.25);
     levelsetDense.setMesh(mesh.get());
     levelsetDense.addObject(segmentation.get(), BITPIT_PI, objectId);
@@ -462,7 +462,7 @@ int subtest_003()
     //
 
     // Initialize levelset
-    bitpit::LevelSet levelsetSparse(bitpit::LevelSetStorageType::SPARSE);
+    bitpit::LevelSet levelsetSparse(bitpit::LevelSetCacheType::SPARSE);
     levelsetSparse.setPropagateSign(true);
     levelsetSparse.setSizeNarrowBand(0.25);
     levelsetSparse.setMesh(mesh.get());
@@ -492,7 +492,7 @@ int subtest_003()
     //
 
     // Initialize levelset
-    bitpit::LevelSet levelsetDense(bitpit::LevelSetStorageType::DENSE);
+    bitpit::LevelSet levelsetDense(bitpit::LevelSetCacheType::DENSE);
     levelsetDense.setPropagateSign(true);
     levelsetDense.setSizeNarrowBand(0.25);
     levelsetDense.setMesh(mesh.get());

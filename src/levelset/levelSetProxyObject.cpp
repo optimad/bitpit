@@ -55,22 +55,6 @@ bool LevelSetProxyObject::isPrimary() const{
 } 
 
 /*!
- * If cell centroid lies within the narrow band and hence levelset is computet exactly
- * @param[in] id cell id
- * @return true/false if the centroid is in narrow band
- */
-bool LevelSetProxyObject::isInNarrowBand(long id)const{
-
-    const LevelSetObject *referenceObject = getReferenceObject(id) ;
-    if ( referenceObject ) {
-        return referenceObject->isInNarrowBand(id);
-    }
-
-    return false;
-
-}
-
-/*!
  * Get the the primary object that defines the levelset information for the
  * specified cell.
  * @param[in] id cell index

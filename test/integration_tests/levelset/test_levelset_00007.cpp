@@ -178,7 +178,7 @@ int subtest_001()
     //
 
     // Initialize levelset
-    bitpit::LevelSet levelsetSparse(bitpit::LevelSetStorageType::SPARSE);
+    bitpit::LevelSet levelsetSparse(bitpit::LevelSetFillIn::SPARSE);
     levelsetSparse.setPropagateSign(true);
     levelsetSparse.setMesh(mesh.get());
     levelsetSparse.addObject(segmentation.get(), BITPIT_PI, objectId);
@@ -194,9 +194,9 @@ int subtest_001()
     mesh->getVTK().setName("levelset_007_cartesian_default_sparse");
     mesh->write();
 
-    double sparseValue0 = levelsetSparse.getObject(objectId).getValue(testCellId0);
-    double sparseValue1 = levelsetSparse.getObject(objectId).getValue(testCellId1);
-    double sparseValue2 = levelsetSparse.getObject(objectId).getValue(testCellId2);
+    double sparseValue0 = levelsetSparse.getObject(objectId).evalCellValue(testCellId0, true);
+    double sparseValue1 = levelsetSparse.getObject(objectId).evalCellValue(testCellId1, true);
+    double sparseValue2 = levelsetSparse.getObject(objectId).evalCellValue(testCellId2, true);
 
     bitpit::log::cout() << " Sparse storage mode: levelset on cell " << testCellId0 << " is equal to " << sparseValue0 << std::endl;
     bitpit::log::cout() << " Sparse storage mode: levelset on cell " << testCellId1 << " is equal to " << sparseValue1 << std::endl;
@@ -207,7 +207,7 @@ int subtest_001()
     //
 
     // Initialize levelset
-    bitpit::LevelSet levelsetDense(bitpit::LevelSetStorageType::DENSE);
+    bitpit::LevelSet levelsetDense(bitpit::LevelSetFillIn::DENSE);
     levelsetDense.setPropagateSign(true);
     levelsetDense.setMesh(mesh.get());
     levelsetDense.addObject(segmentation.get(), BITPIT_PI, objectId);
@@ -223,9 +223,9 @@ int subtest_001()
     mesh->getVTK().setName("levelset_007_cartesian_default_dense");
     mesh->write();
 
-    double denseValue0 = levelsetDense.getObject(objectId).getValue(testCellId0);
-    double denseValue1 = levelsetDense.getObject(objectId).getValue(testCellId1);
-    double denseValue2 = levelsetDense.getObject(objectId).getValue(testCellId2);
+    double denseValue0 = levelsetDense.getObject(objectId).evalCellValue(testCellId0, true);
+    double denseValue1 = levelsetDense.getObject(objectId).evalCellValue(testCellId1, true);
+    double denseValue2 = levelsetDense.getObject(objectId).evalCellValue(testCellId2, true);
 
     bitpit::log::cout() << " Dense storage mode: levelset on cell " << testCellId0 << " is equal to " << denseValue0 << std::endl;
     bitpit::log::cout() << " Dense storage mode: levelset on cell " << testCellId1 << " is equal to " << denseValue1 << std::endl;
@@ -296,7 +296,7 @@ int subtest_002()
     //
 
     // Initialize levelset
-    bitpit::LevelSet levelsetSparse(bitpit::LevelSetStorageType::SPARSE);
+    bitpit::LevelSet levelsetSparse(bitpit::LevelSetFillIn::SPARSE);
     levelsetSparse.setMesh(mesh.get());
     levelsetSparse.addObject(segmentation.get(), BITPIT_PI, objectId);
 
@@ -317,9 +317,9 @@ int subtest_002()
 
     mesh->switchMemoryMode(bitpit::VolCartesian::MEMORY_LIGHT);
 
-    double sparseValue0 = levelsetSparse.getObject(objectId).getValue(testCellId0);
-    double sparseValue1 = levelsetSparse.getObject(objectId).getValue(testCellId1);
-    double sparseValue2 = levelsetSparse.getObject(objectId).getValue(testCellId2);
+    double sparseValue0 = levelsetSparse.getObject(objectId).evalCellValue(testCellId0, true);
+    double sparseValue1 = levelsetSparse.getObject(objectId).evalCellValue(testCellId1, true);
+    double sparseValue2 = levelsetSparse.getObject(objectId).evalCellValue(testCellId2, true);
 
     bitpit::log::cout() << " Sparse storage mode: levelset on cell " << testCellId0 << " is equal to " << sparseValue0 << std::endl;
     bitpit::log::cout() << " Sparse storage mode: levelset on cell " << testCellId1 << " is equal to " << sparseValue1 << std::endl;
@@ -330,7 +330,7 @@ int subtest_002()
     //
 
     // Initialize levelset
-    bitpit::LevelSet levelsetDense(bitpit::LevelSetStorageType::DENSE);
+    bitpit::LevelSet levelsetDense(bitpit::LevelSetFillIn::DENSE);
     levelsetDense.setMesh(mesh.get());
     levelsetDense.addObject(segmentation.get(), BITPIT_PI, objectId);
 
@@ -351,9 +351,9 @@ int subtest_002()
 
     mesh->switchMemoryMode(bitpit::VolCartesian::MEMORY_LIGHT);
 
-    double denseValue0 = levelsetDense.getObject(objectId).getValue(testCellId0);
-    double denseValue1 = levelsetDense.getObject(objectId).getValue(testCellId1);
-    double denseValue2 = levelsetDense.getObject(objectId).getValue(testCellId2);
+    double denseValue0 = levelsetDense.getObject(objectId).evalCellValue(testCellId0, true);
+    double denseValue1 = levelsetDense.getObject(objectId).evalCellValue(testCellId1, true);
+    double denseValue2 = levelsetDense.getObject(objectId).evalCellValue(testCellId2, true);
 
     bitpit::log::cout() << " Dense storage mode: levelset on cell " << testCellId0 << " is equal to " << denseValue0 << std::endl;
     bitpit::log::cout() << " Dense storage mode: levelset on cell " << testCellId1 << " is equal to " << denseValue1 << std::endl;
@@ -425,7 +425,7 @@ int subtest_003()
     //
 
     // Initialize levelset
-    bitpit::LevelSet levelsetSparse(bitpit::LevelSetStorageType::SPARSE);
+    bitpit::LevelSet levelsetSparse(bitpit::LevelSetFillIn::SPARSE);
     levelsetSparse.setPropagateSign(true);
     levelsetSparse.setMesh(mesh.get());
     levelsetSparse.addObject(segmentation.get(), BITPIT_PI, objectId);
@@ -441,9 +441,9 @@ int subtest_003()
     mesh->getVTK().setName("levelset_007_octree_sparse");
     mesh->write();
 
-    double sparseValue0 = levelsetSparse.getObject(objectId).getValue(testCellId0);
-    double sparseValue1 = levelsetSparse.getObject(objectId).getValue(testCellId1);
-    double sparseValue2 = levelsetSparse.getObject(objectId).getValue(testCellId2);
+    double sparseValue0 = levelsetSparse.getObject(objectId).evalCellValue(testCellId0, true);
+    double sparseValue1 = levelsetSparse.getObject(objectId).evalCellValue(testCellId1, true);
+    double sparseValue2 = levelsetSparse.getObject(objectId).evalCellValue(testCellId2, true);
 
     bitpit::log::cout() << " Sparse storage mode: levelset on cell " << testCellId0 << " is equal to " << sparseValue0 << std::endl;
     bitpit::log::cout() << " Sparse storage mode: levelset on cell " << testCellId1 << " is equal to " << sparseValue1 << std::endl;
@@ -454,7 +454,7 @@ int subtest_003()
     //
 
     // Initialize levelset
-    bitpit::LevelSet levelsetDense(bitpit::LevelSetStorageType::DENSE);
+    bitpit::LevelSet levelsetDense(bitpit::LevelSetFillIn::DENSE);
     levelsetDense.setPropagateSign(true);
     levelsetDense.setMesh(mesh.get());
     levelsetDense.addObject(segmentation.get(), BITPIT_PI, objectId);
@@ -470,9 +470,9 @@ int subtest_003()
     mesh->getVTK().setName("levelset_007_octree_dense");
     mesh->write();
 
-    double denseValue0 = levelsetDense.getObject(objectId).getValue(testCellId0);
-    double denseValue1 = levelsetDense.getObject(objectId).getValue(testCellId1);
-    double denseValue2 = levelsetDense.getObject(objectId).getValue(testCellId2);
+    double denseValue0 = levelsetDense.getObject(objectId).evalCellValue(testCellId0, true);
+    double denseValue1 = levelsetDense.getObject(objectId).evalCellValue(testCellId1, true);
+    double denseValue2 = levelsetDense.getObject(objectId).evalCellValue(testCellId2, true);
 
     bitpit::log::cout() << " Dense storage mode: levelset on cell " << testCellId0 << " is equal to " << denseValue0 << std::endl;
     bitpit::log::cout() << " Dense storage mode: levelset on cell " << testCellId1 << " is equal to " << denseValue1 << std::endl;

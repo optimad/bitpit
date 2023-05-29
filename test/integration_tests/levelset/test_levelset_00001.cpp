@@ -153,6 +153,15 @@ int subtest_001()
     ids.push_back(id0);
     ids.push_back(id1);
 
+    bitpit::LevelSetObject *object0 = static_cast<bitpit::LevelSetObject *>(levelset.getObjectPtr(id0));
+    bitpit::LevelSetObject *object1 = static_cast<bitpit::LevelSetObject *>(levelset.getObjectPtr(id1));
+
+    bitpit::LevelSetFieldset levelsetFields;
+    levelsetFields.insert(bitpit::LevelSetField::VALUE);
+
+    object0->setFieldCache(levelsetFields, bitpit::LevelSetCacheMode::NARROW_BAND);
+    object1->setFieldCache(levelsetFields, bitpit::LevelSetCacheMode::FULL);
+
     start = std::chrono::system_clock::now();
     levelset.compute( ) ;
     end = std::chrono::system_clock::now();

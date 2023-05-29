@@ -158,6 +158,17 @@ int subtest_001()
     id3 = levelset.addObject(bitpit::LevelSetBooleanOperation::UNION,id0,id1) ;
     id4 = levelset.addObject(bitpit::LevelSetBooleanOperation::SUBTRACTION,id3,id2) ;
 
+    bitpit::LevelSetObject &object0 = static_cast<bitpit::LevelSetObject &>(levelset.getObject(id0));
+    bitpit::LevelSetObject &object1 = static_cast<bitpit::LevelSetObject &>(levelset.getObject(id1));
+    bitpit::LevelSetObject &object2 = static_cast<bitpit::LevelSetObject &>(levelset.getObject(id2));
+
+    bitpit::LevelSetFieldset levelsetFields;
+    levelsetFields.insert(bitpit::LevelSetField::VALUE);
+
+    object0.setFieldCache(levelsetFields, bitpit::LevelSetCacheMode::NARROW_BAND);
+    object1.setFieldCache(levelsetFields, bitpit::LevelSetCacheMode::NARROW_BAND);
+    object2.setFieldCache(levelsetFields, bitpit::LevelSetCacheMode::NARROW_BAND);
+
     std::vector<int> ids;
     ids.push_back(id0);
     ids.push_back(id1);
@@ -191,26 +202,22 @@ int subtest_001()
     mesh.write() ;
 
     // Refine mesh, update levelset and write data
-    const bitpit::LevelSetObject &object0 = levelset.getObject(id0);
-    const bitpit::LevelSetObject &object1 = levelset.getObject(id1);
-    const bitpit::LevelSetObject &object2 = levelset.getObject(id2);
-
     for( int i=0; i<10; ++i){
 
         for( auto & cell : mesh.getCells() ){
             long cellId = cell.getId() ;
-            if( std::abs(object0.getValue(cellId)) < mesh.evalCellSize(cellId)  ){
+            if( object0.evalCellValue(cellId, false) < mesh.evalCellSize(cellId)  ){
                 mesh.markCellForRefinement(cellId) ;
             }
 
             if( i<3) {
-                if( std::abs(object1.getValue(cellId)) < mesh.evalCellSize(cellId)  ){
+                if( object1.evalCellValue(cellId, false) < mesh.evalCellSize(cellId)  ){
                     mesh.markCellForRefinement(cellId) ;
                 }
             }
 
             if( i<6) {
-                if( std::abs(object2.getValue(cellId)) < mesh.evalCellSize(cellId)  ){
+                if( object2.evalCellValue(cellId, false) < mesh.evalCellSize(cellId)  ){
                     mesh.markCellForRefinement(cellId) ;
                 }
             }
