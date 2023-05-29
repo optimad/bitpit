@@ -77,8 +77,6 @@ class LevelSetObject : public VTKBaseStreamer, public virtual LevelSetObjectInte
 
     std::size_t                                 m_nReferences;
 
-    std::unordered_set<LevelSetWriteField, LevelSetWriteFieldHasher> m_enabledVTKOutputs;
-
     void                                        setId(int id);
 
     std::size_t                                 incrementReferenceCount();
@@ -89,6 +87,8 @@ class LevelSetObject : public VTKBaseStreamer, public virtual LevelSetObjectInte
         UPDATE_STRATEGY_EXCHANGE,
         UPDATE_STRATEGY_EVALUATE,
     };
+
+    LevelSetFieldMap<std::string>               m_enabledOutputFields;
 
     LevelSetObject(int);
     LevelSetObject(const LevelSetObject &other);
@@ -136,12 +136,21 @@ class LevelSetObject : public VTKBaseStreamer, public virtual LevelSetObjectInte
     virtual void                                _readCommunicationBuffer(const std::vector<long>&, RecvBuffer&)  ;
 # endif 
 
+    bool                                        hasVTKOutputData(LevelSetField field, const std::string &objectName) const;
+    void                                        removeVTKOutputData(LevelSetField field, const std::string &objectName);
+    virtual void                                addVTKOutputData(LevelSetField field, const std::string &objectName);
+    std::string                                 getVTKOutputDataName(LevelSetField field, const std::string &objectName) const;
+    virtual std::string                         getVTKOutputFieldName(LevelSetField field) const;
+    virtual void                                flushVTKOutputData(LevelSetField field, std::fstream &stream, VTKFormat format) const;
+
     public:
     virtual ~LevelSetObject();
 
     const LevelSetKernel *                      getKernel() const override;
 
     virtual LevelSetObject*                     clone() const =0;
+
+    virtual LevelSetFieldset                    getSupportedFields() const;
 
     int                                         getId() const ;
     virtual bool                                isPrimary() const ;
@@ -155,20 +164,19 @@ class LevelSetObject : public VTKBaseStreamer, public virtual LevelSetObjectInte
 
     BITPIT_DEPRECATED(LevelSetInfo              getLevelSetInfo(long ) const override);
     BITPIT_DEPRECATED(double                    getLS(long ) const override);
-    virtual int                                 getPart(long ) const ;
-    virtual std::array<double,3>                getNormal(long ) const;
     virtual LevelSetInfo                        computeLevelSetInfo(const std::array<double,3> &) const =0;
     std::array<double,3>                        computeProjectionPoint(const std::array<double,3> &) const;
 
     double                                      getSizeNarrowBand() const;
 
     LevelSetIntersectionStatus                  intersectSurface(long, LevelSetIntersectionMode=LevelSetIntersectionMode::FAST_FUZZY) const;
-    virtual double                              getSurfaceFeatureSize(long ) const;
-    virtual double                              getMinSurfaceFeatureSize() const;
-    virtual double                              getMaxSurfaceFeatureSize() const;
 
-    void                                        enableVTKOutput(LevelSetWriteField fieldset, bool enable=true);
+    void                                        enableVTKOutput(LevelSetWriteField field, bool enable=true);
+    void                                        enableVTKOutput(const LevelSetFieldset &fieldset, bool enable=true);
+    void                                        enableVTKOutput(LevelSetField field, bool enable=true);
     void                                        enableVTKOutput(LevelSetWriteField fieldset, const std::string &objectName, bool enable=true);
+    void                                        enableVTKOutput(const LevelSetFieldset &fieldset, const std::string &objectName, bool enable=true);
+    void                                        enableVTKOutput(LevelSetField field, const std::string &objectName, bool enable=true);
     void                                        flushData(std::fstream &, const std::string &, VTKFormat) override;
 
 

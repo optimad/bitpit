@@ -135,6 +135,21 @@ LevelSetSegmentationObject<narrow_band_cache_t> * LevelSetSegmentationObject<nar
 }
 
 /*!
+ * Get the list of supported field.
+ * @result The list of supported field.
+ */
+template<typename narrow_band_cache_t>
+LevelSetFieldset LevelSetSegmentationObject<narrow_band_cache_t>::getSupportedFields() const {
+
+    LevelSetFieldset supportedFields = LevelSetCachedObject<narrow_band_cache_t>::getSupportedFields();
+    supportedFields.insert(LevelSetField::PART);
+    supportedFields.insert(LevelSetField::NORMAL);
+
+    return supportedFields;
+
+}
+
+/*!
  * Gets the closest support within the narrow band of cell
  * @param[in] id index of cell
  * @return closest segment in narrow band
@@ -715,6 +730,106 @@ LevelSetInfo LevelSetSegmentationObject<narrow_band_cache_t>::computeLevelSetInf
 
     return LevelSetInfo(distance,gradient);
 
+}
+
+/*!
+ * Add the VTK data associated with the specified field.
+ *
+ * @param[in] field is the field
+ * @param[in] objectName is the name that will be associated with the object
+ */
+template<typename narrow_band_cache_t>
+void LevelSetSegmentationObject<narrow_band_cache_t>::addVTKOutputData( LevelSetField field, const std::string &objectName) {
+
+    VTK &vtkWriter = this->m_kernel->getMesh()->getVTK() ;
+    std::string name = this->getVTKOutputDataName(field, objectName);
+
+    switch(field) {
+
+        case LevelSetField::NORMAL:
+            vtkWriter.addData<double>( name, VTKFieldType::VECTOR, VTKLocation::CELL, this);
+            break;
+
+        case LevelSetField::PART:
+            vtkWriter.addData<int>( name, VTKFieldType::SCALAR, VTKLocation::CELL, this);
+            break;
+
+        default:
+            LevelSetCachedObject<narrow_band_cache_t>::addVTKOutputData(field, objectName);
+            break;
+
+    }
+
+}
+
+/*!
+ * Get the name that will be used by the VTK writer for the specifed field.
+ *
+ * @param[in] field is the field
+ * @result The name that will be used by the VTK writer for the specifed field.
+ */
+template<typename narrow_band_cache_t>
+std::string LevelSetSegmentationObject<narrow_band_cache_t>::getVTKOutputFieldName( LevelSetField field) const {
+
+    switch(field) {
+
+        case LevelSetField::NORMAL:
+            return "Normal";
+
+        case LevelSetField::PART:
+            return "PartId";
+
+        default:
+            return LevelSetCachedObject<narrow_band_cache_t>::getVTKOutputFieldName(field);
+
+    }
+
+}
+
+/*!
+ * Write the specified field to the given stream.
+ *
+ * @param[in] field is the field that will be written
+ * @param[in] stream output stream
+ * @param[in] format is the format which must be used. Supported options
+ * are "ascii" or "appended". For "appended" type an unformatted binary
+ * stream must be used
+ */
+template<typename narrow_band_cache_t>
+void LevelSetSegmentationObject<narrow_band_cache_t>::flushVTKOutputData(LevelSetField field, std::fstream &stream, VTKFormat format) const {
+
+    switch(field) {
+
+    case LevelSetField::PART:
+    {
+        for( const Cell &cell : this->m_kernel->getMesh()->getVTKCellWriteRange() ){
+            long cellId = cell.getId();
+            int value = getPart(cellId);
+            this->flushValue(stream, format, value);
+        }
+
+        break;
+    }
+
+    case LevelSetField::NORMAL:
+    {
+        for( const Cell &cell : this->m_kernel->getMesh()->getVTKCellWriteRange() ){
+            long cellId = cell.getId();
+            const std::array<double,3> &value = getNormal(cellId);
+            this->flushValue(stream, format, value);
+        }
+
+        break;
+    }
+
+    default:
+    {
+        LevelSetCachedObject<narrow_band_cache_t>::flushVTKOutputData(field, stream, format);
+
+        break;
+    }
+
+    }
 }
 
 }
