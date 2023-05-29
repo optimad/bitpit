@@ -55,9 +55,12 @@ LevelSetObject::LevelSetObject(const LevelSetObject &other)
     : m_id(other.m_id),
       m_nReferences(other.m_nReferences),
       m_enabledVTKOutputs(other.m_enabledVTKOutputs),
+      m_kernel(other.m_kernel),
       m_narrowBandSize(other.m_narrowBandSize)
 {
-    setKernel(other.m_kernel);
+    for ( LevelSetWriteField field : m_enabledVTKOutputs ) {
+        enableVTKOutput(field, true);
+    }
 }
 
 /*!
@@ -68,13 +71,16 @@ LevelSetObject::LevelSetObject(LevelSetObject &&other)
     : m_id(other.m_id),
       m_nReferences(other.m_nReferences),
       m_enabledVTKOutputs(other.m_enabledVTKOutputs),
+      m_kernel(other.m_kernel),
       m_narrowBandSize(other.m_narrowBandSize)
 {
     for ( LevelSetWriteField field : other.m_enabledVTKOutputs ) {
         other.enableVTKOutput(field, false);
     }
 
-    setKernel(other.m_kernel);
+    for ( LevelSetWriteField field : m_enabledVTKOutputs ) {
+        enableVTKOutput(field, true);
+    }
 }
 
 /*!
