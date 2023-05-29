@@ -52,14 +52,7 @@ class LevelSetComplementObject: public LevelSetProxyObject {
     double                                      getValue(long ) const override;
     std::array<double,3>                        getGradient(long ) const override;
 
-    std::array<double,3>                        getNormal(long ) const override;
-    int                                         getPart(long ) const override;
-    double                                      getSurfaceFeatureSize(long ) const override;
-
     LevelSetInfo                                computeLevelSetInfo(const std::array<double,3> &) const override;
-
-    double                                      getMinSurfaceFeatureSize() const override;
-    double                                      getMaxSurfaceFeatureSize() const override;
 
     const LevelSetObject *                      getReferenceObject( long ) const override;
 

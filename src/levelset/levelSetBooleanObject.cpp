@@ -255,101 +255,12 @@ LevelSetBooleanObject* LevelSetBooleanObject::clone() const {
     return new LevelSetBooleanObject( *this );
 }
 
-/*!
- * Gets the surface normal at the projection point
- * @param[in] id cell index
- * @return closest part
- */
-std::array<double,3> LevelSetBooleanObject::getNormal( long id ) const{
-
-    const LevelSetBooleanResult result = computeBooleanResult(id) ;
-    const LevelSetObject *resultObject = result.getObject();
-    if ( resultObject ) {
-        return (static_cast<double>(result.getObjectSign()) * resultObject->getNormal(id)) ;
-    }
-
-    return levelSetDefaults::GRADIENT;
-}
-
-/*!
- * Gets the closest part index
- * @param[in] id cell index
- * @return closest part
- */
-int LevelSetBooleanObject::getPart( long id ) const{
-
-    const LevelSetBooleanResult result = computeBooleanResult(id) ;
-    const LevelSetObject *resultObject = result.getObject();
-    if ( resultObject ) {
-        return resultObject->getPart(id) ;
-    }
-
-    return levelSetDefaults::PART;
-}
-
 /*
  * Returns the boolean operation
  * @return boolean operation
  */
 LevelSetBooleanOperation LevelSetBooleanObject::getBooleanOperation() const{
     return m_operation;
-}
-
-/*!
- * Get surface feature size
- * @param[in] id cell index
- * @return charcteristic size
- */
-double LevelSetBooleanObject::getSurfaceFeatureSize( long id ) const {
-
-    const LevelSetBooleanResult result = computeBooleanResult(id) ;
-    const LevelSetObject *resultObject = result.getObject();
-    if ( resultObject ) {
-        return resultObject->getSurfaceFeatureSize(id);
-    }
-
-    return (- levelSetDefaults::SIZE);
-
-}
-
-/*!
- * Get the smallest surface feature size
- * @return charcteristic size
- */
-double LevelSetBooleanObject::getMinSurfaceFeatureSize() const {
-
-    bool   minimumValid = false;
-    double minimumSize  = levelSetDefaults::SIZE;
-    for( const LevelSetObject *object : m_sourceObjects ){
-        double objectMinimumSize = object->getMinSurfaceFeatureSize();
-        if (objectMinimumSize < 0) {
-            continue;
-        }
-
-        minimumValid = true;
-        minimumSize  = std::min(objectMinimumSize, minimumSize);
-    }
-
-    if (!minimumValid) {
-        minimumSize = - levelSetDefaults::SIZE;
-    }
-
-    return minimumSize;
-}
-
-/*!
- * Get the largest surface feature size
- * @return charcteristic size
- */
-double LevelSetBooleanObject::getMaxSurfaceFeatureSize() const {
-
-    double maximumSize = - levelSetDefaults::SIZE;
-    for( const LevelSetObject *object : m_sourceObjects ){
-        double objectMaximumSize = object->getMaxSurfaceFeatureSize();
-        maximumSize = std::max(objectMaximumSize, maximumSize);
-    }
-
-    return maximumSize;
 }
 
 /*!

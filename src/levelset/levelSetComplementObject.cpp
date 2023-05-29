@@ -127,59 +127,6 @@ LevelSetComplementObject* LevelSetComplementObject::clone() const
 }
 
 /*!
- * Gets the surface normal at the projection point.
- *
- * \param[in] id cell index
- * \return closest part
- */
-std::array<double,3> LevelSetComplementObject::getNormal(long id) const
-{
-    return (-1. * m_sourceObject->getNormal(id));
-}
-
-/*!
- * Gets the closest part index.
- *
- * \param[in] id cell index
- * \return closest part
- */
-int LevelSetComplementObject::getPart(long id) const
-{
-    return m_sourceObject->getPart(id);
-}
-
-/*!
- * Get surface feature size.
- *
- * \param[in] id cell index
- * \return characteristic size
- */
-double LevelSetComplementObject::getSurfaceFeatureSize(long id) const
-{
-    return m_sourceObject->getSurfaceFeatureSize(id);
-}
-
-/*!
- * Get the smallest surface feature size.
- *
- * \return characteristic size
- */
-double LevelSetComplementObject::getMinSurfaceFeatureSize() const
-{
-    return m_sourceObject->getMinSurfaceFeatureSize();
-}
-
-/*!
- * Get the largest surface feature size.
- *
- * \return characteristic size
- */
-double LevelSetComplementObject::getMaxSurfaceFeatureSize() const
-{
-    return m_sourceObject->getMaxSurfaceFeatureSize();
-}
-
-/*!
  * Get the object that defines the levelset information for the specified cell.
  *
  * \param[in] id cell index
