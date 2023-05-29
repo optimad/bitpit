@@ -90,6 +90,15 @@ enum class LevelSetIntersectionMode{
 
 /*!
  * @ingroup levelsetEnums
+ * Enum class containing the possible sotrage modes.
+ */
+enum class LevelSetStorageType{
+    SPARSE=0,                       /**< Sparse storage, to be used when only a small portion of the domain is inside the narrow band */
+    DENSE=1,                        /**< Dense storage, to be used when almost all the domain is inside the narrow band */
+};
+
+/*!
+ * @ingroup levelsetEnums
  * Enum class containing the possible fields to be added to the VTK file
  */
 enum class LevelSetWriteField{
@@ -99,15 +108,6 @@ enum class LevelSetWriteField{
     PART=3,                         /**< adds part identifier at projection point to VTK*/
     ALL=4,                          /**< adds level set value, gradient, normal and projection point to VTK*/
     DEFAULT=5                       /**< adds levelset value and gradient to VTK*/
-};
-
-/*!
- * @ingroup levelsetEnums
- * Enum class containing the possible sotrage modes.
- */
-enum class LevelSetStorageType{
-    SPARSE=0,                       /**< Sparse storage, to be used when only a small portion of the domain is inside the narrow band */
-    DENSE=1,                        /**< Dense storage, to be used when almost all the domain is inside the narrow band */
 };
 
 /*!
