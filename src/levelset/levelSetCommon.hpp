@@ -27,6 +27,8 @@
 
 // Standard Template Library
 # include <array>
+# include <unordered_map>
+# include <unordered_set>
 # include <vector>
 
 namespace bitpit{
@@ -99,26 +101,51 @@ enum class LevelSetStorageType{
 
 /*!
  * @ingroup levelsetEnums
- * Enum class containing the possible fields to be added to the VTK file
+ * Enum class containing the possible level set fields
  */
-enum class LevelSetWriteField{
-    VALUE=0,                        /**< adds level set value to VTK*/
-    GRADIENT=1,                     /**< adds level set gradient to VTK*/
-    NORMAL=2,                       /**< adds body normal at projection point to VTK*/
-    PART=3,                         /**< adds part identifier at projection point to VTK*/
-    ALL=4,                          /**< adds level set value, gradient, normal and projection point to VTK*/
-    DEFAULT=5                       /**< adds levelset value and gradient to VTK*/
+enum class LevelSetField{
+    BEGIN = 0,
+    VALUE = BEGIN,                  /**< level set value */
+    GRADIENT,                       /**< level set gradient */
+    PART,                           /**< part identifier at projection point */
+    NORMAL,                         /**< body normal at projection point */
+    END,
+    COUNT = END - BEGIN
 };
 
 /*!
  * Hasher for the LevelSetWriteField enum.
  */
-struct LevelSetWriteFieldHasher
+struct LevelSetFieldHasher
 {
-    std::size_t operator()(const LevelSetWriteField &field) const
+    std::size_t operator()(const LevelSetField &field) const
     {
         return static_cast<int>(field);
     }
+};
+
+/*!
+ * Set of field
+ */
+typedef std::unordered_set<LevelSetField> LevelSetFieldset;
+
+/*!
+ * Map of write fields.
+ */
+template<typename value_t>
+using LevelSetFieldMap = std::unordered_map<LevelSetField, value_t, LevelSetFieldHasher>;
+
+/*!
+ * @ingroup levelsetEnums
+ * Enum class containing the possible fields to be added to the VTK file
+ */
+enum class LevelSetWriteField{
+    VALUE    = static_cast<int>(LevelSetField::VALUE),     /**< adds level set value to VTK*/
+    GRADIENT = static_cast<int>(LevelSetField::GRADIENT),  /**< adds level set gradient to VTK*/
+    PART     = static_cast<int>(LevelSetField::PART),      /**< adds part identifier at projection point to VTK*/
+    NORMAL   = static_cast<int>(LevelSetField::NORMAL),    /**< adds body normal at projection point to VTK*/
+    ALL,                                                   /**< adds level set value, gradient, normal and projection point to VTK*/
+    DEFAULT                                                /**< adds levelset value and gradient to VTK*/
 };
 
 }

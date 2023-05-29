@@ -135,6 +135,21 @@ LevelSetSegmentationObject<narrow_band_cache_t> * LevelSetSegmentationObject<nar
 }
 
 /*!
+ * Get the list of supported field.
+ * @result The list of supported field.
+ */
+template<typename narrow_band_cache_t>
+LevelSetFieldset LevelSetSegmentationObject<narrow_band_cache_t>::getSupportedFields() const {
+
+    LevelSetFieldset supportedFields = LevelSetCachedObject<narrow_band_cache_t>::getSupportedFields();
+    supportedFields.insert(LevelSetField::PART);
+    supportedFields.insert(LevelSetField::NORMAL);
+
+    return supportedFields;
+
+}
+
+/*!
  * Gets the closest support within the narrow band of cell
  * @param[in] id index of cell
  * @return closest segment in narrow band
@@ -729,6 +744,72 @@ LevelSetInfo LevelSetSegmentationObject<narrow_band_cache_t>::computeLevelSetInf
 
     return LevelSetInfo(distance,gradient);
 
+}
+
+/*!
+ * Write the specified field to the given stream.
+ *
+ * @param[in] field is the field that will be written
+ * @param[in] stream output stream
+ * @param[in] format is the format which must be used. Supported options
+ * are "ascii" or "appended". For "appended" type an unformatted binary
+ * stream must be used
+ */
+template<typename narrow_band_cache_t>
+void LevelSetSegmentationObject<narrow_band_cache_t>::flushField(LevelSetField field, std::fstream &stream, VTKFormat format) const {
+
+    switch(field) {
+
+    case LevelSetField::PART:
+    {
+        void (*writeFunctionPtr)(std::fstream &, const int &) = nullptr;
+
+        if(format==VTKFormat::APPENDED){
+            writeFunctionPtr = genericIO::flushBINARY<int>;
+        } else if(format==VTKFormat::ASCII){
+            writeFunctionPtr = genericIO::flushASCII<int>;
+        } else {
+            BITPIT_UNREACHABLE("Non-existent VTK format.");
+        }
+
+        for( const Cell &cell : this->m_kernel->getMesh()->getVTKCellWriteRange() ){
+            long cellId = cell.getId();
+            int value = getPart(cellId);
+            (*writeFunctionPtr)(stream,value);
+        }
+
+        break;
+    }
+
+    case LevelSetField::NORMAL:
+    {
+        void (*writeFunctionPtr)(std::fstream &, const std::array<double,3> &) = nullptr;
+
+        if(format==VTKFormat::APPENDED){
+            writeFunctionPtr = genericIO::flushBINARY<std::array<double,3>>;
+        } else if(format==VTKFormat::ASCII){
+            writeFunctionPtr = genericIO::flushASCII<std::array<double,3>>;
+        } else {
+            BITPIT_UNREACHABLE("Non-existent VTK format.");
+        }
+
+        for( const Cell &cell : this->m_kernel->getMesh()->getVTKCellWriteRange() ){
+            long cellId = cell.getId();
+            const std::array<double,3> &value = getNormal(cellId);
+            (*writeFunctionPtr)(stream,value);
+        }
+
+        break;
+    }
+
+    default:
+    {
+        LevelSetCachedObject<narrow_band_cache_t>::flushField(field, stream, format);
+
+        break;
+    }
+
+    }
 }
 
 }

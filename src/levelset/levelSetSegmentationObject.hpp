@@ -202,8 +202,20 @@ private:
 
 };
 
+class LevelSetSegmentationObjectInterface : public virtual LevelSetObjectInterface
+{
+public:
+    virtual int getPart(long cellId) const = 0;
+    virtual std::array<double BITPIT_COMMA 3> getNormal(long cellId) const = 0;
+    virtual long getSupport(long id) const = 0;
+
+    virtual double getSurfaceFeatureSize(long cellId) const = 0;
+    virtual double getMinSurfaceFeatureSize() const = 0;
+    virtual double getMaxSurfaceFeatureSize() const = 0;
+};
+
 template<typename narrow_band_cache_t>
-class LevelSetSegmentationObject : public LevelSetSegmentationKernel, public LevelSetCachedObject<narrow_band_cache_t>, public LevelSetBoundedObject {
+class LevelSetSegmentationObject : public LevelSetSegmentationObjectInterface, public LevelSetSegmentationKernel, public LevelSetCachedObject<narrow_band_cache_t>, public LevelSetBoundedObject {
 
     protected:
 
@@ -218,6 +230,8 @@ class LevelSetSegmentationObject : public LevelSetSegmentationKernel, public Lev
     void                                        updateNarrowBand(const std::vector<adaption::Info> &, bool) override;
     void                                        updateNarrowBand(LevelSetKernel *, const std::vector<adaption::Info> &, bool);
 
+    void                                        flushField(LevelSetField field, std::fstream &stream, VTKFormat format) const override;
+
     public:
 
     LevelSetSegmentationObject(int);
@@ -226,9 +240,11 @@ class LevelSetSegmentationObject : public LevelSetSegmentationKernel, public Lev
 
     LevelSetSegmentationObject *                clone() const override ;
 
-    virtual int                                 getPart(long ) const override;
-    virtual std::array<double,3>                getNormal(long ) const override;
-    long                                        getSupport(long id) const;
+    LevelSetFieldset                            getSupportedFields() const override;
+
+    int                                         getPart(long ) const override;
+    std::array<double,3>                        getNormal(long ) const override;
+    long                                        getSupport(long id) const override;
 
     double                                      getSurfaceFeatureSize(long ) const override;
     double                                      getMinSurfaceFeatureSize() const override;
