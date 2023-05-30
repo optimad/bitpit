@@ -50,6 +50,10 @@ public:
 	virtual double evalInterfaceArea(long id)const = 0;
         virtual std::array<double,3> evalInterfaceNormal(long id)const = 0;
 
+	ConstProxyVector<long> getFaceOrderedVertexIds(const Cell &cell, int face) const;
+	bool areFaceVerticesOrdered(const Cell &cell, int face) const;
+	int getFaceOrderedLocalVertex(const Cell &cell, int face, std::size_t n) const;
+
 protected:
 #if BITPIT_ENABLE_MPI==1
 	VolumeKernel(MPI_Comm communicator, std::size_t haloSize, bool expert);
