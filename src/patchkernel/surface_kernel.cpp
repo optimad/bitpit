@@ -1694,13 +1694,26 @@ ConstProxyVector<long> SurfaceKernel::getFacetOrderedVertexIds(const Cell &facet
 */
 bool SurfaceKernel::areFacetVerticesOrdered(const Cell &facet) const
 {
-    switch (facet.getType()) {
+    // Early return for low-dimension elements
+    if (getDimension() <= 1) {
+        return true;
+    }
 
-    case ElementType::PIXEL:
-        return false;
+    // Check if vertices are ordered
+    ElementType facetType = facet.getType();
+    switch (facetType) {
+
+    case (ElementType::POLYGON):
+    {
+        return true;
+    }
 
     default:
-        return true;
+    {
+        assert(facetType != ElementType::UNDEFINED);
+        const Reference2DElementInfo &facetInfo = static_cast<const Reference2DElementInfo &>(facet.getInfo());
+        return facetInfo.areVerticesCCWOrdered();
+    }
 
     }
 }
@@ -1716,20 +1729,26 @@ bool SurfaceKernel::areFacetVerticesOrdered(const Cell &facet) const
 */
 int SurfaceKernel::getFacetOrderedLocalVertex(const Cell &facet, std::size_t n) const
 {
-    switch (facet.getType()) {
+    // Early return for low-dimension elements
+    if (getDimension() <= 1) {
+        return n;
+    }
 
-    case ElementType::PIXEL:
-        if (n == 2) {
-            return 3;
-        } else if (n == 3) {
-            return 2;
-        } else {
-            return n;
-        }
+    // Get the request index
+    ElementType facetType = facet.getType();
+    switch (facetType) {
+
+    case (ElementType::POLYGON):
+    {
+        return n;
+    }
 
     default:
-        assert(areFacetVerticesOrdered(facet));
-        return n;
+    {
+        assert(facetType != ElementType::UNDEFINED);
+        const Reference2DElementInfo &facetInfo = static_cast<const Reference2DElementInfo &>(facet.getInfo());
+        return facetInfo.getCCWOrderedVertex(n);
+    }
 
     }
 }

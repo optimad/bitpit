@@ -199,10 +199,13 @@ public:
     void evalPointProjection(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords, std::array<double, 3> *projection, double *distance) const override;
     double evalPointDistance(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords) const override;
 
+    virtual bool areVerticesCCWOrdered() const;
+    virtual int getCCWOrderedVertex(int n) const;
+
 protected:
     Reference2DElementInfo(ElementType type, int nVertices);
 
-    virtual void getCCWVertexCoords(const std::array<double, 3> *vertexCoords, const std::array<double, 3> **ccwVertexCoords, std::array<double, 3> *ccwVertexCoordsStorage) const;
+    void getCCWVertexCoords(const std::array<double, 3> *vertexCoords, const std::array<double, 3> **ccwVertexCoords, std::array<double, 3> *ccwVertexCoordsStorage) const;
 
 };
 
@@ -245,6 +248,9 @@ public:
 
     std::array<double, 3> evalNormal(const std::array<double, 3> *vertexCoords, const std::array<double, 3> &point = {{0.5, 0.5, 0.5}}) const override;
 
+    bool areVerticesCCWOrdered() const override;
+    int getCCWOrderedVertex(int n) const override;
+
     const static ReferencePixelInfo info;
 
 protected:
@@ -252,8 +258,6 @@ protected:
 
     ReferencePixelInfo(ReferencePixelInfo const &) = delete;
     ReferencePixelInfo & operator=(ReferencePixelInfo const &) = delete;
-
-    void getCCWVertexCoords(const std::array<double, 3> *vertexCoords, const std::array<double, 3> **ccwVertexCoords, std::array<double, 3> *ccwVertexCoordsStorage) const override;
 
 };
 

@@ -1176,6 +1176,30 @@ double Reference2DElementInfo::evalPointDistance(const std::array<double, 3> &po
 }
 
 /*!
+    Check if the vertices are ordered counter-clockwise.
+
+    \result Return true if the vertices are ordered counter-clockwise,
+    false otherwise.
+*/
+bool Reference2DElementInfo::areVerticesCCWOrdered() const
+{
+    return true;
+}
+
+/*!
+    Get the index of the vertex occupying the n-th position in the
+    counter-clockwise ordered list of vertices.
+
+    \param n is the requested position
+    \result The index of the vertex occupying the n-th position in the
+    counter-clockwise ordered list of vertices.
+*/
+int Reference2DElementInfo::getCCWOrderedVertex(int n) const
+{
+    return n;
+}
+
+/*!
     Gets the vertex coordinates ordered counter-clockwise.
 
     If the input vertex coordintaes are already ordered, the function will
@@ -1193,9 +1217,17 @@ void Reference2DElementInfo::getCCWVertexCoords(const std::array<double, 3> *ver
                                                 const std::array<double, 3> **ccwVertexCoords,
                                                 std::array<double, 3> *ccwVertexCoordsStorage) const
 {
-    BITPIT_UNUSED(ccwVertexCoordsStorage);
+    // Early return if vertex are already ordered
+    if (areVerticesCCWOrdered()) {
+        *ccwVertexCoords = vertexCoords;
+        return;
+    }
 
-    *ccwVertexCoords = vertexCoords;
+    // Order vertices
+    for (int i = 0; i < nVertices; ++i) {
+        ccwVertexCoordsStorage[i] = vertexCoords[getCCWOrderedVertex(i)];
+    }
+    *ccwVertexCoords = ccwVertexCoordsStorage;
 }
 
 /*!
@@ -1446,29 +1478,29 @@ std::array<double, 3> ReferencePixelInfo::evalNormal(const std::array<double, 3>
 }
 
 /*!
-    Gets the vertex coordinates ordered counter-clockwise.
+    Check if the vertices are ordered counter-clockwise.
 
-    If the input vertex coordintaes are already ordered, the function will
-    only make the output vertex coordinates point the input ones, otherwise
-    a full reoredr will be perfromed (the re-ordered coordinates will be
-    stored in the storage provided by the user).
-
-    \param vertexCoords are the coordinates of the vertices
-    \param[out] ccwVertexCoords on output will contain the coordinates of the
-    vertices ordered counter-clockwise
-    \param[out] ccwVertexCoordsStorage if a re-ordered is needed, this is the
-    storage that will contain the ordered coordinates
+    \result Return true if the vertices are ordered counter-clockwise,
+    false otherwise.
 */
-void ReferencePixelInfo::getCCWVertexCoords(const std::array<double, 3> *vertexCoords,
-                                            const std::array<double, 3> **ccwVertexCoords,
-                                            std::array<double, 3> *ccwVertexCoordsStorage) const
+bool ReferencePixelInfo::areVerticesCCWOrdered() const
 {
-    ccwVertexCoordsStorage[0] = vertexCoords[0];
-    ccwVertexCoordsStorage[1] = vertexCoords[1];
-    ccwVertexCoordsStorage[2] = vertexCoords[3];
-    ccwVertexCoordsStorage[3] = vertexCoords[2];
+    return false;
+}
 
-    *ccwVertexCoords = ccwVertexCoordsStorage;
+/*!
+    Get the index of the vertex occupying the n-th position in the
+    counter-clockwise ordered list of vertices.
+
+    \param n is the requested position
+    \result The index of the vertex occupying the n-th position in the
+    counter-clockwise ordered list of vertices.
+*/
+int ReferencePixelInfo::getCCWOrderedVertex(int n) const
+{
+    static const std::array<int, 4> CCW_ORDERED_VERTICES = {{0, 1, 3, 2}};
+
+    return CCW_ORDERED_VERTICES[n];
 }
 
 /*!
