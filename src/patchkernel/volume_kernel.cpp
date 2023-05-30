@@ -209,4 +209,99 @@ bool VolumeKernel::isPointInside(long id, double x, double y, double z) const
 	return isPointInside(id, {{x, y, z}});
 }
 
+/*!
+	Get the counter-clockwise ordered list of vertex for the specified face.
+
+	\param cell is the cell
+	\param face is the face
+	\result The counter-clockwise ordered list of vertex for the specified face.
+*/
+ConstProxyVector<long> VolumeKernel::getFaceOrderedVertexIds(const Cell &cell, int face) const
+{
+    ConstProxyVector<long> faceVertexIds = cell.getFaceVertexIds(face);
+    if (areFaceVerticesOrdered(cell, face)) {
+        return faceVertexIds;
+    }
+
+    std::size_t nFaceVertices = faceVertexIds.size();
+    ConstProxyVector<long> orderedFaceVertexIds(ConstProxyVector<long>::INTERNAL_STORAGE, nFaceVertices);
+    ConstProxyVector<long>::storage_pointer orderedFaceVertexIdsStorage = orderedFaceVertexIds.storedData();
+    for (std::size_t k = 0; k < nFaceVertices; ++k) {
+        int vertex = getFaceOrderedLocalVertex(cell, face, k);
+        orderedFaceVertexIdsStorage[k] = faceVertexIds[vertex];
+    }
+
+    return orderedFaceVertexIds;
+}
+
+/*!
+	Check if the vertices of the specified face are counter-clockwise ordered.
+
+	\param cell is the cell
+	\param face is the face
+	\result Return true if the vertices of the specified face are counter-clockwise
+	ordered, false otherwise.
+*/
+bool VolumeKernel::areFaceVerticesOrdered(const Cell &cell, int face) const
+{
+    // Early return for low-dimension elements
+    if (getDimension() <= 2) {
+        return true;
+    }
+
+    // Check if vertices are ordered
+    ElementType faceType = cell.getFaceType(face);
+    switch (faceType) {
+
+    case (ElementType::POLYGON):
+    {
+        return true;
+    }
+
+    default:
+    {
+        assert(faceType != ElementType::UNDEFINED);
+        const Reference2DElementInfo &faceInfo = static_cast<const Reference2DElementInfo &>(ReferenceElementInfo::getInfo(faceType));
+        return faceInfo.areVerticesCCWOrdered();
+    }
+
+    }
+}
+
+/*!
+	Get the local index of the vertex occupying the n-th position in the counter-clockwise
+	ordered list of vertex ids.
+
+	\param cell is the cell
+	\param face is the face
+	\param[in] n is the requested position
+	\result The local index of the vertex occupying the n-th position in the counter-clockwise
+	ordered list of vertex ids.
+*/
+int VolumeKernel::getFaceOrderedLocalVertex(const Cell &cell, int face, std::size_t n) const
+{
+    // Early return for low-dimension elements
+    if (getDimension() <= 2) {
+        return n;
+    }
+
+    // Get the request index
+    ElementType faceType = cell.getFaceType(face);
+    switch (faceType) {
+
+    case (ElementType::POLYGON):
+    {
+        return n;
+    }
+
+    default:
+    {
+        assert(faceType != ElementType::UNDEFINED);
+        const Reference2DElementInfo &faceInfo = static_cast<const Reference2DElementInfo &>(ReferenceElementInfo::getInfo(faceType));
+        return faceInfo.getCCWOrderedVertex(n);
+    }
+
+    }
+}
+
 }
