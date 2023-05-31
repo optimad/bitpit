@@ -1671,10 +1671,10 @@ bool SurfaceKernel::compareSelectedTypes(unsigned short mask_, ElementType type_
 }
 
 /*!
-	Get the anti-clockwise ordered list of vertex for the specified facet.
+	Get the counter-clockwise ordered list of vertex for the specified facet.
 
 	\param facet is the facet
-	\result The anti-clockwise ordered list of vertex for the specified facet.
+	\result The counter-clockwise ordered list of vertex for the specified facet.
 */
 ConstProxyVector<long> SurfaceKernel::getFacetOrderedVertexIds(const Cell &facet) const
 {
@@ -1695,11 +1695,11 @@ ConstProxyVector<long> SurfaceKernel::getFacetOrderedVertexIds(const Cell &facet
 }
 
 /*!
- * Check if the vertices of the specified facet are anti-clockwise ordered.
+ * Check if the vertices of the specified facet are counter-clockwise ordered.
  *
  * \param[in] facet is the facet
- * \result Return true if the vertices of the specified facet are anti-clockwise ordered,
- * false otherwise.
+ * \result Return true if the vertices of the specified facet are counter-clockwise
+ * ordered, false otherwise.
 */
 bool SurfaceKernel::areFacetVerticesOrdered(const Cell &facet) const
 {
@@ -1728,13 +1728,13 @@ bool SurfaceKernel::areFacetVerticesOrdered(const Cell &facet) const
 }
 
 /*!
- * Get the local index of the vertex occupying the n-th position in the anti-clockwise ordered
- * list of vertex ids.
+ * Get the local index of the vertex occupying the n-th position in the
+ * counter-clockwise ordered list of vertex ids.
  *
  * \param[in] facet is the facet
  * \param[in] n is the requested position
- * \result The local index of the vertex occupying the n-th position in the anti-clockwise
- * ordered list of vertex ids.
+ * \result The local index of the vertex occupying the n-th position in the
+ * counter-clockwise ordered list of vertex ids.
 */
 int SurfaceKernel::getFacetOrderedLocalVertex(const Cell &facet, std::size_t n) const
 {
