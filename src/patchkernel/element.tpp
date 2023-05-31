@@ -183,7 +183,7 @@ std::size_t ElementHalfItem<DerivedElement>::Hasher::operator()(const ElementHal
 	} else {
 		// Reversing the winding of pixel elements needs special handling. In
 		// pixel elements, vertices are ordered using the Z-order, whereas in
-		// all other elements vertices are ordered anti-clockwise.
+		// all other elements vertices are ordered counter-clockwise.
 		if (item.m_element.getType() != ElementType::PIXEL) {
 			for (std::size_t i = nVertices; i > 0; --i) {
 				std::size_t k = (item.m_firstVertexId + i) % nVertices;
