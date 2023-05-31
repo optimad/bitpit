@@ -1762,4 +1762,90 @@ int SurfaceKernel::getFacetOrderedLocalVertex(const Cell &facet, std::size_t n) 
     }
 }
 
+/*!
+	Get the counter-clockwise ordered list of edge for the specified facet.
+
+	\param facet is the facet
+	\result The counter-clockwise ordered list of edge for the specified facet.
+*/
+ConstProxyVector<long> SurfaceKernel::getFacetOrderedEdgeIds(const Cell &facet) const
+{
+    std::size_t nEdges = facet.getFaceCount();
+    ConstProxyVector<long> orderedEdgeIds(ConstProxyVector<long>::INTERNAL_STORAGE, nEdges);
+    ConstProxyVector<long>::storage_pointer orderedEdgeIdsStorage = orderedEdgeIds.storedData();
+    for (std::size_t k = 0; k < nEdges; ++k) {
+        orderedEdgeIdsStorage[k] = getFacetOrderedLocalEdge(facet, k);
+    }
+
+    return orderedEdgeIds;
+}
+
+/*!
+ * Check if the edges of the specified facet are counter-clockwise ordered.
+ *
+ * \param[in] facet is the facet
+ * \result Return true if the edges of the specified facet are counter-clockwise
+ * ordered, false otherwise.
+*/
+bool SurfaceKernel::areFacetEdgesOrdered(const Cell &facet) const
+{
+    // Early return for low-dimension elements
+    if (getDimension() <= 1) {
+        return true;
+    }
+
+    // Check if edges are ordered
+    ElementType facetType = facet.getType();
+    switch (facetType) {
+
+    case (ElementType::POLYGON):
+    {
+        return true;
+    }
+
+    default:
+    {
+        assert(facetType != ElementType::UNDEFINED);
+        const Reference2DElementInfo &facetInfo = static_cast<const Reference2DElementInfo &>(facet.getInfo());
+        return facetInfo.areFacesCCWOrdered();
+    }
+
+    }
+}
+
+/*!
+ * Get the local index of the edge occupying the n-th position in the
+ * counter-clockwise ordered list of edge ids.
+ *
+ * \param[in] facet is the facet
+ * \param[in] n is the requested position
+ * \result The local index of the edge occupying the n-th position in the
+ * counter-clockwise ordered list of edge ids.
+*/
+int SurfaceKernel::getFacetOrderedLocalEdge(const Cell &facet, std::size_t n) const
+{
+    // Early return for low-dimension elements
+    if (getDimension() <= 1) {
+        return n;
+    }
+
+    // Get the request index
+    ElementType facetType = facet.getType();
+    switch (facetType) {
+
+    case (ElementType::POLYGON):
+    {
+        return n;
+    }
+
+    default:
+    {
+        assert(facetType != ElementType::UNDEFINED);
+        const Reference2DElementInfo &facetInfo = static_cast<const Reference2DElementInfo &>(facet.getInfo());
+        return facetInfo.getCCWOrderedFace(n);
+    }
+
+    }
+}
+
 }
