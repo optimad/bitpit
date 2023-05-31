@@ -202,6 +202,9 @@ public:
     virtual bool areVerticesCCWOrdered() const;
     virtual int getCCWOrderedVertex(int n) const;
 
+    virtual bool areFacesCCWOrdered() const;
+    virtual int getCCWOrderedFace(int n) const;
+
 protected:
     Reference2DElementInfo(ElementType type, int nVertices);
 
@@ -250,6 +253,9 @@ public:
 
     bool areVerticesCCWOrdered() const override;
     int getCCWOrderedVertex(int n) const override;
+
+    bool areFacesCCWOrdered() const override;
+    int getCCWOrderedFace(int n) const override;
 
     const static ReferencePixelInfo info;
 

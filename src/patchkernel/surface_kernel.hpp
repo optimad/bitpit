@@ -77,6 +77,10 @@ public:
     bool areFacetVerticesOrdered(const Cell &facet) const;
     int getFacetOrderedLocalVertex(const Cell &facet, std::size_t n) const;
 
+    ConstProxyVector<long> getFacetOrderedEdgeIds(const Cell &facet) const;
+    bool areFacetEdgesOrdered(const Cell &facet) const;
+    int getFacetOrderedLocalEdge(const Cell &facet, std::size_t n) const;
+
     void displayQualityStats(std::ostream&, unsigned int padding = 0) const;
     std::vector<double> computeHistogram(eval_f_ funct_, std::vector<double> &bins, long &count, int n_intervals = 8, unsigned short mask = SELECT_ALL) const;
 

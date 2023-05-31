@@ -1200,6 +1200,30 @@ int Reference2DElementInfo::getCCWOrderedVertex(int n) const
 }
 
 /*!
+    Check if the faces are ordered counter-clockwise.
+
+    \result Return true if the faces are ordered counter-clockwise,
+    false otherwise.
+*/
+bool Reference2DElementInfo::areFacesCCWOrdered() const
+{
+    return true;
+}
+
+/*!
+    Get the index of the face occupying the n-th position in the
+    counter-clockwise ordered list of faces.
+
+    \param n is the requested position
+    \result The local index of the face occupying the n-th position in the
+    counter-clockwise ordered list of faces.
+*/
+int Reference2DElementInfo::getCCWOrderedFace(int n) const
+{
+    return n;
+}
+
+/*!
     Gets the vertex coordinates ordered counter-clockwise.
 
     If the input vertex coordintaes are already ordered, the function will
@@ -1501,6 +1525,32 @@ int ReferencePixelInfo::getCCWOrderedVertex(int n) const
     static const std::array<int, 4> CCW_ORDERED_VERTICES = {{0, 1, 3, 2}};
 
     return CCW_ORDERED_VERTICES[n];
+}
+
+/*!
+    Check if the faces are ordered counter-clockwise.
+
+    \result Return true if the faces are ordered counter-clockwise,
+    false otherwise.
+*/
+bool ReferencePixelInfo::areFacesCCWOrdered() const
+{
+    return false;
+}
+
+/*!
+    Get the index of the face occupying the n-th position in the
+    counter-clockwise ordered list of faces.
+
+    \param[in] n is the requested position
+    \result The local index of the face occupying the n-th position in the
+    counter-clockwise ordered list of faces.
+*/
+int ReferencePixelInfo::getCCWOrderedFace(int n) const
+{
+    static const std::array<int, 4> CCW_ORDERED_FACES = {{2, 1, 3, 0}};
+
+    return CCW_ORDERED_FACES[n];
 }
 
 /*!
