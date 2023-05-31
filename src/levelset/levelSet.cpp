@@ -354,7 +354,7 @@ void LevelSet::removeObjects() {
  * @return true if object has been found and removed
  */
 bool LevelSet::removeObject(int id) {
-    return removeObject(id, false);
+    return unregisterObject(id, false);
 
 }
 
@@ -367,7 +367,7 @@ bool LevelSet::removeObject(int id) {
  * it's a non-remobable object
  * @return true if object has been found and removed
  */
-bool LevelSet::removeObject(int id, bool force) {
+bool LevelSet::unregisterObject(int id, bool force) {
     if( !force && !isObjectRemovable(id) ) {
         return false;
     }
