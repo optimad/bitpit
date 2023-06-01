@@ -218,13 +218,14 @@ template<typename narrow_band_cache_t>
 class LevelSetSegmentationObject : public LevelSetSegmentationObjectInterface, public LevelSetSegmentationKernel, public LevelSetCachedObject<narrow_band_cache_t>, public LevelSetBoundedObject {
 
     protected:
+    double                                      m_narrowBandSize;   /**< Size of narrow band */
 
     void                                        getBoundingBox( std::array<double,3> &, std::array<double,3> &) const override;
 # if BITPIT_ENABLE_MPI
     void                                        getGlobalBoundingBox( std::array<double,3> &, std::array<double,3> &) const override;
 #endif
 
-    void                                        computeNarrowBand(bool) override;
+    void                                        computeNarrowBand(bool signd, double narrowBandSize) override;
     void                                        computeNarrowBand( LevelSetCartesianKernel *, bool);
     void                                        computeNarrowBand( LevelSetKernel *, bool);
     void                                        updateNarrowBand(const std::vector<long> &cellIds, bool signd) override;
