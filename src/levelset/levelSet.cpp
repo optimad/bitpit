@@ -340,10 +340,6 @@ int LevelSet::registerObject( std::unique_ptr<LevelSetObject> &&object ) {
         object->setKernel(m_kernel.get());
     }
 
-    if (m_narrowBandSize > 0.) {
-        object->setSizeNarrowBand(m_narrowBandSize);
-    }
-
     m_objects[id] = std::move(object) ;
 
     setObjectProcessingOrder(id);
@@ -604,10 +600,6 @@ double LevelSet::getSizeNarrowBand() const{
  */
 void LevelSet::setSizeNarrowBand(double r){
     m_narrowBandSize = r;
-
-    for( auto &object :m_objects){
-        object.second->setSizeNarrowBand(m_narrowBandSize);
-    }
 }
 
 /*!
@@ -691,7 +683,7 @@ void LevelSet::compute( const std::unordered_set<LevelSetObject *> &objectProces
         object->clear();
 
         // Compute levelset inside the narrowband
-        object->computeNarrowBand(m_signedDistance) ;
+        object->computeNarrowBand(m_signedDistance, m_narrowBandSize) ;
 #if BITPIT_ENABLE_MPI
         object->exchangeGhosts();
 #endif
