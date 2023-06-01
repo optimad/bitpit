@@ -43,7 +43,7 @@ namespace bitpit {
  * Constructor
  * @param[in] id id assigned to object
  */
-LevelSetObject::LevelSetObject(int id) : m_nReferences(0), m_kernel(nullptr), m_narrowBandSize(levelSetDefaults::NARROWBAND_SIZE) {
+LevelSetObject::LevelSetObject(int id) : m_nReferences(0), m_kernel(nullptr) {
     setId(id);
 }
 
@@ -55,8 +55,7 @@ LevelSetObject::LevelSetObject(const LevelSetObject &other)
     : m_id(other.m_id),
       m_nReferences(other.m_nReferences),
       m_enabledOutputFields(other.m_enabledOutputFields),
-      m_kernel(other.m_kernel),
-      m_narrowBandSize(other.m_narrowBandSize)
+      m_kernel(other.m_kernel)
 {
     for ( const auto &fieldEntry : m_enabledOutputFields ) {
         enableVTKOutput(fieldEntry.first, true);
@@ -71,8 +70,7 @@ LevelSetObject::LevelSetObject(LevelSetObject &&other)
     : m_id(other.m_id),
       m_nReferences(other.m_nReferences),
       m_enabledOutputFields(other.m_enabledOutputFields),
-      m_kernel(other.m_kernel),
-      m_narrowBandSize(other.m_narrowBandSize)
+      m_kernel(other.m_kernel)
 {
     for ( const auto &fieldEntry : other.m_enabledOutputFields ) {
         other.enableVTKOutput(fieldEntry.first, false);
@@ -273,29 +271,6 @@ short LevelSetObject::evalValueSign(double value)const{
 }
 
 /*!
- * Get the current size of the narrow band.
- * A size equal or less than zero means that the levelset will be evaluated
- * only on cells that intersect the surface.
- * @return size of the current narrow band
- */
-double LevelSetObject::getSizeNarrowBand()const{
-    return m_narrowBandSize;
-}
-
-/*!
- * Manually set the size of the narrow band.
- * Setting a size equal or less than zero, levelset will be evaluated only on
- * the cells that intersect the surface and on all their first neighbours.
- * After setting the size of the narrowband, the levelset is not automatically
- * updated. It's up to the caller to make sure the levelset will be properly
- * updated if the size of the narrowband changes.
- * @param[in] r size of the narrow band.
- */
-void LevelSetObject::setSizeNarrowBand(double r){
-    m_narrowBandSize = r;
-}
-
-/*!
  * Check if cell intersects the surface
  *
  * If mode==LevelSetIntersectionMode::FAST_FUZZY the method will compare the levelset 
@@ -406,9 +381,11 @@ LevelSetIntersectionStatus LevelSetObject::intersectSurface(long id, LevelSetInt
 /*!
  * Calculates the value and gradient of the levelset function within the narrow band
  * @param[in] signd if signed distances should be calculted
+ * @param[in] narrowBandSize size of the narrow band
  */
-void LevelSetObject::computeNarrowBand(bool signd){
+void LevelSetObject::computeNarrowBand(bool signd, double narrowBandSize){
     BITPIT_UNUSED(signd);
+    BITPIT_UNUSED(narrowBandSize);
 }
 
 /*!
@@ -458,9 +435,6 @@ void LevelSetObject::dump( std::ostream &stream ){
     // Identifier
     utils::binary::write(stream, m_id) ;
 
-    // Narroband size
-    utils::binary::write(stream, m_narrowBandSize);
-
     // Write fields
     std::size_t nEnabledOutputFields = m_enabledOutputFields.size() ;
     utils::binary::write(stream, nEnabledOutputFields) ;
@@ -488,9 +462,6 @@ void LevelSetObject::_dump( std::ostream &stream ){
 void LevelSetObject::restore( std::istream &stream ){
     // Identifier
     utils::binary::read(stream, m_id) ;
-
-    // Narroband size
-    utils::binary::read(stream, m_narrowBandSize);
 
     // Write fields
     std::size_t nEnabledVTKOutputs ;

@@ -94,9 +94,7 @@ class LevelSetObject : public VTKBaseStreamer, public virtual LevelSetObjectInte
 
     void                                        clear();
 
-    void                                        setSizeNarrowBand(double) ;
-
-    virtual void                                computeNarrowBand(bool);
+    virtual void                                computeNarrowBand(bool signd, double narrowBandSize);
     virtual void                                updateNarrowBand(const std::vector<adaption::Info> &, bool);
     void                                        clearAfterMeshAdaption(const std::vector<adaption::Info>&);
 
@@ -113,7 +111,6 @@ class LevelSetObject : public VTKBaseStreamer, public virtual LevelSetObjectInte
 
 
     LevelSetKernel*                             m_kernel;           /**< Levelset kernel */
-    double                                      m_narrowBandSize;   /**< Size of narrow band */
 
     virtual void                                _clear();
     virtual void                                _clearAfterMeshAdaption(const std::vector<adaption::Info>&) ;
@@ -152,8 +149,6 @@ class LevelSetObject : public VTKBaseStreamer, public virtual LevelSetObjectInte
     BITPIT_DEPRECATED(double                    getLS(long ) const override);
     virtual LevelSetInfo                        computeLevelSetInfo(const std::array<double,3> &) const =0;
     std::array<double,3>                        computeProjectionPoint(const std::array<double,3> &) const;
-
-    double                                      getSizeNarrowBand() const;
 
     LevelSetIntersectionStatus                  intersectSurface(long, LevelSetIntersectionMode=LevelSetIntersectionMode::FAST_FUZZY) const;
 
