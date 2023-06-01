@@ -95,7 +95,8 @@ void LevelSetSegmentationNarrowBandCacheBase<storage_manager_t>::swap(LevelSetSe
 template<typename narrow_band_cache_t>
 LevelSetSegmentationObject<narrow_band_cache_t>::LevelSetSegmentationObject(int id)
     : LevelSetSegmentationKernel(),
-      LevelSetCachedObject<narrow_band_cache_t>(id)
+      LevelSetCachedObject<narrow_band_cache_t>(id),
+      m_narrowBandSize(levelSetDefaults::NARROWBAND_SIZE)
 {
 }
 
@@ -108,7 +109,8 @@ LevelSetSegmentationObject<narrow_band_cache_t>::LevelSetSegmentationObject(int 
 template<typename narrow_band_cache_t>
 LevelSetSegmentationObject<narrow_band_cache_t>::LevelSetSegmentationObject( int id, std::unique_ptr<const SurfUnstructured> &&STL, double featureAngle)
     : LevelSetSegmentationKernel(std::move(STL), featureAngle),
-      LevelSetCachedObject<narrow_band_cache_t>(id)
+      LevelSetCachedObject<narrow_band_cache_t>(id),
+      m_narrowBandSize(levelSetDefaults::NARROWBAND_SIZE)
 {
 }
 
@@ -121,7 +123,8 @@ LevelSetSegmentationObject<narrow_band_cache_t>::LevelSetSegmentationObject( int
 template<typename narrow_band_cache_t>
 LevelSetSegmentationObject<narrow_band_cache_t>::LevelSetSegmentationObject( int id, const SurfUnstructured *STL, double featureAngle)
     : LevelSetSegmentationKernel(STL, featureAngle),
-      LevelSetCachedObject<narrow_band_cache_t>(id)
+      LevelSetCachedObject<narrow_band_cache_t>(id),
+      m_narrowBandSize(levelSetDefaults::NARROWBAND_SIZE)
 {
 }
 
@@ -278,11 +281,15 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::getGlobalBoundingBox( std:
 /*!
  * Computes the levelset function within the narrow band
  * @param[in] signd if signed- or unsigned- distance function should be calculated
+ * @param[in] narrowBandSize size of the narrow band
  */
 template<typename narrow_band_cache_t>
-void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand(bool signd){
+void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand(bool signd, double narrowBandSize){
 
     log::cout() << "Computing levelset within the narrow band... " << std::endl;
+
+    // Set the size of the narrowband
+    m_narrowBandSize = narrowBandSize;
 
     // Cartesian patches are handled separately
     if( LevelSetCartesianKernel* lsCartesian = dynamic_cast<LevelSetCartesianKernel*>(this->m_kernel) ){
