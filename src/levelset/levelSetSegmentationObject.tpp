@@ -800,6 +800,18 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::flushVTKOutputData(LevelSe
 
     switch(field) {
 
+    case LevelSetField::SUPPORT:
+    {
+        for( const Cell &cell : this->m_kernel->getMesh()->getVTKCellWriteRange() ){
+            long cellId = cell.getId();
+            long value = getSupport(cellId);
+            this->flushValue(stream, format, value);
+        }
+
+        break;
+    }
+
+
     case LevelSetField::PART:
     {
         for( const Cell &cell : this->m_kernel->getMesh()->getVTKCellWriteRange() ){
