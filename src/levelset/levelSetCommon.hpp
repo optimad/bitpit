@@ -107,6 +107,7 @@ enum class LevelSetField{
     BEGIN = 0,
     VALUE = BEGIN,                  /**< level set value */
     GRADIENT,                       /**< level set gradient */
+    SUPPORT,                        /**< facet that contains the projection point */
     PART,                           /**< part identifier at projection point */
     NORMAL,                         /**< body normal at projection point */
     END,
@@ -142,6 +143,7 @@ using LevelSetFieldMap = std::unordered_map<LevelSetField, value_t, LevelSetFiel
 enum class LevelSetWriteField{
     VALUE    = static_cast<int>(LevelSetField::VALUE),     /**< adds level set value to VTK*/
     GRADIENT = static_cast<int>(LevelSetField::GRADIENT),  /**< adds level set gradient to VTK*/
+    SUPPORT  = static_cast<int>(LevelSetField::PART),      /**< adds facet that contains the projection point to VTK*/
     PART     = static_cast<int>(LevelSetField::PART),      /**< adds part identifier at projection point to VTK*/
     NORMAL   = static_cast<int>(LevelSetField::NORMAL),    /**< adds body normal at projection point to VTK*/
     ALL,                                                   /**< adds level set value, gradient, normal and projection point to VTK*/
