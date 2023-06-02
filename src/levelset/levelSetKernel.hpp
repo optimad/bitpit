@@ -50,6 +50,13 @@ class LevelSetSignPropagator;
 
 class LevelSetKernel {
 
+    private:
+# if BITPIT_ENABLE_MPI
+    void                                        initializeCommunicator();
+    void                                        freeCommunicator();
+# endif
+
+
     protected:
     VolumeKernel*                               m_mesh;        /**< Pointer to underlying mesh*/
 # if BITPIT_ENABLE_MPI
@@ -75,9 +82,7 @@ class LevelSetKernel {
     BITPIT_DEPRECATED(double                    isCellInsideBoundingBox(long, const std::array<double BITPIT_COMMA 3> &, const std::array<double,3> & ) const);
 
 # if BITPIT_ENABLE_MPI
-    void                                        initializeCommunicator();
     MPI_Comm                                    getCommunicator() const;
-    void                                        freeCommunicator();
     bool                                        isCommunicatorSet() const;
 
     std::unique_ptr<DataCommunicator>           createDataCommunicator() const;

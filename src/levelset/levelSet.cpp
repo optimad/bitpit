@@ -129,13 +129,7 @@ void LevelSet::setMesh( VolumeKernel* mesh ) {
         throw std::runtime_error ("Unable to create the levelset kernel. Mesh type non supported.");
     }
 
-# if BITPIT_ENABLE_MPI
-    // Initialize the communicator
-    if (m_kernel->getMesh()->isPartitioned()) {
-        m_kernel->initializeCommunicator();
-    }
-# endif
-
+    // Assign the kernel to the existing objects
     for( auto &obj : m_objects){
         obj.second->setKernel(m_kernel.get());
     }
@@ -813,15 +807,6 @@ void LevelSet::update( const std::vector<adaption::Info> &adaptionData, const st
     VolumeKernel *mesh = m_kernel->getMesh();
 #if BITPIT_ENABLE_MPI
     bool isMeshPartitioned = mesh->isPartitioned();
-#endif
-
-#if BITPIT_ENABLE_MPI
-    // Set the communicator
-    //
-    // The mesh may have been partitioned after being set.
-    if (isMeshPartitioned && !m_kernel->isCommunicatorSet()) {
-        m_kernel->initializeCommunicator();
-    }
 #endif
 
     // Inspect adaption data to detect what needs to be updated
