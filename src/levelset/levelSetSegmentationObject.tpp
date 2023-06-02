@@ -760,6 +760,28 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::flushField(LevelSetField f
 
     switch(field) {
 
+    case LevelSetField::SUPPORT:
+    {
+        void (*writeFunctionPtr)(std::fstream &, const long &) = nullptr;
+
+        if(format==VTKFormat::APPENDED){
+            writeFunctionPtr = genericIO::flushBINARY<long>;
+        } else if(format==VTKFormat::ASCII){
+            writeFunctionPtr = genericIO::flushASCII<long>;
+        } else {
+            BITPIT_UNREACHABLE("Non-existent VTK format.");
+        }
+
+        for( const Cell &cell : this->m_kernel->getMesh()->getVTKCellWriteRange() ){
+            long cellId = cell.getId();
+            long value = getSupport(cellId);
+            (*writeFunctionPtr)(stream,value);
+        }
+
+        break;
+    }
+
+
     case LevelSetField::PART:
     {
         void (*writeFunctionPtr)(std::fstream &, const int &) = nullptr;
