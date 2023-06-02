@@ -52,6 +52,13 @@ LevelSetKernel::LevelSetKernel() {
  */
 LevelSetKernel::LevelSetKernel( VolumeKernel *patch): LevelSetKernel() {
     m_mesh = patch ;
+
+#if BITPIT_ENABLE_MPI
+    // Initialize the communicator
+    if (m_mesh->isPartitioned()) {
+        initializeCommunicator();
+    }
+#endif
 }
 
 /*!
@@ -83,7 +90,14 @@ void LevelSetKernel::update( const std::vector<adaption::Info> &adaptionData ) {
 
     BITPIT_UNUSED( adaptionData );
 
-    // Nothing to do
+#if BITPIT_ENABLE_MPI
+    // Set the communicator
+    //
+    // The mesh may have been partitioned after being set.
+    if (m_mesh->isPartitioned() && !isCommunicatorSet()) {
+        initializeCommunicator();
+    }
+#endif
 }
 
 /*!
@@ -162,6 +176,24 @@ void LevelSetKernel::initializeCommunicator()
 }
 
 /*!
+    Frees the MPI communicator associated to the patch
+*/
+void LevelSetKernel::freeCommunicator() {
+
+    if (!isCommunicatorSet()) {
+        return;
+    }
+
+    int finalizedCalled;
+    MPI_Finalized(&finalizedCalled);
+    if (finalizedCalled) {
+        return;
+    }
+
+    MPI_Comm_free(&m_communicator);
+}
+
+/*!
  * Returns the MPI communicator stored within LevelSetKernel
  * @return MPI communicator
  */
@@ -179,24 +211,6 @@ MPI_Comm LevelSetKernel::getCommunicator() const {
 bool LevelSetKernel::isCommunicatorSet() const {
 
     return (getCommunicator() != MPI_COMM_NULL);
-}
-
-/*!
-    Frees the MPI communicator associated to the patch
-*/
-void LevelSetKernel::freeCommunicator() {
-
-    if (!isCommunicatorSet()) {
-        return;
-    }
-
-    int finalizedCalled;
-    MPI_Finalized(&finalizedCalled);
-    if (finalizedCalled) {
-        return;
-    }
-
-    MPI_Comm_free(&m_communicator);
 }
 
 /*!
