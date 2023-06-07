@@ -299,24 +299,24 @@ void LevelSetObject::setSizeNarrowBand(double r){
  * Check if cell intersects the surface
  *
  * If mode==LevelSetIntersectionMode::FAST_FUZZY the method will compare the levelset 
- * value to tangent and bounding radius of a cell. If the value is smaler than the
+ * value to tangent and bounding radius of a cell. If the value is smaller than the
  * tangent radius LevelSetIntersectionStatus::TRUE is returned, if it is larger than the
- * bounding radius LevelSetIntersectionStatus::FALSE is returned. If it is inbetwee
+ * bounding radius LevelSetIntersectionStatus::FALSE is returned. If it is in-between
  * LevelSetIntersectionStatus::CLOSE is returned.
  *
  * If mode==LevelSetIntersectionMode::FAST_GUARANTEE_TRUE and the levelset value is 
- * smaller than the rangent radius LevelSetIntersectionStatus::TRUE is retuned,
+ * smaller than the rangent radius LevelSetIntersectionStatus::TRUE is returned,
  * otherwise LevelSetIntersectionStatus::FALSE.
  *
  * If mode==LevelSetIntersectionMode::FAST_GURANTEE_FALSE and the levelset value is 
- * larger than the bounding radius LevelSetIntersectionStatus::FALSE is retuned,
+ * larger than the bounding radius LevelSetIntersectionStatus::FALSE is returned,
  * otherwise LevelSetIntersectionStatus::TRUE.
  *
- * If mode==LevelSetIntersectionMode::ACCURATE, if LevelSetIntersectionMode::FUZZY 
- * returns LevelSetIntersectionStatus::CLOSE, the intersection between the tangent
- * plane at the projection point and the cell is performed additionally. 
- * LevelSetIntersectionStatus::TRUE/::FALSE is returned accordingly. 
- * Errors of the method are related to the ratio of surface curvature over cell size.
+ * If mode==LevelSetIntersectionMode::ACCURATE, the same checks of fuzzy mode are
+ * performed, however, in the cases where fuzzy mode would return CLOSE, an additional
+ * check on the intersection between the tangent plane at the projection point and the
+ * cell is performed. Errors of the method are related to the ratio of surface curvature
+ * over cell size.
  *
  * The bounding sphere is the sphere with the minimum radius that contains all the
  * cell vertices and has the center in the cell centroid.
