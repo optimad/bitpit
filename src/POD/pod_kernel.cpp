@@ -159,6 +159,7 @@ void PODKernel::restoreMesh(const pod::SnapshotFile &snap)
  */
 void PODKernel::evalCellsVolume()
 {
+    m_cellsVolume.unsetKernel();
     m_cellsVolume.setStaticKernel(&m_meshPOD->getCells());
     for (Cell & cell : m_meshPOD->getCells()){
         long id = cell.getId();

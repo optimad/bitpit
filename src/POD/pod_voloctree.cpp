@@ -1050,6 +1050,7 @@ void PODVolOctree::mapBoolFieldToPOD(const PiercedStorage<bool> & field, const V
     // Map bool field (number of fields = 1) on pod mesh
     const PiercedStorage<mapping::Info> &mappingInfo = getMapper()->getMapping();
 
+    mappedField.unsetKernel();
     mappedField.setStaticKernel(&getMesh()->getCells());
     mappedField.fill(false);
 
