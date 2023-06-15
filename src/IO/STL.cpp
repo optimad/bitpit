@@ -56,7 +56,7 @@ const std::string STLBase::ASCII_SOLID_BEGIN  = "solid";
 const std::string STLBase::ASCII_SOLID_END    = "endsolid";
 const std::string STLBase::ASCII_FACET_BEGIN  = "facet";
 const std::string STLBase::ASCII_FACET_END    = "endfacet";
-const std::string STLBase::ASCII_FILE_BEGIN   = STLBase::ASCII_SOLID_BEGIN + " ";
+const std::string STLBase::ASCII_FILE_BEGIN   = STLBase::ASCII_SOLID_BEGIN;
 const std::string STLBase::ASCII_FILE_END     = STLBase::ASCII_SOLID_END;
 const std::size_t STLBase::ASCII_MINIMUM_SIZE = STLBase::ASCII_FILE_BEGIN.length() + STLBase::ASCII_FILE_END.length();
 
