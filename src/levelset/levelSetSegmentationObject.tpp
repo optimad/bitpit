@@ -328,6 +328,10 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
     const ReferenceElementInfo &meshCellTypeInfo = ReferenceElementInfo::getInfo(meshCellType);
     int meshCellFaceCount = meshCellTypeInfo.nFaces;
 
+    std::array<double,3> meshMinPoint;
+    std::array<double,3> meshMaxPoint;
+    mesh.getBoundingBox(meshMinPoint, meshMaxPoint) ;
+
     // Get surface information
     const SurfUnstructured &surface = getSurface();
 
@@ -339,17 +343,6 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
     // evaluated on the cells that intersect the surface and on all their
     // first neighbours.
     double searchRadius = std::max(this->m_narrowBandSize, 2 * levelsetKernel->getCellBoundingRadius());
-
-    // Define mesh bounding box
-    //
-    // The bounding box is inflated be the search radius.
-    std::array<double,3> meshMinPoint;
-    std::array<double,3> meshMaxPoint;
-    mesh.getBoundingBox(meshMinPoint, meshMaxPoint) ;
-    for (int d = 0; d < meshDimension; ++d) {
-        meshMinPoint[d] -= searchRadius;
-        meshMaxPoint[d] += searchRadius;
-    }
 
     // Initialize process list
     //
