@@ -146,7 +146,7 @@ void run()
 #endif
     }
 
-    patch_2D_original->update(true);
+    patch_2D_original->update(false);
 
     patch_2D_original->getVTK().setName("mesh_original.0");
 #if BITPIT_ENABLE_MPI==1
@@ -221,7 +221,7 @@ void run()
         patch_2D->initializeAdjacencies();
         patch_2D->initializeInterfaces();
 
-        patch_2D->update(true);
+        patch_2D->update(false);
 
         nCells = patch_2D->getCellCount();
         log::cout() << ">> Final number of cells... " << nCells << std::endl;
