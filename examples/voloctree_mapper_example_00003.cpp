@@ -168,6 +168,7 @@ void run()
 
     /** Create a new patch */
     VolOctree *patch_2D = new VolOctree(std::move(treePointer2), &treePointer2);
+    patch_2D->update(false);
 #if BITPIT_ENABLE_MPI==1
     patch_2D->setVTKWriteTarget(PatchKernel::WriteTarget::WRITE_TARGET_CELLS_INTERNAL);
 #endif
