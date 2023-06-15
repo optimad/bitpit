@@ -96,7 +96,6 @@ PODKernel::~PODKernel()
 void PODKernel::clear()
 {
     clearMapper();
-    delete m_meshPOD;
 
 # if BITPIT_ENABLE_MPI
     freeCommunicator();
@@ -108,9 +107,9 @@ void PODKernel::clear()
  *
  * param[in] The pointer to the POD mesh.
  */
-void PODKernel::setMesh(bitpit::VolumeKernel* mesh)
+void PODKernel::setMesh(std::unique_ptr<VolumeKernel> &&mesh)
 {
-    m_meshPOD = mesh;
+    m_meshPOD = std::move(mesh);
 }
 
 /**
@@ -120,7 +119,7 @@ void PODKernel::setMesh(bitpit::VolumeKernel* mesh)
  */
 bitpit::VolumeKernel* PODKernel::getMesh()
 {
-    return m_meshPOD;
+    return m_meshPOD.get();
 }
 
 /**
@@ -128,13 +127,13 @@ bitpit::VolumeKernel* PODKernel::getMesh()
  *
  * \param[in] snap Snapshot filename.
  */
-VolumeKernel* PODKernel::readMesh(const pod::SnapshotFile &snap)
+std::unique_ptr<VolumeKernel> PODKernel::readMesh(const pod::SnapshotFile &snap)
 {
     int dumpBlock = (m_nProcs > 1) ? m_rank : -1;
     std::string filename = std::string(snap.directory) + "/" + std::string(snap.name) + ".mesh";
     IBinaryArchive binaryReader(filename, dumpBlock);
 
-    VolumeKernel *mesh = createMesh();
+    std::unique_ptr<VolumeKernel> mesh = createMesh();
 
     mesh->restore(binaryReader.getStream());
 
@@ -246,7 +245,7 @@ void PODKernel::adaptionCleanUp(const std::vector<adaption::Info> & info)
  */
 VolumeMapper* PODKernel::getMapper()
 {
-    return m_meshmap;
+    return m_meshmap.get();
 }
 
 
@@ -255,10 +254,7 @@ VolumeMapper* PODKernel::getMapper()
  */
 void PODKernel::clearMapper()
 {
-    if (m_meshmap != nullptr){
-        delete m_meshmap;
-        m_meshmap = nullptr;
-    }
+    m_meshmap.reset();
     setMapperDirty(true);
 }
 

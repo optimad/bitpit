@@ -138,7 +138,7 @@ public:
     void setMeshType(MeshType type);
     void setMesh(const std::string &directory, const std::string &name);
     void setMesh(const pod::SnapshotFile &file);
-    void setMesh(VolumeKernel* mesh);
+    void setMesh(std::unique_ptr<VolumeKernel> &&mesh);
     MeshType getMeshType();
     void setStaticMesh(bool flag);
     void setUseMean(bool flag);    

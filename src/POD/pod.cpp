@@ -414,16 +414,16 @@ void POD::setMeshType(POD::MeshType type)
  *
  * \param[in] mesh Pointer to POD mesh.
  */
-void POD::setMesh(VolumeKernel* mesh)
+void POD::setMesh(std::unique_ptr<VolumeKernel> &&mesh)
 {
     if (m_meshType == MeshType::UNDEFINED)
         throw std::runtime_error ("POD mesh type not set.");
 
-    const VolOctree* _octreecast_mesh = dynamic_cast<const VolOctree*>(mesh);
+    const VolOctree* _octreecast_mesh = dynamic_cast<const VolOctree*>(mesh.get());
     if (_octreecast_mesh){
         if (m_meshType != MeshType::VOLOCTREE)
             throw std::runtime_error ("POD mesh type not set to VolOctree.");
-        m_podkernel->setMesh(mesh);
+        m_podkernel->setMesh(std::move(mesh));
     }
     else{
         throw std::runtime_error ("POD mesh type not allowed.");
@@ -456,8 +456,8 @@ void POD::setMesh(const pod::SnapshotFile &file)
     if (m_meshType == MeshType::UNDEFINED)
         throw std::runtime_error ("POD mesh type not set.");
 
-    VolumeKernel* mesh = m_podkernel->readMesh(file);
-    setMesh(mesh);
+    std::unique_ptr<VolumeKernel> mesh = m_podkernel->readMesh(file);
+    setMesh(std::move(mesh));
 }
 
 /**
@@ -979,16 +979,16 @@ void POD::_evalMeanMesh()
     if (m_podkernel->getMesh() == nullptr){
 
         //Read first mesh and use as meshPOD
-        VolumeKernel* meshr = m_podkernel->readMesh(m_database[0]);
-        m_podkernel->setMesh(meshr);
+        std::unique_ptr<VolumeKernel> readMesh = m_podkernel->readMesh(m_database[0]);
+        m_podkernel->setMesh(std::move(readMesh));
 
         //Dynamic mesh case
         if (!m_staticMesh){
             // Compute meshPOD (starting from inital mesh) and fill filter
             for (std::size_t i = 1; i < m_nSnapshots; ++i) {
                 log::cout() << "pod : evaluation POD mesh - use snapshot " << i+1 << "/" << m_nSnapshots << std::endl;
-                VolumeKernel* readmesh = m_podkernel->readMesh(m_database[i]);
-                m_podkernel->adaptMeshToMesh(m_podkernel->getMesh(), readmesh);
+                std::unique_ptr<VolumeKernel> readMesh = m_podkernel->readMesh(m_database[i]);
+                m_podkernel->adaptMeshToMesh(m_podkernel->getMesh(), readMesh.get());
                 m_podkernel->clearMapper();
             }
         }
@@ -1870,12 +1870,11 @@ void POD::readSnapshot(const pod::SnapshotFile & snap, pod::PODField & fieldr)
 
     //Set mesh field
     if (m_staticMesh){
-        fieldr.mesh = m_podkernel->getMesh();
+        fieldr.setMesh(m_podkernel->getMesh());
     }
     else{
         //Read and set the mesh
-        fieldr.mesh = m_podkernel->readMesh(snap);
-        fieldr.setMeshOwner();
+        fieldr.setMesh(m_podkernel->readMesh(snap));
     }
     VolumeKernel * mesh = fieldr.mesh;
 

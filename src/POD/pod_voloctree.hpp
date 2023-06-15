@@ -58,9 +58,9 @@ public:
 
 private:
 
-    VolumeKernel* createMesh() override;
+    std::unique_ptr<VolumeKernel> createMesh() override;
 
-    VolumeMapper * _computeMapper(const VolumeKernel * mesh,  bool fillInv) override;
+    std::unique_ptr<VolumeMapper> _computeMapper(const VolumeKernel * mesh,  bool fillInv) override;
 
     bitpit::PiercedStorage<bitpit::adaption::Info> mapMesh(bitpit::VolOctree * mesh);
     void mapMeshSamePartition(bitpit::VolOctree * mesh, bitpit::PiercedStorage<bitpit::adaption::Info> & mapper);
