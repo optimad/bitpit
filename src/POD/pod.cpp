@@ -2977,7 +2977,7 @@ void POD::_buildFields(PiercedStorage<double> &fields,
  * Can be called only if expert mode is active.
  * \param[in] mesh Pointer to input mesh
  */
-void POD::computeMapper(VolumeKernel * mesh)
+void POD::computeMapper(const VolumeKernel * mesh)
 {
     if (!m_expert)
         throw std::runtime_error("POD: compute mapper can be called only in expert mode");
@@ -3001,7 +3001,7 @@ void POD::adaptionAlter(const std::vector<adaption::Info> & info)
  * Compute the mapping of an input mesh to the POD mesh (internal method).
  * \param[in] mesh Pointer to input mesh
  */
-void POD::_computeMapper(VolumeKernel * mesh)
+void POD::_computeMapper(const VolumeKernel * mesh)
 {
     m_podkernel->computeMapper(mesh);
     m_podkernel->setMapperDirty(!m_expert);

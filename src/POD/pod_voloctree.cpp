@@ -79,10 +79,10 @@ VolumeKernel* PODVolOctree::createMesh()
  * \param[in] fillInv If true even the inverse mapping is computed.
  * \return The mapping.
  */
-VolumeMapper * PODVolOctree::_computeMapper(VolumeKernel* mesh, bool fillInv)
+VolumeMapper * PODVolOctree::_computeMapper(const VolumeKernel* mesh, bool fillInv)
 {
-    VolOctree* meshPOD = static_cast<VolOctree*>(getMesh());
-    VolOctree* _mesh = static_cast<VolOctree*>(mesh);
+    const VolOctree* meshPOD = static_cast<const VolOctree*>(getMesh());
+    const VolOctree* _mesh = static_cast<const VolOctree*>(mesh);
 
     VolumeMapper *mapper;
 #if BITPIT_ENABLE_MPI
@@ -1253,7 +1253,7 @@ std::unordered_set<long> PODVolOctree::mapCellsToPOD(const std::unordered_set<lo
 
 }
 
-void PODVolOctree::adaptMeshToMesh(VolumeKernel* meshToAdapt, VolumeKernel * meshReference)
+void PODVolOctree::adaptMeshToMesh(const VolumeKernel* meshToAdapt, const VolumeKernel * meshReference)
 {
     BITPIT_UNUSED(meshToAdapt);
 

@@ -192,7 +192,7 @@ double PODKernel::getRawCellVolume(long rawIndex)
  * \param[in] mesh Pointer to input mesh.
 * \param[in] fillInv If true even the inverse mapping is computed.
  */
-void PODKernel::computeMapper(VolumeKernel * mesh, bool fillInv)
+void PODKernel::computeMapper(const VolumeKernel * mesh, bool fillInv)
 {
     if (m_meshPOD == nullptr)
         throw std::runtime_error ("PODKernel: no pod mesh set in compute Mapper");
