@@ -70,9 +70,9 @@ namespace bitpit {
 /**
  * \param[in] communicator is the MPI communicator
  */
-VolumeMapper::VolumeMapper(VolumeKernel *referencePatch, VolumeKernel *mappedPatch, MPI_Comm communicator)
+VolumeMapper::VolumeMapper(const VolumeKernel *referencePatch, const VolumeKernel *mappedPatch, MPI_Comm communicator)
 #else
-VolumeMapper::VolumeMapper(VolumeKernel *referencePatch, VolumeKernel *mappedPatch)
+VolumeMapper::VolumeMapper(const VolumeKernel *referencePatch, const VolumeKernel *mappedPatch)
 #endif
     : m_referencePatch(referencePatch), m_mappedPatch(mappedPatch), m_mapping(1)
 #if BITPIT_ENABLE_MPI

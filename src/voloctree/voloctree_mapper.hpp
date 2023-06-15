@@ -42,9 +42,9 @@ class VolOctreeMapper: public VolumeMapper {
 
 public:
 #if BITPIT_ENABLE_MPI
-    VolOctreeMapper(VolOctree *referencePatch, VolOctree *mappedPatch, MPI_Comm communicator);
+    VolOctreeMapper(const VolOctree *referencePatch, const VolOctree *mappedPatch, MPI_Comm communicator);
 #else
-    VolOctreeMapper(VolOctree *referencePatch, VolOctree *mappedPatch);
+    VolOctreeMapper(const VolOctree *referencePatch, const VolOctree *mappedPatch);
 #endif
 
     void adaptionPrepare(const std::vector<adaption::Info> &adaptionInfo, bool reference = true) override;
