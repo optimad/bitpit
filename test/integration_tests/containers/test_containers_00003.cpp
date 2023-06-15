@@ -57,10 +57,11 @@ int subtest_001()
     std::cout << "Moving container..." << std::endl;
 
     PiercedVector<double> container(containerExpected);
-    PiercedVector<double> movedContainer(std::move(container));
-
     std::cout << "  Size of original container ....... " << container.size() << std::endl;
+
+    PiercedVector<double> movedContainer(std::move(container));
     std::cout << "  Size of moved container .......... " << movedContainer.size() << std::endl;
+
     if (containerExpected.size() != movedContainer.size()) {
         throw std::runtime_error("Contents of moved container doesn't match expected values");
     }
