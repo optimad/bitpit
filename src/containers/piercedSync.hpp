@@ -161,16 +161,6 @@ protected:
     */
     std::unordered_map<PiercedSyncSlave *, SyncMode> m_slaves;
 
-    /**
-    * Slave synchronization groups
-    */
-    std::unordered_map<SyncMode, SyncGroup, SyncModeHasher> m_syncGroups;
-
-    /**
-    * Slave synchronization groups
-    */
-    std::vector<PiercedSyncAction> m_syncJournal;
-
     PiercedSyncMaster();
 
     void registerSlave(PiercedSyncSlave *slave, PiercedSyncMaster::SyncMode syncMode);
@@ -194,6 +184,19 @@ protected:
     void dump(std::ostream &stream) const;
 
 private:
+    /**
+    * Slave synchronization groups
+    */
+    std::unordered_map<SyncMode, SyncGroup, SyncModeHasher> m_syncGroups;
+
+    /**
+    * Slave synchronization groups
+    */
+    std::vector<PiercedSyncAction> m_syncJournal;
+
+    /**
+    * Controls if the synchronization is enabled
+    */
     bool m_syncEnabled;
 
     void commitSyncAction(PiercedSyncSlave *slave, const PiercedSyncAction &action);
