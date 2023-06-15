@@ -149,9 +149,20 @@ STLReader::STLReader(const std::string &filename, Format format)
 }
 
 /*!
-    Detects if the specified STL file is in binary format.
+    Detects the format of the specified STL file.
+
+    An ASCII STL file begins with the line "solid name" and concludes with
+    the line "endsolid name", where name is an optional string.
+
+    A binary STL file has an 80-character header which is ignored, but should
+    never begin with the ASCII representation of the string solid. Following
+    the header is a 4-byte little-endian unsigned integer indicating the number
+    of triangular facets in the file. The size of the binary file should be
+    consistent with the number of factes. No extra data is allowed after the
+    definition of the factes.
 
     \param filename is the name of the STL file
+    \result The format of the specified STL file.
 */
 STLReader::Format STLReader::detectFormat(const std::string &filename)
 {
