@@ -523,7 +523,7 @@ void PatchKernel::initialize()
 	initializeHaloSize(haloSize);
 
 	// Mark patch as partioned
-	if (isPartitioned()) {
+	if (getCommunicator() != MPI_COMM_NULL) {
 		setPartitioningStatus(PARTITIONING_CLEAN);
 	} else {
 		setPartitioningStatus(PARTITIONING_UNSUPPORTED);
