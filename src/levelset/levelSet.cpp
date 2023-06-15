@@ -182,15 +182,12 @@ int LevelSet::addObject( SurfUnstructured *segmentation, double angle, int id ) 
  */
 int LevelSet::addObject( std::unique_ptr<SurfaceKernel> &&segmentation, double angle, int id ) {
 
-    SurfUnstructured *surfUnstructured = dynamic_cast<SurfUnstructured *>(segmentation.get());
+    auto surfUnstructured = std::unique_ptr<SurfUnstructured>(dynamic_cast<SurfUnstructured *>(segmentation.release())) ;
     if (!surfUnstructured) {
         throw std::runtime_error ("Segmentation type not supported");
     }
 
-    segmentation.release();
-    std::unique_ptr<SurfUnstructured> surfUnstructuredUPtr = std::unique_ptr<SurfUnstructured>(surfUnstructured) ;
-
-    std::unique_ptr<LevelSetObject> object = LevelSetObjectFactory::createSegmentationObject<LevelSetSegmentationNarrowBandCache, int &, std::unique_ptr<SurfUnstructured> &&, double &>( m_kernel.get(), m_storageType, id, std::move(surfUnstructuredUPtr), angle ) ;
+    std::unique_ptr<LevelSetObject> object = LevelSetObjectFactory::createSegmentationObject<LevelSetSegmentationNarrowBandCache, int &, std::unique_ptr<SurfUnstructured> &&, double &>( m_kernel.get(), m_storageType, id, std::move(surfUnstructured), angle ) ;
 
     return registerObject(std::move(object));
 }
