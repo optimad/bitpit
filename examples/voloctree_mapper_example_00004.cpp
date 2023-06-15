@@ -147,7 +147,7 @@ void runReferenceAdaptation()
 #endif
     }
 
-    patch_2D_original->update(true);
+    patch_2D_original->update(false);
 
     /**
      * Create the new tree
@@ -216,7 +216,7 @@ void runReferenceAdaptation()
         patch_2D->initializeAdjacencies();
         patch_2D->initializeInterfaces();
 
-        patch_2D->update(true);
+        patch_2D->update(false);
 
         nCells = patch_2D->getCellCount();
         log::cout() << ">> Final number of cells... " << nCells << std::endl;
@@ -800,7 +800,7 @@ void runMappedAdaptation()
 #endif
     }
 
-    patch_2D_original->update(true);
+    patch_2D_original->update(false);
 
     /**
      * Create the new tree
@@ -869,7 +869,7 @@ void runMappedAdaptation()
         patch_2D->initializeAdjacencies();
         patch_2D->initializeInterfaces();
 
-        patch_2D->update(true);
+        patch_2D->update(false);
 
         nCells = patch_2D->getCellCount();
         log::cout() << ">> Final number of cells... " << nCells << std::endl;
