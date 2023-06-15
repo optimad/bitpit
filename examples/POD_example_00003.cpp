@@ -75,7 +75,7 @@ void run()
     pod.leave1out();
     
     /**<Set target error fields used in the bounding box evaluation.*/
-    std::vector<std::string> namesf {"p","a"};
+    std::vector<std::string> namesf {"rho","rho_e"};
     std::vector<std::array<std::string,3>> namevf {}; //{{"u_x", "u_y","u_z"}};  
     pod.setTargetErrorFields(namesf,namevf);
 
