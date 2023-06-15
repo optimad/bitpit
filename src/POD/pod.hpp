@@ -182,7 +182,7 @@ public:
     void evalEigen();
     void evalReconstruction();
     void evalErrorBoundingBox();
-    void computeMapper(VolumeKernel * mesh);
+    void computeMapper(const VolumeKernel * mesh);
     void adaptionPrepare(const std::vector<adaption::Info> & info);
     void adaptionAlter(const std::vector<adaption::Info> & info);
     void adaptionCleanUp(const std::vector<adaption::Info> & info);
@@ -303,7 +303,7 @@ private:
             const std::vector<std::array<std::size_t, 3>> &vectorIds, const std::vector<std::size_t> &podvectorIds,
             const std::unordered_set<long> *targetCells = nullptr);
 
-    void _computeMapper(VolumeKernel * mesh);
+    void _computeMapper(const VolumeKernel * mesh);
     void _adaptionAlter(const std::vector<adaption::Info> & info);
 
     void diff(PiercedStorage<double> &fields, const pod::PODMode &mode,

@@ -64,7 +64,7 @@ public:
     VolumeMapper* getMapper();
 
     bool isMapperDirty();
-    void computeMapper(VolumeKernel * mesh, bool fillInv = true);
+    void computeMapper(const VolumeKernel * mesh, bool fillInv = true);
     void adaptionPrepare(const std::vector<adaption::Info> & info);
     void adaptionAlter(const std::vector<adaption::Info> & info, bool fillInv = true);
     void adaptionCleanUp(const std::vector<adaption::Info> & info);
@@ -101,7 +101,7 @@ protected:
 
     virtual VolumeKernel* createMesh() = 0;
 
-    virtual VolumeMapper * _computeMapper(VolumeKernel * mesh, bool fillInv) = 0;
+    virtual VolumeMapper * _computeMapper(const VolumeKernel * mesh, bool fillInv) = 0;
 
     virtual pod::PODField mapPODFieldToPOD(const pod::PODField & field, const std::unordered_set<long> * targetCells) = 0;
     virtual void mapPODFieldFromPOD(pod::PODField & field, const std::unordered_set<long> * targetCells, const pod::PODField & mappedField) = 0;
@@ -117,7 +117,7 @@ protected:
 
     virtual std::unordered_set<long> mapCellsToPOD(const std::unordered_set<long> * cells) = 0;
 
-    virtual void adaptMeshToMesh(VolumeKernel * meshToAdapt, VolumeKernel * meshReference) = 0;
+    virtual void adaptMeshToMesh(const VolumeKernel * meshToAdapt, const VolumeKernel * meshReference) = 0;
 
 #if BITPIT_ENABLE_MPI
     void initializeCommunicator(MPI_Comm communicator);
