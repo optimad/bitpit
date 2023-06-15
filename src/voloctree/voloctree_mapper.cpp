@@ -308,7 +308,7 @@ void VolOctreeMapper::_mappingAdaptionReferenceUpdate(const std::vector<adaption
                             if (checkPart || mappedRanks[imapped] == m_rank) {
 #endif
                                 oinfoprev = mappedPatch->getCellOctant(mappedId);
-                                Octant *octm = mappedPatch->getOctantPointer(oinfoprev);
+                                const Octant *octm = mappedPatch->getOctantPointer(oinfoprev);
                                 mortonmapped = mappedPatch->getTree().getMorton(octm);
                                 mortonlastdescmapped = mappedPatch->getTree().getLastDescMorton(octm);
                                 levelmapped = mappedPatch->getCellLevel(mappedId);
@@ -329,7 +329,7 @@ void VolOctreeMapper::_mappingAdaptionReferenceUpdate(const std::vector<adaption
                                 uint64_t morton, mortonlastdesc;
                                 level = adaptedPatch->getCellLevel(id);
                                 VolOctree::OctantInfo octantIfo = adaptedPatch->getCellOctant(id);
-                                Octant *octant = adaptedPatch->getOctantPointer(octantIfo);
+                                const Octant *octant = adaptedPatch->getOctantPointer(octantIfo);
                                 morton = adaptedPatch->getTree().getMorton(octant);
                                 mortonlastdesc = adaptedPatch->getTree().getLastDescMorton(octant);
 
@@ -779,7 +779,7 @@ std::unordered_map<int, std::vector<long>> VolOctreeMapper::getSentReferenceIds(
     // Recover id to be recv/send
     std::unordered_map<int, std::set<long>> rankIdSend;
 
-    for (Cell &cell : m_referencePatch->getCells()) {
+    for (const Cell &cell : m_referencePatch->getCells()) {
         long id = cell.getId();
         auto info = m_mapping[id];
         for (int rank : info.ranks) {
@@ -815,7 +815,7 @@ std::unordered_map<int, std::vector<long>> VolOctreeMapper::getReceivedReference
 
     std::unordered_map<int, std::set<long>> rankIdRecv;
 
-    for (Cell & cell : m_mappedPatch->getCells()) {
+    for (const Cell & cell : m_mappedPatch->getCells()) {
         long id = cell.getId();
         auto info = m_inverseMapping.at(id);
         std::size_t idsSize = info.ids.size();
