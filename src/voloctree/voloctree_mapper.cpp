@@ -65,10 +65,10 @@ namespace bitpit {
 /**
  * \param[in] communicator is the MPI communicator
  */
-VolOctreeMapper::VolOctreeMapper(bitpit::VolOctree *referencePatch, bitpit::VolOctree *mappedPatch, MPI_Comm communicator)
+VolOctreeMapper::VolOctreeMapper(const bitpit::VolOctree *referencePatch, const bitpit::VolOctree *mappedPatch, MPI_Comm communicator)
     : VolumeMapper(referencePatch, mappedPatch, communicator)
 #else
-VolOctreeMapper::VolOctreeMapper(bitpit::VolOctree *referencePatch, bitpit::VolOctree *mappedPatch)
+VolOctreeMapper::VolOctreeMapper(const bitpit::VolOctree *referencePatch, const bitpit::VolOctree *mappedPatch)
     : VolumeMapper(referencePatch, mappedPatch)
 #endif
 {
@@ -177,8 +177,8 @@ void VolOctreeMapper::adaptionCleanup()
  */
 void VolOctreeMapper::_mappingAdaptionReferenceUpdate(const std::vector<adaption::Info> &adaptionInfo, bool inverseFilled)
 {
-    VolOctree *adaptedPatch = static_cast<VolOctree*>(m_referencePatch);
-    VolOctree *mappedPatch  = static_cast<VolOctree*>(m_mappedPatch);
+    const VolOctree *adaptedPatch = static_cast<const VolOctree*>(m_referencePatch);
+    const VolOctree *mappedPatch  = static_cast<const VolOctree*>(m_mappedPatch);
 
     PiercedStorage<mapping::Info> *mappingAdapted = &m_mapping;
     PiercedStorage<mapping::Info> *mappingMapped  = &m_inverseMapping;
@@ -461,8 +461,8 @@ void VolOctreeMapper::_mappingAdaptionReferenceUpdate(const std::vector<adaption
  */
 void VolOctreeMapper::_mappingAdaptionMappedUpdate(const std::vector<adaption::Info> &adaptionInfo)
 {
-    VolOctree *adaptedPatch   = static_cast<VolOctree*>(m_mappedPatch);
-    VolOctree *referencePatch = static_cast<VolOctree*>(m_referencePatch);
+    const VolOctree *adaptedPatch   = static_cast<const VolOctree*>(m_mappedPatch);
+    const VolOctree *referencePatch = static_cast<const VolOctree*>(m_referencePatch);
 
     PiercedStorage<mapping::Info> *mappingAdapted   = &m_inverseMapping;
     PiercedStorage<mapping::Info> *mappingReference = &m_mapping;
@@ -865,10 +865,10 @@ std::unordered_map<int, std::vector<long>> VolOctreeMapper::getSentMappedIds() c
  */
 void VolOctreeMapper::_mapMeshes(bool fillInverse)
 {
-    std::array<double,3> originR = static_cast<VolOctree*>(m_referencePatch)->getOrigin();
-    std::array<double,3> originM = static_cast<VolOctree*>(m_mappedPatch)->getOrigin();
+    std::array<double,3> originR = static_cast<const VolOctree*>(m_referencePatch)->getOrigin();
+    std::array<double,3> originM = static_cast<const VolOctree*>(m_mappedPatch)->getOrigin();
 
-    if (!(utils::DoubleFloatingEqual()(static_cast<VolOctree*>(m_referencePatch)->getLength(),static_cast<VolOctree*>(m_mappedPatch)->getLength()))
+    if (!(utils::DoubleFloatingEqual()(static_cast<const VolOctree*>(m_referencePatch)->getLength(),static_cast<const VolOctree*>(m_mappedPatch)->getLength()))
             || !(utils::DoubleFloatingEqual()(originR[0],originM[0]))
             || !(utils::DoubleFloatingEqual()(originR[1],originM[1]))
             || !(utils::DoubleFloatingEqual()(originR[2],originM[2]))) {
@@ -925,8 +925,8 @@ void VolOctreeMapper::_mapMeshes(bool fillInverse)
 void VolOctreeMapper::_mapMeshesSamePartition(const std::vector<OctantIR> *octantsIRReference, const std::vector<OctantIR> *octantsIRMapped,
                                               bool fillInverse, long *indRef)
 {
-    bitpit::VolOctree *referencePatch = static_cast<VolOctree*>(m_referencePatch);
-    bitpit::VolOctree *mappedPatch    = static_cast<VolOctree*>(m_mappedPatch);
+    const bitpit::VolOctree *referencePatch = static_cast<const VolOctree*>(m_referencePatch);
+    const bitpit::VolOctree *mappedPatch    = static_cast<const VolOctree*>(m_mappedPatch);
 
     // Fill IR with meshes if list pointer is null
 #if BITPIT_ENABLE_MPI
@@ -939,7 +939,7 @@ void VolOctreeMapper::_mapMeshesSamePartition(const std::vector<OctantIR> *octan
         tempOctantsIRReference.reserve(n);
         for (long i = 0; i < n; i++) {
             VolOctree::OctantInfo octantIfoRef(i, true);
-            const Octant *octRef = static_cast<VolOctree*>(m_referencePatch)->getOctantPointer(octantIfoRef);
+            const Octant *octRef = referencePatch->getOctantPointer(octantIfoRef);
             long idRef = referencePatch->getOctantId(octantIfoRef);
 #if BITPIT_ENABLE_MPI
             tempOctantsIRReference.emplace_back(*octRef, idRef, idRef, m_rank);
@@ -1126,8 +1126,8 @@ void VolOctreeMapper::_mapMeshesSamePartition(const std::vector<OctantIR> *octan
  */
 bool VolOctreeMapper::checkPartition()
 {
-    std::vector<uint64_t> partitionMapped    = static_cast<VolOctree*>(m_mappedPatch)->getTree().getPartitionLastDesc();
-    std::vector<uint64_t> partitionReference = static_cast<VolOctree*>(m_referencePatch)->getTree().getPartitionLastDesc();
+    std::vector<uint64_t> partitionMapped    = static_cast<const VolOctree*>(m_mappedPatch)->getTree().getPartitionLastDesc();
+    std::vector<uint64_t> partitionReference = static_cast<const VolOctree*>(m_referencePatch)->getTree().getPartitionLastDesc();
     for (int rank = 0; rank < m_nProcs; ++rank) {
         if (partitionReference[rank] != partitionMapped[rank]) {
             return false;
@@ -1150,13 +1150,13 @@ void VolOctreeMapper::_mapMeshPartitioned(bool fillInverse)
     // Fill IR with reference mesh
     //
     // TODO: make a method to do that
-    long n = static_cast<VolOctree*>(m_referencePatch)->getInternalCellCount();
+    long n = static_cast<const VolOctree*>(m_referencePatch)->getInternalCellCount();
     std::vector<OctantIR> octantsIRReference;
     octantsIRReference.reserve(n);
     for (long i = 0; i < n; i++) {
         VolOctree::OctantInfo octantIfoRef(i, true);
-        const Octant *octRef = static_cast<VolOctree*>(m_referencePatch)->getOctantPointer(octantIfoRef);
-        long idRef = static_cast<VolOctree*>(m_referencePatch)->getOctantId(octantIfoRef);
+        const Octant *octRef = static_cast<const VolOctree*>(m_referencePatch)->getOctantPointer(octantIfoRef);
+        long idRef = static_cast<const VolOctree*>(m_referencePatch)->getOctantId(octantIfoRef);
         octantsIRReference.emplace_back(*octRef, idRef, idRef, m_rank);
     }
 
@@ -1178,8 +1178,8 @@ bool VolOctreeMapper::_recoverPartition()
     // to match the partitioning between the two meshes
 
     // Find owner of reference partition over mapped mesh partition
-    VolOctree* referencePatch = static_cast<VolOctree*>(m_referencePatch);
-    VolOctree* mappedPatch = static_cast<VolOctree*>(m_mappedPatch);
+    const VolOctree* referencePatch = static_cast<const VolOctree*>(m_referencePatch);
+    const VolOctree* mappedPatch = static_cast<const VolOctree*>(m_mappedPatch);
     std::vector<uint64_t> partitionLDReference = referencePatch->getTree().getPartitionLastDesc();
     std::vector<uint64_t> partitionLDMapped = mappedPatch->getTree().getPartitionLastDesc();
     std::vector<uint64_t> partitionFDReference = referencePatch->getTree().getPartitionFirstDesc();
@@ -1430,7 +1430,7 @@ void VolOctreeMapper::_communicateInverseMapper(const std::vector<OctantIR> *oct
             long globalId;
             recvBuffer >> globalId;
 
-            uint32_t idx = static_cast<VolOctree*>(m_mappedPatch)->getTree().getLocalIdx(globalId);
+            uint32_t idx = static_cast<const VolOctree*>(m_mappedPatch)->getTree().getLocalIdx(globalId);
             VolOctree::OctantInfo octantIfo(idx, true);
 
             int type;
@@ -1439,7 +1439,7 @@ void VolOctreeMapper::_communicateInverseMapper(const std::vector<OctantIR> *oct
             int entity;
             recvBuffer >> entity;
 
-            long id = static_cast<VolOctree*>(m_mappedPatch)->getOctantId(octantIfo);
+            long id = static_cast<const VolOctree*>(m_mappedPatch)->getOctantId(octantIfo);
             mapping::Info &info = (*inverseLocalMapping)[id];
             info.type = mapping::Type(type);
             info.entity = mapping::Entity(entity);

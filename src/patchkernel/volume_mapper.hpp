@@ -126,8 +126,8 @@ public:
 #endif
 
 protected:
-    VolumeKernel *m_referencePatch;    /**< Pointer to reference mesh.*/
-    VolumeKernel *m_mappedPatch;       /**< Pointer to mapped mesh.*/
+    const VolumeKernel *m_referencePatch;    /**< Pointer to reference mesh.*/
+    const VolumeKernel *m_mappedPatch;       /**< Pointer to mapped mesh.*/
 
     PiercedStorage<mapping::Info> m_mapping;                     /**< Mapping info for each cell of reference mesh.
                                                                      The mapping info is treated as a set of adaption info related to
@@ -144,9 +144,9 @@ protected:
 #endif
 
 #if BITPIT_ENABLE_MPI
-    VolumeMapper(VolumeKernel *referencePatch, VolumeKernel *mappedPatch, MPI_Comm communicator);
+    VolumeMapper(const VolumeKernel *referencePatch, const VolumeKernel *mappedPatch, MPI_Comm communicator);
 #else
-    VolumeMapper(VolumeKernel *referencePatch, VolumeKernel *mappedPatch);
+    VolumeMapper(const VolumeKernel *referencePatch, const VolumeKernel *mappedPatch);
 #endif
 
     virtual void _mapMeshes(bool fillInverse) = 0;
