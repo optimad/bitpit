@@ -83,7 +83,11 @@ LevelSetObject::LevelSetObject(LevelSetObject &&other)
 LevelSetObject::~LevelSetObject() {
     // Disable all output for the object
     if (m_kernel) {
-        enableVTKOutput(LevelSetWriteField::ALL, false);
+        try {
+            enableVTKOutput(LevelSetWriteField::ALL, false);
+        } catch (const std::exception &exception) {
+            // Nothing to do
+        }
     }
 }
 
