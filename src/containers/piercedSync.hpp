@@ -159,17 +159,17 @@ protected:
     /**
     * Slaves
     */
-    std::unordered_map<PiercedSyncSlave *, SyncMode> m_slaves;
+    mutable std::unordered_map<PiercedSyncSlave *, SyncMode> m_slaves;
 
     PiercedSyncMaster();
 
-    void registerSlave(PiercedSyncSlave *slave, PiercedSyncMaster::SyncMode syncMode);
-    void unregisterSlave(const PiercedSyncSlave *slave);
+    void registerSlave(PiercedSyncSlave *slave, PiercedSyncMaster::SyncMode syncMode) const;
+    void unregisterSlave(const PiercedSyncSlave *slave) const;
     bool isSlaveRegistered(const PiercedSyncSlave *slave) const;
     PiercedSyncMaster::SyncMode getSlaveSyncMode(const PiercedSyncSlave *slave) const;
     bool isSlaveSynced(const PiercedSyncSlave *slave) const;
 
-    void setSyncEnabled(bool enabled);
+    void setSyncEnabled(bool enabled) const;
     bool isSyncEnabled() const;
 
     void sync();
@@ -187,7 +187,7 @@ private:
     /**
     * Slave synchronization groups
     */
-    std::unordered_map<SyncMode, SyncGroup, SyncModeHasher> m_syncGroups;
+    mutable std::unordered_map<SyncMode, SyncGroup, SyncModeHasher> m_syncGroups;
 
     /**
     * Slave synchronization groups
@@ -197,9 +197,9 @@ private:
     /**
     * Controls if the synchronization is enabled
     */
-    bool m_syncEnabled;
+    mutable bool m_syncEnabled;
 
-    void commitSyncAction(PiercedSyncSlave *slave, const PiercedSyncAction &action);
+    void commitSyncAction(PiercedSyncSlave *slave, const PiercedSyncAction &action) const;
     void journalSyncAction(const PiercedSyncAction &action);
 
 };

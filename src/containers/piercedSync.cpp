@@ -222,7 +222,7 @@ void PiercedSyncMaster::swap(PiercedSyncMaster &other) noexcept
 * \param slave is the slave that will be registered
 * \param syncMode is the synchronization mode that will be used for the slave
 */
-void PiercedSyncMaster::registerSlave(PiercedSyncSlave *slave, SyncMode syncMode)
+void PiercedSyncMaster::registerSlave(PiercedSyncSlave *slave, SyncMode syncMode) const
 {
     if (m_slaves.count(slave) > 0) {
         throw std::out_of_range("Slave is already registered");
@@ -270,7 +270,7 @@ void PiercedSyncMaster::processSyncAction(const PiercedSyncAction &action)
 * \param slave is the slave thr action will be commited to
 * \param action is the synchronization action that will be commited
 */
-void PiercedSyncMaster::commitSyncAction(PiercedSyncSlave *slave, const PiercedSyncAction &action)
+void PiercedSyncMaster::commitSyncAction(PiercedSyncSlave *slave, const PiercedSyncAction &action) const
 {
     slave->commitSyncAction(action);
 }
@@ -372,7 +372,7 @@ void PiercedSyncMaster::journalSyncAction(const PiercedSyncAction &action)
 *
 * \param slave is the slave that will be unregistered
 */
-void PiercedSyncMaster::unregisterSlave(const PiercedSyncSlave *slave)
+void PiercedSyncMaster::unregisterSlave(const PiercedSyncSlave *slave) const
 {
     // Check if the slave was actually registered
     if (!isSlaveRegistered(slave)) {
@@ -475,7 +475,7 @@ bool PiercedSyncMaster::isSynced() const
 * \param enabled is set to true the synchronization will be enabled, otherwise
 *  it will be disabled
 */
-void PiercedSyncMaster::setSyncEnabled(bool enabled)
+void PiercedSyncMaster::setSyncEnabled(bool enabled) const
 {
     m_syncEnabled = enabled;
 }
