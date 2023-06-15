@@ -98,7 +98,7 @@ public:
 
     // Methods for synchronizing the storage
     void setStaticKernel(const PiercedKernel<id_t> *kernel);
-    void setDynamicKernel(PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode);
+    void setDynamicKernel(const PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode);
     void unsetKernel(bool release = true);
     const PiercedKernel<id_t> * getKernel() const;
     KernelType getKernelType() const;
@@ -108,19 +108,19 @@ public:
     void swap(PiercedStorageSyncSlave<id_t> &other) noexcept;
 
 protected:
-    const PiercedKernel<id_t> *m_const_kernel;
-    PiercedKernel<id_t> *m_kernel;
+    const PiercedKernel<id_t> *m_kernel;
+    KernelType m_kernelType;
 
     // Constructors and initialization
     PiercedStorageSyncSlave();
     PiercedStorageSyncSlave(const PiercedKernel<id_t> *kernel);
-    PiercedStorageSyncSlave(PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode);
+    PiercedStorageSyncSlave(const PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode);
     PiercedStorageSyncSlave(const PiercedStorageSyncSlave<id_t> &other);
     PiercedStorageSyncSlave(const PiercedStorageSyncSlave<id_t> &other, const PiercedKernel<id_t> *kernel);
-    PiercedStorageSyncSlave(const PiercedStorageSyncSlave<id_t> &other, PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode);
+    PiercedStorageSyncSlave(const PiercedStorageSyncSlave<id_t> &other, const PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode);
     PiercedStorageSyncSlave(PiercedStorageSyncSlave<id_t> &&other);
     PiercedStorageSyncSlave(PiercedStorageSyncSlave<id_t> &&other, const PiercedKernel<id_t> *kernel);
-    PiercedStorageSyncSlave(PiercedStorageSyncSlave<id_t> &&other, PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode);
+    PiercedStorageSyncSlave(PiercedStorageSyncSlave<id_t> &&other, const PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode);
 
     // Methods for synchronizing the storage
     virtual void _postSetStaticKernel();

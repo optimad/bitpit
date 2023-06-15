@@ -182,7 +182,7 @@ void PiercedVectorStorage<value_t, id_t>::setStaticKernel(const PiercedVectorKer
 * \param syncMode is the synchronization mode that will be used for the storage
 */
 template<typename value_t, typename id_t>
-void PiercedVectorStorage<value_t, id_t>::setDynamicKernel(PiercedVectorKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode)
+void PiercedVectorStorage<value_t, id_t>::setDynamicKernel(const PiercedVectorKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode)
 {
     PiercedStorage<value_t, id_t>::setDynamicKernel(kernel, syncMode);
 }
