@@ -157,8 +157,11 @@ struct PODField
      */
     void setStaticKernel(const PiercedKernel<long> *lkernel)
     {
+        mask->unsetKernel();
         mask->setStaticKernel(lkernel);
+        scalar->unsetKernel();
         scalar->setStaticKernel(lkernel);
+        vector->unsetKernel();
         vector->setStaticKernel(lkernel);
     }
 

@@ -669,6 +669,7 @@ void POD::setExpert(bool mode)
  */
 void POD::setSensorMask(const PiercedStorage<bool> & mask, VolumeKernel * mesh)
 {
+    m_sensorMask.unsetKernel();
     m_sensorMask.setStaticKernel(&(m_podkernel->getMesh()->getCells()));
 
     if (m_staticMesh || mesh == m_podkernel->getMesh()){
@@ -1002,6 +1003,7 @@ void POD::_evalMeanMesh()
     //Compute cells volume
     m_podkernel->evalCellsVolume();
 
+    m_filter.unsetKernel();
     m_filter.setStaticKernel(&(m_podkernel->getMesh()->getCells()));
     m_filter.fill(true);
 
@@ -2322,7 +2324,9 @@ void POD::restore()
 
     // Restore the modes, mean and mesh
     {
+        m_filter.unsetKernel();
         m_filter.setStaticKernel(&m_podkernel->getMesh()->getCells());
+        m_sensorMask.unsetKernel();
         m_sensorMask.setStaticKernel(&m_podkernel->getMesh()->getCells());
 
         if (m_memoryMode == MemoryMode::MEMORY_NORMAL) {
