@@ -76,8 +76,8 @@ public:
 
 
 protected:
-    VolumeKernel            *m_meshPOD;     /**< Pointer to POD mesh*/
-    PiercedStorage<double>   m_cellsVolume; /**< Cells volume of POD mesh*/
+    std::unique_ptr<VolumeKernel> m_meshPOD;     /**< POD mesh*/
+    PiercedStorage<double>        m_cellsVolume; /**< Cells volume of POD mesh*/
 
 #if BITPIT_ENABLE_MPI
     MPI_Comm                m_communicator; /**< MPI communicator */
@@ -85,23 +85,23 @@ protected:
     int                     m_rank;         /**< Local rank of process. */
     int                     m_nProcs;       /**< Number of processes. */
 
-    VolumeMapper*           m_meshmap;      /**< Mapping object TO pod mesh.*/
+    std::unique_ptr<VolumeMapper> m_meshmap;      /**< Mapping object TO pod mesh.*/
 
     bool                    m_dirtymap;     /**< True if mapping has to be recomputed/updated [to be set by set method]. */
 
     void clear();
 
-    void setMesh(VolumeKernel*);
+    void setMesh(std::unique_ptr<VolumeKernel> &&mesh);
 
-    VolumeKernel* readMesh(const pod::SnapshotFile &snap);
+    std::unique_ptr<VolumeKernel> readMesh(const pod::SnapshotFile &snap);
     void restoreMesh(const pod::SnapshotFile &snap);
 
     void clearMapper();
     void setMapperDirty(bool dirty = true);
 
-    virtual VolumeKernel* createMesh() = 0;
+    virtual std::unique_ptr<VolumeKernel> createMesh() = 0;
 
-    virtual VolumeMapper * _computeMapper(const VolumeKernel * mesh, bool fillInv) = 0;
+    virtual std::unique_ptr<VolumeMapper> _computeMapper(const VolumeKernel * mesh, bool fillInv) = 0;
 
     virtual pod::PODField mapPODFieldToPOD(const pod::PODField & field, const std::unordered_set<long> * targetCells) = 0;
     virtual void mapPODFieldFromPOD(pod::PODField & field, const std::unordered_set<long> * targetCells, const pod::PODField & mappedField) = 0;

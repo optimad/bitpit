@@ -61,16 +61,13 @@ PODVolOctree::~PODVolOctree()
  *
  * \return Pointer to instantiated mesh.
  */
-VolumeKernel* PODVolOctree::createMesh()
+std::unique_ptr<VolumeKernel> PODVolOctree::createMesh()
 {
-    VolumeKernel *mesh;
 #if BITPIT_ENABLE_MPI
-    mesh = new VolOctree(getCommunicator());
+    return std::unique_ptr<VolumeKernel>(new VolOctree(getCommunicator()));
 #else
-    mesh = new VolOctree();
+    return std::unique_ptr<VolumeKernel>(new VolOctree());
 #endif
-
-    return mesh;
 }
 
 /**
@@ -79,16 +76,16 @@ VolumeKernel* PODVolOctree::createMesh()
  * \param[in] fillInv If true even the inverse mapping is computed.
  * \return The mapping.
  */
-VolumeMapper * PODVolOctree::_computeMapper(const VolumeKernel* mesh, bool fillInv)
+std::unique_ptr<VolumeMapper> PODVolOctree::_computeMapper(const VolumeKernel* mesh, bool fillInv)
 {
     const VolOctree* meshPOD = static_cast<const VolOctree*>(getMesh());
     const VolOctree* _mesh = static_cast<const VolOctree*>(mesh);
 
-    VolumeMapper *mapper;
+    std::unique_ptr<VolumeMapper> mapper;
 #if BITPIT_ENABLE_MPI
-    mapper = new VolOctreeMapper(meshPOD, _mesh, getCommunicator());
+    mapper = std::unique_ptr<VolumeMapper>(new VolOctreeMapper(meshPOD, _mesh, getCommunicator()));
 #else
-    mapper = new VolOctreeMapper(meshPOD, _mesh);
+    mapper = std::unique_ptr<VolumeMapper>(new VolOctreeMapper(meshPOD, _mesh));
 #endif
 
     mapper->initialize(fillInv);

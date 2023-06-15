@@ -64,22 +64,18 @@ struct SnapshotFile
  */
 struct PODField
 {
-    bool                                    meshOwner;  /**<If true the mesh is released during clear. */
-    VolumeKernel*                           mesh;   /**< Mesh of the field.*/
-    std::unique_ptr<PiercedStorage<bool>>   mask;   /**< Mask: true where the values of the field are defined.*/
-    std::unique_ptr<pod::ScalarStorage>     scalar; /**< Scalar fields.*/
-    std::unique_ptr<pod::VectorStorage>     vector; /**< Vector fields.*/
+    std::shared_ptr<VolumeKernel>           meshStorage; /**< Mesh owned by the field */
+    VolumeKernel*                           mesh;        /**< Mesh of the field.*/
+    std::unique_ptr<PiercedStorage<bool>>   mask;        /**< Mask: true where the values of the field are defined.*/
+    std::unique_ptr<pod::ScalarStorage>     scalar;      /**< Scalar fields.*/
+    std::unique_ptr<pod::VectorStorage>     vector;      /**< Vector fields.*/
 
     /**
      * Creates a new empty pod field.
      */
     PODField()
+        : mesh(nullptr)
     {
-        meshOwner = false;
-        mesh   = nullptr;
-        mask   = nullptr;
-        scalar = nullptr;
-        vector = nullptr;
     }
 
     /**
@@ -90,16 +86,30 @@ struct PODField
         scalar(new PiercedStorage<double>(*field.scalar)),
         vector(new PiercedStorage<std::array<double,3>>(*field.vector))
     {
-        meshOwner = field.meshOwner;
-        mesh   = field.mesh;
+        meshStorage = field.meshStorage;
+        mesh        = field.mesh;
     }
 
     /**
-     * Destroy a pod field.
+     * Move a field.
      */
-    ~PODField()
+    PODField(PODField && field) = default;
+
+    /**
+     * Creates a new empty pod field with fixed number of scalar and vector fields and optional linked kernel.
+     *
+     * \param[in] nsf is the number of scalar fields.
+     * \param[in] nvf is the number of vector fields.
+     * \param[in] lmesh Linked mesh.
+     * \param[in] lkernel Linked kernel.
+     */
+
+    PODField(int nsf, int nvf, VolumeKernel *lmesh = nullptr, const PiercedKernel<long> *lkernel = nullptr)
     {
-        clear();
+        mesh   = lmesh;
+        mask   = std::unique_ptr<PiercedStorage<bool>>(new PiercedStorage<bool>(1, lkernel));
+        scalar = std::unique_ptr<pod::ScalarStorage>(new pod::ScalarStorage(nsf, lkernel));
+        vector = std::unique_ptr<pod::VectorStorage>(new pod::VectorStorage(nvf, lkernel));
     }
 
     /**
@@ -125,29 +135,11 @@ struct PODField
      */
     void swap(PODField &other)
     {
-        std::swap(meshOwner, other.meshOwner);
+        std::swap(meshStorage, other.meshStorage);
         std::swap(mesh, other.mesh);
         std::swap(mask, other.mask);
         std::swap(scalar, other.scalar);
         std::swap(vector, other.vector);
-    }
-
-    /**
-     * Creates a new empty pod field with fixed number of scalar and vector fields and optional linked kernel.
-     *
-     * \param[in] nsf is the number of scalar fields.
-     * \param[in] nvf is the number of vector fields.
-     * \param[in] lmesh Linked mesh.
-     * \param[in] lkernel Linked kernel.
-     */
-
-    PODField(int nsf, int nvf, VolumeKernel *lmesh = nullptr, const PiercedKernel<long> *lkernel = nullptr)
-    {
-        meshOwner = false;
-        mesh   = lmesh;
-        mask   = std::unique_ptr<PiercedStorage<bool>>(new PiercedStorage<bool>(1, lkernel));
-        scalar = std::unique_ptr<pod::ScalarStorage>(new pod::ScalarStorage(nsf, lkernel));
-        vector = std::unique_ptr<pod::VectorStorage>(new pod::VectorStorage(nvf, lkernel));
     }
 
     /**
@@ -184,18 +176,19 @@ struct PODField
      */
     void setMesh(VolumeKernel *lmesh)
     {
+        meshStorage.reset();
         mesh = lmesh;
     }
 
     /**
-     * Set the uniqueness of the mesh of a pod field.
-     * If set the mesh will be destroyed with the pod field.
+     * Set the linked mesh to a pod field.
      *
-     * \param[in] owner Owner of the mesh
+     * \param[in] lmesh Linked mesh
      */
-    void setMeshOwner(bool owner = true)
+    void setMesh(const std::shared_ptr<VolumeKernel> &lmesh)
     {
-        meshOwner = owner;
+        meshStorage = lmesh;
+        mesh        = meshStorage.get();
     }
 
     /**
@@ -204,9 +197,8 @@ struct PODField
      */
     void clear()
     {
-        if (meshOwner){
-            delete mesh;
-        }
+        meshStorage.reset();
+
         mesh = nullptr;
         mask.reset();
         scalar.reset();
