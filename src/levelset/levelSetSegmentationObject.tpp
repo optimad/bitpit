@@ -495,7 +495,6 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
             throw std::runtime_error ("Unable to extract the levelset information from segment " + std::to_string(segmentId) + ".");
         }
 
-
         typename narrow_band_cache_t::KernelIterator narrowBandCacheItr = narrowBandCache->insert(cellId, true) ;
         narrowBandCache->set(narrowBandCacheItr, distance, gradient, segmentId, normal);
 
@@ -594,7 +593,6 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
             std::size_t cellRawId = cellItr.getRawIndex();
             intersectedRawCellIds.insert(cellRawId);
         }
-
     }
 
     // Process the neighbours of the cells that intersect the surface
