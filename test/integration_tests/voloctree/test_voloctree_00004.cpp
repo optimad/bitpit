@@ -189,9 +189,10 @@ int subtest_001(VolOctree *patch_2D, VolOctree *patch_2D_restored)
     binaryWriter2D.close();
 
     // Reset the data
-    booleanStorage.fill(false);
-    doubleStorage.fill(0);
-    arrayDoubleStorage.fill({{0., 0., 0.}});
+    booleanStorage.unsetKernel(true);
+    doubleStorage.unsetKernel(true);
+    arrayDoubleStorage.unsetKernel(true);
+
     stringValue = "";
     stringVector.clear();
     stringArray.fill("");
@@ -433,9 +434,10 @@ int subtest_002(VolOctree *patch_3D, VolOctree *patch_3D_restored)
     binaryWriter3D.close();
 
     // Reset the data
-    booleanStorage.fill(false);
-    doubleStorage.fill(0);
-    arrayDoubleStorage.fill({{0., 0., 0.}});
+    booleanStorage.unsetKernel(true);
+    doubleStorage.unsetKernel(true);
+    arrayDoubleStorage.unsetKernel(true);
+
     stringValue = "";
     stringVector.clear();
     stringArray.fill("");
