@@ -588,9 +588,9 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
         //
         // When the narrowband size is not explicitly set, the cell will always
         // intersects the surface because only cells that intersect the surface
-        // are considered, otherwise we need to check if the absolute distance
-        // associated with the cell is lower than the intersection distance.
-        if (this->m_narrowBandSize < 0 || cellBoundingRadius < std::abs(distance)) {
+        // are considered, otherwise we need to explicitly check if the cell
+        // intersects the surface.
+        if (this->m_narrowBandSize < 0 || this->intersectSurface(cellId, LevelSetIntersectionMode::FAST_GUARANTEE_FALSE) == LevelSetIntersectionStatus::TRUE) {
             std::size_t cellRawId = cellItr.getRawIndex();
             intersectedRawCellIds.insert(cellRawId);
         }
