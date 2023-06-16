@@ -765,7 +765,6 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::updateNarrowBand( LevelSet
         m_segmentation->getSearchTree().findPointClosestCell(cellCentroid, searchRadius, &segmentId, &distance);
         if (segmentId < 0) {
             assert(false && "Should not pass here");
-            continue;
         }
 
         // Evaluate levelset information for the cell
