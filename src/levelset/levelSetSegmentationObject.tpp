@@ -409,15 +409,6 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
     // Get surface information
     const SurfUnstructured &surface = m_segmentation->getSurface();
 
-    // Define search radius
-    //
-    // Search radius should be equal to the maximum between the narrow band
-    // size and the radius of the bounding sphere. This guarantees that, when
-    // the narrow band size is equal or less than zero, the levelset will be
-    // evaluated on the cells that intersect the surface and on all their
-    // first neighbours.
-    double searchRadius = std::max(this->m_narrowBandSize, 2 * levelsetKernel->getCellBoundingRadius());
-
     // Initialize process list
     //
     // Process list is initialized with cells that are certainly inside the
@@ -468,9 +459,19 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
     //
     // The initial process list is gradually expanded considering all the
     // neighbours with a distance less than the search radius.
+    //
+    // Search radius for evaluating cell support should be equal to the maximum
+    // between the narrow band size and the radius of the bounding sphere. This
+    // guarantees that, when the narrow band size is equal or less than zero,
+    // the levelset will be evaluated on all the cells that intersect the
+    // surface.
+    double cellBoundingRadius = levelsetKernel->getCellBoundingRadius();
+    double searchRadius = std::max(this->m_narrowBandSize, cellBoundingRadius);
+
     narrow_band_cache_t *narrowBandCache = this->getNarrowBandCache();
 
-    std::unordered_set<long> outsideNarrowBand;
+    std::unordered_set<long> outsideSearchRadius;
+    std::unordered_set<long> surfaceNeighbourhood;
     while (!processList.empty()) {
         // Get the cell to process
         long cellId = *(processList.begin());
@@ -483,7 +484,7 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
         double distance;
         m_segmentation->getSearchTree().findPointClosestCell(cellCentroid, searchRadius, &segmentId, &distance);
         if(segmentId < 0){
-            outsideNarrowBand.insert(cellId);
+            outsideSearchRadius.insert(cellId);
             continue;
         }
 
@@ -498,14 +499,37 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
         typename narrow_band_cache_t::KernelIterator narrowBandCacheItr = narrowBandCache->insert(cellId, true) ;
         narrowBandCache->set(narrowBandCacheItr, distance, gradient, segmentId, normal);
 
+        // Check if the cell intersects the surface
+        //
+        // When the narrowband size is not explicitly set, the cell will always
+        // intersects the surface because only cells that intersect the surface
+        // are considered, otherwise we need to explicitly check if the cell
+        // intersects the surface.
+        bool intersectSurface = false;
+        if (this->m_narrowBandSize < 0 || this->intersectSurface(cellId, LevelSetIntersectionMode::FAST_GUARANTEE_FALSE) == LevelSetIntersectionStatus::TRUE) {
+            intersectSurface = true;
+        }
+
         // Add cell neighbours to the process list
+        //
+        // Neighbours of cells that intersect the surface needs to be tracked,
+        // because they should be added to the narrow band regardless of their
+        // levelset value.
         if (meshMemoryMode == VolCartesian::MEMORY_LIGHT) {
             for (int face = 0; face < meshCellFaceCount; ++face) {
                 long neighId = mesh.getCellFaceNeighsLinearId(cellId, face);
-                if (neighId >= 0) {
-                    if (!this->isInNarrowBand(neighId) && (outsideNarrowBand.count(neighId) == 0)) {
-                        processList.insert(neighId);
-                    }
+                if (neighId < 0) {
+                    continue;
+                } else if (this->isInNarrowBand(neighId)) {
+                    continue;
+                }
+
+                if (outsideSearchRadius.count(neighId) == 0) {
+                    processList.insert(neighId);
+                }
+
+                if (intersectSurface) {
+                    surfaceNeighbourhood.insert(neighId);
                 }
             }
         } else {
@@ -514,11 +538,79 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
             int nNeighbours = cell.getAdjacencyCount() ;
             for (int n = 0; n < nNeighbours; ++n) {
                 long neighId = neighbours[n];
-                if (!this->isInNarrowBand(neighId) && (outsideNarrowBand.count(neighId) == 0)) {
+                if (this->isInNarrowBand(neighId)) {
+                    continue;
+                }
+
+                if (outsideSearchRadius.count(neighId) == 0) {
                     processList.insert(neighId);
+                }
+
+                if (intersectSurface) {
+                    surfaceNeighbourhood.insert(neighId);
                 }
             }
         }
+    }
+
+    // Process the neighbours of the cells that intersect the surface
+    //
+    // If a cell intersects the surface, all its neighbours shoul be added to
+    // the narrow band.
+    //
+    // The search radius for evaluating the support should be large enugh to
+    // make sure the closest segment is always found. At least one neighbour
+    // of the cell intersects the surface, this means that the distance from
+    // the surface should be less than the distance from the cell centroid (C)
+    // to the furthest point on the bounding sphere of the the neghbours (B).
+    //
+    //            +-------+-------+
+    //            |       |       |       cell  : is the processed cell
+    //            | C +   |   +----->+B   neigh : is the negihbout that
+    //            |       |       |               intersects the surface
+    //            +-------+-------+
+    //             [cell]   [neigh]
+    //
+    // If the largest side of the cell is equal to h and the radius of the
+    // bounding is equal to R, the maximum distance form the surface is:
+    //
+    //                        CB = h + R
+    //
+    // regardless of which neighbour intersects the surface.
+    //
+    // To avoid apporximation errors we arbitrary increase the search radius
+    // by 5%.
+    double neighbourhoodSearchRadius = 0.;
+    for (int d = 0; d < mesh.getDimension(); ++d) {
+        neighbourhoodSearchRadius = std::max(mesh.getSpacing(d), neighbourhoodSearchRadius);
+    }
+    neighbourhoodSearchRadius = 1.05 * (neighbourhoodSearchRadius + cellBoundingRadius);
+
+    for (long cellId : surfaceNeighbourhood) {
+        if (this->isInNarrowBand(cellId)) {
+            continue;
+        }
+
+        // Find segment associated to the cell
+        std::array<double,3> cellCentroid = levelsetKernel->computeCellCentroid(cellId);
+
+        long segmentId;
+        double distance;
+        m_segmentation->getSearchTree().findPointClosestCell(cellCentroid, neighbourhoodSearchRadius, &segmentId, &distance);
+        if (segmentId < 0) {
+            assert(false && "Should not pass here");
+        }
+
+        // Evaluate negihbour leveset information
+        std::array<double,3> gradient;
+        std::array<double,3> normal;
+        int error = m_segmentation->getSegmentInfo(cellCentroid, segmentId, signd, distance, gradient, normal);
+        if (error) {
+            throw std::runtime_error ("Unable to extract the levelset information from segment " + std::to_string(segmentId) + ".");
+        }
+
+        typename narrow_band_cache_t::KernelIterator narrowBandCacheItr = narrowBandCache->insert(cellId, true) ;
+        narrowBandCache->set(narrowBandCacheItr, distance, gradient, segmentId, normal);
     }
 }
 
