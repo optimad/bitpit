@@ -228,6 +228,10 @@ PiercedStorageSyncSlave<id_t>::~PiercedStorageSyncSlave()
 * The storage will NOT be synchronized with the kernel. Every change to the
 * kernel can potentially invalidate the link between kernel and storage.
 *
+* If a kernel has already been set for the storage, it is mandatory to unset it
+* before setting a new one. Calling this function when the kernel is already
+* associated with a kernel will lead to an exception being thrown.
+*
 * \param kernel is the kernel that will be set
 */
 template<typename id_t>
@@ -250,9 +254,6 @@ void PiercedStorageSyncSlave<id_t>::setStaticKernel(const PiercedKernel<id_t> *k
 /**
 * Internal function that will be called after setting a static kernel.
 *
-* The storage will NOT be synchronized with the kernel. Every change to the
-* kernel can potentially invalidate the link between kernel and storage.
-*
 * \param kernel is the kernel that will be set
 */
 template<typename id_t>
@@ -265,6 +266,10 @@ void PiercedStorageSyncSlave<id_t>::_postSetStaticKernel()
 * Sets the kernel that will be used by the storage.
 *
 * The storage will dynamically synchronized with the kernel.
+*
+* If a kernel has already been set for the storage, it is mandatory to unset it
+* before setting a new one. Calling this function when the kernel is already
+* associated with a kernel will lead to an exception being thrown.
 *
 * \param kernel is the kernel that will be set
 * \param syncMode is the synchronization mode that will be used for the storage
@@ -285,8 +290,6 @@ void PiercedStorageSyncSlave<id_t>::setDynamicKernel(PiercedKernel<id_t> *kernel
 
 /**
 * Internal function that will be called after setting a dynamic kernel.
-*
-* The storage will dynamically synchronized with the kernel.
 */
 template<typename id_t>
 void PiercedStorageSyncSlave<id_t>::_postSetDynamicKernel()
