@@ -611,8 +611,8 @@ void gradLimiting2D(
 // ========================================================================== //
 
 // Local variables
-int                                 idummy;
-double                              ddummy;
+int                                 idummy = 0;
+double                              ddummy = 0.;
 std::vector<bool>                   inserted(nSimplex, false);
 std::vector< std::array<int,2> >    map(nSimplex), *map_ = &map;
 bitpit::MinPQueue<double, int>      heap(nSimplex, true, map_);
