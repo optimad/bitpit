@@ -751,10 +751,24 @@ void DiscreteStencil<weight_t>::optimize(double tolerance)
 template<typename weight_t>
 void DiscreteStencil<weight_t>::renumber(const std::unordered_map<long, long> &map)
 {
+    renumber([&map] (long id) -> long { return map.at(id); });
+}
+
+/*!
+* Renumber the indexes of the stencil according to the specified map.
+*
+* \param map is the functor that will perform the mapping, the functor should have an
+* operator() that take as an argument the original id and return the renumbered id.
+*/
+template<typename weight_t>
+template<typename Mapper>
+void DiscreteStencil<weight_t>::renumber(Mapper map)
+{
     for (long &id : m_pattern) {
-        id = map.at(id);
+        id = map(id);
     }
 }
+
 
 /*!
 * Add a new item that complements the stencil to zero.

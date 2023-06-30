@@ -147,6 +147,8 @@ public:
 
     void optimize(double tolerance = 1.e-12);
     void renumber(const std::unordered_map<long, long> &map);
+    template<typename Mapper>
+    void renumber(Mapper mapper);
     void addComplementToZero(long id);
     void zero();
 
