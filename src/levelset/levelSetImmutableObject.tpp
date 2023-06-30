@@ -52,31 +52,17 @@ LevelSetImmutableObject<narrow_band_cache_t>::LevelSetImmutableObject(int id)
 /*!
  * Constructor.
  *
- * \param[in,out] source is an object whose contents will be acquired by the
+* \param[in,out] source is an object whose contents will be acquired by the
  * immutable object. Since source contents will be moved into the object, on
  * output the source will be in an undefined state
  */
 template<typename narrow_band_cache_t>
-LevelSetImmutableObject<narrow_band_cache_t>::LevelSetImmutableObject(LevelSetCachedObject<narrow_band_cache_t> *source)
-    : LevelSetObject(*source),
-      LevelSetCachedObjectInterface<narrow_band_cache_t>(std::move(*source)),
-      LevelSetSignedObjectInterface(std::move(*source))
-{
-}
-
-/*!
- * Constructor.
- *
-    * \param[in,out] source is an object whose contents will be acquired by the
- * immutable object. Since source contents will be moved into the object, on
- * output the source will be in an undefined state
- */
-template<typename narrow_band_cache_t>
-LevelSetImmutableObject<narrow_band_cache_t>::LevelSetImmutableObject(LevelSetBooleanObject *source)
+template<typename object_t>
+LevelSetImmutableObject<narrow_band_cache_t>::LevelSetImmutableObject(object_t *source)
     : LevelSetObject(*source)
 {
     // Mesh information
-    const VolumeKernel *mesh = (const_cast<const LevelSetBooleanObject *>(source))->getKernel()->getMesh();
+    const VolumeKernel *mesh = (const_cast<const object_t *>(source))->getKernel()->getMesh();
 
     VolumeKernel::CellConstIterator cellBegin = mesh->cellConstBegin();
     VolumeKernel::CellConstIterator cellEnd   = mesh->cellConstEnd();
@@ -114,6 +100,21 @@ LevelSetImmutableObject<narrow_band_cache_t>::LevelSetImmutableObject(LevelSetBo
 
         signStorage->setDirty(false);
     }
+}
+
+/*!
+ * Constructor.
+ *
+ * \param[in,out] source is an object whose contents will be acquired by the
+ * immutable object. Since source contents will be moved into the object, on
+ * output the source will be in an undefined state
+ */
+template<typename narrow_band_cache_t>
+LevelSetImmutableObject<narrow_band_cache_t>::LevelSetImmutableObject(LevelSetCachedObject<narrow_band_cache_t> *source)
+    : LevelSetObject(*source),
+      LevelSetCachedObjectInterface<narrow_band_cache_t>(std::move(*source)),
+      LevelSetSignedObjectInterface(std::move(*source))
+{
 }
 
 /*!

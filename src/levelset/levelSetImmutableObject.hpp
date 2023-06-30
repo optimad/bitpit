@@ -26,7 +26,6 @@
 #define __BITPIT_LEVELSET_IMMUTABLE_OBJECT_HPP__
 
 #include "levelSetObject.hpp"
-#include "levelSetBooleanObject.hpp"
 #include "levelSetCachedObject.hpp"
 #include "levelSetSignedObject.hpp"
 
@@ -47,8 +46,9 @@ class LevelSetImmutableObject : public LevelSetObject, public LevelSetImmutableO
 {
 
 public:
+    template<typename object_t>
+    LevelSetImmutableObject(object_t *object);
     LevelSetImmutableObject(LevelSetCachedObject<narrow_band_cache_t> *object);
-    LevelSetImmutableObject(LevelSetBooleanObject *object);
 
     LevelSetImmutableObject * clone() const override;
 
