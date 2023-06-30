@@ -342,21 +342,22 @@ public:
 		Adaption status
 	*/
 	enum AdaptionStatus {
-		ADAPTION_UNSUPPORTED = -1,
-		ADAPTION_CLEAN,
-		ADAPTION_DIRTY,
-		ADAPTION_PREPARED,
-		ADAPTION_ALTERED
+		ADAPTION_UNSUPPORTED = -1, //!< Adaptation is not supported by the patch
+		ADAPTION_CLEAN,            //!< There are no adaptation operations in progress
+		ADAPTION_DIRTY,            //!< There are cells marked for adaptation, but the changes
+		                           //!< has not been performed
+		ADAPTION_PREPARED,         //!< Partitioning prepare has been called
+		ADAPTION_ALTERED           //!< Partitioning alters has been called
 	};
 
 	/*!
 		Partitioning status
 	*/
 	enum PartitioningStatus {
-		PARTITIONING_UNSUPPORTED = -1,
-		PARTITIONING_CLEAN,
-		PARTITIONING_PREPARED,
-		PARTITIONING_ALTERED
+		PARTITIONING_UNSUPPORTED = -1, //!< Partitioning is not supported by the patch
+		PARTITIONING_CLEAN,            //!< There are no partitioning operations in progress
+		PARTITIONING_PREPARED,         //!< Partitioning prepare has been called
+		PARTITIONING_ALTERED           //!< Partitioning alter has been called
 	};
 
 	PatchKernel(PatchKernel &&other);
