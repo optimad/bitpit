@@ -87,18 +87,18 @@ std::unique_ptr<LevelSetObject> LevelSetObjectFactory::_createImmutableObject(co
     switch (storageType) {
 
     case LevelSetStorageType::SPARSE:
-        if (LevelSetBooleanObject *booleanSource = dynamic_cast<LevelSetBooleanObject *>(source)) {
-            return std::unique_ptr<LevelSetObject>(new LevelSetImmutableObject<narrow_band_cache_t<typename kernel_t::SparseStorageManager>>(booleanSource));
-        } else if (LevelSetCachedObject<narrow_band_cache_t<typename kernel_t::SparseStorageManager>> *cachedSource = dynamic_cast<LevelSetCachedObject<narrow_band_cache_t<typename kernel_t::SparseStorageManager>> *>(source)) {
+        if (LevelSetCachedObject<narrow_band_cache_t<typename kernel_t::SparseStorageManager>> *cachedSource = dynamic_cast<LevelSetCachedObject<narrow_band_cache_t<typename kernel_t::SparseStorageManager>> *>(source)) {
             return std::unique_ptr<LevelSetObject>(new LevelSetImmutableObject<narrow_band_cache_t<typename kernel_t::SparseStorageManager>>(cachedSource));
+        } else {
+            return std::unique_ptr<LevelSetObject>(new LevelSetImmutableObject<narrow_band_cache_t<typename kernel_t::SparseStorageManager>>(source));
         }
         break;
 
     case LevelSetStorageType::DENSE:
-        if (LevelSetBooleanObject *booleanSource = dynamic_cast<LevelSetBooleanObject *>(source)) {
-            return std::unique_ptr<LevelSetObject>(new LevelSetImmutableObject<narrow_band_cache_t<typename kernel_t::DenseStorageManager>>(booleanSource));
-        } else if (LevelSetCachedObject<narrow_band_cache_t<typename kernel_t::DenseStorageManager>> *cachedSource = dynamic_cast<LevelSetCachedObject<narrow_band_cache_t<typename kernel_t::DenseStorageManager>> *>(source)) {
+        if (LevelSetCachedObject<narrow_band_cache_t<typename kernel_t::DenseStorageManager>> *cachedSource = dynamic_cast<LevelSetCachedObject<narrow_band_cache_t<typename kernel_t::DenseStorageManager>> *>(source)) {
             return std::unique_ptr<LevelSetObject>(new LevelSetImmutableObject<narrow_band_cache_t<typename kernel_t::DenseStorageManager>>(cachedSource));
+        } else {
+            return std::unique_ptr<LevelSetObject>(new LevelSetImmutableObject<narrow_band_cache_t<typename kernel_t::DenseStorageManager>>(source));
         }
         break;
 
