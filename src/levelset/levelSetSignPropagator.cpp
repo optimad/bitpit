@@ -406,11 +406,7 @@ void LevelSetSignPropagator::initializePropagation(const LevelSetObjectInterface
     // flagged as external.
     const LevelSetBoundedObject *boundedObject = dynamic_cast<const LevelSetBoundedObject *>(object);
 
-    m_nExternal = 0;
     if (boundedObject) {
-        // Get tolerance for distance comparison
-        double distanceTolerance = m_mesh->getTol();
-
         // Evaluate the bounding box of the object
         //
         // The current process may only have the portion of the object needed for
@@ -424,63 +420,94 @@ void LevelSetSignPropagator::initializePropagation(const LevelSetObjectInterface
         boundedObject->getBoundingBox(objectBoxMin, objectBoxMax);
 #endif
 
-        // Check if the patch intersects the bounding box of the object
-        std::array<double,3> patchBoxMin;
-        std::array<double,3> patchBoxMax;
-        m_mesh->getBoundingBox(patchBoxMin, patchBoxMax);
-
-        bool isPatchIntersected = CGElem::intersectBoxBox(patchBoxMin, patchBoxMax, objectBoxMin, objectBoxMax, 3, distanceTolerance);
-
-        // Detect external cells
-        VolumeKernel::CellConstIterator cellBegin = m_mesh->cellConstBegin();
-        VolumeKernel::CellConstIterator cellEnd   = m_mesh->cellConstEnd();
-        for (VolumeKernel::CellConstIterator itr = cellBegin; itr != cellEnd; ++itr) {
-            // Cells inside the narrowband cannot be external
-            long cellId = itr.getId();
-            if (object->isInNarrowBand(cellId)) {
-                continue;
+        // Check if the bounding box of the object is empty
+        bool isObjectBoxEmpty = false;
+        for (int i = 0; i < 3; ++i) {
+            if (objectBoxMax[i] < objectBoxMin[i]) {
+                isObjectBoxEmpty = true;
+                break;
             }
+        }
 
-            // Check if the centroid is inside the bounding box
-            //
-            // Cells with the centroid inside the bounding box of the object
-            // cannot be external cells
-            if (isPatchIntersected) {
-                double geometricTolerance = m_mesh->getTol();
-                std::array<double, 3> cellCentroid = object->getKernel()->computeCellCentroid(cellId);
+        // Identify cell outside the bounding box of the object
+        if (!isObjectBoxEmpty) {
+            // Get tolerance for distance comparison
+            double distanceTolerance = m_mesh->getTol();
 
-                bool isCentroidInternal = true;
-                for (int i = 0; i < 3; ++i) {
-                    if (cellCentroid[i] < objectBoxMin[i] - geometricTolerance || cellCentroid[i] > objectBoxMin[i] + geometricTolerance) {
-                        isCentroidInternal = false;
-                        break;
+            // Check if the patch intersects the bounding box of the object
+            std::array<double,3> patchBoxMin;
+            std::array<double,3> patchBoxMax;
+            m_mesh->getBoundingBox(patchBoxMin, patchBoxMax);
+
+            bool isPatchIntersected = CGElem::intersectBoxBox(patchBoxMin, patchBoxMax, objectBoxMin, objectBoxMax, 3, distanceTolerance);
+
+            // Detect external cells
+            VolumeKernel::CellConstIterator cellBegin = m_mesh->cellConstBegin();
+            VolumeKernel::CellConstIterator cellEnd   = m_mesh->cellConstEnd();
+
+            m_nExternal = 0;
+            for (VolumeKernel::CellConstIterator itr = cellBegin; itr != cellEnd; ++itr) {
+                // Cells inside the narrowband cannot be external
+                long cellId = itr.getId();
+                if (object->isInNarrowBand(cellId)) {
+                    continue;
+                }
+
+                // Check if the centroid is inside the bounding box
+                //
+                // Cells with the centroid inside the bounding box of the object
+                // cannot be external cells
+                if (isPatchIntersected) {
+                    double geometricTolerance = m_mesh->getTol();
+                    std::array<double, 3> cellCentroid = object->getKernel()->computeCellCentroid(cellId);
+
+                    bool isCentroidInternal = true;
+                    for (int i = 0; i < 3; ++i) {
+                        if (cellCentroid[i] < objectBoxMin[i] - geometricTolerance || cellCentroid[i] > objectBoxMin[i] + geometricTolerance) {
+                            isCentroidInternal = false;
+                            break;
+                        }
+                    }
+
+                    if (isCentroidInternal) {
+                        continue;
                     }
                 }
 
-                if (isCentroidInternal) {
+                // Check if the cell is inside the bounding box of the object
+                std::array<double,3> cellBoxMin;
+                std::array<double,3> cellBoxMax;
+                m_mesh->evalCellBoundingBox(cellId, &cellBoxMin, &cellBoxMax);
+
+                bool isCellIntersected = CGElem::intersectBoxBox(cellBoxMin, cellBoxMax, objectBoxMin, objectBoxMax, 3, distanceTolerance);
+                if (isCellIntersected) {
                     continue;
                 }
+
+                std::size_t cellRawId = itr.getRawIndex();
+                m_propagationStates.rawAt(cellRawId) = STATE_EXTERNAL;
+                ++m_nExternal;
             }
 
-            // Check if the cell is inside the bounding box of the object
-            std::array<double,3> cellBoxMin;
-            std::array<double,3> cellBoxMax;
-            m_mesh->evalCellBoundingBox(cellId, &cellBoxMin, &cellBoxMax);
+            // Initialize the sign of the external region
+            m_externalSign = LevelSetSignStorage::SIGN_UNDEFINED;
+        } else {
+            // All cells are external
+            m_nExternal = m_mesh->getCellCount();
 
-            bool isCellIntersected = CGElem::intersectBoxBox(cellBoxMin, cellBoxMax, objectBoxMin, objectBoxMax, 3, distanceTolerance);
-            if (isCellIntersected) {
-                continue;
-            }
-
-            std::size_t cellRawId = itr.getRawIndex();
-            m_propagationStates.rawAt(cellRawId) = STATE_EXTERNAL;
-            ++m_nExternal;
+            // Initialize the sign of the external region
+            m_externalSign = LevelSetSignStorage::SIGN_POSITIVE;
         }
-        m_nWaiting -= m_nExternal;
-    }
 
-    // Initialize the sign of the external region
-    m_externalSign = LevelSetSignStorage::SIGN_UNDEFINED;
+        // Update the number of cells waiting for sing propagation
+        m_nWaiting -= m_nExternal;
+    } else {
+        // It's not possible to identify
+        m_nExternal = 0;
+
+        // Initialize the sign of the external region
+        m_externalSign = LevelSetSignStorage::SIGN_UNDEFINED;
+    }
 }
 
 /*!
