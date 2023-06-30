@@ -88,6 +88,8 @@ class LevelSet{
 
     void                    setMesh( VolumeKernel* ) ;
 
+    int                     addObjectComplement( int, int id=levelSetDefaults::OBJECT ) ;
+
     int                     addObject( std::unique_ptr<SurfaceKernel> &&, double, int id = levelSetDefaults::OBJECT ) ;
     int                     addObject( SurfaceKernel *, double, int id = levelSetDefaults::OBJECT ) ;
     int                     addObject( std::unique_ptr<SurfUnstructured> &&, double, int id = levelSetDefaults::OBJECT ) ;

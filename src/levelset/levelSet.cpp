@@ -143,6 +143,24 @@ void LevelSet::setMesh( VolumeKernel* mesh ) {
 }
 
 /*!
+ * Adds the complement of the specified object.
+ * Objects can be added to the levelset only after setting the mesh.
+ * @param[in] sourceId id of source object
+ * @param[in] id id to be assigned to object. In case default value is passed the insertion order will be used as identifier
+ * @return identifier of new object
+ */
+int LevelSet::addObjectComplement( int sourceId, int id ) {
+
+    assert(m_kernel && " levelset: setMesh must be called before adding a mask object ");
+
+    LevelSetObject *sourceObject = m_objects.at(sourceId).get() ;
+
+    std::unique_ptr<LevelSetObject> object = LevelSetObjectFactory::createComplementObject( m_kernel.get(), m_storageType, id, sourceObject ) ;
+
+    return registerObject(std::move(object));
+};
+
+/*!
  * Adds a segmentation object
  * Objects can be added to the levelset only after setting the mesh.
  * @param[in] segmentation surface segmentation
