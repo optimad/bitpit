@@ -46,6 +46,7 @@
 #include "levelSetSegmentationObject.hpp"
 #include "levelSetSignedObject.hpp"
 #include "levelSetBooleanObject.hpp"
+#include "levelSetComplementObject.hpp"
 #include "levelSetMaskObject.hpp"
 
 #include "levelSet.hpp"

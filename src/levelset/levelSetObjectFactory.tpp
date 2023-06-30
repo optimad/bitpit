@@ -51,6 +51,22 @@ std::unique_ptr<LevelSetObject> LevelSetObjectFactory::createBooleanObject(const
 }
 
 /*!
+ * Create a new complement object for the specified kernel.
+ *
+ * \param kernel is the kernel
+ * \param storageType is the storage type
+ * \param args are the arguments that will be forwarded to the constructor
+ */
+template<typename... Args>
+std::unique_ptr<LevelSetObject> LevelSetObjectFactory::createComplementObject(const LevelSetKernel *kernel, LevelSetStorageType storageType, Args&&... args)
+{
+    BITPIT_UNUSED(kernel);
+    BITPIT_UNUSED(storageType);
+
+    return std::unique_ptr<LevelSetObject>(new LevelSetComplementObject(std::forward<Args>(args)...));
+}
+
+/*!
  * Create a new immutable object for the specified kernel.
  *
  * \param kernel is the kernel
