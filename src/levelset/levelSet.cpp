@@ -259,7 +259,7 @@ int LevelSet::addObject( LevelSetBooleanOperation operation, const std::vector<i
  */
 int LevelSet::addObject( const std::unordered_set<long> &list, int id ) {
 
-    assert(m_kernel && " levelset: setMesh must be called befor adding a mask object ");
+    assert(m_kernel && " levelset: setMesh must be called before adding a mask object ");
 
     std::unique_ptr<LevelSetObject> object = LevelSetObjectFactory::createMaskObject<LevelSetMaskNarrowBandCache, int &, const std::unordered_set<long> &, const VolumeKernel &>( m_kernel.get(), m_storageType, id, list, *m_kernel->getMesh() ) ;
 
@@ -277,7 +277,7 @@ int LevelSet::addObject( const std::unordered_set<long> &list, int id ) {
  */
 int LevelSet::addObject( const std::vector<long> &list, long refInterface, bool invert, int id ) {
 
-    assert(m_kernel && " levelset: setMesh must be called befor adding a mask object ");
+    assert(m_kernel && " levelset: setMesh must be called before adding a mask object ");
 
     std::unique_ptr<LevelSetObject> object = LevelSetObjectFactory::createMaskObject<LevelSetMaskNarrowBandCache, int &, const std::vector<long> &, long &, bool &, const VolumeKernel &>( m_kernel.get(), m_storageType, id, list, refInterface, invert, *m_kernel->getMesh() ) ;
 
