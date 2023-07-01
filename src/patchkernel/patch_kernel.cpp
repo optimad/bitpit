@@ -5734,9 +5734,9 @@ bool PatchKernel::isSameFace(const Cell &cell_A, int face_A, const Cell &cell_B,
 /*!
  * Get the vertices that are on the specified cells.
  *
- * The result will contain a list of unique interfaces that are on the given
+ * The result will contain a list of unique vertices that are on the given
  * cells. The list will be populated iterating the cells and addding the
- * interfaces as they are encountered.
+ * vertices as they are encountered.
  *
  * \param cellIds are the ids of the cell whose vertices will be gathered
  * \param interior controls if interior vertices will be gathered
@@ -5761,7 +5761,7 @@ std::vector<long> PatchKernel::getOrderedCellsVertices(const std::vector<long> &
     for (long cellId : cellIds) {
         const Cell &cell = getCell(cellId);
         for (long vertexId : cell.getVertexIds()) {
-            if (verticesSet.count(vertexId) == 0) {
+            if (verticesSet.count(vertexId) != 0) {
                 continue;
             }
 
