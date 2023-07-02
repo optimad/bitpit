@@ -145,7 +145,19 @@ int subtest_001(int rank, VolUnstructured *patch_2D, VolUnstructured *patch_2D_r
         }
     }
 
-    patch_2D->partition(cellRanks, true, true);
+    std::vector<bitpit::adaption::Info> adaptionInfo = patch_2D->partition(cellRanks, true, true);
+
+    for (auto & info : adaptionInfo) {
+        if (info.entity == bitpit::adaption::Entity::ENTITY_CELL) {
+            log::cout() << "cell info previous: " << info.previous << std::endl;
+            log::cout() << "cell info current: " << info.current << std::endl;
+        }
+        else if (info.entity == bitpit::adaption::Entity::ENTITY_VERTEX) {
+            log::cout() << "vertex info previous: " << info.previous << std::endl;
+            log::cout() << "vertex info current: " << info.current << std::endl;
+        }
+
+    }
 
     // Show patch info
     log::cout() << "Cell count:          " << patch_2D->getCellCount() << std::endl;
@@ -154,6 +166,9 @@ int subtest_001(int rank, VolUnstructured *patch_2D, VolUnstructured *patch_2D_r
     log::cout() << "Vertex count:        " << patch_2D->getVertexCount() << std::endl;
 
     patch_2D->write();
+
+    exit(0);
+
 
     // Create data associated to the patch
     PiercedStorage<bool> booleanStorage(1, &patch_2D->getCells());

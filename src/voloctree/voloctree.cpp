@@ -1641,31 +1641,11 @@ void VolOctree::createCells(StitchInfo &stitchInfo, std::istream *restoreStream,
 		}
 	}
 
-#if BITPIT_ENABLE_MPI==1
-	// Track internal vertices received from other partitions
-	std::unordered_set<long> recvVertices;
-	if (vertexAdaptionData) {
-		for (const adaption::Info &adaptionInfo : *cellAdaptionData) {
-			if (adaptionInfo.type != adaption::TYPE_PARTITION_RECV) {
-				continue;
-			}
-
-			std::size_t vertexRecvInfoId = vertexAdaptionData->insert(adaption::TYPE_PARTITION_RECV, adaption::ENTITY_VERTEX, adaptionInfo.rank);
-			adaption::Info &vertexRecvInfo = vertexAdaptionData->at(vertexRecvInfoId);
-			vertexRecvInfo.current = getOrderedCellsVertices(adaptionInfo.current, true, false);
-			recvVertices.insert(vertexRecvInfo.current.begin(), vertexRecvInfo.current.end());
-		}
-	}
-#endif
-
-	// Track vertex creation
+	// Track creation of vertices
 	if (!trackedCreatedVertices.empty()) {
 		std::size_t vertexCreationInfoId = vertexAdaptionData->insert(adaption::TYPE_CREATION, adaption::ENTITY_VERTEX);
 		adaption::Info &vertexCreationInfo = vertexAdaptionData->at(vertexCreationInfoId);
 		vertexCreationInfo.current = std::move(trackedCreatedVertices);
-#if BITPIT_ENABLE_MPI==1
-		adaption::InfoCollection::removeIds(recvVertices, &(vertexCreationInfo.current));
-#endif
 		trackedCreatedVertices.clear();
 	}
 }
@@ -1690,23 +1670,6 @@ VolOctree::StitchInfo VolOctree::deleteCells(const adaption::InfoCollection &cel
 	// Info of the cells
 	int nCellVertices = m_cellTypeInfo->nVertices;
 	int nCellFaces    = m_cellTypeInfo->nFaces;
-
-#if BITPIT_ENABLE_MPI==1
-	// Track internal vertices sent to other partitions
-	std::unordered_set<long> trackedSentVertices;
-	if (vertexAdaptionData) {
-		for (const adaption::Info &adaptionInfo : cellAdaptionData) {
-			if (adaptionInfo.type != adaption::TYPE_PARTITION_SEND) {
-				continue;
-			}
-
-			std::size_t vertexSendInfoId = vertexAdaptionData->insert(adaption::TYPE_PARTITION_SEND, adaption::ENTITY_VERTEX, adaptionInfo.rank);
-			adaption::Info &vertexSendInfo = vertexAdaptionData->at(vertexSendInfoId);
-			vertexSendInfo.previous = getOrderedCellsVertices(adaptionInfo.previous, true, false);
-			trackedSentVertices.insert(vertexSendInfo.previous.begin(), vertexSendInfo.previous.end());
-		}
-	}
-#endif
 
 	// Delete cells
 	std::vector<long> deadCells;
@@ -1856,9 +1819,6 @@ VolOctree::StitchInfo VolOctree::deleteCells(const adaption::InfoCollection &cel
 		std::size_t deletionInfoId = vertexAdaptionData->insert(adaption::TYPE_DELETION, adaption::ENTITY_VERTEX);
 		adaption::Info &deletionInfo = vertexAdaptionData->at(deletionInfoId);
 		deletionInfo.previous = std::vector<long>(deadVertices.begin(), deadVertices.end());
-#if BITPIT_ENABLE_MPI==1
-		adaption::InfoCollection::removeIds(trackedSentVertices, &(deletionInfo.previous));
-#endif
 	}
 
 	// Done
