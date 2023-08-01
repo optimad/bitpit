@@ -2191,7 +2191,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter(bool trackPartitioni
 }
 
 /*!
-    Get the ghost that will change ownership after partitioning.
+    Get the ghost cells that will change ownership after partitioning.
 
     Some of the cells that are send during a partitioning may be ghosts on
     other processes. We need to find out the final ghost owners after the
