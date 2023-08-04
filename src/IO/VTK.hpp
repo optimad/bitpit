@@ -249,6 +249,8 @@ class VTKField{
 
         //methods
     public:
+        static unsigned getComponentCount(VTKFieldType fieldType);
+
         virtual ~VTKField() = default;
 
         VTKField();
@@ -257,6 +259,7 @@ class VTKField{
         const std::string &     getName() const;
         VTKDataType             getDataType() const;
         VTKFieldType            getFieldType() const;
+        unsigned                getComponentCount() const;
         VTKLocation             getLocation() const;
         VTKFormat               getCodification() const;
         uint64_t                getOffset() const;

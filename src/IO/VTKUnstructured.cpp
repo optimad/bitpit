@@ -693,7 +693,7 @@ uint64_t VTKUnstructuredGrid::calcFieldEntries( const VTKField &field ){
     const std::string &name = field.getName() ;
 
     if( name == "Points" ){
-        entries = m_points *static_cast<int>(VTKFieldType::VECTOR) ; 
+        entries = m_points * VTKField::getComponentCount(VTKFieldType::VECTOR) ;
 
     } else if( name == "offsets" ){
         entries = m_cells ;
@@ -723,10 +723,7 @@ uint64_t VTKUnstructuredGrid::calcFieldEntries( const VTKField &field ){
 
         }
 
-        VTKFieldType fieldType( field.getFieldType() ) ;
-        assert( fieldType != VTKFieldType::UNDEFINED) ;
-
-        entries *= static_cast<uint64_t>(fieldType) ;
+        entries *= field.getComponentCount() ;
 
     }
 
@@ -745,7 +742,7 @@ uint8_t VTKUnstructuredGrid::calcFieldComponents( const VTKField &field ){
     const std::string &name = field.getName() ;
 
     if( name == "Points" ){
-        comp = static_cast<int>(VTKFieldType::VECTOR) ; 
+        comp = VTKField::getComponentCount(VTKFieldType::VECTOR) ;
 
     } else if( name == "offsets" ){
         comp = 1 ;
@@ -769,11 +766,7 @@ uint8_t VTKUnstructuredGrid::calcFieldComponents( const VTKField &field ){
         comp = 1 ;
 
     } else{
-
-        VTKFieldType fieldType( field.getFieldType() ) ;
-        assert( fieldType != VTKFieldType::UNDEFINED) ;
-
-        comp = static_cast<uint8_t>(fieldType) ;
+        comp = field.getComponentCount();
 
     }
 

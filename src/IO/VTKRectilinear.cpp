@@ -534,10 +534,7 @@ uint64_t VTKRectilinearGrid::calcFieldEntries( const VTKField &field ){
 
         }
 
-        VTKFieldType fieldType( field.getFieldType() ) ;
-        assert( fieldType != VTKFieldType::UNDEFINED) ;
-
-        entries *= static_cast<uint64_t>(fieldType) ;
+        entries *= field.getComponentCount() ;
 
     }
 
@@ -559,10 +556,7 @@ uint8_t VTKRectilinearGrid::calcFieldComponents( const VTKField &field ){
         comp = 1 ;
 
     } else{
-        VTKFieldType fieldType( field.getFieldType() ) ;
-        assert( fieldType != VTKFieldType::UNDEFINED) ;
-
-        comp = static_cast<uint8_t>(fieldType) ;
+        comp = field.getComponentCount();
 
     }
 

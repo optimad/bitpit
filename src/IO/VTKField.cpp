@@ -34,6 +34,27 @@ namespace bitpit{
  */
 
 /*!
+ * get the number of field components
+ * @return number of field components
+ */
+unsigned VTKField::getComponentCount(VTKFieldType fieldType) {
+
+    switch (fieldType) {
+
+    case VTKFieldType::SCALAR:
+        return 1;
+
+    case VTKFieldType::VECTOR:
+        return 3;
+
+    default:
+        throw std::runtime_error("Unable to identify the number of components of field type " + std::to_string(static_cast<int>(fieldType)));
+
+    }
+}
+
+
+/*!
  * Default constructor
  */
 VTKField::VTKField(){
@@ -150,6 +171,15 @@ const std::string & VTKField::getName() const{
  */
 VTKFieldType VTKField::getFieldType() const{ 
     return m_fieldType; 
+}
+
+/*!
+ * get the number of field components
+ * @return number of field components
+ */
+unsigned VTKField::getComponentCount() const{
+
+    return getComponentCount(getFieldType());
 }
 
 /*!
