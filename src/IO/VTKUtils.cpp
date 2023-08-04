@@ -104,6 +104,8 @@ bool vtk::convertStringToDataArray( const std::string &line, VTKField &field  ){
 
         if(components==3)
             comp=VTKFieldType::VECTOR ;
+        else if(components==9)
+            comp=VTKFieldType::TENSOR ;
 
         vtk::convertStringToEnum( typ, type) ;
         vtk::convertStringToEnum( code, codex) ;
