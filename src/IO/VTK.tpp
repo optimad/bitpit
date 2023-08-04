@@ -47,7 +47,7 @@ VTKField& VTK::addData( const std::string &name, std::vector<T> &data ){
  * Codification will be set according to default value [appended] or to value set by VTK::setDataCodex( VTKFormat ) or VTK::setCodex( VTKFormat )
  * @tparam T type of std::vector<>
  * @param[in] name name of field
- * @param[in] comp type of data field [ VTKFieldType::SCALAR/ VTKFieldType::VECTOR ] 
+ * @param[in] comp type of data field [ VTKFieldType::SCALAR/VECTOR ]
  * @param[in] loc location of data [VTKLocation::CELL/VTKLocation::POINT]
  * @param[in] data data
  */
@@ -68,7 +68,7 @@ VTKField& VTK::addData(const std::string &name, VTKFieldType comp,  VTKLocation 
  * Codification will be set according to default value [appended] or to value set by VTK::setDataCodex( VTKFormat ) or VTK::setCodex( VTKFormat )
  * @tparam T type of data to be written or read
  * @param[in] name name of field
- * @param[in] comp type of data field [ VTKFieldType::SCALAR/ VTKFieldType::VECTOR ] 
+ * @param[in] comp type of data field [ VTKFieldType::SCALAR/VECTOR ]
  * @param[in] loc location of data [VTKLocation::CELL/VTKLocation::POINT]
  * @param[in] streamer data streamer
  */

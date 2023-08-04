@@ -187,7 +187,7 @@ VTKUnstructuredGrid::VTKUnstructuredGrid( VTKElementType elementType ) :VTK() {
 
     for( auto & field : m_geometry ){
         field.setLocation( VTKLocation::CELL ) ;
-        field.setFieldType( VTKFieldType::KNOWN_BY_CLASS ) ;
+        field.setFieldType( VTKFieldType::SCALAR ) ;
         field.setDataType( VTKDataType::Int32 ) ;
         field.setCodification(m_geomCodex);
     }
