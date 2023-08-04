@@ -142,10 +142,7 @@ bool vtk::convertStringToDataArray( const std::string &line, VTKField &field  ){
 std::string  vtk::convertDataArrayToString( const VTKField &field ){
 
     std::stringstream   os("") ;
-    unsigned            comp = static_cast<unsigned>(field.getFieldType())  ;
-
-    if( field.getFieldType() != VTKFieldType::SCALAR && field.getFieldType() != VTKFieldType::VECTOR )
-        comp = 1 ;
+    unsigned            comp = field.getComponentCount() ;
 
     os << "        <DataArray "
         << "type=\"" << vtk::convertEnumToString( field.getDataType() ) << "\" "
@@ -172,10 +169,7 @@ std::string  vtk::convertDataArrayToString( const VTKField &field ){
 std::string  vtk::convertPDataArrayToString( const VTKField &field ){
 
     std::stringstream  os("") ;
-    unsigned            comp = static_cast<unsigned>(field.getFieldType())  ;
-
-    if( field.getFieldType() != VTKFieldType::SCALAR && field.getFieldType() != VTKFieldType::VECTOR )
-        comp = 1 ;
+    unsigned            comp = field.getComponentCount() ;
 
     os << "        <PDataArray "
         << "type=\"" << vtk::convertEnumToString(field.getDataType()) << "\" "
