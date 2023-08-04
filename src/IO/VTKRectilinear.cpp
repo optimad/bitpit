@@ -53,7 +53,7 @@ VTKRectilinearGrid::VTKRectilinearGrid( ) :VTK() {
 
     for( auto & field : m_geometry ){
         field.setLocation( VTKLocation::POINT ) ;
-        field.setFieldType( VTKFieldType::KNOWN_BY_CLASS ) ;
+        field.setFieldType( VTKFieldType::SCALAR ) ;
         field.setDataType( VTKDataType::Float64 ) ;
         field.setCodification(m_geomCodex);
     }

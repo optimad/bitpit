@@ -92,7 +92,7 @@ void VTKField::setCodification( VTKFormat cod ){
 
 /*!
  * set type of data field
- * @param[in] type type of data field [VTKFieldType::SCALAR/VECTOR/KNOWN_BY_CLASS]
+ * @param[in] type type of data field [ VTKFieldType::SCALAR/VECTOR ]
  */
 void VTKField::setFieldType( VTKFieldType type ){ 
     m_fieldType= type; 

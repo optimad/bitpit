@@ -59,7 +59,6 @@ enum class VTKFieldType {
     UNDEFINED = -1,
     SCALAR = 1,
     VECTOR = 3,
-    KNOWN_BY_CLASS = 4,
 };
 
 /*!
@@ -238,7 +237,7 @@ class VTKField{
     //members
     protected:
         std::string             m_name;                     /**< name of the field */
-        VTKFieldType            m_fieldType;                /**< type of field [ VTKFieldType::SCALAR/VECTOR/KNOWN_BY_CLASS ] */
+        VTKFieldType            m_fieldType;                /**< type of field [ VTKFieldType::SCALAR/VECTOR ] */
         VTKDataType             m_dataType;                 /**< type of data [  VTKDataType::[[U]Int[8/16/32/64] / Float[32/64] ]] */
         VTKLocation             m_location;                 /**< cell or point data [ VTKLocation::CELL/VTKLocation::POINT] */
         VTKFormat               m_codification ;            /**< Type of codification [VTKFormat::ASCII, VTKFormat::APPENDED] */
