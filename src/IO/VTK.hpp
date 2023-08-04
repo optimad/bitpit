@@ -54,11 +54,16 @@ enum class VTKWriteMode {
 /*!
  * @ingroup VTKEnums
  * Enum class defining types of fields whic may be written through class VTK
+ *
+ * Only second-order (3x3) tensors are supported. They should be passed to the VTK classes as
+ * 9-component vectors. It's up to the user of the VTK classes to specify how the tensors are
+ * linearized (e.g., row-major order).
  */
 enum class VTKFieldType {
     UNDEFINED = -1,
-    SCALAR = 1,
-    VECTOR = 3,
+    SCALAR    = 0,
+    VECTOR    = 1,
+    TENSOR    = 2,
 };
 
 /*!
@@ -237,7 +242,7 @@ class VTKField{
     //members
     protected:
         std::string             m_name;                     /**< name of the field */
-        VTKFieldType            m_fieldType;                /**< type of field [ VTKFieldType::SCALAR/VECTOR ] */
+        VTKFieldType            m_fieldType;                /**< type of field [ VTKFieldType::SCALAR/VECTOR/TENSOR ] */
         VTKDataType             m_dataType;                 /**< type of data [  VTKDataType::[[U]Int[8/16/32/64] / Float[32/64] ]] */
         VTKLocation             m_location;                 /**< cell or point data [ VTKLocation::CELL/VTKLocation::POINT] */
         VTKFormat               m_codification ;            /**< Type of codification [VTKFormat::ASCII, VTKFormat::APPENDED] */

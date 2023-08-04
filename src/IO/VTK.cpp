@@ -926,6 +926,7 @@ void VTK::writeDataHeader( std::fstream &str, bool parallel ){
             if( field.isEnabled() && field.getLocation() == location){
                 if(      field.getFieldType() == VTKFieldType::SCALAR ) scalars <<  field.getName() << " " ;
                 else if( field.getFieldType() == VTKFieldType::VECTOR ) vectors <<  field.getName() << " " ;
+                else if( field.getFieldType() == VTKFieldType::TENSOR ) vectors <<  field.getName() << " " ;
             }
 
         }

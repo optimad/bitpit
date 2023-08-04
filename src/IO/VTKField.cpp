@@ -47,6 +47,9 @@ unsigned VTKField::getComponentCount(VTKFieldType fieldType) {
     case VTKFieldType::VECTOR:
         return 3;
 
+    case VTKFieldType::TENSOR:
+        return 9;
+
     default:
         throw std::runtime_error("Unable to identify the number of components of field type " + std::to_string(static_cast<int>(fieldType)));
 
@@ -113,7 +116,7 @@ void VTKField::setCodification( VTKFormat cod ){
 
 /*!
  * set type of data field
- * @param[in] type type of data field [ VTKFieldType::SCALAR/VECTOR ]
+ * @param[in] type type of data field [ VTKFieldType::SCALAR/VECTOR/TENSOR ]
  */
 void VTKField::setFieldType( VTKFieldType type ){ 
     m_fieldType= type; 

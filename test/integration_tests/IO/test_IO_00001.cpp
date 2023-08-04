@@ -41,8 +41,9 @@ int subtest_001()
     vector<array<double,3>>     points ;
     vector<vector<int>>          connectivity ;
 
-    vector<double>              pressure ;
-    vector<array<double,3>>     velocity ;
+    vector<double>           pressure ;
+    vector<array<double,3>>  velocity ;
+    vector<array<double,9>>  velocity_gradient ;
 
 
     points.resize(8) ;
@@ -51,6 +52,7 @@ int subtest_001()
 
     pressure.resize(8) ;
     velocity.resize(1) ;
+    velocity_gradient.resize(1) ;
 
     points[0][0]  =  0.  ;
     points[0][1]  =  0.  ;
@@ -88,9 +90,13 @@ int subtest_001()
     for( int i=0; i<8; i++)  connectivity[0][i] = i ;
 
     for( int i=0; i<8; i++)  pressure[i] = (double) i ;
-    velocity[0][0] = 1. ;
-    velocity[0][1] = 2. ;
-    velocity[0][2] = 3. ;
+
+    for (int d = 0; d < 3; ++d) {
+        velocity[0][d] = d + 1 ;
+        for (int k = 0; k < 3; ++k) {
+            velocity_gradient[0][d * 3 + k] = (d + 1) * 1000 + (k + 1) ;
+        }
+    }
 
     { //Write only grid to VTK in ascii format
         cout << "Write only grid to VTK in ascii format" << endl;
@@ -115,6 +121,7 @@ int subtest_001()
         vtk.setGeomData( bitpit::VTKUnstructuredField::CONNECTIVITY, connectivity) ;
         vtk.addData( "press", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::POINT, pressure) ;
         vtk.addData( "vel", bitpit::VTKFieldType::VECTOR, bitpit::VTKLocation::CELL, velocity) ;
+        vtk.addData( "vel_grad", bitpit::VTKFieldType::TENSOR, bitpit::VTKLocation::CELL, velocity_gradient) ;
 
         vtk.write() ;
     }
