@@ -2124,7 +2124,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningPrepare(const std::unorder
 		MPI_Allreduce(MPI_IN_PLACE, &m_partitioningSerialization, 1, MPI_C_BOOL, MPI_LAND, m_communicator);
 	}
 
-	// Track changes that involve data exchange
+	// Track cell changes that involve data exchange
 	std::vector<adaption::Info> partitioningData;
 	if (trackPartitioning) {
 		std::vector<long> cellsToSend;
@@ -2155,19 +2155,100 @@ std::vector<adaption::Info> PatchKernel::_partitioningPrepare(const std::unorder
 
 			// Fill tracking data structures
 			partitioningData.emplace_back();
-			adaption::Info &partitioningVertexInfo = partitioningData.back();
-			partitioningVertexInfo.entity   = adaption::ENTITY_VERTEX;
-			partitioningVertexInfo.type     = adaption::TYPE_PARTITION_SEND;
-			partitioningVertexInfo.rank     = recvRank;
-			partitioningVertexInfo.previous = getOrderedCellsVertices(cellsToSend, true, false);
-
-			partitioningData.emplace_back();
 			adaption::Info &partitioningCellInfo = partitioningData.back();
 			partitioningCellInfo.entity   = adaption::ENTITY_CELL;
 			partitioningCellInfo.type     = adaption::TYPE_PARTITION_SEND;
 			partitioningCellInfo.rank     = recvRank;
 			partitioningCellInfo.previous = std::move(cellsToSend);
 		}
+	}
+
+	// Track vertex changes that involve data exchange
+
+	PiercedStorage<int, long>> vertexPartitionedOwners(1, &m_vertices);
+	vertexPartitionedOwners.fill(std::numeric_limits<int>::max());
+
+	// Identify the owner of the vertices of cells that will be sent
+	for (CellIterator cellItr = internalCellBegin(); cellItr != internalCellEnd(); ++cellItr) {
+		// Get cell owner
+		//
+		// We need to consider only cells that will be sent to other partition.
+		long cellId = cellItr.getId();
+		auto cellOwnerItr = m_partitioningOutgoings.find(cellId);
+		if (cellOwnerItr == m_partitioningOutgoings.end()) {
+			continue;
+		}
+
+		// Update owner of cell vertices
+		ConstProxyVector<long> cellVertexIds = cellItr.getVertexIds();
+		for (long vertexId : cellVertexIds) {
+			int *vertexOwner = vertexPartitionedOwners.data(vertexId);
+			*vertexOwner = std::min(*cellOwnerItr, *vertexOwner);
+		}
+	}
+
+	// Identify the owner source cells
+	for (CellIterator cellItr = internalCellBegin(); cellItr != internalCellEnd(); ++cellItr) {
+		// Get cell owner
+		//
+		// We need to consider only cells that will be sent to other partition.
+		long cellId = cellItr.getId();
+		auto cellOwnerItr = m_partitioningOutgoings.find(cellId);
+		if (cellOwnerItr == m_partitioningOutgoings.end()) {
+			continue;
+		}
+
+		// Update owner of cell vertices
+		ConstProxyVector<long> cellVertexIds = cellItr.getVertexIds();
+		for (long vertexId : cellVertexIds) {
+			int *vertexOwner = vertexPartitionedOwners.data(vertexId);
+			*vertexOwner = std::min(*cellOwnerItr, *vertexOwner);
+		}
+	}
+
+	// Exchange owner information
+
+
+
+	exchange on ghosts
+
+	// Identify the vertices that will be sent to other partitions
+	for (VertexIterator vertexItr = internalVertexBegin(); vertexItr != internalVertexEnd(); ++vertexItr) {
+		long vertexId    = vertexItr.getId();
+		long vertexRawId = vertexItr.getRawIndex();
+
+		int vertexOwner            = getVertexOwner();
+		int vertexPartitionedOwner = vertexPartitionedOwners.rawAt(vertexRawId);
+		if (vertexOwner != vertexPartitionedOwner) {
+			m_partitioningVertexOutgoings[vertexId] = vertexPartitionedOwner;
+		}
+	}
+
+	std::unordered_map<int, std::size_t> vertexSendListSizes;
+	for (const auto &entry : m_partitioningVertexOutgoings) {
+		long vertexId = m_partitioningVertexOutgoings.first;
+		++vertexSendLists[vertexId];
+	}
+
+	std::unordered_map<adaption::Info *> partitioningVertexInfoCollection;
+	for (const auto &entry : vertexSendListSizes) {
+		int receiver = entry.first;
+		std::size_t nExchangedVertices = entry.second;
+
+		partitioningData.emplace_back();
+		adaption::Info &partitioningVertexInfo = partitioningData.back();
+		partitioningVertexInfo.entity = adaption::ENTITY_VERTEX;
+		partitioningVertexInfo.type   = adaption::TYPE_PARTITION_SEND;
+		partitioningVertexInfo.rank   = receiver;
+		partitioningVertexInfo.previous.reserve(nExchangedVertices);
+
+		partitioningVertexInfoCollection[receiver] = *partitioningVertexInfo;
+	}
+
+	for (const auto &entry : m_partitioningVertexOutgoings) {
+		long vertexId = m_partitioningVertexOutgoings.first;
+		long vertexRecv = m_partitioningVertexOutgoings.second;
+		partitioningVertexInfoCollection.at(vertexRecv).previous.push_back(vertexId);
 	}
 
 	return partitioningData;
@@ -4378,7 +4459,7 @@ const std::vector<long> & PatchKernel::getGhostExchangeSources(int rank) const
 }
 
 /*!
-	Sets the owner of the specified ghost vertex.
+	Sets the information of the specified ghost vertex.
 
 	\param id is the id of the ghost vertex
 	\param owner is the rank of the process that owns the ghost vertex
@@ -4425,7 +4506,7 @@ void PatchKernel::clearGhostVerticesInfo()
 }
 
 /*!
-	Sets the information of the specified ghost.
+	Sets the information of the specified ghost cell.
 
 	\param id is the id of the ghost cell
 	\param owner is the rank of the process that owns the ghost cell
