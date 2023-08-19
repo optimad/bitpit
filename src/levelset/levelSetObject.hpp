@@ -93,12 +93,13 @@ class LevelSetObject : public VTKBaseStreamer, public virtual LevelSetObjectInte
     LevelSetKernel *                            getKernel() override;
 
     void                                        clear();
+    void                                        update( const std::vector<adaption::Info> &adaptionData, bool signedDistance );
 
     void                                        setSizeNarrowBand(double) ;
 
     virtual void                                computeNarrowBand(bool);
-    virtual void                                updateNarrowBand(const std::vector<adaption::Info> &, bool);
-    void                                        clearAfterMeshAdaption(const std::vector<adaption::Info>&);
+    virtual void                                updateNarrowBand(const std::vector<long> &cellIds, bool signd);
+    virtual void                                pruneNarrowBand(const std::vector<long> &cellIds);
 
     short                                       evalValueSign(double) const ;
 
@@ -116,7 +117,6 @@ class LevelSetObject : public VTKBaseStreamer, public virtual LevelSetObjectInte
     double                                      m_narrowBandSize;   /**< Size of narrow band */
 
     virtual void                                _clear();
-    virtual void                                _clearAfterMeshAdaption(const std::vector<adaption::Info>&) ;
     virtual void                                _dump(std::ostream &);
     virtual void                                _restore( std::istream &);
 

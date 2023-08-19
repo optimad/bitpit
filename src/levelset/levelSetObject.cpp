@@ -409,6 +409,87 @@ double LevelSetObject::getMaxSurfaceFeatureSize() const{
 }
 
 /*!
+ * Updates the object after an adaption.
+ *
+ * @param[in] adaptionData are the information about the adaption
+ * @param[in] signedDistance controls if signed- or unsigned- distance function should be calculated
+ */
+void LevelSetObject::update( const std::vector<adaption::Info> &adaptionData, bool signedDistance ) {
+
+    std::vector<long> pruneList ;
+    std::vector<long> updateList ;
+#if BITPIT_ENABLE_MPI
+    std::unordered_map<int, std::vector<long>> exchangeSendList ;
+    std::unordered_map<int, std::vector<long>> exchangeRecvList ;
+#endif
+    for( const adaption::Info &adaptionInfo : adaptionData){
+        if( adaptionInfo.entity != adaption::Entity::ENTITY_CELL){
+            continue;
+        }
+
+        switch (adaptionInfo.type) {
+
+#if BITPIT_ENABLE_MPI
+        case adaption::Type::TYPE_PARTITION_SEND:
+            exchangeSendList.insert({{adaptionInfo.rank,adaptionInfo.previous}}) ;
+            break;
+
+        case adaption::Type::TYPE_PARTITION_RECV:
+            exchangeRecvList.insert({{adaptionInfo.rank,adaptionInfo.current}}) ;
+            break;
+#endif
+
+        default:
+            updateList.insert(updateList.end(), adaptionInfo.current.begin(), adaptionInfo.current.end()) ;
+            break;
+
+        }
+
+        pruneList.insert(pruneList.end(), adaptionInfo.previous.begin(), adaptionInfo.previous.end()) ;
+    }
+
+#if BITPIT_ENABLE_MPI
+    // Initialize data exchange
+    bool exchangeData = (!exchangeSendList.empty() || !exchangeRecvList.empty());
+    if (m_kernel->getMesh()->isPartitioned()) {
+        MPI_Allreduce(MPI_IN_PLACE, &exchangeData, 1, MPI_C_BOOL, MPI_LOR, m_kernel->getCommunicator()) ;
+    }
+
+    std::unique_ptr<DataCommunicator> dataCommunicator;
+    if (exchangeData) {
+        dataCommunicator = m_kernel->createDataCommunicator() ;
+    }
+
+    // Start data exchange
+    if (exchangeData) {
+        startExchange( exchangeSendList, dataCommunicator.get() ) ;
+    }
+#endif
+
+    // Prune narrow band data structures
+    if (!pruneList.empty()) {
+        pruneNarrowBand( pruneList ) ;
+    }
+
+#if BITPIT_ENABLE_MPI
+    // Complete data exchange
+    if (exchangeData) {
+        completeExchange( exchangeRecvList, dataCommunicator.get() ) ;
+    }
+#endif
+
+    // Update narrow band
+    if (!updateList.empty()) {
+        updateNarrowBand( updateList, signedDistance ) ;
+    }
+
+#if BITPIT_ENABLE_MPI
+    // Update data on ghost cells
+    exchangeGhosts() ;
+#endif
+}
+
+/*!
  * Calculates the value and gradient of the levelset function within the narrow band
  * @param[in] signd if signed distances should be calculted
  */
@@ -417,29 +498,21 @@ void LevelSetObject::computeNarrowBand(bool signd){
 }
 
 /*!
- * Updates the value and gradient of the levelset function within the narrow band
- * @param[in] adaptionData are the information about the adaption
+ * Updates the narrow band levelset function of the specified cells.
+ * @param[in] cellIds are the ids of the cells that will be updated
  * @param[in] signd if signed distances should be calculted
  */
-void LevelSetObject::updateNarrowBand(const std::vector<adaption::Info> &adaptionData, bool signd){
-    BITPIT_UNUSED(adaptionData);
+void LevelSetObject::updateNarrowBand(const std::vector<long> &cellIds, bool signd){
+    BITPIT_UNUSED(cellIds);
     BITPIT_UNUSED(signd);
 }
 
 /*! 
- * Deletes non-existing items and items outside the narrow band after grid adaption.
- * @param[in] adaptionData are the information about the adaption
+ * Clear narrow band information associated with the specified cells.
+ * @param[in] cellIds are the ids of the cells for which narrow band information will be deleted
  */
-void LevelSetObject::clearAfterMeshAdaption( const std::vector<adaption::Info> &adaptionData ){
-    _clearAfterMeshAdaption( adaptionData ) ;
-}
-
-/*!
- * Clears data structure after mesh modification
- * @param[in] adaptionData are the information about the adaption
- */
-void LevelSetObject::_clearAfterMeshAdaption( const std::vector<adaption::Info> &adaptionData ){
-    BITPIT_UNUSED(adaptionData) ;
+void LevelSetObject::pruneNarrowBand(const std::vector<long> &cellIds){
+    BITPIT_UNUSED(cellIds);
 }
 
 /*! 

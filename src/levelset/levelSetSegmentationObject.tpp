@@ -281,12 +281,12 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand(bool sig
 }
 
 /*!
- * Updates the levelset function within the narrow band after mesh adaptation.
- * @param[in] adaptionData are the information about the adaption
+ * Updates the narrow band levelset function of the specified cells.
+ * @param[in] cellIds are the ids of the cells that will be updated
  * @param[in] signd if signed- or unsigned- distance function should be calculated
  */
 template<typename narrow_band_cache_t>
-void LevelSetSegmentationObject<narrow_band_cache_t>::updateNarrowBand( const std::vector<adaption::Info> &adaptionData, bool signd){
+void LevelSetSegmentationObject<narrow_band_cache_t>::updateNarrowBand( const std::vector<long> &cellIds, bool signd){
 
     log::cout() << "Updating levelset within the narrow band... " << std::endl;
 
@@ -301,7 +301,7 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::updateNarrowBand( const st
     }
 
     // All other patches are handled with the same method
-    updateNarrowBand(this->m_kernel, adaptionData, signd);
+    updateNarrowBand(this->m_kernel, cellIds, signd);
 
 }
 
@@ -488,8 +488,8 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
         // The search radius is evaluated as the maximum value between the
         // narroband size and the distance above which the cell will surely
         // not intersect the surface. In this way, cells that intersect the
-        // surface are always included in the narrowband, even if their
-        // distance from the surface is greater than then narrowband size
+        // surface are always included in the narrow band, even if their
+        // distance from the surface is greater than the narrow band size
         // explicitly set by the user.
         //
         // If no segment is identified the cell is not processed.
@@ -581,7 +581,7 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
 }
 
 /*!
- * Updates the levelset within the narrow band after a grid adaption.
+ * Updates the narrow band levelset function of the specified cells.
  * If the size of the narrow band has been set, the method will compute the
  * levelset values on the cells that intersect the surface, on all their
  * first neighbours and on the cells with a distance from the surface less
@@ -590,11 +590,11 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::computeNarrowBand( LevelSe
  * evaluated only on the cells that intersect the surface and on all their
  * first neighbours.
  * @param[in] levelsetKernel the octree LevelSetKernel
- * @param[in] adaptionData are the information about the adaption
+ * @param[in] cellIds are the ids of the cells that will be updated
  * @param[in] signd whether signed distance should be calculated
  */
 template<typename narrow_band_cache_t>
-void LevelSetSegmentationObject<narrow_band_cache_t>::updateNarrowBand( LevelSetKernel *levelsetKernel, const std::vector<adaption::Info> &adaptionData, bool signd){
+void LevelSetSegmentationObject<narrow_band_cache_t>::updateNarrowBand( LevelSetKernel *levelsetKernel, const std::vector<long> &cellIds, bool signd){
 
     VolumeKernel &mesh = *(levelsetKernel->getMesh()) ;
     narrow_band_cache_t *narrowBandCache = this->getNarrowBandCache();
@@ -606,54 +606,40 @@ void LevelSetSegmentationObject<narrow_band_cache_t>::updateNarrowBand( LevelSet
     // When searching for the segment associated to a cell, the search radius
     // is evaluated as the maximum value between the narroband size and the
     // distance above which the cell will surely not intersect the surface.
-    for( const adaption::Info &adaptionInfo : adaptionData ){
+    for( long cellId : cellIds ){
 
-        if( adaptionInfo.entity != adaption::Entity::ENTITY_CELL ){
+        // Identify the segment associated with the cell
+        //
+        // The search radius is evaluated as the maximum value between the
+        // narroband size and the distance above which the cell will surely
+        // not intersect the surface. In this way, cells that intersect the
+        // surface are always included in the narrow band, even if their
+        // distance from the surface is greater than the narrow band size
+        // explicitly set by the user.
+        //
+        // If no segment is identified the cell is not processed.
+        std::array<double,3> centroid = levelsetKernel->computeCellCentroid(cellId);
+
+        double searchRadius = std::max(this->m_narrowBandSize, levelsetKernel->computeCellBoundingRadius(cellId));
+
+        long segmentId;
+        double distance;
+        getSearchTree().findPointClosestCell(centroid, searchRadius, &segmentId, &distance);
+        if (segmentId < 0) {
+            cellsOutsideNarrowband.push_back(cellId);
             continue;
         }
 
-        if( adaptionInfo.type == adaption::Type::TYPE_PARTITION_SEND){
-            continue;
-        } else if( adaptionInfo.type == adaption::Type::TYPE_PARTITION_RECV){
-            continue;
+        // Evaluate levelset information
+        std::array<double,3> gradient;
+        std::array<double,3> normal;
+        int error = getSegmentInfo(centroid, segmentId, signd, distance, gradient, normal);
+        if (error) {
+            throw std::runtime_error ("Unable to extract the levelset information from segment " + std::to_string(segmentId) + ".");
         }
 
-        for( long cellId : adaptionInfo.current ){
-
-            // Identify the segment associated with the cell
-            //
-            // The search radius is evaluated as the maximum value between the
-            // narroband size and the distance above which the cell will surely
-            // not intersect the surface. In this way, cells that intersect the
-            // surface are always included in the narrowband, even if their
-            // distance from the surface is greater than then narrowband size
-            // explicitly set by the user.
-            //
-            // If no segment is identified the cell is not processed.
-            std::array<double,3> centroid = levelsetKernel->computeCellCentroid(cellId);
-
-            double searchRadius = std::max(this->m_narrowBandSize, levelsetKernel->computeCellBoundingRadius(cellId));
-
-            long segmentId;
-            double distance;
-            getSearchTree().findPointClosestCell(centroid, searchRadius, &segmentId, &distance);
-            if (segmentId < 0) {
-                cellsOutsideNarrowband.push_back(cellId);
-                continue;
-            }
-
-            // Evaluate levelset information
-            std::array<double,3> gradient;
-            std::array<double,3> normal;
-            int error = getSegmentInfo(centroid, segmentId, signd, distance, gradient, normal);
-            if (error) {
-                throw std::runtime_error ("Unable to extract the levelset information from segment " + std::to_string(segmentId) + ".");
-            }
-
-            typename narrow_band_cache_t::KernelIterator narrowBandCacheItr = narrowBandCache->insert(cellId, true) ;
-            narrowBandCache->set(narrowBandCacheItr, distance, gradient, segmentId, normal);
-        }
-
+        typename narrow_band_cache_t::KernelIterator narrowBandCacheItr = narrowBandCache->insert(cellId, true) ;
+        narrowBandCache->set(narrowBandCacheItr, distance, gradient, segmentId, normal);
     }
 
     // Cells with neighbours that intersect the surface need to be added to

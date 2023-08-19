@@ -223,9 +223,10 @@ template<typename narrow_band_cache_t>
 class LevelSetCachedObject : public LevelSetObject, public LevelSetCachedObjectInterface<narrow_band_cache_t>, public LevelSetSignedObjectInterface {
 
     protected:
-    void                                        _clear( ) override ;
 
-    void                                        _clearAfterMeshAdaption(const std::vector<adaption::Info> & ) override ;
+    void                                        pruneNarrowBand(const std::vector<long> &cellIds) override ;
+
+    void                                        _clear( ) override ;
 
     void                                        _dump( std::ostream &) override ;
     void                                        _restore( std::istream &) override ;

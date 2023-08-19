@@ -825,8 +825,8 @@ void LevelSet::update( const std::vector<adaption::Info> &adaptionData, const st
 
     assert(m_kernel && "LevelSet::setMesh() must be called prior to LevelSet::partition()");
 
-    VolumeKernel *mesh = m_kernel->getMesh();
 #if BITPIT_ENABLE_MPI
+    const VolumeKernel *mesh = m_kernel->getMesh();
     bool isMeshPartitioned = mesh->isPartitioned();
 #endif
 
@@ -839,57 +839,27 @@ void LevelSet::update( const std::vector<adaption::Info> &adaptionData, const st
     }
 #endif
 
-    // Inspect adaption data to detect what needs to be updated
-    std::unordered_map<int,std::vector<long>> partitioningSendList ;
-    std::unordered_map<int,std::vector<long>> partitioningRecvList ;
-
-    bool updateNarrowBand   = false;
-    bool updatePartitioning = false;
+    // Check if the levelset needs to be updated
+    bool isDirty = false;
     for( const adaption::Info &adaptionInfo : adaptionData){
         if( adaptionInfo.entity != adaption::Entity::ENTITY_CELL){
             continue;
         }
 
-        if( adaptionInfo.type == adaption::Type::TYPE_PARTITION_SEND){
-            partitioningSendList.insert({{adaptionInfo.rank,adaptionInfo.previous}}) ;
-            updatePartitioning = true;
-        } else if( adaptionInfo.type == adaption::Type::TYPE_PARTITION_RECV){
-            partitioningRecvList.insert({{adaptionInfo.rank,adaptionInfo.current}}) ;
-            updatePartitioning = true;
-        } else if (adaptionInfo.type == adaption::Type::TYPE_DELETION) {
-            updateNarrowBand = true;
-        } else {
-            if (!updateNarrowBand) {
-                for (long cellId : adaptionInfo.current) {
-                    const Cell &cell = mesh->getCell(cellId);
-                    if (cell.isInterior()) {
-                        updateNarrowBand = true;
-                        break;
-                    }
-                }
-            }
-        }
+        isDirty = true;
+        break;
     }
 
 #if BITPIT_ENABLE_MPI
     if (isMeshPartitioned) {
-        MPI_Allreduce(MPI_IN_PLACE, &updateNarrowBand, 1, MPI_C_BOOL, MPI_LOR, m_kernel->getCommunicator());
-        MPI_Allreduce(MPI_IN_PLACE, &updatePartitioning, 1, MPI_C_BOOL, MPI_LOR, m_kernel->getCommunicator());
+        MPI_Allreduce(MPI_IN_PLACE, &isDirty, 1, MPI_C_BOOL, MPI_LOR, m_kernel->getCommunicator());
     }
 #endif
 
     // Early return if no update is needed
-    if (!updateNarrowBand && !updatePartitioning) {
+    if (!isDirty) {
         return;
     }
-
-#if BITPIT_ENABLE_MPI
-    // Get data communicator for updating partitioning
-    std::unique_ptr<DataCommunicator> dataCommunicator;
-    if (updatePartitioning) {
-        dataCommunicator = m_kernel->createDataCommunicator();
-    }
-#endif
 
     // Update kernel
     m_kernel->update( adaptionData ) ;
@@ -914,13 +884,6 @@ void LevelSet::update( const std::vector<adaption::Info> &adaptionData, const st
             signPropagationObject = nullptr;
         }
 
-#if BITPIT_ENABLE_MPI
-        // Start partitioning update
-        if (updatePartitioning) {
-            object->startExchange( partitioningSendList, dataCommunicator.get() );
-        }
-#endif
-
         // Propagated sign is now dirty
         //
         // The propagated sign will be set as non-dirty by the sign propagator.
@@ -928,25 +891,8 @@ void LevelSet::update( const std::vector<adaption::Info> &adaptionData, const st
             signPropagationObject->setSignStorageDirty(true);
         }
 
-        // Clear data structures after mesh update
-        object->clearAfterMeshAdaption( adaptionData ) ;
-
-#if BITPIT_ENABLE_MPI
-        // Complete partitioning update
-        if (updatePartitioning) {
-            object->completeExchange( partitioningRecvList, dataCommunicator.get() );
-        }
-#endif
-
-        // Update levelset inside narrow band
-        if (updateNarrowBand) {
-            object->updateNarrowBand( adaptionData, m_signedDistance ) ;
-        }
-
-#if BITPIT_ENABLE_MPI
-        // Update data on ghost cells
-        object->exchangeGhosts();
-#endif
+        // Update object
+        object->update( adaptionData, m_signedDistance );
 
         // Propagate sign
         //
