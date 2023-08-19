@@ -215,8 +215,8 @@ class LevelSetSegmentationObject : public LevelSetSegmentationKernel, public Lev
     void                                        computeNarrowBand(bool) override;
     void                                        computeNarrowBand( LevelSetCartesianKernel *, bool);
     void                                        computeNarrowBand( LevelSetKernel *, bool);
-    void                                        updateNarrowBand(const std::vector<adaption::Info> &, bool) override;
-    void                                        updateNarrowBand(LevelSetKernel *, const std::vector<adaption::Info> &, bool);
+    void                                        updateNarrowBand(const std::vector<long> &cellIds, bool signd) override;
+    void                                        updateNarrowBand(LevelSetKernel *, const std::vector<long> &cellIds, bool signd);
 
     public:
 

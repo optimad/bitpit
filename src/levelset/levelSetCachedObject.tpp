@@ -354,24 +354,17 @@ std::array<double,3> LevelSetCachedObject<narrow_band_cache_t>::getGradient(long
 
 }
 
-/*! 
- * Deletes non-existing items after grid adaption.
- * @param[in] adaptionData are the information about the adaption
+/*!
+ * Clear narrow band information associated with the specified cells.
+ * @param[in] cellIds are the ids of the cells for which narrow band information will be deleted
  */
 template<typename narrow_band_cache_t>
-void LevelSetCachedObject<narrow_band_cache_t>::_clearAfterMeshAdaption( const std::vector<adaption::Info> &adaptionData ){
+void LevelSetCachedObject<narrow_band_cache_t>::pruneNarrowBand(const std::vector<long> &cellIds){
 
-    // Clear stale narrow band entries
     narrow_band_cache_t *narrowBandCache = this->getNarrowBandCache();
-    for (const adaption::Info &adaptionInfo : adaptionData) {
-        if (adaptionInfo.entity != adaption::Entity::ENTITY_CELL) {
-            continue;
-        }
-
-        for (long cellId : adaptionInfo.previous) {
-            if (narrowBandCache->contains(cellId)) {
-                narrowBandCache->erase(cellId, false);
-            }
+    for (long cellId : cellIds) {
+        if (narrowBandCache->contains(cellId)) {
+            narrowBandCache->erase(cellId, false);
         }
     }
 
