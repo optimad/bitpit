@@ -49,7 +49,8 @@ template class LevelSetCachedObject<LevelSetNarrowBandCache<LevelSetDirectStorag
  * \param kernel is the container associated with the storage manager
  */
 LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>::LevelSetNarrowBandCache(Kernel *kernel)
-    : LevelSetExternalPiercedStorageManager(kernel), LevelSetNarrowBandCacheBase<LevelSetExternalPiercedStorageManager>()
+    : LevelSetExternalPiercedStorageManager(kernel, KERNEL_SYNC_MODE_AUTOMATIC),
+      LevelSetNarrowBandCacheBase<LevelSetExternalPiercedStorageManager>()
 {
     m_values    = addStorage<double>(getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_JOURNALED);
     m_gradients = addStorage<std::array<double, 3>>(getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_JOURNALED);
