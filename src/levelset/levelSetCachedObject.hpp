@@ -223,6 +223,9 @@ template<typename narrow_band_cache_t>
 class LevelSetCachedObject : public LevelSetObject, public LevelSetCachedObjectInterface<narrow_band_cache_t>, public LevelSetSignedObjectInterface {
 
     protected:
+# if BITPIT_ENABLE_MPI
+    UpdateStrategy                              getPartitioningUpdateStrategy() const override;
+# endif
 
     void                                        pruneNarrowBand(const std::vector<long> &cellIds) override ;
 

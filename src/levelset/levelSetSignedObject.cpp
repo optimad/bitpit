@@ -54,7 +54,7 @@ const LevelSetSignStorage::Sign LevelSetSignStorage::SIGN_POSITIVE  =  1;
  *
  * \param kernel is the kernel
  */
-LevelSetSignStorage::LevelSetSignStorage(PiercedKernel<long> *kernel) : LevelSetExternalPiercedStorageManager(kernel) {
+LevelSetSignStorage::LevelSetSignStorage(PiercedKernel<long> *kernel) : LevelSetExternalPiercedStorageManager(kernel, KERNEL_SYNC_MODE_AUTOMATIC) {
 
     m_signs = addStorage<Sign>(getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_JOURNALED);
 

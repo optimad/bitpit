@@ -416,6 +416,10 @@ double LevelSetObject::getMaxSurfaceFeatureSize() const{
  */
 void LevelSetObject::update( const std::vector<adaption::Info> &adaptionData, bool signedDistance ) {
 
+#if BITPIT_ENABLE_MPI
+    UpdateStrategy partitioningUpdateStrategy = getPartitioningUpdateStrategy();
+#endif
+
     std::vector<long> pruneList ;
     std::vector<long> updateList ;
 #if BITPIT_ENABLE_MPI
@@ -431,11 +435,17 @@ void LevelSetObject::update( const std::vector<adaption::Info> &adaptionData, bo
 
 #if BITPIT_ENABLE_MPI
         case adaption::Type::TYPE_PARTITION_SEND:
-            exchangeSendList.insert({{adaptionInfo.rank,adaptionInfo.previous}}) ;
+            if (partitioningUpdateStrategy == UPDATE_STRATEGY_EXCHANGE) {
+                exchangeSendList.insert({{adaptionInfo.rank,adaptionInfo.previous}}) ;
+            }
             break;
 
         case adaption::Type::TYPE_PARTITION_RECV:
-            exchangeRecvList.insert({{adaptionInfo.rank,adaptionInfo.current}}) ;
+            if (partitioningUpdateStrategy == UPDATE_STRATEGY_EXCHANGE) {
+                exchangeRecvList.insert({{adaptionInfo.rank,adaptionInfo.current}}) ;
+            } else if (partitioningUpdateStrategy == UPDATE_STRATEGY_EVALUATE) {
+                updateList.insert(updateList.end(), adaptionInfo.current.begin(), adaptionInfo.current.end()) ;
+            }
             break;
 #endif
 
@@ -488,6 +498,16 @@ void LevelSetObject::update( const std::vector<adaption::Info> &adaptionData, bo
     exchangeGhosts() ;
 #endif
 }
+
+#if BITPIT_ENABLE_MPI
+/*!
+ * Get the strategy that should be used to update the object after a partitioning.
+ * @result The strategy that should be used to update the object after a partitioning.
+ */
+LevelSetObject::UpdateStrategy LevelSetObject::getPartitioningUpdateStrategy() const {
+    return UPDATE_STRATEGY_EXCHANGE;
+}
+#endif
 
 /*!
  * Calculates the value and gradient of the levelset function within the narrow band

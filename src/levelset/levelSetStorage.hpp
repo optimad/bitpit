@@ -204,6 +204,19 @@ class LevelSetStorageManager
 {
 
 public:
+    /*!
+    * Defines the kernel synchronization mode.
+    *
+    * Possible synchronization modes are:
+    *  - manual, in this mode the storage manager is in charge of updating the kernel;
+    *  - automatic, in this mode the storage manager doesn't need to updated the kernel,
+    *    because its update will be performed automatically.
+    */
+    enum KernelSyncMode {
+        KERNEL_SYNC_MODE_MANUAL,
+        KERNEL_SYNC_MODE_AUTOMATIC,
+    };
+
     typedef kernel_t Kernel;
     typedef kernel_iterator_t KernelIterator;
 
@@ -213,6 +226,7 @@ public:
     void setDirty(bool dirty);
 
     const Kernel * getKernel() const;
+    KernelSyncMode getKernelSyncMode() const;
 
     virtual KernelIterator insert(long id, bool sync = true) = 0;
     virtual void erase(long id, bool sync = true) = 0;
@@ -265,10 +279,11 @@ public:
 protected:
     bool m_dirty; //! Controls if the manager is dirty
     Kernel *m_kernel; //! Kernel associated with the manager
+    KernelSyncMode m_kernelSyncMode; //! Kernel synchronization mode
     std::unordered_map<int, std::unique_ptr<LevelSetBaseStorage<kernel_iterator_t>>> m_storages; //! Storages handled by the manager
     std::vector<std::unique_ptr<LevelSetContainerWrapper>> m_containers; //! Containers that are handled by the manager
 
-    LevelSetStorageManager(Kernel *kernel);
+    LevelSetStorageManager(Kernel *kernel, KernelSyncMode kernelSyncMode);
 
     virtual void clearKernel() = 0;
 
@@ -304,7 +319,7 @@ public:
 
 protected:
     LevelSetExternalPiercedStorageManager();
-    LevelSetExternalPiercedStorageManager(Kernel *kernel);
+    LevelSetExternalPiercedStorageManager(Kernel *kernel, KernelSyncMode kernelSyncMode);
 
     void clearKernel() override;
 

@@ -513,10 +513,11 @@ void LevelSetDirectStorage<value_t>::readItem(const KernelIterator &kernelIterat
  * Constructor.
  *
  * \param kernel is the container associated with the storage manager
+ * \param kernelSyncMode is the synchronization mode of the kernel
  */
 template<typename kernel_t, typename kernel_iterator_t>
-LevelSetStorageManager<kernel_t, kernel_iterator_t>::LevelSetStorageManager(Kernel *kernel)
-    : m_dirty(true), m_kernel(kernel)
+LevelSetStorageManager<kernel_t, kernel_iterator_t>::LevelSetStorageManager(Kernel *kernel, KernelSyncMode kernelSyncMode)
+    : m_dirty(true), m_kernel(kernel), m_kernelSyncMode(kernelSyncMode)
 {
 }
 
@@ -551,6 +552,17 @@ template<typename kernel_t, typename kernel_iterator_t>
 const typename LevelSetStorageManager<kernel_t, kernel_iterator_t>::Kernel * LevelSetStorageManager<kernel_t, kernel_iterator_t>::getKernel() const
 {
     return m_kernel;
+}
+
+/*!
+ * Get the synchronization mode of the kernel.
+ *
+ * \result The synchronization mode of the kernel.
+ */
+template<typename kernel_t, typename kernel_iterator_t>
+typename LevelSetStorageManager<kernel_t, kernel_iterator_t>::KernelSyncMode LevelSetStorageManager<kernel_t, kernel_iterator_t>::getKernelSyncMode() const
+{
+    return m_kernelSyncMode;
 }
 
 /*!

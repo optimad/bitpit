@@ -354,6 +354,26 @@ std::array<double,3> LevelSetCachedObject<narrow_band_cache_t>::getGradient(long
 
 }
 
+#if BITPIT_ENABLE_MPI
+/*!
+ * Get the strategy that should be used to update the object after a partitioning.
+ * @result The strategy that should be used to update the object after a partitioning.
+ */
+template<typename narrow_band_cache_t>
+LevelSetObject::UpdateStrategy LevelSetCachedObject<narrow_band_cache_t>::getPartitioningUpdateStrategy() const {
+    // If the kernel of the cache uses an automatic synchronization, it's not possible to
+    // update the object after a partitioning exchanging data. That's because, at the time
+    // the update takes place, the automatic synchronization has already deleted the data
+    // of the cells that have been sent.
+    const narrow_band_cache_t *narrowBandCache = this->getNarrowBandCache();
+    if (narrowBandCache->getKernelSyncMode() == narrow_band_cache_t::KERNEL_SYNC_MODE_MANUAL) {
+        return UPDATE_STRATEGY_EXCHANGE;
+    } else {
+        return UPDATE_STRATEGY_EVALUATE;
+    }
+}
+#endif
+
 /*!
  * Clear narrow band information associated with the specified cells.
  * @param[in] cellIds are the ids of the cells for which narrow band information will be deleted
