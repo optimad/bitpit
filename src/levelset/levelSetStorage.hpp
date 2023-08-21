@@ -299,6 +299,8 @@ public:
     template<typename T>
     using Storage = PiercedStorage<T, long>;
 
+    using StorageSyncMode = PiercedSyncMaster::SyncMode;
+
     KernelIterator insert(long id, bool sync = true) override;
     void erase(long id, bool sync = true) override;
 
@@ -311,15 +313,17 @@ public:
     KernelIterator end() const override;
 
     template<typename value_t>
-    Storage<value_t> * addStorage(int id, int nFields, PiercedSyncMaster::SyncMode syncMode);
+    Storage<value_t> * addStorage(int id, int nFields);
 
     void syncStorages() override;
 
     void swap(LevelSetExternalPiercedStorageManager &other) noexcept;
 
 protected:
+    StorageSyncMode m_storageSyncMode; //! Storage synchronization mode
+
     LevelSetExternalPiercedStorageManager();
-    LevelSetExternalPiercedStorageManager(Kernel *kernel, KernelSyncMode kernelSyncMode);
+    LevelSetExternalPiercedStorageManager(Kernel *kernel, KernelSyncMode kernelSyncMode, StorageSyncMode storageSyncMode);
 
     void clearKernel() override;
 
@@ -343,6 +347,7 @@ protected:
     Kernel m_internalKernel; //! Internal pierced kernel
 
     LevelSetInternalPiercedStorageManager();
+    LevelSetInternalPiercedStorageManager(StorageSyncMode storageSyncMode);
 
     void clearKernel() override;
 
