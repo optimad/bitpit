@@ -85,6 +85,11 @@ class LevelSetObject : public VTKBaseStreamer, public virtual LevelSetObjectInte
     std::size_t                                 decrementReferenceCount();
 
     protected:
+    enum UpdateStrategy {
+        UPDATE_STRATEGY_EXCHANGE,
+        UPDATE_STRATEGY_EVALUATE,
+    };
+
     LevelSetObject(int);
     LevelSetObject(const LevelSetObject &other);
     LevelSetObject(LevelSetObject &&other);
@@ -96,6 +101,10 @@ class LevelSetObject : public VTKBaseStreamer, public virtual LevelSetObjectInte
     void                                        update( const std::vector<adaption::Info> &adaptionData, bool signedDistance );
 
     void                                        setSizeNarrowBand(double) ;
+
+# if BITPIT_ENABLE_MPI
+    virtual UpdateStrategy                      getPartitioningUpdateStrategy() const;
+# endif
 
     virtual void                                computeNarrowBand(bool);
     virtual void                                updateNarrowBand(const std::vector<long> &cellIds, bool signd);

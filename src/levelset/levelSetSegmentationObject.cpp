@@ -43,7 +43,9 @@ template class LevelSetSegmentationObject<LevelSetSegmentationNarrowBandCache<Le
  * \param kernel is the container associated with the storage manager
  */
 LevelSetSegmentationNarrowBandCache<LevelSetExternalPiercedStorageManager>::LevelSetSegmentationNarrowBandCache(Kernel *kernel)
-    : LevelSetExternalPiercedStorageManager(kernel), LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>(kernel), LevelSetSegmentationNarrowBandCacheBase<LevelSetExternalPiercedStorageManager>()
+    : LevelSetExternalPiercedStorageManager(kernel, KERNEL_SYNC_MODE_AUTOMATIC),
+      LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>(kernel),
+      LevelSetSegmentationNarrowBandCacheBase<LevelSetExternalPiercedStorageManager>()
 {
     m_supportIds     = this->template addStorage<long>(this->getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_JOURNALED);
     m_surfaceNormals = this->template addStorage<std::array<double, 3>>(this->getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_JOURNALED);

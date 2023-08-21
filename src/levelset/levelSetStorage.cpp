@@ -86,17 +86,18 @@ void LevelSetContainerWrapper::swap(LevelSetContainerWrapper &other) noexcept
  * Constructor.
  */
 LevelSetExternalPiercedStorageManager::LevelSetExternalPiercedStorageManager()
-    : LevelSetExternalPiercedStorageManager(nullptr)
+    : LevelSetExternalPiercedStorageManager(nullptr, KERNEL_SYNC_MODE_MANUAL)
 {
 }
 
 /*!
  * Constructor.
  *
- * \param kernel is the container associated with the storage manager
+ * \param kernel is the kernel associated with the storage manager
+ * \param kernelSyncMode is the synchronization mode of the kernel
  */
-LevelSetExternalPiercedStorageManager::LevelSetExternalPiercedStorageManager(Kernel *kernel)
-    : LevelSetStorageManager<PiercedKernel<long>>(kernel)
+LevelSetExternalPiercedStorageManager::LevelSetExternalPiercedStorageManager(Kernel *kernel, KernelSyncMode kernelSyncMode)
+    : LevelSetStorageManager<PiercedKernel<long>>(kernel, kernelSyncMode)
 {
 }
 
@@ -253,7 +254,7 @@ void LevelSetExternalPiercedStorageManager::swap(LevelSetExternalPiercedStorageM
  * Constructor.
  */
 LevelSetInternalPiercedStorageManager::LevelSetInternalPiercedStorageManager()
-    : LevelSetExternalPiercedStorageManager(&m_internalKernel)
+    : LevelSetExternalPiercedStorageManager(&m_internalKernel, KERNEL_SYNC_MODE_MANUAL)
 {
 }
 
@@ -365,7 +366,7 @@ LevelSetDirectStorageManager::LevelSetDirectStorageManager()
  * \param nItems is the number of items each storage will contain
  */
 LevelSetDirectStorageManager::LevelSetDirectStorageManager(std::size_t nItems)
-    : LevelSetStorageManager<std::size_t, std::size_t>(nullptr), m_nItems(nItems)
+    : LevelSetStorageManager<std::size_t, std::size_t>(nullptr, KERNEL_SYNC_MODE_MANUAL), m_nItems(nItems)
 {
 }
 
