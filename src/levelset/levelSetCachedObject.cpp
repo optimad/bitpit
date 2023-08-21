@@ -49,13 +49,13 @@ template class LevelSetCachedObject<LevelSetNarrowBandCache<LevelSetDirectStorag
  * \param kernel is the container associated with the storage manager
  */
 LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>::LevelSetNarrowBandCache(Kernel *kernel)
-    : LevelSetExternalPiercedStorageManager(kernel, KERNEL_SYNC_MODE_AUTOMATIC),
+    : LevelSetExternalPiercedStorageManager(kernel, KERNEL_SYNC_MODE_AUTOMATIC, StorageSyncMode::SYNC_MODE_JOURNALED),
       LevelSetNarrowBandCacheBase<LevelSetExternalPiercedStorageManager>()
 {
-    m_values    = addStorage<double>(getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_JOURNALED);
-    m_gradients = addStorage<std::array<double, 3>>(getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_JOURNALED);
+    m_values    = addStorage<double>(getStorageCount(), 1);
+    m_gradients = addStorage<std::array<double, 3>>(getStorageCount(), 1);
 
-    m_narrowBandFlag = addStorage<char>(getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_JOURNALED);
+    m_narrowBandFlag = addStorage<char>(getStorageCount(), 1);
     m_narrowBandFlag->fill(0);
 }
 
@@ -247,14 +247,16 @@ void LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>::swap(LevelS
 
 /*!
  * Constructor
+ *
+ * It is faster to use a concurrent synchronization for the storage manager, because items will
+ * be added/removed to the kernel one at the time.
  */
 LevelSetNarrowBandCache<LevelSetInternalPiercedStorageManager>::LevelSetNarrowBandCache()
-    : LevelSetInternalPiercedStorageManager(), LevelSetNarrowBandCacheBase<LevelSetInternalPiercedStorageManager>()
+    : LevelSetInternalPiercedStorageManager(StorageSyncMode::SYNC_MODE_CONCURRENT),
+      LevelSetNarrowBandCacheBase<LevelSetInternalPiercedStorageManager>()
 {
-    // It is faster to use a concurrent synchronization because items will be added/removed
-    // to the kernel one at the time.
-    m_values    = addStorage<double>(getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_CONCURRENT);
-    m_gradients = addStorage<std::array<double, 3>>(getStorageCount(), 1, PiercedSyncMaster::SYNC_MODE_CONCURRENT);
+    m_values    = addStorage<double>(getStorageCount(), 1);
+    m_gradients = addStorage<std::array<double, 3>>(getStorageCount(), 1);
 }
 
 /*!

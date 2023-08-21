@@ -889,9 +889,9 @@ void LevelSetStorageManager<kernel_t, kernel_iterator_t>::swap(LevelSetStorageMa
  * \result Returns a pointer to the container.
  */
 template<typename value_t>
-LevelSetExternalPiercedStorageManager::Storage<value_t> * LevelSetExternalPiercedStorageManager::addStorage(int id, int nFields, PiercedSyncMaster::SyncMode syncMode)
+LevelSetExternalPiercedStorageManager::Storage<value_t> * LevelSetExternalPiercedStorageManager::addStorage(int id, int nFields)
 {
-    std::unique_ptr<Storage<value_t>> container = std::unique_ptr<Storage<value_t>>(new Storage<value_t>(nFields, m_kernel, syncMode));
+    std::unique_ptr<Storage<value_t>> container = std::unique_ptr<Storage<value_t>>(new Storage<value_t>(nFields, m_kernel, m_storageSyncMode));
     m_containers.emplace_back(new LevelSetUniqueContainerWrapper<Storage<value_t>>(std::move(container)));
     LevelSetContainerWrapper *containerWrapper = m_containers.back().get();
 
