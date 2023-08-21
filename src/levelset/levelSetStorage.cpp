@@ -86,7 +86,7 @@ void LevelSetContainerWrapper::swap(LevelSetContainerWrapper &other) noexcept
  * Constructor.
  */
 LevelSetExternalPiercedStorageManager::LevelSetExternalPiercedStorageManager()
-    : LevelSetExternalPiercedStorageManager(nullptr, KERNEL_SYNC_MODE_MANUAL)
+    : LevelSetExternalPiercedStorageManager(nullptr, KERNEL_SYNC_MODE_MANUAL, StorageSyncMode::SYNC_MODE_DISABLED)
 {
 }
 
@@ -95,9 +95,11 @@ LevelSetExternalPiercedStorageManager::LevelSetExternalPiercedStorageManager()
  *
  * \param kernel is the kernel associated with the storage manager
  * \param kernelSyncMode is the synchronization mode of the kernel
+ * \param storageSyncMode is the synchronization mode that will be used for the storages
  */
-LevelSetExternalPiercedStorageManager::LevelSetExternalPiercedStorageManager(Kernel *kernel, KernelSyncMode kernelSyncMode)
-    : LevelSetStorageManager<PiercedKernel<long>>(kernel, kernelSyncMode)
+LevelSetExternalPiercedStorageManager::LevelSetExternalPiercedStorageManager(Kernel *kernel, KernelSyncMode kernelSyncMode, StorageSyncMode storageSyncMode)
+    : LevelSetStorageManager<PiercedKernel<long>>(kernel, kernelSyncMode),
+      m_storageSyncMode(storageSyncMode)
 {
 }
 
@@ -254,7 +256,17 @@ void LevelSetExternalPiercedStorageManager::swap(LevelSetExternalPiercedStorageM
  * Constructor.
  */
 LevelSetInternalPiercedStorageManager::LevelSetInternalPiercedStorageManager()
-    : LevelSetExternalPiercedStorageManager(&m_internalKernel, KERNEL_SYNC_MODE_MANUAL)
+    : LevelSetInternalPiercedStorageManager(StorageSyncMode::SYNC_MODE_DISABLED)
+{
+}
+
+/*!
+ * Constructor.
+ *
+ * \param storageSyncMode is the synchronization mode that will be used for the storages
+ */
+LevelSetInternalPiercedStorageManager::LevelSetInternalPiercedStorageManager(StorageSyncMode storageSyncMode)
+    : LevelSetExternalPiercedStorageManager(&m_internalKernel, KERNEL_SYNC_MODE_MANUAL, storageSyncMode)
 {
 }
 
