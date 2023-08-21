@@ -531,11 +531,11 @@ void LevelSetSignPropagator::executeSeedPropagation(const std::vector<std::size_
 
     std::vector<std::size_t> rawProcessList;
 
-    std::size_t rawSeedCursor = rawSeeds.size();
-    while (rawSeedCursor != 0) {
+    std::size_t nRawSeeds = rawSeeds.size();
+    while (nRawSeeds != 0) {
         // Get a seed
-        --rawSeedCursor;
-        std::size_t seedRawId = rawSeeds[rawSeedCursor];
+        --nRawSeeds;
+        std::size_t seedRawId = rawSeeds[nRawSeeds];
 
         // Get the sign of the seed
         LevelSetSignStorage::KernelIterator seedSignStorageItr = storage->rawFind(seedRawId);
