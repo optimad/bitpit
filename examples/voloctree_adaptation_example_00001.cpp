@@ -58,18 +58,15 @@ public:
 
     void flushData(std::fstream &stream, const std::string &name, VTKFormat format) override
     {
-        assert(format == VTKFormat::APPENDED);
-        BITPIT_UNUSED(format);
-
         if (name == "scalarField") {
             for (const Cell &cell : m_patch.getVTKCellWriteRange()) {
                 long id = cell.getId();
-                genericIO::flushBINARY(stream, m_scalarField.at(id));
+                flushValue(stream, format, m_scalarField.at(id));
             }
         } else if (name == "vectorField") {
             for (const Cell &cell : m_patch.getVTKCellWriteRange()) {
                 long id = cell.getId();
-                genericIO::flushBINARY(stream, m_vectorField.at(id));
+                flushValue(stream, format, m_vectorField.at(id));
             }
         }
     };

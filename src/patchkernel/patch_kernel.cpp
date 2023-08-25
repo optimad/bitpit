@@ -7817,9 +7817,6 @@ void PatchKernel::replaceVTKStreamer(const VTKBaseStreamer *original, VTKBaseStr
  */
 void PatchKernel::flushData(std::fstream &stream, const std::string &name, VTKFormat format)
 {
-	assert(format == VTKFormat::APPENDED);
-	BITPIT_UNUSED(format);
-
 	if (name == "Points") {
 		VertexConstIterator endItr = vertexConstEnd();
 		for (VertexConstIterator itr = vertexConstBegin(); itr != endItr; ++itr) {
@@ -7827,14 +7824,14 @@ void PatchKernel::flushData(std::fstream &stream, const std::string &name, VTKFo
 			long vertexVTKId = m_vtkVertexMap.rawAt(vertexRawId);
 			if (vertexVTKId != Vertex::NULL_ID) {
 				const Vertex &vertex = m_vertices.rawAt(vertexRawId);
-				genericIO::flushBINARY(stream, vertex.getCoords());
+				flushValue(stream, format,vertex.getCoords());
 			}
 		}
 	} else if (name == "offsets") {
 		long offset = 0;
 		for (const Cell &cell : getVTKCellWriteRange()) {
 			offset += cell.getVertexCount();
-			genericIO::flushBINARY(stream, offset);
+			flushValue(stream, format,offset);
 		}
 	} else if (name == "types") {
 		for (const Cell &cell : getVTKCellWriteRange()) {
@@ -7895,7 +7892,7 @@ void PatchKernel::flushData(std::fstream &stream, const std::string &name, VTKFo
 
 			}
 
-			genericIO::flushBINARY(stream, (int) VTKType);
+			flushValue(stream, format,(int) VTKType);
 		}
 	} else if (name == "connectivity") {
 		for (const Cell &cell : getVTKCellWriteRange()) {
@@ -7904,19 +7901,19 @@ void PatchKernel::flushData(std::fstream &stream, const std::string &name, VTKFo
 			for (int k = 0; k < nCellVertices; ++k) {
 				long vertexId = cellVertexIds[k];
 				long vtkVertexId = m_vtkVertexMap.at(vertexId);
-				genericIO::flushBINARY(stream, vtkVertexId);
+				flushValue(stream, format,vtkVertexId);
 			}
 		}
 	} else if (name == "faces") {
 		for (const Cell &cell : getVTKCellWriteRange()) {
 			if (cell.getDimension() <= 2 || cell.hasInfo()) {
-				genericIO::flushBINARY(stream, (long) 0);
+				flushValue(stream, format,(long) 0);
 			} else {
 				std::vector<long> faceStream = cell.getFaceStream();
 				Cell::renumberFaceStream(m_vtkVertexMap, &faceStream);
 				int faceStreamSize = faceStream.size();
 				for (int k = 0; k < faceStreamSize; ++k) {
-					genericIO::flushBINARY(stream, faceStream[k]);
+					flushValue(stream, format,faceStream[k]);
 				}
 			}
 		}
@@ -7929,15 +7926,15 @@ void PatchKernel::flushData(std::fstream &stream, const std::string &name, VTKFo
 				offset += cell.getFaceStreamSize();
 			}
 
-			genericIO::flushBINARY(stream, offset);
+			flushValue(stream, format,offset);
 		}
 	} else if (name == "cellIndex") {
 		for (const Cell &cell : getVTKCellWriteRange()) {
-			genericIO::flushBINARY(stream, cell.getId());
+			flushValue(stream, format,cell.getId());
 		}
 	} else if (name == "PID") {
 		for (const Cell &cell : getVTKCellWriteRange()) {
-			genericIO::flushBINARY(stream, cell.getPID());
+			flushValue(stream, format,cell.getPID());
 		}
 	} else if (name == "vertexIndex") {
 		VertexConstIterator endItr = vertexConstEnd();
@@ -7946,22 +7943,22 @@ void PatchKernel::flushData(std::fstream &stream, const std::string &name, VTKFo
 			long vertexVTKId = m_vtkVertexMap.rawAt(vertexRawId);
 			if (vertexVTKId != Vertex::NULL_ID) {
 				long vertexId = itr.getId();
-				genericIO::flushBINARY(stream, vertexId);
+				flushValue(stream, format,vertexId);
 			}
 		}
 #if BITPIT_ENABLE_MPI==1
 	} else if (name == "cellGlobalIndex") {
 		PatchNumberingInfo numberingInfo(this);
 		for (const Cell &cell : getVTKCellWriteRange()) {
-			genericIO::flushBINARY(stream, numberingInfo.getCellGlobalId(cell.getId()));
+			flushValue(stream, format,numberingInfo.getCellGlobalId(cell.getId()));
 		}
 	} else if (name == "cellRank") {
 		for (const Cell &cell : getVTKCellWriteRange()) {
-			genericIO::flushBINARY(stream, getCellOwner(cell.getId()));
+			flushValue(stream, format,getCellOwner(cell.getId()));
 		}
 	} else if (name == "cellHaloLayer") {
 		for (const Cell &cell : getVTKCellWriteRange()) {
-			genericIO::flushBINARY(stream, getCellHaloLayer(cell.getId()));
+			flushValue(stream, format,getCellHaloLayer(cell.getId()));
 		}
 	} else if (name == "vertexRank") {
 		VertexConstIterator endItr = vertexConstEnd();
@@ -7969,7 +7966,7 @@ void PatchKernel::flushData(std::fstream &stream, const std::string &name, VTKFo
 			std::size_t vertexRawId = itr.getRawIndex();
 			long vertexVTKId = m_vtkVertexMap.rawAt(vertexRawId);
 			if (vertexVTKId != Vertex::NULL_ID) {
-				genericIO::flushBINARY(stream, getVertexOwner(itr.getId()));
+				flushValue(stream, format,getVertexOwner(itr.getId()));
 			}
 		}
 #endif
