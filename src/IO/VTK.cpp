@@ -581,6 +581,38 @@ int VTK::_findFieldIndex( const std::string &name, const std::vector<VTKField> &
 }
 
 /*!
+ * Check if the VTK file contains data in appended format.
+ * \return True if the VTK file contains data in appended format, false otherwise.
+ */
+bool VTK::isAppendedActive() const {
+
+    for( auto & field : m_data ){
+        if( field.isEnabled() && field.getCodification() == VTKFormat::APPENDED) {
+            return true;
+        }
+    }
+
+    return false;
+
+}
+
+/*!
+ * Check if the VTK file contains data in ASCII format.
+ * \return True if the VTK file contains data in ASCII format, false otherwise.
+ */
+bool VTK::isASCIIActive() const {
+
+    for( auto & field : m_data ){
+        if( field.isEnabled() && field.getCodification() == VTKFormat::ASCII) {
+            return true;
+        }
+    }
+
+    return false;
+
+}
+
+/*!
  * Calculates the offsets of all geometry and data fields for appended output.
  * Offsets are stored in each field.
  */
@@ -705,9 +737,6 @@ void VTK::write( const std::string &name, VTKWriteMode writeMode ){
  */
 void VTK::writeData( ){
 
-    std::fstream             str ;
-    std::fstream::pos_type   position_insert ;
-
     int                 length;
     char*               buffer ;
 
@@ -716,6 +745,7 @@ void VTK::writeData( ){
     //methods to work properly. ASCII mode does not guarantee a correct
     //stream positioning, because of automatic jump of escape characters
     // (e.g., "\n" on Unix or "\r\n" on Windows).
+    std::fstream str ;
     str.open( m_fh.getPath( ), std::ios::in | std::ios::out | std::ios::binary ) ;
     if (!str.is_open()) {
         throw std::runtime_error("Cannot create file \"" + m_fh.getName() + "\"" + " inside the directory \"" + m_fh.getDirectory() + "\"");
@@ -724,13 +754,13 @@ void VTK::writeData( ){
     //Position the input stream at the beginning
     str.seekg(0, std::ios::beg);
 
-    { // Write Ascii
+    if (isASCIIActive()) { // Write Ascii
       //
       // It is fine to write ASCII on a binary opened file because the method
       // genericIO::flushBinary is basically a reinterpret_cast of chars into
       // chars and ensures consistent results.
 
-        position_insert = str.tellg();
+        std::fstream::pos_type position_insert = str.tellg();
 
         //Writing first point data then cell data
         for( auto &field : m_data ){
@@ -808,7 +838,7 @@ void VTK::writeData( ){
 
     }
 
-    { // Write Appended
+    if (isAppendedActive()) { // Write Appended
 
         char                    c_;
         std::string             line ;
@@ -820,7 +850,6 @@ void VTK::writeData( ){
         str >> c_;
         while( c_ != '_') str >> c_;
 
-        position_insert = str.tellg();
         genericIO::copyUntilEOFInString( str, buffer, length );
 
         //Writing first point data then cell data

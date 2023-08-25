@@ -397,6 +397,9 @@ class VTK{
 
         int                     _findFieldIndex( const std::string &name, const std::vector<VTKField> &fields ) const;
 
+        bool                    isAppendedActive() const;
+        bool                    isASCIIActive() const;
+
         void                    calcAppendedOffsets() ;
         virtual uint64_t        calcFieldSize( const VTKField &) =0;
         virtual uint64_t        calcFieldEntries( const VTKField &) =0;
