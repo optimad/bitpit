@@ -520,10 +520,12 @@ void VTKUnstructuredGrid::writeMetaInformation( ){
     str << "  </UnstructuredGrid>"  << std::endl;
 
     //Appended Section
+    if (isAppendedActive()) {
+        str << "  <AppendedData encoding=\"raw\">" << std::endl;
+        str << "_" << std::endl;
+    }
 
-    str << "  <AppendedData encoding=\"raw\">" << std::endl;
-    str << "_" ;
-    str << std::endl ;
+    // Closing XML
     str << "</VTKFile>" << std::endl;
 
     str.close() ;

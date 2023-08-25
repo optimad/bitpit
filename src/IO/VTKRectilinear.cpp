@@ -264,9 +264,10 @@ void VTKRectilinearGrid::writeMetaInformation( ){
     str << "  </RectilinearGrid>" << std::endl;
 
     //Write Appended Section
-    str << "  <AppendedData encoding=\"raw\">" << std::endl;
-    str << "_" ;
-    str << std::endl ;
+    if (isAppendedActive()) {
+        str << "  <AppendedData encoding=\"raw\">" << std::endl;
+        str << "_" << std::endl;
+    }
 
     //Closing XML
     str << "</VTKFile>" << std::endl;
