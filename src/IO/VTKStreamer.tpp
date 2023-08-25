@@ -50,6 +50,50 @@ VTKVectorContainer<T>::VTKVectorContainer( std::vector<T> &data){
 }
 
 /*!
+ * Writes value to file stream
+ * @tparam T type of std::vector<>
+ * @param[in] str file stream
+ * @param[in] format VTKFormat::ASCII or VTKFormat::APPENDED
+ * @param[in] value is the value that will be written
+ */
+template<class T>
+void VTKBaseStreamer::flushValue( std::fstream &str, VTKFormat format, const T &value){
+
+    if( format==VTKFormat::ASCII){
+        genericIO::flushASCII( str, value) ;
+
+    } else if( format==VTKFormat::APPENDED) {
+        genericIO::flushBINARY( str, value) ;
+
+    }
+
+}
+
+/*!
+ * Writes value to file stream
+ * @tparam T type of std::vector<>
+ * @param[in] str file stream
+ * @param[in] format VTKFormat::ASCII or VTKFormat::APPENDED
+ * @param[in] values is a pointer to the values that will be written
+ * @param[in] size is the number of values that will be writtend
+ */
+template<class T>
+void VTKBaseStreamer::flushValue( std::fstream &str, VTKFormat format, const T *values, int nValues){
+
+    if( format==VTKFormat::ASCII){
+        genericIO::flushASCII( str, values, nValues) ;
+
+    } else if( format==VTKFormat::APPENDED) {
+        genericIO::flushBINARY( str, values, nValues) ;
+
+    } else {
+        throw std::runtime_error("VTK format not supported.") ;
+
+    }
+
+}
+
+/*!
  * Writes data to file stream
  * @tparam T type of std::vector<>
  * @param[in] str file stream
@@ -63,6 +107,9 @@ void VTKVectorContainer<T>::flushData( std::fstream &str, VTKFormat format){
 
     } else if( format==VTKFormat::APPENDED) {
         genericIO::flushBINARY( str, *m_ptr) ;
+
+    } else {
+        throw std::runtime_error("VTK format not supported.") ;
 
     }
 

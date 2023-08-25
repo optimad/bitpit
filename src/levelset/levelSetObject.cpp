@@ -633,74 +633,34 @@ void LevelSetObject::flushData( std::fstream &stream, const std::string &name, V
 
     if(utils::string::keywordInString(name,"levelsetValue")){
 
-        void (*writeFunctionPtr)(std::fstream &, const double &) = nullptr;
-
-        if(format==VTKFormat::APPENDED){
-            writeFunctionPtr = genericIO::flushBINARY<double>;
-        } else if(format==VTKFormat::ASCII){
-            writeFunctionPtr = genericIO::flushASCII<double>;
-        } else {
-            BITPIT_UNREACHABLE("Non-existent VTK format.");
-        }
-
         for( const Cell &cell : m_kernel->getMesh()->getVTKCellWriteRange() ){
             long cellId = cell.getId();
             double value = getValue(cellId);
-            (*writeFunctionPtr)(stream,value);
+            flushValue(stream, format, value);
         }
 
     } else if( utils::string::keywordInString(name,"levelsetGradient")){
 
-        void (*writeFunctionPtr)(std::fstream &, const std::array<double,3> &) = nullptr;
-
-        if(format==VTKFormat::APPENDED){
-            writeFunctionPtr = genericIO::flushBINARY<std::array<double,3>>;
-        } else if(format==VTKFormat::ASCII){
-            writeFunctionPtr = genericIO::flushASCII<std::array<double,3>>;
-        } else {
-            BITPIT_UNREACHABLE("Non-existent VTK format.");
-        }
-
         for( const Cell &cell : m_kernel->getMesh()->getVTKCellWriteRange() ){
             long cellId = cell.getId();
             const std::array<double,3> &value = getGradient(cellId);
-            (*writeFunctionPtr)(stream,value);
+            flushValue(stream, format, value);
         }
 
     } else if( utils::string::keywordInString(name,"levelsetNormal")){
 
-        void (*writeFunctionPtr)(std::fstream &, const std::array<double,3> &) = nullptr;
-
-        if(format==VTKFormat::APPENDED){
-            writeFunctionPtr = genericIO::flushBINARY<std::array<double,3>>;
-        } else if(format==VTKFormat::ASCII){
-            writeFunctionPtr = genericIO::flushASCII<std::array<double,3>>;
-        } else {
-            BITPIT_UNREACHABLE("Non-existent VTK format.");
-        }
-
         for( const Cell &cell : m_kernel->getMesh()->getVTKCellWriteRange() ){
             long cellId = cell.getId();
             const std::array<double,3> &value = getNormal(cellId);
-            (*writeFunctionPtr)(stream,value);
+            flushValue(stream, format, value);
         }
 
     } else if( utils::string::keywordInString(name,"levelsetPart")){
 
-        void (*writeFunctionPtr)(std::fstream &, const int &) = nullptr;
-
-        if(format==VTKFormat::APPENDED){
-            writeFunctionPtr = genericIO::flushBINARY<int>;
-        } else if(format==VTKFormat::ASCII){
-            writeFunctionPtr = genericIO::flushASCII<int>;
-        } else {
-            BITPIT_UNREACHABLE("Non-existent VTK format.");
-        }
-
         for( const Cell &cell : m_kernel->getMesh()->getVTKCellWriteRange() ){
             long cellId = cell.getId();
             int value = getPart(cellId);
-            (*writeFunctionPtr)(stream,value);
+            flushValue(stream, format, value);
         }
     }
 }

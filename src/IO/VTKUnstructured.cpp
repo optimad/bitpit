@@ -76,78 +76,38 @@ void VTKUnstructuredGrid::HomogeneousInfoStreamer::flushData( std::fstream &str,
 
     VTKDataType connectivityDataType = m_connectivity->getDataType();
 
-    if( format == VTKFormat::APPENDED){
-
-        if(name == "types" ){
-            uint8_t type = (uint8_t) m_type ;
-            for( unsigned int i=0; i<m_nCells; ++i){
-                genericIO::flushBINARY(str, type );
-            }
-        
-        } else if(name == "offsets" ){
-            uint8_t     n = vtk::getElementNodeCount(m_type) ;
-            if (connectivityDataType == VTKDataType::Int64 || connectivityDataType == VTKDataType::UInt64) {
-                uint64_t    offset(0) ;
-                for( unsigned int i=0; i<m_nCells; ++i){
-                    offset += n ;
-                    genericIO::flushBINARY(str, offset );
-                }
-            } else if (connectivityDataType == VTKDataType::Int32 || connectivityDataType == VTKDataType::UInt32) {
-                uint32_t    offset(0) ;
-                for( unsigned int i=0; i<m_nCells; ++i){
-                    offset += n ;
-                    genericIO::flushBINARY(str, offset );
-                }
-            } else if (connectivityDataType == VTKDataType::Int16 || connectivityDataType == VTKDataType::UInt16) {
-                uint16_t    offset(0) ;
-                for( unsigned int i=0; i<m_nCells; ++i){
-                    offset += n ;
-                    genericIO::flushBINARY(str, offset );
-                }
-            } else if (connectivityDataType == VTKDataType::Int8 || connectivityDataType == VTKDataType::UInt8) {
-                uint8_t    offset(0) ;
-                for( unsigned int i=0; i<m_nCells; ++i){
-                    offset += n ;
-                    genericIO::flushBINARY(str, offset );
-                }
-            }
-        
+    if(name == "types" ){
+        uint8_t type = (uint8_t) m_type ;
+        for( unsigned int i=0; i<m_nCells; ++i){
+            flushValue(str, format, type );
         }
 
-    } else {
-        if(name == "types" ){
-            uint8_t type = (uint8_t) m_type ;
-            for( unsigned int i=0; i<m_nCells; ++i)
-                genericIO::flushASCII(str, type );
-        
-        } else if(name == "offsets" ){
-            uint8_t     n = vtk::getElementNodeCount(m_type) ;
-            if (connectivityDataType == VTKDataType::Int64 || connectivityDataType == VTKDataType::UInt64) {
-                uint64_t    offset(0) ;
-                for( unsigned int i=0; i<m_nCells; ++i){
-                    offset += n ;
-                    genericIO::flushASCII(str, offset );
-                }
-            } else if (connectivityDataType == VTKDataType::Int32 || connectivityDataType == VTKDataType::UInt32) {
-                uint32_t    offset(0) ;
-                for( unsigned int i=0; i<m_nCells; ++i){
-                    offset += n ;
-                    genericIO::flushASCII(str, offset );
-                }
-            } else if (connectivityDataType == VTKDataType::Int16 || connectivityDataType == VTKDataType::UInt16) {
-                uint16_t    offset(0) ;
-                for( unsigned int i=0; i<m_nCells; ++i){
-                    offset += n ;
-                    genericIO::flushASCII(str, offset );
-                }
-            } else if (connectivityDataType == VTKDataType::Int8 || connectivityDataType == VTKDataType::UInt8) {
-                uint8_t    offset(0) ;
-                for( unsigned int i=0; i<m_nCells; ++i){
-                    offset += n ;
-                    genericIO::flushASCII(str, offset );
-                }
+    } else if(name == "offsets" ){
+        uint8_t     n = vtk::getElementNodeCount(m_type) ;
+        if (connectivityDataType == VTKDataType::Int64 || connectivityDataType == VTKDataType::UInt64) {
+            uint64_t    offset(0) ;
+            for( unsigned int i=0; i<m_nCells; ++i){
+                offset += n ;
+                flushValue(str, format, offset );
             }
-        
+        } else if (connectivityDataType == VTKDataType::Int32 || connectivityDataType == VTKDataType::UInt32) {
+            uint32_t    offset(0) ;
+            for( unsigned int i=0; i<m_nCells; ++i){
+                offset += n ;
+                flushValue(str, format, offset );
+            }
+        } else if (connectivityDataType == VTKDataType::Int16 || connectivityDataType == VTKDataType::UInt16) {
+            uint16_t    offset(0) ;
+            for( unsigned int i=0; i<m_nCells; ++i){
+                offset += n ;
+                flushValue(str, format, offset );
+            }
+        } else if (connectivityDataType == VTKDataType::Int8 || connectivityDataType == VTKDataType::UInt8) {
+            uint8_t    offset(0) ;
+            for( unsigned int i=0; i<m_nCells; ++i){
+                offset += n ;
+                flushValue(str, format, offset );
+            }
         }
 
     }
