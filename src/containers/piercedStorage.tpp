@@ -912,10 +912,33 @@ void PiercedStorage<value_t, id_t>::rawErase(std::size_t pos, std::size_t n)
 /**
 * Swaps two elements.
 *
+* This template is used for all types of values with the exception of boolean
+* values.
+*
 * \param pos_first is the position of the first element that will be swapped
 * \param pos_second is the position of the second element that will be swapped
 */
 template<typename value_t, typename id_t>
+template<typename T, typename std::enable_if<!std::is_same<T, bool>::value>::type *>
+void PiercedStorage<value_t, id_t>::rawSwap(std::size_t pos_first, std::size_t pos_second)
+{
+    std::size_t firstOffset  = pos_first * m_nFields;
+    std::size_t secondOffset = pos_second * m_nFields;
+    for (std::size_t k = 0; k < m_nFields; ++k) {
+        std::swap(m_fields[firstOffset + k], m_fields[secondOffset + k]);
+    }
+}
+
+/**
+* Swaps two elements.
+*
+* This template is used when the container stores boolean values.
+*
+* \param pos_first is the position of the first element that will be swapped
+* \param pos_second is the position of the second element that will be swapped
+*/
+template<typename value_t, typename id_t>
+template<typename T, typename std::enable_if<std::is_same<T, bool>::value>::type *>
 void PiercedStorage<value_t, id_t>::rawSwap(std::size_t pos_first, std::size_t pos_second)
 {
     std::size_t firstOffset  = pos_first * m_nFields;
@@ -929,9 +952,9 @@ void PiercedStorage<value_t, id_t>::rawSwap(std::size_t pos_first, std::size_t p
         //
         // Although the libstdc++ defines an overload for swapping this type of
         // proxy objects, this is just an extension to the standard.
-        auto temp = std::move(m_fields[firstOffset + k]);
+        auto temp = m_fields[firstOffset + k];
         m_fields[firstOffset + k]  = m_fields[secondOffset + k];
-        m_fields[secondOffset + k] = std::move(temp);
+        m_fields[secondOffset + k] = temp;
     }
 }
 
