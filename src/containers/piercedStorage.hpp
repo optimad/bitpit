@@ -454,6 +454,9 @@ protected:
     void rawClear(bool release);
     void rawErase(std::size_t pos, std::size_t n);
 
+    template<typename T = value_t, typename std::enable_if<!std::is_same<T, bool>::value>::type * = nullptr>
+    void rawSwap(std::size_t pos_first, std::size_t pos_second);
+    template<typename T = value_t, typename std::enable_if<std::is_same<T, bool>::value>::type * = nullptr>
     void rawSwap(std::size_t pos_first, std::size_t pos_second);
     void rawReorder(const std::vector<std::size_t> &permutations);
 
