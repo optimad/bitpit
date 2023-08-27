@@ -600,7 +600,21 @@ long SparseMatrix::getMaxRowNZCount() const
 */
 long SparseMatrix::getNZElementCount() const
 {
-    long nElements = getBlockSize() * getNZCount();
+    long nNZ = getNZCount();
+
+    return getNZElementCount(nNZ);
+}
+
+/**
+* Get the number of non-zero elements.
+*
+* \param nNZ is the number of non-zero elements contained in the matrix
+* \result The number of non-zero elements.
+*/
+long SparseMatrix::getNZElementCount(long nNZ) const
+{
+    int blockSize  = getBlockSize();
+    long nElements = blockSize * blockSize * nNZ;
 
     return nElements;
 }
