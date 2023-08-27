@@ -729,7 +729,7 @@ SystemSolver::SystemSolver(const std::string &prefix, bool flatten, bool transpo
     : m_flatten(flatten), m_transpose(transpose),
       m_A(PETSC_NULL), m_rhs(PETSC_NULL), m_solution(PETSC_NULL),
       m_KSP(PETSC_NULL),
-      m_prefix(prefix), m_assembled(false), m_setUp(false),
+      m_prefix(prefix), m_assembled(false), m_KSPDirty(true),
 #if BITPIT_ENABLE_MPI==1
       m_communicator(MPI_COMM_SELF), m_partitioned(false),
 #endif
@@ -775,11 +775,8 @@ SystemSolver::~SystemSolver()
  */
 void SystemSolver::clear()
 {
-    if (isSetUp()) {
-        KSPDestroy(&m_KSP);
-        m_KSP = nullptr;
-
-        m_setUp = false;
+    if (m_KSP) {
+        destroyKSP();
     }
 
     if (isAssembled()) {
@@ -1207,11 +1204,13 @@ bool SystemSolver::isAssembled() const
 /*!
  * Check if the system is set up.
  *
+ * This function is deprecated, it will always return true.
+ *
  * \return Returns true if the system is set up, false otherwise.
  */
 bool SystemSolver::isSetUp() const
 {
-    return m_setUp;
+    return true;
 }
 
 /*!
@@ -1224,10 +1223,8 @@ void SystemSolver::solve()
         throw std::runtime_error("Unable to solve the system. The system is not yet assembled.");
     }
 
-    // Check if the system is set up
-    if (!isSetUp()) {
-        setUp();
-    }
+    // Prepare the KSP
+    prepareKSP();
 
     // Perfrom actions before KSP solution
     preKSPSolveActions();
@@ -1255,6 +1252,9 @@ void SystemSolver::solve()
 
     // Perfrom actions after KSP solution
     postKSPSolveActions();
+
+    // Finalize the KSP
+    finalizeKSP();
 }
 
 /*!
@@ -1492,6 +1492,9 @@ void SystemSolver::matrixFill(const SystemMatrixAssembler &assembler)
  */
 void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrixAssembler &assembler)
 {
+    // Updating the matrix invalidates the KSP
+    m_KSPDirty = true;
+
     // Get block size
     const int matrixBlockSize    = getBlockSize();
     const int assemblerBlockSize = assembler.getBlockSize();
@@ -2087,20 +2090,70 @@ void SystemSolver::clearReordering()
 
 /*!
  * Setup the system.
+ *
+ * This function is deprecated, there is no need to call it.
  */
 void SystemSolver::setUp()
+{
+    // Nothing to do
+}
+
+/*!
+ * Prepare the KSP for solving the system.
+ */
+void SystemSolver::prepareKSP()
 {
     // Check if the system is assembled
     if (!isAssembled()) {
         throw std::runtime_error("Unable to solve the system. The system is not yet assembled.");
     }
 
-    // Destroy existing Krylov space
-    if (m_KSP) {
-        KSPDestroy(&m_KSP);
+    // Early return if the preconditioner can be reused
+    if (!m_KSPDirty) {
+        return;
     }
 
-    // Create Krylov space
+    // Create KSP
+    bool setupNeeded = false;
+    if (!m_KSP) {
+        createKSP();
+        setupNeeded = true;
+    }
+
+    // Set the matrix associated with the linear system
+    KSPSetOperators(m_KSP, m_A, m_A);
+
+    // Set up
+    if (setupNeeded) {
+        // Perform actions before KSP set up
+        preKSPSetupActions();
+
+        // KSP set up
+        KSPSetFromOptions(m_KSP);
+        KSPSetUp(m_KSP);
+
+        // Perform actions after KSP set up
+        postKSPSetupActions();
+    }
+
+    // KSP is now ready
+    m_KSPDirty = false;
+}
+
+/*!
+ * Finalize the KSP after the system has been solved.
+ */
+void SystemSolver::finalizeKSP()
+{
+    // Nothing to do
+}
+
+/*!
+ * Create the KSP.
+ */
+void SystemSolver::createKSP()
+{
+    // Create KSP object
 #if BITPIT_ENABLE_MPI==1
     KSPCreate(m_communicator, &m_KSP);
 #else
@@ -2111,22 +2164,16 @@ void SystemSolver::setUp()
     if (!m_prefix.empty()) {
         KSPSetOptionsPrefix(m_KSP, m_prefix.c_str());
     }
+}
 
-    // Set the matrix associated with the linear system
-    KSPSetOperators(m_KSP, m_A, m_A);
-
-    // Perform actions before KSP set up
-    preKSPSetupActions();
-
-    // Setup Krylov space
-    KSPSetFromOptions(m_KSP);
-    KSPSetUp(m_KSP);
-
-    // Perform actions after KSP set up
-    postKSPSetupActions();
-
-    // Set up is now complete
-    m_setUp = true;
+/*!
+ * Destroy the KSP.
+ */
+void SystemSolver::destroyKSP()
+{
+    m_KSPDirty = true;
+    KSPDestroy(&m_KSP);
+    m_KSP = nullptr;
 }
 
 /*!
