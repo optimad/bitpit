@@ -165,6 +165,8 @@ private:
     void freeCommunicator();
 #endif
 
+    long getNZElementCount(long nNZ) const;
+
 };
 
 }
