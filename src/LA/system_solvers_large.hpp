@@ -264,6 +264,7 @@ public:
     virtual ~SystemSolver();
 
     void clear();
+    void clearWorkspace();
 
     void assembly(const SparseMatrix &matrix);
     void assembly(const SparseMatrix &matrix, const SystemMatrixOrdering &reordering);

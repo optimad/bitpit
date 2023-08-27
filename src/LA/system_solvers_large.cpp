@@ -775,9 +775,7 @@ SystemSolver::~SystemSolver()
  */
 void SystemSolver::clear()
 {
-    if (m_KSP) {
-        destroyKSP();
-    }
+    clearWorkspace();
 
     if (isAssembled()) {
         MatDestroy(&m_A);
@@ -792,6 +790,19 @@ void SystemSolver::clear()
     }
 
     clearReordering();
+}
+
+/*!
+ * Clear and release the memory of all data structures needed for the solution of the system
+ *
+ * These data structures will be re-created the next time the system will be solved.
+ */
+void SystemSolver::clearWorkspace()
+{
+    // Clear KSP
+    if (m_KSP) {
+        destroyKSP();
+    }
 }
 
 /*!
