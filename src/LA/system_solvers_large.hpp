@@ -281,8 +281,8 @@ public:
     void update(const SystemMatrixAssembler &assembler);
     void update(long nRows, const long *rows, const SystemMatrixAssembler &assembler);
 
-    void setUp();
-    bool isSetUp() const;
+    BITPIT_DEPRECATED(void setUp());
+    BITPIT_DEPRECATED(bool isSetUp() const);
 
     int getBlockSize() const;
 
@@ -352,6 +352,11 @@ protected:
     void clearReordering();
     void setReordering(long nRows, long nCols, const SystemMatrixOrdering &reordering);
 
+    void prepareKSP();
+    void finalizeKSP();
+    void createKSP();
+    void destroyKSP();
+
     virtual void preKSPSetupActions();
     virtual void postKSPSetupActions();
 
@@ -370,7 +375,8 @@ private:
     std::string m_prefix;
 
     bool m_assembled;
-    bool m_setUp;
+
+    bool m_KSPDirty;
 
 #if BITPIT_ENABLE_MPI==1
     MPI_Comm m_communicator;
