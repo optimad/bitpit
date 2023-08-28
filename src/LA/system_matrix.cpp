@@ -390,24 +390,19 @@ void SparseMatrix::_initialize(int blockSize, long nRows, long nCols, long nNZ)
     m_nRows     = nRows;
     m_nCols     = nCols;
 
-    m_pattern.reserve(m_nRows, nNZ);
-    m_values.reserve(m_blockSize * m_blockSize * nNZ);
+    initializePatternStorage(nNZ);
+    initializeValueStorage(nNZ);
 }
 
 /**
-* Clear the pattern.
+* Clear the matrix.
 *
-* \param release if set to true the memory hold by the pattern will be released
+* \param release if set to true the memory hold by the matrix will be released
 */
 void SparseMatrix::clear(bool release)
 {
-    if (release) {
-        m_pattern.clear();
-        m_values.clear();
-    } else {
-        FlatVector2D<long>().swap(m_pattern);
-        std::vector<double>().swap(m_values);
-    }
+    clearPatternStorage(release);
+    clearValueStorage(release);
 
     m_blockSize =  0;
     m_nRows     =  0;
@@ -433,12 +428,100 @@ void SparseMatrix::clear(bool release)
 /*!
 * Squeeze.
 *
-* Requests the matrix pattern to reduce its capacity to fit its size.
+* Requests the matrix to reduce its capacity to fit its size.
 */
 void SparseMatrix::squeeze()
 {
+    squeezePatternStorage();
+    squeezeValueStorage();
+}
+
+/**
+* Initialize the storage for the pattern.
+*/
+void SparseMatrix::initializePatternStorage()
+{
+    long nNZ = getNZCount();
+
+    m_pattern.reserve(nNZ);
+}
+
+/**
+* Initialize the storage for the pattern.
+*
+* \param nNZ is the number of non-zero elements contained in the matrix
+*/
+void SparseMatrix::initializePatternStorage(long nNZ)
+{
+    long nRows = getRowCount();
+
+    m_pattern.reserve(nRows, nNZ);
+}
+
+/**
+* Squeeze the storage for the pattern.
+*
+* Requests the pattern storage to reduce its capacity to fit its size.
+*/
+void SparseMatrix::squeezePatternStorage()
+{
     m_pattern.shrinkToFit();
+}
+
+/**
+* Clear the storage for the pattern.
+*
+* \param release if set to true the memory hold by the pattern storage will be released
+*/
+void SparseMatrix::clearPatternStorage(bool release)
+{
+    m_pattern.clear(release);
+}
+
+/**
+* Initialize the storage for the values.
+*/
+void SparseMatrix::initializeValueStorage()
+{
+    long nNZ = getNZCount();
+
+    initializeValueStorage(nNZ);
+}
+
+/**
+* Initialize the storage for the values.
+*
+* \param nNZ is the number of non-zero elements contained in the matrix
+*/
+void SparseMatrix::initializeValueStorage(long nNZ)
+{
+    long nNZElements = getNZElementCount(nNZ);
+
+    m_values.reserve(nNZElements);
+}
+
+/**
+* Squeeze the storage for the values.
+*
+* Requests the value storage to reduce its capacity to fit its size.
+*/
+void SparseMatrix::squeezeValueStorage()
+{
     m_values.shrink_to_fit();
+}
+
+/**
+* Clear the storage for the values.
+*
+* \param release if set to true the memory hold by the value storage will be released
+*/
+void SparseMatrix::clearValueStorage(bool release)
+{
+    m_values.clear();
+
+    if (release) {
+        squeezeValueStorage();
+    }
 }
 
 /*!
