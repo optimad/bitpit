@@ -154,6 +154,14 @@ protected:
     double * getRowValuesData(long row);
     const double * getRowValuesData(long row) const;
 
+    void initializePatternStorage();
+    void squeezePatternStorage();
+    void clearPatternStorage(bool release);
+
+    void initializeValueStorage();
+    void squeezeValueStorage();
+    void clearValueStorage(bool release);
+
 private:
     void _initialize(int blockSize, long nRows, long nCols, long nNZ);
 #if BITPIT_ENABLE_MPI==1
@@ -164,6 +172,9 @@ private:
     void setCommunicator(MPI_Comm communicator);
     void freeCommunicator();
 #endif
+
+    void initializePatternStorage(long capacity);
+    void initializeValueStorage(long capacity);
 
     long getNZElementCount(long nNZ) const;
 
