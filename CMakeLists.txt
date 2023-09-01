@@ -369,6 +369,10 @@ set(BITPIT_LIBRARY ${PROJECT_NAME} CACHE INTERNAL "bitpit library name" FORCE)
 
 add_library(${BITPIT_LIBRARY})
 
+target_compile_features(${BITPIT_LIBRARY} PUBLIC cxx_std_11)
+set_target_properties(${BITPIT_LIBRARY} PROPERTIES CXX_STANDARD 11)
+set_target_properties(${BITPIT_LIBRARY} PROPERTIES CXX_STANDARD_REQUIRED ON)
+
 if (BITPIT_ENABLE_MPI)
     set_target_properties(${BITPIT_LIBRARY} PROPERTIES DEBUG_POSTFIX "_MPI_D")
     set_target_properties(${BITPIT_LIBRARY} PROPERTIES RELWITHDEBINFO_POSTFIX "_MPI_D")
@@ -947,8 +951,6 @@ endif()
 # Compiler settings
 #------------------------------------------------------------------------------------#
 string(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWER)
-
-set(CMAKE_CXX_STANDARD 11)
 
 # GNU profiling build type
 SET(CMAKE_CXX_FLAGS_GNUPROFILING "-pg" CACHE STRING
