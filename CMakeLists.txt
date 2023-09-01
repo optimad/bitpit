@@ -39,7 +39,7 @@ project("bitpit" CXX)
 set(BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libraries")
 
 set(BITPIT_ENABLE_DOC OFF CACHE BOOL "If set, the HTML-based API documentation will be created (requires Doxygen)")
-set(BITPIT_ENABLE_MPI OFF CACHE BOOL "If set, the program is compiled with MPI support")
+set(BITPIT_ENABLE_MPI ON CACHE BOOL "If set, the program is compiled with MPI support")
 
 set(BITPIT_LTO_STRATEGY "Auto" CACHE STRING "Choose the Link Time Optimization (LTO) strategy, options are: Auto (i.e., optimiziation is enabled only in release build and only for some tested configurations) Enabled Disabled.")
 set_property(CACHE BITPIT_LTO_STRATEGY PROPERTY STRINGS "Auto" "Enabled" "Disabled")
