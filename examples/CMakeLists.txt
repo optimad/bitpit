@@ -72,8 +72,14 @@ if(BITPIT_BUILD_EXAMPLES)
         list(APPEND EXAMPLES_SOURCES ${EXAMPLE_SOURCES})
 
         add_executable(${EXAMPLE_NAME} "${EXAMPLE_SOURCES}")
+
+        target_compile_features(${EXAMPLE_NAME} PUBLIC cxx_std_11)
+        set_target_properties(${EXAMPLE_NAME} PROPERTIES CXX_STANDARD 11)
+        set_target_properties(${EXAMPLE_NAME} PROPERTIES CXX_STANDARD_REQUIRED ON)
+
         target_link_libraries(${EXAMPLE_NAME} ${BITPIT_LIBRARY})
         target_link_libraries(${EXAMPLE_NAME} ${BITPIT_EXTERNAL_LIBRARIES})
+
         install(TARGETS ${EXAMPLE_NAME} DESTINATION doc/${PROJECT_NAME}-${BITPIT_VERSION}/examples)
 
         foreach (MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
