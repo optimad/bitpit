@@ -37,7 +37,7 @@
  * \param str is the error message that will be displayed it the unreachable
  * code is reached
  */
-#ifdef HAVE___BUILTIN_UNREACHABLE
+#ifdef BITPIT_ENABLE_BUILTIN_UNREACHABLE
 #define BITPIT_UNREACHABLE(str)    \
 do {                        \
    assert(!str);            \

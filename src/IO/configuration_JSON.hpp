@@ -24,7 +24,7 @@
 #ifndef __BITPIT_CONFIGURATION_JSON_HPP__
 #define __BITPIT_CONFIGURATION_JSON_HPP__
 
-#if HAS_RAPIDJSON_LIB
+#if BITPIT_ENABLE_RAPIDJSON
 #include <rapidjson/document.h>
 
 #include "configuration_config.hpp"
