@@ -132,7 +132,7 @@ function(addModuleIncludeDirectories TARGET_NAME MODULE_NAME)
 
     # External includes
     if (INCLUDE_EXTERNAL)
-        target_include_directories(${TARGET_NAME} PRIVATE "${BITPIT_EXTERNAL_INCLUDE_DIRS}")
+        target_include_directories(${TARGET_NAME} PUBLIC "${BITPIT_EXTERNAL_INCLUDE_DIRS}")
     endif ()
 
     # Add dependiecies
@@ -854,16 +854,16 @@ if (${_RapidJSON_index} GREATER -1)
 
     if (RapidJSON_FOUND)
         # RapidJSON library has been found
-        target_compile_definitions(${BITPIT_LIBRARY} PRIVATE "HAS_RAPIDJSON_LIB=1")
+        target_compile_definitions(${BITPIT_LIBRARY} PUBLIC "BITPIT_ENABLE_RAPIDJSON=1")
 
         list (INSERT BITPIT_EXTERNAL_DEPENDENCIES 0 "RapidJSON")
         list (INSERT BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS 0 "RAPIDJSON_INCLUDE_DIRS")
 
         # Activate std::string RapidJSON compliancy
-        target_compile_definitions(${BITPIT_LIBRARY} PRIVATE "RAPIDJSON_HAS_STDSTRING=1")
+        target_compile_definitions(${BITPIT_LIBRARY} PUBLIC "RAPIDJSON_HAS_STDSTRING=1")
     else()
         # RapidJSON library has not been found
-        target_compile_definitions(${BITPIT_LIBRARY} PRIVATE "HAS_RAPIDJSON_LIB=0")
+        target_compile_definitions(${BITPIT_LIBRARY} PUBLIC "BITPIT_ENABLE_RAPIDJSON=0")
 
         message(STATUS "RapidJSON library not found, JSON support will be disabled.")
     endif()
@@ -919,13 +919,13 @@ if (${_METIS_index} GREATER -1)
     find_package(METIS)
 
     if (METIS_FOUND)
-        target_compile_definitions(${BITPIT_LIBRARY} PRIVATE "BITPIT_ENABLE_METIS=1")
+        target_compile_definitions(${BITPIT_LIBRARY} PUBLIC "BITPIT_ENABLE_METIS=1")
 
         list (APPEND BITPIT_EXTERNAL_DEPENDENCIES "METIS")
         list (APPEND BITPIT_EXTERNAL_VARIABLES_LIBRARIES "METIS_LIBRARIES")
         list (APPEND BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS "METIS_INCLUDE_DIRS")
     else()
-        target_compile_definitions(${BITPIT_LIBRARY} PRIVATE "BITPIT_ENABLE_METIS=0")
+        target_compile_definitions(${BITPIT_LIBRARY} PUBLIC "BITPIT_ENABLE_METIS=0")
 
         message(STATUS "METIS library not found, default patch partitioning support will be disabled.")
     endif()
@@ -1088,9 +1088,9 @@ endif()
 
 # Define a preprocessor macro to recognize debug builds
 IF(CMAKE_BUILD_TYPE_LOWER MATCHES "debug" OR CMAKE_BUILD_TYPE_LOWER MATCHES "debinfo")
-    target_compile_definitions(${BITPIT_LIBRARY} PRIVATE "BITPIT_ENABLE_DEBUG=1")
+    target_compile_definitions(${BITPIT_LIBRARY} PUBLIC "BITPIT_ENABLE_DEBUG=1")
 else ()
-    target_compile_definitions(${BITPIT_LIBRARY} PRIVATE "BITPIT_ENABLE_DEBUG=0")
+    target_compile_definitions(${BITPIT_LIBRARY} PUBLIC "BITPIT_ENABLE_DEBUG=0")
 endif ()
 
 IF(NOT CMAKE_BUILD_TYPE_LOWER MATCHES "debug")
@@ -1131,9 +1131,9 @@ endif ()
 # Check the features supported by the compiler
 include(CheckCXXSourceCompiles)
 
-CHECK_CXX_SOURCE_COMPILES("int main() {__builtin_unreachable();}" HAVE___BUILTIN_UNREACHABLE)
-if(HAVE___BUILTIN_UNREACHABLE)
-    target_compile_definitions(${BITPIT_LIBRARY} PRIVATE "HAVE___BUILTIN_UNREACHABLE")
+CHECK_CXX_SOURCE_COMPILES("int main() {__builtin_unreachable();}" BITPIT_ENABLE_BUILTIN_UNREACHABLE)
+if(BITPIT_ENABLE_BUILTIN_UNREACHABLE)
+    target_compile_definitions(${BITPIT_LIBRARY} PUBLIC "BITPIT_ENABLE_BUILTIN_UNREACHABLE")
 endif()
 
 #------------------------------------------------------------------------------------#

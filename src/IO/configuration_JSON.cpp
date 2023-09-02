@@ -24,7 +24,7 @@
 
 #include "configuration_JSON.hpp"
 
-#if HAS_RAPIDJSON_LIB
+#if BITPIT_ENABLE_RAPIDJSON
 
 #include "rapidjson/encodedstream.h"
 #include <rapidjson/error/en.h>

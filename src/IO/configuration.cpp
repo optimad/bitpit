@@ -26,7 +26,7 @@
 #include "configuration.hpp"
 #include "configuration_XML.hpp"
 
-#if HAS_RAPIDJSON_LIB
+#if BITPIT_ENABLE_RAPIDJSON
 #include "configuration_JSON.hpp"
 #endif
 
@@ -177,7 +177,7 @@ void ConfigParser::read(const std::string &filename, bool append)
 
     if (extension == "xml" || extension == "XML") {
         config::XML::readConfiguration(filename, m_root, m_checkVersion, m_version, this);
-#if HAS_RAPIDJSON_LIB
+#if BITPIT_ENABLE_RAPIDJSON
     } else if (extension == "json" || extension == "JSON") {
         config::JSON::readConfiguration(filename, this);
 #endif
@@ -207,7 +207,7 @@ void ConfigParser::write(const std::string &filename) const
 
     if (extension == "xml" || extension == "XML") {
         config::XML::writeConfiguration(filename, m_root, m_version, this);
-#if HAS_RAPIDJSON_LIB
+#if BITPIT_ENABLE_RAPIDJSON
     } else if (extension == "json" || extension == "JSON") {
         bool prettify = true;
         config::JSON::writeConfiguration(filename, this, prettify);

@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
     // Initialize the logger
     log::manager().initialize(log::MODE_COMBINE);
 
-#if HAS_RAPIDJSON_LIB
+#if BITPIT_ENABLE_RAPIDJSON
     // Run the subtests
     log::cout() << "Testing json configuration parser" << std::endl;
 
