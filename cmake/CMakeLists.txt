@@ -60,6 +60,12 @@ endforeach()
 
 configure_file("BITPITConfig.cmake.in"  "${CMAKE_CURRENT_BINARY_DIR}/BITPITConfig.cmake" @ONLY)
 
+unset(BITPIT_ENABLED_MODULE_LIST)
+unset(BITPIT_INTERFACE_COMPILE_DEFINITIONS)
+unset(BITPIT_RELEASE_POSTFIX)
+unset(BITPIT_DEBUG_POSTFIX)
+unset(BITPIT_INSTALL_PREFIX_CODE)
+
 #------------------------------------------------------------------------------------#
 # Generate BITPITConfigVersion.cmake.in
 #------------------------------------------------------------------------------------#
