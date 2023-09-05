@@ -83,6 +83,7 @@ public:
 
     void swap(PiercedSyncAction &other) noexcept;
 
+    void importData(std::vector<std::size_t> &&values);
     void importData(const std::vector<std::size_t> &values);
 
     // Dump and restore
