@@ -97,6 +97,16 @@ void PiercedSyncAction::swap(PiercedSyncAction &other) noexcept
 *
 * \param values are the values that will be imported
 */
+void PiercedSyncAction::importData(std::vector<std::size_t> &&values)
+{
+    data = std::unique_ptr<std::vector<std::size_t>>(new std::vector<std::size_t>(std::move(values)));
+}
+
+/*!
+* Import the given data.
+*
+* \param values are the values that will be imported
+*/
 void PiercedSyncAction::importData(const std::vector<std::size_t> &values)
 {
     data = std::unique_ptr<std::vector<std::size_t>>(new std::vector<std::size_t>(values));
