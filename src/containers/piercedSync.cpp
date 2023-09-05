@@ -117,11 +117,18 @@ void PiercedSyncAction::restore(std::istream &stream)
         utils::binary::read(stream, info[k]);
     }
 
-    std::size_t dataSize;
-    utils::binary::read(stream, dataSize);
-    data = std::unique_ptr<std::vector<std::size_t>>(new std::vector<std::size_t>(dataSize));
-    for (std::size_t k = 0; k < dataSize; ++k) {
-        utils::binary::read(stream, (*data)[k]);
+    bool hasData;
+    utils::binary::read(stream, hasData);
+
+    if (hasData) {
+        std::size_t dataSize;
+        utils::binary::read(stream, dataSize);
+        data = std::unique_ptr<std::vector<std::size_t>>(new std::vector<std::size_t>(dataSize));
+        for (std::size_t k = 0; k < dataSize; ++k) {
+            utils::binary::read(stream, (*data)[k]);
+        }
+    } else {
+        data.reset();
     }
 }
 
@@ -138,10 +145,15 @@ void PiercedSyncAction::dump(std::ostream &stream) const
         utils::binary::write(stream, info[k]);
     }
 
-    std::size_t dataSize = data->size();
-    utils::binary::write(stream, dataSize);
-    for (std::size_t k = 0; k < dataSize; ++k) {
-        utils::binary::write(stream, (*data)[k]);
+    bool hasData = (data != nullptr);
+    utils::binary::write(stream, hasData);
+
+    if (hasData) {
+        std::size_t dataSize = data->size();
+        utils::binary::write(stream, dataSize);
+        for (std::size_t k = 0; k < dataSize; ++k) {
+            utils::binary::write(stream, (*data)[k]);
+        }
     }
 }
 
