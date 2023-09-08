@@ -30,6 +30,22 @@ cmake_minimum_required(VERSION 3.13)
 project("bitpit" CXX)
 
 #------------------------------------------------------------------------------------#
+# External utilities
+#------------------------------------------------------------------------------------#
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/external/git/cmake")
+include(GetGitRevisionDescription)
+
+include(CheckCCompilerFlag)
+include(CheckCXXCompilerFlag)
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/external/clang-format/cmake")
+include(ClangFormat)
+
+include(GNUInstallDirs)
+
+include(CTest)
+
+#------------------------------------------------------------------------------------#
 # Variables visible to the user
 #
 # NOTE: to generate Windows lib files, both BUILD_SHARED_LIBS and CMAKE_GNUtoMS flags
@@ -49,22 +65,6 @@ set_property(CACHE BITPIT_LTO_STRATEGY PROPERTY STRINGS "Auto" "Enabled" "Disabl
 #------------------------------------------------------------------------------------#
 set(BITPIT_VERSION "1.9.0-devel" CACHE INTERNAL "Version number")
 set(BITPIT_INSTALL_CMAKEDIR "${CMAKE_INSTALL_DATAROOTDIR}/${CMAKE_PROJECT_NAME}/cmake" CACHE INTERNAL "Directory in which cmake modules will be installed")
-
-#------------------------------------------------------------------------------------#
-# External utilities
-#------------------------------------------------------------------------------------#
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/external/git/cmake")
-include(GetGitRevisionDescription)
-
-include(CheckCCompilerFlag)
-include(CheckCXXCompilerFlag)
-
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/external/clang-format/cmake")
-include(ClangFormat)
-
-include(GNUInstallDirs)
-
-include(CTest)
 
 #------------------------------------------------------------------------------------#
 # Functions
