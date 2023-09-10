@@ -52,13 +52,25 @@ function(configureModule MODULE_NAME)
         configure_file("${CONFIGURABLE_HEADER_FILE}" "${CONFIGURED_HEADER_FILE}")
     endforeach()
 
-    # Configure targets
+    # Get sources
     file(GLOB SOURCE_FILES "*.cpp")
     set(${UPPER_MODULE_NAME}_SOURCES "${SOURCE_FILES}" CACHE INTERNAL "Sources of ${MODULE_NAME} module" FORCE)
     unset(SOURCE_FILES)
 
+    # Get headers
+    file(GLOB HEADER_FILES "*.hpp" "*.tpp")
+    file(GLOB CONFIGURED_HEADER_FILES "${PROJECT_BINARY_DIR}/src/${MODULE_NAME}/*.hpp" "${PROJECT_BINARY_DIR}/src/${MODULE_NAME}/*.tpp")
+    set(${UPPER_MODULE_NAME}_HEADERS "${HEADER_FILES}" "${CONFIGURED_HEADER_FILES}" CACHE INTERNAL "Headers of ${MODULE_NAME} module" FORCE)
+    unset(HEADER_FILES)
+    unset(CONFIGURED_HEADER_FILES)
+
+    # Configure target
+    #
+    # For header-only no target is created, the headers are simply added to the list of bitpit
+    # public headers.
     if (NOT "${${UPPER_MODULE_NAME}_SOURCES}" STREQUAL "")
-        add_library(${UPPER_MODULE_NAME}_TARGET_OBJECT OBJECT ${${UPPER_MODULE_NAME}_SOURCES})
+        add_library(${UPPER_MODULE_NAME}_TARGET_OBJECT OBJECT)
+        target_sources(${UPPER_MODULE_NAME}_TARGET_OBJECT PRIVATE ${${UPPER_MODULE_NAME}_SOURCES})
 
         target_compile_features(${UPPER_MODULE_NAME}_TARGET_OBJECT PUBLIC cxx_std_11)
         set_target_properties(${UPPER_MODULE_NAME}_TARGET_OBJECT PROPERTIES CXX_STANDARD 11)
@@ -73,15 +85,19 @@ function(configureModule MODULE_NAME)
         target_sources(${BITPIT_LIBRARY} PRIVATE $<TARGET_OBJECTS:${UPPER_MODULE_NAME}_TARGET_OBJECT>)
     endif ()
 
-    # Configure installation
-    file(GLOB HEADER_FILES "*.hpp" "*.tpp")
-    file(GLOB CONFIGURED_HEADER_FILES "${PROJECT_BINARY_DIR}/src/${MODULE_NAME}/*.hpp" "${PROJECT_BINARY_DIR}/src/${MODULE_NAME}/*.tpp")
-    set(${UPPER_MODULE_NAME}_HEADERS "${HEADER_FILES}" "${CONFIGURED_HEADER_FILES}" CACHE INTERNAL "Headers of ${MODULE_NAME} module" FORCE)
-    unset(HEADER_FILES)
-    unset(CONFIGURED_HEADER_FILES)
-
     if (NOT "${${UPPER_MODULE_NAME}_HEADERS}" STREQUAL "")
-        install(FILES ${${UPPER_MODULE_NAME}_HEADERS} DESTINATION include/${PROJECT_NAME})
+        if (NOT "${${UPPER_MODULE_NAME}_SOURCES}" STREQUAL "")
+            target_sources(${UPPER_MODULE_NAME}_TARGET_OBJECT PRIVATE ${${UPPER_MODULE_NAME}_HEADERS})
+            set_target_properties(${UPPER_MODULE_NAME}_TARGET_OBJECT PROPERTIES PUBLIC_HEADER "${${UPPER_MODULE_NAME}_HEADERS}")
+        endif ()
+
+        get_target_property(BITPIT_PUBLIC_HEADERS ${BITPIT_LIBRARY} PUBLIC_HEADER)
+        if (NOT "${BITPIT_PUBLIC_HEADERS}" STREQUAL "" AND NOT "${BITPIT_PUBLIC_HEADERS}" STREQUAL "BITPIT_PUBLIC_HEADERS-NOTFOUND")
+            set(BITPIT_PUBLIC_HEADERS "${BITPIT_PUBLIC_HEADERS};${${UPPER_MODULE_NAME}_HEADERS}")
+        else ()
+            set(BITPIT_PUBLIC_HEADERS "${${UPPER_MODULE_NAME}_HEADERS}")
+        endif ()
+        set_target_properties(${BITPIT_LIBRARY} PROPERTIES PUBLIC_HEADER "${BITPIT_PUBLIC_HEADERS}")
     endif ()
 
     # Configure source formatting
