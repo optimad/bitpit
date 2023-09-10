@@ -2221,12 +2221,12 @@ void PiercedKernel<id_t>::setPosId(std::size_t pos, id_t id)
 /**
 * Updates the id of the specified position to mark it as empty element.
 *
-* The id of an empty element contains the distance, measured in
-* number of elements, between the current element and the next
-* non-empty element (the distance is negative).
+* The id of an empty element contains the distance, measured in number of elements, between
+* the current element and the next element the iterator should jump to (the distance is
+* negative).
 *
-* The next used position has to be greater than the position to
-* update. Otherwise, undefined behavior occurs.
+* The next used position has to be greater than the position to update. Otherwise, undefined
+* behavior occurs.
 *
 * \param pos is the position to update
 * \param nextUsedPos is the position of the next non-empty element
@@ -2236,7 +2236,36 @@ void PiercedKernel<id_t>::setPosEmptyId(std::size_t pos, std::size_t nextUsedPos
 {
     assert(nextUsedPos > pos);
 
-    m_ids[pos] = -1 * id_t(nextUsedPos - pos);
+    // Early return if we are updating the last position
+    //
+    // When updating the last position, the id can only be set to point to the next position
+    // (i.e., set equal to -1).
+    if (pos == (m_end_pos - 1)) {
+        m_ids[pos] = id_t(-1);
+        return;
+    }
+
+    // Set the id of the position
+    //
+    // The id of an empty element contains the distance, measured in number of elements, between
+    // the current element and the next element the iterator should jump to (the distance is
+    // negative). If the next position is non-empty or a regular hole, the value of the id will
+    // be set in such a way to point to the next non-empty element (this will make the iterator
+    // as fast as possible). If the next position is a pending hole, we need to set the id to
+    // -1, otherwise we may break the iterator. For example,
+    //
+    //      ID    1  2  3 -1  4 -1 -1  5
+    //     POS    0  1  2  3  4  5  6  7
+    //
+    // when setting the id associated with position 4, it should be set to -1 and not to -3,
+    // otherwise if the position 5 will be filled, the iterator will not able to reach it (it
+    // will reach position 4 and will wrongly skip to position 7).
+    id_t offset = id_t(pos - nextUsedPos);
+    if (m_ids[pos + 1] == offset + 1) {
+        m_ids[pos] = offset;
+    } else {
+        m_ids[pos] = id_t(-1);
+    }
 }
 
 /**
