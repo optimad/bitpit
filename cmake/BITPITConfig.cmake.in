@@ -4,15 +4,15 @@
 # This file is configured by bitpit and used by the UseBITPIT.cmake module
 # to load bitpit's settings for an external project.
 
-# If a different UseBITPIT.cmake was previoulsy loaded a reconfiguration
-# is needed
-if(NOT ("@BITPIT_INSTALL_CMAKEDIR@" STREQUAL BITPIT_INSTALL_CMAKEDIR_PREVIOUS))
-    set(BITPIT_RECONFIGURE 1)
-    set(BITPIT_INSTALL_CMAKEDIR_PREVIOUS "@BITPIT_INSTALL_CMAKEDIR@" CACHE INTERNAL "Defines the previous bitpit CMake configuration file loaded")
-endif()
-
 # Compute the installation prefix from this BITPITConfig.cmake file location.
 @BITPIT_INSTALL_PREFIX_CODE@
+
+# If a different UseBITPIT.cmake was previoulsy loaded a reconfiguration
+# is needed
+if(NOT ("${BITPIT_INSTALL_PREFIX}/@BITPIT_INSTALL_CMAKEDIR@" STREQUAL BITPIT_INSTALL_CMAKEDIR_PREVIOUS))
+    set(BITPIT_RECONFIGURE 1)
+    set(BITPIT_INSTALL_CMAKEDIR_PREVIOUS "${BITPIT_INSTALL_PREFIX}/@BITPIT_INSTALL_CMAKEDIR@" CACHE INTERNAL "Defines the previous bitpit CMake configuration file loaded")
+endif()
 
 # The C and C++ flags added by bitpit to the cmake-configured flags.
 SET(BITPIT_REQUIRED_C_FLAGS "")
