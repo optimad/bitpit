@@ -219,6 +219,9 @@ if(NOT TARGET bitpit::bitpit)
         PROPERTIES
         IMPORTED_LOCATION "${BITPIT_LIBRARY}"
         INTERFACE_INCLUDE_DIRECTORIES "${BITPIT_INCLUDE_DIRS}"
-        INTERFACE_LINK_LIBRARIES "${BITPIT_LIBRARIES}"
         INTERFACE_COMPILE_DEFINITIONS "${BITPIT_DEFINITIONS}")
+
+    # The property INTERFACE_LINK_LIBRARIES is set using target_link_libraries so that the debug
+    # and optimized keywords work.
+    target_link_libraries(bitpit::bitpit INTERFACE ${BITPIT_LIBRARIES})
 endif()
