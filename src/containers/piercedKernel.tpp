@@ -683,6 +683,7 @@ void PiercedKernel<id_t>::dump() const
 template<typename id_t>
 void PiercedKernel<id_t>::checkIntegrity() const
 {
+    // Check if the elements and their position match
     for (const auto &entry : m_pos) {
         id_t id = entry.first;
         std::size_t pos = entry.second;
@@ -704,6 +705,52 @@ void PiercedKernel<id_t>::checkIntegrity() const
                 std::cout << " Position " << pos << " contains the element with id " << id << std::endl;
                 std::cout << " but the position map claims that the element is at position " << m_pos.at(id) << std::endl;
                 throw std::runtime_error("Integrity check error");
+            }
+        }
+    }
+
+    // Check if the number of elements visited by the iterator matches the size of the kernel
+    std::size_t n = 0;
+    for (auto it = begin(); it != end(); ++it) {
+        ++n;
+    }
+
+    if (n != size()) {
+        std::cout << " The number of elements visited by the iterator doesn't match the size of the kernel" << std::endl;
+        std::cout << " The iterator has visited " << n << "elements" << std::endl;
+        std::cout << " The size of the kernel is " << size() << std::endl;
+        throw std::runtime_error("Integrity check error");
+    }
+
+    // Check the consistency of the ids of elements associated with empty positions
+    //
+    // The id of an empty element contains the distance, measured in number of elements, between
+    // the current element and the next element the iterator should jump to (the distance is
+    // negative). If the id of an element is lower than -1, the ids of the following elements
+    // should be consecutive until they reach -1.
+    if (!empty()) {
+        std::size_t pos = 0;
+        while (pos < m_ids.size() - 1) {
+            for (std::size_t i = pos; i < m_ids.size(); ++i) {
+                // Skip non-empty positions
+                if (m_ids[i] >= 0) {
+                    pos = i + 1;
+                    break;
+                }
+
+                // Skip empty positions with a distance from a non-empty element equal to one
+                if (m_ids[i + 1] >= 0 && m_ids[i] == - 1) {
+                    pos = i + 2;
+                    break;
+                }
+
+                // Check if ids are consecutive
+                if ((m_ids[i] - m_ids[i + 1] != -1) && m_ids[i] != -1) {
+                    std::cout << " The ids associated with empty positions are not consecutive" << std::endl;
+                    std::cout << " Position " << i << " is associated with id " << m_ids[i] << std::endl;
+                    std::cout << " Position " << (i + 1) << " is associated with id " << m_ids[i + 1] << std::endl;
+                    throw std::runtime_error("Integrity check error");
+                }
             }
         }
     }
