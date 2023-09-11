@@ -57,9 +57,11 @@ int subtest_001()
     std::cout << "Moving container..." << std::endl;
 
     PiercedVector<double> container(containerExpected);
+    container.checkIntegrity();
     std::cout << "  Size of original container ....... " << container.size() << std::endl;
 
     PiercedVector<double> movedContainer(std::move(container));
+    movedContainer.checkIntegrity();
     std::cout << "  Size of moved container .......... " << movedContainer.size() << std::endl;
 
     if (containerExpected.size() != movedContainer.size()) {
@@ -102,8 +104,11 @@ int subtest_002()
     std::cout << "Moving container..." << std::endl;
 
     PiercedVector<double> container(containerExpected);
+    container.checkIntegrity();
+
     PiercedVector<double> movedContainer;
     movedContainer = std::move(container);
+    movedContainer.checkIntegrity();
 
     std::cout << "  Size of original container ....... " << container.size() << std::endl;
     std::cout << "  Size of moved container .......... " << movedContainer.size()<< std::endl;

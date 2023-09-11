@@ -114,6 +114,7 @@ int subtest_001()
 
 		std::cout << "  Deleting element with id = " << id_erase << std::endl;
 		container.erase(id_erase);
+		container.checkIntegrity();
 	}
 
 	printElements(container);
@@ -134,6 +135,7 @@ int subtest_001()
 	std::cout << "  Resizing the container to " << size << " elements" << std::endl;
 
 	container.resize(size);
+	container.checkIntegrity();
 
 	printElements(container);
 
@@ -153,36 +155,42 @@ int subtest_001()
 	if (!container.exists(id_insert)) {
 		std::cout << "  Inserting (at first avilable position) element with id = " << id_insert << std::endl;
 		container.emplace(id_insert, id_insert);
+		container.checkIntegrity();
 	}
 
 	id_insert = 13;
 	if (!container.exists(id_insert)) {
 		std::cout << "  Inserting (at the end) element with id = " << id_insert << std::endl;
 		container.emplaceBack(id_insert, id_insert);
+		container.checkIntegrity();
 	}
 
 	id_insert = 15;
 	if (!container.exists(id_insert)) {
 		std::cout << "  Inserting (at first avilable position) element with id = " << id_insert << std::endl;
 		container.emplace(id_insert, id_insert);
+		container.checkIntegrity();
 	}
 
 	id_insert = 17;
 	if (!container.exists(id_insert)) {
 		std::cout << "  Inserting (at the end) element with id = " << id_insert << std::endl;
 		container.emplaceBack(id_insert, id_insert);
+		container.checkIntegrity();
 	}
 
 	id_insert = 45;
 	if (!container.exists(id_insert)) {
 		std::cout << "  Inserting (at first avilable position) element with id = " << id_insert << std::endl;
 		container.emplace(id_insert, id_insert);
+		container.checkIntegrity();
 	}
 
 	id_insert = 102;
 	if (!container.exists(id_insert)) {
 		std::cout << "  Inserting (at the end) element with id = " << id_insert << std::endl;
 		container.emplaceBack(id_insert, id_insert);
+		container.checkIntegrity();
 	}
 
 	printElements(container);
@@ -203,6 +211,7 @@ int subtest_001()
 	if (!container.exists(id_insert)) {
 		std::cout << "  Inserting (before the element with id = " << id_reference << ") element with id = " << id_insert << std::endl;
 		container.emplaceBefore(id_reference, id_insert, id_insert);
+		container.checkIntegrity();
 	}
 
 	id_insert    = 123;
@@ -210,6 +219,7 @@ int subtest_001()
 	if (!container.exists(id_insert)) {
 		std::cout << "  Inserting (before the element with id = " << id_reference << ") element with id = " << id_insert << std::endl;
 		container.emplaceBefore(id_reference, id_insert, id_insert);
+		container.checkIntegrity();
 	}
 
 
@@ -218,6 +228,7 @@ int subtest_001()
 	if (!container.exists(id_insert)) {
 		std::cout << "  Inserting (before the element with id = " << id_reference << ") element with id = " << id_insert << std::endl;
 		container.emplaceBefore(id_reference, id_insert, id_insert);
+		container.checkIntegrity();
 	}
 
 	id_insert    = 125;
@@ -225,6 +236,7 @@ int subtest_001()
 	if (!container.exists(id_insert)) {
 		std::cout << "  Inserting (after the element with id = " << id_reference << ") element with id = " << id_insert << std::endl;
 		container.emplaceAfter(id_reference, id_insert, id_insert);
+		container.checkIntegrity();
 	}
 
 	id_insert    = 126;
@@ -232,6 +244,7 @@ int subtest_001()
 	if (!container.exists(id_insert)) {
 		std::cout << "  Inserting (after the element with id = " << id_reference << ") element with id = " << id_insert << std::endl;
 		container.emplaceAfter(id_reference, id_insert, id_insert);
+		container.checkIntegrity();
 	}
 
 	id_insert    = 127;
@@ -239,6 +252,7 @@ int subtest_001()
 	if (!container.exists(id_insert)) {
 		std::cout << "  Inserting (after the element with id = " << id_reference << ") element with id = " << id_insert << std::endl;
 		container.emplaceAfter(id_reference, id_insert, id_insert);
+		container.checkIntegrity();
 	}
 
 	printElements(container);
@@ -268,6 +282,7 @@ int subtest_001()
 	std::cout << std::endl << "::: Sort elements by ids :::" << std::endl;
 
 	container.sort();
+	container.checkIntegrity();
 
 	printElements(container);
 
@@ -276,6 +291,7 @@ int subtest_001()
 
 	while (!container.empty()) {
 		container.popBack();
+		container.checkIntegrity();
 	}
 
 	printElements(container);
@@ -290,6 +306,7 @@ int subtest_001()
 	std::cout << std::endl << "::: Filling the vector :::" << std::endl;
 
 	fillContainer(nElements, container);
+	container.checkIntegrity();
 
 	printElements(container);
 
@@ -306,30 +323,37 @@ int subtest_001()
 	id_erase = 0;
 	std::cout << "  Deleting element with id = " << id_erase << std::endl;
 	container.erase(id_erase);
+	container.checkIntegrity();
 
 	id_erase = 1;
 	std::cout << "  Deleting element with id = " << id_erase << std::endl;
 	container.erase(id_erase);
+	container.checkIntegrity();
 
 	id_erase = 2;
 	std::cout << "  Deleting element with id = " << id_erase << std::endl;
 	container.erase(id_erase);
+	container.checkIntegrity();
 
 	id_erase = 3;
 	std::cout << "  Deleting element with id = " << id_erase << std::endl;
 	container.erase(id_erase);
+	container.checkIntegrity();
 
 	id_erase = 4;
 	std::cout << "  Deleting element with id = " << id_erase << std::endl;
 	container.erase(id_erase);
+	container.checkIntegrity();
 
 	id_erase = 8;
 	std::cout << "  Deleting element with id = " << id_erase << std::endl;
 	container.erase(id_erase);
+	container.checkIntegrity();
 
 	id_erase = 7;
 	std::cout << "  Deleting element with id = " << id_erase << std::endl;
 	container.erase(id_erase);
+	container.checkIntegrity();
 
 	// Inserting elements in the container
 	std::cout << std::endl << "::: Testing insertion of element :::" << std::endl;
@@ -338,14 +362,17 @@ int subtest_001()
 	id_insert = 40;
 	std::cout << "  Emplacing element with id = " << id_insert << std::endl;
 	container.emplace(id_insert, id_insert);
+	container.checkIntegrity();
 
 	id_insert = 41;
 	std::cout << "  Emplacing element with id = " << id_insert << std::endl;
 	container.emplace(id_insert, id_insert);
+	container.checkIntegrity();
 
 	id_insert = 42;
 	std::cout << "  Emplacing element with id = " << id_insert << std::endl;
 	container.emplace(id_insert, id_insert);
+	container.checkIntegrity();
 
 	printElements(container);
 
@@ -360,6 +387,7 @@ int subtest_001()
 	std::cout << std::endl;
 	std::cout << "  Moving element with id = " << id_move << " before element with id = " << id_reference << std::endl;
 	container.moveBefore(id_reference, id_move);
+	container.checkIntegrity();
 
 	printElements(container);
 
@@ -368,6 +396,7 @@ int subtest_001()
 	std::cout << std::endl;
 	std::cout << "  Moving element with id = " << id_move << " after element with id = " << id_reference << std::endl;
 	container.moveAfter(id_reference, id_move);
+	container.checkIntegrity();
 
 	printElements(container);
 
@@ -376,6 +405,7 @@ int subtest_001()
 	std::cout << std::endl;
 	std::cout << "  Moving element with id = " << id_move << " after element with id = " << id_reference << std::endl;
 	container.moveAfter(id_reference, id_move);
+	container.checkIntegrity();
 
 	printElements(container);
 
@@ -392,6 +422,7 @@ int subtest_001()
 	std::cout << "  Capacity before squeeze = " << container.capacity() << std::endl;
 
 	container.squeeze();
+	container.checkIntegrity();
 
 	std::cout << "  Capacity after squeeze  = " << container.capacity() << std::endl;
 
@@ -407,6 +438,7 @@ int subtest_001()
 	std::cout << std::endl << "::: Clear the vector :::" << std::endl;
 
 	container.clear();
+	container.checkIntegrity();
 
 	printElements(container);
 
@@ -414,6 +446,7 @@ int subtest_001()
 	std::cout << std::endl << "::: Filling the vector :::" << std::endl;
 
 	fillContainer(nElements, container);
+	container.checkIntegrity();
 
 	printElements(container);
 
