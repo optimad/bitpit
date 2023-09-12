@@ -357,6 +357,34 @@ void PiercedSyncMaster::journalSyncAction(const PiercedSyncAction &action)
         }
         break;
 
+    case PiercedSyncAction::TYPE_OVERWRITE:
+        if (previousActionType == PiercedSyncAction::TYPE_OVERWRITE) {
+            previousAction->type = PiercedSyncAction::TYPE_OVERWRITE_MULTIPLE;
+            previousAction->data = std::unique_ptr<std::vector<std::size_t>>(new std::vector<std::size_t>(2));
+            (*(previousAction->data))[0] = previousAction->info[PiercedSyncAction::INFO_POS];
+            (*(previousAction->data))[1] = action.info[PiercedSyncAction::INFO_POS];
+            previousAction->info[PiercedSyncAction::INFO_POS] = std::numeric_limits<std::size_t>::max();
+        } else if (previousActionType == PiercedSyncAction::TYPE_OVERWRITE_MULTIPLE) {
+            previousAction->data->push_back(action.info[PiercedSyncAction::INFO_POS]);
+        } else {
+            m_syncJournal.push_back(action);
+        }
+        break;
+
+    case PiercedSyncAction::TYPE_OVERWRITE_MULTIPLE:
+        if (previousActionType == PiercedSyncAction::TYPE_OVERWRITE) {
+            previousAction->type = PiercedSyncAction::TYPE_OVERWRITE_MULTIPLE;
+            previousAction->data = std::unique_ptr<std::vector<std::size_t>>(new std::vector<std::size_t>(action.data->size() + 1));
+            (*(previousAction->data))[0] = previousAction->info[PiercedSyncAction::INFO_POS];
+            previousAction->data->insert(previousAction->data->begin() + 1, action.data->begin(), action.data->end());
+            previousAction->info[PiercedSyncAction::INFO_POS] = std::numeric_limits<std::size_t>::max();
+        } else if (previousActionType == PiercedSyncAction::TYPE_OVERWRITE_MULTIPLE) {
+            previousAction->data->insert(previousAction->data->begin(), action.data->begin(), action.data->end());
+        } else {
+            m_syncJournal.push_back(action);
+        }
+        break;
+
     case PiercedSyncAction::TYPE_NOOP:
         break;
 

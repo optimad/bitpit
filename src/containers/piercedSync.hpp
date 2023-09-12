@@ -54,6 +54,7 @@ public:
         TYPE_APPEND,
         TYPE_INSERT,
         TYPE_OVERWRITE,
+        TYPE_OVERWRITE_MULTIPLE,
         TYPE_MOVE_APPEND,
         TYPE_MOVE_INSERT,
         TYPE_MOVE_OVERWRITE,
