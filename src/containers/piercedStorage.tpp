@@ -791,6 +791,7 @@ void PiercedStorage<value_t, id_t>::commitSyncAction(const PiercedSyncAction &ac
     }
 
     case PiercedSyncAction::TYPE_OVERWRITE:
+    case PiercedSyncAction::TYPE_OVERWRITE_MULTIPLE:
     {
         break;
     }
