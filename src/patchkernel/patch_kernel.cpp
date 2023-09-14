@@ -5643,17 +5643,66 @@ std::array<double, 3> PatchKernel::evalElementCentroid(const Element &element) c
 */
 void PatchKernel::evalElementBoundingBox(const Element &element, std::array<double,3> *minPoint, std::array<double,3> *maxPoint) const
 {
-	ConstProxyVector<long> elementVertexIds = element.getVertexIds();
-	const int nElementVertices = elementVertexIds.size();
+	ElementType elementType = element.getType();
+	switch (elementType)
+	{
 
-	*minPoint = getVertexCoords(elementVertexIds[0]);
-	*maxPoint = *minPoint;
-	for (int i = 1; i < nElementVertices; ++i) {
-		const std::array<double, 3> &vertexCoord = getVertexCoords(elementVertexIds[i]);
+	case ElementType::VERTEX:
+	{
+		const long *elementConnect = element.getConnect();
+		*minPoint = getVertexCoords(elementConnect[0]);
+		*maxPoint = *minPoint;
+		break;
+	}
+
+	case ElementType::PIXEL:
+	{
+		const long *elementConnect = element.getConnect();
+
+		const std::array<double, 3> &vertexCoord_0 = getVertexCoords(elementConnect[0]);
+		const std::array<double, 3> &vertexCoord_3 = getVertexCoords(elementConnect[3]);
+
 		for (int d = 0; d < 3; ++d) {
-			(*minPoint)[d] = std::min(vertexCoord[d], (*minPoint)[d]);
-			(*maxPoint)[d] = std::max(vertexCoord[d], (*maxPoint)[d]);
+			(*minPoint)[d] = std::min(vertexCoord_0[d], vertexCoord_3[d]);
+			(*maxPoint)[d] = std::max(vertexCoord_0[d], vertexCoord_3[d]);
 		}
+
+		break;
+	}
+
+	case ElementType::VOXEL:
+	{
+		const long *elementConnect = element.getConnect();
+
+		const std::array<double, 3> &vertexCoord_0 = getVertexCoords(elementConnect[0]);
+		const std::array<double, 3> &vertexCoord_7 = getVertexCoords(elementConnect[7]);
+
+		for (int d = 0; d < 3; ++d) {
+			(*minPoint)[d] = std::min(vertexCoord_0[d], vertexCoord_7[d]);
+			(*maxPoint)[d] = std::max(vertexCoord_0[d], vertexCoord_7[d]);
+		}
+
+		break;
+	}
+
+	default:
+	{
+		ConstProxyVector<long> elementVertexIds = element.getVertexIds();
+		const int nElementVertices = elementVertexIds.size();
+
+		*minPoint = getVertexCoords(elementVertexIds[0]);
+		*maxPoint = *minPoint;
+		for (int i = 1; i < nElementVertices; ++i) {
+			const std::array<double, 3> &vertexCoord = getVertexCoords(elementVertexIds[i]);
+			for (int d = 0; d < 3; ++d) {
+				(*minPoint)[d] = std::min(vertexCoord[d], (*minPoint)[d]);
+				(*maxPoint)[d] = std::max(vertexCoord[d], (*maxPoint)[d]);
+			}
+		}
+
+		break;
+	}
+
 	}
 }
 
