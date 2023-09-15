@@ -394,6 +394,7 @@ void LevelSetSignPropagator::initializePropagation(const LevelSetObjectInterface
     // Initialize propagation state
     m_nWaiting = m_mesh->getCellCount();
 
+    m_propagationStates.unsetKernel();
     m_propagationStates.setStaticKernel(&(m_mesh->getCells()));
     m_propagationStates.fill(STATE_WAITING);
 
