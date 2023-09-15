@@ -1233,7 +1233,7 @@ void PatchKernel::write(VTKWriteMode mode)
 	}
 
 	int vtkVertexCount = 0;
-	m_vtkVertexMap.unsetKernel(true);
+	m_vtkVertexMap.unsetKernel();
 	m_vtkVertexMap.setStaticKernel(&m_vertices);
 	VertexConstIterator endItr = vertexConstEnd();
 	for (VertexConstIterator itr = vertexConstBegin(); itr != endItr; ++itr) {
