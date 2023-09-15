@@ -681,6 +681,7 @@ void PiercedStorage<value_t, id_t>::_postSetStaticKernel()
 {
     // Resize the storage
     rawResize(this->m_kernel->rawSize());
+    rawShrinkToFit();
 }
 
 /**
