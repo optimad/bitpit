@@ -374,6 +374,7 @@ void LevelSetSegmentationKernel::setSurface( const SurfUnstructured *surface, do
     m_featureAngle = featureAngle;
 
     // Segment vertices information
+    m_segmentVertexOffset.unsetKernel();
     m_segmentVertexOffset.setStaticKernel(&m_surface->getCells());
 
     std::size_t nTotalSegmentVertices = 0;
@@ -383,12 +384,16 @@ void LevelSetSegmentationKernel::setSurface( const SurfUnstructured *surface, do
     }
 
     // Normals
+    m_segmentNormalsValid.unsetKernel();
     m_segmentNormalsValid.setStaticKernel(&m_surface->getCells());
     m_segmentNormalsValid.fill(false);
+    m_segmentNormalsStorage.unsetKernel();
     m_segmentNormalsStorage.setStaticKernel(&m_surface->getCells());
 
+    m_unlimitedVertexNormalsValid.unsetKernel();
     m_unlimitedVertexNormalsValid.setStaticKernel(&m_surface->getVertices());
     m_unlimitedVertexNormalsValid.fill(false);
+    m_unlimitedVertexNormalsStorage.unsetKernel();
     m_unlimitedVertexNormalsStorage.setStaticKernel(&m_surface->getVertices());
 
     m_limitedSegmentVertexNormalValid.resize(nTotalSegmentVertices);
