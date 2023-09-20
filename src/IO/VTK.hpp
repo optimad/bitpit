@@ -216,9 +216,9 @@ class VTKBaseStreamer{
         virtual void            absorbData( std::fstream &, const std::string &, VTKFormat, uint64_t, uint8_t, VTKDataType)  ;
 
         template<typename T>
-        void                    flushValue(std::fstream &, VTKFormat, const T &value);
+        void                    flushValue(std::fstream &, VTKFormat, const T &value) const;
         template<typename T>
-        void                    flushValue(std::fstream &, VTKFormat, const T *values, int nValues);
+        void                    flushValue(std::fstream &, VTKFormat, const T *values, int nValues) const;
 
 };
 
