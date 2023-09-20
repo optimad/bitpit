@@ -57,7 +57,7 @@ VTKVectorContainer<T>::VTKVectorContainer( std::vector<T> &data){
  * @param[in] value is the value that will be written
  */
 template<class T>
-void VTKBaseStreamer::flushValue( std::fstream &str, VTKFormat format, const T &value){
+void VTKBaseStreamer::flushValue( std::fstream &str, VTKFormat format, const T &value) const {
 
     if( format==VTKFormat::ASCII){
         genericIO::flushASCII( str, value) ;
@@ -78,7 +78,7 @@ void VTKBaseStreamer::flushValue( std::fstream &str, VTKFormat format, const T &
  * @param[in] size is the number of values that will be writtend
  */
 template<class T>
-void VTKBaseStreamer::flushValue( std::fstream &str, VTKFormat format, const T *values, int nValues){
+void VTKBaseStreamer::flushValue( std::fstream &str, VTKFormat format, const T *values, int nValues) const {
 
     if( format==VTKFormat::ASCII){
         genericIO::flushASCII( str, values, nValues) ;
