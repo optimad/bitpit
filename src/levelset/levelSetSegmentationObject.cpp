@@ -396,7 +396,7 @@ void LevelSetSegmentationKernel::setSurface( const SurfUnstructured *surface, do
     m_unlimitedVertexNormalsStorage.unsetKernel();
     m_unlimitedVertexNormalsStorage.setStaticKernel(&m_surface->getVertices());
 
-    m_limitedSegmentVertexNormalValid.resize(nTotalSegmentVertices);
+    m_limitedSegmentVertexNormalValid.assign(nTotalSegmentVertices, false);
 
     // Initialize search tree
     m_searchTree = std::unique_ptr<SurfaceSkdTree>(new SurfaceSkdTree(surface));
