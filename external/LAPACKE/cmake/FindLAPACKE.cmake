@@ -413,6 +413,12 @@ endif()
 mark_as_advanced(LAPACKE_DIR)
 mark_as_advanced(LAPACKE_DIR_FOUND)
 
+if(MSVC)
+  # hard-coded just for MKL distributions : put the include dir to CBLAS_DIR_FOUND/include
+  set(LAPACKE_INCLUDE_DIRS "${LAPACKE_DIR_FOUND}/include")
+endif()
+
+
 # check that LAPACKE has been found
 # ---------------------------------
 include(FindPackageHandleStandardArgs)
