@@ -161,7 +161,7 @@ set(_EXTERNAL_VARIABLES_LIBRARIES "@BITPIT_EXTERNAL_VARIABLES_LIBRARIES@")
 set(_EXTERNAL_VARIABLES_INCLUDE_DIRS "@BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS@")
 
 if(MSVC)
-    # download directly libxml2, rapidjson, mkl blas, mkl lapack and mkl lapacke 
+    # download directly libxml2, rapidjson
     # through nuget system and attach it to current VS project
     include(bitpitNuGet)
     bitpitNuGet()
