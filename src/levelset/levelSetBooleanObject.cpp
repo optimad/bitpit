@@ -144,9 +144,10 @@ LevelSetBooleanObject::LevelSetBooleanObject( int id, LevelSetBooleanOperation o
  * @param[in] op type of boolean operation
  * @param[in] sourceObjects pointers to source objects
  */
-LevelSetBooleanObject::LevelSetBooleanObject( int id, LevelSetBooleanOperation op, const std::vector<const LevelSetObject*> &sourceObjects ) :LevelSetProxyObject(id) {
-    m_operation     = op;
-    m_sourceObjects = sourceObjects;
+LevelSetBooleanObject::LevelSetBooleanObject( int id, LevelSetBooleanOperation op, const std::vector<const LevelSetObject*> &sourceObjects )
+    : LevelSetProxyObject(id),
+      m_operation(op), m_sourceObjects(sourceObjects) {
+
 }
 
 /*!
@@ -154,9 +155,10 @@ LevelSetBooleanObject::LevelSetBooleanObject( int id, LevelSetBooleanOperation o
  * Assigns same id to new object;
  * @param[in] other object to be coppied
  */
-LevelSetBooleanObject::LevelSetBooleanObject( const LevelSetBooleanObject &other) :LevelSetProxyObject(other) {
-    m_operation     = other.m_operation;
-    m_sourceObjects = other.m_sourceObjects;
+LevelSetBooleanObject::LevelSetBooleanObject( const LevelSetBooleanObject &other)
+    : LevelSetProxyObject(other),
+      m_operation(other.m_operation),
+      m_sourceObjects(other.m_sourceObjects) {
 }
 
 /*!
