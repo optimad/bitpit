@@ -57,7 +57,7 @@ template<typename T>
 std::vector<T *>  LevelSet::getObjectPtrs( ) const{
     std::vector<T *> objects;
     objects.reserve(m_objects.size());
-    for( auto &entry : m_objects){
+    for(const auto &entry : m_objects){
         T *object = getObjectPtr(entry.first) ;
         if(object){
             objects.push_back( object ) ;
