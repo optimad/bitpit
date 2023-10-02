@@ -29,11 +29,9 @@
 
 namespace bitpit{
 
-class LevelSet;
 class LevelSetObject;
 
 class LevelSetProxyObject : public LevelSetObject{
-    friend class LevelSet;
 
     protected:
     virtual void replaceSourceObject(const LevelSetObject *current, const LevelSetObject *updated) = 0;
