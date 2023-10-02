@@ -29,12 +29,17 @@
 
 #include <bitpit_common.hpp>
 
+#include <array>
+
 namespace bitpit{
 
 class LevelSetProxyBaseObject {
     public:
-    virtual int getReferenceObjectId( long ) const = 0;
-    virtual int getReferencePrimaryObjectId( long ) const = 0;
+    virtual int getCellReferenceObjectId( long id ) const = 0;
+    virtual int getCellReferencePrimaryObjectId( long id ) const = 0;
+
+    virtual int getReferenceObjectId( const std::array<double, 3> &point ) const = 0;
+    virtual int getReferencePrimaryObjectId( const std::array<double, 3> &point ) const = 0;
 
     virtual std::vector<int> getSourceObjectIds() const = 0;
     virtual std::vector<int> getPrimarySourceObjectIds() const = 0;
@@ -46,25 +51,36 @@ class LevelSetProxyObject : public BaseLevelSetObject, public LevelSetProxyBaseO
     protected:
     LevelSetProxyObject(int);
 
+    void fillCellLocationCache() override;
+    void fillCellLocationCache(const std::vector<adaption::Info> &adaptionData) override;
+
     virtual void replaceSourceObject(const SourceLevelSetObject *current, const SourceLevelSetObject *updated) = 0;
 
     public:
-    bool            isPrimary() const override;
+    bool isPrimary() const override;
 
-    bool            isInNarrowBand(long id) const override;
+    bool isCellInNarrowBand(long id) const override;
+    bool isInNarrowBand(const std::array<double,3> &point) const override;
 
-    virtual const SourceLevelSetObject *    getReferenceObject( long ) const =0;
-    virtual const SourceLevelSetObject *    getReferencePrimaryObject( long ) const;
+    virtual const SourceLevelSetObject * getCellReferenceObject( long id ) const =0;
+    virtual const SourceLevelSetObject * getCellReferencePrimaryObject( long id ) const;
 
-    int getReferenceObjectId( long ) const override;
-    int getReferencePrimaryObjectId( long ) const override;
-    BITPIT_DEPRECATED(int getPrimaryObjectId( long ) const);
+    virtual const SourceLevelSetObject * getReferenceObject( const std::array<double, 3> &point ) const =0;
+    virtual const SourceLevelSetObject * getReferencePrimaryObject( const std::array<double, 3> &point ) const;
+
+    int getCellReferenceObjectId( long id ) const override;
+    int getCellReferencePrimaryObjectId( long id ) const override;
+
+    int getReferenceObjectId( const std::array<double, 3> &point ) const override;
+    int getReferencePrimaryObjectId( const std::array<double, 3> &point ) const override;
 
     virtual std::vector<const SourceLevelSetObject *> getSourceObjects() const =0;
     virtual std::vector<const SourceLevelSetObject *> getPrimarySourceObjects() const;
 
     std::vector<int> getSourceObjectIds() const override;
     std::vector<int> getPrimarySourceObjectIds() const override;
+
+    BITPIT_DEPRECATED(int getPrimaryObjectId( long ) const);
 
 };
 

@@ -159,19 +159,42 @@ int subtest_001()
     ids.push_back(id3);
     id5 = levelset.addObject(bitpit::LevelSetBooleanOperation::UNION,ids) ;
 
-    levelset.getObject(id0).enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
-    levelset.getObject(id1).enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
-    levelset.getObject(id2).enableVTKOutput(bitpit::LevelSetWriteField::DEFAULT);
-    levelset.getObject(id3).enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
-    levelset.getObject(id4).enableVTKOutput(bitpit::LevelSetWriteField::DEFAULT);
-    levelset.getObject(id5).enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
+    bitpit::LevelSetObject &object0 = levelset.getObject(id0);
+    bitpit::LevelSetObject &object1 = levelset.getObject(id1);
+    bitpit::LevelSetObject &object2 = levelset.getObject(id2);
+    bitpit::LevelSetObject &object3 = levelset.getObject(id3);
+    bitpit::LevelSetObject &object4 = levelset.getObject(id4);
+    bitpit::LevelSetObject &object5 = levelset.getObject(id5);
 
-    levelset.setPropagateSign(true);
+    object0.setCellBulkEvaluationMode(bitpit::LevelSetBulkEvaluationMode::SIGN_PROPAGATION);
+    object1.setCellBulkEvaluationMode(bitpit::LevelSetBulkEvaluationMode::SIGN_PROPAGATION);
+    object2.setCellBulkEvaluationMode(bitpit::LevelSetBulkEvaluationMode::SIGN_PROPAGATION);
+    object3.setCellBulkEvaluationMode(bitpit::LevelSetBulkEvaluationMode::SIGN_PROPAGATION);
+    object4.setCellBulkEvaluationMode(bitpit::LevelSetBulkEvaluationMode::SIGN_PROPAGATION);
+    object5.setCellBulkEvaluationMode(bitpit::LevelSetBulkEvaluationMode::SIGN_PROPAGATION);
 
-    // Compute the levelset
-    levelset.compute( ids );
+    object0.enableFieldCellCache(bitpit::LevelSetField::SIGN, bitpit::LevelSetCacheMode::FULL);
+    object1.enableFieldCellCache(bitpit::LevelSetField::SIGN, bitpit::LevelSetCacheMode::FULL);
+    object2.enableFieldCellCache(bitpit::LevelSetField::SIGN, bitpit::LevelSetCacheMode::FULL);
+    object3.enableFieldCellCache(bitpit::LevelSetField::SIGN, bitpit::LevelSetCacheMode::FULL);
+    object4.enableFieldCellCache(bitpit::LevelSetField::SIGN, bitpit::LevelSetCacheMode::FULL);
+    object5.enableFieldCellCache(bitpit::LevelSetField::SIGN, bitpit::LevelSetCacheMode::FULL);
+
+    object0.enableFieldCellCache(bitpit::LevelSetField::VALUE, bitpit::LevelSetCacheMode::NARROW_BAND);
+    object1.enableFieldCellCache(bitpit::LevelSetField::VALUE, bitpit::LevelSetCacheMode::NARROW_BAND);
+    object2.enableFieldCellCache(bitpit::LevelSetField::VALUE, bitpit::LevelSetCacheMode::NARROW_BAND);
+    object3.enableFieldCellCache(bitpit::LevelSetField::VALUE, bitpit::LevelSetCacheMode::NARROW_BAND);
+    object4.enableFieldCellCache(bitpit::LevelSetField::VALUE, bitpit::LevelSetCacheMode::NARROW_BAND);
+    object5.enableFieldCellCache(bitpit::LevelSetField::VALUE, bitpit::LevelSetCacheMode::NARROW_BAND);
 
     // Write levelset information
+    object0.enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
+    object1.enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
+    object2.enableVTKOutput(bitpit::LevelSetWriteField::DEFAULT);
+    object3.enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
+    object4.enableVTKOutput(bitpit::LevelSetWriteField::DEFAULT);
+    object5.enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
+
     mesh.getVTK().setName("levelset_005") ;
     mesh.write() ;
 

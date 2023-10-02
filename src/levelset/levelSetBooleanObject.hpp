@@ -65,16 +65,16 @@ class LevelSetBooleanResult {
 };
 
 template<typename SourceLevelSetObject>
-class LevelSetBooleanBaseObject : public LevelSetProxyObject<SourceLevelSetObject> {
+class LevelSetBooleanBaseObject : public LevelSetProxyObject<SourceLevelSetObject, SourceLevelSetObject> {
 
     private:
     LevelSetBooleanOperation                    m_operation;            /**< identifier of operation */
-    std::vector<const SourceLevelSetObject*>    m_sourceObjects;        /**< Pointers to source objects */
+    std::vector<const SourceLevelSetObject *>   m_sourceObjects;        /**< Pointers to source objects */
 
     LevelSetBooleanOperation                    getBooleanOperation() const;
 
-    LevelSetBooleanResult<SourceLevelSetObject> computeBooleanResult( long ) const ;
-    LevelSetBooleanResult<SourceLevelSetObject> computeBooleanResult( const std::array<double,3> &coords ) const ;
+    LevelSetBooleanResult<SourceLevelSetObject> computeBooleanResult( long, bool signedLevelSet ) const ;
+    LevelSetBooleanResult<SourceLevelSetObject> computeBooleanResult( const std::array<double,3> &coords, bool signedLevelSet ) const ;
 
     protected:
     LevelSetBooleanBaseObject(int, LevelSetBooleanOperation, const SourceLevelSetObject *, const SourceLevelSetObject *);
@@ -82,15 +82,30 @@ class LevelSetBooleanBaseObject : public LevelSetProxyObject<SourceLevelSetObjec
 
     void                                        replaceSourceObject(const SourceLevelSetObject *current, const SourceLevelSetObject *updated) override ;
 
+    void                                        fillCellPropagatedSignCache() override;
+
+    short                                       _evalCellSign(long id) const override;
+    double                                      _evalCellValue(long id, bool signedLevelSet) const override;
+    std::array<double,3>                        _evalCellGradient(long id, bool signedLevelSet) const override;
+
+    double                                      _evalValue(const std::array<double,3> &point, bool signedLevelSet) const override;
+    std::array<double,3>                        _evalGradient(const std::array<double,3> &point, bool signedLevelSet) const override;
+
     public:
-    double                                      getValue(long ) const override;
-    std::array<double,3>                        getGradient(long ) const override;
+    bool                                        empty() const override;
 
-    LevelSetInfo                                computeLevelSetInfo(const std::array<double,3> &) const override;
+    const SourceLevelSetObject *                getCellReferenceObject(long id) const override;
 
-    const SourceLevelSetObject *                getReferenceObject( long ) const override;
+    const SourceLevelSetObject *                getReferenceObject(const std::array<double,3> &point) const override;
 
     std::vector<const SourceLevelSetObject *>   getSourceObjects() const override;
+
+protected:
+    template<typename data_t, typename function_t>
+    data_t _evalCellFunction(long id, bool signedLevelSet, const function_t &function) const;
+
+    template<typename data_t, typename function_t>
+    data_t _evalFunction(const std::array<double,3> &point, bool signedLevelSet, const function_t &function) const;
 
 };
 

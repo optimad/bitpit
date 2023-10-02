@@ -141,20 +141,20 @@ int subtest_001()
     mesh.initializeInterfaces();
     mesh.update() ;
 
-    // Set levelset configuration
+    // Create levelset
     std::chrono::time_point<std::chrono::system_clock> start, end;
     int elapsed_init, elapsed_refi(0);
+    start = std::chrono::system_clock::now();
 
     bitpit::LevelSet levelset;
-    
-    std::vector<bitpit::adaption::Info> adaptionData ;
+
     int id0, id1, id2, id3, id4, id5;
 
     levelset.setMesh(&mesh) ;
+
     id0 = levelset.addObject(std::move(STL0),BITPIT_PI) ;
     id1 = levelset.addObject(std::move(STL1),BITPIT_PI) ;
     id2 = levelset.addObject(std::move(STL2),BITPIT_PI/10.) ;
-
     id3 = levelset.addObject(bitpit::LevelSetBooleanOperation::UNION,id0,id1) ;
     id4 = levelset.addObject(bitpit::LevelSetBooleanOperation::SUBTRACTION,id3,id2) ;
 
@@ -164,57 +164,81 @@ int subtest_001()
     ids.push_back(id2);
     id5 = levelset.addObject(bitpit::LevelSetBooleanOperation::UNION,ids) ;
 
-    ids.push_back(id3);
-    ids.push_back(id4);
-    ids.push_back(id5);
+    bitpit::LevelSetObject &object0 = levelset.getObject(id0);
+    bitpit::LevelSetObject &object1 = levelset.getObject(id1);
+    bitpit::LevelSetObject &object2 = levelset.getObject(id2);
+    bitpit::LevelSetObject &object3 = levelset.getObject(id3);
+    bitpit::LevelSetObject &object4 = levelset.getObject(id4);
+    bitpit::LevelSetObject &object5 = levelset.getObject(id5);
 
-    levelset.getObject(id0).enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
-    levelset.getObject(id1).enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
-    levelset.getObject(id2).enableVTKOutput(bitpit::LevelSetWriteField::DEFAULT);
-    levelset.getObject(id3).enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
-    levelset.getObject(id4).enableVTKOutput(bitpit::LevelSetWriteField::DEFAULT);
-    levelset.getObject(id5).enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
+    object0.setCellBulkEvaluationMode(bitpit::LevelSetBulkEvaluationMode::SIGN_PROPAGATION);
+    object1.setCellBulkEvaluationMode(bitpit::LevelSetBulkEvaluationMode::SIGN_PROPAGATION);
+    object2.setCellBulkEvaluationMode(bitpit::LevelSetBulkEvaluationMode::SIGN_PROPAGATION);
+    object3.setCellBulkEvaluationMode(bitpit::LevelSetBulkEvaluationMode::SIGN_PROPAGATION);
+    object4.setCellBulkEvaluationMode(bitpit::LevelSetBulkEvaluationMode::SIGN_PROPAGATION);
+    object5.setCellBulkEvaluationMode(bitpit::LevelSetBulkEvaluationMode::SIGN_PROPAGATION);
+
+    object0.enableFieldCellCache(bitpit::LevelSetField::SIGN, bitpit::LevelSetCacheMode::FULL);
+    object1.enableFieldCellCache(bitpit::LevelSetField::SIGN, bitpit::LevelSetCacheMode::FULL);
+    object2.enableFieldCellCache(bitpit::LevelSetField::SIGN, bitpit::LevelSetCacheMode::FULL);
+    object3.enableFieldCellCache(bitpit::LevelSetField::SIGN, bitpit::LevelSetCacheMode::FULL);
+    object4.enableFieldCellCache(bitpit::LevelSetField::SIGN, bitpit::LevelSetCacheMode::FULL);
+    object5.enableFieldCellCache(bitpit::LevelSetField::SIGN, bitpit::LevelSetCacheMode::FULL);
+
+    object0.enableFieldCellCache(bitpit::LevelSetField::VALUE, bitpit::LevelSetCacheMode::FULL);
+    object1.enableFieldCellCache(bitpit::LevelSetField::VALUE, bitpit::LevelSetCacheMode::FULL);
+    object2.enableFieldCellCache(bitpit::LevelSetField::VALUE, bitpit::LevelSetCacheMode::FULL);
+    object3.enableFieldCellCache(bitpit::LevelSetField::VALUE, bitpit::LevelSetCacheMode::FULL);
+    object4.enableFieldCellCache(bitpit::LevelSetField::VALUE, bitpit::LevelSetCacheMode::FULL);
+    object5.enableFieldCellCache(bitpit::LevelSetField::VALUE, bitpit::LevelSetCacheMode::FULL);
+
+    end = std::chrono::system_clock::now();
+    elapsed_init = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+
+    // Write output
+    bitpit::log::cout() << " - Writing output" << std::endl;
+
+    object0.enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
+    object0.enableVTKOutput(bitpit::LevelSetWriteField::SIGN);
+    object1.enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
+    object1.enableVTKOutput(bitpit::LevelSetWriteField::SIGN);
+    object2.enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
+    object2.enableVTKOutput(bitpit::LevelSetWriteField::SIGN);
+    object3.enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
+    object3.enableVTKOutput(bitpit::LevelSetWriteField::SIGN);
+    object4.enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
+    object4.enableVTKOutput(bitpit::LevelSetWriteField::SIGN);
+    object5.enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
+    object5.enableVTKOutput(bitpit::LevelSetWriteField::SIGN);
 
     mesh.getVTK().setName("levelset_003") ;
     mesh.getVTK().setCounter() ;
-
-    levelset.setPropagateSign(true);
-
-    // Compute and write level set on initial mesh
-    start = std::chrono::system_clock::now();
-    levelset.compute( );
-    end = std::chrono::system_clock::now();
-
-    elapsed_init = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
-
-    bitpit::log::cout() << " - Exporting data" << std::endl;
     mesh.write() ;
 
     // Refine mesh, update levelset and write data
-    const bitpit::LevelSetObject &object0 = levelset.getObject(id0);
-    const bitpit::LevelSetObject &object1 = levelset.getObject(id1);
-    const bitpit::LevelSetObject &object2 = levelset.getObject(id2);
-
+    std::vector<bitpit::adaption::Info> adaptionData ;
     for( int i=0; i<10; ++i){
 
+        std::cout << " ::: " << std::endl;
         for( auto & cell : mesh.getCells() ){
             long cellId = cell.getId() ;
-            if( std::abs(object0.getValue(cellId)) < mesh.evalCellSize(cellId)  ){
+            if( object0.evalCellValue(cellId, false) < mesh.evalCellSize(cellId)  ){
                 mesh.markCellForRefinement(cellId) ;
             }
 
             if( i<3) {
-                if( std::abs(object1.getValue(cellId)) < mesh.evalCellSize(cellId)  ){
+                if( object1.evalCellValue(cellId, false) < mesh.evalCellSize(cellId)  ){
                     mesh.markCellForRefinement(cellId) ;
                 }
             }
 
             if( i<6) {
-                if( std::abs(object2.getValue(cellId)) < mesh.evalCellSize(cellId)  ){
+                if( object2.evalCellValue(cellId, false) < mesh.evalCellSize(cellId)  ){
                     mesh.markCellForRefinement(cellId) ;
                 }
             }
         }
+
 
         adaptionData = mesh.update(true) ;
         start = std::chrono::system_clock::now();

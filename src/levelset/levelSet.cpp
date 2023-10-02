@@ -32,16 +32,13 @@
 # include "levelSetCommon.hpp"
 # include "levelSetKernel.hpp"
 # include "levelSetCartesianKernel.hpp"
+# include "levelSetComplementObject.hpp"
 # include "levelSetOctreeKernel.hpp"
 # include "levelSetObject.hpp"
 # include "levelSetProxyObject.hpp"
-# include "levelSetCachedObject.hpp"
 # include "levelSetBooleanObject.hpp"
 # include "levelSetSegmentationObject.hpp"
-# include "levelSetSignedObject.hpp"
-# include "levelSetSignPropagator.hpp"
 # include "levelSetMaskObject.hpp"
-# include "levelSetObjectFactory.hpp"
 # include "levelSetUnstructuredKernel.hpp"
 
 # include "levelSet.hpp"
@@ -58,11 +55,14 @@ namespace bitpit {
  * with respect to geometrical objects. The user needs to define the computional kernel by calling setMesh() and the objects which define the zero 
  * levelset via addObject().
  *
- * LevelSet will calculate the exact distance with respect the objects within a narrow band.
- * Outside this narrow band an approximate value will be calculated.
+ * Evaluation of the fields inside the narrow band is always performed using an exact algorithm,
+ * on the other hand evaluation of the fields in the bulk can be performed choosing different
+ * algorithms.
  *
- * The user may set the size of the narrow band explicitly.
- * Alternatively LevelSet will guarantee a least on cell center with exact levelset values across the zero-levelset iso-surface.
+ * With respect to the levelset value, the domain can be divided in two regions: the narrow band
+ * and the bulk. The narrow band defines the portion of the domain close to the zero-levelset iso
+ * surface whereas the bulk is everything else. Regardless of the specified narrow bans size, the
+ * narrow band will always contain the intersected cells and their neighbours.
  *
  * LevelSet can use two types of storages: sparse or dense. When sparse storage
  * is used, objects will only allocate space for storing information of cells
@@ -79,27 +79,97 @@ namespace bitpit {
 
 /*!
  * Default constructor
- *
- * \param storageType is the storage type that will be used for storing
- * levelset information.
  */
-LevelSet::LevelSet(LevelSetStorageType storageType) : m_storageType(storageType) {
+LevelSet::LevelSet(LevelSetFillIn expectedFillIn) {
+
+    m_expectedFillIn = expectedFillIn ;
 
     m_objects.clear() ;
 
-    m_narrowBandSize = levelSetDefaults::NARROWBAND_SIZE;
-
     m_signedDistance = true ;
-    m_propagateSign  = false;
+
+    m_forceSignPropagation   = false;
+    m_signPropagationEnabled = false;
+
+    m_narrowBandSize = 0;
 
 }
 
 /*!
- * Get the storage type that will be used for storing levelset information.
- * @return storage type that will be used for storing levelset information
-*/
-LevelSetStorageType LevelSet::getStorageType() const{
-    return m_storageType ;
+ * Clear the levelset entirely, deleting kernel and objects
+ */
+void LevelSet::clear(){
+    removeObjects();
+    m_kernel.reset();
+}
+
+/*!
+ * Updates the levelset a mesh update.
+ * Before being able to update the cached, it has to be filled.
+ * Levelset and associated information will be updated on both internal and
+ * ghost cells.
+ * @param[in] adaptionData are the information about the adaption
+ */
+void LevelSet::update( const std::vector<adaption::Info> &adaptionData ){
+
+    assert(m_kernel && "LevelSet::setMesh() must be called prior to LevelSet::update()");
+
+    // Update kernel
+    bool updated = m_kernel->update( adaptionData ) ;
+    if (!updated) {
+        return;
+    }
+
+    // Update objects
+    for( int id : m_orderedObjectsIds){
+        LevelSetObject *object = m_objects.at(id).get() ;
+        object->update( adaptionData ) ;
+    }
+}
+
+/*!
+ * Get the size of the narrow band.
+ *
+ * With respect to the levelset value, the domain can be divided in two regions: the narrow band
+ * and the bulk. The narrow band defines the portion of the domain close to the zero-levelset iso
+ * surface whereas the bulk is everything else.
+ *
+ * The size of the narrow band is the absolute distance from the zero-levelset iso surface below
+ * which a point is considered belonging to the narrow band. Setting the size of the narrow band
+ * to LEVELSET_NARROW_BAND_UNLIMITED means that the whole domain belongs to the narrow band.
+ * Regardless of the specified size, the narrow band will always contain the intersected cells
+ * and their neighbours.
+ *
+ * @return The size of the narrow band.
+ */
+double LevelSet::getNarrowBandSize() const {
+    return m_narrowBandSize;
+}
+
+/*!
+ * Set the size of the narrow band.
+ *
+ * With respect to the levelset value, the domain can be divided in two regions: the narrow band
+ * and the bulk. The narrow band defines the portion of the domain close to the zero-levelset iso
+ * surface whereas the bulk is everything else.
+ *
+ * The size of the narrow band is the absolute distance from the zero-levelset iso surface below
+ * which a point is considered belonging to the narrow band. Setting the size of the narrow band
+ * to LEVELSET_NARROW_BAND_UNLIMITED means that the whole domain belongs to the narrow band.
+ * Regardless of the specified size, the narrow band will always contain the intersected cells
+ * and their neighbours.
+ *
+ * @param[in] size is the size of the narrow band.
+ */
+void LevelSet::setNarrowBandSize(double size) {
+    // Set narrow band size
+    m_narrowBandSize = std::max(size, 0.);
+
+    // Set object narrow band size
+    for (auto &objectEntry : m_objects) {
+        LevelSetObject *object = objectEntry.second.get();
+        object->setNarrowBandSize(size);
+    }
 }
 
 /*!
@@ -109,9 +179,8 @@ LevelSetStorageType LevelSet::getStorageType() const{
  * mesh type is not among the supported types, an exception is thrown.
  *
  * @param[in] mesh computational mesh
- * @param[in] fillIn expected kernel fill-in
  */
-void LevelSet::setMesh( VolumeKernel* mesh, LevelSetFillIn fillIn ) {
+void LevelSet::setMesh( VolumeKernel* mesh ) {
 
     // Mesh can be set only once
     if (m_kernel) {
@@ -120,53 +189,22 @@ void LevelSet::setMesh( VolumeKernel* mesh, LevelSetFillIn fillIn ) {
 
     // Create the kernel
     if (VolCartesian *cartesian = dynamic_cast<VolCartesian *>(mesh)) {
-        m_kernel = std::unique_ptr<LevelSetKernel>(new LevelSetCartesianKernel(*cartesian, fillIn));
+        m_kernel = std::unique_ptr<LevelSetKernel>(new LevelSetCartesianKernel(*cartesian, m_expectedFillIn));
     } else if (VolOctree *octree = dynamic_cast<VolOctree *>(mesh)) {
-        m_kernel = std::unique_ptr<LevelSetKernel>(new LevelSetOctreeKernel(*octree, fillIn));
+        m_kernel = std::unique_ptr<LevelSetKernel>(new LevelSetOctreeKernel(*octree, m_expectedFillIn));
     } else if (VolUnstructured *unstructured = dynamic_cast<VolUnstructured*>(mesh)) {
-        m_kernel = std::unique_ptr<LevelSetKernel>(new LevelSetUnstructuredKernel(*unstructured, fillIn));
+        m_kernel = std::unique_ptr<LevelSetKernel>(new LevelSetUnstructuredKernel(*unstructured, m_expectedFillIn));
     } else {
         throw std::runtime_error ("Unable to create the levelset kernel. Mesh type non supported.");
     }
 
     // Assign the kernel to the existing objects
-    for( auto &obj : m_objects){
-        obj.second->setKernel(m_kernel.get());
+    for( int id : m_orderedObjectsIds){
+        LevelSetObject *object = m_objects.at(id).get() ;
+        object->setKernel(m_kernel.get());
     }
 
 }
-
-/*!
- * Clear the cache that stores mesh information.
- */
-void LevelSet::clearMeshCache( ) {
-
-    LevelSetCachedKernel *cachedKernel = dynamic_cast<LevelSetCachedKernel *>(m_kernel.get());
-    if (!cachedKernel) {
-        return;
-    }
-
-    cachedKernel->clearCache();
-
-}
-
-/*!
- * Adds the complement of the specified object.
- * Objects can be added to the levelset only after setting the mesh.
- * @param[in] sourceId id of source object
- * @param[in] id id to be assigned to object. In case default value is passed the insertion order will be used as identifier
- * @return identifier of new object
- */
-int LevelSet::addObjectComplement( int sourceId, int id ) {
-
-    assert(m_kernel && " levelset: setMesh must be called before adding a mask object ");
-
-    LevelSetObject *sourceObject = m_objects.at(sourceId).get() ;
-
-    std::unique_ptr<LevelSetObject> object = LevelSetObjectFactory::createComplementObject( m_kernel.get(), m_storageType, id, sourceObject ) ;
-
-    return registerObject(std::move(object));
-};
 
 /*!
  * Adds a segmentation object
@@ -178,7 +216,7 @@ int LevelSet::addObjectComplement( int sourceId, int id ) {
  */
 int LevelSet::addObject( std::unique_ptr<SurfUnstructured> &&segmentation, double angle, int id ) {
 
-    std::unique_ptr<LevelSetObject> object = LevelSetObjectFactory::createSegmentationObject<LevelSetSegmentationNarrowBandCache, int &, std::unique_ptr<SurfUnstructured> &&, double &>(m_kernel.get(), m_storageType, id, std::move(segmentation), angle ) ;
+    auto object = std::unique_ptr<LevelSetObject>(new LevelSetSegmentationObject(id, std::move(segmentation), angle));
 
     return registerObject(std::move(object));
 }
@@ -193,7 +231,7 @@ int LevelSet::addObject( std::unique_ptr<SurfUnstructured> &&segmentation, doubl
  */
 int LevelSet::addObject( SurfUnstructured *segmentation, double angle, int id ) {
 
-    std::unique_ptr<LevelSetObject> object = LevelSetObjectFactory::createSegmentationObject<LevelSetSegmentationNarrowBandCache, int &, SurfUnstructured * &, double &>( m_kernel.get(), m_storageType, id, segmentation, angle ) ;
+    auto object = std::unique_ptr<LevelSetObject>(new LevelSetSegmentationObject(id, segmentation, angle));
 
     return registerObject(std::move(object));
 }
@@ -213,7 +251,7 @@ int LevelSet::addObject( std::unique_ptr<SurfaceKernel> &&segmentation, double a
         throw std::runtime_error ("Segmentation type not supported");
     }
 
-    std::unique_ptr<LevelSetObject> object = LevelSetObjectFactory::createSegmentationObject<LevelSetSegmentationNarrowBandCache, int &, std::unique_ptr<SurfUnstructured> &&, double &>( m_kernel.get(), m_storageType, id, std::move(surfUnstructured), angle ) ;
+    auto object = std::unique_ptr<LevelSetObject>(new LevelSetSegmentationObject(id, std::move(surfUnstructured), angle));
 
     return registerObject(std::move(object));
 }
@@ -233,49 +271,11 @@ int LevelSet::addObject( SurfaceKernel *segmentation, double angle, int id ) {
         throw std::runtime_error ("Segmentation type not supported");
     }
 
-    std::unique_ptr<LevelSetObject> object = LevelSetObjectFactory::createSegmentationObject<LevelSetSegmentationNarrowBandCache, int &, SurfUnstructured * &, double &>( m_kernel.get(), m_storageType, id, surfUnstructured, angle ) ;
+    auto object = std::unique_ptr<LevelSetObject>(new LevelSetSegmentationObject(id, surfUnstructured, angle));
 
     return registerObject(std::move(object));
 }
 
-/*!
- * Adds a boolean operation between two objects
- * Objects can be added to the levelset only after setting the mesh.
- * @param[in] operation boolean operation
- * @param[in] id1 id of first operand
- * @param[in] id2 id of second operand
- * @param[in] id id to be assigned to object. In case default value is passed the insertion order will be used as identifier
- * @return identifier of new object
- */
-int LevelSet::addObject( LevelSetBooleanOperation operation, int id1, int id2, int id ) {
-
-    LevelSetObject *ptr1 = m_objects.at(id1).get() ;
-    LevelSetObject *ptr2 = m_objects.at(id2).get() ;
-
-    std::unique_ptr<LevelSetObject> object = LevelSetObjectFactory::createBooleanObject( m_kernel.get(), m_storageType, id, operation, ptr1, ptr2 ) ;
-
-    return registerObject(std::move(object));
-}
-
-/*!
- * Adds a boolean operation between that will be applied recursivly to a series of objects
- * Objects can be added to the levelset only after setting the mesh.
- * @param[in] operation boolean operation
- * @param[in] ids vector with indices of operand objects
- * @param[in] id id to be assigned to object. In case default value is passed the insertion order will be used as identifier
- * @return identifier of new object
- */
-int LevelSet::addObject( LevelSetBooleanOperation operation, const std::vector<int> &ids, int id ) {
-
-    std::vector<const LevelSetObject*> ptr;
-    for( int id : ids){
-        ptr.push_back( m_objects.at(id).get() );
-    }
-
-    std::unique_ptr<LevelSetObject> object = LevelSetObjectFactory::createBooleanObject( m_kernel.get(), m_storageType, id, operation, ptr ) ;
-
-    return registerObject(std::move(object));
-}
 /*!
  * Adds a LevelSetMask object composed of the external envelope of a list of mesh cells.
  * Objects can be added to the levelset only after setting the mesh.
@@ -287,7 +287,7 @@ int LevelSet::addObject( const std::unordered_set<long> &list, int id ) {
 
     assert(m_kernel && " levelset: setMesh must be called before adding a mask object ");
 
-    std::unique_ptr<LevelSetObject> object = LevelSetObjectFactory::createMaskObject<LevelSetMaskNarrowBandCache, int &, const std::unordered_set<long> &, const VolumeKernel &>( m_kernel.get(), m_storageType, id, list, *m_kernel->getMesh() ) ;
+    auto object = std::unique_ptr<LevelSetObject>(new LevelSetMaskObject(id, list, *m_kernel->getMesh()));
 
     return registerObject(std::move(object));
 }
@@ -305,7 +305,7 @@ int LevelSet::addObject( const std::vector<long> &list, long refInterface, bool 
 
     assert(m_kernel && " levelset: setMesh must be called before adding a mask object ");
 
-    std::unique_ptr<LevelSetObject> object = LevelSetObjectFactory::createMaskObject<LevelSetMaskNarrowBandCache, int &, const std::vector<long> &, long &, bool &, const VolumeKernel &>( m_kernel.get(), m_storageType, id, list, refInterface, invert, *m_kernel->getMesh() ) ;
+    auto object = std::unique_ptr<LevelSetObject>(new LevelSetMaskObject(id, list, refInterface, invert, *m_kernel->getMesh()));
 
     return registerObject(std::move(object));
 };
@@ -328,6 +328,7 @@ int LevelSet::addObject( std::unique_ptr<LevelSetObject> &&object ) {
  */
 int LevelSet::registerObject( std::unique_ptr<LevelSetObject> &&object ) {
 
+    // Set object id
     int id = object->getId();
     if (id == levelSetDefaults::OBJECT) {
         id = m_objectIdentifierGenerator.generate();
@@ -336,14 +337,25 @@ int LevelSet::registerObject( std::unique_ptr<LevelSetObject> &&object ) {
         m_objectIdentifierGenerator.setAssigned(id);
     }
 
-    if( m_kernel){
+    // Set object properties
+    object->setDefaultLevelSetSigndness(m_signedDistance);
+    object->setNarrowBandSize(m_narrowBandSize);
+    if (m_forceSignPropagation) {
+        if (m_signPropagationEnabled) {
+            object->setCellBulkEvaluationMode(LevelSetBulkEvaluationMode::SIGN_PROPAGATION);
+        } else {
+            object->setCellBulkEvaluationMode(LevelSetBulkEvaluationMode::NONE);
+        }
+    }
+
+    // Set object kernel
+    if (m_kernel) {
         object->setKernel(m_kernel.get());
     }
 
+    // Add the object to the levelset
     m_objects[id] = std::move(object) ;
-
-    setObjectProcessingOrder(id);
-
+    registerObjectId(id);
     incrementObjectsReferenceCount(id);
 
     return id;
@@ -353,7 +365,7 @@ int LevelSet::registerObject( std::unique_ptr<LevelSetObject> &&object ) {
  * Remove all levelset objects
  */
 void LevelSet::removeObjects() {
-    m_objectsProcessingOrder.clear();
+    m_orderedObjectsIds.clear();
     m_objectIdentifierGenerator.reset();
     m_objects.clear();
 }
@@ -384,7 +396,7 @@ bool LevelSet::unregisterObject(int id, bool force) {
     }
 
     decrementObjectsReferenceCount(id);
-    unsetObjectProcessingOrder(id);
+    unregisterObjectId(id);
     m_objectIdentifierGenerator.trash(id);
     m_objects.erase(id);
 
@@ -415,55 +427,61 @@ bool LevelSet::isObjectRemovable(int id) {
 }
 
 /*!
- * Set the processing order of the specified object.
+ * Register to specified object id.
  *
- * The insertion order determines the processing order, however priority is
- * given to primary objects.
+ * Objects should be processed in a specific order: first the primary objects (in the order they
+ * were added to the levelset) and then the other objects (in the order they were added to the
+ * levelset). The registration process updates the list of ids to guarantee that the objects
+ * will be processed in the correct order.
  *
  * This function must be called when a new object is added.
  *
- * @param[in] id the id of the object
+ * @param[in] id the object id that will be registered
  */
-void LevelSet::setObjectProcessingOrder( int id ) {
+void LevelSet::registerObjectId( int id ) {
 
-    // Define the processing order for the object
+    // Add the id from the list
     //
-    // The insertion order determines the processing order, however priority
-    // is given to primary objects.
-    std::vector<int>::iterator processingOrderItr;
+    // Ids should be sorted according to the order in which they corresponding objects should be
+    // processed: first the ids of the primary objects (in the order the objects were added to
+    // the levelset) and then the ids of the other objects (in the order the objects were added
+    // to the levelset).
+    std::vector<int>::iterator idItr;
     if(getObjectPtr(id)->isPrimary()){
-        std::vector<int>::iterator processingOrderBegin = m_objectsProcessingOrder.begin();
-        std::vector<int>::iterator processingOrderEnd   = m_objectsProcessingOrder.end();
+        std::vector<int>::iterator orderedIdsBegin = m_orderedObjectsIds.begin();
+        std::vector<int>::iterator orderedIdsEnd   = m_orderedObjectsIds.end();
 
-        for (processingOrderItr = processingOrderBegin; processingOrderItr != processingOrderEnd; ++processingOrderItr) {
-            int candidateId = *processingOrderItr ;
+        for (idItr = orderedIdsBegin; idItr != orderedIdsEnd; ++idItr) {
+            int candidateId = *idItr ;
             const LevelSetObject *candidateObject = getObjectPtr(candidateId) ;
             if( !candidateObject->isPrimary() ){
                 break;
             }
         }
     } else {
-        processingOrderItr = m_objectsProcessingOrder.end();
+        idItr = m_orderedObjectsIds.end();
     }
 
-    m_objectsProcessingOrder.insert(processingOrderItr,id) ;
+    m_orderedObjectsIds.insert(idItr, id) ;
 
 }
 
 /*!
- * Unset the processing order of the specified object.
- * This function must be called whan a object is removed.
- * @param[in] id the id of the object
+ * Register to specified object id.
+ *
+ * This function must be called when a object is removed.
+ *
+ * @param[in] id the object id that will be unregistered
  */
-void LevelSet::unsetObjectProcessingOrder(int id){
+void LevelSet::unregisterObjectId(int id){
 
-    // Remove the object from the list of processed objects
-    std::vector<int>::iterator processingOrderBegin = m_objectsProcessingOrder.begin();
-    std::vector<int>::iterator processingOrderEnd   = m_objectsProcessingOrder.end();
+    // Remove the id from the list
+    std::vector<int>::iterator orderedIdsBegin = m_orderedObjectsIds.begin();
+    std::vector<int>::iterator orderedIdsEnd   = m_orderedObjectsIds.end();
 
-    std::vector<int>::iterator processingOrderItr = std::find(processingOrderBegin, processingOrderEnd, id);
-    assert(processingOrderItr != processingOrderEnd);
-    m_objectsProcessingOrder.erase(processingOrderItr);
+    std::vector<int>::iterator idItr = std::find(orderedIdsBegin, orderedIdsEnd, id);
+    assert(idItr != orderedIdsEnd);
+    m_orderedObjectsIds.erase(idItr);
 
 }
 
@@ -555,11 +573,43 @@ std::vector<int> LevelSet::getObjectIds( ) const{
 }
 
 /*!
- * Clear LevelSet entirely, deleteing kernel and objects
+ * Writes LevelSetKernel to stream in binary format
+ * @param[in] stream output stream
  */
-void LevelSet::clear(){
-    removeObjects();
-    m_kernel.reset();
+void LevelSet::dump( std::ostream &stream ) const{
+
+    utils::binary::write(stream, m_expectedFillIn);
+    utils::binary::write(stream, m_signedDistance);
+    utils::binary::write(stream, m_forceSignPropagation);
+    utils::binary::write(stream, m_signPropagationEnabled);
+    utils::binary::write(stream, m_narrowBandSize);
+
+    m_objectIdentifierGenerator.dump(stream);
+    for( const auto &object : m_objects ){
+        object.second->dump( stream ) ;
+    }
+    utils::binary::write(stream, m_orderedObjectsIds);
+
+}
+
+/*!
+ * Reads LevelSetKernel from stream in binary format
+ * @param[in] stream output stream
+ */
+void LevelSet::restore( std::istream &stream ){
+
+    utils::binary::read(stream, m_expectedFillIn);
+    utils::binary::read(stream, m_signedDistance);
+    utils::binary::read(stream, m_forceSignPropagation);
+    utils::binary::read(stream, m_signPropagationEnabled);
+    utils::binary::read(stream, m_narrowBandSize);
+
+    m_objectIdentifierGenerator.restore(stream);
+    for( const auto &object : m_objects ){
+        object.second->restore( stream ) ;
+    }
+    utils::binary::read(stream, m_orderedObjectsIds);
+
 }
 
 /*!
@@ -573,263 +623,152 @@ void LevelSet::setSign(bool flag){
 
 /*!
  * Set if the levelset sign has to be propagated from the narrow band to the whole domain.
+ *
+ * This function is provided only for compatibility with older versions of bitpit. It sets
+ * the bulk evaluation mode that matches the behaviour of the older levelset versions:
+ *  - if sign propagation is enabled, the bulk evaluation mode is set to "sign propagation";
+ *  - if sign propagation is disabled, the bulk evaluation mode is set to "none".
+ * The recommended way to setup sign propagation is to manually set the bulk evaluation mode
+ * of the relevant objects to "sign propagation".
+ *
  * @param[in] flag True/false to active/disable the propagation .
  */
 void LevelSet::setPropagateSign(bool flag){
-    m_propagateSign = flag;
+    // Set propagation
+    m_forceSignPropagation   = true;
+    m_signPropagationEnabled = flag;
+
+    // Set object bulk evaluation mode
+    for (auto &objectEntry : m_objects) {
+        LevelSetObject *object = objectEntry.second.get();
+        if (m_forceSignPropagation) {
+            if (m_signPropagationEnabled) {
+                object->setCellBulkEvaluationMode(LevelSetBulkEvaluationMode::SIGN_PROPAGATION);
+            } else {
+                object->setCellBulkEvaluationMode(LevelSetBulkEvaluationMode::NONE);
+            }
+        }
+    }
 }
 
 /*!
- * Get the physical size of the narrow band.
- * A size equal or less than zero means that the levelset will be evaluated
- * only on cells that intersect the surface.
- * @return the physical size of the narrow band
+ * Get the size of the narrow band.
+ *
+ * With respect to the levelset value, the domain can be divided in two regions: the narrow band
+ * and the bulk. The narrow band defines the portion of the domain close to the zero-levelset iso
+ * surface whereas the bulk is everything else.
+ *
+ * The size of the narrow band is the absolute distance from the zero-levelset iso surface below
+ * which a point is considered belonging to the narrow band. Setting the size of the narrow band
+ * to LEVELSET_NARROW_BAND_UNLIMITED means that the whole domain belongs to the narrow band.
+ * Regardless of the specified size, the narrow band will always contain the intersected cells
+ * and their neighbours.
+ *
+ * @return The size of the narrow band.
  */
 double LevelSet::getSizeNarrowBand() const{
-    return m_narrowBandSize;
+    return getNarrowBandSize();
 }
 
 /*!
- * Manually set the physical size of the narrow band.
- * Setting a size equal or less than zero, levelset will be evaluated only on
- * the cells that intersect the surface and on all their first neighbours.
- * After setting the size of the narrowband, the levelset is not automatically
- * updated. It's up to the caller to make sure the levelset will be properly
- * updated if the size of the narrowband changes.
- * @param[in] r Size of the narrow band.
+ * Set the size of the narrow band.
+ *
+ * With respect to the levelset value, the domain can be divided in two regions: the narrow band
+ * and the bulk. The narrow band defines the portion of the domain close to the zero-levelset iso
+ * surface whereas the bulk is everything else.
+ *
+ * The size of the narrow band is the absolute distance from the zero-levelset iso surface below
+ * which a point is considered belonging to the narrow band. Setting the size of the narrow band
+ * to LEVELSET_NARROW_BAND_UNLIMITED means that the whole domain belongs to the narrow band.
+ * Regardless of the specified size, the narrow band will always contain the intersected cells
+ * and their neighbours.
+ *
+ * @param[in] size is the size of the narrow band.
  */
-void LevelSet::setSizeNarrowBand(double r){
-    m_narrowBandSize = r;
+void LevelSet::setSizeNarrowBand(double size){
+    return setNarrowBandSize(size);
 }
 
 /*!
  * Computes levelset on given mesh with respect to the objects.
- * Levelset and associated information will be computed on both internal and
- * ghost cells.
+ *
+ * This function is deprecated, there is no need to explicitly compute levelset information.
  */
 void LevelSet::compute(){
 
-    std::unordered_set<LevelSetObject *> objectProcessList = getObjectProcessList();
-
-    compute(objectProcessList);
+    // Nothing to do
 
 }
 
 /*!
  * Computes levelset on given mesh with respect to the specified object.
- * All source objects needed for evaluating the levelset on the specified
- * object will be computed as well.
- * Levelset and associated information will be computed on both internal and
- * ghost cells.
+ *
+ * This function is deprecated, there is no need to explicitly compute levelset information.
+ *
  * @param[in] id identifier of object.
  */
 void LevelSet::compute( int id ){
 
-    std::unordered_set<LevelSetObject *> objectProcessList = getObjectProcessList(1, &id);
+    BITPIT_UNUSED(id);
 
-    compute(objectProcessList);
+    // Nothing to do
 
 }
 
 /*!
  * Computes levelset on given mesh with respect to the specified objects.
- * All source objects needed for evaluating the levelset on the specified
- * objects will be computed as well.
- * Levelset and associated information will be computed on both internal and
- * ghost cells.
+ *
+ * This function is deprecated, there is no need to explicitly compute levelset information.
+ *
  * @param[in] ids identifiers of objects.
  */
 void LevelSet::compute( const std::vector<int> &ids ){
 
-    std::unordered_set<LevelSetObject *> objectProcessList = getObjectProcessList(ids.size(), ids.data());
+    BITPIT_UNUSED(ids);
 
-    compute(objectProcessList);
-
-}
-
-/*!
- * Computes levelset on given mesh with respect to the specified objects.
- * Only the specified objects will be computed, it's up to the caller to
- * provide an object process list that contains all the needed source
- * objects.
- * Levelset and associated information will be computed on both internal and
- * ghost cells.
- * @param[in] objectProcessList are the objects for which the levelset will be
- * computed
- */
-void LevelSet::compute( const std::unordered_set<LevelSetObject *> &objectProcessList ){
-
-    assert(m_kernel && "LevelSet::setMesh() must be called prior to LevelSet::compute()");
-
-    std::unique_ptr<LevelSetSignPropagator> signPropagator ;
-    if (m_propagateSign) {
-        signPropagator = m_kernel->createSignPropagator() ;
-    }
-
-    for( int id : m_objectsProcessingOrder){
-        LevelSetObject *object = m_objects.at(id).get() ;
-        if (objectProcessList.count(object) == 0) {
-            continue;
-        }
-
-        LevelSetSignedObjectInterface *signPropagationObject;
-        if (m_propagateSign) {
-            signPropagationObject = dynamic_cast<LevelSetSignedObjectInterface *>(object);
-        } else {
-            signPropagationObject = nullptr;
-        }
-
-        // Clear the object
-        object->clear();
-
-        // Compute levelset inside the narrowband
-        object->computeNarrowBand(m_signedDistance, m_narrowBandSize) ;
-#if BITPIT_ENABLE_MPI
-        object->exchangeGhosts();
-#endif
-
-        // Propagate sign
-        if(signPropagationObject) {
-            signPropagator->execute(signPropagationObject);
-        }
-    }
-}
-
-/*!
- * Updates the levelset after a mesh update.
- * Before being able to update the levelset, it has to be computed.
- * Levelset and associated information will be updated on both internal and
- * ghost cells.
- * @param[in] adaptionData are the information about the adaption
- */
-void LevelSet::update( const std::vector<adaption::Info> &adaptionData ){
-
-    std::unordered_set<LevelSetObject *> objectProcessList = getObjectProcessList();
-
-    update(adaptionData, objectProcessList);
+    // Nothing to do
 
 }
 
 /*!
  * Computes levelset on given mesh with respect to the specified object.
- * Before being able to update the levelset, it has to be computed.
- * All source objects needed for evaluating the levelset on the specified
- * object will be updated as well.
- * Levelset and associated information will be updated on both internal and
- * ghost cells.
+ *
+ * It is not possible to update the levelset for a specific objects, levelset will be
+ * computed for all the objects. This function is provided only for compatibility
+ * with older versions of bitpit.
+ *
  * @param[in] adaptionData are the information about the adaption
  * @param[in] id identifier of object.
  */
 void LevelSet::update( const std::vector<adaption::Info> &adaptionData, int id){
 
-    std::unordered_set<LevelSetObject *> objectProcessList = getObjectProcessList(1, &id);
+    BITPIT_UNUSED(id);
 
-    update(adaptionData, objectProcessList);
+    log::warning() << " It is not possible to update the levelset for a specific objects." << std::endl;
+    log::warning() << " Levelset will be computed for all the objects." << std::endl;
+
+    update(adaptionData);
 
 }
 
 /*!
  * Computes levelset on given mesh with respect to the specified objects.
- * Before being able to update the levelset, it has to be computed.
- * All source objects needed for evaluating the levelset on the specified
- * objects will be updated as well.
- * Levelset and associated information will be updated on both internal and
- * ghost cells.
+ *
+ * It is not possible to update the levelset for a specific objects, levelset will be
+ * computed for all the objects. This function is provided only for compatibility
+ * with older versions of bitpit.
+ *
  * @param[in] adaptionData are the information about the adaption
  * @param[in] ids identifiers of objects.
  */
 void LevelSet::update( const std::vector<adaption::Info> &adaptionData, const std::vector<int> &ids ){
 
-    std::unordered_set<LevelSetObject *> objectProcessList = getObjectProcessList(ids.size(), ids.data());
+    BITPIT_UNUSED(ids);
 
-    update(adaptionData, objectProcessList);
+    log::warning() << " It is not possible to update the levelset for a specific objects." << std::endl;
+    log::warning() << " Levelset will be computed for all the objects." << std::endl;
 
-}
-
-/*!
- * Updates the levelset after a mesh update.
- * Before being able to update the levelset, it has to be computed.
- * Only the specified objects will be updated, it's up to the caller to
- * provide an object process list that contains all the needed source
- * objects.
- * Levelset and associated information will be updated on both internal and
- * ghost cells.
- * @param[in] adaptionData are the information about the adaption
- * @param[in] objectProcessList are the objects that will be updated
- */
-void LevelSet::update( const std::vector<adaption::Info> &adaptionData, const std::unordered_set<LevelSetObject *> &objectProcessList ){
-
-    assert(m_kernel && "LevelSet::setMesh() must be called prior to LevelSet::partition()");
-
-#if BITPIT_ENABLE_MPI
-    const VolumeKernel *mesh = m_kernel->getMesh();
-    bool isMeshPartitioned = mesh->isPartitioned();
-#endif
-
-
-    // Check if the levelset needs to be updated
-    bool isDirty = false;
-    for( const adaption::Info &adaptionInfo : adaptionData){
-        if( adaptionInfo.entity != adaption::Entity::ENTITY_CELL){
-            continue;
-        }
-
-        isDirty = true;
-        break;
-    }
-
-#if BITPIT_ENABLE_MPI
-    if (isMeshPartitioned) {
-        MPI_Allreduce(MPI_IN_PLACE, &isDirty, 1, MPI_C_BOOL, MPI_LOR, m_kernel->getCommunicator());
-    }
-#endif
-
-    // Early return if no update is needed
-    if (!isDirty) {
-        return;
-    }
-
-    // Update kernel
-    m_kernel->update( adaptionData ) ;
-
-    // Create sign propagator
-    std::unique_ptr<LevelSetSignPropagator> signPropagator ;
-    if (m_propagateSign) {
-        signPropagator = m_kernel->createSignPropagator() ;
-    }
-
-    // Update objects
-    for( int id : m_objectsProcessingOrder){
-        LevelSetObject *object = m_objects.at(id).get() ;
-        if (objectProcessList.count(object) == 0) {
-            continue;
-        }
-
-        LevelSetSignedObjectInterface *signPropagationObject;
-        if (m_propagateSign) {
-            signPropagationObject = dynamic_cast<LevelSetSignedObjectInterface *>(object);
-        } else {
-            signPropagationObject = nullptr;
-        }
-
-        // Propagated sign is now dirty
-        //
-        // The propagated sign will be set as non-dirty by the sign propagator.
-        if (signPropagationObject) {
-            signPropagationObject->setSignStorageDirty(true);
-        }
-
-        // Update object
-        object->update( adaptionData, m_signedDistance );
-
-        // Propagate sign
-        //
-        // It's not possible to communicate sign information, therefore sign
-        // needs to be propagated also when the mesh is only partitioned.
-        if (signPropagationObject) {
-            signPropagator->execute(adaptionData, signPropagationObject);
-        }
-    }
+    update(adaptionData);
 
 }
 
@@ -844,94 +783,6 @@ void LevelSet::partition( const std::vector<adaption::Info> &adaptionData ){
 
 }
 #endif
-
-/*!
- * Return the list of all objects that can be processed.
- * @return the list of all objects that can be processed.
- */
-std::unordered_set<LevelSetObject *> LevelSet::getObjectProcessList() const{
-
-    std::unordered_set<LevelSetObject *> objectProcessList;
-    for (const auto &entry : m_objects) {
-        objectProcessList.insert(entry.second.get()) ;
-    }
-
-    return objectProcessList;
-
-}
-
-/*!
- * Return the list of objects that need to be processed in order to evaluate
- * the levelset of the specified objects.
- * The levelset of an objects may depend on the levelset of other objects,
- * therefore to evaluate the levelset of the specified object it may be
- * needed to process also other objects.
- * @param[in] nObjects is the number of objects.
- * @param[in] objectIds are the object identifiers.
- * @return the list of objects that need to be processed in order to
- * evaluate the lsevelset of the specified objects.
- */
-std::unordered_set<LevelSetObject *> LevelSet::getObjectProcessList(std::size_t nObjects, const int *objectIds) const{
-
-    std::unordered_set<LevelSetObject *> objectProcessList;
-    for (std::size_t i = 0; i < nObjects; ++i) {
-        int objectId = objectIds[i] ;
-        LevelSetObject *object = getObjectPtr(objectId) ;
-        if (objectProcessList.count(object) != 0) {
-            continue;
-        }
-
-        objectProcessList.insert(object);
-        if( const LevelSetProxyBaseObject *proxyObject = dynamic_cast<const LevelSetProxyBaseObject*>(object) ){
-            std::vector<int> sourceObjectIds = proxyObject->getSourceObjectIds();
-            std::unordered_set<LevelSetObject *> sourceObjectProcessList = getObjectProcessList(sourceObjectIds.size(), sourceObjectIds.data()) ;
-            objectProcessList.insert(sourceObjectProcessList.begin(), sourceObjectProcessList.end());
-        }
-    }
-
-    return objectProcessList;
-
-}
-
-/*! 
- * Writes LevelSetKernel to stream in binary format
- * @param[in] stream output stream
- */
-void LevelSet::dump( std::ostream &stream ){
-
-    m_objectIdentifierGenerator.dump(stream);
-
-    utils::binary::write(stream, m_storageType);
-
-    utils::binary::write(stream, m_objectsProcessingOrder);
-    utils::binary::write(stream, m_narrowBandSize);
-    utils::binary::write(stream, m_signedDistance);
-    utils::binary::write(stream, m_propagateSign);
-
-    for( const auto &object : m_objects ){
-        object.second->dump( stream ) ;
-    }
-}
-
-/*! 
- * Reads LevelSetKernel from stream in binary format
- * @param[in] stream output stream
- */
-void LevelSet::restore( std::istream &stream ){
-
-    m_objectIdentifierGenerator.restore(stream);
-
-    utils::binary::read(stream, m_storageType);
-
-    utils::binary::read(stream, m_objectsProcessingOrder);
-    utils::binary::read(stream, m_narrowBandSize);
-    utils::binary::read(stream, m_signedDistance);
-    utils::binary::read(stream, m_propagateSign);
-
-    for( const auto &object : m_objects ){
-        object.second->restore( stream ) ;
-    }
-}
 
 }
 
