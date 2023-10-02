@@ -54,6 +54,17 @@ LevelSetComplementBaseObject<SourceLevelSetObject>::LevelSetComplementBaseObject
 }
 
 /*!
+ * Checks if the object is empty.
+ *
+ * \result Returns true is the object is empty, false otherwise.
+ */
+template<typename SourceLevelSetObject>
+bool LevelSetComplementBaseObject<SourceLevelSetObject>::empty() const
+{
+    return m_sourceObject->empty();
+}
+
+/*!
  * Replace a source object.
  *
  * \param[in] current current source object
@@ -70,43 +81,146 @@ void LevelSetComplementBaseObject<SourceLevelSetObject>::replaceSourceObject(con
 }
 
 /*!
- * Get the levelset value.
- *
- * \param[in] id cell id
- * \return levelset value in cell
+ * Fill the cache that contains the propagated cell sign.
  */
 template<typename SourceLevelSetObject>
-double LevelSetComplementBaseObject<SourceLevelSetObject>::getValue(long id) const
+void LevelSetComplementBaseObject<SourceLevelSetObject>::fillCellPropagatedSignCache()
 {
-    return (- m_sourceObject->getValue(id));
+    // Early return if propagated sign cannot be copied from the source object
+    LevelSetBulkEvaluationMode sourceBulkEvaluationMode = m_sourceObject->getCellBulkEvaluationMode();
+
+    bool useSourceSign = false;
+    if (sourceBulkEvaluationMode == LevelSetBulkEvaluationMode::SIGN_PROPAGATION) {
+        useSourceSign = true;
+    } else if (sourceBulkEvaluationMode == LevelSetBulkEvaluationMode::EXACT) {
+        LevelSetCacheMode sourceSignCacheMode = m_sourceObject->getFieldCellCacheMode(LevelSetField::SIGN);
+        if (sourceSignCacheMode == LevelSetCacheMode::FULL) {
+            useSourceSign = true;
+        } else {
+            LevelSetCacheMode sourceValueCacheMode = m_sourceObject->getFieldCellCacheMode(LevelSetField::VALUE);
+            if (sourceValueCacheMode == LevelSetCacheMode::FULL) {
+                useSourceSign = true;
+            }
+        }
+    }
+
+    if (!useSourceSign) {
+        SourceLevelSetObject::fillCellPropagatedSignCache();
+        return;
+    }
+
+    // Mesh information
+    const VolumeKernel &mesh = *(this->getKernel()->getMesh()) ;
+    VolumeKernel::CellConstIterator cellBegin = mesh.cellConstBegin();
+    VolumeKernel::CellConstIterator cellEnd   = mesh.cellConstEnd();
+
+    // Get cache for sign propagation
+    typedef typename SourceLevelSetObject::CellCacheCollection::template ValueCache<char> ZoneCache;
+    ZoneCache *propagatedSignCache = this->template getCellCache<char>(this->m_cellPropagatedSignCacheId);
+
+    // Get propagated sign from source object
+    for (VolumeKernel::CellConstIterator cellItr = cellBegin; cellItr != cellEnd; ++cellItr) {
+        long cellId = cellItr.getId();
+        short cellSign = - m_sourceObject->evalCellSign(cellId);
+
+        propagatedSignCache->insertEntry(cellId, static_cast<char>(cellSign));
+    }
 }
 
 /*!
- * Get the levelset gradient.
+ * Evaluate levelset sign at the specified cell.
  *
- * \param[in] id cell id
- * \return levelset gradient in cell
+ * \param id is the id of the cell
+ * \result The sign of the levelset at the specified cell.
  */
 template<typename SourceLevelSetObject>
-std::array<double,3> LevelSetComplementBaseObject<SourceLevelSetObject>::getGradient(long id) const
+short LevelSetComplementBaseObject<SourceLevelSetObject>::_evalCellSign(long id) const
 {
-    return (- 1. * m_sourceObject->getGradient(id));
+    return (-1 * m_sourceObject->evalCellSign(id));
 }
 
 /*!
- * Computes the LevelSetInfo in a point.
+ * Evaluate levelset value at the specified cell.
  *
- * \param[in] coords point coordinates
- * \return LevelSetInfo
-*/
+ * \param id is the id of the cell
+ * \param signedLevelSet controls if signed levelset function will be used
+ * \result The value of the levelset at the specified cell.
+ */
 template<typename SourceLevelSetObject>
-LevelSetInfo LevelSetComplementBaseObject<SourceLevelSetObject>::computeLevelSetInfo(const std::array<double,3> &coords) const
+double LevelSetComplementBaseObject<SourceLevelSetObject>::_evalCellValue(long id, bool signedLevelSet) const
 {
-    LevelSetInfo levelSetInfo = m_sourceObject->computeLevelSetInfo(coords);
-    levelSetInfo.value    *= -1.;
-    levelSetInfo.gradient *= -1.;
+    double value = m_sourceObject->evalCellValue(id, signedLevelSet);
+    if (signedLevelSet) {
+        value *= -1.;
+    }
 
-    return levelSetInfo;
+    return value;
+}
+
+/*!
+ * Evaluate levelset gradient at the specified cell.
+ *
+ * \param id is the id of the cell
+ * \param signedLevelSet controls if signed levelset function will be used
+ * \result The gradient of the levelset at the specified cell.
+ */
+template<typename SourceLevelSetObject>
+std::array<double,3> LevelSetComplementBaseObject<SourceLevelSetObject>::_evalCellGradient(long id, bool signedLevelSet) const
+{
+    std::array<double,3> gradient = m_sourceObject->evalCellGradient(id, signedLevelSet);
+    if (signedLevelSet) {
+        gradient *= -1.;
+    }
+
+    return gradient;
+}
+
+/*!
+ * Evaluate levelset sign at the specified point.
+ *
+ * \param point are the coordinates of the point
+ * \result The sign of the levelset at the specified point.
+ */
+template<typename SourceLevelSetObject>
+short LevelSetComplementBaseObject<SourceLevelSetObject>::_evalSign(const std::array<double,3> &point) const
+{
+    return (-1 * m_sourceObject->evalSign(point));
+}
+
+/*!
+ * Evaluate levelset value at the specified point.
+ *
+ * \param point are the coordinates of the point
+ * \param signedLevelSet controls if signed levelset function will be used
+ * \result The value of the levelset at the specified point.
+ */
+template<typename SourceLevelSetObject>
+double LevelSetComplementBaseObject<SourceLevelSetObject>::_evalValue(const std::array<double,3> &point, bool signedLevelSet) const
+{
+    double value = m_sourceObject->evalValue(point, signedLevelSet);
+    if (signedLevelSet) {
+        value *= -1.;
+    }
+
+    return value;
+}
+
+/*!
+ * Evaluate levelset gradient at the specified point.
+ *
+ * \param point are the coordinates of the point
+ * \param signedLevelSet controls if signed levelset function will be used
+ * \result The gradient of the levelset at the specified point.
+ */
+template<typename SourceLevelSetObject>
+std::array<double,3> LevelSetComplementBaseObject<SourceLevelSetObject>::_evalGradient(const std::array<double,3> &point, bool signedLevelSet) const
+{
+    std::array<double,3> gradient = m_sourceObject->evalGradient(point, signedLevelSet);
+    if (signedLevelSet) {
+        gradient *= -1.;
+    }
+
+    return gradient;
 }
 
 /*!
@@ -117,9 +231,24 @@ LevelSetInfo LevelSetComplementBaseObject<SourceLevelSetObject>::computeLevelSet
  * cell.
  */
 template<typename SourceLevelSetObject>
-const SourceLevelSetObject * LevelSetComplementBaseObject<SourceLevelSetObject>::getReferenceObject(long id) const
+const SourceLevelSetObject * LevelSetComplementBaseObject<SourceLevelSetObject>::getCellReferenceObject(long id) const
 {
     BITPIT_UNUSED(id);
+
+    return m_sourceObject;
+}
+
+/*!
+ * Get the object that defines the levelset information for the specified point.
+ *
+ * @param[in] point are the coordinates of the point
+ * \return The object that defines the levelset information for the specified
+ * point.
+ */
+template<typename SourceLevelSetObject>
+const SourceLevelSetObject * LevelSetComplementBaseObject<SourceLevelSetObject>::getReferenceObject(const std::array<double, 3> &point) const
+{
+    BITPIT_UNUSED(point);
 
     return m_sourceObject;
 }

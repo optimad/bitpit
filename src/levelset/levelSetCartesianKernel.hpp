@@ -38,9 +38,6 @@ class LevelSetCartesianKernel : public LevelSetCachedKernel {
     double                                      m_cellBoundingRadius ;    /**< Cell bounding radius */
 
     public:
-    typedef LevelSetDirectStorageManager          DenseStorageManager;
-    typedef LevelSetInternalPiercedStorageManager SparseStorageManager;
-
     template<typename value_t>
     using CellSparseCacheContainer = std::unordered_map<long, value_t>;
     template<typename value_t>

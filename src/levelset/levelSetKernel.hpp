@@ -39,15 +39,10 @@
 # include "bitpit_patchkernel.hpp"
 
 # include "levelSetCache.hpp"
-# include "levelSetObject.hpp"
-# include "levelSetSignPropagator.hpp"
 
 namespace bitpit{
 
 class VolumeKernel ;
-
-class LevelSetObject ;
-class LevelSetSignPropagator;
 
 class LevelSetKernel {
 
@@ -59,8 +54,8 @@ class LevelSetKernel {
 
 
     protected:
-    VolumeKernel*                               m_mesh;        /**< Pointer to underlying mesh*/
-    LevelSetFillIn                              m_fillIn;      /**< Expected kernel fit-in */
+    VolumeKernel*                               m_mesh;           /**< Pointer to underlying mesh*/
+    LevelSetFillIn                              m_expectedFillIn; /**< Expected kernel fit-in */
 # if BITPIT_ENABLE_MPI
     MPI_Comm                                    m_communicator; /**< MPI communicator */
 # endif
@@ -72,7 +67,7 @@ class LevelSetKernel {
 
     virtual VolumeKernel *                      getMesh() const;
 
-    LevelSetFillIn                              getFillIn() const;
+    LevelSetFillIn                              getExpectedFillIn() const;
 
     double                                      getDistanceTolerance() const;
 
@@ -80,7 +75,7 @@ class LevelSetKernel {
     virtual double                              computeCellTangentRadius(long) const = 0;
     virtual double                              computeCellBoundingRadius(long) const = 0;
 
-    virtual void                                update(const std::vector<adaption::Info> &);
+    virtual bool                                update(const std::vector<adaption::Info> &);
 
     virtual bool                                intersectCellPlane(long, const std::array<double,3> &, const std::array<double,3> &, double);
 
@@ -94,8 +89,6 @@ class LevelSetKernel {
     std::unique_ptr<DataCommunicator>           createDataCommunicator() const;
 # endif
 
-    virtual std::unique_ptr<LevelSetSignPropagator>     createSignPropagator() const ;
-
 };
 
 class LevelSetCachedKernel : public LevelSetKernel {
@@ -105,9 +98,9 @@ class LevelSetCachedKernel : public LevelSetKernel {
 
     LevelSetCachedKernel( VolumeKernel *, LevelSetFillIn fillIn ) ;
 
-    void                                        clearCache(bool release = false);
+    void                                        clearCaches(bool release = false);
 
-    void                                        update(const std::vector<adaption::Info> &) override;
+    bool                                        update(const std::vector<adaption::Info> &) override;
 
     protected:
     mutable std::unique_ptr<CellCacheCollection> m_cellCacheCollection;  /**< Cell cache collection */

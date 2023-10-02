@@ -168,7 +168,7 @@ int subtest_001()
 
     // Initialize test
     long testCellId0 = 12065;
-    long testCellId1 = 13590;
+    long testCellId1 = 13671;
     long testCellId2 = 15495;
 
     int objectId = 0;
@@ -178,25 +178,28 @@ int subtest_001()
     //
 
     // Initialize levelset
-    bitpit::LevelSet levelsetSparse(bitpit::LevelSetStorageType::SPARSE);
-    levelsetSparse.setPropagateSign(true);
+    bitpit::log::cout() << "Filling levelset cache using sprase storage... " << std::endl;
+    std::chrono::time_point<std::chrono::system_clock> startSparse = std::chrono::system_clock::now();
+
+    bitpit::LevelSet levelsetSparse(bitpit::LevelSetFillIn::SPARSE);
     levelsetSparse.setMesh(mesh.get());
     levelsetSparse.addObject(segmentation.get(), BITPIT_PI, objectId);
 
-    bitpit::log::cout() << "Computing levelset using sprase storage... " << std::endl;
-    std::chrono::time_point<std::chrono::system_clock> startSparse = std::chrono::system_clock::now();
-    levelsetSparse.compute( ) ;
+    bitpit::LevelSetObject &sparseObject = levelsetSparse.getObject(objectId);
+    sparseObject.enableFieldCellCache(bitpit::LevelSetField::SIGN, bitpit::LevelSetCacheMode::FULL);
+    sparseObject.enableFieldCellCache(bitpit::LevelSetField::VALUE, bitpit::LevelSetCacheMode::FULL);
+
     std::chrono::time_point<std::chrono::system_clock> endSparse = std::chrono::system_clock::now();
     int elapsedTimeSparse = std::chrono::duration_cast<std::chrono::milliseconds>(endSparse - startSparse).count();
-    bitpit::log::cout() << "Computation compreted in " << elapsedTimeSparse << " ms" << std::endl;
+    bitpit::log::cout() << "Computation completed in " << elapsedTimeSparse << " ms" << std::endl;
 
     levelsetSparse.getObject(objectId).enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
     mesh->getVTK().setName("levelset_007_cartesian_default_sparse");
     mesh->write();
 
-    double sparseValue0 = levelsetSparse.getObject(objectId).getValue(testCellId0);
-    double sparseValue1 = levelsetSparse.getObject(objectId).getValue(testCellId1);
-    double sparseValue2 = levelsetSparse.getObject(objectId).getValue(testCellId2);
+    double sparseValue0 = levelsetSparse.getObject(objectId).evalCellValue(testCellId0, true);
+    double sparseValue1 = levelsetSparse.getObject(objectId).evalCellValue(testCellId1, true);
+    double sparseValue2 = levelsetSparse.getObject(objectId).evalCellValue(testCellId2, true);
 
     bitpit::log::cout() << " Sparse storage mode: levelset on cell " << testCellId0 << " is equal to " << sparseValue0 << std::endl;
     bitpit::log::cout() << " Sparse storage mode: levelset on cell " << testCellId1 << " is equal to " << sparseValue1 << std::endl;
@@ -207,25 +210,28 @@ int subtest_001()
     //
 
     // Initialize levelset
-    bitpit::LevelSet levelsetDense(bitpit::LevelSetStorageType::DENSE);
-    levelsetDense.setPropagateSign(true);
+    bitpit::log::cout() << "Filling levelset cache using dense storage... " << std::endl;
+    std::chrono::time_point<std::chrono::system_clock> startDense = std::chrono::system_clock::now();
+
+    bitpit::LevelSet levelsetDense(bitpit::LevelSetFillIn::DENSE);
     levelsetDense.setMesh(mesh.get());
     levelsetDense.addObject(segmentation.get(), BITPIT_PI, objectId);
 
-    bitpit::log::cout() << "Computing levelset using dense storage... " << std::endl;
-    std::chrono::time_point<std::chrono::system_clock> startDense = std::chrono::system_clock::now();
-    levelsetDense.compute( ) ;
+    bitpit::LevelSetObject &denseObject = levelsetDense.getObject(objectId);
+    denseObject.enableFieldCellCache(bitpit::LevelSetField::SIGN, bitpit::LevelSetCacheMode::FULL);
+    denseObject.enableFieldCellCache(bitpit::LevelSetField::VALUE, bitpit::LevelSetCacheMode::NARROW_BAND);
+
     std::chrono::time_point<std::chrono::system_clock> endDense = std::chrono::system_clock::now();
     int elapsedTimeDense = std::chrono::duration_cast<std::chrono::milliseconds>(endDense - startDense).count();
-    bitpit::log::cout() << "Computation compreted in " << elapsedTimeDense << " ms" << std::endl;
+    bitpit::log::cout() << "Computation completed in " << elapsedTimeDense << " ms" << std::endl;
 
     levelsetDense.getObject(objectId).enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
     mesh->getVTK().setName("levelset_007_cartesian_default_dense");
     mesh->write();
 
-    double denseValue0 = levelsetDense.getObject(objectId).getValue(testCellId0);
-    double denseValue1 = levelsetDense.getObject(objectId).getValue(testCellId1);
-    double denseValue2 = levelsetDense.getObject(objectId).getValue(testCellId2);
+    double denseValue0 = levelsetDense.getObject(objectId).evalCellValue(testCellId0, true);
+    double denseValue1 = levelsetDense.getObject(objectId).evalCellValue(testCellId1, true);
+    double denseValue2 = levelsetDense.getObject(objectId).evalCellValue(testCellId2, true);
 
     bitpit::log::cout() << " Dense storage mode: levelset on cell " << testCellId0 << " is equal to " << denseValue0 << std::endl;
     bitpit::log::cout() << " Dense storage mode: levelset on cell " << testCellId1 << " is equal to " << denseValue1 << std::endl;
@@ -286,7 +292,7 @@ int subtest_002()
 
     // Initialize test
     long testCellId0 = 12065;
-    long testCellId1 = 13590;
+    long testCellId1 = 13671;
     long testCellId2 = 15495;
 
     int objectId = 0;
@@ -296,16 +302,16 @@ int subtest_002()
     //
 
     // Initialize levelset
-    bitpit::LevelSet levelsetSparse(bitpit::LevelSetStorageType::SPARSE);
+    bitpit::log::cout() << "Filling levelset cache using sprase storage... " << std::endl;
+    std::chrono::time_point<std::chrono::system_clock> startSparse = std::chrono::system_clock::now();
+
+    bitpit::LevelSet levelsetSparse(bitpit::LevelSetFillIn::SPARSE);
     levelsetSparse.setMesh(mesh.get());
     levelsetSparse.addObject(segmentation.get(), BITPIT_PI, objectId);
 
-    bitpit::log::cout() << "Computing levelset using sprase storage... " << std::endl;
-    std::chrono::time_point<std::chrono::system_clock> startSparse = std::chrono::system_clock::now();
-    levelsetSparse.compute( ) ;
     std::chrono::time_point<std::chrono::system_clock> endSparse = std::chrono::system_clock::now();
     int elapsedTimeSparse = std::chrono::duration_cast<std::chrono::milliseconds>(endSparse - startSparse).count();
-    bitpit::log::cout() << "Computation compreted in " << elapsedTimeSparse << " ms" << std::endl;
+    bitpit::log::cout() << "Computation completed in " << elapsedTimeSparse << " ms" << std::endl;
 
     mesh->switchMemoryMode(bitpit::VolCartesian::MEMORY_NORMAL);
     mesh->initializeAdjacencies();
@@ -317,9 +323,9 @@ int subtest_002()
 
     mesh->switchMemoryMode(bitpit::VolCartesian::MEMORY_LIGHT);
 
-    double sparseValue0 = levelsetSparse.getObject(objectId).getValue(testCellId0);
-    double sparseValue1 = levelsetSparse.getObject(objectId).getValue(testCellId1);
-    double sparseValue2 = levelsetSparse.getObject(objectId).getValue(testCellId2);
+    double sparseValue0 = levelsetSparse.getObject(objectId).evalCellValue(testCellId0, true);
+    double sparseValue1 = levelsetSparse.getObject(objectId).evalCellValue(testCellId1, true);
+    double sparseValue2 = levelsetSparse.getObject(objectId).evalCellValue(testCellId2, true);
 
     bitpit::log::cout() << " Sparse storage mode: levelset on cell " << testCellId0 << " is equal to " << sparseValue0 << std::endl;
     bitpit::log::cout() << " Sparse storage mode: levelset on cell " << testCellId1 << " is equal to " << sparseValue1 << std::endl;
@@ -330,16 +336,16 @@ int subtest_002()
     //
 
     // Initialize levelset
-    bitpit::LevelSet levelsetDense(bitpit::LevelSetStorageType::DENSE);
+    bitpit::log::cout() << "Filling levelset cache using dense storage... " << std::endl;
+    std::chrono::time_point<std::chrono::system_clock> startDense = std::chrono::system_clock::now();
+
+    bitpit::LevelSet levelsetDense(bitpit::LevelSetFillIn::DENSE);
     levelsetDense.setMesh(mesh.get());
     levelsetDense.addObject(segmentation.get(), BITPIT_PI, objectId);
 
-    bitpit::log::cout() << "Computing levelset using dense storage... " << std::endl;
-    std::chrono::time_point<std::chrono::system_clock> startDense = std::chrono::system_clock::now();
-    levelsetDense.compute( ) ;
     std::chrono::time_point<std::chrono::system_clock> endDense = std::chrono::system_clock::now();
     int elapsedTimeDense = std::chrono::duration_cast<std::chrono::milliseconds>(endDense - startDense).count();
-    bitpit::log::cout() << "Computation compreted in " << elapsedTimeDense << " ms" << std::endl;
+    bitpit::log::cout() << "Computation completed in " << elapsedTimeDense << " ms" << std::endl;
 
     mesh->switchMemoryMode(bitpit::VolCartesian::MEMORY_NORMAL);
     mesh->initializeAdjacencies();
@@ -351,9 +357,9 @@ int subtest_002()
 
     mesh->switchMemoryMode(bitpit::VolCartesian::MEMORY_LIGHT);
 
-    double denseValue0 = levelsetDense.getObject(objectId).getValue(testCellId0);
-    double denseValue1 = levelsetDense.getObject(objectId).getValue(testCellId1);
-    double denseValue2 = levelsetDense.getObject(objectId).getValue(testCellId2);
+    double denseValue0 = levelsetDense.getObject(objectId).evalCellValue(testCellId0, true);
+    double denseValue1 = levelsetDense.getObject(objectId).evalCellValue(testCellId1, true);
+    double denseValue2 = levelsetDense.getObject(objectId).evalCellValue(testCellId2, true);
 
     bitpit::log::cout() << " Dense storage mode: levelset on cell " << testCellId0 << " is equal to " << denseValue0 << std::endl;
     bitpit::log::cout() << " Dense storage mode: levelset on cell " << testCellId1 << " is equal to " << denseValue1 << std::endl;
@@ -415,7 +421,7 @@ int subtest_003()
 
     // Initialize test
     long testCellId0 = 9873;
-    long testCellId1 = 10652;
+    long testCellId1 = 15517;
     long testCellId2 = 10905;
 
     int objectId = 0;
@@ -425,25 +431,28 @@ int subtest_003()
     //
 
     // Initialize levelset
-    bitpit::LevelSet levelsetSparse(bitpit::LevelSetStorageType::SPARSE);
-    levelsetSparse.setPropagateSign(true);
+    bitpit::log::cout() << "Filling levelset cache using sprase storage... " << std::endl;
+    std::chrono::time_point<std::chrono::system_clock> startSparse = std::chrono::system_clock::now();
+
+    bitpit::LevelSet levelsetSparse(bitpit::LevelSetFillIn::SPARSE);
     levelsetSparse.setMesh(mesh.get());
     levelsetSparse.addObject(segmentation.get(), BITPIT_PI, objectId);
 
-    bitpit::log::cout() << "Computing levelset using sprase storage... " << std::endl;
-    std::chrono::time_point<std::chrono::system_clock> startSparse = std::chrono::system_clock::now();
-    levelsetSparse.compute( ) ;
+    bitpit::LevelSetObject &sparseObject = levelsetSparse.getObject(objectId);
+    sparseObject.enableFieldCellCache(bitpit::LevelSetField::SIGN, bitpit::LevelSetCacheMode::FULL);
+    sparseObject.enableFieldCellCache(bitpit::LevelSetField::VALUE, bitpit::LevelSetCacheMode::NARROW_BAND);
+
     std::chrono::time_point<std::chrono::system_clock> endSparse = std::chrono::system_clock::now();
     int elapsedTimeSparse = std::chrono::duration_cast<std::chrono::milliseconds>(endSparse - startSparse).count();
-    bitpit::log::cout() << "Computation compreted in " << elapsedTimeSparse << " ms" << std::endl;
+    bitpit::log::cout() << "Computation completed in " << elapsedTimeSparse << " ms" << std::endl;
 
     levelsetSparse.getObject(objectId).enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
     mesh->getVTK().setName("levelset_007_octree_sparse");
     mesh->write();
 
-    double sparseValue0 = levelsetSparse.getObject(objectId).getValue(testCellId0);
-    double sparseValue1 = levelsetSparse.getObject(objectId).getValue(testCellId1);
-    double sparseValue2 = levelsetSparse.getObject(objectId).getValue(testCellId2);
+    double sparseValue0 = levelsetSparse.getObject(objectId).evalCellValue(testCellId0, true);
+    double sparseValue1 = levelsetSparse.getObject(objectId).evalCellValue(testCellId1, true);
+    double sparseValue2 = levelsetSparse.getObject(objectId).evalCellValue(testCellId2, true);
 
     bitpit::log::cout() << " Sparse storage mode: levelset on cell " << testCellId0 << " is equal to " << sparseValue0 << std::endl;
     bitpit::log::cout() << " Sparse storage mode: levelset on cell " << testCellId1 << " is equal to " << sparseValue1 << std::endl;
@@ -454,25 +463,28 @@ int subtest_003()
     //
 
     // Initialize levelset
-    bitpit::LevelSet levelsetDense(bitpit::LevelSetStorageType::DENSE);
-    levelsetDense.setPropagateSign(true);
+    bitpit::log::cout() << "Filling levelset cache using dense storage... " << std::endl;
+    std::chrono::time_point<std::chrono::system_clock> startDense = std::chrono::system_clock::now();
+
+    bitpit::LevelSet levelsetDense(bitpit::LevelSetFillIn::DENSE);
     levelsetDense.setMesh(mesh.get());
     levelsetDense.addObject(segmentation.get(), BITPIT_PI, objectId);
 
-    bitpit::log::cout() << "Computing levelset using dense storage... " << std::endl;
-    std::chrono::time_point<std::chrono::system_clock> startDense = std::chrono::system_clock::now();
-    levelsetDense.compute( ) ;
+    bitpit::LevelSetObject &denseObject = levelsetSparse.getObject(objectId);
+    denseObject.enableFieldCellCache(bitpit::LevelSetField::SIGN, bitpit::LevelSetCacheMode::FULL);
+    denseObject.enableFieldCellCache(bitpit::LevelSetField::VALUE, bitpit::LevelSetCacheMode::NARROW_BAND);
+
     std::chrono::time_point<std::chrono::system_clock> endDense = std::chrono::system_clock::now();
     int elapsedTimeDense = std::chrono::duration_cast<std::chrono::milliseconds>(endDense - startDense).count();
-    bitpit::log::cout() << "Computation compreted in " << elapsedTimeDense << " ms" << std::endl;
+    bitpit::log::cout() << "Computation completed in " << elapsedTimeDense << " ms" << std::endl;
 
     levelsetDense.getObject(objectId).enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
     mesh->getVTK().setName("levelset_007_octree_dense");
     mesh->write();
 
-    double denseValue0 = levelsetDense.getObject(objectId).getValue(testCellId0);
-    double denseValue1 = levelsetDense.getObject(objectId).getValue(testCellId1);
-    double denseValue2 = levelsetDense.getObject(objectId).getValue(testCellId2);
+    double denseValue0 = levelsetDense.getObject(objectId).evalCellValue(testCellId0, true);
+    double denseValue1 = levelsetDense.getObject(objectId).evalCellValue(testCellId1, true);
+    double denseValue2 = levelsetDense.getObject(objectId).evalCellValue(testCellId2, true);
 
     bitpit::log::cout() << " Dense storage mode: levelset on cell " << testCellId0 << " is equal to " << denseValue0 << std::endl;
     bitpit::log::cout() << " Dense storage mode: levelset on cell " << testCellId1 << " is equal to " << denseValue1 << std::endl;

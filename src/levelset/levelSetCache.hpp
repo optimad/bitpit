@@ -155,7 +155,7 @@ class LevelSetValueCache : public LevelSetCache<key_t>
 public:
     typedef LevelSetValueCacheEntry<value_t> Entry;
 
-    virtual Entry findEntry(const key_t &key) = 0;
+    virtual Entry findEntry(const key_t &key) const = 0;
     virtual Entry insertEntry(const key_t &key, const value_t &value) = 0;
     virtual Entry insertEntry(const key_t &key, value_t &&value) = 0;
 
@@ -196,7 +196,7 @@ public:
 
     bool contains(const key_t &key) const override;
 
-    Entry findEntry(const key_t &key) override;
+    Entry findEntry(const key_t &key) const override;
     Entry insertEntry(const key_t &key, const value_t &value) override;
     Entry insertEntry(const key_t &key, value_t &&value) override;
 

@@ -147,13 +147,12 @@ int subtest_001()
     levelset.clear();
     levelset.setMesh(mesh.get());
     levelset.addObject(segmentation.get(), BITPIT_PI, objectId);
-    levelset.compute();
 
     levelset.getObject(objectId).enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
     mesh->getVTK().setName("levelset_006_normal");
     mesh->write();
 
-    double normalValue = levelset.getObject(objectId).getValue(testCellId);
+    double normalValue = levelset.getObject(objectId).evalCellValue(testCellId, true);
 
     // Compute levleset with the patch in light memory mode
     mesh->switchMemoryMode(bitpit::VolCartesian::MEMORY_LIGHT);
@@ -161,9 +160,8 @@ int subtest_001()
     levelset.clear();
     levelset.setMesh(mesh.get());
     levelset.addObject(segmentation.get(), BITPIT_PI, objectId);
-    levelset.compute();
 
-    double lightValue = levelset.getObject(objectId).getValue(testCellId);
+    double lightValue = levelset.getObject(objectId).evalCellValue(testCellId, true);
 
     mesh->switchMemoryMode(bitpit::VolCartesian::MEMORY_NORMAL);
     levelset.getObject(objectId).enableVTKOutput(bitpit::LevelSetWriteField::VALUE);

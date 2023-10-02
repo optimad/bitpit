@@ -28,6 +28,79 @@
 namespace bitpit{
 
 /*!
+ * Adds the complement of the specified object.
+ * Objects can be added to the levelset only after setting the mesh.
+ * @param[in] sourceId id of source object
+ * @param[in] id id to be assigned to object. In case default value is passed the insertion order will be used as identifier
+ * @return identifier of new object
+ */
+template<typename LevelSetSourceObject>
+int LevelSet::addObjectComplement( int sourceId, int id ) {
+
+    const LevelSetSourceObject *sourceObject = getObjectPtr<LevelSetSourceObject>(sourceId) ;
+    if (!sourceObject) {
+        throw std::runtime_error("The type of the object does not match the type of the complement object!");
+    }
+
+    auto object = std::unique_ptr<LevelSetObject>(new LevelSetComplementObject<LevelSetSourceObject>(id, sourceObject));
+
+    return registerObject(std::move(object));
+};
+
+/*!
+ * Adds a boolean operation between two objects
+ * Objects can be added to the levelset only after setting the mesh.
+ * @param[in] operation boolean operation
+ * @param[in] id1 id of first operand
+ * @param[in] id2 id of second operand
+ * @param[in] id id to be assigned to object. In case default value is passed the insertion order will be used as identifier
+ * @return identifier of new object
+ */
+template<typename LevelSetSourceObject>
+int LevelSet::addObject( LevelSetBooleanOperation operation, int id1, int id2, int id ) {
+
+    const LevelSetObject *object1 = getObjectPtr<LevelSetSourceObject>(id1) ;
+    if (!object1) {
+        throw std::runtime_error("The type of the object does not match the type of the boolean object!");
+    }
+
+    const LevelSetObject *object2 = getObjectPtr<LevelSetSourceObject>(id2) ;
+    if (!object2) {
+        throw std::runtime_error("The type of the object does not match the type of the boolean object!");
+    }
+
+    auto object = std::unique_ptr<LevelSetObject>(new LevelSetBooleanObject<LevelSetSourceObject>(id, operation, object1, object2));
+
+    return registerObject(std::move(object));
+}
+
+/*!
+ * Adds a boolean operation between that will be applied recursively to a series of objects
+ * Objects can be added to the levelset only after setting the mesh.
+ * @param[in] operation boolean operation
+ * @param[in] ids vector with indices of operand objects
+ * @param[in] id id to be assigned to object. In case default value is passed the insertion order will be used as identifier
+ * @return identifier of new object
+ */
+template<typename LevelSetSourceObject>
+int LevelSet::addObject( LevelSetBooleanOperation operation, const std::vector<int> &ids, int id ) {
+
+    std::vector<const LevelSetSourceObject*> objects;
+    for( int id : ids){
+        const LevelSetSourceObject *object = getObjectPtr<LevelSetSourceObject>(id) ;
+        if (!object) {
+            throw std::runtime_error("The type of the object does not match the type of the boolean object!");
+        }
+
+        objects.push_back( object );
+    }
+
+    auto object = std::unique_ptr<LevelSetObject>(new LevelSetBooleanObject<LevelSetSourceObject>(id, operation, objects));
+
+    return registerObject(std::move(object));
+}
+
+/*!
  * Get a constant reference to the specified object.
  * If the specified id does not exist an exception is thrown.
  * @param id is the object id

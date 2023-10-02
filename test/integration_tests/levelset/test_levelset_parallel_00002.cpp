@@ -113,40 +113,44 @@ int subtest_001(int rank)
     mesh.initializeInterfaces();
     mesh.update() ;
 
-    // Configure levelset
+    // Compute levelset in narrow band
     std::chrono::time_point<std::chrono::system_clock> start, end;
     int elapsed_init, elapsed_part, elapsed_refi(0);
+
+    start = std::chrono::system_clock::now();
 
     bitpit::LevelSet levelset;
 
     std::vector<bitpit::adaption::Info> adaptionData ;
     int id0, id1, id2 ;
-    std::vector<int> ids;
 
     levelset.setMesh(&mesh) ;
     id0 = levelset.addObject(std::move(STL0),BITPIT_PI) ;
     id1 = levelset.addObject(std::move(STL1),BITPIT_PI) ;
     id2 = levelset.addObject(bitpit::LevelSetBooleanOperation::INTERSECTION,id0,id1) ;
-    ids.push_back(id0);
-    ids.push_back(id1);
-    ids.push_back(id2);
 
     bitpit::LevelSetObject &object0 = levelset.getObject(id0) ;
     bitpit::LevelSetObject &object1 = levelset.getObject(id1) ;
     bitpit::LevelSetObject &object2 = levelset.getObject(id2) ;
 
-    object0.enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
-    object1.enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
-    object2.enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
+    object0.enableFieldCellCache(bitpit::LevelSetField::SIGN, bitpit::LevelSetCacheMode::FULL);
+    object1.enableFieldCellCache(bitpit::LevelSetField::SIGN, bitpit::LevelSetCacheMode::FULL);
+    object2.enableFieldCellCache(bitpit::LevelSetField::SIGN, bitpit::LevelSetCacheMode::FULL);
 
-    levelset.setPropagateSign(true);
+    object0.enableFieldCellCache(bitpit::LevelSetField::VALUE, bitpit::LevelSetCacheMode::NARROW_BAND);
+    object1.enableFieldCellCache(bitpit::LevelSetField::VALUE, bitpit::LevelSetCacheMode::NARROW_BAND);
+    object2.enableFieldCellCache(bitpit::LevelSetField::VALUE, bitpit::LevelSetCacheMode::NARROW_BAND);
 
-    // Compute levelset in narrow band
-    start = std::chrono::system_clock::now();
-    levelset.compute( );
     end = std::chrono::system_clock::now();
 
     elapsed_init = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+
+    object0.enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
+    object0.enableVTKOutput(bitpit::LevelSetWriteField::SIGN);
+    object1.enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
+    object1.enableVTKOutput(bitpit::LevelSetWriteField::SIGN);
+    object2.enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
+    object2.enableVTKOutput(bitpit::LevelSetWriteField::SIGN);
 
     mesh.getVTK().setName("levelset_parallel_002_serial");
     mesh.write() ;
@@ -170,12 +174,12 @@ int subtest_001(int rank)
 
         for( auto & cell : mesh.getCells() ){
             long id = cell.getId() ;
-            if( std::abs(object0.getValue(id)) < mesh.evalCellSize(id) ){
+            if( std::abs(object0.evalCellValue(id, false)) < mesh.evalCellSize(id) ){
                 mesh.markCellForRefinement(id) ;
             }
 
             if( i<4){
-                if( std::abs(object1.getValue(id)) < mesh.evalCellSize(id) ){
+                if( std::abs(object1.evalCellValue(id, false)) < mesh.evalCellSize(id) ){
                     mesh.markCellForRefinement(id) ;
                 }
             }

@@ -34,6 +34,8 @@
 
 # include "levelSetCommon.hpp"
 
+# include "bitpit_IO.hpp"
+
 namespace bitpit{
 
 namespace adaption{
@@ -48,54 +50,57 @@ class LevelSetObject;
 
 class LevelSet{
 
-    private:
-    LevelSetStorageType m_storageType; /**< Storage type to be used for storing levelset information */
-
-    IndexGenerator<long> m_objectIdentifierGenerator; /**< Object identifier generator */
-
+private:
     std::unique_ptr<LevelSetKernel>                             m_kernel ;            /**< LevelSet computational kernel */
-    std::unordered_map<int,std::unique_ptr<LevelSetObject>>     m_objects ;           /**< Objects defining the boundaries */
 
-    std::vector<int>        m_objectsProcessingOrder ; /**< Processing order of objects */
-    double                  m_narrowBandSize;          /**< Size of narrowban, negative values means that the narrowband is disabled  */
-    bool                    m_signedDistance;          /**< Flag for sigend/unsigned distance (default = true) */
-    bool                    m_propagateSign;           /**< Flag for sign propagation from narrow band (default = false) */
+    LevelSetFillIn          m_expectedFillIn;          /**< Expected fill-in for data structures */
+
+    bool                    m_signedDistance;          /**< Flag for signed/unsigned distance (default = true) */
+
+    bool                    m_forceSignPropagation;    /**< Flag for forcing sign propagation from narrow band (default = false) */
+    bool                    m_signPropagationEnabled;  /**< Flag for sign propagation from narrow band (default = false) */
+
+    double                  m_narrowBandSize;          /**< Size of the narrow band. Regardless of the specified size, the narrow band
+                                                            will always contain the intersected cells and their neighbours */
+
+    IndexGenerator<long>                                        m_objectIdentifierGenerator; /**< Object identifier generator */
+    std::unordered_map<int,std::unique_ptr<LevelSetObject>>     m_objects ;                  /**< Objects defining the boundaries */
+    std::vector<int>                                            m_orderedObjectsIds ;        /**< Object ids sorted according to the order in which they should be processed */
 
     int                     registerObject( std::unique_ptr<LevelSetObject> && ) ;
     bool                    unregisterObject(int id, bool force);
 
-    void                    setObjectProcessingOrder(int) ;
-    void                    unsetObjectProcessingOrder(int) ;
+    void                    registerObjectId(int) ;
+    void                    unregisterObjectId(int) ;
 
     void                    incrementObjectsReferenceCount(int parentId) ;
     void                    decrementObjectsReferenceCount(int parentId) ;
 
-    void                    compute( const std::unordered_set<LevelSetObject *> &objectProcessList) ;
-
-    void                    update( const std::vector<adaption::Info> &adaptionData, const std::unordered_set<LevelSetObject *> &objectProcessList );
-
-    std::unordered_set<LevelSetObject *> getObjectProcessList() const ;
-    std::unordered_set<LevelSetObject *> getObjectProcessList(std::size_t nObjects, const int *objectIds) const ;
-
-    public:
-    LevelSet(LevelSetStorageType storageType = LevelSetStorageType::SPARSE) ;
+public:
+    LevelSet(LevelSetFillIn expectedFillIn = LevelSetFillIn::SPARSE) ;
 
     LevelSet(LevelSet&& other) = default;
+
     void                    clear();
+    void                    update(const std::vector<adaption::Info> &adaptionData) ;
 
-    LevelSetStorageType     getStorageType() const ;
+    double                  getNarrowBandSize() const;
+    void                    setNarrowBandSize(double size = 0);
 
-    void                    setMesh( VolumeKernel* mesh, LevelSetFillIn fillIn = LevelSetFillIn::SPARSE ) ;
-    void                    clearMeshCache() ;
+    void                    setMesh( VolumeKernel* mesh ) ;
 
+    template<typename LevelSetSourceObject = LevelSetObject>
     int                     addObjectComplement( int, int id=levelSetDefaults::OBJECT ) ;
+
+    template<typename LevelSetSourceObject = LevelSetObject>
+    int                     addObject( LevelSetBooleanOperation, int, int, int id=levelSetDefaults::OBJECT ) ;
+    template<typename LevelSetSourceObject = LevelSetObject>
+    int                     addObject( LevelSetBooleanOperation, const std::vector<int> &, int id=levelSetDefaults::OBJECT ) ;
 
     int                     addObject( std::unique_ptr<SurfaceKernel> &&, double, int id = levelSetDefaults::OBJECT ) ;
     int                     addObject( SurfaceKernel *, double, int id = levelSetDefaults::OBJECT ) ;
     int                     addObject( std::unique_ptr<SurfUnstructured> &&, double, int id = levelSetDefaults::OBJECT ) ;
     int                     addObject( SurfUnstructured *, double, int id = levelSetDefaults::OBJECT ) ;
-    int                     addObject( LevelSetBooleanOperation, int, int, int id=levelSetDefaults::OBJECT ) ;
-    int                     addObject( LevelSetBooleanOperation, const std::vector<int> &, int id=levelSetDefaults::OBJECT ) ;
     int                     addObject( const std::unordered_set<long> &, int id=levelSetDefaults::OBJECT ) ;
     int                     addObject( const std::vector<long> &, long, bool, int id=levelSetDefaults::OBJECT ) ;
     int                     addObject( std::unique_ptr<LevelSetObject> && ) ;
@@ -119,22 +124,21 @@ class LevelSet{
     int                     getObjectCount( ) const ;
     std::vector<int>        getObjectIds( ) const ;
 
-    void                    setSizeNarrowBand(double) ;
-    double                  getSizeNarrowBand() const ;
-
-    void                    setSign(bool);
-    void                    setPropagateSign(bool) ;
-
-    void                    dump( std::ostream &);
+    void                    dump( std::ostream &) const;
     void                    restore( std::istream &);
 
-    void                    compute( ) ;
-    void                    compute( int id ) ;
-    void                    compute( const std::vector<int> &ids ) ;
+    BITPIT_DEPRECATED_FOR(void setSizeNarrowBand(double size), void setNarrowBandSize(double size));
+    BITPIT_DEPRECATED_FOR(double getSizeNarrowBand() const, double getNarrowBandSize() const);
 
-    void                    update( const std::vector<adaption::Info> &adaptionData );
-    void                    update( const std::vector<adaption::Info> &adaptionData, int id );
-    void                    update( const std::vector<adaption::Info> &adaptionData, const std::vector<int> &ids );
+    BITPIT_DEPRECATED(void   setSign(bool));
+    BITPIT_DEPRECATED(void   setPropagateSign(bool));
+
+    BITPIT_DEPRECATED_FOR(void compute(), void evaluate());
+    BITPIT_DEPRECATED_FOR(void compute(int id), void evaluate(int id));
+    BITPIT_DEPRECATED_FOR(void compute(const std::vector<int> &ids), void evaluate(const std::vector<int> &ids));
+
+    BITPIT_DEPRECATED_FOR(void update(const std::vector<adaption::Info> &adaptionData, int id), void update(const std::vector<adaption::Info> &adaptionData));
+    BITPIT_DEPRECATED_FOR(void update(const std::vector<adaption::Info> &adaptionData, const std::vector<int> &ids), void update(const std::vector<adaption::Info> &adaptionData));
 
 # if BITPIT_ENABLE_MPI
     BITPIT_DEPRECATED(void  partition( const std::vector<adaption::Info> & ));
