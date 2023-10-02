@@ -103,37 +103,35 @@ int subtest_001(int rank)
     // Compute level set in narrow band
     std::chrono::time_point<std::chrono::system_clock>    start, end;
     int elapsed_init, elapsed_refi(0);
+    start = std::chrono::system_clock::now();
 
     bitpit::LevelSet levelset;
-
-    std::vector<bitpit::adaption::Info> adaptionData;
-
     levelset.setMesh(&mesh);
-    levelset.setPropagateSign(true);
-    int id0 = levelset.addObject(std::move(STL),BITPIT_PI);
 
+    int objectId = levelset.addObject(std::move(STL),BITPIT_PI);
+    bitpit::LevelSetObject &object = levelset.getObject(objectId);
 
-    start = std::chrono::system_clock::now();
-    levelset.compute( );
+    object.enableFieldCellCache(bitpit::LevelSetField::SIGN, bitpit::LevelSetCacheMode::FULL);
+    object.enableFieldCellCache(bitpit::LevelSetField::VALUE, bitpit::LevelSetCacheMode::FULL);
+
     end = std::chrono::system_clock::now();
-
     elapsed_init = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
 
     // Write mesh
-    bitpit::log::cout() << " - Exporting data" << std::endl;
+    bitpit::log::cout() << " - Writing output" << std::endl;
 
-    levelset.getObject(id0).enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
+    object.enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
+
     mesh.getVTK().setCounter();
     mesh.getVTK().setName("levelset_parallel_003");
     mesh.write();
 
     // Refinement
-    const bitpit::LevelSetObject &object = levelset.getObject(id0);
+    std::vector<bitpit::adaption::Info> adaptionData;
     for (int i=0; i<3; ++i){
-
         for (auto & cell : mesh.getCells() ){
             long id = cell.getId();
-            if( std::abs(object.getValue(id)) < 100. ){
+            if (object.isCellInNarrowBand(id)) {
                 mesh.markCellForRefinement(id);
             }
         }

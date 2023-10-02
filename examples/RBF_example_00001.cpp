@@ -236,15 +236,14 @@ void run(std::string filename,
 
     // Set levelset configuration
     bitpit::LevelSet levelset;
-    levelset.setMesh(&mesh);
-    int id0 = levelset.addObject(std::move(STL0), 0);
-    const bitpit::LevelSetObject &object0 = levelset.getObject(id0);
-    std::vector<int> ids;
-    levelset.getObject(id0).enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
     levelset.setPropagateSign(true);
     levelset.setSizeNarrowBand(sqrt(3.0) * h);
-    // Compute the levelset
-    levelset.compute(id0);
+    levelset.setMesh(&mesh);
+
+    int id0 = levelset.addObject(std::move(STL0), 0);
+    const bitpit::LevelSetObject &object0 = levelset.getObject(id0);
+    levelset.getObject(id0).enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
+
     // Write levelset information
     mesh.write();
     bitpit::log::cout() << "Computed levelset within the narrow band... " << std::endl;

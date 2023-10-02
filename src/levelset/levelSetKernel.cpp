@@ -38,8 +38,8 @@ namespace bitpit {
  * Default constructor.
  */
 LevelSetKernel::LevelSetKernel() {
-    m_mesh   = NULL ;
-    m_fillIn = LevelSetFillIn::SPARSE ;
+    m_mesh           = NULL ;
+    m_expectedFillIn = LevelSetFillIn::SPARSE ;
 
 #if BITPIT_ENABLE_MPI
     m_communicator = MPI_COMM_NULL;
@@ -50,11 +50,11 @@ LevelSetKernel::LevelSetKernel() {
 /*!
  * Constructor
  * @param[in] patch underlying mesh
- * @param[in] fillIn expected kernel fill-in
+ * @param[in] expectedFillIn expected kernel fill-in
  */
-LevelSetKernel::LevelSetKernel( VolumeKernel *patch, LevelSetFillIn fillIn ): LevelSetKernel() {
-    m_mesh   = patch ;
-    m_fillIn = fillIn ;
+LevelSetKernel::LevelSetKernel( VolumeKernel *patch, LevelSetFillIn expectedFillIn ): LevelSetKernel() {
+    m_mesh           = patch ;
+    m_expectedFillIn = expectedFillIn ;
 
 #if BITPIT_ENABLE_MPI
     // Initialize the communicator
@@ -89,9 +89,9 @@ VolumeKernel * LevelSetKernel::getMesh() const{
  *
  * \result The expected kernel fill-in.
 */
-LevelSetFillIn LevelSetKernel::getFillIn() const
+LevelSetFillIn LevelSetKernel::getExpectedFillIn() const
 {
-    return m_fillIn;
+    return m_expectedFillIn;
 }
 
 /*!
@@ -108,10 +108,37 @@ double LevelSetKernel::getDistanceTolerance() const
  * Updates the kernel after an adaption.
  *
  * @param[in] adaptionData are the information about the adaption
+ * @result Returns true if the kernel has been updated, false if no update was needed.
  */
-void LevelSetKernel::update( const std::vector<adaption::Info> &adaptionData ) {
+bool LevelSetKernel::update( const std::vector<adaption::Info> &adaptionData ) {
 
-    BITPIT_UNUSED( adaptionData );
+    // Early return if the kernel doesn't need to be updated
+#if BITPIT_ENABLE_MPI
+    VolumeKernel *mesh = getMesh();
+    bool isMeshPartitioned = mesh->isPartitioned();
+#endif
+
+    // Check if the levelset needs to be updated
+    bool isDirty = false;
+    for( const adaption::Info &adaptionInfo : adaptionData){
+        if( adaptionInfo.entity != adaption::Entity::ENTITY_CELL){
+            continue;
+        }
+
+        isDirty = true;
+        break;
+    }
+
+#if BITPIT_ENABLE_MPI
+    if (isMeshPartitioned) {
+        MPI_Allreduce(MPI_IN_PLACE, &isDirty, 1, MPI_C_BOOL, MPI_LOR, getCommunicator());
+    }
+#endif
+
+    // Early return if no changes were detected
+    if (!isDirty) {
+        return false;
+    }
 
 #if BITPIT_ENABLE_MPI
     // Set the communicator
@@ -121,6 +148,9 @@ void LevelSetKernel::update( const std::vector<adaption::Info> &adaptionData ) {
         initializeCommunicator();
     }
 #endif
+
+    // The kernel has been updated
+    return true;
 }
 
 /*!
@@ -254,19 +284,6 @@ std::unique_ptr<DataCommunicator> LevelSetKernel::createDataCommunicator( ) cons
 #endif
 
 /*!
-    Create the sign propagator.
-
-    The sign propagator allow to propagate the levelset sign from the narrow
-    band to the rest of the domain.
-
-    \result The newlycreated sign propagator.
-*/
-std::unique_ptr<LevelSetSignPropagator> LevelSetKernel::createSignPropagator( ) const {
-
-    return std::unique_ptr<LevelSetSignPropagator>(new LevelSetSignPropagator(m_mesh)) ;
-}
-
-/*!
     @interface  LevelSetCachedKernel
     @ingroup levelset
     @brief Base class for defining kernels that need to cache data.
@@ -289,7 +306,7 @@ LevelSetCachedKernel::LevelSetCachedKernel( VolumeKernel *patch, LevelSetFillIn 
  * \param release if set to true the memory hold by the cache will be released, otherwise
  * the cache will be cleared but its memory may not be released
  */
-void LevelSetCachedKernel::clearCache(bool release)
+void LevelSetCachedKernel::clearCaches(bool release)
 {
     for (CellCacheCollection::Item &cacheItem : *m_cellCacheCollection) {
         if (!cacheItem.hasCache()) {
@@ -332,11 +349,15 @@ const LevelSetCachedKernel::CellCacheCollection & LevelSetCachedKernel::getCellC
  * Updates the kernel after an adaption.
  *
  * @param[in] adaptionData are the information about the adaption
+ * @result Returns true if the kernel has been updated, false if no update was needed.
  */
-void LevelSetCachedKernel::update( const std::vector<adaption::Info> &adaptionData ) {
+bool LevelSetCachedKernel::update( const std::vector<adaption::Info> &adaptionData ) {
 
     // Update base class
-    LevelSetKernel::update( adaptionData );
+    bool updated = LevelSetKernel::update( adaptionData );
+    if (!updated) {
+        return false;
+    }
 
     // Update cell cache collection
     for (const adaption::Info &adaptionInfo : adaptionData) {
@@ -360,12 +381,15 @@ void LevelSetCachedKernel::update( const std::vector<adaption::Info> &adaptionDa
         }
 
         CellCacheCollection::Cache *cache = cacheItem.getCache();
-        if (m_fillIn == LevelSetFillIn::DENSE) {
+        if (m_expectedFillIn == LevelSetFillIn::DENSE) {
             cache->reserve(getMesh()->getCells().size());
         } else {
             cache->shrink_to_fit();
         }
     }
+
+    // The kernel has been updated
+    return true;
 
 }
 
