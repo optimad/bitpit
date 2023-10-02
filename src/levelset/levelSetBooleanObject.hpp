@@ -78,9 +78,6 @@ class LevelSetBooleanObject: public LevelSetProxyObject {
     protected:
     void                                        replaceSourceObject(const LevelSetObject *current, const LevelSetObject *updated) override ;
 
-    void                                        _dump( std::ostream &) override;
-    void                                        _restore( std::istream &) override;
-
     public:
     LevelSetBooleanObject(int, LevelSetBooleanOperation, const LevelSetObject*, const LevelSetObject*);
     LevelSetBooleanObject(int, LevelSetBooleanOperation, const std::vector<const LevelSetObject*> &);
