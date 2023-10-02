@@ -482,9 +482,8 @@ void LevelSet::incrementObjectsReferenceCount(int parentId) {
         return;
     }
 
-    if( const LevelSetProxyObject *parentProxyObject = dynamic_cast<const LevelSetProxyObject*>(parentObject) ){
-        for ( const LevelSetObject *sourceObject : parentProxyObject->getSourceObjects() ){
-            int sourceObjectId = sourceObject->getId();
+    if( const LevelSetProxyBaseObject *parentProxyObject = dynamic_cast<const LevelSetProxyBaseObject *>(parentObject) ){
+        for ( int sourceObjectId : parentProxyObject->getSourceObjectIds() ){
             getObjectPtr(sourceObjectId)->incrementReferenceCount();
         }
     }
@@ -502,9 +501,8 @@ void LevelSet::decrementObjectsReferenceCount(int parentId) {
         return;
     }
 
-    if( const LevelSetProxyObject *parentProxyObject = dynamic_cast<const LevelSetProxyObject*>(parentObject) ){
-        for ( const LevelSetObject *sourceObject : parentProxyObject->getSourceObjects() ){
-            int sourceObjectId = sourceObject->getId();
+    if( const LevelSetProxyBaseObject *parentProxyObject = dynamic_cast<const LevelSetProxyBaseObject *>(parentObject) ){
+        for ( int sourceObjectId : parentProxyObject->getSourceObjectIds() ){
             getObjectPtr(sourceObjectId)->decrementReferenceCount();
         }
     }
@@ -892,7 +890,7 @@ std::unordered_set<LevelSetObject *> LevelSet::getObjectProcessList(std::size_t 
         }
 
         objectProcessList.insert(object);
-        if( const LevelSetProxyObject *proxyObject = dynamic_cast<const LevelSetProxyObject*>(object) ){
+        if( const LevelSetProxyBaseObject *proxyObject = dynamic_cast<const LevelSetProxyBaseObject*>(object) ){
             std::vector<int> sourceObjectIds = proxyObject->getSourceObjectIds();
             std::unordered_set<LevelSetObject *> sourceObjectProcessList = getObjectProcessList(sourceObjectIds.size(), sourceObjectIds.data()) ;
             objectProcessList.insert(sourceObjectProcessList.begin(), sourceObjectProcessList.end());

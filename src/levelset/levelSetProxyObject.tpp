@@ -22,10 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-# include "bitpit_common.hpp"
-
-# include "levelSetObject.hpp"
-# include "levelSetProxyObject.hpp"
+# ifndef __BITPIT_LEVELSET_PROXY_OBJECT_TPP__
+# define __BITPIT_LEVELSET_PROXY_OBJECT_TPP__
 
 namespace bitpit {
 
@@ -38,7 +36,8 @@ namespace bitpit {
 /*!
  * Constructor
  */
-LevelSetProxyObject::LevelSetProxyObject(int id) : LevelSetObject(id){
+template<typename SourceLevelSetObject, typename BaseLevelSetObject>
+LevelSetProxyObject<SourceLevelSetObject, BaseLevelSetObject>::LevelSetProxyObject(int id) : BaseLevelSetObject(id){
 }
 
 /*!
@@ -50,7 +49,8 @@ LevelSetProxyObject::LevelSetProxyObject(int id) : LevelSetObject(id){
  * @return Returns always true, because proxy-objects are non-primary objects
  * by definition.
  */
-bool LevelSetProxyObject::isPrimary() const{
+template<typename SourceLevelSetObject, typename BaseLevelSetObject>
+bool LevelSetProxyObject<SourceLevelSetObject, BaseLevelSetObject>::isPrimary() const{
     return false;
 } 
 
@@ -59,9 +59,10 @@ bool LevelSetProxyObject::isPrimary() const{
  * @param[in] id cell id
  * @return true/false if the centroid is in narrow band
  */
-bool LevelSetProxyObject::isInNarrowBand(long id)const{
+template<typename SourceLevelSetObject, typename BaseLevelSetObject>
+bool LevelSetProxyObject<SourceLevelSetObject, BaseLevelSetObject>::isInNarrowBand(long id)const{
 
-    const LevelSetObject *referenceObject = getReferenceObject(id) ;
+    const SourceLevelSetObject *referenceObject = getReferenceObject(id) ;
     if ( referenceObject ) {
         return referenceObject->isInNarrowBand(id);
     }
@@ -77,9 +78,10 @@ bool LevelSetProxyObject::isInNarrowBand(long id)const{
  * @return The the primary object that defines the levelset information for
  * the specified cell.
  */
-const LevelSetObject * LevelSetProxyObject::getReferencePrimaryObject(long id) const{
+template<typename SourceLevelSetObject, typename BaseLevelSetObject>
+const SourceLevelSetObject * LevelSetProxyObject<SourceLevelSetObject, BaseLevelSetObject>::getReferencePrimaryObject(long id) const{
 
-    const LevelSetObject *referenceObject = getReferenceObject(id);
+    const SourceLevelSetObject *referenceObject = getReferenceObject(id);
     if (!referenceObject) {
         return nullptr;
     }
@@ -103,9 +105,10 @@ const LevelSetObject * LevelSetProxyObject::getReferencePrimaryObject(long id) c
  * @return The id of the object that defines the levelset information for the
  * specified cell.
  */
-int LevelSetProxyObject::getReferenceObjectId(long id) const{
+template<typename SourceLevelSetObject, typename BaseLevelSetObject>
+int LevelSetProxyObject<SourceLevelSetObject, BaseLevelSetObject>::getReferenceObjectId(long id) const{
 
-    const LevelSetObject *referenceObject = getReferenceObject(id);
+    const SourceLevelSetObject *referenceObject = getReferenceObject(id);
     if (!referenceObject) {
         return levelSetDefaults::OBJECT;
     }
@@ -121,9 +124,10 @@ int LevelSetProxyObject::getReferenceObjectId(long id) const{
  * @return The the primary object that defines the levelset information for
  * the specified cell.
  */
-int LevelSetProxyObject::getReferencePrimaryObjectId(long id) const{
+template<typename SourceLevelSetObject, typename BaseLevelSetObject>
+int LevelSetProxyObject<SourceLevelSetObject, BaseLevelSetObject>::getReferencePrimaryObjectId(long id) const{
 
-    const LevelSetObject *referenceObject = getReferenceObject(id);
+    const SourceLevelSetObject *referenceObject = getReferenceObject(id);
     if (!referenceObject) {
         return levelSetDefaults::OBJECT;
     }
@@ -133,7 +137,7 @@ int LevelSetProxyObject::getReferencePrimaryObjectId(long id) const{
     }
 
 
-    const LevelSetProxyObject *referenceProxyObject = dynamic_cast<const LevelSetProxyObject *>(referenceObject);
+    const LevelSetProxyBaseObject *referenceProxyObject = dynamic_cast<const LevelSetProxyBaseObject *>(referenceObject);
     if (!referenceProxyObject) {
         return levelSetDefaults::OBJECT;
     }
@@ -148,7 +152,8 @@ int LevelSetProxyObject::getReferencePrimaryObjectId(long id) const{
  * @return The id of the object that defines the levelset information for the
  * specified cell.
  */
-int LevelSetProxyObject::getPrimaryObjectId(long id) const{
+template<typename SourceLevelSetObject, typename BaseLevelSetObject>
+int LevelSetProxyObject<SourceLevelSetObject, BaseLevelSetObject>::getPrimaryObjectId(long id) const{
 
     return getReferencePrimaryObjectId(id);
 
@@ -159,12 +164,13 @@ int LevelSetProxyObject::getPrimaryObjectId(long id) const{
  * \return pointers to all primary objects involved in the definition of the
  * proxy object levelset information.
  */
-std::vector<const LevelSetObject*> LevelSetProxyObject::getPrimarySourceObjects() const{
+template<typename SourceLevelSetObject, typename BaseLevelSetObject>
+std::vector<const SourceLevelSetObject *> LevelSetProxyObject<SourceLevelSetObject, BaseLevelSetObject>::getPrimarySourceObjects() const{
 
-    std::vector<const LevelSetObject*> objects;
-    for( const LevelSetObject *sourceObject : getSourceObjects()){
+    std::vector<const SourceLevelSetObject *> objects;
+    for( const SourceLevelSetObject *sourceObject : getSourceObjects()){
         if( const LevelSetProxyObject *proxySourceObject = dynamic_cast<const LevelSetProxyObject*>(sourceObject) ){
-            std::vector<const LevelSetObject*> sourcePrimarySourceObjects = proxySourceObject->getPrimarySourceObjects();
+            std::vector<const SourceLevelSetObject *> sourcePrimarySourceObjects = proxySourceObject->getPrimarySourceObjects();
             objects.insert(objects.end(), sourcePrimarySourceObjects.begin(), sourcePrimarySourceObjects.end());
         } else {
             objects.push_back(sourceObject);
@@ -180,14 +186,15 @@ std::vector<const LevelSetObject*> LevelSetProxyObject::getPrimarySourceObjects(
  * \return identifiers of all primary objects involved in the definition of the
  * meta object levelset information.
  */
-std::vector<int> LevelSetProxyObject::getSourceObjectIds() const{
+template<typename SourceLevelSetObject, typename BaseLevelSetObject>
+std::vector<int> LevelSetProxyObject<SourceLevelSetObject, BaseLevelSetObject>::getSourceObjectIds() const{
 
-    std::vector<const LevelSetObject*> sourceObjects = getSourceObjects();
+    std::vector<const SourceLevelSetObject*> sourceObjects = getSourceObjects();
     std::size_t nSourceObjects = sourceObjects.size();
 
     std::vector<int> sourceIds(nSourceObjects);
     for (std::size_t i = 0; i < nSourceObjects; ++i) {
-        const LevelSetObject *sourceObject = sourceObjects[i];
+        const SourceLevelSetObject *sourceObject = sourceObjects[i];
         sourceIds[i] = sourceObject->getId();
     }
 
@@ -200,14 +207,15 @@ std::vector<int> LevelSetProxyObject::getSourceObjectIds() const{
  * \return identifiers of all primary objects involved in the definition of the
  * meta object levelset information.
  */
-std::vector<int> LevelSetProxyObject::getPrimarySourceObjectIds() const{
+template<typename SourceLevelSetObject, typename BaseLevelSetObject>
+std::vector<int> LevelSetProxyObject<SourceLevelSetObject, BaseLevelSetObject>::getPrimarySourceObjectIds() const{
 
-    std::vector<const LevelSetObject*> primaryObjects = getPrimarySourceObjects();
+    std::vector<const SourceLevelSetObject*> primaryObjects = getPrimarySourceObjects();
     std::size_t nPrimaryObjects = primaryObjects.size();
 
     std::vector<int> primaryIds(nPrimaryObjects);
     for (std::size_t i = 0; i < nPrimaryObjects; ++i) {
-        const LevelSetObject *primaryObject = primaryObjects[i];
+        const SourceLevelSetObject *primaryObject = primaryObjects[i];
         primaryIds[i] = primaryObject->getId();
     }
 
@@ -216,3 +224,5 @@ std::vector<int> LevelSetProxyObject::getPrimarySourceObjectIds() const{
 }
 
 }
+
+#endif
