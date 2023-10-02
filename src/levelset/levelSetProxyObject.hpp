@@ -25,42 +25,55 @@
 # ifndef __BITPIT_LEVELSET_PROXY_OBJECT_HPP__
 # define __BITPIT_LEVELSET_PROXY_OBJECT_HPP__
 
+#include <levelSetObject.hpp>
+
 #include <bitpit_common.hpp>
 
 namespace bitpit{
 
-class LevelSetObject;
-
-class LevelSetProxyObject : public LevelSetObject{
-
-    protected:
-    virtual void replaceSourceObject(const LevelSetObject *current, const LevelSetObject *updated) = 0;
-
+class LevelSetProxyBaseObject {
     public:
+    virtual int getReferenceObjectId( long ) const = 0;
+    virtual int getReferencePrimaryObjectId( long ) const = 0;
+
+    virtual std::vector<int> getSourceObjectIds() const = 0;
+    virtual std::vector<int> getPrimarySourceObjectIds() const = 0;
+
+};
+
+template<typename SourceLevelSetObject, typename BaseLevelSetObject = LevelSetObject>
+class LevelSetProxyObject : public BaseLevelSetObject, public LevelSetProxyBaseObject {
+    protected:
     LevelSetProxyObject(int);
 
+    virtual void replaceSourceObject(const SourceLevelSetObject *current, const SourceLevelSetObject *updated) = 0;
+
+    public:
     bool            isPrimary() const override;
 
     bool            isInNarrowBand(long id) const override;
 
-    virtual const LevelSetObject *    getReferenceObject( long ) const =0;
-    virtual const LevelSetObject *    getReferencePrimaryObject( long ) const;
+    virtual const SourceLevelSetObject *    getReferenceObject( long ) const =0;
+    virtual const SourceLevelSetObject *    getReferencePrimaryObject( long ) const;
 
-    int getReferenceObjectId( long ) const;
-    int getReferencePrimaryObjectId( long ) const;
+    int getReferenceObjectId( long ) const override;
+    int getReferencePrimaryObjectId( long ) const override;
     BITPIT_DEPRECATED(int getPrimaryObjectId( long ) const);
 
-    virtual std::vector<const LevelSetObject *> getSourceObjects() const =0;
-    virtual std::vector<const LevelSetObject *> getPrimarySourceObjects() const;
+    virtual std::vector<const SourceLevelSetObject *> getSourceObjects() const =0;
+    virtual std::vector<const SourceLevelSetObject *> getPrimarySourceObjects() const;
 
-    std::vector<int> getSourceObjectIds() const;
-    std::vector<int> getPrimarySourceObjectIds() const;
+    std::vector<int> getSourceObjectIds() const override;
+    std::vector<int> getPrimarySourceObjectIds() const override;
 
 };
 
 // Compatibility with older versions
-typedef LevelSetProxyObject LevelSetMetaObject;
+typedef LevelSetProxyObject<LevelSetObject> LevelSetMetaObject;
 
 }
+
+// Include template implementations
+#include "levelSetProxyObject.tpp"
 
 #endif 

@@ -22,16 +22,10 @@
  *
 \*---------------------------------------------------------------------------*/
 
-# include <cassert>
+#include "levelSetComplementObject.hpp"
+#include "levelSetComplementObject.tpp"
 
-# include "bitpit_IO.hpp"
-# include "bitpit_common.hpp"
-
-# include "levelSetObject.hpp"
-# include "levelSetProxyObject.hpp"
-# include "levelSetComplementObject.hpp"
-
-namespace bitpit {
+namespace bitpit{
 
 /*!
  * \class LevelSetComplementObject
@@ -46,109 +40,18 @@ namespace bitpit {
  * \param[in] id identifier of object
  * \param[in] source pointer to source object
  */
-LevelSetComplementObject::LevelSetComplementObject(int id, const LevelSetObject *source)
-    : LevelSetProxyObject(id),
-      m_sourceObject(source)
+LevelSetComplementObject<LevelSetObject>::LevelSetComplementObject(int id, const LevelSetObject *source)
+    : LevelSetComplementBaseObject<LevelSetObject>(id, source)
 {
 }
 
 /*!
- * Copy constructor.
- *
- * Assigns same id to new object;
- * \param[in] other object to be copied
+ * Clones the object
+ * @return pointer to cloned object
  */
-LevelSetComplementObject::LevelSetComplementObject(const LevelSetComplementObject &other)
-    : LevelSetProxyObject(other),
-      m_sourceObject(other.m_sourceObject)
+LevelSetComplementObject<LevelSetObject> * LevelSetComplementObject<LevelSetObject>::clone() const
 {
-}
-
-/*!
- * Get the levelset value.
- *
- * \param[in] id cell id
- * \return levelset value in cell
- */
-double LevelSetComplementObject::getValue(long id) const
-{
-    return (- m_sourceObject->getValue(id));
-}
-
-/*!
- * Get the levelset gradient.
- *
- * \param[in] id cell id
- * \return levelset gradient in cell
- */
-std::array<double,3> LevelSetComplementObject::getGradient(long id) const
-{
-    return (- 1. * m_sourceObject->getGradient(id));
-}
-
-/*!
- * Computes the LevelSetInfo in a point.
- *
- * \param[in] coords point coordinates
- * \return LevelSetInfo
-*/
-LevelSetInfo LevelSetComplementObject::computeLevelSetInfo(const std::array<double,3> &coords) const
-{
-    LevelSetInfo levelSetInfo = m_sourceObject->computeLevelSetInfo(coords);
-    levelSetInfo.value    *= -1.;
-    levelSetInfo.gradient *= -1.;
-
-    return levelSetInfo;
-}
-
-/*!
- * Replace a source object.
- *
- * \param[in] current current source object
- * \param[in] updated updated source object
- */
-void LevelSetComplementObject::replaceSourceObject(const LevelSetObject *current, const LevelSetObject *updated)
-{
-    if (current != m_sourceObject) {
-        throw std::runtime_error("Unable to find the source that should be replaced.");
-    }
-
-    m_sourceObject = updated;
-}
-
-/*!
- * Clones the object.
- *
- * \return pointer to cloned object
- */
-LevelSetComplementObject* LevelSetComplementObject::clone() const
-{
-    return new LevelSetComplementObject(*this);
-}
-
-/*!
- * Get the object that defines the levelset information for the specified cell.
- *
- * \param[in] id cell index
- * \return The object that defines the levelset information for the specified
- * cell.
- */
-const LevelSetObject * LevelSetComplementObject::getReferenceObject(long id) const
-{
-    BITPIT_UNUSED(id);
-
-    return m_sourceObject;
-}
-
-/*!
- * Get all objects that compose the boolean object.
- *
- * \return pointers to all primary objects involved in the definition of the
- * boolean object levelset information.
- */
-std::vector<const LevelSetObject *> LevelSetComplementObject::getSourceObjects() const
-{
-    return std::vector<const LevelSetObject *>(1, m_sourceObject);
+    return new LevelSetComplementObject<LevelSetObject>(*this);
 }
 
 }

@@ -47,7 +47,7 @@ std::unique_ptr<LevelSetObject> LevelSetObjectFactory::createBooleanObject(const
     BITPIT_UNUSED(kernel);
     BITPIT_UNUSED(storageType);
 
-    return std::unique_ptr<LevelSetObject>(new LevelSetBooleanObject(std::forward<Args>(args)...));
+    return std::unique_ptr<LevelSetObject>(new LevelSetBooleanObject<LevelSetObject>(std::forward<Args>(args)...));
 }
 
 /*!
@@ -63,7 +63,7 @@ std::unique_ptr<LevelSetObject> LevelSetObjectFactory::createComplementObject(co
     BITPIT_UNUSED(kernel);
     BITPIT_UNUSED(storageType);
 
-    return std::unique_ptr<LevelSetObject>(new LevelSetComplementObject(std::forward<Args>(args)...));
+    return std::unique_ptr<LevelSetObject>(new LevelSetComplementObject<LevelSetObject>(std::forward<Args>(args)...));
 }
 
 /*!
