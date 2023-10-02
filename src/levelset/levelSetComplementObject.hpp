@@ -33,30 +33,43 @@
 namespace bitpit{
 
 class LevelSetObject ;
-class LevelSetProxyObject ;
 
-class LevelSetComplementObject: public LevelSetProxyObject {
+template<typename SourceLevelSetObject>
+class LevelSetComplementBaseObject : public LevelSetProxyObject<SourceLevelSetObject, SourceLevelSetObject> {
 
     private:
-    const LevelSetObject*                       m_sourceObject;        /**< Pointers to source object */
+    const SourceLevelSetObject *                         m_sourceObject;        /**< Pointers to source object */
 
     protected:
-    void                                        replaceSourceObject(const LevelSetObject *current, const LevelSetObject *updated) override ;
+    LevelSetComplementBaseObject(int id, const SourceLevelSetObject *source);
+
+    void                                                 replaceSourceObject(const SourceLevelSetObject *current, const SourceLevelSetObject *updated) override;
 
     public:
-    LevelSetComplementObject(int id, const LevelSetObject*);
-    LevelSetComplementObject(const LevelSetComplementObject &);
+    double                                               getValue(long ) const override;
+    std::array<double,3>                                 getGradient(long ) const override;
 
-    LevelSetComplementObject*                   clone() const override;
+    LevelSetInfo                                         computeLevelSetInfo(const std::array<double,3> &) const override;
 
-    double                                      getValue(long ) const override;
-    std::array<double,3>                        getGradient(long ) const override;
+    const SourceLevelSetObject *                         getReferenceObject( long ) const override;
 
-    LevelSetInfo                                computeLevelSetInfo(const std::array<double,3> &) const override;
+    virtual const SourceLevelSetObject *                 getSourceObject() const;
+    std::vector<const SourceLevelSetObject *>            getSourceObjects() const override;
 
-    const LevelSetObject *                      getReferenceObject( long ) const override;
+};
 
-    std::vector<const LevelSetObject *>         getSourceObjects() const override;
+template<typename SourceLevelSetObject>
+class LevelSetComplementObject : public LevelSetComplementBaseObject<SourceLevelSetObject> {
+
+};
+
+template<>
+class LevelSetComplementObject<LevelSetObject> : public LevelSetComplementBaseObject<LevelSetObject> {
+
+public:
+    LevelSetComplementObject(int id, const LevelSetObject *source);
+
+    LevelSetComplementObject<LevelSetObject> * clone() const override;
 
 };
 

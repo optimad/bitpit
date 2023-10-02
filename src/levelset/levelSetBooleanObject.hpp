@@ -34,71 +34,85 @@
 
 namespace bitpit{
 
+class LevelSetObject ;
+
 namespace adaption{
     struct Info;
 }
 
-class LevelSetObject ;
-class LevelSetProxyObject ;
-
+template<typename SourceLevelSetObject>
 class LevelSetBooleanResult {
 
     private:
     LevelSetBooleanOperation                    m_operation;            /**< Boolean operation */
 
-    const LevelSetObject                       *m_object;               /**< Object that defines the result */
+    const SourceLevelSetObject                 *m_object;               /**< Object that defines the result */
     int                                         m_objectSign;           /**< Sign associated with the object */
 
     double                                      m_value;                /**< Value of the results */
 
     public:
     LevelSetBooleanResult(LevelSetBooleanOperation operation) ;
-    LevelSetBooleanResult(LevelSetBooleanOperation operation, const LevelSetObject *object, double value) ;
+    LevelSetBooleanResult(LevelSetBooleanOperation operation, const SourceLevelSetObject *object, double value) ;
 
-    void update(const LevelSetObject *object, double value) ;
+    void update(const SourceLevelSetObject *object, double value) ;
 
-    const LevelSetObject * getObject() const ;
+    const SourceLevelSetObject * getObject() const ;
     int getObjectSign () const ;
 
     double getValue() const ;
 
 };
 
-class LevelSetBooleanObject: public LevelSetProxyObject {
+template<typename SourceLevelSetObject>
+class LevelSetBooleanBaseObject : public LevelSetProxyObject<SourceLevelSetObject> {
 
     private:
     LevelSetBooleanOperation                    m_operation;            /**< identifier of operation */
-    std::vector<const LevelSetObject*>          m_sourceObjects;        /**< Pointers to source objects */
+    std::vector<const SourceLevelSetObject*>    m_sourceObjects;        /**< Pointers to source objects */
 
     LevelSetBooleanOperation                    getBooleanOperation() const;
 
-    LevelSetBooleanResult                       computeBooleanResult( long ) const ;
-    LevelSetBooleanResult                       computeBooleanResult( const std::array<double,3> &coords ) const ;
+    LevelSetBooleanResult<SourceLevelSetObject> computeBooleanResult( long ) const ;
+    LevelSetBooleanResult<SourceLevelSetObject> computeBooleanResult( const std::array<double,3> &coords ) const ;
 
     protected:
-    void                                        replaceSourceObject(const LevelSetObject *current, const LevelSetObject *updated) override ;
+    LevelSetBooleanBaseObject(int, LevelSetBooleanOperation, const SourceLevelSetObject *, const SourceLevelSetObject *);
+    LevelSetBooleanBaseObject(int, LevelSetBooleanOperation, const std::vector<const SourceLevelSetObject *> &);
+
+    void                                        replaceSourceObject(const SourceLevelSetObject *current, const SourceLevelSetObject *updated) override ;
 
     public:
-    LevelSetBooleanObject(int, LevelSetBooleanOperation, const LevelSetObject*, const LevelSetObject*);
-    LevelSetBooleanObject(int, LevelSetBooleanOperation, const std::vector<const LevelSetObject*> &);
-    LevelSetBooleanObject(const LevelSetBooleanObject &);
-
-    LevelSetBooleanObject*                      clone() const override;
-
     double                                      getValue(long ) const override;
     std::array<double,3>                        getGradient(long ) const override;
 
     LevelSetInfo                                computeLevelSetInfo(const std::array<double,3> &) const override;
 
-    const LevelSetObject *                      getReferenceObject( long ) const override;
+    const SourceLevelSetObject *                getReferenceObject( long ) const override;
 
-    std::vector<const LevelSetObject *>         getSourceObjects() const override;
+    std::vector<const SourceLevelSetObject *>   getSourceObjects() const override;
+
+};
+
+template<typename SourceLevelSetObject>
+class LevelSetBooleanObject : public LevelSetBooleanBaseObject<SourceLevelSetObject> {
+
+};
+
+template<>
+class LevelSetBooleanObject<LevelSetObject> : public LevelSetBooleanBaseObject<LevelSetObject> {
+
+public:
+    LevelSetBooleanObject(int, LevelSetBooleanOperation, const LevelSetObject *, const LevelSetObject *);
+    LevelSetBooleanObject(int, LevelSetBooleanOperation, const std::vector<const LevelSetObject *> &);
+
+    LevelSetBooleanObject<LevelSetObject> * clone() const override;
 
 };
 
 // Typdefs for compatibility with older versions
-typedef LevelSetBooleanObject LevelSetBoolean;
+typedef LevelSetBooleanObject<LevelSetObject> LevelSetBoolean;
 
 }
 
-#endif /*__BITPIT_LEVELSET_BOOLEAN_HPP__ */
+#endif
