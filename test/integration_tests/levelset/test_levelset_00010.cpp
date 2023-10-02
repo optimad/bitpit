@@ -31,6 +31,7 @@
 #endif
 
 // bitpit
+# include "bitpit_IO.hpp"
 # include "bitpit_surfunstructured.hpp"
 # include "bitpit_volcartesian.hpp"
 # include "bitpit_voloctree.hpp"
@@ -56,7 +57,7 @@ std::unique_ptr<bitpit::SurfUnstructured> generateSegmentation()
     segmentation->deleteCoincidentVertices() ;
     segmentation->initializeAdjacencies() ;
 
-    segmentation->getVTK().setName("geometry_002") ;
+    segmentation->getVTK().setName("geometry_010") ;
     segmentation->write() ;
 
     return segmentation;
@@ -257,7 +258,7 @@ int subtest_001()
     bitpit::log::cout() << " - Loading geometry" << std::endl;
 
     std::unique_ptr<bitpit::SurfUnstructured> segmentation = generateSegmentation();
-    segmentation->getVTK().setName("geometry_002");
+    segmentation->getVTK().setName("geometry_010");
     segmentation->write();
 
     bitpit::log::cout() << "n. vertex: " << segmentation->getVertexCount() << std::endl;
@@ -292,23 +293,100 @@ int subtest_001()
     int elapsed_seconds = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
     bitpit::log::cout() << "elapsed time: " << elapsed_seconds << " ms" << std::endl;
 
+    // Store values
+    long testCellId0 = 226911;
+    long testCellId1 = 210719;
+    long testCellId2 = 190431;
+
+    double initialValue0 = object->evalCellValue(testCellId0, true);
+    double initialValue1 = object->evalCellValue(testCellId1, true);
+    double initialValue2 = object->evalCellValue(testCellId2, true);
+
+    bitpit::log::cout() << " Initial levelset: levelset on cell " << testCellId0 << " is equal to " << initialValue0 << std::endl;
+    bitpit::log::cout() << " Initial levelset: levelset on cell " << testCellId1 << " is equal to " << initialValue1 << std::endl;
+    bitpit::log::cout() << " Initial levelset: levelset on cell " << testCellId2 << " is equal to " << initialValue2 << std::endl;
+
     // Write output
     bitpit::log::cout() << " - Writing output" << std::endl;
 
     levelset.getObject(objectId).enableVTKOutput(bitpit::LevelSetWriteField::SIGN);
     levelset.getObject(objectId).enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
-    mesh->getVTK().setName("levelset_002_cartesian_normal");
+    mesh->getVTK().setName("levelset_010_cartesian_normal_initial");
     mesh->write();
+
+    // Dump the levelset
+    bitpit::log::cout() << "Dumping levelset..." << std::endl;
+
+    int archiveVersion = 1;
+
+    std::string header = "Cartesian levelset in normal mode";
+    bitpit::OBinaryArchive binaryWriter("levelset_010_cartesian_normal", archiveVersion, header);
+    levelset.dump(binaryWriter.getStream());
+    binaryWriter.close();
+
+    // Clear existing levelset
+    levelset.getObject(objectId).enableVTKOutput(bitpit::LevelSetWriteField::SIGN, false);
+    levelset.getObject(objectId).enableVTKOutput(bitpit::LevelSetWriteField::VALUE, false);
+
+    levelset.clear();
+
+    // Restore the levelset
+    bitpit::log::cout() << "Restoring levelset..." << std::endl;
+
+    bitpit::LevelSet restoredLevelset ;
+    restoredLevelset.setMesh(mesh.get());
+    restoredLevelset.addObject(segmentation.get(), BITPIT_PI, objectId);
+
+    bitpit::IBinaryArchive binaryReader("levelset_010_cartesian_normal");
+    restoredLevelset.restore(binaryReader.getStream());
+    binaryReader.close();
+
+    double restoredValue0 = object->evalCellValue(testCellId0, true);
+    double restoredValue1 = object->evalCellValue(testCellId1, true);
+    double restoredValue2 = object->evalCellValue(testCellId2, true);
+
+    bitpit::log::cout() << " Restored levelset: levelset on cell " << testCellId0 << " is equal to " << restoredValue0 << std::endl;
+    bitpit::log::cout() << " Restored levelset: levelset on cell " << testCellId1 << " is equal to " << restoredValue1 << std::endl;
+    bitpit::log::cout() << " Restored levelset: levelset on cell " << testCellId2 << " is equal to " << restoredValue2 << std::endl;
+
+    // Write restored output
+    bitpit::log::cout() << " - Writing output" << std::endl;
+
+    mesh->getVTK().setName("levelset_010_cartesian_normal_restored");
+    mesh->write();
+
+    //
+    // Comparison
+    //
+    bitpit::log::cout() << " Checking levelset values" << std::endl;
+
+    if (!bitpit::utils::DoubleFloatingEqual()(initialValue0, restoredValue0)) {
+        bitpit::log::cout() << "  - Restored value for test cell #0 doesn't match the initial value." << std::endl;
+        return 1;
+    }
+    bitpit::log::cout() << "  - Restored value for test cell #0 matches the initial value." << std::endl;
+
+    if (!bitpit::utils::DoubleFloatingEqual()(initialValue1, restoredValue1)) {
+        bitpit::log::cout() << "  - Restored value for test cell #1 doesn't match the initial value." << std::endl;
+        return 1;
+    }
+    bitpit::log::cout() << "  - Restored value for test cell #1 matches the initial value." << std::endl;
+
+    if (!bitpit::utils::DoubleFloatingEqual()(initialValue2, restoredValue2)) {
+        bitpit::log::cout() << "  - Restored value for test cell #2 doesn't match the initial value." << std::endl;
+        return 1;
+    }
+    bitpit::log::cout() << "  - Restored value for test cell #2 matches the initial value." << std::endl;
 
     return 0;
 }
 
 /*!
-* Subtest 002
+* Subtest 010
 *
 * Testing basic features of a 3D levelset on a Cartesian mesh in light memory mode.
 */
-int subtest_002()
+int subtest_010()
 {
     bitpit::log::cout() << std::endl;
     bitpit::log::cout() << "Testing three-dimensional levelset on a Cartesian mesh in light memory mode" << std::endl;
@@ -317,7 +395,7 @@ int subtest_002()
     bitpit::log::cout() << " - Loading geometry" << std::endl;
 
     std::unique_ptr<bitpit::SurfUnstructured> segmentation = generateSegmentation();
-    segmentation->getVTK().setName("geometry_002");
+    segmentation->getVTK().setName("geometry_010");
     segmentation->write();
 
     bitpit::log::cout() << "n. vertex: " << segmentation->getVertexCount() << std::endl;
@@ -350,14 +428,94 @@ int subtest_002()
     int elapsed_seconds = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
     bitpit::log::cout() << "elapsed time: " << elapsed_seconds << " ms" << std::endl;
 
+    // Store values
+    long testCellId0 = 226911;
+    long testCellId1 = 210719;
+    long testCellId2 = 190431;
+
+    double initialValue0 = object->evalCellValue(testCellId0, true);
+    double initialValue1 = object->evalCellValue(testCellId1, true);
+    double initialValue2 = object->evalCellValue(testCellId2, true);
+
+    bitpit::log::cout() << " Initial levelset: levelset on cell " << testCellId0 << " is equal to " << initialValue0 << std::endl;
+    bitpit::log::cout() << " Initial levelset: levelset on cell " << testCellId1 << " is equal to " << initialValue1 << std::endl;
+    bitpit::log::cout() << " Initial levelset: levelset on cell " << testCellId2 << " is equal to " << initialValue2 << std::endl;
+
     // Write output
     bitpit::log::cout() << " - Writing output" << std::endl;
 
     levelset.getObject(objectId).enableVTKOutput(bitpit::LevelSetWriteField::SIGN);
     levelset.getObject(objectId).enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
+    mesh->getVTK().setName("levelset_010_cartesian_light_initial");
     mesh->switchMemoryMode(bitpit::VolCartesian::MEMORY_NORMAL);
-    mesh->getVTK().setName("levelset_002_cartesian_light");
     mesh->write();
+    mesh->switchMemoryMode(bitpit::VolCartesian::MEMORY_LIGHT);
+
+    // Dump the levelset
+    bitpit::log::cout() << "Dumping levelset..." << std::endl;
+
+    int archiveVersion = 1;
+
+    std::string header = "Cartesian levelset in light mode";
+    bitpit::OBinaryArchive binaryWriter("levelset_010_cartesian_light", archiveVersion, header);
+    levelset.dump(binaryWriter.getStream());
+    binaryWriter.close();
+
+    // Clear existing levelset
+    levelset.getObject(objectId).enableVTKOutput(bitpit::LevelSetWriteField::SIGN, false);
+    levelset.getObject(objectId).enableVTKOutput(bitpit::LevelSetWriteField::VALUE, false);
+
+    levelset.clear();
+
+    // Restore the levelset
+    bitpit::log::cout() << "Restoring levelset..." << std::endl;
+
+    bitpit::LevelSet restoredLevelset ;
+    restoredLevelset.setMesh(mesh.get());
+    restoredLevelset.addObject(segmentation.get(), BITPIT_PI, objectId);
+
+    bitpit::IBinaryArchive binaryReader("levelset_010_cartesian_light");
+    restoredLevelset.restore(binaryReader.getStream());
+    binaryReader.close();
+
+    double restoredValue0 = object->evalCellValue(testCellId0, true);
+    double restoredValue1 = object->evalCellValue(testCellId1, true);
+    double restoredValue2 = object->evalCellValue(testCellId2, true);
+
+    bitpit::log::cout() << " Restored levelset: levelset on cell " << testCellId0 << " is equal to " << restoredValue0 << std::endl;
+    bitpit::log::cout() << " Restored levelset: levelset on cell " << testCellId1 << " is equal to " << restoredValue1 << std::endl;
+    bitpit::log::cout() << " Restored levelset: levelset on cell " << testCellId2 << " is equal to " << restoredValue2 << std::endl;
+
+    // Write restored output
+    bitpit::log::cout() << " - Writing output" << std::endl;
+
+    mesh->getVTK().setName("levelset_010_cartesian_light_restored");
+    mesh->switchMemoryMode(bitpit::VolCartesian::MEMORY_NORMAL);
+    mesh->write();
+    mesh->switchMemoryMode(bitpit::VolCartesian::MEMORY_LIGHT);
+
+    //
+    // Comparison
+    //
+    bitpit::log::cout() << " Checking levelset values" << std::endl;
+
+    if (!bitpit::utils::DoubleFloatingEqual()(initialValue0, restoredValue0)) {
+        bitpit::log::cout() << "  - Restored value for test cell #0 doesn't match the initial value." << std::endl;
+        return 1;
+    }
+    bitpit::log::cout() << "  - Restored value for test cell #0 matches the initial value." << std::endl;
+
+    if (!bitpit::utils::DoubleFloatingEqual()(initialValue1, restoredValue1)) {
+        bitpit::log::cout() << "  - Restored value for test cell #1 doesn't match the initial value." << std::endl;
+        return 1;
+    }
+    bitpit::log::cout() << "  - Restored value for test cell #1 matches the initial value." << std::endl;
+
+    if (!bitpit::utils::DoubleFloatingEqual()(initialValue2, restoredValue2)) {
+        bitpit::log::cout() << "  - Restored value for test cell #2 doesn't match the initial value." << std::endl;
+        return 1;
+    }
+    bitpit::log::cout() << "  - Restored value for test cell #2 matches the initial value." << std::endl;
 
     return 0;
 }
@@ -376,7 +534,7 @@ int subtest_003()
     bitpit::log::cout() << " - Loading geometry" << std::endl;
 
     std::unique_ptr<bitpit::SurfUnstructured> segmentation = generateSegmentation();
-    segmentation->getVTK().setName("geometry_002");
+    segmentation->getVTK().setName("geometry_010");
     segmentation->write();
 
     bitpit::log::cout() << "n. vertex: " << segmentation->getVertexCount() << std::endl;
@@ -410,13 +568,90 @@ int subtest_003()
     int elapsed_seconds = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
     bitpit::log::cout() << "elapsed time: " << elapsed_seconds << " ms" << std::endl;
 
+    // Store values
+    long testCellId0 = 219133;
+    long testCellId1 = 203775;
+    long testCellId2 = 201579;
+
+    double initialValue0 = object->evalCellValue(testCellId0, true);
+    double initialValue1 = object->evalCellValue(testCellId1, true);
+    double initialValue2 = object->evalCellValue(testCellId2, true);
+
+    bitpit::log::cout() << " Initial levelset: levelset on cell " << testCellId0 << " is equal to " << initialValue0 << std::endl;
+    bitpit::log::cout() << " Initial levelset: levelset on cell " << testCellId1 << " is equal to " << initialValue1 << std::endl;
+    bitpit::log::cout() << " Initial levelset: levelset on cell " << testCellId2 << " is equal to " << initialValue2 << std::endl;
+
     // Write output
     bitpit::log::cout() << " - Writing output" << std::endl;
 
     levelset.getObject(objectId).enableVTKOutput(bitpit::LevelSetWriteField::SIGN);
     levelset.getObject(objectId).enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
-    mesh->getVTK().setName("levelset_002_octree");
+    mesh->getVTK().setName("levelset_010_octree_initial");
     mesh->write();
+
+    // Dump the levelset
+    bitpit::log::cout() << "Dumping levelset..." << std::endl;
+
+    int archiveVersion = 1;
+
+    std::string header = "Octree levelset";
+    bitpit::OBinaryArchive binaryWriter("levelset_010_octree", archiveVersion, header);
+    levelset.dump(binaryWriter.getStream());
+    binaryWriter.close();
+
+    // Clear existing levelset
+    levelset.getObject(objectId).enableVTKOutput(bitpit::LevelSetWriteField::SIGN, false);
+    levelset.getObject(objectId).enableVTKOutput(bitpit::LevelSetWriteField::VALUE, false);
+
+    levelset.clear();
+
+    // Restore the levelset
+    bitpit::log::cout() << "Restoring levelset..." << std::endl;
+
+    bitpit::LevelSet restoredLevelset ;
+    restoredLevelset.setMesh(mesh.get());
+    restoredLevelset.addObject(segmentation.get(), BITPIT_PI, objectId);
+
+    bitpit::IBinaryArchive binaryReader("levelset_010_octree");
+    restoredLevelset.restore(binaryReader.getStream());
+    binaryReader.close();
+
+    double restoredValue0 = object->evalCellValue(testCellId0, true);
+    double restoredValue1 = object->evalCellValue(testCellId1, true);
+    double restoredValue2 = object->evalCellValue(testCellId2, true);
+
+    bitpit::log::cout() << " Restored levelset: levelset on cell " << testCellId0 << " is equal to " << restoredValue0 << std::endl;
+    bitpit::log::cout() << " Restored levelset: levelset on cell " << testCellId1 << " is equal to " << restoredValue1 << std::endl;
+    bitpit::log::cout() << " Restored levelset: levelset on cell " << testCellId2 << " is equal to " << restoredValue2 << std::endl;
+
+    // Write restored output
+    bitpit::log::cout() << " - Writing output" << std::endl;
+
+    mesh->getVTK().setName("levelset_010_octree_restored");
+    mesh->write();
+
+    //
+    // Comparison
+    //
+    bitpit::log::cout() << " Checking levelset values" << std::endl;
+
+    if (!bitpit::utils::DoubleFloatingEqual()(initialValue0, restoredValue0)) {
+        bitpit::log::cout() << "  - Restored value for test cell #0 doesn't match the initial value." << std::endl;
+        return 1;
+    }
+    bitpit::log::cout() << "  - Restored value for test cell #0 matches the initial value." << std::endl;
+
+    if (!bitpit::utils::DoubleFloatingEqual()(initialValue1, restoredValue1)) {
+        bitpit::log::cout() << "  - Restored value for test cell #1 doesn't match the initial value." << std::endl;
+        return 1;
+    }
+    bitpit::log::cout() << "  - Restored value for test cell #1 matches the initial value." << std::endl;
+
+    if (!bitpit::utils::DoubleFloatingEqual()(initialValue2, restoredValue2)) {
+        bitpit::log::cout() << "  - Restored value for test cell #2 doesn't match the initial value." << std::endl;
+        return 1;
+    }
+    bitpit::log::cout() << "  - Restored value for test cell #2 matches the initial value." << std::endl;
 
     return 0;
 }
@@ -435,7 +670,7 @@ int subtest_004()
     bitpit::log::cout() << " - Loading geometry" << std::endl;
 
     std::unique_ptr<bitpit::SurfUnstructured> segmentation = generateSegmentation();
-    segmentation->getVTK().setName("geometry_002");
+    segmentation->getVTK().setName("geometry_010");
     segmentation->write();
 
     bitpit::log::cout() << "n. vertex: " << segmentation->getVertexCount() << std::endl;
@@ -469,13 +704,90 @@ int subtest_004()
     int elapsed_seconds = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
     bitpit::log::cout() << "elapsed time: " << elapsed_seconds << " ms" << std::endl;
 
+    // Store values
+    long testCellId0 = 226911;
+    long testCellId1 = 210719;
+    long testCellId2 = 190431;
+
+    double initialValue0 = object->evalCellValue(testCellId0, true);
+    double initialValue1 = object->evalCellValue(testCellId1, true);
+    double initialValue2 = object->evalCellValue(testCellId2, true);
+
+    bitpit::log::cout() << " Initial levelset: levelset on cell " << testCellId0 << " is equal to " << initialValue0 << std::endl;
+    bitpit::log::cout() << " Initial levelset: levelset on cell " << testCellId1 << " is equal to " << initialValue1 << std::endl;
+    bitpit::log::cout() << " Initial levelset: levelset on cell " << testCellId2 << " is equal to " << initialValue2 << std::endl;
+
     // Write output
     bitpit::log::cout() << " - Writing output" << std::endl;
 
     levelset.getObject(objectId).enableVTKOutput(bitpit::LevelSetWriteField::SIGN);
     levelset.getObject(objectId).enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
-    mesh->getVTK().setName("levelset_002_unstructured");
+    mesh->getVTK().setName("levelset_010_unstructured_initial");
     mesh->write();
+
+    // Dump the levelset
+    bitpit::log::cout() << "Dumping levelset..." << std::endl;
+
+    int archiveVersion = 1;
+
+    std::string header = "Unstructured levelset";
+    bitpit::OBinaryArchive binaryWriter("levelset_010_unstructured", archiveVersion, header);
+    levelset.dump(binaryWriter.getStream());
+    binaryWriter.close();
+
+    // Clear existing levelset
+    levelset.getObject(objectId).enableVTKOutput(bitpit::LevelSetWriteField::SIGN, false);
+    levelset.getObject(objectId).enableVTKOutput(bitpit::LevelSetWriteField::VALUE, false);
+
+    levelset.clear();
+
+    // Restore the levelset
+    bitpit::log::cout() << "Restoring levelset..." << std::endl;
+
+    bitpit::LevelSet restoredLevelset ;
+    restoredLevelset.setMesh(mesh.get());
+    restoredLevelset.addObject(segmentation.get(), BITPIT_PI, objectId);
+
+    bitpit::IBinaryArchive binaryReader("levelset_010_unstructured");
+    restoredLevelset.restore(binaryReader.getStream());
+    binaryReader.close();
+
+    double restoredValue0 = object->evalCellValue(testCellId0, true);
+    double restoredValue1 = object->evalCellValue(testCellId1, true);
+    double restoredValue2 = object->evalCellValue(testCellId2, true);
+
+    bitpit::log::cout() << " Restored levelset: levelset on cell " << testCellId0 << " is equal to " << restoredValue0 << std::endl;
+    bitpit::log::cout() << " Restored levelset: levelset on cell " << testCellId1 << " is equal to " << restoredValue1 << std::endl;
+    bitpit::log::cout() << " Restored levelset: levelset on cell " << testCellId2 << " is equal to " << restoredValue2 << std::endl;
+
+    // Write restored output
+    bitpit::log::cout() << " - Writing output" << std::endl;
+
+    mesh->getVTK().setName("levelset_010_unstructured_restored");
+    mesh->write();
+
+    //
+    // Comparison
+    //
+    bitpit::log::cout() << " Checking levelset values" << std::endl;
+
+    if (!bitpit::utils::DoubleFloatingEqual()(initialValue0, restoredValue0)) {
+        bitpit::log::cout() << "  - Restored value for test cell #0 doesn't match the initial value." << std::endl;
+        return 1;
+    }
+    bitpit::log::cout() << "  - Restored value for test cell #0 matches the initial value." << std::endl;
+
+    if (!bitpit::utils::DoubleFloatingEqual()(initialValue1, restoredValue1)) {
+        bitpit::log::cout() << "  - Restored value for test cell #1 doesn't match the initial value." << std::endl;
+        return 1;
+    }
+    bitpit::log::cout() << "  - Restored value for test cell #1 matches the initial value." << std::endl;
+
+    if (!bitpit::utils::DoubleFloatingEqual()(initialValue2, restoredValue2)) {
+        bitpit::log::cout() << "  - Restored value for test cell #2 doesn't match the initial value." << std::endl;
+        return 1;
+    }
+    bitpit::log::cout() << "  - Restored value for test cell #2 matches the initial value." << std::endl;
 
     return 0;
 }
@@ -505,7 +817,7 @@ int main(int argc, char *argv[])
 			return status;
 		}
 
-		status = subtest_002();
+		status = subtest_010();
 		if (status != 0) {
 			return status;
 		}

@@ -25,155 +25,54 @@
 # ifndef __BITPIT_LEVELSET_SEGMENTATION_OBJECT_HPP__
 # define __BITPIT_LEVELSET_SEGMENTATION_OBJECT_HPP__
 
-// Standard Template Library
+#include "levelSetCartesianKernel.hpp"
+#include "levelSetBooleanObject.hpp"
+#include "levelSetBooleanObject.tpp"
+#include "levelSetCommon.hpp"
+#include "levelSetComplementObject.hpp"
+#include "levelSetComplementObject.tpp"
+#include "levelSetKernel.hpp"
+#include "levelSetObject.hpp"
+
+#include "bitpit_surfunstructured.hpp"
+#include "bitpit_volcartesian.hpp"
+#include "bitpit_voloctree.hpp"
+
 # include <array>
 # include <vector>
 # include <unordered_set>
 # include <unordered_map>
 
-#include "bitpit_CG.hpp"
-#include "bitpit_surfunstructured.hpp"
-#include "bitpit_volcartesian.hpp"
-#include "bitpit_voloctree.hpp"
-
-#include "levelSetCommon.hpp"
-#include "levelSetBoundedObject.hpp"
-#include "levelSetCachedObject.hpp"
-#include "levelSetCartesianKernel.hpp"
-#include "levelSetKernel.hpp"
-
 namespace bitpit{
 
-namespace adaption{
-    struct Info;
-}
 class SurfaceSkdTree;
 
-class SendBuffer;
-class RecvBuffer;
-
-template<typename storage_manager_t>
-class LevelSetSegmentationNarrowBandCacheBase : public virtual LevelSetNarrowBandCacheBase<storage_manager_t>
-{
-    public:
-    using typename LevelSetNarrowBandCacheBase<storage_manager_t>::Kernel;
-    using typename LevelSetNarrowBandCacheBase<storage_manager_t>::KernelIterator;
-
-    template<typename T>
-    using Storage = typename LevelSetNarrowBandCache<storage_manager_t>::template Storage<T>;
-
-    LevelSetSegmentationNarrowBandCacheBase();
-
-    virtual long &                                      getSupportId(const KernelIterator &itr) = 0;
-    virtual long                                        getSupportId(const KernelIterator &itr) const = 0;
-
-    virtual std::array<double, 3> &                     getSurfaceNormal(const KernelIterator &itr) = 0;
-    virtual const std::array<double, 3> &               getSurfaceNormal(const KernelIterator &itr) const = 0;
-
-    void                                        set(const KernelIterator &itr, double value, const std::array<double, 3> &gradient) = delete ;
-    void                                        set(const KernelIterator &itr, double value, const std::array<double, 3> &gradient, long semgnetId, const std::array<double, 3> &surfaceNormal) ;
-
-    void                                        swap(LevelSetSegmentationNarrowBandCacheBase &other) noexcept;
-
-    protected:
-    Storage<long>                              *m_supportIds;      /** Support ids of the cells inside the narrow band */
-    Storage<std::array<double,3>>              *m_surfaceNormals;  /** Surface normal associated with the cells inside the narrow band */
-
-};
-
-template<typename storage_manager_t>
-class LevelSetSegmentationNarrowBandCache : public virtual storage_manager_t, public virtual LevelSetNarrowBandCache<storage_manager_t>, public virtual LevelSetSegmentationNarrowBandCacheBase<storage_manager_t>
-{
-
-};
-
-template<>
-class LevelSetSegmentationNarrowBandCache<LevelSetExternalPiercedStorageManager> : public virtual LevelSetExternalPiercedStorageManager, public virtual LevelSetNarrowBandCache<LevelSetExternalPiercedStorageManager>, public virtual LevelSetSegmentationNarrowBandCacheBase<LevelSetExternalPiercedStorageManager>
-{
+class LevelSetSegmentationSurfaceInfo {
 
 public:
-    LevelSetSegmentationNarrowBandCache(Kernel *kernel);
+    typedef SurfUnstructured::CellIterator SegmentIterator;
+    typedef SurfUnstructured::CellConstIterator SegmentConstIterator;
 
-    long &                                      getSupportId(const KernelIterator &itr) override;
-    long                                        getSupportId(const KernelIterator &itr) const override;
+    static const double DEFAULT_FEATURE_ANGLE;
 
-    std::array<double, 3> &                     getSurfaceNormal(const KernelIterator &itr) override;
-    const std::array<double, 3> &               getSurfaceNormal(const KernelIterator &itr) const override;
-
-};
-
-template<>
-class LevelSetSegmentationNarrowBandCache<LevelSetInternalPiercedStorageManager> : public virtual LevelSetInternalPiercedStorageManager, public virtual LevelSetNarrowBandCache<LevelSetInternalPiercedStorageManager>, public virtual LevelSetSegmentationNarrowBandCacheBase<LevelSetInternalPiercedStorageManager>
-{
-
-public:
-    LevelSetSegmentationNarrowBandCache();
-
-    long &                                      getSupportId(const KernelIterator &itr) override;
-    long                                        getSupportId(const KernelIterator &itr) const override;
-
-    std::array<double, 3> &                     getSurfaceNormal(const KernelIterator &itr) override;
-    const std::array<double, 3> &               getSurfaceNormal(const KernelIterator &itr) const override;
-
-};
-
-template<>
-class LevelSetSegmentationNarrowBandCache<LevelSetDirectStorageManager> : public virtual LevelSetDirectStorageManager, public virtual LevelSetNarrowBandCache<LevelSetDirectStorageManager>, public virtual LevelSetSegmentationNarrowBandCacheBase<LevelSetDirectStorageManager>
-{
-
-public:
-    LevelSetSegmentationNarrowBandCache(std::size_t nItems);
-
-    long &                                      getSupportId(const KernelIterator &itr) override;
-    long                                        getSupportId(const KernelIterator &itr) const override;
-
-    std::array<double, 3> &                     getSurfaceNormal(const KernelIterator &itr) override;
-    const std::array<double, 3> &               getSurfaceNormal(const KernelIterator &itr) const override;
-
-};
-
-template<>
-class LevelSetNarrowBandCacheFactory<LevelSetSegmentationNarrowBandCache<LevelSetExternalPiercedStorageManager>>
-{
-
-public:
-    static std::shared_ptr<LevelSetSegmentationNarrowBandCache<LevelSetExternalPiercedStorageManager>> create(LevelSetCachedObjectInterface<LevelSetSegmentationNarrowBandCache<LevelSetExternalPiercedStorageManager>> *object);
-
-};
-
-template<>
-class LevelSetNarrowBandCacheFactory<LevelSetSegmentationNarrowBandCache<LevelSetDirectStorageManager>>
-{
-
-public:
-    static std::shared_ptr<LevelSetSegmentationNarrowBandCache<LevelSetDirectStorageManager>> create(LevelSetCachedObjectInterface<LevelSetSegmentationNarrowBandCache<LevelSetDirectStorageManager>> *object);
-
-};
-
-class LevelSetSegmentationKernel {
-
-public:
-    LevelSetSegmentationKernel();
-    LevelSetSegmentationKernel(const LevelSetSegmentationKernel &other);
-    LevelSetSegmentationKernel(LevelSetSegmentationKernel &&other);
-    LevelSetSegmentationKernel(const SurfUnstructured *surface, double featureAngle);
-    LevelSetSegmentationKernel(std::unique_ptr<const SurfUnstructured> &&surface, double featureAngle);
-
-    virtual ~LevelSetSegmentationKernel() = default;
+    LevelSetSegmentationSurfaceInfo();
+    LevelSetSegmentationSurfaceInfo(const LevelSetSegmentationSurfaceInfo &other);
+    LevelSetSegmentationSurfaceInfo(LevelSetSegmentationSurfaceInfo &&other) = default;
+    LevelSetSegmentationSurfaceInfo(const SurfUnstructured *surface, double featureAngle);
+    LevelSetSegmentationSurfaceInfo(std::unique_ptr<const SurfUnstructured> &&surface, double featureAngle);
 
     const SurfUnstructured & getSurface() const;
-    void setSurface(std::unique_ptr<const SurfUnstructured> &&surface, double featureAngle = 2. * BITPIT_PI);
-    void setSurface(const SurfUnstructured *surface, double featureAngle = 2. * BITPIT_PI);
-
-    double getFeatureAngle() const;
+    void setSurface(std::unique_ptr<const SurfUnstructured> &&surface, double featureAngle = DEFAULT_FEATURE_ANGLE);
+    void setSurface(const SurfUnstructured *surface, double featureAngle = DEFAULT_FEATURE_ANGLE);
 
     const SurfaceSkdTree & getSearchTree() const;
 
-    int getSegmentInfo( const std::array<double,3> &pointCoords, long segmentId, bool signd, double &distance, std::array<double,3> &gradient, std::array<double,3> &normal ) const;
+    double getFeatureAngle() const;
 
-    double getSegmentSize(long segmentId) const;
-    double getMinSegmentSize() const;
-    double getMaxSegmentSize() const;
+    double evalDistance(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr) const;
+    std::array<double, 3> evalDistanceVector(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr) const;
+
+    std::array<double, 3> evalNormal(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr) const;
 
 private:
     typedef std::pair<long, int> SegmentVertexKey;
@@ -193,6 +92,8 @@ private:
     mutable std::vector<bool> m_limitedSegmentVertexNormalValid;
     mutable std::unordered_map<SegmentVertexKey, std::array<double,3>, utils::hashing::hash<SegmentVertexKey>> m_limitedSegmentVertexNormalStorage;
 
+    std::array<double, 3> evalProjection(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, double *lambda) const;
+
     std::array<double,3> computePseudoNormal( const SurfUnstructured::CellConstIterator &segmentIterator, const double *lambda ) const;
     std::array<double,3> computeSurfaceNormal( const SurfUnstructured::CellConstIterator &segmentIterator, const double *lambda ) const;
 
@@ -202,83 +103,171 @@ private:
 
 };
 
-class LevelSetSegmentationObjectInterface : public virtual LevelSetObjectInterface
-{
+class LevelSetSegmentationBaseObject : public LevelSetObject {
+
 public:
-    virtual int getPart(long cellId) const = 0;
-    virtual std::array<double BITPIT_COMMA 3> getNormal(long cellId) const = 0;
-    virtual long getSupport(long id) const = 0;
+    static const double AUTOMATIC_SEARCH_RADIUS;
 
-    virtual double getSurfaceFeatureSize(long cellId) const = 0;
-    virtual double getMinSurfaceFeatureSize() const = 0;
-    virtual double getMaxSurfaceFeatureSize() const = 0;
+    friend class LevelSetBooleanObject<LevelSetSegmentationBaseObject>;
+
+    using LevelSetObject::LevelSetObject;
+
+    LevelSetFieldset getSupportedFields() const override;
+
+    const SurfUnstructured & evalCellSurface(long id) const;
+    long evalCellSupport(long id, double searchRadius = AUTOMATIC_SEARCH_RADIUS) const;
+    int evalCellPart(long id) const;
+    std::array<double,3> evalCellNormal(long id, bool signedLevelSet) const;
+
+    const SurfUnstructured & evalSurface(const std::array<double,3> &point) const;
+    long evalSupport(const std::array<double,3> &point) const;
+    long evalSupport(const std::array<double,3> &point, double searchRadius) const;
+    int evalPart(const std::array<double,3> &point) const;
+    std::array<double,3> evalNormal(const std::array<double,3> &point, bool signedLevelSet) const;
+
+    BITPIT_DEPRECATED(int getPart(long cellId) const);
+    BITPIT_DEPRECATED(std::array<double BITPIT_COMMA 3> getNormal(long cellId) const);
+    BITPIT_DEPRECATED(long getSupport(long cellId) const);
+    BITPIT_DEPRECATED(double getSurfaceFeatureSize(long cellId) const);
+
+    BITPIT_DEPRECATED(int getPart(const std::array<double,3> &point) const);
+    BITPIT_DEPRECATED(std::array<double BITPIT_COMMA 3> getNormal(const std::array<double,3> &point) const);
+    BITPIT_DEPRECATED(long getSupport(const std::array<double,3> &point) const);
+    BITPIT_DEPRECATED(double getSurfaceFeatureSize(const std::array<double,3> &point) const);
+
+protected:
+    LevelSetSegmentationBaseObject(int, const LevelSetSegmentationSurfaceInfo *surfaceInfo);
+
+    using LevelSetObject::createFieldCellCache;
+    std::size_t createFieldCellCache(LevelSetField field) override;
+    void fillFieldCellCache(LevelSetField field, long id) override;
+    using LevelSetObject::fillFieldCellCache;
+
+    LevelSetIntersectionStatus _intersectSurface(long, double distance, LevelSetIntersectionMode=LevelSetIntersectionMode::FAST_FUZZY) const override;
+
+    virtual const SurfUnstructured & _evalCellSurface(long id) const = 0;
+    virtual int _evalCellPart(long id) const;
+    virtual std::array<double,3> _evalCellNormal(long id, bool signedLevelSet) const = 0;
+    virtual long _evalCellSupport(long id, double searchRadius = AUTOMATIC_SEARCH_RADIUS) const = 0;
+
+    virtual const SurfUnstructured & _evalSurface(const std::array<double,3> &point) const = 0;
+    virtual int _evalPart(const std::array<double,3> &point) const;
+    virtual std::array<double,3> _evalNormal(const std::array<double,3> &point, bool signedLevelSet) const = 0;
+    virtual long _evalSupport(const std::array<double,3> &point) const = 0;
+    virtual long _evalSupport(const std::array<double,3> &point, double searchRadius) const = 0;
+
+    void addVTKOutputData(LevelSetField field, const std::string &objectName) override;
+    std::string getVTKOutputFieldName(LevelSetField field) const override;
+    void flushVTKOutputData(std::fstream &stream, VTKFormat format, LevelSetField field) const override;
+    using LevelSetObject::flushVTKOutputData;
 };
 
-template<typename narrow_band_cache_t>
-class LevelSetSegmentationObject : public LevelSetSegmentationObjectInterface, public LevelSetSegmentationKernel, public LevelSetCachedObject<narrow_band_cache_t>, public LevelSetBoundedObject {
+class LevelSetSegmentationObject : public LevelSetSegmentationBaseObject {
 
-    protected:
-    double                                      m_narrowBandSize;   /**< Size of narrow band */
-
-    void                                        getBoundingBox( std::array<double,3> &, std::array<double,3> &) const override;
-# if BITPIT_ENABLE_MPI
-    void                                        getGlobalBoundingBox( std::array<double,3> &, std::array<double,3> &) const override;
-#endif
-
-    void                                        computeNarrowBand(bool signd, double narrowBandSize) override;
-    void                                        computeNarrowBand( LevelSetCartesianKernel *, bool);
-    void                                        computeNarrowBand( LevelSetKernel *, bool);
-    void                                        updateNarrowBand(const std::vector<long> &cellIds, bool signd) override;
-    void                                        updateNarrowBand(LevelSetKernel *, const std::vector<long> &cellIds, bool signd);
-
-    void                                        addVTKOutputData(LevelSetField field, const std::string &objectName) override;
-    std::string                                 getVTKOutputFieldName(LevelSetField field) const override;
-    void                                        flushVTKOutputData(LevelSetField field, std::fstream &stream, VTKFormat format) const override;
-
-    public:
-
+public:
     LevelSetSegmentationObject(int);
-    LevelSetSegmentationObject(int, std::unique_ptr<const SurfUnstructured> &&, double featureAngle = 2. * BITPIT_PI);
-    LevelSetSegmentationObject(int, const SurfUnstructured*, double featureAngle = 2. * BITPIT_PI);
+    LevelSetSegmentationObject(int, std::unique_ptr<const SurfUnstructured> &&surface, double featureAngle = 2. * BITPIT_PI);
+    LevelSetSegmentationObject(int, const SurfUnstructured *surface, double featureAngle = 2. * BITPIT_PI);
+    LevelSetSegmentationObject(const LevelSetSegmentationObject &other);
+    LevelSetSegmentationObject(LevelSetSegmentationObject &&other) = default;
 
-    LevelSetSegmentationObject *                clone() const override ;
+    bool empty() const override;
 
-    LevelSetFieldset                            getSupportedFields() const override;
+    LevelSetSegmentationObject * clone() const override;
 
-    int                                         getPart(long ) const override;
-    std::array<double,3>                        getNormal(long ) const override;
-    long                                        getSupport(long id) const override;
+    const SurfUnstructured & getSurface() const;
+    void setSurface(std::unique_ptr<const SurfUnstructured> &&surface, bool force = false);
+    void setSurface(std::unique_ptr<const SurfUnstructured> &&surface, double featureAngle, bool force = false);
+    void setSurface(const SurfUnstructured *surface, bool force = false);
+    void setSurface(const SurfUnstructured *surface, double featureAngle, bool force = false);
 
-    double                                      getSurfaceFeatureSize(long ) const override;
-    double                                      getMinSurfaceFeatureSize() const override;
-    double                                      getMaxSurfaceFeatureSize() const override;
+    const SurfaceSkdTree & getSearchTree() const;
 
-    LevelSetInfo                                computeLevelSetInfo(const std::array<double,3> &) const override;
+    double getFeatureAngle() const;
+
+    BITPIT_DEPRECATED(double getMinSurfaceFeatureSize() const);
+    BITPIT_DEPRECATED(double getMaxSurfaceFeatureSize() const);
+
+protected:
+    void fillCellLocationCache() override;
+    void fillCellLocationCache(const std::vector<adaption::Info> &adaptionData) override;
+    LevelSetCellLocation fillCellGeometricNarrowBandLocationCache(long id) override;
+
+    short _evalCellSign(long id) const override;
+    double _evalCellValue(long id, bool signedLevelSet) const override;
+    std::array<double,3> _evalCellGradient(long id, bool signedLevelSet) const override;
+    const SurfUnstructured & _evalCellSurface(long id) const override;
+    long _evalCellSupport(long id, double searchRadius = AUTOMATIC_SEARCH_RADIUS) const override;
+    std::array<double,3> _evalCellNormal(long id, bool signedLevelSet) const override;
+
+    short _evalSign(const std::array<double,3> &point) const override;
+    double _evalValue(const std::array<double,3> &point, bool signedLevelSet) const override;
+    std::array<double,3> _evalGradient(const std::array<double,3> &point, bool signedLevelSet) const override;
+    const SurfUnstructured & _evalSurface(const std::array<double,3> &point) const override;
+    long _evalSupport(const std::array<double,3> &point) const override;
+    long _evalSupport(const std::array<double,3> &point, double searchRadius) const override;
+    std::array<double,3> _evalNormal(const std::array<double,3> &point, bool signedLevelSet) const override;
+
+private:
+    std::unique_ptr<LevelSetSegmentationSurfaceInfo> m_surfaceInfo;
+
+    void fillCartesianCellZoneCache();
+
+    short _evalSign(const std::array<double,3> &point, long support) const;
+    double _evalValue(const std::array<double,3> &point, long support, bool signedLevelSet) const;
+    std::array<double,3> _evalGradient(const std::array<double,3> &point, long support, bool signedLevelSet) const;
+    std::array<double,3> _evalNormal(const std::array<double,3> &point, long support, bool signedLevelSet) const;
 
 };
 
-// Typdefs for compatibility with older versions
-typedef LevelSetSegmentationObject<LevelSetSegmentationNarrowBandCache<LevelSetInternalPiercedStorageManager>> LevelSetSegmentation;
+template<>
+class LevelSetBooleanObject<LevelSetSegmentationBaseObject>: public LevelSetBooleanBaseObject<LevelSetSegmentationBaseObject> {
+
+public:
+    LevelSetBooleanObject(int, LevelSetBooleanOperation, const LevelSetSegmentationBaseObject *, const LevelSetSegmentationBaseObject *);
+    LevelSetBooleanObject(int, LevelSetBooleanOperation, const std::vector<const LevelSetSegmentationBaseObject *> &);
+
+    LevelSetBooleanObject<LevelSetSegmentationBaseObject> * clone() const override;
+
+protected:
+    const SurfUnstructured & _evalCellSurface(long id) const override;
+    long _evalCellSupport(long id, double searchRadius = AUTOMATIC_SEARCH_RADIUS) const override;
+    int _evalCellPart(long id) const override;
+    std::array<double,3> _evalCellNormal(long id, bool signedLevelSet) const override;
+
+    const SurfUnstructured & _evalSurface(const std::array<double,3> &point) const override;
+    long _evalSupport(const std::array<double,3> &point) const override;
+    long _evalSupport(const std::array<double,3> &point, double searchRadius) const override;
+    int _evalPart(const std::array<double,3> &point) const override;
+    std::array<double,3> _evalNormal(const std::array<double,3> &point, bool signedLevelSet) const override;
+
+};
+
+template<>
+class LevelSetComplementObject<LevelSetSegmentationBaseObject>: public LevelSetComplementBaseObject<LevelSetSegmentationBaseObject> {
+
+public:
+    LevelSetComplementObject(int id, const LevelSetSegmentationBaseObject *source);
+
+    LevelSetComplementObject<LevelSetSegmentationBaseObject> * clone() const override;
+
+protected:
+    const SurfUnstructured & _evalCellSurface(long id) const override;
+    long _evalCellSupport(long id, double searchRadius = AUTOMATIC_SEARCH_RADIUS) const override;
+    int _evalCellPart(long id) const override;
+    std::array<double,3> _evalCellNormal(long id, bool signedLevelSet) const override;
+
+    const SurfUnstructured & _evalSurface(const std::array<double,3> &point) const override;
+    long _evalSupport(const std::array<double,3> &point) const override;
+    long _evalSupport(const std::array<double,3> &point, double searchRadius) const override;
+    int _evalPart(const std::array<double,3> &point) const override;
+    std::array<double,3> _evalNormal(const std::array<double,3> &point, bool signedLevelSet) const override;
+
+};
+
+// Typedefs for compatibility with older versions
+typedef LevelSetSegmentationObject LevelSetSegmentation;
 
 }
-
-// Include template implementations
-#include "levelSetSegmentationObject.tpp"
-
-
-// Explicit instantization
-#ifndef __BITPIT_LEVELSET_SEGMENTATION_OBJECT_SRC__
-namespace bitpit {
-
-extern template class LevelSetSegmentationNarrowBandCacheBase<LevelSetExternalPiercedStorageManager>;
-extern template class LevelSetSegmentationNarrowBandCacheBase<LevelSetInternalPiercedStorageManager>;
-extern template class LevelSetSegmentationNarrowBandCacheBase<LevelSetDirectStorageManager>;
-
-extern template class LevelSetSegmentationObject<LevelSetSegmentationNarrowBandCache<LevelSetExternalPiercedStorageManager>>;
-extern template class LevelSetSegmentationObject<LevelSetSegmentationNarrowBandCache<LevelSetInternalPiercedStorageManager>>;
-extern template class LevelSetSegmentationObject<LevelSetSegmentationNarrowBandCache<LevelSetDirectStorageManager>>;
-
-}
-#endif
 
 #endif

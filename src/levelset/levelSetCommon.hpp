@@ -27,11 +27,17 @@
 
 // Standard Template Library
 # include <array>
+# include <limits>
 # include <unordered_map>
-# include <unordered_set>
 # include <vector>
 
 namespace bitpit{
+
+/*!
+ * Setting the size of the narrow band to LEVELSET_NARROW_BAND_UNLIMITED means that the whole
+ * domain belongs to the narrow band.
+ */
+const double LEVELSET_NARROW_BAND_UNLIMITED = std::numeric_limits<double>::max();
 
 /*!
  * @ingroup levelset
@@ -46,7 +52,8 @@ namespace levelSetDefaults{
     const int                               OBJECT = -1 ;               /**< Default value for closest object  */
     const int                               PART  = -1 ;                /**< Default value for closest patch  */
     const long                              SUPPORT = -1 ;              /**< Default value for closest support element */
-    const double                            NARROWBAND_SIZE = -1 ;      /**< Default value for the narrowband size */
+    const std::array<double,3>              NORMAL = {{0.,0.,0.}};      /**< Default value for closest surface normal */
+    const double                            NARROW_BAND_SIZE = -1 ;     /**< Default value for the narrow band size */
 };
 
 struct LevelSetInfo{
@@ -55,6 +62,31 @@ struct LevelSetInfo{
 
     LevelSetInfo() ;
     LevelSetInfo( double , const std::array<double,3> &) ;
+};
+
+/*!
+ * @ingroup levelsetEnums
+ * Enum class defining different type of zones.
+ */
+enum class LevelSetZone {
+    NARROW_BAND,        //!< Narrow band zone
+    BULK,               //!< Bulk zone
+};
+
+/*!
+ * @ingroup levelsetEnums
+ * Enum class defining different type of cell locations.
+ */
+enum class LevelSetCellLocation {
+    UNKNOWN = -1,                //!< Unknown location
+    NARROW_BAND_DISTANCE,        //!< Narrow band zone, the distance of the cell from the surface
+                                 //!< is less than the narrow band size
+    NARROW_BAND_INTERSECTED,     //!< Narrow band zone, the cell intersects the surface
+    NARROW_BAND_NEIGHBOUR,       //!< Narrow band zone, on of the cell face neighbours intersect
+                                 //!< the surface
+    NARROW_BAND_UNDEFINED,       //!< Narrow band zone, the reason why the cell is inside the
+                                 //!< narrow band is not defined
+    BULK,                        //!< Bulk zone
 };
 
 /*!
@@ -92,15 +124,6 @@ enum class LevelSetIntersectionMode{
 
 /*!
  * @ingroup levelsetEnums
- * Enum class containing the possible sotrage modes.
- */
-enum class LevelSetStorageType{
-    SPARSE=0,                       /**< Sparse storage, to be used when only a small portion of the domain is inside the narrow band */
-    DENSE=1,                        /**< Dense storage, to be used when almost all the domain is inside the narrow band */
-};
-
-/*!
- * @ingroup levelsetEnums
  * Enum class containing the possible fill-in modes for the levelset.
  */
 enum class LevelSetFillIn{
@@ -112,21 +135,50 @@ typedef LevelSetFillIn LevelSetCacheType;
 
 /*!
  * @ingroup levelsetEnums
+ * Enum class containing the possible modes for the caches.
+ */
+enum class LevelSetCacheMode{
+    BEGIN = 0,
+    NONE = 0,              //!< No caching will be performed
+    ON_DEMAND,             //!< Data are cached only where explicitly evaluated
+    NARROW_BAND,           //!< Data are cached only inside the narrow band
+    FULL,                  //!< Data are cached in the whole domain
+    END,
+    COUNT = END - BEGIN,
+};
+
+/*!
+ * @ingroup levelsetEnums
+ * Enum class containing the possible evaluation modes for cell data in the bulk.
+ */
+enum class LevelSetBulkEvaluationMode{
+    BEGIN = 0,
+    NONE = 0,              //!< No data is evaluated
+    SIGN_PROPAGATION,      //!< Sign is propagated from the narrow band, no other data will be evaluated
+    EXACT,                 //!< Exact data is evaluated
+    END,
+    COUNT = END - BEGIN,
+};
+
+/*!
+ * @ingroup levelsetEnums
  * Enum class containing the possible level set fields
  */
 enum class LevelSetField{
     BEGIN = 0,
     VALUE = BEGIN,                  /**< level set value */
+    SIGN,                           /**< level set sign */
     GRADIENT,                       /**< level set gradient */
     SUPPORT,                        /**< facet that contains the projection point */
     PART,                           /**< part identifier at projection point */
     NORMAL,                         /**< body normal at projection point */
     END,
-    COUNT = END - BEGIN
+    COUNT = END - BEGIN,
+    UNDEFINED
 };
 
 /*!
- * Hasher for the LevelSetWriteField enum.
+ * Hasher for the LevelSetField enum.
  */
 struct LevelSetFieldHasher
 {
@@ -139,7 +191,7 @@ struct LevelSetFieldHasher
 /*!
  * Set of field
  */
-typedef std::unordered_set<LevelSetField> LevelSetFieldset;
+typedef std::vector<LevelSetField> LevelSetFieldset;
 
 /*!
  * Map of write fields.
@@ -153,8 +205,9 @@ using LevelSetFieldMap = std::unordered_map<LevelSetField, value_t, LevelSetFiel
  */
 enum class LevelSetWriteField{
     VALUE    = static_cast<int>(LevelSetField::VALUE),     /**< adds level set value to VTK*/
+    SIGN     = static_cast<int>(LevelSetField::SIGN),      /**< adds level set sign to VTK*/
     GRADIENT = static_cast<int>(LevelSetField::GRADIENT),  /**< adds level set gradient to VTK*/
-    SUPPORT  = static_cast<int>(LevelSetField::PART),      /**< adds facet that contains the projection point to VTK*/
+    SUPPORT  = static_cast<int>(LevelSetField::SUPPORT),   /**< adds facet that contains the projection point to VTK*/
     PART     = static_cast<int>(LevelSetField::PART),      /**< adds part identifier at projection point to VTK*/
     NORMAL   = static_cast<int>(LevelSetField::NORMAL),    /**< adds body normal at projection point to VTK*/
     ALL,                                                   /**< adds level set value, gradient, normal and projection point to VTK*/

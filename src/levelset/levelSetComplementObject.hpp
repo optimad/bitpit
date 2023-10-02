@@ -45,13 +45,22 @@ class LevelSetComplementBaseObject : public LevelSetProxyObject<SourceLevelSetOb
 
     void                                                 replaceSourceObject(const SourceLevelSetObject *current, const SourceLevelSetObject *updated) override;
 
+    void                                                 fillCellPropagatedSignCache() override;
+
+    short                                                _evalCellSign(long id) const override;
+    double                                               _evalCellValue(long id, bool signedLevelSet) const override;
+    std::array<double,3>                                 _evalCellGradient(long id, bool signedLevelSet) const override;
+
+    short                                                _evalSign(const std::array<double,3> &point) const override;
+    double                                               _evalValue(const std::array<double,3> &point, bool signedLevelSet) const override;
+    std::array<double,3>                                 _evalGradient(const std::array<double,3> &point, bool signedLevelSet) const override;
+
     public:
-    double                                               getValue(long ) const override;
-    std::array<double,3>                                 getGradient(long ) const override;
+    bool                                                 empty() const override;
 
-    LevelSetInfo                                         computeLevelSetInfo(const std::array<double,3> &) const override;
+    const SourceLevelSetObject *                         getCellReferenceObject(long id) const override;
 
-    const SourceLevelSetObject *                         getReferenceObject( long ) const override;
+    const SourceLevelSetObject *                         getReferenceObject(const std::array<double, 3> &point) const override;
 
     virtual const SourceLevelSetObject *                 getSourceObject() const;
     std::vector<const SourceLevelSetObject *>            getSourceObjects() const override;

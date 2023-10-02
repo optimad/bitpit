@@ -212,9 +212,9 @@ bool LevelSetContainerBaseCache<key_t, container_t, value_t, reference_t, const_
  * contain an actual entry associated with the key.
  */
 template<typename key_t, typename container_t, typename value_t, typename reference_t, typename const_reference_t>
-typename LevelSetValueCache<key_t, value_t>::Entry LevelSetContainerBaseCache<key_t, container_t, value_t, reference_t, const_reference_t>::findEntry(const key_t &key)
+typename LevelSetValueCache<key_t, value_t>::Entry LevelSetContainerBaseCache<key_t, container_t, value_t, reference_t, const_reference_t>::findEntry(const key_t &key) const
 {
-    iterator itr = find(key);
+    const_iterator itr = find(key);
     if (itr != end()) {
         return Entry(getValue(itr));
     } else {
@@ -235,7 +235,7 @@ typename LevelSetValueCache<key_t, value_t>::Entry LevelSetContainerBaseCache<ke
 template<typename key_t, typename container_t, typename value_t, typename reference_t, typename const_reference_t>
 typename LevelSetValueCache<key_t, value_t>::Entry LevelSetContainerBaseCache<key_t, container_t, value_t, reference_t, const_reference_t>::insertEntry(const key_t &key, const value_t &value)
 {
-    iterator itr = insert(key, value);
+    const_iterator itr = insert(key, value);
 
     return Entry(getValue(itr));
 }
@@ -253,7 +253,7 @@ typename LevelSetValueCache<key_t, value_t>::Entry LevelSetContainerBaseCache<ke
 template<typename key_t, typename container_t, typename value_t, typename reference_t, typename const_reference_t>
 typename LevelSetValueCache<key_t, value_t>::Entry LevelSetContainerBaseCache<key_t, container_t, value_t, reference_t, const_reference_t>::insertEntry(const key_t &key, value_t &&value)
 {
-    iterator itr = insert(key, std::move(value));
+    const_iterator itr = insert(key, std::move(value));
 
     return Entry(getValue(itr));
 }
@@ -338,11 +338,10 @@ void LevelSetContainerBaseCache<key_t, container_t, value_t, reference_t, const_
     for (const key_t &key : keys) {
         const_iterator itr = find(key);
         if (itr != cend()) {
-            buffer << true;
-            buffer << *itr;
+            buffer << static_cast<unsigned char>(1);
+            buffer << getValue(itr);
         } else {
-            buffer << false;
-            buffer << value_t{};
+            buffer << static_cast<unsigned char>(0);
         }
     }
 }
@@ -356,13 +355,13 @@ void LevelSetContainerBaseCache<key_t, container_t, value_t, reference_t, const_
 template<typename key_t, typename container_t, typename value_t, typename reference_t, typename const_reference_t>
 void LevelSetContainerBaseCache<key_t, container_t, value_t, reference_t, const_reference_t>::readBuffer(const std::vector<key_t> &keys, RecvBuffer &buffer)
 {
+    value_t value;
     for (const key_t &key : keys) {
-        bool isCached;
+        unsigned char isCached;
         buffer >> isCached;
+        if (isCached == 1) {
+            buffer >> value;
 
-        value_t value;
-        buffer >> value;
-        if (isCached) {
             insert(key, value);
         }
     }
@@ -1632,7 +1631,7 @@ template<typename key_t>
 template<typename value_t>
 const LevelSetValueCache<key_t, value_t> * LevelSetCacheCollection<key_t>::Item::getCache(bool allowCreation) const
 {
-    assert(!hasCache() || dynamic_cast<const LevelSetValueCache<key_t BITPIT_COMMA value_t> *>(at(index, false)));
+    assert(!hasCache() || dynamic_cast<const LevelSetValueCache<key_t BITPIT_COMMA value_t> *>(getCache(allowCreation)));
 
     return static_cast<const LevelSetValueCache<key_t, value_t> *>(getCache(allowCreation));
 }
