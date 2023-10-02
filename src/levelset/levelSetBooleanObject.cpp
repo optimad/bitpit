@@ -234,22 +234,6 @@ void LevelSetBooleanObject::replaceSourceObject(const LevelSetObject *current, c
 }
 
 /*!
- * Writes LevelSetBooleanObject to stream in binary format
- * @param[in] stream output stream
- */
-void LevelSetBooleanObject::_dump( std::ostream &stream ){
-    BITPIT_UNUSED(stream);
-}
-
-/*!
- * Reads LevelSetBooleanObject from stream in binary format
- * @param[in] stream output stream
- */
-void LevelSetBooleanObject::_restore( std::istream &stream ){
-    BITPIT_UNUSED(stream);
-}
-
-/*!
  * Clones the object
  * @return pointer to cloned object
  */
