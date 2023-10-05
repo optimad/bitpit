@@ -212,6 +212,15 @@ if (myRank == 0) {
         log::cout() << "   Error during surface orientation" << endl;
     }
 
+    // Check if orientation is consistent ----------------------------------- //
+    log::cout() << "** Mesh adjust orientation" << endl;
+    bool oriented = mesh.isCellOrientationConsistent();
+    if (oriented) {
+        log::cout() << "   Mesh orientation is consistent" << endl;
+    } else {
+        log::cout() << "   Error while checking if mesh orientation is consisten" << endl;
+    }
+
     // Write mesh ----------------------------------------------------------- //
     log::cout() << "** Writing mesh" << endl;
     mesh.write();

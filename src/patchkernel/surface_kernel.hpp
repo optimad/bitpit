@@ -69,6 +69,7 @@ public:
                                    std::array<double, 3> *unlimitedNormal, std::array<double, 3> *limitedNormal) const;
     double evalCellSize(long id) const override;
 
+    bool isCellOrientationConsistent() const;
     bool adjustCellOrientation();
     bool adjustCellOrientation(long id, bool invert = false);
     void flipCellOrientation(long id);

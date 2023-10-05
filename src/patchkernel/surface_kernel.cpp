@@ -887,6 +887,113 @@ void SurfaceKernel::evalVertexNormals(long id, int vertex, std::size_t nVertexNe
 }
 
 /*!
+ * Check if the factes have a consistent orientation.
+ *
+ * \return Returns true if the factes have a consistent orientation, false otherwise.
+ */
+bool SurfaceKernel::isCellOrientationConsistent() const
+{
+    CellConstIterator internalBegin = internalCellConstBegin();
+    CellConstIterator internalEnd   = internalCellConstEnd();
+
+    std::size_t nUnprocessed = getInternalCellCount();
+    PiercedStorage<bool> alreadyProcessed(1, &(getCells()));
+    alreadyProcessed.fill(false);
+
+    bool consistent = true;
+    std::vector<std::size_t> processRawList;
+    for (CellConstIterator seedItr = internalBegin; seedItr != internalEnd; ++seedItr) {
+        // Get seed information
+        long seedRawId = seedItr.getRawIndex();
+        if (alreadyProcessed.rawAt(seedRawId)) {
+            continue;
+        }
+
+        // Compare seed orientation with the orientation of its neighbours
+        processRawList.assign(1, seedRawId);
+        while (!processRawList.empty()) {
+            // Get cell to process
+            std::size_t cellRawId = processRawList.back();
+            processRawList.pop_back();
+
+            // Skip cells already processed
+            if (alreadyProcessed.rawAt(cellRawId)) {
+                continue;
+            }
+
+            // Process cell
+            CellConstIterator cellItr = getCells().rawFind(cellRawId);
+            const Cell &cell = *cellItr;
+            int nCellFaces = cell.getFaceCount();
+            for (int face = 0; face < nCellFaces; ++face) {
+                int nFaceAdjacencies = cell.getAdjacencyCount(face);
+                const long *faceAdjacencies = cell.getAdjacencies(face);
+                for (int i = 0; i < nFaceAdjacencies; ++i) {
+                    // Neighbout information
+                    long neighId = faceAdjacencies[i];
+                    CellConstIterator neighItr = getCells().find(neighId);
+                    const Cell &neigh = getCell(neighId);
+
+                    // Check neighbour consistency
+                    int neighFace = findAdjoinNeighFace(cell, face, neigh);
+                    bool isNeighConsistent = haveSameOrientation(cell, face, neigh, neighFace);
+                    if (!isNeighConsistent) {
+                        consistent = false;
+                        break;
+                    }
+
+                    // Add neighbour to the process list
+                    //
+                    // Only internal cells needs to be processed.
+                    if (neigh.isInterior()) {
+                        std::size_t neighRawId = neighItr.getRawIndex();
+                        if (!alreadyProcessed.rawAt(neighRawId)) {
+                            processRawList.push_back(neighRawId);
+                        }
+                    }
+                }
+
+                // Stop processing the cell is the orientation is not consistent
+                if (!consistent) {
+                    break;
+                }
+            }
+
+            // Cell processing has been completed
+            alreadyProcessed.rawSet(cellRawId, true);
+            --nUnprocessed;
+            if (nUnprocessed == 0) {
+                break;
+            }
+
+            // Stop processing the patch is the orientation is not consistent
+            if (!consistent) {
+                break;
+            }
+        }
+
+        // Stop processing the patch is the orientation is not consistent
+        if (!consistent) {
+            break;
+        }
+
+        // Check if all cells have been processed
+        if (nUnprocessed == 0) {
+            break;
+        }
+    }
+
+#if BITPIT_ENABLE_MPI==1
+    // Comunicate consistency flag among the partitions
+    if (isPartitioned()) {
+        MPI_Allreduce(MPI_IN_PLACE, &consistent, 1, MPI_C_BOOL, MPI_LAND, getCommunicator());
+    }
+#endif
+
+    return consistent;
+}
+
+/*!
  * Adjust the orientation of all facets of the local partition according to the
  * orientation of the first facet stored.
  *
