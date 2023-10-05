@@ -954,156 +954,204 @@ bool SurfaceKernel::adjustCellOrientation(long seed, bool invert)
     bool ghostExchangeNeeded = isPartitioned();
 
     // Initialize ghost communications
-    std::unordered_set<long> flipped;
-    std::unique_ptr<DataCommunicator> ghostComm;
+    std::unordered_set<long> flippedCells;
+    std::unique_ptr<DataCommunicator> ghostCommunicator;
     if (ghostExchangeNeeded) {
-        ghostComm = std::unique_ptr<DataCommunicator>(new DataCommunicator(getCommunicator()));
+        ghostCommunicator = std::unique_ptr<DataCommunicator>(new DataCommunicator(getCommunicator()));
 
         for (auto &entry : getGhostCellExchangeSources()) {
             const int rank = entry.first;
             const std::vector<long> &sources = entry.second;
-            ghostComm->setSend(rank, sources.size() * sizeof(bool));
+            ghostCommunicator->setSend(rank, 2 * sources.size() * sizeof(unsigned char));
         }
 
         for (auto &entry : getGhostCellExchangeTargets()) {
             const int rank = entry.first;
             const std::vector<long> &targets = entry.second;
-            ghostComm->setRecv(rank, targets.size() * sizeof(bool));
+            ghostCommunicator->setRecv(rank, 2 * targets.size() * sizeof(unsigned char));
         }
     }
 #endif
 
-    // Initialize the seed
-    std::set<long> toVisit;
+    // Initialize list of cells to process
+    std::vector<std::size_t> processRawList;
     if (seed != Element::NULL_ID) {
         assert(getCells().exists(seed));
-        toVisit.insert(seed);
+        processRawList.push_back(getCells().find(seed).getRawIndex());
         if (invert) {
             flipCellOrientation(seed);
 #if BITPIT_ENABLE_MPI==1
             if (ghostExchangeNeeded) {
-                flipped.insert(seed);
+                flippedCells.insert(seed);
             }
 #endif
         }
     }
 
     // Orient the surface
-    std::unordered_set<long> visited;
+    PiercedStorage<bool> alreadyProcessed(1, &(getCells()));
+    alreadyProcessed.fill(false);
 
     bool orientable = true;
-    bool completed = false;
-    while (!completed) {
-        while (orientable && !toVisit.empty()) {
-            auto toVisitBegin = toVisit.begin();
-            long cellId = *toVisitBegin;
-            toVisit.erase(toVisitBegin);
+    while (true) {
+        while (!processRawList.empty()) {
+            // Get cell to process
+            std::size_t cellRawId = processRawList.back();
+            processRawList.pop_back();
 
-            visited.insert(cellId);
+            // Skip cells already processed
+            if (alreadyProcessed.rawAt(cellRawId)) {
+                continue;
+            }
 
-            const auto &cell = getCell(cellId);
+            // Process cell
+            CellConstIterator cellItr = getCells().rawFind(cellRawId);
+            const Cell &cell = *cellItr;
             int nCellFaces = cell.getFaceCount();
             for (int face = 0; face < nCellFaces; ++face) {
                 int nFaceAdjacencies = cell.getAdjacencyCount(face);
                 const long *faceAdjacencies = cell.getAdjacencies(face);
                 for (int i = 0; i < nFaceAdjacencies; ++i) {
+                    // Neighbout information
                     long neighId = faceAdjacencies[i];
-                    const Cell &neigh = getCell(neighId);
-#if BITPIT_ENABLE_MPI==1
-                    if (ghostExchangeNeeded) {
-                        if (!neigh.isInterior()) {
-                            continue;
-                        }
+                    CellConstIterator neighItr = getCells().find(neighId);
+                    std::size_t neighRawId = neighItr.getRawIndex();
+                    const Cell &neigh = *neighItr;
+
+                    // Skip ghost neighbours
+                    if (!neigh.isInterior()) {
+                        continue;
                     }
-#endif
 
+                    // Check neighbour orientation
+                    //
+                    // If the neighour has not been processed yet and its orientation
+                    // is wrong we flip the orientation of the facet.If the neighour
+                    // has already been processed and its orientation is wrong the
+                    // surface is not orientable.
                     int neighFace = findAdjoinNeighFace(cell, face, neigh);
-
                     bool isNeighOriented = haveSameOrientation(cell, face, neigh, neighFace);
-                    if (visited.count(neighId) == 0) {
-                        if (!isNeighOriented) {
+                    if (!isNeighOriented) {
+                        if (!alreadyProcessed.rawAt(neighRawId)) {
                             flipCellOrientation(neighId);
 #if BITPIT_ENABLE_MPI==1
                             if (ghostExchangeNeeded) {
-                                flipped.insert(neighId);
+                                flippedCells.insert(neighId);
                             }
 #endif
+                        } else {
+                            orientable = false;
+                            break;
                         }
-
-                        toVisit.insert(neighId);
-                    } else if (!isNeighOriented) {
-                        orientable = false;
-                        break;
                     }
 
-                    if (!orientable) {
-                        break;
+                    // Add neighbour to the process list
+                    if (!alreadyProcessed.rawAt(neighRawId)) {
+                        processRawList.push_back(neighRawId);
                     }
                 }
+
+                // Stop processing the cell if the patch is not orientable
+                if (!orientable) {
+                    break;
+                }
             }
+
+            // Stop processing if the patch is not orientable
+            if (!orientable) {
+                break;
+            }
+
+            // Cell processing has been completed
+            alreadyProcessed.rawSet(cellRawId, true);
         }
 
+        // If the surface is globally not orientable we can exit
 #if BITPIT_ENABLE_MPI==1
-        // Comunicate the orientable flag among the partitions
         if (ghostExchangeNeeded) {
             MPI_Allreduce(MPI_IN_PLACE, &orientable, 1, MPI_C_BOOL, MPI_LAND, getCommunicator());
         }
 #endif
 
-        // If the surface is not orientable we can exit
         if (!orientable) {
             break;
         }
 
 #if BITPIT_ENABLE_MPI==1
+        // Add ghost to the process list
+        //
+        // A ghost should be added to the process list if:
+        //  - its orientation was flipped by the owner;
+        //  - it has been processed by the owner but is hass't yet processed by
+        //    the current process.
         if (ghostExchangeNeeded) {
-            // Add seeds from other partitions
-            ghostComm->startAllRecvs();
+            // Exchange ghost data
+            ghostCommunicator->startAllRecvs();
 
             for(auto &entry : getGhostCellExchangeSources()) {
                 int rank = entry.first;
-                SendBuffer &buffer = ghostComm->getSendBuffer(rank);
+                SendBuffer &buffer = ghostCommunicator->getSendBuffer(rank);
                 for (long cellId : entry.second) {
-                    if (flipped.count(cellId) > 0) {
-                        buffer << true;
+                    std::size_t cellRawId = getCells().find(cellId).getRawIndex();
+
+                    buffer << static_cast<unsigned char>(alreadyProcessed.rawAt(cellRawId));
+                    if (flippedCells.count(cellId) > 0) {
+                        buffer << static_cast<unsigned char>(1);
                     } else {
-                        buffer << false;
+                        buffer << static_cast<unsigned char>(0);
                     }
                 }
-                ghostComm->startSend(rank);
+                ghostCommunicator->startSend(rank);
             }
 
-            int nPendingRecvs = ghostComm->getRecvCount();
+            int nPendingRecvs = ghostCommunicator->getRecvCount();
             while (nPendingRecvs != 0) {
-                int rank = ghostComm->waitAnyRecv();
-                RecvBuffer buffer = ghostComm->getRecvBuffer(rank);
+                int rank = ghostCommunicator->waitAnyRecv();
+                RecvBuffer buffer = ghostCommunicator->getRecvBuffer(rank);
 
                 for (long cellId : getGhostCellExchangeTargets(rank)) {
-                    bool ghostFlipped;
+                    unsigned char processed;
+                    buffer >> processed ;
+
+                    unsigned char ghostFlipped;
                     buffer >> ghostFlipped;
-                    if (ghostFlipped) {
-                        toVisit.insert(cellId);
-                        flipCellOrientation(cellId);
+
+                    if (ghostFlipped == 1 || processed == 1) {
+                        std::size_t cellRawId = getCells().find(cellId).getRawIndex();
+
+                        if (ghostFlipped == 1) {
+                            flipCellOrientation(cellId);
+                            processRawList.push_back(cellRawId);
+                            alreadyProcessed.rawSet(cellRawId, false);
+                        } else if (processed == 1) {
+                            if (!alreadyProcessed.rawAt(cellRawId)) {
+                                processRawList.push_back(cellRawId);
+                            }
+                        }
                     }
                 }
 
                 --nPendingRecvs;
             }
 
-            ghostComm->waitAllSends();
+            ghostCommunicator->waitAllSends();
 
-            // Clear list of flipped cells
-            flipped.clear();
+            // Clear list of flippedCells cells
+            flippedCells.clear();
         }
 #endif
 
         // Detect if the orientation is completed
-        completed = (toVisit.size() == 0);
+        bool completed = processRawList.empty();
 #if BITPIT_ENABLE_MPI==1
         if (ghostExchangeNeeded) {
             MPI_Allreduce(MPI_IN_PLACE, &completed, 1, MPI_C_BOOL, MPI_LAND, getCommunicator());
         }
 #endif
+
+        if (completed) {
+            break;
+        }
     }
 
     return orientable;
