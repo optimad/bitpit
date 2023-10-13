@@ -5791,37 +5791,48 @@ namespace bitpit {
             (*m_log) << " " << endl;
         }
 
-        // Process internal octants
-        if (verbose){
-            (*m_log) << " Processing internal octants" << endl;
-        }
-
-        m_octree.localBalance(balanceNewOctants, true, false);
-
+        bool initialStep = true;
+        while (true) {
 #if BITPIT_ENABLE_MPI==1
-        // Propagate marker changes across processes
-        if (!m_serial) {
-            if (verbose){
-                (*m_log) << " Propagating marker changes across processes" << endl;
-            }
-
-            while (true) {
-                // Exchange markers across processes
+            // Exchange markers across processes
+            if (!m_serial) {
                 bool markersUpdated = commMarker();
-                MPI_Allreduce(MPI_IN_PLACE, &markersUpdated, 1, MPI_C_BOOL, MPI_LOR, m_comm);
-                if (!markersUpdated) {
-                    break;
+                if (!initialStep) {
+                    MPI_Allreduce(MPI_IN_PLACE, &markersUpdated, 1, MPI_C_BOOL, MPI_LOR, m_comm);
+                    if (!markersUpdated) {
+                        break;
+                    }
                 }
+            }
+#endif
 
-                // Process ghost octants to propagate marker changes applied by other processes
-                bool balanceUpdated = m_octree.localBalance(balanceNewOctants, false, true);
+            // Balance 2:1 the tree
+            //
+            // After the first step only ghost octants are checked for balance, that's because
+            // starting from the second step we only need to propagate marker information across
+            // the processes.
+            bool checkInterior = initialStep;
+            bool checkGhosts   = true;
+
+            bool balanceUpdated = m_octree.localBalance(balanceNewOctants, checkInterior, checkGhosts);
+#if BITPIT_ENABLE_MPI==1
+            if (!m_serial) {
                 MPI_Allreduce(MPI_IN_PLACE, &balanceUpdated, 1, MPI_C_BOOL, MPI_LOR, m_comm);
                 if (!balanceUpdated) {
                     break;
                 }
+            } else {
+                break;
             }
-        }
+#else
+            BITPIT_UNUSED(balanceUpdated);
+            break;
 #endif
+
+            // This is not anymore the first balance step
+            initialStep = false;
+
+        }
 
         // Print footer
         if (verbose){
