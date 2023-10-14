@@ -2894,6 +2894,10 @@ namespace bitpit {
         std::sort(mortonList.begin(), mortonList.end());
 
         // Build node list and connectivity
+        m_nodes.clear();
+        m_connectivity.clear();
+        m_ghostsConnectivity.clear();
+
         m_nodes.reserve(mortonList.size());
         m_connectivity.resize(noctants);
         m_ghostsConnectivity.resize(nghosts);
@@ -2918,22 +2922,33 @@ namespace bitpit {
             }
             nodeId++;
         }
+
+        m_nodes.shrink_to_fit();
     };
 
     /*! Clear nodes vector and connectivity of octants of local tree
+     * \param[in] release if it's true the memory hold by the connectivity will be
+     * released, otherwise the connectivity will be cleared but its memory will
+     * not be released
      */
     void
-    LocalTree::clearConnectivity(){
-        u32arr3vector().swap(m_nodes);
-        u32vector2D().swap(m_connectivity);
-        u32vector2D().swap(m_ghostsConnectivity);
+    LocalTree::clearConnectivity(bool release){
+        if (release) {
+            u32arr3vector().swap(m_nodes);
+            u32vector2D().swap(m_connectivity);
+            u32vector2D().swap(m_ghostsConnectivity);
+        } else {
+            m_nodes.clear();
+            m_connectivity.clear();
+            m_ghostsConnectivity.clear();
+        }
     };
 
     /*! Updates nodes vector and connectivity of octants of local tree
      */
     void
     LocalTree::updateConnectivity(){
-        clearConnectivity();
+        clearConnectivity(false);
         computeConnectivity();
     };
 
