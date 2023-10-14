@@ -5843,10 +5843,10 @@ namespace bitpit {
     void
     ParaTree::write(const std::string &filename) {
 
-        if (m_octree.m_connectivity.size() == 0) {
-            m_octree.computeConnectivity();
-        }
+        // Update connectivity
+        m_octree.updateConnectivity();
 
+        // Write output file
         stringstream name;
         name << "s" << std::setfill('0') << std::setw(4) << m_nproc << "-p" << std::setfill('0') << std::setw(4) << m_rank << "-" << filename << ".vtu";
 
@@ -5998,10 +5998,10 @@ namespace bitpit {
     void
     ParaTree::writeTest(const std::string &filename, vector<double> data) {
 
-        if (m_octree.m_connectivity.size() == 0) {
-            m_octree.computeConnectivity();
-        }
+        // Update connectivity
+        m_octree.updateConnectivity();
 
+        // Write output file
         stringstream name;
         name << "s" << std::setfill('0') << std::setw(4) << m_nproc << "-p" << std::setfill('0') << std::setw(4) << m_rank << "-" << filename << ".vtu";
 
