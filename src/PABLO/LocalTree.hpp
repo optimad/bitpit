@@ -227,7 +227,7 @@ private:
 
 	void 		computeNeighSearchBegin(uint64_t sameSizeVirtualNeighMorton, const octvector &octants, uint32_t *searchBeginIdx, uint64_t *searchBeginMorton) const;
 
-	bool 		localBalance(bool doNew, bool doInterior, bool doGhost);
+	bool 		localBalance(bool doNew, bool checkInterior, bool checkGhost);
 
 	bool 		fixBrokenFamiliesMarkers(std::vector<Octant *> *updatedOctants = nullptr, std::vector<bool> *updatedGhostFlags = nullptr);
 
