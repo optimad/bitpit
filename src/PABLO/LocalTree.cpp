@@ -1920,12 +1920,12 @@ namespace bitpit {
 
     /*! 2:1 balancing on level a local tree (refinement wins!)
      * \param[in] doNew Set to true the balance is enforced also on new octants.
-     * \param[in] doInterior Set to false if the interior octants are already balanced.
-     * \param[in] doGhost Set to true if the ghost octants will be processed.
+     * \param[in] checkInterior Set to true if interior octants should be checked.
+     * \param[in] checkGhost Set to true if ghost octants should be checked.
      * \return True if balanced done with some markers modification.
      */
     bool
-    LocalTree::localBalance(bool doNew, bool doInterior, bool doGhost){
+    LocalTree::localBalance(bool doNew, bool checkInterior, bool checkGhost){
 
         bool balanceEdges = ((m_balanceCodim>1) && (m_dim==3));
         bool balanceNodes = (m_balanceCodim==m_dim);
@@ -1934,7 +1934,7 @@ namespace bitpit {
         std::vector<bool> processGhostFlags;
 
         // Identify internal octants that will be processed
-        if(doInterior){
+        if(checkInterior){
             for (Octant &octant : m_octants){
                 // Skip octants that doesn't need balancing
                 bool balanceOctant = octant.getBalance();
@@ -1964,7 +1964,7 @@ namespace bitpit {
         // because it's faster to process all the ghost octants that may affect balacning
         // of internal octants, rather than find the ones that actually affect balacing of
         // internal octants.
-        if (doGhost) {
+        if (checkGhost) {
             for (Octant &octant : m_ghosts){
                 // Only ghosts of the first layer can affect load balance
                 if (octant.getGhostLayer() > 0) {
@@ -2854,7 +2854,7 @@ namespace bitpit {
      */
     void
     LocalTree::computeConnectivity(){
-        vector<uint64_t>                             mortonList;
+        vector<uint64_t>                             nodeKeys;
         unordered_map<uint64_t, array<uint32_t, 3> > nodeCoords;
         unordered_map<uint64_t, vector<uint64_t> >   nodeOctants;
         uint32_t                                     noctants = getNumOctants();
@@ -2863,7 +2863,7 @@ namespace bitpit {
 
 
         // Gather node information
-        mortonList.reserve(noctants);
+        nodeKeys.reserve(noctants);
         nodeCoords.reserve(noctants);
         nodeOctants.reserve(noctants);
 
@@ -2881,31 +2881,31 @@ namespace bitpit {
                 u32array3 node;
                 octant->getLogicalNode(node, i);
 
-                uint64_t morton = octant->computeNodePersistentKey(node);
-                if (nodeCoords.count(morton) == 0) {
-                    mortonList.push_back(morton);
-                    nodeCoords.insert({{morton, std::move(node)}});
-                    nodeOctants[morton].reserve(m_treeConstants->nNodes);
+                uint64_t nodeKey = octant->computeNodePersistentKey(node);
+                if (nodeCoords.count(nodeKey) == 0) {
+                    nodeKeys.push_back(nodeKey);
+                    nodeCoords.insert({{nodeKey, std::move(node)}});
+                    nodeOctants[nodeKey].reserve(m_treeConstants->nNodes);
                 }
 
-                nodeOctants[morton].push_back(n);
+                nodeOctants[nodeKey].push_back(n);
             }
         }
-        std::sort(mortonList.begin(), mortonList.end());
+        std::sort(nodeKeys.begin(), nodeKeys.end());
 
         // Build node list and connectivity
         m_nodes.clear();
         m_connectivity.clear();
         m_ghostsConnectivity.clear();
 
-        m_nodes.reserve(mortonList.size());
+        m_nodes.reserve(nodeKeys.size());
         m_connectivity.resize(noctants);
         m_ghostsConnectivity.resize(nghosts);
 
         uint32_t nodeId = 0;
-        for (uint64_t morton : mortonList) {
-            m_nodes.emplace_back(std::move(nodeCoords.at(morton)));
-            for (uint64_t n : nodeOctants.at(morton)) {
+        for (uint64_t nodeKey : nodeKeys) {
+            m_nodes.emplace_back(std::move(nodeCoords.at(nodeKey)));
+            for (uint64_t n : nodeOctants.at(nodeKey)) {
                 std::vector<uint32_t> *octantConnect;
                 if (n < noctants) {
                     uint32_t octantId = n;
