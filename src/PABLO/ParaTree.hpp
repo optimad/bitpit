@@ -518,7 +518,7 @@ namespace bitpit {
         bool 		adaptGlobalRefine(bool mapper_flag = false);
         bool 		adaptGlobalCoarse(bool mapper_flag = false);
         void 		computeConnectivity();
-        void 		clearConnectivity();
+        void 		clearConnectivity(bool release = true);
         void 		updateConnectivity();
         const u32vector2D & getConnectivity() const;
         const u32vector & getConnectivity(uint32_t idx) const;

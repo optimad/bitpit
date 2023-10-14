@@ -3956,10 +3956,13 @@ namespace bitpit {
     }
 
     /** Clear the connectivity of octants.
+     * \param[in] release if it's true the memory hold by the connectivity will be
+     * released, otherwise the connectivity will be cleared but its memory will
+     * not be released
      */
     void
-    ParaTree::clearConnectivity() {
-        m_octree.clearConnectivity();
+    ParaTree::clearConnectivity(bool release) {
+        m_octree.clearConnectivity(release);
     }
 
     /** Update the connectivity of octants.

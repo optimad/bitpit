@@ -240,7 +240,7 @@ private:
 	void 		findMortonUpperBound(uint64_t targetMorton, const octvector &octants, uint32_t *upperBoundIdx, uint64_t *upperBoundMorton) const;
 
 	void 		computeConnectivity();
-	void 		clearConnectivity();
+	void 		clearConnectivity(bool release = true);
 	void 		updateConnectivity();
 
 	// =================================================================================== //
