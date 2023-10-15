@@ -338,7 +338,7 @@ void LevelSetObject::setSizeNarrowBand(double r){
 LevelSetIntersectionStatus LevelSetObject::intersectSurface(long id, LevelSetIntersectionMode mode) const{
 
     double absoluteDistance  = std::abs(getValue(id));
-    double distanceTolerance = m_kernel->getMesh()->getTol();
+    double distanceTolerance = m_kernel->getDistanceTolerance();
 
     switch(mode){
         case LevelSetIntersectionMode::FAST_GUARANTEE_TRUE:
