@@ -95,6 +95,16 @@ LevelSetFillIn LevelSetKernel::getFillIn() const
 }
 
 /*!
+ * Get the tolerance for distance checks.
+ *
+ * \result The tolerance for distance checks.
+*/
+double LevelSetKernel::getDistanceTolerance() const
+{
+    return m_mesh->getTol();
+}
+
+/*!
  * Updates the kernel after an adaption.
  *
  * @param[in] adaptionData are the information about the adaption
@@ -151,7 +161,7 @@ bool LevelSetKernel::isPointInCell(long id, const std::array<double,3> &pointCoo
  */
 double LevelSetKernel::isCellInsideBoundingBox( long id, const std::array<double, 3> &boxMin, const std::array<double, 3> &boxMax ) const {
 
-    double distanceTolerance = m_mesh->getTol();
+    double distanceTolerance = getDistanceTolerance();
 
     std::array<double,3> cellBoxMin;
     std::array<double,3> cellBoxMax;
