@@ -74,6 +74,8 @@ class LevelSetKernel {
 
     LevelSetFillIn                              getFillIn() const;
 
+    double                                      getDistanceTolerance() const;
+
     virtual std::array<double, 3>               computeCellCentroid(long) const = 0;
     virtual double                              computeCellTangentRadius(long) const = 0;
     virtual double                              computeCellBoundingRadius(long) const = 0;
