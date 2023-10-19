@@ -350,7 +350,7 @@ int subtest_001()
         Q1.fill(0.0);
         Q1[2] = 1.0;
         P1.fill(0.0);
-        P1[2] = 1.0;
+        P1[2] = 2.0;
         n1.fill(0.0);
         n1[2] = 1.0;
         intersect = CGElem::intersectSegmentPlane(Q0, Q1, P1, n1, P);
@@ -376,6 +376,7 @@ int subtest_001()
         Q1.fill(0.0);
         Q1[2] = 0.5;
         P1.fill(0.0);
+        P1[2] = 0.25;
         n1.fill(0.0);
         n1[1] = 1.0;
         intersect = CGElem::intersectSegmentPlane(Q0, Q1, P1, n1, P);
