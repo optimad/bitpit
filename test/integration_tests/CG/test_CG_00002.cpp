@@ -859,6 +859,20 @@ bool testIntersectBoxPolygon(){
 }
 
 /*!
+ * \return true, test intersectPointLine passed
+ */
+bool testIntersectPointLine(){
+    
+    array3D p, n, target;
+    p ={{3,4,5}};
+    n = {{1.4, -5.6, 9.9}};
+    n /= norm2(n);
+    target = p + 1.4453623*n;
+    
+    return intersectPointLine(target, p ,n);
+}
+
+/*!
  * \return true, test intersectPointSegment passed
  */
 bool testIntersectPointSegment(){
@@ -1490,6 +1504,15 @@ int main(int argc, char *argv[])
 
         pass = testIntersectBoxPolygon();
         std::cout << "Testing intersectBoxPolygon...";
+        if (!pass) {
+            std::cout << " Failed" << std::endl;
+            return 1;
+        } else {
+            std::cout << " Passed" << std::endl;
+        }
+
+        pass = testIntersectPointLine();
+        std::cout << "Testing intersectPointLine...";
         if (!pass) {
             std::cout << " Failed" << std::endl;
             return 1;

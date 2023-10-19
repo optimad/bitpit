@@ -2500,6 +2500,26 @@ bool intersectBoxSphere( array3D const &A0, array3D const &A1, array3D const &ce
 //to levelset }
 
 /*!
+ * checks if points lies on line defined by two given points in 3D
+ * \param[in] P point coordinates
+ * \param[in] Q point on line
+ * \param[in] n line direction
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
+ * \return if point lies on segment
+ */
+bool intersectPointLine( array3D const &P, array3D const &Q, array3D const &n, const double distanceTolerance)
+{
+    assert( validLine(Q,n) );
+
+    array3D xP;
+    if(distancePointLine(P, Q, n, xP) > distanceTolerance){
+        return false;
+    }
+
+    return true;
+}
+
+/*!
  * checks if points lies on segment in 3D
  * \param[in] P point coordinates
  * \param[in] P1 start point of segment
