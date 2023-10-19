@@ -2531,11 +2531,10 @@ bool intersectPointSegment( array3D const &P, array3D const &P1, array3D const &
 {
     assert( validSegment(P1,P2) );
 
-    if(distancePointSegment(P, P1, P2) > distanceTolerance){
-        return false;
-    }
+    array3D xP     = projectPointSegment( P, P1, P2 );
+    array3D offset = xP - P;
 
-    return true;
+    return (dotProduct(offset, offset) <= distanceTolerance * distanceTolerance);
 }
 
 /*!
