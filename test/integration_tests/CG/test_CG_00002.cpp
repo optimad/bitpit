@@ -582,6 +582,7 @@ bool testIntersectLinePlane(){
  */
 bool testIntersectSegmentPlane(){
     
+    // Test 1: plane intersects segment
     bool check(true);
     double cc = pow(29,0.5);
     
@@ -597,6 +598,11 @@ bool testIntersectSegmentPlane(){
     
     check &= intersectSegmentPlane(p0,p1,p2,n2,xp);
     check &= (norm2(test-xp)<1.E-12);
+
+    // Test 2: plane does not intersect segment
+    p2[0] = 10.0;
+
+    check &= !intersectSegmentPlane(p0,p1,p2,n2,xp);
     
     return check;
 }
@@ -883,9 +889,9 @@ bool testIntersectPointSegment(){
     n0 /= norm2(n0);
     p1 = p0 + 5.23*n0;
     target1 = p0 + 1.4453623*n0;
-    target2 = p1;
+    target2 = p0 + 8.62*n0;
     
-    return (intersectPointSegment(target1, p0,p1) && intersectPointSegment(target2, p0,p1) );
+    return (intersectPointSegment(target1, p0,p1) && !intersectPointSegment(target2, p0,p1) );
 }
 
 /*!
