@@ -163,6 +163,8 @@ double distanceLineLine(array3D const &, array3D const &, array3D const &, array
 double distanceLineLine(array3D const &, array3D const &, array3D const &, array3D const &, array3D &, array3D &);
 
 
+bool intersectPointLine( array3D const &, array3D const &, array3D const &, 
+        const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE) ;
 bool intersectPointSegment( array3D const &, array3D const &, array3D const &, 
         const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE) ;
 bool intersectPointTriangle( array3D const &, array3D const &, array3D const &, array3D const &, 
