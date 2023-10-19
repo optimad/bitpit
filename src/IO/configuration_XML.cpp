@@ -38,7 +38,7 @@ namespace XML {
 /*!
     Default encoding.
 */
-const std::string DEFAULT_ENCODING = "ISO-8859-1";
+const std::string DEFAULT_ENCODING = "UTF-8";
 
 /*!
     Read an XML node.
