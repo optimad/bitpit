@@ -436,6 +436,178 @@ void SparseMatrix::squeeze()
     squeezeValueStorage();
 }
 
+/*!
+ * Displays matrix information.
+ *
+ * \param stream is the output stream
+ * \param negligiblity is the threshold below which the values are considered
+ * negligible
+ * \param[in] indent is the number of spaces to prepend to each row
+ */
+void SparseMatrix::display(std::ostream &stream, double negligiblity, int indent) const
+{
+    // Initialize padding
+    std::string padding(indent, ' ');
+
+    // Display base information
+    int blockSize = getBlockSize();
+    int nBlockElements = blockSize * blockSize;
+
+    stream << padding << "General information" << std::endl;
+    stream << padding << "  Block size ............................................ " << blockSize << std::endl;
+
+    // Gather local information
+    long nRows = getRowCount();
+    long nCols = getColCount();
+
+    long nRowElements = getRowElementCount();
+    long nColElements = getColElementCount();
+
+    long nNZBlocks   = getNZCount();
+    long nNZElements = getNZElementCount();
+
+    long maxRowNZBlocks   = getMaxRowNZCount();
+    long maxRowNZElements = getMaxRowNZElementCount();
+
+    // Count local non-negligible blocks and elements
+    int nZeroStreak       = 0;
+    long nNZBlockValues   = 0;
+    long nNZElementValues = 0;
+    for (long k = 0; k < nNZElements; ++k) {
+        double value = m_values[k];
+        if (!bitpit::utils::DoubleFloatingEqual()(value, 0., negligiblity, negligiblity)) {
+            ++nNZElementValues;
+            nZeroStreak = 0;
+        } else {
+            ++nZeroStreak;
+        }
+
+        if ((k % nBlockElements) == 0) {
+            if (nZeroStreak < nBlockElements) {
+                ++nNZBlockValues;
+            }
+            nZeroStreak = 0;
+        }
+    }
+
+    // Evaluate local sparisty
+    std::size_t nBlocks   = nRows * nCols;
+    std::size_t nElements = nRowElements * nColElements;
+
+    double blockSparsity   = static_cast<double>(nBlocks - nNZBlocks) / nBlocks;
+    double elementSparsity = static_cast<double>(nElements - nNZElements) / nElements;
+
+    double blockValueSparsity   = static_cast<double>(nBlocks - nNZBlockValues) / nBlocks;
+    double elementValueSparsity = static_cast<double>(nElements - nNZElementValues) / nElements;
+
+    // Evaluate local memory usage
+    double valueStorageMemory = nNZElements * sizeof(decltype(m_values)::value_type);
+
+    // Display local information
+    stream << padding << "Local information: " << std::endl;
+    stream << padding << "  Maximum number of non-zero blocks per row ............. " << maxRowNZBlocks << std::endl;
+    stream << padding << "  Maximum number of non-zero elements per row ........... " << maxRowNZElements << std::endl;
+    stream << padding << "  Number of block rows .................................. " << nRows << std::endl;
+    stream << padding << "  Number of block columns ............................... " << nCols << std::endl;
+    stream << padding << "  Number of non-zero blocks (pattern) ................... " << nNZBlocks << std::endl;
+    stream << padding << "  Number of non-zero elements (pattern) ................. " << nNZElements << std::endl;
+    stream << padding << "  Number of non-zero blocks (non-neglibile values) ...... " << nNZBlockValues << std::endl;
+    stream << padding << "  Number of non-zero elements (non-neglibile values) .... " << nNZElementValues << std::endl;
+    stream << padding << "  Sparsity of the blocks (pattern) ...................... " << blockSparsity << std::endl;
+    stream << padding << "  Sparsity of the elements (pattern) .................... " << elementSparsity << std::endl;
+    stream << padding << "  Sparsity of the blocks (non-neglibile values) ......... " << blockValueSparsity << std::endl;
+    stream << padding << "  Sparsity of the elements (non-neglibile values) ....... " << elementValueSparsity << std::endl;
+
+    stream << padding << "  Memory used by the value storage ...................... ";
+    if (valueStorageMemory > 1024 * 1024 * 1024) {
+        stream  << valueStorageMemory / (1024 * 1024 * 1024) << " GB";
+    } else if (valueStorageMemory > 1024 * 1024) {
+        stream  << valueStorageMemory / (1024 * 1024) << " MB";
+    } else if (valueStorageMemory > 1024) {
+        stream  << valueStorageMemory / (1024) << " KB";
+    }
+    stream << std::endl;
+
+#if BITPIT_ENABLE_MPI==1
+    // Display global information
+    if (isPartitioned()) {
+        // Get MPI data types
+        MPI_Datatype valueMPIDataType;
+        if (std::is_same<decltype(m_values)::value_type, double>::value) {
+            valueMPIDataType = MPI_DOUBLE;
+        } else if (std::is_same<decltype(m_values)::value_type, float>::value) {
+            valueMPIDataType = MPI_FLOAT;
+        } else {
+            throw std::runtime_error("Unable to identify the MPI data type of the matrix values.");
+        }
+
+        // Gather global information
+        long nGlobalRows = getRowGlobalCount();
+        long nGlobalCols = getColGlobalCount();
+
+        long nGlobalRowElements = getRowGlobalElementCount();
+        long nGlobalColElements = getColGlobalElementCount();
+
+        long nGlobalNZBlocks   = getNZGlobalCount();
+        long nGlobalNZElements = getNZGlobalElementCount();
+
+        long maxGlobalRowNZBlocks;
+        long maxGlobalRowNZElements;
+        MPI_Allreduce(&maxRowNZBlocks,   &maxGlobalRowNZBlocks,   1, MPI_LONG, MPI_MAX, getCommunicator());
+        MPI_Allreduce(&maxRowNZElements, &maxGlobalRowNZElements, 1, MPI_LONG, MPI_MAX, getCommunicator());
+
+        // Count global non-negligible blocks and elements
+        long nGlobalNZBlockValues;
+        long nGlobalNZElementValues;
+        MPI_Allreduce(&nNZBlockValues,   &nGlobalNZBlockValues,   1, MPI_LONG, MPI_SUM, getCommunicator());
+        MPI_Allreduce(&nNZElementValues, &nGlobalNZElementValues, 1, MPI_LONG, MPI_SUM, getCommunicator());
+
+        // Evaluate global sparisty
+        std::size_t nGlobalBlocks   = nGlobalRows * nGlobalCols;
+        std::size_t nGlobalElements = nGlobalRowElements * nGlobalColElements;
+
+        double globalBlockSparsity   = static_cast<double>(nGlobalBlocks - nGlobalNZBlocks) / nGlobalBlocks;
+        double globalElementSparsity = static_cast<double>(nGlobalElements - nGlobalNZElements) / nGlobalElements;
+
+        double globalBlockValueSparsity   = static_cast<double>(nGlobalBlocks - nGlobalNZBlockValues) / nGlobalBlocks;
+        double globalElementValueSparsity = static_cast<double>(nGlobalElements - nGlobalNZElementValues) / nGlobalElements;
+
+        // Evaluate global memory usage
+        double valueStorageGlobalMemory;
+        MPI_Allreduce(&valueStorageMemory, &valueStorageGlobalMemory, 1, valueMPIDataType, MPI_SUM, getCommunicator());
+
+        // Display information
+        stream << padding << "Global information: " << std::endl;
+        stream << padding << "  Maximum number of non-zero blocks per row ............. " << maxGlobalRowNZBlocks << std::endl;
+        stream << padding << "  Maximum number of non-zero elements per row ........... " << maxGlobalRowNZElements << std::endl;
+        stream << padding << "  Number of block columns ............................... " << nGlobalCols << std::endl;
+        stream << padding << "  Number of block rows .................................. " << nGlobalRows << std::endl;
+        stream << padding << "  Number of non-zero blocks (pattern) ................... " << nGlobalNZBlocks << std::endl;
+        stream << padding << "  Number of non-zero elements (pattern) ................. " << nGlobalNZElements << std::endl;
+        stream << padding << "  Number of non-zero blocks (non-neglibile values) ...... " << nGlobalNZBlockValues << std::endl;
+        stream << padding << "  Number of non-zero elements (non-neglibile values) .... " << nGlobalNZElementValues << std::endl;
+        stream << padding << "  Sparsity of the blocks (pattern) ...................... " << globalBlockSparsity << std::endl;
+        stream << padding << "  Sparsity of the elements (pattern) .................... " << globalElementSparsity << std::endl;
+        stream << padding << "  Sparsity of the blocks (non-neglibile values) ......... " << globalBlockValueSparsity << std::endl;
+        stream << padding << "  Sparsity of the elements (non-neglibile values) ....... " << globalElementValueSparsity << std::endl;
+
+        stream << padding << "  Memory used by the value storage ...................... ";
+        if (valueStorageGlobalMemory > 1024 * 1024 * 1024) {
+            stream  << valueStorageGlobalMemory / (1024 * 1024 * 1024) << " GB";
+        } else if (valueStorageGlobalMemory > 1024 * 1024) {
+            stream  << valueStorageGlobalMemory / (1024 * 1024) << " MB";
+        } else if (valueStorageGlobalMemory > 1024) {
+            stream  << valueStorageGlobalMemory / (1024) << " KB";
+        }
+        stream << std::endl;
+    }
+#endif
+
+    // Display information
+    stream << padding << "Display information: " << std::endl;
+    stream << padding << "  Negligibility threshold ............................... " << negligiblity << std::endl;
+}
+
 /**
 * Initialize the storage for the pattern.
 */
@@ -552,6 +724,9 @@ void SparseMatrix::assembly()
     if (m_partitioned) {
         MPI_Allreduce(&m_maxRowNZ, &m_global_maxRowNZ, 1, MPI_LONG, MPI_MAX, m_communicator);
         MPI_Allreduce(&m_nNZ, &m_global_nNZ, 1, MPI_LONG, MPI_SUM, m_communicator);
+    } else {
+        m_global_maxRowNZ = m_maxRowNZ;
+        m_global_nNZ      = m_nNZ;
     }
 #endif
 
@@ -899,9 +1074,9 @@ long SparseMatrix::getMaxRowNZGlobalCount() const
 */
 long SparseMatrix::getNZGlobalElementCount() const
 {
-    long nElement = getBlockSize() * getNZGlobalCount();
+    long nGlobalNZ = getNZGlobalCount();
 
-    return nElement;
+    return getNZElementCount(nGlobalNZ);
 }
 
 /**
