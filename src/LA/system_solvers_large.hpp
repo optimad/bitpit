@@ -249,9 +249,9 @@ private:
 class SystemSolver {
 
 public:
-    enum DumpFormat {
-        DUMP_BINARY,
-        DUMP_ASCII
+    enum FileFormat {
+        FILE_BINARY,
+        FILE_ASCII
     };
 
     SystemSolver(bool debug = false);
@@ -306,9 +306,16 @@ public:
     void solve();
     void solve(const std::vector<double> &rhs, std::vector<double> *solution);
 
-    void dump(const std::string &directory, const std::string &prefix = "",
-              DumpFormat matrixFormat = DUMP_BINARY, DumpFormat rhsFormat = DUMP_BINARY,
-              DumpFormat solutionFormat = DUMP_BINARY) const;
+    void dumpSystem(const std::string &directory, const std::string &prefix = "") const;
+#if BITPIT_ENABLE_MPI==1
+    void restoreSystem(MPI_Comm communicator, const std::string &directory, const std::string &prefix = "");
+#else
+    void restoreSystem(const std::string &directory, const std::string &prefix = "");
+#endif
+
+    void exportMatrix(const std::string &filePath, FileFormat exportFormat = FILE_BINARY) const;
+    void exportRHS(const std::string &filePath, FileFormat exportFormat = FILE_BINARY) const;
+    void exportSolution(const std::string &filePath, FileFormat exportFormat = FILE_BINARY) const;
 
     virtual void setNullSpace();
     void unsetNullSpace();
@@ -322,12 +329,14 @@ public:
     const double * getRHSRawReadPtr() const;
     void restoreRHSRawPtr(double *raw_rhs);
     void restoreRHSRawReadPtr(const double *raw_rhs) const;
+    void fillRHS(const std::string &filePath);
 
     double * getSolutionRawPtr();
     const double * getSolutionRawPtr() const;
     const double * getSolutionRawReadPtr() const;
     void restoreSolutionRawPtr(double *raw_solution);
     void restoreSolutionRawReadPtr(const double *raw_solution) const;
+    void fillSolution(const std::string &filePath);
 
     bool isForceConsistencyEnabled() const;
     void enableForceConsistency(bool enable);
@@ -344,13 +353,18 @@ protected:
     KSPOptions m_KSPOptions;
     KSPStatus m_KSPStatus;
 
+    void matrixCreate(int blockSize);
     void matrixCreate(const SystemMatrixAssembler &assembler);
     void matrixFill(const SystemMatrixAssembler &assembler);
+    void matrixFill(const std::string &filePath);
+    void matrixDestroy();
     void matrixUpdate(long nRows, const long *rows, const SystemMatrixAssembler &assembler);
 
     void vectorsCreate();
     void vectorsReorder(bool invert);
     void vectorsFill(const std::vector<double> &rhs, std::vector<double> *solution);
+    void vectorsFill(const std::string &rhsFilePath, const std::string &solutionFilePath);
+    void vectorsDestroy();
     void vectorsExport(std::vector<double> *solution);
 
     void clearReordering();
@@ -366,6 +380,11 @@ protected:
 
     virtual void preKSPSolveActions();
     virtual void postKSPSolveActions();
+
+    std::string getInfoFilePath(const std::string &directory, const std::string &prefix) const;
+    std::string getMatrixFilePath(const std::string &directory, const std::string &prefix) const;
+    std::string getRHSFilePath(const std::string &directory, const std::string &prefix) const;
+    std::string getSolutionFilePath(const std::string &directory, const std::string &prefix) const;
 
 #if BITPIT_ENABLE_MPI==1
     const MPI_Comm & getCommunicator() const;

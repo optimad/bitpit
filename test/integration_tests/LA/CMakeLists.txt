@@ -35,6 +35,7 @@ list(APPEND TESTS "test_LA_00005")
 if (BITPIT_ENABLE_MPI)
     list(APPEND TESTS "test_LA_parallel_00001")
     list(APPEND TESTS "test_LA_parallel_00002")
+    list(APPEND TESTS "test_LA_parallel_00003")
 endif()
 
 # Test extra modules
