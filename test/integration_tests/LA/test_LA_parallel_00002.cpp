@@ -79,6 +79,7 @@ int subtest_001(int rank, int nProcs)
         matrix.addRow(rowPattern, rowValues);
     }
     matrix.assembly();
+    matrix.display(log::cout(), 1e-14, 0);
 
     // Build system
     log::cout() << "Building system..." << std::endl;

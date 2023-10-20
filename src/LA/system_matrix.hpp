@@ -58,6 +58,8 @@ public:
     void clear(bool release = false);
     void squeeze();
 
+    virtual void display(std::ostream &stream, double negligiblity, int indent = 0) const;
+
     void assembly();
     bool isAssembled() const;
 
