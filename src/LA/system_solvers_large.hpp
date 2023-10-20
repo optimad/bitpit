@@ -285,6 +285,9 @@ public:
     BITPIT_DEPRECATED(void setUp());
     BITPIT_DEPRECATED(bool isSetUp() const);
 
+    bool getTranspose() const;
+    void setTranspose(bool transpose);
+
     int getBlockSize() const;
 
     long getRowCount() const;
