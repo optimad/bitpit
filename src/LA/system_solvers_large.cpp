@@ -114,6 +114,49 @@ SystemMatrixAssembler::AssemblyOptions SystemSparseMatrixAssembler::getOptions()
 }
 
 /*!
+ * Get the transpose flag.
+ *
+ * \result Returns true if the transposed system will be solved, false otherwise.
+ */
+bool SystemSolver::getTranspose() const
+{
+    return m_transpose;
+}
+
+/*!
+ * Set the transpose flag.
+ *
+ * If the system is already assembled and the transpose flag needs to be changed,
+ * both the soltion vector and the RHS one will be destroyed and re-created.
+ *
+ * If the transpose flag needs to be changed, the workspaces associated wit the
+ * system will be cleared.
+ *
+ * \param transpose if set to true, transposed system will be solved
+ */
+void SystemSolver::setTranspose(bool transpose)
+{
+    // Early return if the transpose flag is already correctly set.
+    if (m_transpose == transpose) {
+        return;
+    }
+
+    // Clear the workspace
+    clearWorkspace();
+
+    // Re-create the vectors
+    if (isAssembled()) {
+        VecDestroy(&m_rhs);
+        VecDestroy(&m_solution);
+
+        vectorsCreate();
+    }
+
+    // Set the flag
+    m_transpose = transpose;
+}
+
+/*!
  * Get the block size.
  *
  * \result The block size.
