@@ -306,9 +306,27 @@ public:
     void solve();
     void solve(const std::vector<double> &rhs, std::vector<double> *solution);
 
+    void dumpMatrix(const std::string &directory, const std::string &prefix = "",
+                    DumpFormat matrixFormat = DUMP_BINARY) const;
+    void dumpSolution(const std::string &directory, const std::string &prefix = "",
+                      DumpFormat solutionFormat = DUMP_BINARY) const;
+    void dumpRHS(const std::string &directory, const std::string &prefix = "",
+                 DumpFormat rhsFormat = DUMP_BINARY) const;
+    void dumpInfo(const std::string &directory, const std::string &prefix = "") const;
     void dump(const std::string &directory, const std::string &prefix = "",
               DumpFormat matrixFormat = DUMP_BINARY, DumpFormat rhsFormat = DUMP_BINARY,
               DumpFormat solutionFormat = DUMP_BINARY) const;
+
+    void restoreMatrix(const std::string &directory, const std::string &prefix = "");
+    void restoreSolution(const std::string &directory, const std::string &prefix = "");
+    void restoreRHS(const std::string &directory, const std::string &prefix = "");
+    void restoreInfo(const std::string &directory, const std::string &prefix = "");
+#if BITPIT_ENABLE_MPI==1
+    void restore(MPI_Comm communicator, bool isPartitioned, const std::string &directory,
+            const std::string &prefix = "");
+#else
+    void restore(const std::string &directory, const std::string &prefix = "");
+#endif
 
     virtual void setNullSpace();
     void unsetNullSpace();
@@ -344,6 +362,7 @@ protected:
     KSPOptions m_KSPOptions;
     KSPStatus m_KSPStatus;
 
+    void matrixCreate(int blockSize);
     void matrixCreate(const SystemMatrixAssembler &assembler);
     void matrixFill(const SystemMatrixAssembler &assembler);
     void matrixUpdate(long nRows, const long *rows, const SystemMatrixAssembler &assembler);
