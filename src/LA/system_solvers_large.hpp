@@ -308,22 +308,19 @@ public:
 
     void dumpMatrix(const std::string &directory, const std::string &prefix = "",
                     DumpFormat matrixFormat = DUMP_BINARY) const;
-    void dumpSolution(const std::string &directory, const std::string &prefix = "",
-                      DumpFormat solutionFormat = DUMP_BINARY) const;
     void dumpRHS(const std::string &directory, const std::string &prefix = "",
                  DumpFormat rhsFormat = DUMP_BINARY) const;
-    void dumpInfo(const std::string &directory, const std::string &prefix = "") const;
+    void dumpSolution(const std::string &directory, const std::string &prefix = "",
+                      DumpFormat solutionFormat = DUMP_BINARY) const;
     void dump(const std::string &directory, const std::string &prefix = "",
               DumpFormat matrixFormat = DUMP_BINARY, DumpFormat rhsFormat = DUMP_BINARY,
               DumpFormat solutionFormat = DUMP_BINARY) const;
 
     void restoreMatrix(const std::string &directory, const std::string &prefix = "");
-    void restoreSolution(const std::string &directory, const std::string &prefix = "");
     void restoreRHS(const std::string &directory, const std::string &prefix = "");
-    void restoreInfo(const std::string &directory, const std::string &prefix = "");
+    void restoreSolution(const std::string &directory, const std::string &prefix = "");
 #if BITPIT_ENABLE_MPI==1
-    void restore(MPI_Comm communicator, bool isPartitioned, const std::string &directory,
-            const std::string &prefix = "");
+    void restore(MPI_Comm communicator, const std::string &directory, const std::string &prefix = "");
 #else
     void restore(const std::string &directory, const std::string &prefix = "");
 #endif
@@ -365,11 +362,13 @@ protected:
     void matrixCreate(int blockSize);
     void matrixCreate(const SystemMatrixAssembler &assembler);
     void matrixFill(const SystemMatrixAssembler &assembler);
+    void matrixDestroy();
     void matrixUpdate(long nRows, const long *rows, const SystemMatrixAssembler &assembler);
 
     void vectorsCreate();
     void vectorsReorder(bool invert);
     void vectorsFill(const std::vector<double> &rhs, std::vector<double> *solution);
+    void vectorsDestroy();
     void vectorsExport(std::vector<double> *solution);
 
     void clearReordering();
@@ -385,6 +384,11 @@ protected:
 
     virtual void preKSPSolveActions();
     virtual void postKSPSolveActions();
+
+    std::string getInfoFilePath(const std::string &directory, const std::string &prefix) const;
+    std::string getMatrixFilePath(const std::string &directory, const std::string &prefix) const;
+    std::string getRHSFilePath(const std::string &directory, const std::string &prefix) const;
+    std::string getSolutionFilePath(const std::string &directory, const std::string &prefix) const;
 
 #if BITPIT_ENABLE_MPI==1
     const MPI_Comm & getCommunicator() const;

@@ -102,7 +102,7 @@ int subtest_001(int rank, int nProcs)
     log::cout() << "Restoring system..." << std::endl;
 
     SystemSolver restoredSystem("", false);
-    restoredSystem.restore(MPI_COMM_WORLD, true, ".", "test_parallel_00003_");
+    restoredSystem.restore(MPI_COMM_WORLD, ".", "test_parallel_00003_");
 
     long restoredGlobalNRows = restoredSystem.getRowGlobalCount();
     long globalNRows = system.getRowGlobalCount();
