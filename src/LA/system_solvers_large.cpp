@@ -1527,7 +1527,7 @@ void SystemSolver::matrixCreate(const SystemMatrixAssembler &assembler)
 }
 
 /*!
- * Fills the matrix.
+ * Fills the matrix reading its contents from the specified assembler..
  *
  * \param assembler is the matrix assembler
  */
@@ -1541,6 +1541,53 @@ void SystemSolver::matrixFill(const SystemMatrixAssembler &assembler)
     // When updating the matrix it will not be possible to alter the pattern,
     // it will be possible to change only the values.
     MatSetOption(m_A, MAT_NEW_NONZERO_LOCATIONS, PETSC_FALSE);
+}
+
+/*!
+ * Fill the matrix reading its contents form the specified file.
+ *
+ * The input file should contain a compatible matrix stored in PETSc binary format. It's up to the
+ * caller of this routine to make sure the loaded matrix is compatible with the system. If the
+ * matrix file cannot be read an exception is thrown.
+ *
+ * \param filePath is the path of the file
+ */
+void SystemSolver::matrixFill(const std::string &filePath)
+{
+    // Check if the matrix exists
+    if (!m_A) {
+        throw std::runtime_error("Matrix should be created before restoring it.");
+    }
+
+    // Check if the file exists
+    std::ifstream fileStream(filePath.c_str());
+    if (!fileStream.good()) {
+        throw std::runtime_error("The PETSc matrix file \"" + filePath + "\" doesn't exists");
+    }
+    fileStream.close();
+
+    // Clear workspace
+    clearWorkspace();
+
+    // Clear reordering
+    clearReordering();
+
+    // Restore the matrix
+    PetscViewer viewer;
+#if BITPIT_ENABLE_MPI==1
+    PetscViewerCreate(m_communicator, &viewer);
+#else
+    PetscViewerCreate(PETSC_COMM_SELF, &viewer);
+#endif
+    PetscViewerSetType(viewer, PETSCVIEWERBINARY);
+    PetscViewerFileSetMode(viewer, FILE_MODE_READ);
+    PetscViewerFileSetName(viewer, filePath.c_str());
+    MatLoad(m_A, viewer);
+    PetscViewerDestroy(&viewer);
+
+    // Re-create vectors
+    vectorsDestroy();
+    vectorsCreate();
 }
 
 /*!
@@ -1829,7 +1876,7 @@ void SystemSolver::vectorsReorder(bool invert)
  */
 void SystemSolver::vectorsFill(const std::vector<double> &rhs, std::vector<double> *solution)
 {
-    // Import RHS
+    // Fill RHS
     int rhsSize;
     VecGetLocalSize(m_rhs, &rhsSize);
 
@@ -1840,7 +1887,7 @@ void SystemSolver::vectorsFill(const std::vector<double> &rhs, std::vector<doubl
     }
     VecRestoreArray(m_rhs, &raw_rhs);
 
-    // Import initial solution
+    // Fill initial solution
     int solutionSize;
     VecGetLocalSize(m_solution, &solutionSize);
 
@@ -1850,6 +1897,52 @@ void SystemSolver::vectorsFill(const std::vector<double> &rhs, std::vector<doubl
         raw_solution[i] = (*solution)[i];
     }
     VecRestoreArray(m_solution, &raw_solution);
+}
+
+/*!
+ * Fills rhs and solution vectors.
+ *
+ * \param rhs is the right-hand-side of the system
+ * \param solution is the solution of the linear system
+ */
+
+/*!
+ * Fill the matrix reading its contents form the specified file.
+ *
+ * The input file should contain a compatible matrix stored in PETSc binary format. It's up to the
+ * caller of this routine to make sure the loaded matrix is compatible with the system. If the
+ * matrix file cannot be read an exception is thrown.
+ *
+ * \param filePath is the path of the file
+ */
+
+
+/*!
+ * Import the RHS vector from the specified file.
+ *
+ * The input files should contain compatible vectors stored in PETSc binary format. If the size
+ * of the loaded vectors is not compatible with the matrix, an exception is thrown.
+ *
+ * If a file cannot be read, the corresponding vector will not be filled.
+ *
+ * \param rhsFilePath is the path of the file that contains the RHS vector
+ * \param solutionFilePath is the path of the file that contains the solution vector
+ */
+void SystemSolver::vectorsFill(const std::string &rhsFilePath, const std::string &solutionFilePath)
+{
+    // Fill the RHS vector
+    std::ifstream rhsFileStream(rhsFilePath);
+    if (rhsFileStream.good()) {
+        fillRHS(rhsFilePath);
+    }
+    rhsFileStream.close();
+
+    // Fill the solution vector
+    std::ifstream solutionFileStream(solutionFilePath);
+    if (solutionFileStream.good()) {
+        fillSolution(solutionFilePath);
+    }
+    solutionFileStream.close();
 }
 
 /*!
@@ -1987,19 +2080,17 @@ void SystemSolver::restoreSolutionRawReadPtr(const double *raw_solution) const
 }
 
 /*!
- * Dump the matrix to file
+ * Export the matrix to file
  *
- * \param directory is the directory where the files will be saved
- * \param prefix is the prefix that will be added to the files
- * \param matrixFormat is the dump format that will be used for the matrix,
+ * \param filePath is the path of the file
+ * \param fileFormat is the file format that will be used for exporting the matrix,
  * the ASCII format may not be able to dump large matrices
  */
-void SystemSolver::dumpMatrix(const std::string &directory, const std::string &prefix,
-                              DumpFormat matrixFormat) const
+void SystemSolver::exportMatrix(const std::string &filePath, FileFormat fileFormat) const
 {
     PetscViewerType viewerType;
     PetscViewerFormat viewerFormat;
-    if (matrixFormat == DUMP_BINARY) {
+    if (fileFormat == FILE_BINARY) {
         viewerType   = PETSCVIEWERBINARY;
         viewerFormat = PETSC_VIEWER_DEFAULT;
     } else {
@@ -2017,26 +2108,23 @@ void SystemSolver::dumpMatrix(const std::string &directory, const std::string &p
     PetscViewerFileSetMode(matViewer, FILE_MODE_WRITE);
     PetscViewerPushFormat(matViewer, viewerFormat);
 
-    std::string filePath = getMatrixFilePath(directory, prefix);
     PetscViewerFileSetName(matViewer, filePath.c_str());
     MatView(m_A, matViewer);
     PetscViewerDestroy(&matViewer);
 }
 
 /*!
- * Dump the rhs to file
+ * Export the RHS vector to file
  *
- * \param directory is the directory where the files will be saved
- * \param prefix is the prefix that will be added to the files
- * \param rhsFormat is the dump format that will be used for the RHS,
- * the ASCII format may not be able to dump large vectors
+ * \param filePath is the path of the file
+ * \param fileFormat is the file format that will be used for exporting the RHS,
+ * the ASCII format may not be able to handle large vectors
  */
-void SystemSolver::dumpRHS(const std::string &directory, const std::string &prefix,
-                           DumpFormat rhsFormat) const
+void SystemSolver::exportRHS(const std::string &filePath, FileFormat fileFormat) const
 {
     PetscViewerType viewerType;
     PetscViewerFormat viewerFormat;
-    if (rhsFormat == DUMP_BINARY) {
+    if (fileFormat == FILE_BINARY) {
         viewerType   = PETSCVIEWERBINARY;
         viewerFormat = PETSC_VIEWER_DEFAULT;
     } else {
@@ -2054,26 +2142,23 @@ void SystemSolver::dumpRHS(const std::string &directory, const std::string &pref
     PetscViewerFileSetMode(viewer, FILE_MODE_WRITE);
     PetscViewerPushFormat(viewer, viewerFormat);
 
-    std::string filePath = getRHSFilePath(directory, prefix);
     PetscViewerFileSetName(viewer, filePath.c_str());
     VecView(m_rhs, viewer);
     PetscViewerDestroy(&viewer);
 }
 
 /*!
- * Dump the solution to file
+ * Dump the solution vector to file
  *
- * \param directory is the directory where the files will be saved
- * \param prefix is the prefix that will be added to the files
- * \param solutionFormat is the dump format that will be used for the solution,
- * the ASCII format may not be able to dump large vectors
+ * \param filePath is the path of the file
+ * \param fileFormat is the file format that will be used for exporting the solution,
+ * the ASCII format may not be able to handle large vectors
  */
-void SystemSolver::dumpSolution(const std::string &directory, const std::string &prefix,
-                                DumpFormat solutionFormat) const
+void SystemSolver::exportSolution(const std::string &filePath, FileFormat fileFormat) const
 {
     PetscViewerType viewerType;
     PetscViewerFormat viewerFormat;
-    if (solutionFormat == DUMP_BINARY) {
+    if (fileFormat == FILE_BINARY) {
         viewerType   = PETSCVIEWERBINARY;
         viewerFormat = PETSC_VIEWER_DEFAULT;
     } else {
@@ -2091,122 +2176,33 @@ void SystemSolver::dumpSolution(const std::string &directory, const std::string 
     PetscViewerFileSetMode(viewer, FILE_MODE_WRITE);
     PetscViewerPushFormat(viewer, viewerFormat);
 
-    std::string filePath = getSolutionFilePath(directory, prefix);
     PetscViewerFileSetName(viewer, filePath.c_str());
     VecView(m_solution, viewer);
     PetscViewerDestroy(&viewer);
 }
 
 /*!
- * Dump the system to file
+ * Fill the RHS vector reading its contents from the specified file.
  *
- * \param directory is the directory where the files will be saved
- * \param prefix is the prefix that will be added to the files
- * \param matrixFormat is the dump format that will be used for the matrix,
- * the ASCII format may not be able to dump large matrices
- * \param rhsFormat is the dump format that will be used for the RHS,
- * the ASCII format may not be able to dump large vectors
- * \param solutionFormat is the dump format that will be used for the solution,
- * the ASCII format may not be able to dump large vectors
+ * The input file should contain a compatible vector stored in PETSc binary format. If the size
+ * of the vector stored in the file is not compatible with the matrix, an exception is thrown.
+ * An exception is also raised if the file cannot be read.
+ *
+ * It is possible to fill the RHS vector only after the system has been assembled.
+ *
+ * \param filePath is the path of the file
  */
-void SystemSolver::dump(const std::string &directory, const std::string &prefix,
-                        DumpFormat matrixFormat, DumpFormat rhsFormat,
-                        DumpFormat solutionFormat) const
-{
-    // Dump information
-    int blockSize = getBlockSize();
-
-    std::string filePath = getInfoFilePath(directory, prefix);
-    std::ofstream fileStream(filePath);
-    std::string header("transpose blocksize partitioned");
-    fileStream << header << std::endl;
-    fileStream << m_transpose;
-    fileStream << " " << blockSize;
-    fileStream << " " << m_partitioned;
-    fileStream << std::endl;
-    fileStream.close();
-
-    // Dump matrix
-    dumpMatrix(directory, prefix, matrixFormat);
-
-    // Dump vectors
-    dumpRHS(directory, prefix, rhsFormat);
-    dumpSolution(directory, prefix, solutionFormat);
-}
-
-/*!
- * Restore the matrix from a binary file.
- *
- * If the specified matrix file cannot be read, an exception is thrown.
- *
- * This function will re-create the vectors and will clear both the workspace and
- * the reordering.
- *
- * \param directory is the directory where the files will be read from
- * \param prefix is the prefix that will be was added to the files during
- */
-void SystemSolver::restoreMatrix(const std::string &directory, const std::string &prefix)
-{
-    // Check if the matrix exists
-    if (!m_A) {
-        throw std::runtime_error("Matrix should be created before restoring it.");
-    }
-
-    // Check if the file exists
-    std::string filePath = getMatrixFilePath(directory, prefix);
-    std::ifstream fileStream(filePath.c_str());
-    if (!fileStream.good()) {
-        throw std::runtime_error("The PETSc matrix file \"" + filePath + "\" doesn't exists");
-    }
-    fileStream.close();
-
-    // Clear workspace
-    clearWorkspace();
-
-    // Clear reordering
-    clearReordering();
-
-    // Restore the matrix
-    PetscViewer viewer;
-#if BITPIT_ENABLE_MPI==1
-    PetscViewerCreate(m_communicator, &viewer);
-#else
-    PetscViewerCreate(PETSC_COMM_SELF, &viewer);
-#endif
-    PetscViewerSetType(viewer, PETSCVIEWERBINARY);
-    PetscViewerFileSetMode(viewer, FILE_MODE_READ);
-    PetscViewerFileSetName(viewer, filePath.c_str());
-    MatLoad(m_A, viewer);
-    PetscViewerDestroy(&viewer);
-
-    // Re-create vectors
-    vectorsDestroy();
-    vectorsCreate();
-}
-
-/*!
- * Restore the RHS from binary files.
- *
- * If the specified RHS file cannot be read, an exception is thrown.
- *
- * The restored vector size should be compatible with the matrix, if this is not the case an
- * exception is thrown.
- *
- * \param directory is the directory where the files will be read from
- * \param prefix is the prefix that will be was added to the files during
- */
-void SystemSolver::restoreRHS(const std::string &directory, const std::string &prefix)
+void SystemSolver::fillRHS(const std::string &filePath)
 {
     // Check if the system is assembled
     if (!m_assembled) {
-        throw std::runtime_error("RHS vector can be restored only after assembling the system");
+        throw std::runtime_error("The RHS vector can be loaded only after assembling the system.");
     }
 
     // Check if the file exists
-    std::string filePath = getRHSFilePath(directory, prefix);
-    std::ifstream fileStream(filePath.c_str());
+    std::ifstream fileStream(filePath);
     if (!fileStream.good()) {
-        throw std::runtime_error("The PETSc solution file \"" + filePath + "\" doesn't exists");
+        throw std::runtime_error("The file \"" + filePath + "\" cannot be read.");
     }
     fileStream.close();
 
@@ -2223,7 +2219,7 @@ void SystemSolver::restoreRHS(const std::string &directory, const std::string &p
     VecLoad(m_rhs, viewer);
     PetscViewerDestroy(&viewer);
 
-    // Check if the restored RHS is compatible with the matrix
+    // Check if the imported RHS is compatible with the matrix
     PetscInt vecSize;
     VecGetLocalSize(m_rhs, &vecSize);
 
@@ -2236,40 +2232,35 @@ void SystemSolver::restoreRHS(const std::string &directory, const std::string &p
     expectedVecSize *= getBlockSize();
 
     if (vecSize != expectedVecSize) {
-        log::cout() << "The restored RHS vector is not compatible with the matrix" << std::endl;
-        log::cout() << "The size of the restored RHS vector is " << vecSize << std::endl;
+        log::cout() << "The imported RHS vector is not compatible with the matrix" << std::endl;
+        log::cout() << "The size of the imported RHS vector is " << vecSize << std::endl;
         log::cout() << "The expected size of RHS vector is " << expectedVecSize << std::endl;
-        throw std::runtime_error("The restored RHS vector is not compatible with the matrix");
+        throw std::runtime_error("The imported RHS vector is not compatible with the matrix");
     }
 }
 
 /*!
- * Restore the solution from binary files.
+ * Fill the solution vector reading its contents from the specified file.
  *
- * If the specified solution file cannot be read, an exception is thrown.
+ * The input file should contain a compatible vector stored in PETSc binary format. If the size
+ * of the vector stored in the file is not compatible with the matrix, an exception is thrown.
+ * An exception is also raised if the file cannot be read.
  *
- * The restored vector size should be compatible with the matrix, if this is not the case an
- * exception is thrown.
+ * It is possible to fill the solution vector only after the system has been assembled.
  *
- * \param directory is the directory where the files will be read from
- * \param prefix is the prefix that will be was added to the files during
+ * \param filePath is the path of the file
  */
-void SystemSolver::restoreSolution(const std::string &directory, const std::string &prefix)
+void SystemSolver::fillSolution(const std::string &filePath)
 {
     // Check if the system is assembled
     if (!m_assembled) {
-        throw std::runtime_error("Solution vector can be restored only after assembling the system");
+        throw std::runtime_error("The solution vector can be loaded only after assembling the system.");
     }
 
     // Check if the file exists
-    std::stringstream solutionPathStream;
-    solutionPathStream.str(std::string());
-    solutionPathStream << directory << "/" << prefix << "solution.txt";
-    std::string solutionPath = solutionPathStream.str();
-
-    std::ifstream fileStream(solutionPath.c_str());
+    std::ifstream fileStream(filePath);
     if (!fileStream.good()) {
-        throw std::runtime_error("The PETSc solution file \"" + solutionPath + "\" doesn't exists");
+        throw std::runtime_error("The file \"" + filePath + "\" cannot be read.");
     }
     fileStream.close();
 
@@ -2282,13 +2273,13 @@ void SystemSolver::restoreSolution(const std::string &directory, const std::stri
 #endif
     PetscViewerSetType(viewer, PETSCVIEWERBINARY);
     PetscViewerFileSetMode(viewer, FILE_MODE_READ);
-    PetscViewerFileSetName(viewer, solutionPath.c_str());
+    PetscViewerFileSetName(viewer, filePath.c_str());
     VecLoad(m_solution, viewer);
     PetscViewerDestroy(&viewer);
 
-    // Check if the restored solution is compatible with the matrix
+    // Check if the imported solution is compatible with the matrix
     PetscInt vecSize;
-    VecGetLocalSize(m_rhs, &vecSize);
+    VecGetLocalSize(m_solution, &vecSize);
 
     PetscInt expectedVecSize;
     if (!m_transpose) {
@@ -2299,64 +2290,97 @@ void SystemSolver::restoreSolution(const std::string &directory, const std::stri
     expectedVecSize *= getBlockSize();
 
     if (vecSize != expectedVecSize) {
-        log::cout() << "The restored solution vector is not compatible with the matrix" << std::endl;
-        log::cout() << "The size of the restored solution vector is " << vecSize << std::endl;
+        log::cout() << "The imported solution vector is not compatible with the matrix" << std::endl;
+        log::cout() << "The size of the imported solution vector is " << vecSize << std::endl;
         log::cout() << "The expected size of solution vector is " << expectedVecSize << std::endl;
-        throw std::runtime_error("The restored solution vector is not compatible with the matrix");
+        throw std::runtime_error("The imported solution vector is not compatible with the matrix");
     }
 }
 
-#if BITPIT_ENABLE_MPI==1
 /*!
- * Restore the system from binary files.
+ * Dump the system to files.
  *
- * Matrix file is mandatory, whereas solution and RHS files are not. If no
- * solution or RHS files are found their content will not be modified.
+ * Only the contents of the system will be dumped, this include the matrix, the RHS vector,
+ * the solution vector, and the information needed to properly restore the aforementioned
+ * data structures (e.g., the block size or the transpose flag).
  *
+ * \param directory is the directory where the files will be saved
+ * \param prefix is the prefix that will be added to the files
+ */
+void SystemSolver::dumpSystem(const std::string &directory, const std::string &prefix) const
+{
+    // Dump system information
+    int blockSize = getBlockSize();
+
+    std::string filePath = getInfoFilePath(directory, prefix);
+    std::ofstream fileStream(filePath);
+    std::string header("transpose blocksize partitioned");
+    fileStream << header << std::endl;
+    fileStream << m_transpose;
+    fileStream << " " << blockSize;
+    fileStream << " " << m_partitioned;
+    fileStream << std::endl;
+    fileStream.close();
+
+    // Dump matrix
+    std::string matrixFilePath = getMatrixFilePath(directory, prefix);
+    exportMatrix(matrixFilePath, FILE_BINARY);
+
+    // Dump RHS
+    std::string rhsFilePath = getRHSFilePath(directory, prefix);
+    exportRHS(rhsFilePath, FILE_BINARY);
+
+    // Dump solution
+    std::string solutionFilePath = getSolutionFilePath(directory, prefix);
+    exportSolution(solutionFilePath, FILE_BINARY);
+}
+
+/*!
+ * Restore the system from files.
+ *
+ * Only the contents of the system will be restored, this include the matrix, the RHS vector,
+ * the solution vector, and the information needed to properly create the aforementioned data
+ * structures (e.g., the block size or the transpose flag).
+ *
+ * Matrix file is mandatory, whereas solution and RHS files are not. If no solution or RHS
+ * files are found they will be re-created from scratch (but they will not be initialized).
+ */
+#if BITPIT_ENABLE_MPI==1
+ /*!
  * \param communicator is the MPI communicator
  * \param directory is the directory where the files will be read from
  * \param prefix is the prefix that will be was added to the files during
  */
-void SystemSolver::restore(MPI_Comm communicator, const std::string &directory, const std::string &prefix)
+void SystemSolver::restoreSystem(MPI_Comm communicator, const std::string &directory, const std::string &prefix)
 #else
-/*!
- * Restore the system from binary files.
- *
- * Matrix file is mandatory, whereas solution and RHS files are not. If no
- * solution or RHS files are found their content will not be modified.
- *
+ /*!
  * \param directory is the directory where the files will be read from
  * \param prefix is the prefix that will be was added to the files during
  */
-void SystemSolver::restore(const std::string &directory, const std::string &prefix)
+void SystemSolver::restoreSystem(const std::string &directory, const std::string &prefix)
 #endif
 {
-    // Open the stream
+    // Read system information
     std::string filePath = getInfoFilePath(directory, prefix);
     std::ifstream fileStream(filePath);
     if (!fileStream.good()) {
         throw std::runtime_error("The system solver info file \"" + filePath + "\" doesn't exists");
     }
 
-    // Read one-line header
     std::string header;
     std::getline(fileStream, header);
 
-    // Get transpose flag
     bool transpose;
     fileStream >> transpose;
 
-    // Get block size
     int blockSize;
     fileStream >> blockSize;
 
 #if BITPIT_ENABLE_MPI == 1
-    // Get partitioned flag
     bool isPartitioned;
     fileStream >> isPartitioned;
 #endif
 
-    // Close stream
     fileStream.close();
 
     // Clear the system
@@ -2375,7 +2399,9 @@ void SystemSolver::restore(const std::string &directory, const std::string &pref
 
     // Restore the matrix
     matrixCreate(blockSize);
-    restoreMatrix(directory, prefix);
+
+    std::string matrixFilePath = getMatrixFilePath(directory, prefix);
+    matrixFill(matrixFilePath);
 
     // Initialize RHS and solution vectors
     vectorsCreate();
@@ -2383,21 +2409,10 @@ void SystemSolver::restore(const std::string &directory, const std::string &pref
     // The system is now assembled
     m_assembled = true;
 
-    // Restore the RHS
-    std::string rhsFilePath = getRHSFilePath(directory, prefix);
-    std::ifstream rhsFileStream(rhsFilePath.c_str());
-    if (rhsFileStream.good()) {
-        restoreRHS(directory, prefix);
-    }
-    rhsFileStream.close();
-
-    // Restore the solution
+    // Restore RHS and solution vectors
+    std::string rhsFilePath      = getRHSFilePath(directory, prefix);
     std::string solutionFilePath = getSolutionFilePath(directory, prefix);
-    std::ifstream solutionFileStream(solutionFilePath.c_str());
-    if (solutionFileStream.good()) {
-        restoreSolution(directory, prefix);
-    }
-    solutionFileStream.close();
+    vectorsFill(rhsFilePath, solutionFilePath);
 }
 
 /*!

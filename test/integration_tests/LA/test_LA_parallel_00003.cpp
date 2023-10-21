@@ -33,7 +33,7 @@ using namespace bitpit;
 /*!
 * Subtest 001
 *
-* Testing reading system solver from file.
+* Testing reading dump/restore functionality.
 *
 * \param rank is the rank of the process
 * \param nProcs is the number of processes
@@ -75,54 +75,54 @@ int subtest_001(int rank, int nProcs)
 
     matrix.assembly();
 
-    // Build system
-    log::cout() << "Building system..." << std::endl;
+    // Build solver
+    log::cout() << "Building solver..." << std::endl;
 
-    SystemSolver system;
-    system.assembly(matrix);
+    SystemSolver solver;
+    solver.assembly(matrix);
 
-    double *rhs = system.getRHSRawPtr();
+    double *rhs = solver.getRHSRawPtr();
     for (int i = 0; i < nCols; ++i) {
         rhs[i] = 1.;
     }
-    system.restoreRHSRawPtr(rhs);
+    solver.restoreRHSRawPtr(rhs);
 
-    double *initialSolution = system.getSolutionRawPtr();
+    double *initialSolution = solver.getSolutionRawPtr();
     for (int i = 0; i < nRows; ++i) {
         initialSolution[i] = 0;
     }
-    system.restoreSolutionRawPtr(initialSolution);
+    solver.restoreSolutionRawPtr(initialSolution);
 
     // Dump system
     log::cout() << "Dumping system..." << std::endl;
 
-    system.dump(".", "test_parallel_00003_");
+    solver.dumpSystem(".", "test_parallel_00003_");
 
     // Restore system
     log::cout() << "Restoring system..." << std::endl;
 
-    SystemSolver restoredSystem("", false);
-    restoredSystem.restore(MPI_COMM_WORLD, ".", "test_parallel_00003_");
+    SystemSolver restoredSolver("", false);
+    restoredSolver.restoreSystem(MPI_COMM_WORLD, ".", "test_parallel_00003_");
 
-    long restoredGlobalNRows = restoredSystem.getRowGlobalCount();
-    long globalNRows = system.getRowGlobalCount();
+    long restoredGlobalNRows = restoredSolver.getRowGlobalCount();
+    long globalNRows = solver.getRowGlobalCount();
 
     if (restoredGlobalNRows != globalNRows) {
         throw std::runtime_error("  The restored system has not the same global number of rows of the original one.");
     }
 
-    nRows = restoredSystem.getRowCount();
-    nCols = restoredSystem.getColCount();
+    nRows = restoredSolver.getRowCount();
+    nCols = restoredSolver.getColCount();
 
     // Solve restored system
     log::cout() << "Solving restored system..." << std::endl;
 
-    restoredSystem.solve();
+    restoredSolver.solve();
 
     log::cout() << std::setprecision(16) << std::scientific;
 
     if (nRows > 0) {
-        const double *solution = restoredSystem.getSolutionRawReadPtr();
+        const double *solution = restoredSolver.getSolutionRawReadPtr();
         for (int i = 0; i < nRows; ++i) {
             log::cout() << "  Solution[" << i << "] = " << solution[i] << std::endl;
 
@@ -133,7 +133,7 @@ int subtest_001(int rank, int nProcs)
                 throw std::runtime_error("  The solution of the system doesn't match the expected one.");
             }
         }
-        restoredSystem.restoreSolutionRawReadPtr(solution);
+        restoredSolver.restoreSolutionRawReadPtr(solution);
     } else {
         log::cout() << "  System matrix is empty on this process" << std::endl;
     }
