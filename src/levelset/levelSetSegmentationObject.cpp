@@ -555,15 +555,7 @@ int LevelSetSegmentationKernel::getSegmentInfo( const std::array<double,3> &poin
  */
 double LevelSetSegmentationKernel::getSegmentSize(long segmentId) const {
 
-    int surfaceDimension = m_surface->getDimension();
-    if (surfaceDimension == 1) {
-        return m_surface->evalCellArea(segmentId); //TODO check
-    } else if (surfaceDimension == 2) {
-        int dummy;
-        return m_surface->evalMinEdgeLength(segmentId, dummy);
-    }
-
-    return (- levelSetDefaults::SIZE);
+    return m_surface->evalCellSize(segmentId);
 }
 
 /*!
