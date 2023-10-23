@@ -1833,25 +1833,25 @@ double PatchKernel::evalPartitioningUnbalance(const std::unordered_map<long, dou
 */
 std::vector<adaption::Info> PatchKernel::_partitioningPrepare(const std::unordered_map<long, double> &cellWeights, double defaultWeight, bool trackPartitioning)
 {
-	// Early return if the mesh is empty
-	if (empty(true)) {
-		return std::vector<adaption::Info>();
-	}
-
-	// Early return if there is a single partition
-	if (getProcessorCount() == 1) {
-		return std::vector<adaption::Info>();
-	}
+	// Check if the patch needs a non-trivial partitioning
+	//
+	// A non-trivial partitioning is needed only if the patch is not empty
+	// and if there are multiple processes associated with the patch.
+	bool isCellRankEvaluationNeeded = (!empty(true) && (getProcessorCount() > 1));
 
 	// Default partitioning can only be used when the patch is all on a single process
-	if (isDistributed()) {
-		throw std::runtime_error("Default partitioning can only be used when the patch is all on a single process");
+	if (isCellRankEvaluationNeeded) {
+		if (isDistributed()) {
+			throw std::runtime_error("Default partitioning can only be used when the patch is all on a single process");
+		}
 	}
 
 	// Evaluate partitioning
+	//
+	// Only the owner of the patch need to evaluate the partitioning.
 #if BITPIT_ENABLE_METIS==1
 	std::unordered_map<long, int> cellRanks;
-	if (getRank() == getOwner()) {
+	if (isCellRankEvaluationNeeded && getRank() == getOwner()) {
 		// Initialize map between patch vertices and METIS nodes
 		//
 		// METIS node numbering needs to be contiguous and needs to start from zero.
