@@ -33,14 +33,14 @@ namespace bitpit{
 /*!
  * @ingroup VisualizationToolKit
  * @interface VTK
- * @brief A base class for VTK input output. 
+ * @brief A base class for VTK input output.
  *
  * VTK provides all basic methods for reading and writing VTK files.
  * ASCII and APPENDED mode are supported.
  *
  */
 
-/*! 
+/*!
  * Default constructor referes to a serial VTK file with appended binary data.
  */
 VTK::VTK(){
@@ -49,7 +49,7 @@ VTK::VTK(){
     m_rank  = 0;
 
     m_headerType = "UInt32" ;
-    
+
     m_fh.setDirectory( "." ) ;
     m_fh.setSeries( false ) ;
     m_fh.setParallel( false ) ;
@@ -62,7 +62,7 @@ VTK::VTK(){
 
 }
 
-/*! 
+/*!
  * Constructor referes to a serial VTK file with appended binary data.
  * @param[in]  dir    directory of file with final "/"
  * @param[in]  name   file name without suffix
@@ -74,7 +74,7 @@ VTK::VTK(const std::string &dir, const std::string &name ):
 
 }
 
-/*! 
+/*!
  * set header type for appended binary output
  * @param[in] st header type ["UInt32"/"UInt64"]
  */
@@ -90,7 +90,7 @@ void  VTK::setHeaderType(const std::string &st){
 
 }
 
-/*! 
+/*!
  * Get header type for appended binary output
  * @return header type ["UInt32"/"UInt64"]
  */
@@ -98,7 +98,7 @@ const std::string &  VTK::getHeaderType( ) const{
     return m_headerType ;
 }
 
-/*! 
+/*!
  * set directory and name for VTK file
  * @param[in] dir directory of file with final "/"
  * @param[in] name file name without suffix
@@ -152,7 +152,7 @@ std::string  VTK::getDirectory() const {
  * Activates output for time series. sets series to true first output index to input
  * @param[in] counter first output index
  */
-void  VTK::setCounter( int counter){ 
+void  VTK::setCounter( int counter){
 
   m_fh.setSeries(true) ;
   m_fh.setCounter(counter) ;
@@ -174,22 +174,22 @@ void  VTK::incrementCounter( ){
 }
 
 /*!
- * De-activates output for time series. 
+ * De-activates output for time series.
  * @return last value of counter
  */
-int  VTK::unsetCounter( ){ 
+int  VTK::unsetCounter( ){
 
   int counter = getCounter() ;
   m_fh.setSeries(false) ;
 
-  return counter; 
+  return counter;
 }
 
 /*!
  * Returns the time index of the following file
- * @return counter 
+ * @return counter
  */
-int  VTK::getCounter( ) const{ 
+int  VTK::getCounter( ) const{
 
   return m_fh.getCounter( ) ;
 
@@ -200,13 +200,13 @@ int  VTK::getCounter( ) const{
  * @param[in] procs number of processes
  * @param[in] rank my rank
  */
-void  VTK::setParallel( uint16_t procs, uint16_t rank){ 
+void  VTK::setParallel( uint16_t procs, uint16_t rank){
 
   if( procs <  1 ) log::cout() << " Numer of processes must be greater than 0" << std::endl ;
   if( rank  >= procs) log::cout() << " m_rankess is not in valid range " << std::endl ;
 
-  m_procs = procs; 
-  m_rank  = rank; 
+  m_procs = procs;
+  m_rank  = rank;
 
   if(m_procs == 0) {
    m_fh.setParallel(false) ;
@@ -296,7 +296,7 @@ VTKField& VTK::addData( VTKField &&field ){
 }
 
 /*!
- * Add user data for input or output. 
+ * Add user data for input or output.
  * Codification will be set according to default value [appended] or to value
  * set by VTK::setDataCodex( VTKFormat ) or VTK::setCodex( VTKFormat )
  * @param[in] name name of field
@@ -337,7 +337,7 @@ void VTK::removeData( const std::string &name ){
         } else {
             ++fieldItr;
         }
-    } 
+    }
 
     log::cout() << "did not find field for removing in VTK: " << name << std::endl;
 
@@ -886,7 +886,7 @@ void VTK::writeData( ){
                     assert(false);
                 }
             }
-        } 
+        }
 
         for( auto &field : m_data ){
             if( field.isEnabled() && field.getCodification() == VTKFormat::APPENDED && field.getLocation() == VTKLocation::CELL ) {
@@ -909,7 +909,7 @@ void VTK::writeData( ){
                 }
 
             }
-        } 
+        }
 
         //Writing Geometry Data
         for( auto &field : m_geometry ){
@@ -996,7 +996,7 @@ void VTK::writeDataHeader( std::fstream &str, bool parallel ){
         //Writing DataArray
         for( auto &field : m_data ){
             if( field.isEnabled() && field.getLocation() == location && !parallel) writeDataArray( str, field ) ;
-            if( field.isEnabled() && field.getLocation() == location &&  parallel) writePDataArray( str, field ); 
+            if( field.isEnabled() && field.getLocation() == location &&  parallel) writePDataArray( str, field );
         }
 
         str << "      </" ;
@@ -1128,7 +1128,7 @@ void VTK::readData( ){
 
     }
 
-    
+
     //Read ascii data
     for( auto & field : m_data ){
         if( field.isEnabled() &&  field.getCodification() == VTKFormat::ASCII){
@@ -1212,7 +1212,7 @@ void VTK::readDataHeader( std::fstream &str ){
         ss << "</" << locationString << "Data>" ;
         loc = ss.str();
 
-        read= true ; 
+        read= true ;
         if( ! getline( str, line) ) read = false ;
         if( bitpit::utils::string::keywordInString( line, loc) ) read=false ;
 
@@ -1225,7 +1225,7 @@ void VTK::readDataHeader( std::fstream &str ){
                 }
 
                 else{
-                    pos_ =  0 ; 
+                    pos_ =  0 ;
                 }
 
                 temp.setPosition( pos_ ) ;
@@ -1288,7 +1288,7 @@ bool VTK::readDataArray( std::fstream &str, VTKField &field  ){
         }
     }
 
-    return false ; 
+    return false ;
 
 }
 
