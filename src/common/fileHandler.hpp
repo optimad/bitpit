@@ -72,14 +72,17 @@ class FileHandler{
         void                setName( const std::string & n_) ;
         void                setAppendix( const std::string & a_) ;
 
+        bool                isSeries( ) const ;
         void                setSeries( bool s_) ;
 
         int                 getCounter() const ;
         void                setCounter(int c_);
         void                incrementCounter();
 
+        bool                isParallel( ) const ;
         void                setParallel( bool p_) ;
 
+        int                 getBlock( ) const ;
         void                setBlock( int b_) ;
 
 };

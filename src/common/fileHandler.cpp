@@ -166,6 +166,14 @@ void    FileHandler::setAppendix(const std::string &a_){
 }
 
 /*!
+ * Checks if file belongs to a time series
+ * @return Returns true if the file belongs to a time series, false otherwise
+ */
+bool    FileHandler::isSeries() const {
+    return series;
+}
+
+/*!
  * sets if file belongs to a time series
  * @param[in]   s_      [true/false] if series
  */
@@ -202,12 +210,28 @@ void    FileHandler::incrementCounter(){
 }
 
 /*!
+ * Checks if file belongs to a parallel output
+ * @return Returns true if the file belongs to a parallel output, false otherwise
+ */
+bool    FileHandler::isParallel() const {
+    return parallel;
+}
+
+/*!
  * sets if file belongs to a parallel output
  * @param[in]   p_      [true/false] if parallel
  */
 void    FileHandler::setParallel( bool p_){
     parallel=p_;
     return;
+}
+
+/*!
+ * gets the index of the parallel block
+ * @return the index of the parallel block
+ */
+int    FileHandler::getBlock( ) const {
+    return block;
 }
 
 /*!
