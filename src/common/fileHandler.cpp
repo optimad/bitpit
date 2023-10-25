@@ -42,7 +42,7 @@ FileHandler::FileHandler()
     : directory("./"), name("file"), appendix("dat"),
       series(false), parallel(false),
       counter(0), block(0) {
-} ;
+}
 
 /*!
  * Constructor. 
@@ -56,7 +56,7 @@ FileHandler::FileHandler(const std::string &dir_, const std::string &name_, cons
     : directory(dir_), name(name_), appendix(app_),
       series(false), parallel(false),
       counter(0), block(0) {
-};
+}
 
 /*!
  * Copy Constructor. 
@@ -66,7 +66,7 @@ FileHandler::FileHandler(const FileHandler& other){
 
     (*this) = other ;
 
-};
+}
 
 /*!
  * Assignment operator.
@@ -83,7 +83,7 @@ FileHandler&    FileHandler::operator=(const FileHandler& other){
 
 
     return *this ;
-};
+}
 
 /*!
  * Checks if file exists.
@@ -92,7 +92,7 @@ FileHandler&    FileHandler::operator=(const FileHandler& other){
 bool   FileHandler::exists() {
     std::ifstream f( getPath() );
     return f.good() ;
-};
+}
 
 /*!
  * Composes the filename.
@@ -109,7 +109,7 @@ std::string  FileHandler::getPath(){
 
   return filename.str() ;
 
-};
+}
 
 /*!
  * Get the directory where the file will be saved
@@ -118,7 +118,7 @@ std::string  FileHandler::getPath(){
 std::string  FileHandler::getDirectory() const {
 
   return directory;
-};
+}
 
 /*!
  * Get the name of the file
@@ -127,7 +127,7 @@ std::string  FileHandler::getDirectory() const {
 std::string  FileHandler::getName() const {
 
   return name;
-};
+}
 
 /*!
  * Get the appendix of the file
@@ -136,7 +136,7 @@ std::string  FileHandler::getName() const {
 std::string  FileHandler::getAppendix() const {
 
   return appendix;
-};
+}
 
 /*!
  * sets the directory
@@ -191,7 +191,7 @@ int  FileHandler::getCounter() const {
 void    FileHandler::setCounter(int c_){ 
     counter=c_; 
     return; 
-};
+}
 
 /*!
  * Increments the counter used for series.
@@ -199,7 +199,7 @@ void    FileHandler::setCounter(int c_){
 void    FileHandler::incrementCounter(){ 
     counter++; 
     return; 
-};
+}
 
 /*!
  * sets if file belongs to a parallel output
