@@ -179,7 +179,7 @@ void  VTK::incrementCounter( ){
  */
 int  VTK::unsetCounter( ){ 
 
-  int counter = m_fh.getCounter() ;
+  int counter = getCounter() ;
   m_fh.setSeries(false) ;
 
   return counter; 
