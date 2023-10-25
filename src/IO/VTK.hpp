@@ -377,12 +377,13 @@ class VTK{
         void                    write( VTKWriteMode writeMode=VTKWriteMode::DEFAULT )  ;
         void                    write( const std::string &, VTKWriteMode writeMode=VTKWriteMode::NO_INCREMENT )  ;
 
-        virtual void            writeMetaInformation() = 0 ;
-        void                    writeData() ;
         virtual void            writeCollection() = 0 ;
 
     protected:
         //For Writing
+        virtual void            writeMetaInformation() = 0 ;
+        void                    writeData() ;
+
         void                    writeDataHeader( std::fstream &, bool parallel=false ) ;
         void                    writeDataArray( std::fstream &, VTKField &) ;
         void                    writePDataArray( std::fstream &, VTKField &) ;
