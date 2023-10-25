@@ -235,8 +235,8 @@ int    FileHandler::getBlock( ) const {
 }
 
 /*!
- * sets the counter of the series
- * @param[in]   b_      index of block of parallel set
+ * sets the index of the parallel block
+ * @param[in]   b_      index of the parallel block
  */
 void    FileHandler::setBlock( int b_){
     block=b_;
