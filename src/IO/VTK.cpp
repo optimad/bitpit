@@ -700,30 +700,30 @@ void VTK::checkAllFields(){
  */
 void VTK::write( VTKWriteMode writeMode ){
 
-    int     counter(0);
-
+    // Initialize counter
+    int counter = getCounter();
     if( writeMode == VTKWriteMode::NO_SERIES ){
-        counter = unsetCounter() ;
-    } 
+        unsetCounter() ;
+    } else if( writeMode == VTKWriteMode::NO_INCREMENT ){
+        setCounter(counter - 1) ;
+    }
 
-    if( writeMode == VTKWriteMode::NO_INCREMENT ){
-        counter = getCounter() -1 ;
-        setCounter( counter) ;
-    } 
-
+    // Write data
     checkAllFields() ;
     calcAppendedOffsets() ;
 
     writeMetaInformation() ;
     writeData() ;
 
-    if( m_procs > 1  && m_rank == 0)  writeCollection() ;
-
-    if( writeMode == VTKWriteMode::DEFAULT || writeMode == VTKWriteMode::NO_INCREMENT ){
-        m_fh.incrementCounter() ;
+    // Write collection
+    if( m_procs > 1  && m_rank == 0){
+        writeCollection() ;
     }
 
-    if( writeMode == VTKWriteMode::NO_SERIES ){
+    // Update counter
+    if( writeMode == VTKWriteMode::DEFAULT || writeMode == VTKWriteMode::NO_INCREMENT ){
+        incrementCounter() ;
+    } else if( writeMode == VTKWriteMode::NO_SERIES ){
         setCounter(counter) ;
     }
 
