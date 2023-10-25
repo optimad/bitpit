@@ -48,11 +48,12 @@ class FileHandler{
         std::string           directory;       /**< name od directory where file resides */
         std::string           name;            /**< name of file; */
         std::string           appendix ;       /**< appendix; */
-        bool                  series ;         /**< is time series? */
-        bool                  parallel ;       /**< is part of distributed data? */
-        int                   counter ;        /**< counter for time series ; */
-        int                   block  ;         /**< index of block if parallel data */
 
+        bool                  series ;         /**< is time series? */
+        int                   counter ;        /**< counter for time series ; */
+
+        bool                  parallel ;       /**< is part of distributed data? */
+        int                   block  ;         /**< index of block if parallel data */
 
     public:
         FileHandler() ;
@@ -61,22 +62,25 @@ class FileHandler{
 
         FileHandler& operator=( const FileHandler& other) ;
 
+        bool                exists() ;
+
+        std::string         getPath() ;
+        std::string         getDirectory() const ;
+        std::string         getName() const ;
+        std::string         getAppendix() const ;
         void                setDirectory( const std::string & d_) ;
         void                setName( const std::string & n_) ;
         void                setAppendix( const std::string & a_) ;
+
         void                setSeries( bool s_) ;
-        void                setParallel( bool p_) ;
-        void                setCounter(int c_);
-        void                setBlock( int b_) ;
 
-        std::string         getPath() ;
-        std::string         getName() const ;
-        std::string         getDirectory() const ;
-        std::string         getAppendix() const ;
         int                 getCounter() const ;
-
+        void                setCounter(int c_);
         void                incrementCounter();
-        bool                exists() ;
+
+        void                setParallel( bool p_) ;
+
+        void                setBlock( int b_) ;
 
 };
 

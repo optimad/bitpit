@@ -86,74 +86,12 @@ FileHandler&    FileHandler::operator=(const FileHandler& other){
 };
 
 /*!
- * sets the directory
- * @param[in]   d_      name of directory
+ * Checks if file exists.
+ * @return  [true/false] if file exists
  */
-void    FileHandler::setDirectory(const std::string &d_){
-    directory=d_; 
-    return;
-} ;
-
-/*!
- * sets the name
- * @param[in]   n_      name of file
- */
-void    FileHandler::setName(const std::string &n_){
-    name=n_; 
-    return;
-} ;
-
-/*!
- * sets the appendix
- * @param[in]   a_      appendix of file
- */
-void    FileHandler::setAppendix(const std::string &a_){
-    appendix=a_; 
-    return;
-} ;
-
-/*!
- * sets if file belongs to a time series
- * @param[in]   s_      [true/false] if series
- */
-void    FileHandler::setSeries( bool s_){ 
-    series=s_; 
-    return;
-} ;
-
-/*!
- * sets the counter of the series
- * @param[in]   c_      index of series
- */
-void    FileHandler::setCounter(int c_){ 
-    counter=c_; 
-    return; 
-};
-
-/*!
- * sets if file belongs to a parallel output
- * @param[in]   p_      [true/false] if parallel
- */
-void    FileHandler::setParallel( bool p_){ 
-    parallel=p_; 
-    return;
-} ;
-
-/*!
- * sets the counter of the series
- * @param[in]   b_      index of block of parallel set
- */
-void    FileHandler::setBlock( int b_){ 
-    block=b_; 
-    return;
-} ;
-
-/*!
- * Increments the counter used for series.
- */
-void    FileHandler::incrementCounter(){ 
-    counter++; 
-    return; 
+bool   FileHandler::exists() {
+    std::ifstream f( getPath() );
+    return f.good() ;
 };
 
 /*!
@@ -174,21 +112,21 @@ std::string  FileHandler::getPath(){
 };
 
 /*!
- * Get the name of the file
- * @return The name of the file.
- */
-std::string  FileHandler::getName() const {
-
-  return name;
-};
-
-/*!
  * Get the directory where the file will be saved
  * @return The directory where the file will be saved.
  */
 std::string  FileHandler::getDirectory() const {
 
   return directory;
+};
+
+/*!
+ * Get the name of the file
+ * @return The name of the file.
+ */
+std::string  FileHandler::getName() const {
+
+  return name;
 };
 
 /*!
@@ -201,21 +139,84 @@ std::string  FileHandler::getAppendix() const {
 };
 
 /*!
- * Get the time index of the following file
+ * sets the directory
+ * @param[in]   d_      name of directory
+ */
+void    FileHandler::setDirectory(const std::string &d_){
+    directory=d_;
+    return;
+}
+
+/*!
+ * sets the name
+ * @param[in]   n_      name of file
+ */
+void    FileHandler::setName(const std::string &n_){
+    name=n_;
+    return;
+}
+
+/*!
+ * sets the appendix
+ * @param[in]   a_      appendix of file
+ */
+void    FileHandler::setAppendix(const std::string &a_){
+    appendix=a_;
+    return;
+}
+
+/*!
+ * sets if file belongs to a time series
+ * @param[in]   s_      [true/false] if series
+ */
+void    FileHandler::setSeries( bool s_){ 
+    series=s_; 
+    return;
+}
+
+/*!
+ * Get the time index of the following file.
+ * If the file doen't belong to a time series, a negative number will
+ * be returned.
  * @return counter
  */
 int  FileHandler::getCounter() const {
-
   return counter;
+}
+
+/*!
+ * sets the counter of the series
+ * @param[in]   c_      index of series
+ */
+void    FileHandler::setCounter(int c_){ 
+    counter=c_; 
+    return; 
 };
 
 /*!
- * Checks if file exists.
- * @return  [true/false] if file exists
+ * Increments the counter used for series.
  */
-bool   FileHandler::exists() {
-    std::ifstream f( getPath() );
-    return f.good() ;
+void    FileHandler::incrementCounter(){ 
+    counter++; 
+    return; 
 };
+
+/*!
+ * sets if file belongs to a parallel output
+ * @param[in]   p_      [true/false] if parallel
+ */
+void    FileHandler::setParallel( bool p_){
+    parallel=p_;
+    return;
+}
+
+/*!
+ * sets the counter of the series
+ * @param[in]   b_      index of block of parallel set
+ */
+void    FileHandler::setBlock( int b_){
+    block=b_;
+    return;
+}
 
 }
