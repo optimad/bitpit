@@ -160,6 +160,20 @@ void  VTK::setCounter( int counter){
 }
 
 /*!
+ * Increment the time series' counter. If the time series is not active, it will
+ * be activated and the counter will be reset.
+ */
+void  VTK::incrementCounter( ){
+
+  if (!m_fh.isSeries()) {
+    setCounter(0);
+  } else {
+    m_fh.incrementCounter() ;
+  }
+
+}
+
+/*!
  * De-activates output for time series. 
  * @return last value of counter
  */

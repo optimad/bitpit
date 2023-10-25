@@ -329,6 +329,7 @@ class VTK{
         void                    setName( const std::string & ) ;
         void                    setDirectory( const std::string & ) ;
         void                    setCounter( int c_=0 ) ;
+        void                    incrementCounter( ) ;
         int                     unsetCounter( ) ;
         void                    setParallel( uint16_t , uint16_t ) ;
 
