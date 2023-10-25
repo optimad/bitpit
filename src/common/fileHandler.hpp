@@ -56,6 +56,8 @@ class FileHandler{
         int                   block  ;         /**< index of the parallel block for distributed data */
 
     public:
+        static const int INVALID_COUNTER = -1; /**< dummy counter associate with files that doesn't belong to a time series*/
+
         FileHandler() ;
         FileHandler( const std::string & dir_, const std::string & name_, const std::string & app_) ;
         FileHandler(  const FileHandler& other ) ;
