@@ -189,7 +189,11 @@ void    FileHandler::setSeries( bool s_){
  * @return counter
  */
 int  FileHandler::getCounter() const {
-  return counter;
+  if (series) {
+    return counter;
+  } else {
+    return INVALID_COUNTER;
+  }
 }
 
 /*!
