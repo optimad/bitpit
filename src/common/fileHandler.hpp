@@ -67,9 +67,9 @@ class FileHandler{
         bool                exists() ;
 
         std::string         getPath() ;
-        std::string         getDirectory() const ;
-        std::string         getName() const ;
-        std::string         getAppendix() const ;
+        const std::string & getDirectory() const ;
+        const std::string & getName() const ;
+        const std::string & getAppendix() const ;
         void                setDirectory( const std::string & d_) ;
         void                setName( const std::string & n_) ;
         void                setAppendix( const std::string & a_) ;

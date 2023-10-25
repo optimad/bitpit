@@ -115,7 +115,7 @@ std::string  FileHandler::getPath(){
  * Get the directory where the file will be saved
  * @return The directory where the file will be saved.
  */
-std::string  FileHandler::getDirectory() const {
+const std::string &  FileHandler::getDirectory() const {
 
   return directory;
 }
@@ -124,7 +124,7 @@ std::string  FileHandler::getDirectory() const {
  * Get the name of the file
  * @return The name of the file.
  */
-std::string  FileHandler::getName() const {
+const std::string &  FileHandler::getName() const {
 
   return name;
 }
@@ -133,7 +133,7 @@ std::string  FileHandler::getName() const {
  * Get the appendix of the file
  * @return The appendix of the file.
  */
-std::string  FileHandler::getAppendix() const {
+const std::string &  FileHandler::getAppendix() const {
 
   return appendix;
 }
