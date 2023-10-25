@@ -53,7 +53,7 @@ class FileHandler{
         int                   counter ;        /**< counter for time series ; */
 
         bool                  parallel ;       /**< is part of distributed data? */
-        int                   block  ;         /**< index of block if parallel data */
+        int                   block  ;         /**< index of the parallel block for distributed data */
 
     public:
         FileHandler() ;
