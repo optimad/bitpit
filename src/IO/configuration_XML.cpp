@@ -139,10 +139,6 @@ void writeNode(xmlTextWriterPtr writer, const Config *config, const std::string 
 */
 xmlChar * encodeString(const std::string &in, const std::string &encoding)
 {
-    if (in.empty()) {
-        return nullptr;
-    }
-
     xmlCharEncodingHandlerPtr handler = xmlFindCharEncodingHandler(encoding.c_str());
     if (!handler) {
         return nullptr;
