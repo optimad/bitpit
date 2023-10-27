@@ -495,20 +495,19 @@ void VTKUnstructuredGrid::writeMetaInformation( ){
 /*!  
  *  Writes collection file for parallel output. 
  *  Is called by rank 0 in VTK::Write()
+ *
+ *  \param outputName filename to be set for this output only
+ *  \param collectionName collection filename to be set for this output only
  */
-void VTKUnstructuredGrid::writeCollection( ){
+void VTKUnstructuredGrid::writeCollection( const std::string &outputName, const std::string &collectionName ) {
 
     std::fstream str ;
 
-    FileHandler     fhp, fho ;
-
-    fhp = m_fh ;
-    fho = m_fh ;
-
+    FileHandler fhp(m_fh) ;
+    fhp.setSeries(false) ;
     fhp.setParallel(false) ;
+    fhp.setName(collectionName) ;
     fhp.setAppendix("pvtu") ;
-
-    fho.setDirectory(".") ;
 
     str.open( fhp.getPath( ), std::ios::out ) ;
     if (!str.is_open()) {
@@ -540,6 +539,10 @@ void VTKUnstructuredGrid::writeCollection( ){
     }
     str << "      </PCells>" << std::endl;
 
+    FileHandler fho(m_fh) ;
+    fho.setSeries(false) ;
+    fho.setDirectory(".") ;
+    fho.setName(outputName) ;
     for( int i=0; i<m_procs; i++){
         fho.setBlock(i) ;
         str << "    <Piece  Source=\"" << fho.getPath() <<  "\"/>" << std::endl;

@@ -747,6 +747,24 @@ void VTK::write( const std::string &name, VTKWriteMode writeMode ){
 }
 
 /*!
+ *  Writes collection file for parallel output.
+ *  Is called by rank 0 in VTK::Write()
+ */
+void VTK::writeCollection( ) {
+    writeCollection(getName(), getName()) ;
+}
+
+/*!
+ *  Writes collection file for parallel output.
+ *  Is called by rank 0 in VTK::Write()
+ *
+ *  \param outputName filename to be set for this output only
+ */
+void VTK::writeCollection( const std::string &outputName ) {
+    writeCollection(outputName, outputName) ;
+}
+
+/*!
  * Writes data only in VTK file
  */
 void VTK::writeData( ){
