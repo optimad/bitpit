@@ -1173,11 +1173,54 @@ void PatchKernel::write(const std::string &filename, VTKWriteMode mode)
 }
 
 /*!
-	Writes the patch a filename with the same name of the patch.
+	Writes the patch to filename specified in input.
+
+	\param filename the filename where the patch will be written to
+	\param mode is the VTK file mode that will be used for writing the patch
+	\param time is the current time
+*/
+void PatchKernel::write(const std::string &filename, VTKWriteMode mode, double time)
+{
+	std::string oldFilename = m_vtk.getName();
+
+	m_vtk.setName(filename);
+	write(mode, time);
+	m_vtk.setName(oldFilename);
+}
+
+/*!
+	Writes the patch to filename specified in input.
 
 	\param mode is the VTK file mode that will be used for writing the patch
 */
 void PatchKernel::write(VTKWriteMode mode)
+{
+	_writePrepare();
+
+	m_vtk.write(mode);
+
+	_writeFinalize();
+}
+
+/*!
+	Writes the patch a filename with the same name of the patch.
+
+	\param mode is the VTK file mode that will be used for writing the patch
+	\param time is the current time
+*/
+void PatchKernel::write(VTKWriteMode mode, double time)
+{
+	_writePrepare();
+
+	m_vtk.write(mode, time);
+
+	_writeFinalize();
+}
+
+/*!
+	Internal function to be called before writing the patch.
+*/
+void PatchKernel::_writePrepare()
 {
 	// Get VTK cell count
 	long vtkCellCount = 0;
@@ -1246,9 +1289,14 @@ void PatchKernel::write(VTKWriteMode mode)
 	}
 
 	m_vtk.setDimensions(vtkCellCount, vtkVertexCount, vtkConnectSize, vtkFaceStreamSize);
+}
 
-	// Write the mesh
-	m_vtk.write(mode);
+/*!
+	Internal function to be called after writing the patch.
+*/
+void PatchKernel::_writeFinalize()
+{
+	// Nothing to do
 }
 
 /*!

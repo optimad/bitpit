@@ -374,12 +374,18 @@ class VTK{
         virtual void            readMetaInformation() = 0 ; 
         void                    readData() ;
 
+        void                    write( VTKWriteMode writeMode, double time )  ;
         void                    write( VTKWriteMode writeMode=VTKWriteMode::DEFAULT )  ;
+        void                    write( const std::string &, VTKWriteMode writeMode, double time )  ;
         void                    write( const std::string &, VTKWriteMode writeMode=VTKWriteMode::NO_INCREMENT )  ;
 
         void                    writeCollection( ) const ;
         void                    writeCollection( const std::string &outputName ) const ;
         virtual void            writeCollection( const std::string &outputName, const std::string &collectionName ) const = 0;
+
+        void                    writeTimeSeries( double time ) const;
+        void                    writeTimeSeries( const std::string &outputName, double time ) const ;
+        void                    writeTimeSeries( const std::string &outputName, const std::string &seriesName, double time ) const ;
 
     protected:
         //For Writing

@@ -682,7 +682,9 @@ public:
 	void setVTKWriteTarget(WriteTarget targetCells);
 	const CellConstRange getVTKCellWriteRange() const;
 	void write(VTKWriteMode mode = VTKWriteMode::DEFAULT);
+	void write(VTKWriteMode mode, double time);
 	void write(const std::string &name, VTKWriteMode mode = VTKWriteMode::DEFAULT);
+	void write(const std::string &name, VTKWriteMode mode, double time);
 
 	void flushData(std::fstream &stream, const std::string &name, VTKFormat format) override;
 
@@ -902,6 +904,9 @@ protected:
 	virtual void _findCellFaceNeighs(long id, int face, const std::vector<long> *blackList, std::vector<long> *neighs) const;
 	virtual void _findCellEdgeNeighs(long id, int edge, const std::vector<long> *blackList, std::vector<long> *neighs) const;
 	virtual void _findCellVertexNeighs(long id, int vertex, const std::vector<long> *blackList, std::vector<long> *neighs) const;
+
+	virtual void _writePrepare();
+	virtual void _writeFinalize();
 
 	void setExpert(bool expert);
 
