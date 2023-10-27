@@ -64,9 +64,9 @@ class FileHandler{
 
         FileHandler& operator=( const FileHandler& other) ;
 
-        bool                exists() ;
+        bool                exists() const ;
 
-        std::string         getPath() ;
+        std::string         getPath() const ;
         const std::string & getDirectory() const ;
         const std::string & getName() const ;
         const std::string & getAppendix() const ;
