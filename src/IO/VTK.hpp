@@ -377,7 +377,9 @@ class VTK{
         void                    write( VTKWriteMode writeMode=VTKWriteMode::DEFAULT )  ;
         void                    write( const std::string &, VTKWriteMode writeMode=VTKWriteMode::NO_INCREMENT )  ;
 
-        virtual void            writeCollection() = 0 ;
+        void                    writeCollection( ) ;
+        void                    writeCollection( const std::string &outputName ) ;
+        virtual void            writeCollection( const std::string &outputName, const std::string &collectionName ) = 0;
 
     protected:
         //For Writing
@@ -444,8 +446,6 @@ class VTKUnstructuredGrid : public VTK {
     VTKUnstructuredGrid( const std::string &, const std::string &, VTKElementType elementType = VTKElementType::UNDEFINED ) ;
 
     protected:
-        void                    writeCollection() override ;
-
         uint64_t                readConnectivityEntries( ) ;
         uint64_t                readFaceStreamEntries( ) ;
 
@@ -456,6 +456,8 @@ class VTKUnstructuredGrid : public VTK {
 
         void                    readMetaInformation() override ;
         void                    writeMetaInformation() override ;
+
+        void                    writeCollection( const std::string &outputName, const std::string &collectionName ) override ;
 
         void                    setDimensions( uint64_t , uint64_t , uint64_t nconn = 0 , uint64_t nfacestream = 0 ) ;
 
@@ -495,14 +497,13 @@ class VTKRectilinearGrid : public VTK{
         VTKRectilinearGrid( const std::string & , const std::string & , VTKFormat, int, int, int, int );
         VTKRectilinearGrid( const std::string & , const std::string & , VTKFormat, int, int );
 
-    protected:
-        void                    writeCollection() override ;
-
     public:
         using                   VTK::setGeomData;
 
         void                    readMetaInformation() override ;
         void                    writeMetaInformation() override ;
+
+        void                    writeCollection( const std::string &outputName, const std::string &collectionName ) override ;
 
         void                    setDimensions( int, int, int, int, int, int ) ;
         void                    setDimensions( int, int, int ) ;
