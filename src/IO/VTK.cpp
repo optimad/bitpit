@@ -23,6 +23,8 @@
 \*---------------------------------------------------------------------------*/
 
 #include <cassert>
+#include <sstream>
+#include <string>
 #include <unordered_set>
 
 #include "VTK.hpp"
@@ -697,6 +699,25 @@ void VTK::checkAllFields(){
  * @param[in] writeMode if writeMode == VTKWriteMode::DEFAULT the default write setting will be used according to setCounter();
  * if writeMode == VTKWriteMode::NO_SERIES no time stamp will be added and the counter will not be increased;
  * if writeMode == VTKWriteMode::NO_INCREMENT the output file will have the same time stamp like the previous one ;
+ * @param[in] time is the time associated with the file
+ */
+void VTK::write( VTKWriteMode writeMode, double time ){
+
+    // Write VTK file
+    write(writeMode);
+
+    // Write time series file
+    if( writeMode == VTKWriteMode::DEFAULT || writeMode == VTKWriteMode::NO_INCREMENT ){
+        writeTimeSeries(time);
+    }
+
+}
+
+/*!
+ * Writes entire VTK file (headers and data).
+ * @param[in] writeMode if writeMode == VTKWriteMode::DEFAULT the default write setting will be used according to setCounter();
+ * if writeMode == VTKWriteMode::NO_SERIES no time stamp will be added and the counter will not be increased;
+ * if writeMode == VTKWriteMode::NO_INCREMENT the output file will have the same time stamp like the previous one ;
  */
 void VTK::write( VTKWriteMode writeMode ){
 
@@ -741,6 +762,23 @@ void VTK::write( const std::string &name, VTKWriteMode writeMode ){
     setName(name) ;
     write(writeMode) ;
     setName(oldName) ;
+}
+
+/*!
+ * Writes entire VTK file (headers and data).
+ * @param[in] name filename to be set for this output only
+ * @param[in] writeMode if writeMode == VTKWriteMode::DEFAULT the default write setting will be used according to setCounter();
+ * if writeMode == VTKWriteMode::NO_SERIES no time stamp will be added and the counter will not be increased;
+ * if writeMode == VTKWriteMode::NO_INCREMENT the output file will have the same time stamp like the previous one ;
+ * @param[in] time is the time associated with the file
+ */
+void VTK::write( const std::string &name, VTKWriteMode writeMode, double time ){
+
+    std::string oldName = getName() ;
+
+    setName(name) ;
+    write(writeMode, time) ;
+    setName(oldName) ;
 
 }
 
@@ -760,6 +798,132 @@ void VTK::writeCollection( ) const {
  */
 void VTK::writeCollection( const std::string &outputName ) const {
     writeCollection(outputName, outputName) ;
+}
+
+/*!
+ *  Writes time series file.
+ *
+ *  If the file doesn't exists or if this is the first data set of the series
+ *  (i.e., the counter is equal to zero), the time series will be written from
+ *  scratch and will contain only the current data set. Otherwise, the existing
+ *  time series will be inspected and the current data set will be either added
+ *  at the end of the series or will it will replace the entry with the same
+ *  file name it such an entry exists.
+ *
+ *  \param time is the time associated with the data set
+ */
+void VTK::writeTimeSeries( double time ) const {
+    writeTimeSeries(getName(), getName(), time) ;
+}
+
+/*!
+ *  Writes time series file.
+ *
+ *  If the file doesn't exists or if this is the first data set of the series
+ *  (i.e., the counter is equal to zero), the time series will be written from
+ *  scratch and will contain only the current data set. Otherwise, the existing
+ *  time series will be inspected and the current data set will be either added
+ *  at the end of the series or will it will replace the entry with the same
+ *  file name it such an entry exists.
+ *
+ *  \param outputName filename to be set for this output only
+ *  \param time is the time associated with the data set
+ */
+void VTK::writeTimeSeries( const std::string &outputName, double time ) const {
+    writeTimeSeries(outputName, outputName, time) ;
+}
+
+/*!
+ *  Writes time series file.
+ *
+ *  If the file doesn't exists or if this is the first data set of the series
+ *  (i.e., the counter is equal to zero), the time series will be written from
+ *  scratch and will contain only the current data set. Otherwise, the existing
+ *  time series will be inspected and the current data set will be either added
+ *  at the end of the series or will it will replace the entry with the same
+ *  file name it such an entry exists.
+ *
+ *  \param outputName filename to be set for this output only
+ *  \param seriesName series filename to be set for this output only
+ *  \param time is the time associated with the data set
+ */
+void VTK::writeTimeSeries( const std::string &outputName, const std::string &seriesName, double time ) const {
+
+    // Only one process should write the time series
+    if (m_rank != 0) {
+        return;
+    }
+
+    // Initialize series file handle
+    FileHandler seriesFileHandler = m_fh ;
+    seriesFileHandler.setSeries(false) ;
+    seriesFileHandler.setParallel(false) ;
+    seriesFileHandler.setName(seriesName) ;
+    seriesFileHandler.setAppendix("pvd") ;
+
+    // Initialize series
+    if (!seriesFileHandler.exists() || getCounter() == 0) {
+        std::fstream emptySeriesFileStream;
+        emptySeriesFileStream.open( seriesFileHandler.getPath(), std::ios::out | std::ios::trunc ) ;
+        if (!emptySeriesFileStream.is_open()) {
+            throw std::runtime_error("Cannot create file \"" + seriesFileHandler.getName() + "\"" + " inside the directory \"" + seriesFileHandler.getDirectory() + "\"");
+        }
+
+        emptySeriesFileStream << "<?xml version=\"1.0\"?>" << std::endl;
+        emptySeriesFileStream << "<VTKFile type=\"Collection\" version=\"0.1\">" << std::endl;
+        emptySeriesFileStream << "    <Collection>" << std::endl;
+        emptySeriesFileStream << "    </Collection>" << std::endl;
+        emptySeriesFileStream << "</VTKFile>" << std::endl;
+        emptySeriesFileStream.close();
+    }
+
+    // Create updated series
+    FileHandler dataSetFileHandler;
+    if (m_procs <= 1) {
+        dataSetFileHandler = m_fh ;
+        dataSetFileHandler.setSeries(false) ;
+        dataSetFileHandler.setParallel(false) ;
+        dataSetFileHandler.setName(outputName);
+    } else {
+        dataSetFileHandler = createCollectionHandler(outputName) ;
+    }
+    dataSetFileHandler.setDirectory(".");
+
+    std::string line;
+    std::stringstream series;
+
+    std::fstream seriesFileStream;
+    seriesFileStream.open( seriesFileHandler.getPath( ), std::ios::in ) ;
+    if (!seriesFileStream.is_open()) {
+        throw std::runtime_error("Cannot read file \"" + seriesFileHandler.getName() + "\"" + " inside the directory \"" + seriesFileHandler.getDirectory() + "\"");
+    }
+
+    while (std::getline(seriesFileStream, line)) {
+        bool duplicateEntry = (line.find("file=\"" + dataSetFileHandler.getPath() + "\"") != std::string::npos);
+        bool collectionEnd  = (line.find("</Collection>") != std::string::npos);
+
+        if (collectionEnd || duplicateEntry) {
+            series << "        <DataSet";
+            series << " timestep=\"" << time << "\"";
+            series << " file=\"" << dataSetFileHandler.getPath() << "\"";
+            series << "/>" << std::endl;
+        }
+
+        if (!duplicateEntry) {
+            series << line << std::endl;
+        }
+    }
+    seriesFileStream.close();
+
+    // Write updated series
+    std::ofstream updatedSeriesFileStream;
+    updatedSeriesFileStream.open( seriesFileHandler.getPath( )) ;
+    if (!updatedSeriesFileStream.is_open()) {
+        throw std::runtime_error("Cannot create file \"" + seriesFileHandler.getName() + "\"" + " inside the directory \"" + seriesFileHandler.getDirectory() + "\"");
+    }
+
+    updatedSeriesFileStream << series.rdbuf();
+    updatedSeriesFileStream.close();
 }
 
 /*!
