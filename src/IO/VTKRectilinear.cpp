@@ -278,13 +278,18 @@ void VTKRectilinearGrid::writeMetaInformation( ){
 
 /*!  
  *  Writes collection file for parallel output. 
- *  Is called by rank 0 in VTK::Write()
  *
  *  \param outputName filename to be set for this output only
  *  \param collectionName collection filename to be set for this output only
  */
 void VTKRectilinearGrid::writeCollection( const std::string &outputName, const std::string &collectionName ) {
 
+    // Only one process in a parallel output should write the collection
+    if (m_procs <= 1 || m_rank != 0) {
+        return;
+    }
+
+    // Initialize file handler
     std::fstream str ;
 
     FileHandler fhp(m_fh) ;
