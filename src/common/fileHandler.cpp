@@ -89,7 +89,7 @@ FileHandler&    FileHandler::operator=(const FileHandler& other){
  * Checks if file exists.
  * @return  [true/false] if file exists
  */
-bool   FileHandler::exists() {
+bool   FileHandler::exists() const {
     std::ifstream f( getPath() );
     return f.good() ;
 }
@@ -98,7 +98,7 @@ bool   FileHandler::exists() {
  * Composes the filename.
  * @return  complete filename
  */
-std::string  FileHandler::getPath(){
+std::string  FileHandler::getPath() const {
   std::stringstream filename ;
 
   if (!directory.empty()) filename << directory << "/";
