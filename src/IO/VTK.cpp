@@ -716,9 +716,7 @@ void VTK::write( VTKWriteMode writeMode ){
     writeData() ;
 
     // Write collection
-    if( m_procs > 1  && m_rank == 0){
-        writeCollection() ;
-    }
+    writeCollection() ;
 
     // Update counter
     if( writeMode == VTKWriteMode::DEFAULT || writeMode == VTKWriteMode::NO_INCREMENT ){
