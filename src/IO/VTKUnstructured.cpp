@@ -438,7 +438,7 @@ uint64_t VTKUnstructuredGrid::readFaceStreamEntries( ){
 /*!  
  *  Writes entire VTU but the data.
  */
-void VTKUnstructuredGrid::writeMetaInformation( ){
+void VTKUnstructuredGrid::writeMetaInformation( ) const {
 
     std::fstream str ;
 
@@ -498,7 +498,7 @@ void VTKUnstructuredGrid::writeMetaInformation( ){
  *  \param outputName filename to be set for this output only
  *  \param collectionName collection filename to be set for this output only
  */
-void VTKUnstructuredGrid::writeCollection( const std::string &outputName, const std::string &collectionName ) {
+void VTKUnstructuredGrid::writeCollection( const std::string &outputName, const std::string &collectionName ) const {
 
     // Only one process in a parallel output should write the collection
     if (m_procs <= 1 || m_rank != 0) {
@@ -633,7 +633,7 @@ void VTKUnstructuredGrid::readMetaInformation( ){
  *  Returns the size of the connectivity information
  *  @return size of connectivity
  */
-uint64_t VTKUnstructuredGrid::calcConnectivityEntries( ){
+uint64_t VTKUnstructuredGrid::calcConnectivityEntries( ) const {
 
     return calcFieldEntries( m_geometry[getFieldGeomId(VTKUnstructuredField::CONNECTIVITY)] ) ;
 }
@@ -643,7 +643,7 @@ uint64_t VTKUnstructuredGrid::calcConnectivityEntries( ){
  * @param[in] field field 
  * @return size of the field
  */
-uint64_t VTKUnstructuredGrid::calcFieldSize( const VTKField &field ){
+uint64_t VTKUnstructuredGrid::calcFieldSize( const VTKField &field ) const {
 
     uint64_t bytes = calcFieldEntries(field) ;
     bytes *= VTKTypes::sizeOfType( field.getDataType() ) ;
@@ -657,7 +657,7 @@ uint64_t VTKUnstructuredGrid::calcFieldSize( const VTKField &field ){
  * @param[in] field field 
  * @return size of the field
  */
-uint64_t VTKUnstructuredGrid::calcFieldEntries( const VTKField &field ){
+uint64_t VTKUnstructuredGrid::calcFieldEntries( const VTKField &field ) const {
 
     uint64_t entries(0) ;
     const std::string &name = field.getName() ;
@@ -706,7 +706,7 @@ uint64_t VTKUnstructuredGrid::calcFieldEntries( const VTKField &field ){
  * @param[in] field field 
  * @return size of the field
  */
-uint8_t VTKUnstructuredGrid::calcFieldComponents( const VTKField &field ){
+uint8_t VTKUnstructuredGrid::calcFieldComponents( const VTKField &field ) const {
 
     uint8_t comp ;
     const std::string &name = field.getName() ;
@@ -749,7 +749,7 @@ uint8_t VTKUnstructuredGrid::calcFieldComponents( const VTKField &field ){
  *  @param[in] field field
  *  @return geometry index associated to the field
  */
-int VTKUnstructuredGrid::getFieldGeomId( VTKUnstructuredField field ){
+int VTKUnstructuredGrid::getFieldGeomId( VTKUnstructuredField field ) const {
 
     return static_cast<std::underlying_type<VTKElementType>::type>(field) ;
 }

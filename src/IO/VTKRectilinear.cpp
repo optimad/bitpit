@@ -221,7 +221,7 @@ void VTKRectilinearGrid::readMetaInformation( ){
 /*!  
  *  Writes entire VTR but the data.
  */
-void VTKRectilinearGrid::writeMetaInformation( ){
+void VTKRectilinearGrid::writeMetaInformation( ) const {
 
     std::fstream str;
 
@@ -282,7 +282,7 @@ void VTKRectilinearGrid::writeMetaInformation( ){
  *  \param outputName filename to be set for this output only
  *  \param collectionName collection filename to be set for this output only
  */
-void VTKRectilinearGrid::writeCollection( const std::string &outputName, const std::string &collectionName ) {
+void VTKRectilinearGrid::writeCollection( const std::string &outputName, const std::string &collectionName ) const {
 
     // Only one process in a parallel output should write the collection
     if (m_procs <= 1 || m_rank != 0) {
@@ -333,7 +333,7 @@ void VTKRectilinearGrid::writeCollection( const std::string &outputName, const s
     fho.setName(outputName) ;
     for( int i=0; i<m_procs; i++){
         fho.setBlock(i) ;
-        extension3D_t &index = m_procIndex[i] ;
+        const extension3D_t &index = m_procIndex[i] ;
 
         str << "    <Piece Extent= \" " 
             << index[0][0] << " " << index[0][1] << " "
@@ -505,7 +505,7 @@ void VTKRectilinearGrid::setGlobalIndex( const std::vector<extension2D_t> &loc )
  * @param[in] field field 
  * @return size of the field
  */
-uint64_t VTKRectilinearGrid::calcFieldSize( const VTKField &field ){
+uint64_t VTKRectilinearGrid::calcFieldSize( const VTKField &field ) const {
 
     uint64_t bytes = calcFieldEntries(field) ;
     bytes *= VTKTypes::sizeOfType( field.getDataType() ) ;
@@ -519,7 +519,7 @@ uint64_t VTKRectilinearGrid::calcFieldSize( const VTKField &field ){
  * @param[in] field field 
  * @return size of the field
  */
-uint64_t VTKRectilinearGrid::calcFieldEntries( const VTKField &field ){
+uint64_t VTKRectilinearGrid::calcFieldEntries( const VTKField &field ) const {
 
     uint64_t entries(0) ;
     const std::string &name = field.getName() ;
@@ -559,7 +559,7 @@ uint64_t VTKRectilinearGrid::calcFieldEntries( const VTKField &field ){
  * @param[in] field field 
  * @return size of the field
  */
-uint8_t VTKRectilinearGrid::calcFieldComponents( const VTKField &field ){
+uint8_t VTKRectilinearGrid::calcFieldComponents( const VTKField &field ) const {
 
     uint8_t comp ;
     const std::string &name = field.getName() ;

@@ -377,22 +377,22 @@ class VTK{
         void                    write( VTKWriteMode writeMode=VTKWriteMode::DEFAULT )  ;
         void                    write( const std::string &, VTKWriteMode writeMode=VTKWriteMode::NO_INCREMENT )  ;
 
-        void                    writeCollection( ) ;
-        void                    writeCollection( const std::string &outputName ) ;
-        virtual void            writeCollection( const std::string &outputName, const std::string &collectionName ) = 0;
+        void                    writeCollection( ) const ;
+        void                    writeCollection( const std::string &outputName ) const ;
+        virtual void            writeCollection( const std::string &outputName, const std::string &collectionName ) const = 0;
 
     protected:
         //For Writing
-        virtual void            writeMetaInformation() = 0 ;
+        virtual void            writeMetaInformation() const = 0 ;
         void                    writeData() ;
 
-        void                    writeDataHeader( std::fstream &, bool parallel=false ) ;
-        void                    writeDataArray( std::fstream &, VTKField &) ;
-        void                    writePDataArray( std::fstream &, VTKField &) ;
+        void                    writeDataHeader( std::fstream &, bool parallel=false ) const ;
+        void                    writeDataArray( std::fstream &, const VTKField &) const ;
+        void                    writePDataArray( std::fstream &, const VTKField &) const ;
 
         //For Reading
         void                    readDataHeader( std::fstream &) ;
-        bool                    readDataArray( std::fstream &, VTKField &);
+        bool                    readDataArray( std::fstream &, VTKField &) const ;
 
         //General Purpose
         std::vector<std::string> getFieldNames( const std::vector<VTKField> &fields ) const;
@@ -411,10 +411,10 @@ class VTK{
         bool                    isASCIIActive() const;
 
         void                    calcAppendedOffsets() ;
-        virtual uint64_t        calcFieldSize( const VTKField &) =0;
-        virtual uint64_t        calcFieldEntries( const VTKField &) =0;
-        virtual uint8_t         calcFieldComponents( const VTKField &) =0;
-        void                    checkAllFields() ;
+        virtual uint64_t        calcFieldSize( const VTKField &) const = 0;
+        virtual uint64_t        calcFieldEntries( const VTKField &) const = 0;
+        virtual uint8_t         calcFieldComponents( const VTKField &) const = 0;
+        void                    checkAllFields();
 
 };
 
@@ -455,9 +455,9 @@ class VTKUnstructuredGrid : public VTK {
         using                   VTK::setGeomData;
 
         void                    readMetaInformation() override ;
-        void                    writeMetaInformation() override ;
+        void                    writeMetaInformation() const override ;
 
-        void                    writeCollection( const std::string &outputName, const std::string &collectionName ) override ;
+        void                    writeCollection( const std::string &outputName, const std::string &collectionName ) const override ;
 
         void                    setDimensions( uint64_t , uint64_t , uint64_t nconn = 0 , uint64_t nfacestream = 0 ) ;
 
@@ -468,13 +468,13 @@ class VTKUnstructuredGrid : public VTK {
         template<class T>
         void setGeomData( VTKUnstructuredField, VTKBaseStreamer* = nullptr );
 
-        uint64_t                calcConnectivityEntries( ) ;
-        uint64_t                calcFieldSize( const VTKField &) override ;
-        uint64_t                calcFieldEntries( const VTKField &) override ;
-        uint8_t                 calcFieldComponents( const VTKField &) override ;
+        uint64_t                calcConnectivityEntries( ) const ;
+        uint64_t                calcFieldSize( const VTKField &) const override ;
+        uint64_t                calcFieldEntries( const VTKField &) const override ;
+        uint8_t                 calcFieldComponents( const VTKField &) const override ;
 
     private:
-        int                     getFieldGeomId( VTKUnstructuredField field ) ;
+        int                     getFieldGeomId( VTKUnstructuredField field ) const ;
 
 };
 
@@ -501,9 +501,9 @@ class VTKRectilinearGrid : public VTK{
         using                   VTK::setGeomData;
 
         void                    readMetaInformation() override ;
-        void                    writeMetaInformation() override ;
+        void                    writeMetaInformation() const override ;
 
-        void                    writeCollection( const std::string &outputName, const std::string &collectionName ) override ;
+        void                    writeCollection( const std::string &outputName, const std::string &collectionName ) const override ;
 
         void                    setDimensions( int, int, int, int, int, int ) ;
         void                    setDimensions( int, int, int ) ;
@@ -523,9 +523,9 @@ class VTKRectilinearGrid : public VTK{
         void                    setGlobalIndex( const std::vector<extension3D_t> & ) ;
         void                    setGlobalIndex( const std::vector<extension2D_t> & ) ;
 
-        uint64_t                calcFieldSize( const VTKField &) override ;
-        uint64_t                calcFieldEntries( const VTKField &) override ;
-        uint8_t                 calcFieldComponents( const VTKField &) override ;
+        uint64_t                calcFieldSize( const VTKField &) const override ;
+        uint64_t                calcFieldEntries( const VTKField &) const override ;
+        uint8_t                 calcFieldComponents( const VTKField &) const override ;
 };
 
 /*!

@@ -748,7 +748,7 @@ void VTK::write( const std::string &name, VTKWriteMode writeMode ){
  *  Writes collection file for parallel output.
  *  Is called by rank 0 in VTK::Write()
  */
-void VTK::writeCollection( ) {
+void VTK::writeCollection( ) const {
     writeCollection(getName(), getName()) ;
 }
 
@@ -758,7 +758,7 @@ void VTK::writeCollection( ) {
  *
  *  \param outputName filename to be set for this output only
  */
-void VTK::writeCollection( const std::string &outputName ) {
+void VTK::writeCollection( const std::string &outputName ) const {
     writeCollection(outputName, outputName) ;
 }
 
@@ -964,7 +964,7 @@ void VTK::writeData( ){
  * @param[in] str output stream
  * @param[in] parallel flag for parallel data headers for collection files [true/false]
  */
-void VTK::writeDataHeader( std::fstream &str, bool parallel ){
+void VTK::writeDataHeader( std::fstream &str, bool parallel ) const {
 
     VTKLocation           location ;
     std::stringstream     scalars, vectors ;
@@ -1030,7 +1030,7 @@ void VTK::writeDataHeader( std::fstream &str, bool parallel ){
  * @param[in] str output stream
  * @param[in] field field to be written
  */
-void VTK::writeDataArray( std::fstream &str, VTKField &field ){
+void VTK::writeDataArray( std::fstream &str, const VTKField &field ) const {
 
     str << vtk::convertDataArrayToString( field )  << std::endl ;
     str << "        </DataArray>" << std::endl ;
@@ -1042,7 +1042,7 @@ void VTK::writeDataArray( std::fstream &str, VTKField &field ){
  * @param[in] str output stream
  * @param[in] field field to be written
  */
-void VTK::writePDataArray( std::fstream &str, VTKField &field ){
+void VTK::writePDataArray( std::fstream &str, const VTKField &field ) const {
 
     str << vtk::convertPDataArrayToString( field ) << std::endl ;
     str << "        </PDataArray>" << std::endl ;
@@ -1286,7 +1286,7 @@ void VTK::readDataHeader( std::fstream &str ){
  * @param[in]  str output stream
  * @param[out] field field information
  */
-bool VTK::readDataArray( std::fstream &str, VTKField &field  ){
+bool VTK::readDataArray( std::fstream &str, VTKField &field  ) const {
 
     std::string line ;
 
