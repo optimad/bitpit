@@ -314,6 +314,109 @@ void PatchKernel::mappedItemRenumbering(PiercedVector<item_t, id_t> &container,
 }
 
 /*!
+	Applies the specified function to all the neighbours of the provided seed.
+
+	Starting from the specified seeds, neighbours will be processed one layer after
+	another, until the requested number of layers has been identified and processed.
+
+	Cell processing will be performed using the specified specified functor, that
+	functor should receive in input the id of the cell to be processed and the layer
+	the cell belongs to. The functor should return a boolean value, when the value
+	returned by the function is true, cell processing will stop.
+
+	\param seedId is the seed
+	\param nLayers is the number of neighbour layers that will be processed
+	\param function is a functor that will be applied
+*/
+template<typename Function>
+void PatchKernel::processCellNeighbours(long seedId, int nLayers, Function function) const
+{
+	auto selector = [](long neighId) {
+		BITPIT_UNUSED(neighId);
+
+		return true;
+	};
+
+	processCellNeighbours(seedId, nLayers, selector, function);
+}
+
+/*!
+	Applies the specified function to the selected neighbours of the provided
+	seed.
+
+	Neighbours are selected using the specified functor. The functor receives the
+	id of a cell and returns true if the cell should be selected, false otherwise.
+	The function will be evaluated only for the selected cells.
+
+	Starting from the specified seeds, neighbours will be processed one layer after
+	another, until the requested number of layers has been identified and processed.
+
+	Cell processing will be performed using the specified specified functor, that
+	functor should receive in input the id of the cell to be processed and the layer
+	the cell belongs to. The functor should return a boolean value, when the value
+	returned by the function is true, cell processing will stop.
+
+	\param seedId is the seed
+	\param nLayers is the number of neighbour layers that will be processed
+	\param function is a functor that will be applied
+	\param selector is a functor that controls if a neighbour is selected
+	or not
+*/
+template<typename Selector, typename Function>
+void PatchKernel::processCellNeighbours(long seedId, int nLayers, Selector selector, Function function) const
+{
+	if (nLayers == 1) {
+		assert(getAdjacenciesBuildStrategy() != ADJACENCIES_NONE);
+
+		std::vector<long> neighIds;
+		findCellNeighs(seedId, &neighIds);
+		for (long neighId : neighIds) {
+			if (!selector(neighId)) {
+				continue;
+			}
+
+			bool stop = function(neighId, 0);
+			if (stop) {
+				return;
+			}
+		}
+	} else {
+		processCellsNeighbours(std::array<long, 1>{{seedId}}, nLayers, selector, function);
+	}
+}
+
+/*!
+	Applies the specified function to all the neighbours of the provided seeds.
+
+	Neighbours are selected using the specified functor. The functor receives the
+	id of a cell and returns true if the cell should be selected, false otherwise.
+	The function will be evaluated only for the selected cells.
+
+	Starting from the specified seeds, neighbours will be processed one layer after
+	another, until the requested number of layers has been identified and processed.
+
+	Cell processing will be performed using the specified specified functor, that
+	functor should receive in input the id of the cell to be processed and the layer
+	the cell belongs to. The functor should return a boolean value, when the value
+	returned by the function is true, cell processing will stop.
+
+	\param seeds are the seeds
+	\param nLayers is the number of neighbour layers that will be processed
+	\param function is a functor that will be applied
+*/
+template<typename Function, typename SeedContainer>
+void PatchKernel::processCellsNeighbours(const SeedContainer &seeds, int nLayers, Function function) const
+{
+	auto selector = [](long neighId) {
+		BITPIT_UNUSED(neighId);
+
+		return true;
+	};
+
+	processCellsNeighbours(seeds, nLayers, selector, function);
+}
+
+/*!
 	Applies the specified function to the selected neighbours of the provided
 	seeds.
 
@@ -332,36 +435,236 @@ void PatchKernel::mappedItemRenumbering(PiercedVector<item_t, id_t> &container,
 	\param seeds are the seeds
 	\param nLayers is the number of neighbour layers that will be processed
 	\param function is a functor that will be applied
-	\param isSelected is a functor that controls if a neighbour is selected
-	or not
+	\param selector is a functor that controls if a neighbour is selected or not
 */
 template<typename Selector, typename Function, typename SeedContainer>
-void PatchKernel::processCellsNeighbours(const SeedContainer &seeds, int nLayers,
-										 Selector isSelected, Function function)
+void PatchKernel::processCellsNeighbours(const SeedContainer &seedIds, int nLayers,
+										 Selector selector, Function function) const
 {
 	assert(getAdjacenciesBuildStrategy() != ADJACENCIES_NONE);
 
-	std::unordered_set<long> previousSeeds;
-	std::unordered_set<long> currentSeeds;
-	std::unordered_set<long> futureSeeds(seeds.begin(), seeds.end());
+	std::unordered_set<long> previousSeedIds;
+	std::unordered_set<long> currentSeedIds;
+	std::unordered_set<long> futureSeeds(seedIds.begin(), seedIds.end());
 
 	std::vector<long> neighIds;
 	for (int layer = 0; layer < nLayers; ++layer) {
-		previousSeeds.swap(currentSeeds);
-		currentSeeds.swap(futureSeeds);
+		previousSeedIds.swap(currentSeedIds);
+		currentSeedIds.swap(futureSeeds);
 		futureSeeds.clear();
 
-		for (long seedId : currentSeeds) {
+		for (long seedId : currentSeedIds) {
 			neighIds.clear();
 			findCellNeighs(seedId, &neighIds);
 			for (long neighId : neighIds) {
-				if (previousSeeds.count(neighId) > 0) {
+				if (previousSeedIds.count(neighId) > 0) {
 					continue;
-				} else if (currentSeeds.count(neighId) > 0) {
+				} else if (currentSeedIds.count(neighId) > 0) {
 					continue;
 				} else if (futureSeeds.count(neighId) > 0) {
 					continue;
-				} else if (!isSelected(neighId)) {
+				} else if (!selector(neighId)) {
+					continue;
+				}
+
+				bool stop = function(neighId, layer);
+				if (stop) {
+					return;
+				}
+
+				futureSeeds.insert(neighId);
+			}
+		}
+	}
+}
+
+/*!
+	Applies the specified function to all face neighbours of the provided seed.
+
+	Starting from the specified seeds, neighbours will be processed one layer after
+	another, until the requested number of layers has been identified and processed.
+
+	Cell processing will be performed using the specified specified functor, that
+	functor should receive in input the id of the cell to be processed and the layer
+	the cell belongs to. The functor should return a boolean value, when the value
+	returned by the function is true, cell processing will stop.
+
+	\param seedId is the seed
+	\param nLayers is the number of neighbour layers that will be processed
+	\param function is a functor that will be applied
+*/
+template<typename Function>
+void PatchKernel::processCellFaceNeighbours(long seedId, int nLayers, Function function) const
+{
+	auto selector = [](long neighId) {
+		BITPIT_UNUSED(neighId);
+
+		return true;
+	};
+
+	processCellFaceNeighbours(seedId, nLayers, selector, function);
+}
+
+/*!
+	Applies the specified function to the selected face neighbours of the provided
+	seed.
+
+	Neighbours are selected using the specified functor. The functor receives the
+	id of a cell and returns true if the cell should be selected, false otherwise.
+	The function will be evaluated only for the selected cells.
+
+	Starting from the specified seeds, neighbours will be processed one layer after
+	another, until the requested number of layers has been identified and processed.
+
+	Cell processing will be performed using the specified specified functor, that
+	functor should receive in input the id of the cell to be processed and the layer
+	the cell belongs to. The functor should return a boolean value, when the value
+	returned by the function is true, cell processing will stop.
+
+	\param seedId is the seed
+	\param nLayers is the number of neighbour layers that will be processed
+	\param function is a functor that will be applied
+	\param selector is a functor that controls if a neighbour is selected or not
+*/
+template<typename Selector, typename Function>
+void PatchKernel::processCellFaceNeighbours(long seedId, int nLayers, Selector selector, Function function) const
+{
+	if (nLayers == 1) {
+		bool cellAdjacenciesAvailable = (getAdjacenciesBuildStrategy() != ADJACENCIES_NONE);
+		if (cellAdjacenciesAvailable) {
+			cellAdjacenciesAvailable = !m_cells.empty();
+		}
+
+		std::unique_ptr<std::vector<long>> neighStorage;
+		if (!cellAdjacenciesAvailable) {
+			neighStorage = std::unique_ptr<std::vector<long>>(new std::vector<long>());
+		}
+
+		const long *neighs;
+		std::size_t nNeighs;
+		if (cellAdjacenciesAvailable) {
+			const Cell &cell = getCell(seedId);
+			neighs = cell.getAdjacencies();
+			nNeighs = cell.getAdjacencyCount();
+		} else {
+			findCellFaceNeighs(seedId, neighStorage.get());
+			neighs = neighStorage->data();
+			nNeighs = neighStorage->size();
+		}
+
+		for(std::size_t n = 0; n < nNeighs; ++n){
+			long neighId = neighs[n];
+			if (!selector(neighId)) {
+				continue;
+			}
+
+			bool stop = function(neighId, 0);
+			if (stop) {
+				return;
+			}
+		}
+	} else {
+		processCellsFaceNeighbours(std::array<long, 1>{{seedId}}, nLayers, selector, function);
+	}
+}
+
+/*!
+	Applies the specified function to all face neighbours of the provided seeds.
+
+	Starting from the specified seeds, neighbours will be processed one layer after
+	another, until the requested number of layers has been identified and processed.
+
+	Cell processing will be performed using the specified specified functor, that
+	functor should receive in input the id of the cell to be processed and the layer
+	the cell belongs to. The functor should return a boolean value, when the value
+	returned by the function is true, cell processing will stop.
+
+	\param seeds are the seeds
+	\param nLayers is the number of neighbour layers that will be processed
+	\param function is a functor that will be applied
+*/
+template<typename Function, typename SeedContainer>
+void PatchKernel::processCellsFaceNeighbours(const SeedContainer &seedIds, int nLayers, Function function) const
+{
+	auto selector = [](long neighId) {
+		BITPIT_UNUSED(neighId);
+
+		return true;
+	};
+
+	processCellsFaceNeighbours(seedIds, nLayers, selector, function);
+}
+
+/*!
+	Applies the specified function to the selected face neighbours of the provided
+	seeds.
+
+	Neighbours are selected using the specified functor. The functor receives the
+	id of a cell and returns true if the cell should be selected, false otherwise.
+	The function will be evaluated only for the selected cells.
+
+	Starting from the specified seeds, neighbours will be processed one layer after
+	another, until the requested number of layers has been identified and processed.
+
+	Cell processing will be performed using the specified specified functor, that
+	functor should receive in input the id of the cell to be processed and the layer
+	the cell belongs to. The functor should return a boolean value, when the value
+	returned by the function is true, cell processing will stop.
+
+	\param seedIds are the seeds
+	\param nLayers is the number of neighbour layers that will be processed
+	\param function is a functor that will be applied
+	\param selector is a functor that controls if a neighbour is selected or not
+*/
+template<typename Selector, typename Function, typename SeedContainer>
+void PatchKernel::processCellsFaceNeighbours(const SeedContainer &seedIds, int nLayers,
+											 Selector selector, Function function) const
+{
+	// Early return if there are no layers to process
+	if (nLayers == 0) {
+		return;
+	}
+
+	// Initialize neighbour evaluation
+	bool cellAdjacenciesAvailable = (getAdjacenciesBuildStrategy() != ADJACENCIES_NONE);
+
+	std::unique_ptr<std::vector<long>> neighStorage;
+	if (!cellAdjacenciesAvailable) {
+		neighStorage = std::unique_ptr<std::vector<long>>(new std::vector<long>());
+	}
+
+	// Process neighbours
+	std::unordered_set<long> previousSeedIds;
+	std::unordered_set<long> currentSeedIds;
+	std::unordered_set<long> futureSeeds(seedIds.begin(), seedIds.end());
+
+	for (int layer = 0; layer < nLayers; ++layer) {
+		previousSeedIds.swap(currentSeedIds);
+		currentSeedIds.swap(futureSeeds);
+		futureSeeds.clear();
+
+		for (long seedId : currentSeedIds) {
+			const long *neighs;
+			std::size_t nNeighs;
+			if (cellAdjacenciesAvailable) {
+				const Cell &cell = getCell(seedId);
+				neighs = cell.getAdjacencies();
+				nNeighs = cell.getAdjacencyCount();
+			} else {
+				findCellFaceNeighs(seedId, neighStorage.get());
+				neighs = neighStorage->data();
+				nNeighs = neighStorage->size();
+			}
+
+			for(std::size_t n = 0; n < nNeighs; ++n){
+				long neighId = neighs[n];
+				if (previousSeedIds.count(neighId) > 0) {
+					continue;
+				} else if (currentSeedIds.count(neighId) > 0) {
+					continue;
+				} else if (futureSeeds.count(neighId) > 0) {
+					continue;
+				} else if (!selector(neighId)) {
 					continue;
 				}
 
