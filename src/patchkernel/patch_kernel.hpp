@@ -753,6 +753,23 @@ public:
 	void partitioningCleanup();
 #endif
 
+	template<typename Function>
+	void processCellNeighbours(long seedId, int nLayers, Function function) const;
+	template<typename Selector, typename Function>
+	void processCellNeighbours(long seedId, int nLayers, Selector isSelected, Function function) const;
+	template<typename Function, typename SeedContainer>
+	void processCellsNeighbours(const SeedContainer &seedIds, int nLayers, Function function) const;
+	template<typename Selector, typename Function, typename SeedContainer>
+	void processCellsNeighbours(const SeedContainer &seedIds, int nLayers, Selector isSelected, Function function) const;
+	template<typename Function>
+	void processCellFaceNeighbours(long seedId, int nLayers, Function function) const;
+	template<typename Selector, typename Function>
+	void processCellFaceNeighbours(long seedId, int nLayers, Selector isSelected, Function function) const;
+	template<typename Function, typename SeedContainer>
+	void processCellsFaceNeighbours(const SeedContainer &seedIds, int nLayers, Function function) const;
+	template<typename Selector, typename Function, typename SeedContainer>
+	void processCellsFaceNeighbours(const SeedContainer &seedIds, int nLayers, Selector isSelected, Function function) const;
+
 	std::array<double, 3> evalElementCentroid(const Element &element) const;
 	void evalElementBoundingBox(const Element &element, std::array<double,3> *minPoint, std::array<double,3> *maxPoint) const;
 	BITPIT_DEPRECATED(ConstProxyVector<std::array<double BITPIT_COMMA 3>> getElementVertexCoordinates(const Element &element) const);
@@ -1138,9 +1155,6 @@ private:
 	void _deleteInterface(long id);
 
 	void replaceVTKStreamer(const VTKBaseStreamer *original, VTKBaseStreamer *updated);
-
-	template<typename Selector, typename Function, typename SeedContainer>
-	void processCellsNeighbours(const SeedContainer &seeds, int nLayers, Selector isSelected, Function function);
 
 };
 
