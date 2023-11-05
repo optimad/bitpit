@@ -227,7 +227,7 @@ double SurfaceKernel::evalCellSize(long id) const
     // ====================================================================== //
 
     // Local variables
-    // none
+    const Cell                   *cell_ = &m_cells[id];
 
     // Counters
     // none
@@ -235,6 +235,11 @@ double SurfaceKernel::evalCellSize(long id) const
     // ====================================================================== //
     // COMPUTE CELL SIZE                                                      //
     // ====================================================================== //
+    if ((cell_->getType() == ElementType::UNDEFINED)
+     || (cell_->getType() == ElementType::VERTEX)) return 0.0;
+    if (cell_->getType() == ElementType::LINE) {
+        return evalCellArea(id);
+    }
     return(sqrt(evalCellArea(id))); 
 }
 
