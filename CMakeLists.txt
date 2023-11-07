@@ -1314,11 +1314,8 @@ if(BITPIT_ENABLE_DOC)
 endif()
 
 # Tests
-if(BUILD_TESTING)
-    enable_testing()
-    add_subdirectory(test)
-endif()
-
+enable_testing()
+add_subdirectory(test)
 # ------------------------------------------------------------------------------------#
 # Installation
 # ------------------------------------------------------------------------------------#
