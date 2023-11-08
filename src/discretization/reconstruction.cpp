@@ -2470,7 +2470,7 @@ void ReconstructionKernel::updatePolynomial(uint8_t degree, int nFields, const d
 void ReconstructionKernel::computeValueWeights(const std::array<double, 3> &origin,
                                                const std::array<double, 3> &point, double *valueWeights) const
 {
-    computeValueLimitedWeights(getDegree(), origin, point, nullptr, valueWeights);
+    computeValueLimitedWeights(getEquationCount(), getDegree(), origin, point, nullptr, valueWeights);
 }
 
 /*!
@@ -2494,7 +2494,33 @@ void ReconstructionKernel::computeValueWeights(const std::array<double, 3> &orig
 void ReconstructionKernel::computeValueWeights(uint8_t degree, const std::array<double, 3> &origin,
                                                const std::array<double, 3> &point, double *valueWeights) const
 {
-    computeValueLimitedWeights(degree, origin, point, nullptr, valueWeights);
+    computeValueLimitedWeights(getEquationCount(), degree, origin, point, nullptr, valueWeights);
+}
+
+
+/*!
+ * Computes the weights for evaluating the value at a given point.
+ *
+ * In other words, when multiplying the values associated with the support
+ * with their corresponding weights, the value at point is retrieved.
+ *
+ * Weights are computed according the order in which the equations have been
+ * added in the assembly step.
+ *
+ * The degree of the reconstruction has to be less than or equal to the
+ * degree used in the assembly step.
+ *
+ * \param nEquations is the number of equations that will be considered
+ * \param degree is the degree of the polynomial
+ * \param origin is the point chosen as origin of the reconstruction
+ * \param point is the point were the reconstruction will be evaluated
+ * \param[out] valueWeights on output will contain the weights of the
+ * reconstruction
+ */
+void ReconstructionKernel::computeValueWeights(int nEquations, uint8_t degree, const std::array<double, 3> &origin,
+                                               const std::array<double, 3> &point, double *valueWeights) const
+{
+   computeValueLimitedWeights(nEquations, degree, origin, point, nullptr, valueWeights);
 }
 
 /*!
@@ -2521,7 +2547,36 @@ void ReconstructionKernel::computeValueWeights(uint8_t degree, const std::array<
 void ReconstructionKernel::computeValueLimitedWeights(const std::array<double, 3> &origin, const std::array<double, 3> &point,
                                                       const double *limiters, double *valueWeights) const
 {
-    computeValueLimitedWeights(getDegree(), origin, point, limiters, valueWeights);
+    computeValueLimitedWeights(getEquationCount(), getDegree(), origin, point, limiters, valueWeights);
+}
+
+/*!
+ * Computes the weights for evaluating the limited value at a given point.
+ *
+ * In other words, when multiplying the values associated with the support
+ * with their corresponding weights, the value at point is retrieved.
+ *
+ * Weights are computed according the order in which the equations have been
+ * added in the assembly step.
+ *
+ * If a valid pointer to the limiter scale factor is passed, a limited
+ * reconstruction will be used. It is necessary to provide one scale factor
+ * for each polynomial degree greater than zero (a reconstruction using
+ * 2nd degree polynomials will need two scale factors, one for the 1st degree
+ * coefficients and one for the 2nd degree coefficients).
+ *
+ * \param degree is the degree of the polynomial
+ * \param origin is the point chosen as origin of the reconstruction
+ * \param point is the point were the reconstruction will be evaluated
+ * \param limiters are the scale factors of the limiter
+ * \param[out] valueWeights on output will contain the weights of the
+ * reconstruction
+ */
+void ReconstructionKernel::computeValueLimitedWeights(uint8_t degree, const std::array<double, 3> &origin,
+                                                      const std::array<double, 3> &point, const double *limiters,
+                                                      double *valueWeights) const
+{
+    computeValueLimitedWeights(getEquationCount(), degree, origin, point, limiters, valueWeights);
 }
 
 /*!
@@ -2542,18 +2597,20 @@ void ReconstructionKernel::computeValueLimitedWeights(const std::array<double, 3
  * 2nd degree polynomials will need two scale factors, one for the 1st degree
  * coefficients and one for the 2nd degree coefficients).
  *
+ * \param nEquations is the number of equations that will be considered
+ * \param degree is the degree of the polynomial
  * \param origin is the point chosen as origin of the reconstruction
  * \param point is the point were the reconstruction will be evaluated
  * \param limiters are the scale factors of the limiter
  * \param[out] valueWeights on output will contain the weights of the
  * reconstruction
  */
-void ReconstructionKernel::computeValueLimitedWeights(uint8_t degree, const std::array<double, 3> &origin, const std::array<double, 3> &point,
-                                                      const double *limiters, double *valueWeights) const
+void ReconstructionKernel::computeValueLimitedWeights(int nEquations, uint8_t degree, const std::array<double, 3> &origin,
+                                                      const std::array<double, 3> &point, const double *limiters,
+                                                      double *valueWeights) const
 {
+    assert(nEquations <= getEquationCount());
     assert(degree <= getDegree());
-
-    int nEquations = getEquationCount();
 
     // Constant polynomial
     if (ENABLE_FAST_PATH_OPTIMIZATIONS && degree == 0) {
@@ -2577,10 +2634,11 @@ void ReconstructionKernel::computeValueLimitedWeights(uint8_t degree, const std:
     }
 
     // Generic polynomial
+    int polynomialWeightsRowCount = getEquationCount();
     const double *polynomialWeights = getPolynomialWeights();
 
     cblas_dgemv(CBLAS_ORDER::CblasColMajor, CBLAS_TRANSPOSE::CblasNoTrans,
-                nEquations, nCoeffs, 1., polynomialWeights, nEquations,
+                nEquations, nCoeffs, 1., polynomialWeights, polynomialWeightsRowCount,
                 csi, 1, 0, valueWeights, 1);
 }
 
@@ -2604,7 +2662,7 @@ void ReconstructionKernel::computeDerivativeWeights(const std::array<double, 3> 
                                                     const std::array<double, 3> &point, const std::array<double, 3> &direction,
                                                     double *derivativeWeights) const
 {
-    computeDerivativeLimitedWeights(getDegree(), origin, point, direction, nullptr, derivativeWeights);
+    computeDerivativeLimitedWeights(getEquationCount(), getDegree(), origin, point, direction, nullptr, derivativeWeights);
 }
 
 /*!
@@ -2631,8 +2689,35 @@ void ReconstructionKernel::computeDerivativeWeights(uint8_t degree, const std::a
                                                     const std::array<double, 3> &point, const std::array<double, 3> &direction,
                                                     double *derivativeWeights) const
 {
-    computeDerivativeLimitedWeights(degree, origin, point, direction, nullptr, derivativeWeights);
+    computeDerivativeLimitedWeights(getEquationCount(), degree, origin, point, direction, nullptr, derivativeWeights);
+}
 
+/*!
+ * Computes the weights for evaluating the directional derivative at a given
+ * point.
+ *
+ * In other words, when multiplying the values associated with the support
+ * with their corresponding weights, the derivative at point is retrieved.
+ *
+ * Weights are computed according the order in which the equations have been
+ * added in the assembly step.
+ *
+ * The degree of the reconstruction has to be less than or equal to the
+ * degree used in the assembly step.
+ *
+ * \param nEquations is the number of equations that will be considered
+ * \param degree is the degree of the polynomial
+ * \param origin is the point chosen as origin of the reconstruction
+ * \param point is the point were the reconstruction will be evaluated
+ * \param direction is the direction of the derivative
+ * \param[out] derivativeWeights on output will contain the weights of the
+ * derivative
+ */
+void ReconstructionKernel::computeDerivativeWeights(int nEquations, uint8_t degree, const std::array<double, 3> &origin,
+                                                    const std::array<double, 3> &point, const std::array<double, 3> &direction,
+                                                    double *derivativeWeights) const
+{
+    computeDerivativeLimitedWeights(nEquations, degree, origin, point, direction, nullptr, derivativeWeights);
 }
 
 /*!
@@ -2663,7 +2748,7 @@ void ReconstructionKernel::computeDerivativeLimitedWeights(const std::array<doub
                                                            const double *limiters,
                                                            double *derivativeWeights) const
 {
-    computeDerivativeLimitedWeights(getDegree(), origin, point, direction, limiters, derivativeWeights);
+    computeDerivativeLimitedWeights(getEquationCount(), getDegree(), origin, point, direction, limiters, derivativeWeights);
 }
 
 /*!
@@ -2698,9 +2783,44 @@ void ReconstructionKernel::computeDerivativeLimitedWeights(uint8_t degree, const
                                                            const double *limiters,
                                                            double *derivativeWeights) const
 {
-    assert(degree <= getDegree());
+    computeDerivativeLimitedWeights(getEquationCount(), degree, origin, point, direction, limiters, derivativeWeights);
+}
 
-    int nEquations = getEquationCount();
+/*!
+ * Computes the weights for evaluating the limited directional derivative
+ * at a given point.
+ *
+ * In other words, when multiplying the values associated with the support
+ * with their corresponding weights, the derivative at point is retrieved.
+ *
+ * Weights are computed according the order in which the equations have been
+ * added in the assembly step.
+ *
+ * The degree of the reconstruction has to be less than or equal to the
+ * degree used in the assembly step.
+ *
+ * If a valid pointer to the limiter scale factor is passed, a limited
+ * reconstruction will be used. It is necessary to provide one scale factor
+ * for each polynomial degree greater than zero (a reconstruction using
+ * 2nd degree polynomials will need two scale factors, one for the 1st degree
+ * coefficients and one for the 2nd degree coefficients).
+ *
+ * \param nEquations is the number of equations that will be considered
+ * \param degree is the degree of the polynomial
+ * \param origin is the point chosen as origin of the reconstruction
+ * \param point is the point were the reconstruction will be evaluated
+ * \param direction is the direction of the derivative
+ * \param limiters are the scale factors of the limiters
+ * \param[out] derivativeWeights on output will contain the weights of the
+ * derivative
+ */
+void ReconstructionKernel::computeDerivativeLimitedWeights(int nEquations, uint8_t degree, const std::array<double, 3> &origin,
+                                                           const std::array<double, 3> &point, const std::array<double, 3> &direction,
+                                                           const double *limiters,
+                                                           double *derivativeWeights) const
+{
+    assert(nEquations <= getEquationCount());
+    assert(degree <= getDegree());
 
     // Constant polynomial
     if (ENABLE_FAST_PATH_OPTIMIZATIONS && degree == 0) {
@@ -2720,10 +2840,11 @@ void ReconstructionKernel::computeDerivativeLimitedWeights(uint8_t degree, const
     }
 
     // Generic polynomial
+    int polynomialWeightsRowCount = getEquationCount();
     const double *polynomialWeights = getPolynomialWeights();
 
     cblas_dgemv(CBLAS_ORDER::CblasColMajor, CBLAS_TRANSPOSE::CblasNoTrans,
-                nEquations, nCoeffs, 1., polynomialWeights, nEquations,
+                nEquations, nCoeffs, 1., polynomialWeights, polynomialWeightsRowCount,
                 dcsi, 1, 0, derivativeWeights, 1);
 }
 
@@ -2745,7 +2866,7 @@ void ReconstructionKernel::computeGradientWeights(const std::array<double, 3> &o
                                                   const std::array<double, 3> &point,
                                                   std::array<double, 3> *gradientWeights) const
 {
-    computeGradientLimitedWeights(getDegree(), origin, point, nullptr, gradientWeights);
+    computeGradientLimitedWeights(getEquationCount(), getDegree(), origin, point, nullptr, gradientWeights);
 }
 
 /*!
@@ -2770,7 +2891,33 @@ void ReconstructionKernel::computeGradientWeights(uint8_t degree, const std::arr
                                                   const std::array<double, 3> &point,
                                                   std::array<double, 3> *gradientWeights) const
 {
-    computeGradientLimitedWeights(degree, origin, point, nullptr, gradientWeights);
+    computeGradientLimitedWeights(getEquationCount(), degree, origin, point, nullptr, gradientWeights);
+}
+
+/*!
+ * Computes the weights for evaluating the gradient at a given point.
+ *
+ * In other words, when multiplying the values associated with the support
+ * with their corresponding weights, the derivative at point is retrieved.
+ *
+ * Weights are computed according the order in which the equations have been
+ * added in the assembly step.
+ *
+ * The degree of the reconstruction has to be less than or equal to the
+ * degree used in the assembly step.
+ *
+ * \param nEquations is the number of equations that will be considered
+ * \param degree is the degree of the polynomial
+ * \param origin is the point chosen as origin of the reconstruction
+ * \param point is the point were the reconstruction will be evaluated
+ * \param[out] gradientWeights on output will contain the weights of the
+ * gradient
+ */
+void ReconstructionKernel::computeGradientWeights(int nEquations, uint8_t degree, const std::array<double, 3> &origin,
+                                                  const std::array<double, 3> &point,
+                                                  std::array<double, 3> *gradientWeights) const
+{
+    computeGradientLimitedWeights(nEquations, degree, origin, point, nullptr, gradientWeights);
 }
 
 /*!
@@ -2797,7 +2944,7 @@ void ReconstructionKernel::computeGradientLimitedWeights(const std::array<double
                                                          const std::array<double, 3> &point, const double *limiters,
                                                          std::array<double, 3> *gradientWeights) const
 {
-    computeGradientLimitedWeights(getDegree(), origin, point, limiters, gradientWeights);
+    computeGradientLimitedWeights(getEquationCount(), getDegree(), origin, point, limiters, gradientWeights);
 }
 
 /*!
@@ -2828,9 +2975,40 @@ void ReconstructionKernel::computeGradientLimitedWeights(uint8_t degree, const s
                                                          const std::array<double, 3> &point, const double *limiters,
                                                          std::array<double, 3> *gradientWeights) const
 {
-    assert(degree <= getDegree());
+    computeGradientLimitedWeights(getEquationCount(), degree, origin, point, limiters, gradientWeights);
+}
 
-    int nEquations = getEquationCount();
+/*!
+ * Computes the weights for evaluating the limited gradient at a given point.
+ *
+ * In other words, when multiplying the values associated with the support
+ * with their corresponding weights, the derivative at point is retrieved.
+ *
+ * Weights are computed according the order in which the equations have been
+ * added in the assembly step.
+ *
+ * The degree of the reconstruction has to be less than or equal to the
+ * degree used in the assembly step.
+ *
+ * If a valid pointer to the limiter scale factor is passed, a limited
+ * reconstruction will be used. It is necessary to provide one scale factor
+ * for each polynomial degree greater than zero (a reconstruction using
+ * 2nd degree polynomials will need two scale factors, one for the 1st degree
+ * coefficients and one for the 2nd degree coefficients).
+ *
+ * \param nEquations is the number of equations that will be considered
+ * \param degree is the degree of the polynomial
+ * \param origin is the point chosen as origin of the reconstruction
+ * \param point is the point were the reconstruction will be evaluated
+ * \param[out] gradientWeights on output will contain the weights of the
+ * gradient
+ */
+void ReconstructionKernel::computeGradientLimitedWeights(int nEquations, uint8_t degree, const std::array<double, 3> &origin,
+                                                         const std::array<double, 3> &point, const double *limiters,
+                                                         std::array<double, 3> *gradientWeights) const
+{
+    assert(nEquations <= getEquationCount());
+    assert(degree <= getDegree());
 
     // Constant polynomial
     if (ENABLE_FAST_PATH_OPTIMIZATIONS && degree == 0) {
@@ -2843,6 +3021,7 @@ void ReconstructionKernel::computeGradientLimitedWeights(uint8_t degree, const s
     uint8_t dimensions = getDimensions();
     int nCoeffs = ReconstructionPolynomial::getCoefficientCount(degree, dimensions);
 
+    int polynomialWeightsRowCount = getEquationCount();
     const double *polynomialWeights = getPolynomialWeights();
 
     BITPIT_CREATE_WORKSPACE(dcsi, double, nCoeffs, MAX_STACK_WORKSPACE_SIZE);
@@ -2864,7 +3043,7 @@ void ReconstructionKernel::computeGradientLimitedWeights(uint8_t degree, const s
         // means we can access the weights of the current dimensions using
         // the dimension as offset and a stride of three elements
         cblas_dgemv(CBLAS_ORDER::CblasColMajor, CBLAS_TRANSPOSE::CblasNoTrans,
-                    nEquations, nCoeffs, 1., polynomialWeights, nEquations,
+                    nEquations, nCoeffs, 1., polynomialWeights, polynomialWeightsRowCount,
                     dcsi, 1, 0, gradientWeights->data() + d, 3);
 
         // Reset direction
