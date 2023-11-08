@@ -203,18 +203,24 @@ public:
 
     void computeValueWeights(const std::array<double, 3> &origin, const std::array<double, 3> &point, double *valueWeights) const;
     void computeValueWeights(uint8_t degree, const std::array<double, 3> &origin, const std::array<double, 3> &point, double *valueWeights) const;
+    void computeValueWeights(int nEquations, uint8_t degree, const std::array<double, 3> &origin, const std::array<double, 3> &point, double *valueWeights) const;
     void computeValueLimitedWeights(const std::array<double, 3> &origin, const std::array<double, 3> &point, const double *limiters, double *valueWeights) const;
     void computeValueLimitedWeights(uint8_t degree, const std::array<double, 3> &origin, const std::array<double, 3> &point, const double *limiters, double *valueWeights) const;
+    void computeValueLimitedWeights(int nEquations, uint8_t degree, const std::array<double, 3> &origin, const std::array<double, 3> &point, const double *limiters, double *valueWeights) const;
 
     void computeDerivativeWeights(const std::array<double, 3> &origin, const std::array<double, 3> &point, const std::array<double, 3> &direction, double *derivativeWeights) const;
     void computeDerivativeWeights(uint8_t degree, const std::array<double, 3> &origin, const std::array<double, 3> &point, const std::array<double, 3> &direction, double *derivativeWeights) const;
+    void computeDerivativeWeights(int nEquations, uint8_t degree, const std::array<double, 3> &origin, const std::array<double, 3> &point, const std::array<double, 3> &direction, double *derivativeWeights) const;
     void computeDerivativeLimitedWeights(const std::array<double, 3> &origin, const std::array<double, 3> &point, const std::array<double, 3> &direction, const double *limiters, double *derivativeWeights) const;
     void computeDerivativeLimitedWeights(uint8_t degree, const std::array<double, 3> &origin, const std::array<double, 3> &point, const std::array<double, 3> &direction, const double *limiters, double *derivativeWeights) const;
+    void computeDerivativeLimitedWeights(int nEquations, uint8_t degree, const std::array<double, 3> &origin, const std::array<double, 3> &point, const std::array<double, 3> &direction, const double *limiters, double *derivativeWeights) const;
 
     void computeGradientWeights(const std::array<double, 3> &origin, const std::array<double, 3> &point, std::array<double, 3> *gradientWeights) const;
     void computeGradientWeights(uint8_t degree, const std::array<double, 3> &origin, const std::array<double, 3> &point, std::array<double, 3> *gradientWeights) const;
+    void computeGradientWeights(int nEquations, uint8_t degree, const std::array<double, 3> &origin, const std::array<double, 3> &point, std::array<double, 3> *gradientWeights) const;
     void computeGradientLimitedWeights(const std::array<double, 3> &origin, const std::array<double, 3> &point, const double *limiters, std::array<double, 3> *gradientWeights) const;
     void computeGradientLimitedWeights(uint8_t degree, const std::array<double, 3> &origin, const std::array<double, 3> &point, const double *limiters, std::array<double, 3> *gradientWeights) const;
+    void computeGradientLimitedWeights(int nEquations, uint8_t degree, const std::array<double, 3> &origin, const std::array<double, 3> &point, const double *limiters, std::array<double, 3> *gradientWeights) const;
 
     void display(std::ostream &out, double tolerance = 1.e-10) const;
 
