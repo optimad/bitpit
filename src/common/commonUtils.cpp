@@ -91,6 +91,30 @@ void extractWithoutReplacement(int n, int m, std::vector<int> &list)
     }
 }
 
+
+/*!
+ * \ingroup common_misc
+ *
+ * Count the number of digits of the given number.
+ *
+ * \param[in] n is number whose digits should be counted
+ * \result The number of digits of the specified number.
+ */
+std::size_t countDigits(int n)
+{
+    if (n== 0) {
+        return 1;
+    }
+
+    std::size_t nDigits = 0;
+    while (n != 0) {
+        n /= 10;
+        ++nDigits;
+    }
+
+    return nDigits;
+}
+
 /*!
  * \ingroup common_misc
  *

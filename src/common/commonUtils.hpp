@@ -126,6 +126,8 @@ void extractWithoutReplacement(                                               //
     std::vector<int>           &                                              // (input/output) list of extracted value
 );
 
+std::size_t countDigits(int n);
+
 unsigned long factorial(unsigned long n);
 
 /*!
