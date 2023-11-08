@@ -452,7 +452,7 @@ PiercedStorage<value_t, id_t>::PiercedStorage(std::size_t nFields, const Pierced
 * \param syncMode is the synchronization mode that will be used for the storage
 */
 template<typename value_t, typename id_t>
-PiercedStorage<value_t, id_t>::PiercedStorage(std::size_t nFields, PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode)
+PiercedStorage<value_t, id_t>::PiercedStorage(std::size_t nFields, const PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode)
     : PiercedStorageSyncSlave<id_t>(kernel, syncMode), m_nFields(nFields)
 {
     // Base class constructor cannot call virtual functions
@@ -515,7 +515,7 @@ PiercedStorage<value_t, id_t>::PiercedStorage(const PiercedStorage<value_t, id_t
 * \param syncMode is the synchronization mode that will be used for the storage
 */
 template<typename value_t, typename id_t>
-PiercedStorage<value_t, id_t>::PiercedStorage(const PiercedStorage<value_t, id_t> &other, PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode)
+PiercedStorage<value_t, id_t>::PiercedStorage(const PiercedStorage<value_t, id_t> &other, const PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode)
     : PiercedStorageSyncSlave<id_t>(other, kernel, syncMode),
       m_nFields(other.m_nFields), m_fields(other.m_fields)
 {
@@ -609,7 +609,7 @@ PiercedStorage<value_t, id_t>::PiercedStorage(PiercedStorage<value_t, id_t> &&ot
 * \param syncMode is the synchronization mode that will be used for the storage
 */
 template<typename value_t, typename id_t>
-PiercedStorage<value_t, id_t>::PiercedStorage(PiercedStorage<value_t, id_t> &&other, PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode)
+PiercedStorage<value_t, id_t>::PiercedStorage(PiercedStorage<value_t, id_t> &&other, const PiercedKernel<id_t> *kernel, PiercedSyncMaster::SyncMode syncMode)
     : PiercedStorageSyncSlave<long>(other, kernel, syncMode),
       m_nFields(std::move(other.m_nFields)), m_fields(std::move(other.m_fields))
 {
