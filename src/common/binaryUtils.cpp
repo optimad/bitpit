@@ -40,7 +40,10 @@ namespace binary {
 */
 void write(std::ostream &stream, const std::vector<bool> &container)
 {
-    std::copy(container.begin(), container.end(), std::ostream_iterator<bool>(stream));
+    size_t size = container.size();
+    write(stream, size);
+
+    std::copy(container.begin(), container.end(), std::ostream_iterator<char>(stream));
 }
 
 /*!
@@ -68,7 +71,15 @@ void write(std::ostream &stream, const std::string &string)
 */
 void read(std::istream &stream, std::vector<bool> &container)
 {
-    std::copy(std::istream_iterator<bool>(stream), {}, std::back_inserter(container));
+    std::size_t size;
+    read(stream, size);
+
+    container.resize(size);
+    for (std::size_t n = 0; n < size; ++n) {
+        char value;
+        read(stream, value);
+        container[n] = value;
+    }
 }
 
 /*!
