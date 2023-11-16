@@ -680,13 +680,13 @@ void LevelSetObject::fillCellLocationCache(const std::vector<adaption::Info> &ad
             locationCache->insertEntry(cellId, static_cast<char>(LevelSetCellLocation::UNKNOWN));
 
             // Add internal cells to the process list
-            bool isCellProcessable;
+            bool isCellProcessable = true;
+#if BITPIT_ENABLE_MPI==1
             if (mesh.isPartitioned()) {
                 VolumeKernel::CellConstIterator cellItr = mesh.getCellConstIterator(cellId);
                 isCellProcessable = cellItr->isInterior();
-            } else {
-                isCellProcessable = true;
             }
+#endif
 
             if (isCellProcessable) {
                 unknownZoneCellIds.insert(cellId);
