@@ -447,7 +447,7 @@ template<typename SourceLevelSetObject>
 const SourceLevelSetObject * LevelSetBooleanBaseObject<SourceLevelSetObject>::getCellReferenceObject(long id) const{
 
     // Early return if the object is empty or has only one source
-    if (empty()) {
+    if (m_sourceObjects.empty()) {
         return nullptr;
     } else if (m_sourceObjects.size() == 1) {
         return m_sourceObjects.front();
