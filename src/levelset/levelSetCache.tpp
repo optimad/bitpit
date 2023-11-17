@@ -1893,6 +1893,18 @@ std::size_t ElementCacheCollection::insert(Args&&... args)
     return LevelSetCacheCollection<long>::insert<container_t>(m_kernel, cacheSyncMode, std::forward<Args>(args)...);
 }
 
+/*!
+ * Insert a new cache.
+ *
+ * \param args are the arguments that will be used to create the cache factory
+ * \result The index associated with the newly created cache.
+ */
+template<typename container_t, typename... Args, typename std::enable_if<!std::is_same<bitpit::PiercedStorage<typename container_t::value_type>, container_t>::value>::type *>
+std::size_t ElementCacheCollection::insert(Args&&... args)
+{
+    return Base::insert<container_t, Args...>(std::forward<Args>(args)...);
+}
+
 }
 
 #endif 

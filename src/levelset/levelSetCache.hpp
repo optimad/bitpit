@@ -682,7 +682,8 @@ public:
 
     template<typename container_t, typename... Args, typename std::enable_if<std::is_same<bitpit::PiercedStorage<typename container_t::value_type>, container_t>::value>::type * = nullptr>
     std::size_t insert(Args&&... args);
-    using Base::insert;
+    template<typename container_t, typename... Args, typename std::enable_if<!std::is_same<bitpit::PiercedStorage<typename container_t::value_type>, container_t>::value>::type * = nullptr>
+    std::size_t insert(Args&&... args);
 
 protected:
     const PiercedKernel<long> *m_kernel;
