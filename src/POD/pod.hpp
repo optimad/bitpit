@@ -176,17 +176,22 @@ public:
     void restore();
     void leave1out();    
 
+    void evalDecomposition();
+    void evalReconstruction();
+
     void evalMeanMesh();
     void fillListActiveIDs(const PiercedStorage<bool> &bfield);
     void evalCorrelation();
     void evalModes();
     void evalEigen();
-    void evalReconstruction();
     void evalErrorBoundingBox();
     void computeMapper(const VolumeKernel * mesh);
     void adaptionPrepare(const std::vector<adaption::Info> & info);
     void adaptionAlter(const std::vector<adaption::Info> & info);
     void adaptionCleanUp(const std::vector<adaption::Info> & info);
+
+    void dumpDecomposition();
+    void restoreDecomposition();
 
     void reconstructFields(pod::PODField &field, pod::PODField &recon);
     std::vector<std::vector<double>> projectField(pod::PODField &field);
