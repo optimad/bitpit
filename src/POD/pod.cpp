@@ -835,43 +835,284 @@ std::unique_ptr<PODKernel> & POD::getKernel()
  */
 void POD::run()
 {
+    // Decomposition
     if (m_runMode == RunMode::COMPUTE) {
-
-        // Evaluate mean field and mesh
-        log::cout() << "pod : computing mean field and pod mesh... " << std::endl;
-        evalMeanMesh();
-
-        // Initialize ID list
-        fillListActiveIDs(m_filter);
-
-        // Evaluate correlation matrices
-        log::cout() << "pod : computing correlation matrix... " << std::endl;
-        evalCorrelation();
-
-        // Compute eigenvalues and eigenvectors
-        log::cout() << "pod : computing eigenvectors... " << std::endl;
-        evalEigen();
-
-        // Compute POD modes
-        log::cout() << "pod : computing pod modes... " << std::endl;
-        evalModes();
-
+        log::cout() << "pod : evaluate decomposition ... " << std::endl;
+        evalDecomposition();
     } else if (m_runMode == RunMode::RESTORE) {
-
-        log::cout() << "pod : restore... " << std::endl;
-        restore();
-
+        log::cout() << "pod : restore decomposition ... " << std::endl;
+        restoreDecomposition();
     }
+
+    // Reconstruction
+    log::cout() << "pod : evaluate reconstruction ... " << std::endl;
+    evalReconstruction();
+}
+
+/**
+ * Write the POD results by dumping.
+ */
+void POD::dump()
+{
+    // Dump decomposition
+    dumpDecomposition();
+}
+
+/**
+ * Restore the POD results.
+ */
+void POD::restore()
+{
+    // Restore decomposition
+    restoreDecomposition();
+}
+
+/**
+ * Evaluate POD decomposition over a set of given snapshots.
+ */
+void POD::evalDecomposition()
+{
+    // Evaluate mean field and mesh
+    log::cout() << "pod : computing mean field and pod mesh... " << std::endl;
+    evalMeanMesh();
+
+    // Initialize ID list
+    fillListActiveIDs(m_filter);
+
+    // Evaluate correlation matrices
+    log::cout() << "pod : computing correlation matrix... " << std::endl;
+    evalCorrelation();
+
+    // Compute eigenvalues and eigenvectors
+    log::cout() << "pod : computing eigenvectors... " << std::endl;
+    evalEigen();
+
+    // Compute POD modes
+    log::cout() << "pod : computing pod modes... " << std::endl;
+    evalModes();
 
     // Dump pod
     if (m_writeMode != WriteMode::NONE) {
         log::cout() << "pod : dumping... " << std::endl;
         dump();
     }
+}
 
-    // Evaluate reconstruction
-    evalReconstruction();
+/**
+ * Dump decomposition..
+ */
+void POD::dumpDecomposition()
+{
+    int dumpBlock = (m_nProcs > 1) ? m_rank : -1;
 
+    log::cout()  << "Dumping POD ... " << std::endl;
+    // Dump the POD info (no reconstruction info)
+    std::string header = "pod";
+    OBinaryArchive binaryWriter(m_directory + m_name, ARCHIVE_VERSION, header, dumpBlock);
+    std::ostream &dataStream = binaryWriter.getStream();
+    utils::binary::write(dataStream, m_meshType);
+    utils::binary::write(dataStream, m_nModes);
+    utils::binary::write(dataStream, m_nSnapshots);
+    for (std::size_t i = 0; i < m_nSnapshots; ++i) {
+        utils::binary::write(dataStream, m_database[i].directory);
+        utils::binary::write(dataStream, m_database[i].name);
+    }
+    utils::binary::write(dataStream,m_staticMesh);
+    utils::binary::write(dataStream,m_memoryMode);
+    binaryWriter.close();
+
+    // Dump the modes, mean and meshPOD
+    if (m_memoryMode == MemoryMode::MEMORY_NORMAL) {
+        for (std::size_t ir = 0; ir < m_nModes; ++ir)
+            dumpMode(ir);
+
+    }
+
+    // Dumping mean as snapshot
+    if (m_useMean){
+        dumpMode(m_nModes);
+    }
+
+    // Dumping mask
+    {
+        std::string header = "podmask";
+        OBinaryArchive binaryWriter(m_directory + m_name + ".mask.data", ARCHIVE_VERSION, header, dumpBlock);
+        std::ostream &dataStream = binaryWriter.getStream();
+        m_sensorMask.dump(dataStream);
+        binaryWriter.close();
+    }
+
+    // Dumping mesh
+    {
+        std::string header = "podmesh";
+        OBinaryArchive binaryWriter(m_directory + m_name + ".mesh", ARCHIVE_VERSION, header, dumpBlock);
+        m_podkernel->getMesh()->dump(binaryWriter.getStream());
+        binaryWriter.close();
+    }
+
+    // Write debug info
+    if (m_writeMode == WriteMode::DEBUG) {
+        std::vector<std::string > datastring;
+        m_podkernel->getMesh()->getVTK().setDirectory(m_directory);
+        m_podkernel->getMesh()->getVTK().setName(m_name);
+
+        std::size_t nf=m_nModes;
+        if (m_useMean)
+            nf=nf+1;
+        std::vector<std::vector<std::vector<double>>> fields(nf, std::vector<std::vector<double>> (m_nScalarFields, std::vector<double>(m_podkernel->getMesh()->getInternalCellCount(), 0.0)));
+        std::vector<std::vector<std::vector<std::array<double,3>>>> fieldv(nf, std::vector<std::vector<std::array<double,3>>>(m_nVectorFields, std::vector<std::array<double,3>>(m_podkernel->getMesh()->getInternalCellCount(), {{0.0, 0.0, 0.0}})));
+
+        if (m_useMean){
+            for (std::size_t isf = 0; isf < m_nScalarFields; ++isf) {
+                int i = 0;
+                for (const Cell &cell : m_podkernel->getMesh()->getCells()) {
+                    if (cell.isInterior()) {
+                        long id = cell.getId();
+                        fields[0][isf][i] = m_mean.scalar->at(id, isf);
+                        ++i;
+                    }
+                }
+                m_podkernel->getMesh()->getVTK().addData("scalarField" + std::to_string(isf) + "_mean", VTKFieldType::SCALAR, VTKLocation::CELL, fields[0][isf]);
+                datastring.push_back("scalarField" + std::to_string(isf) + "_mean");
+            }
+            for (std::size_t ivf = 0; ivf < m_nVectorFields; ++ivf) {
+                int i = 0;
+                for (const Cell &cell : m_podkernel->getMesh()->getCells()) {
+                    if (cell.isInterior()) {
+                        long id = cell.getId();
+                        fieldv[0][ivf][i] = m_mean.vector->at(id, ivf);
+                        ++i;
+                    }
+                }
+                m_podkernel->getMesh()->getVTK().addData("vectorField"+std::to_string(ivf)+"_mean", VTKFieldType::VECTOR, VTKLocation::CELL, fieldv[0][ivf]);
+                datastring.push_back("vectorField"+std::to_string(ivf)+"_mean");
+            }
+        }
+        for (std::size_t ir = 0; ir < m_nModes; ++ir) {
+            if (m_memoryMode == MemoryMode::MEMORY_LIGHT)
+                readMode(ir);
+
+            std::size_t nir = ir;
+            if (m_useMean)
+                nir=ir+1;
+
+            for (std::size_t isf = 0; isf < m_nScalarFields; ++isf) {
+                int i=0;
+                for (const Cell &cell : m_podkernel->getMesh()->getCells()) {
+                    if (cell.isInterior()) {
+                        long id = cell.getId();
+                        fields[nir][isf][i] = m_modes[ir].scalar->at(id, isf);
+                        ++i;
+                    }
+                }
+                m_podkernel->getMesh()->getVTK().addData("scalarField"+std::to_string(isf)+"_podMode"+std::to_string(ir), VTKFieldType::SCALAR, VTKLocation::CELL, fields[nir][isf]);
+                datastring.push_back("scalarField"+std::to_string(isf)+"_podMode"+std::to_string(ir));
+            }
+
+            for (std::size_t ivf = 0; ivf < m_nVectorFields; ++ivf) {
+                int i=0;
+                for (const Cell &cell : m_podkernel->getMesh()->getCells()) {
+                    if (cell.isInterior()) {
+                        long id = cell.getId();
+                        fieldv[nir][ivf][i] = m_modes[ir].vector->at(id, ivf);
+                        ++i;
+                    }
+                }
+                m_podkernel->getMesh()->getVTK().addData("vectorField"+std::to_string(ivf)+"_podMode"+std::to_string(ir), VTKFieldType::VECTOR, VTKLocation::CELL, fieldv[nir][ivf]);
+                datastring.push_back("vectorField"+std::to_string(ivf)+"_podMode"+std::to_string(ir));
+            }
+
+            if (m_memoryMode == MemoryMode::MEMORY_LIGHT)
+                m_modes[ir].clear();
+        }
+
+        std::vector<uint8_t> mask(m_podkernel->getMesh()->getInternalCellCount(), 0);
+        int i=0;
+        for (const Cell &cell : m_podkernel->getMesh()->getCells()) {
+            if (cell.isInterior()) {
+                long id = cell.getId();
+                mask[i] = m_filter[id];
+                ++i;
+            }
+        }
+
+        m_podkernel->getMesh()->getVTK().addData("filter", VTKFieldType::SCALAR, VTKLocation::CELL, mask);
+        datastring.push_back("filter");
+        m_podkernel->getMesh()->write();
+
+        for (std::size_t is = 0; is < datastring.size(); ++is)
+            m_podkernel->getMesh()->getVTK().removeData(datastring[is]);
+    }
+}
+
+/**
+ * Restore the decomposition.
+ */
+void POD::restoreDecomposition()
+{
+    int dumpBlock = (m_nProcs > 1) ? m_rank : -1;
+
+    // Restore the POD info (no reconstruction info)
+    log::cout()  << "Restore POD ... " << std::endl;
+
+    std::string header = "pod";
+    IBinaryArchive binaryReader(m_directory + m_name, dumpBlock);
+    std::istream &dataStream = binaryReader.getStream();
+    MeshType m_meshType_;
+    utils::binary::read(dataStream, m_meshType_);
+    setMeshType(m_meshType_);
+    std::size_t nr_;
+    utils::binary::read(dataStream, nr_);
+    m_nModes = std::min(m_nModes, nr_);
+    m_modes.resize(m_nModes);
+    utils::binary::read(dataStream, m_nSnapshots);
+    m_database.resize(m_nSnapshots);
+    for (std::size_t i = 0; i < m_nSnapshots; ++i) {
+        utils::binary::read(dataStream, m_database[i].directory);
+        utils::binary::read(dataStream, m_database[i].name);
+    }
+    utils::binary::read(dataStream,m_staticMesh);
+    utils::binary::read(dataStream,m_memoryMode);
+    binaryReader.close();
+
+    // Restore mesh
+    {
+        pod::SnapshotFile podfile;
+        podfile.directory = m_directory;
+        podfile.name = m_name;
+        m_podkernel->restoreMesh(podfile);
+    }
+
+    // Restore the modes, mean and mesh
+    {
+        m_filter.unsetKernel();
+        m_filter.setStaticKernel(&m_podkernel->getMesh()->getCells());
+        m_sensorMask.unsetKernel();
+        m_sensorMask.setStaticKernel(&m_podkernel->getMesh()->getCells());
+
+        if (m_memoryMode == MemoryMode::MEMORY_NORMAL) {
+            for (std::size_t ir = 0; ir < m_nModes; ++ir) {
+                readMode(ir);
+            }
+        }
+    }
+
+    // Restore mean
+    if (m_useMean){
+        readMode(m_nModes);
+    }
+
+    // Restore mask
+    {
+        IBinaryArchive binaryReader(m_directory + m_name + ".mask.data", dumpBlock);
+        std::istream &dataStream = binaryReader.getStream();
+        m_sensorMask.restore(dataStream);
+        binaryReader.close();
+    }
+
+    // Lestore ID list
+    fillListActiveIDs(m_sensorMask);
+    m_toUpdate = true;
 }
 
 /**
@@ -2150,223 +2391,6 @@ void POD::dumpMode(std::size_t ir)
         }
         binaryWriter.close();
     }
-}
-
-/**
- * Write the POD results by dumping.
- */
-void POD::dump()
-{
-    int dumpBlock = (m_nProcs > 1) ? m_rank : -1;
-
-    log::cout()  << "Dumping POD ... " << std::endl;
-    // Dump the POD info (no reconstruction info)
-    std::string header = "pod";
-    OBinaryArchive binaryWriter(m_directory + m_name, ARCHIVE_VERSION, header, dumpBlock);
-    std::ostream &dataStream = binaryWriter.getStream();
-    utils::binary::write(dataStream, m_meshType);
-    utils::binary::write(dataStream, m_nModes);
-    utils::binary::write(dataStream, m_nSnapshots);
-    for (std::size_t i = 0; i < m_nSnapshots; ++i) {
-        utils::binary::write(dataStream, m_database[i].directory);
-        utils::binary::write(dataStream, m_database[i].name);
-    }
-    utils::binary::write(dataStream,m_staticMesh);
-    utils::binary::write(dataStream,m_memoryMode);
-    binaryWriter.close();
-
-    // Dump the modes, mean and meshPOD
-    if (m_memoryMode == MemoryMode::MEMORY_NORMAL) {
-        for (std::size_t ir = 0; ir < m_nModes; ++ir)
-            dumpMode(ir);
-
-    }
-
-    // Dumping mean as snapshot
-    if (m_useMean){
-        dumpMode(m_nModes);
-    }
-
-    // Dumping mask
-    {
-        std::string header = "podmask";
-        OBinaryArchive binaryWriter(m_directory + m_name + ".mask.data", ARCHIVE_VERSION, header, dumpBlock);
-        std::ostream &dataStream = binaryWriter.getStream();
-        m_sensorMask.dump(dataStream);
-        binaryWriter.close();
-    }
-
-    // Dumping mesh
-    {
-        std::string header = "podmesh";
-        OBinaryArchive binaryWriter(m_directory + m_name + ".mesh", ARCHIVE_VERSION, header, dumpBlock);
-        m_podkernel->getMesh()->dump(binaryWriter.getStream());
-        binaryWriter.close();
-    }
-
-    // Write debug info
-    if (m_writeMode == WriteMode::DEBUG) {
-        std::vector<std::string > datastring;
-        m_podkernel->getMesh()->getVTK().setDirectory(m_directory);
-        m_podkernel->getMesh()->getVTK().setName(m_name);
-
-        std::size_t nf=m_nModes;
-        if (m_useMean)
-            nf=nf+1;
-        std::vector<std::vector<std::vector<double>>> fields(nf, std::vector<std::vector<double>> (m_nScalarFields, std::vector<double>(m_podkernel->getMesh()->getInternalCellCount(), 0.0)));
-        std::vector<std::vector<std::vector<std::array<double,3>>>> fieldv(nf, std::vector<std::vector<std::array<double,3>>>(m_nVectorFields, std::vector<std::array<double,3>>(m_podkernel->getMesh()->getInternalCellCount(), {{0.0, 0.0, 0.0}})));
-
-        if (m_useMean){
-            for (std::size_t isf = 0; isf < m_nScalarFields; ++isf) {
-                int i = 0;
-                for (const Cell &cell : m_podkernel->getMesh()->getCells()) {
-                    if (cell.isInterior()) {
-                        long id = cell.getId();
-                        fields[0][isf][i] = m_mean.scalar->at(id, isf);
-                        ++i;
-                    }
-                }
-                m_podkernel->getMesh()->getVTK().addData("scalarField" + std::to_string(isf) + "_mean", VTKFieldType::SCALAR, VTKLocation::CELL, fields[0][isf]);
-                datastring.push_back("scalarField" + std::to_string(isf) + "_mean");
-            }
-            for (std::size_t ivf = 0; ivf < m_nVectorFields; ++ivf) {
-                int i = 0;
-                for (const Cell &cell : m_podkernel->getMesh()->getCells()) {
-                    if (cell.isInterior()) {
-                        long id = cell.getId();
-                        fieldv[0][ivf][i] = m_mean.vector->at(id, ivf);
-                        ++i;
-                    }
-                }
-                m_podkernel->getMesh()->getVTK().addData("vectorField"+std::to_string(ivf)+"_mean", VTKFieldType::VECTOR, VTKLocation::CELL, fieldv[0][ivf]);
-                datastring.push_back("vectorField"+std::to_string(ivf)+"_mean");
-            }
-        }
-        for (std::size_t ir = 0; ir < m_nModes; ++ir) {
-            if (m_memoryMode == MemoryMode::MEMORY_LIGHT)
-                readMode(ir);
-
-            std::size_t nir = ir;
-            if (m_useMean)
-                nir=ir+1;            
-
-            for (std::size_t isf = 0; isf < m_nScalarFields; ++isf) {
-                int i=0;
-                for (const Cell &cell : m_podkernel->getMesh()->getCells()) {
-                    if (cell.isInterior()) {
-                        long id = cell.getId();
-                        fields[nir][isf][i] = m_modes[ir].scalar->at(id, isf);
-                        ++i;
-                    }
-                }
-                m_podkernel->getMesh()->getVTK().addData("scalarField"+std::to_string(isf)+"_podMode"+std::to_string(ir), VTKFieldType::SCALAR, VTKLocation::CELL, fields[nir][isf]);
-                datastring.push_back("scalarField"+std::to_string(isf)+"_podMode"+std::to_string(ir));
-            }
-
-            for (std::size_t ivf = 0; ivf < m_nVectorFields; ++ivf) {
-                int i=0;
-                for (const Cell &cell : m_podkernel->getMesh()->getCells()) {
-                    if (cell.isInterior()) {
-                        long id = cell.getId();
-                        fieldv[nir][ivf][i] = m_modes[ir].vector->at(id, ivf);
-                        ++i;
-                    }
-                }
-                m_podkernel->getMesh()->getVTK().addData("vectorField"+std::to_string(ivf)+"_podMode"+std::to_string(ir), VTKFieldType::VECTOR, VTKLocation::CELL, fieldv[nir][ivf]);
-                datastring.push_back("vectorField"+std::to_string(ivf)+"_podMode"+std::to_string(ir));
-            }
-
-            if (m_memoryMode == MemoryMode::MEMORY_LIGHT)
-                m_modes[ir].clear();
-        }
-
-        std::vector<uint8_t> mask(m_podkernel->getMesh()->getInternalCellCount(), 0);
-        int i=0;
-        for (const Cell &cell : m_podkernel->getMesh()->getCells()) {
-            if (cell.isInterior()) {
-                long id = cell.getId();
-                mask[i] = m_filter[id];
-                ++i;
-            }
-        }
-
-        m_podkernel->getMesh()->getVTK().addData("filter", VTKFieldType::SCALAR, VTKLocation::CELL, mask);
-        datastring.push_back("filter");
-        m_podkernel->getMesh()->write();
-
-        for (std::size_t is = 0; is < datastring.size(); ++is)
-            m_podkernel->getMesh()->getVTK().removeData(datastring[is]);
-    }
-}
-
-/**
- * Restore the POD results.
- */
-void POD::restore()
-{
-    int dumpBlock = (m_nProcs > 1) ? m_rank : -1;
-
-    // Restore the POD info (no reconstruction info)
-    log::cout()  << "Restore POD ... " << std::endl;
-
-    std::string header = "pod";
-    IBinaryArchive binaryReader(m_directory + m_name, dumpBlock);
-    std::istream &dataStream = binaryReader.getStream();
-    MeshType m_meshType_;
-    utils::binary::read(dataStream, m_meshType_);
-    setMeshType(m_meshType_);
-    std::size_t nr_;
-    utils::binary::read(dataStream, nr_);
-    m_nModes = std::min(m_nModes, nr_);
-    m_modes.resize(m_nModes);
-    utils::binary::read(dataStream, m_nSnapshots);
-    m_database.resize(m_nSnapshots);
-    for (std::size_t i = 0; i < m_nSnapshots; ++i) {
-        utils::binary::read(dataStream, m_database[i].directory);
-        utils::binary::read(dataStream, m_database[i].name);
-    }
-    utils::binary::read(dataStream,m_staticMesh);
-    utils::binary::read(dataStream,m_memoryMode);
-    binaryReader.close();
-
-    // Restore mesh
-    {
-        pod::SnapshotFile podfile;
-        podfile.directory = m_directory;
-        podfile.name = m_name;
-        m_podkernel->restoreMesh(podfile);
-    }
-
-    // Restore the modes, mean and mesh
-    {
-        m_filter.unsetKernel();
-        m_filter.setStaticKernel(&m_podkernel->getMesh()->getCells());
-        m_sensorMask.unsetKernel();
-        m_sensorMask.setStaticKernel(&m_podkernel->getMesh()->getCells());
-
-        if (m_memoryMode == MemoryMode::MEMORY_NORMAL) {
-            for (std::size_t ir = 0; ir < m_nModes; ++ir) {
-                readMode(ir);
-            }
-        }
-    }
-
-    // Restore mean
-    if (m_useMean){
-        readMode(m_nModes);
-    }
-
-    // Restore mask
-    {
-        IBinaryArchive binaryReader(m_directory + m_name + ".mask.data", dumpBlock);
-        std::istream &dataStream = binaryReader.getStream();
-        m_sensorMask.restore(dataStream);
-        binaryReader.close();
-    }
-
-    // Lestore ID list
-    fillListActiveIDs(m_sensorMask);
-    m_toUpdate = true;
 }
 
 /**
