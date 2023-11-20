@@ -193,6 +193,7 @@ public:
     void reconstructFields(PiercedStorage<double> &fields, VolumeKernel *mesh,
             std::map<std::string, std::size_t> targetFields,
             const std::unordered_set<long> *targetCells);
+    void compute();
 
 private:
     std::unique_ptr<PODKernel>              m_podkernel;                /**< POD computational kernel */
