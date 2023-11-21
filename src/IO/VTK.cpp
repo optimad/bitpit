@@ -763,6 +763,21 @@ void VTK::writeCollection( const std::string &outputName ) const {
 }
 
 /*!
+ *  Creates a handler for the collection.
+ *
+ *  \param collectionName collection filename to be set for this output only
+ */
+FileHandler VTK::createCollectionHandler( const std::string &collectionName ) const {
+    FileHandler handler(m_fh) ;
+    handler.setSeries(false) ;
+    handler.setParallel(false) ;
+    handler.setName(collectionName) ;
+    handler.setAppendix(getCollectionExtension()) ;
+
+    return handler;
+}
+
+/*!
  * Writes data only in VTK file
  */
 void VTK::writeData( ){

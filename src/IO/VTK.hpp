@@ -390,6 +390,8 @@ class VTK{
         void                    writeDataArray( std::fstream &, const VTKField &) const ;
         void                    writePDataArray( std::fstream &, const VTKField &) const ;
 
+        FileHandler             createCollectionHandler( const std::string &collectionName) const ;
+
         //For Reading
         void                    readDataHeader( std::fstream &) ;
         bool                    readDataArray( std::fstream &, VTKField &) const ;

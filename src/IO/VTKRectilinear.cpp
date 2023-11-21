@@ -289,15 +289,11 @@ void VTKRectilinearGrid::writeCollection( const std::string &outputName, const s
         return;
     }
 
-    // Initialize file handler
+    // Create file handler
+    FileHandler fhp = createCollectionHandler(collectionName) ;
+
+    // Initialize outout stream
     std::fstream str ;
-
-    FileHandler fhp(m_fh) ;
-    fhp.setSeries(false) ;
-    fhp.setParallel(false) ;
-    fhp.setName(collectionName) ;
-    fhp.setAppendix(getCollectionExtension()) ;
-
     str.open( fhp.getPath( ), std::ios::out ) ;
     if (!str.is_open()) {
         throw std::runtime_error("Cannot create file \"" + fhp.getName() + "\"" + " inside the directory \"" + fhp.getDirectory() + "\"");
