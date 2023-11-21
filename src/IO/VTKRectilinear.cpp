@@ -45,7 +45,7 @@ namespace bitpit{
  */
 VTKRectilinearGrid::VTKRectilinearGrid( ) :VTK() {
 
-    m_fh.setAppendix( "vtr" );
+    m_fh.setAppendix( getExtension() );
 
     m_geometry.push_back( VTKField("x_Coord") ) ;
     m_geometry.push_back( VTKField("y_Coord") ) ;
@@ -296,7 +296,7 @@ void VTKRectilinearGrid::writeCollection( const std::string &outputName, const s
     fhp.setSeries(false) ;
     fhp.setParallel(false) ;
     fhp.setName(collectionName) ;
-    fhp.setAppendix("pvtr") ;
+    fhp.setAppendix(getCollectionExtension()) ;
 
     str.open( fhp.getPath( ), std::ios::out ) ;
     if (!str.is_open()) {
@@ -574,6 +574,15 @@ uint8_t VTKRectilinearGrid::calcFieldComponents( const VTKField &field ) const {
 
     return comp ;
 
+}
+
+/*!
+ *  Gets the extension of the VTK file.
+ *
+ *  \result The extension of the VTK file.
+ */
+std::string VTKRectilinearGrid::getExtension() const {
+    return "vtr";
 }
 
 }
