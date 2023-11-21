@@ -1477,6 +1477,21 @@ short LevelSetObject::evalCellSign(long id) const {
                 }
             }
 
+            // Try fetching the sign from the cached value
+            if (getCellBulkEvaluationMode() == LevelSetBulkEvaluationMode::EXACT) {
+                CellCacheCollection::ValueCache<double> *valueCache = getFieldCellCache<double>(LevelSetField::VALUE);
+                if (valueCache) {
+                    LevelSetCacheMode signCacheMode  = getFieldCellCacheMode(LevelSetField::SIGN);
+                    LevelSetCacheMode valueCacheMode = getFieldCellCacheMode(LevelSetField::VALUE);
+                    if (valueCacheMode == LevelSetCacheMode::FULL || signCacheMode == valueCacheMode) {
+                        CellCacheCollection::ValueCache<double>::Entry valueCacheEntry = valueCache->findEntry(id);
+                        if (valueCacheEntry.isValid()) {
+                            return evalValueSign(*valueCacheEntry);
+                        }
+                    }
+                }
+            }
+
             // Evaluate the sign
             return _evalCellSign(id);
         };
