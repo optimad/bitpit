@@ -198,12 +198,12 @@ LevelSetBooleanOperation LevelSetBooleanBaseObject<SourceLevelSetObject>::getBoo
 template<typename SourceLevelSetObject>
 LevelSetBooleanResult<SourceLevelSetObject> LevelSetBooleanBaseObject<SourceLevelSetObject>::computeBooleanResult( long id, bool signedLevelSet ) const{
 
-    LevelSetBooleanResult<SourceLevelSetObject> result( getBooleanOperation() );
-    for( size_t n=0; n<m_sourceObjects.size(); ++n){
-        if (m_sourceObjects[n]->empty()) {
-            continue;
-        }
+    if (m_sourceObjects.empty()) {
+        return LevelSetBooleanResult<SourceLevelSetObject>(getBooleanOperation());
+    }
 
+    LevelSetBooleanResult<SourceLevelSetObject> result( getBooleanOperation(), m_sourceObjects[n], m_sourceObjects[n]->evalCellValue(id, signedLevelSet) );
+    for( size_t n=1; n<m_sourceObjects.size(); ++n){
         result.update(m_sourceObjects[n], m_sourceObjects[n]->evalCellValue(id, signedLevelSet));
     }
 
@@ -219,12 +219,12 @@ LevelSetBooleanResult<SourceLevelSetObject> LevelSetBooleanBaseObject<SourceLeve
 template<typename SourceLevelSetObject>
 LevelSetBooleanResult<SourceLevelSetObject> LevelSetBooleanBaseObject<SourceLevelSetObject>::computeBooleanResult( const std::array<double,3> &coords, bool signedLevelSet ) const{
 
-    LevelSetBooleanResult<SourceLevelSetObject> result( getBooleanOperation() );
-    for( size_t n=0; n<m_sourceObjects.size(); ++n){
-        if (m_sourceObjects[n]->empty()) {
-            continue;
-        }
+    if (m_sourceObjects.empty()) {
+        return LevelSetBooleanResult<SourceLevelSetObject>(getBooleanOperation());
+    }
 
+    LevelSetBooleanResult<SourceLevelSetObject> result( getBooleanOperation(), m_sourceObjects[n], m_sourceObjects[n]->evalValue(coords, signedLevelSet) );
+    for( size_t n=1; n<m_sourceObjects.size(); ++n){
         result.update(m_sourceObjects[n], m_sourceObjects[n]->evalValue(coords, signedLevelSet));
     }
 
@@ -259,10 +259,6 @@ void LevelSetBooleanBaseObject<SourceLevelSetObject>::fillCellPropagatedSignCach
 {
     // Early return if propagated sign cannot be copied from the source object
     for (const SourceLevelSetObject *sourceObject : m_sourceObjects) {
-        if (sourceObject->empty()) {
-            continue;
-        }
-
         LevelSetBulkEvaluationMode sourceBulkEvaluationMode = sourceObject->getCellBulkEvaluationMode();
 
         bool useSourceSign = false;
@@ -446,10 +442,13 @@ data_t LevelSetBooleanBaseObject<SourceLevelSetObject>::_evalFunction(const std:
 template<typename SourceLevelSetObject>
 const SourceLevelSetObject * LevelSetBooleanBaseObject<SourceLevelSetObject>::getCellReferenceObject(long id) const{
 
-    // Early return if the object is empty or has only one source
+    // Early return if the object has no sources
     if (m_sourceObjects.empty()) {
         return nullptr;
-    } else if (m_sourceObjects.size() == 1) {
+    }
+
+    // Early return if the object has only one source
+    if (m_sourceObjects.size() == 1) {
         return m_sourceObjects.front();
     }
 
@@ -469,10 +468,13 @@ const SourceLevelSetObject * LevelSetBooleanBaseObject<SourceLevelSetObject>::ge
 template<typename SourceLevelSetObject>
 const SourceLevelSetObject * LevelSetBooleanBaseObject<SourceLevelSetObject>::getReferenceObject(const std::array<double, 3> &point) const{
 
-    // Early return if the object is empty or has only one source
-    if (empty()) {
+    // Early return if the object has no sources
+    if (m_sourceObjects.empty()) {
         return nullptr;
-    } else if (m_sourceObjects.size() == 1) {
+    }
+
+    // Early return if the object has only one source
+    if (m_sourceObjects.size() == 1) {
         return m_sourceObjects.front();
     }
 
