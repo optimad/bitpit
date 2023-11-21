@@ -1308,4 +1308,13 @@ bool VTK::readDataArray( std::fstream &str, VTKField &field  ) const {
 
 }
 
+/*!
+ *  Gets the extension of the collection file for parallel output.
+ *
+ *  \result The extension of the collection file for parallel output.
+ */
+std::string VTK::getCollectionExtension() const {
+    return "p" + getExtension();
+}
+
 }

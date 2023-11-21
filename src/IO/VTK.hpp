@@ -416,6 +416,9 @@ class VTK{
         virtual uint8_t         calcFieldComponents( const VTKField &) const = 0;
         void                    checkAllFields();
 
+        virtual std::string     getExtension() const = 0 ;
+        virtual std::string     getCollectionExtension() const;
+
 };
 
 class VTKUnstructuredGrid : public VTK {
@@ -450,6 +453,8 @@ class VTKUnstructuredGrid : public VTK {
         uint64_t                readFaceStreamEntries( ) ;
 
         void                    setElementType( VTKElementType ) ;
+
+        std::string             getExtension() const override;
 
     public:
         using                   VTK::setGeomData;
@@ -496,6 +501,9 @@ class VTKRectilinearGrid : public VTK{
         VTKRectilinearGrid( const std::string & , const std::string & , VTKFormat, int, int, int );
         VTKRectilinearGrid( const std::string & , const std::string & , VTKFormat, int, int, int, int );
         VTKRectilinearGrid( const std::string & , const std::string & , VTKFormat, int, int );
+
+    protected:
+        std::string             getExtension() const override;
 
     public:
         using                   VTK::setGeomData;

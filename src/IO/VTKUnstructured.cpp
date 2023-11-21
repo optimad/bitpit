@@ -132,7 +132,7 @@ void VTKUnstructuredGrid::HomogeneousInfoStreamer::flushData( std::fstream &str,
  */
 VTKUnstructuredGrid::VTKUnstructuredGrid( VTKElementType elementType ) :VTK() {
 
-    m_fh.setAppendix("vtu");
+    m_fh.setAppendix(getExtension());
 
     int nGeomFields = 6;
 
@@ -512,7 +512,7 @@ void VTKUnstructuredGrid::writeCollection( const std::string &outputName, const 
     fhp.setSeries(false) ;
     fhp.setParallel(false) ;
     fhp.setName(collectionName) ;
-    fhp.setAppendix("pvtu") ;
+    fhp.setAppendix(getCollectionExtension()) ;
 
     str.open( fhp.getPath( ), std::ios::out ) ;
     if (!str.is_open()) {
@@ -752,6 +752,15 @@ uint8_t VTKUnstructuredGrid::calcFieldComponents( const VTKField &field ) const 
 int VTKUnstructuredGrid::getFieldGeomId( VTKUnstructuredField field ) const {
 
     return static_cast<std::underlying_type<VTKElementType>::type>(field) ;
+}
+
+/*!
+ *  Gets the extension of the VTK file.
+ *
+ *  \result The extension of the VTK file.
+ */
+std::string VTKUnstructuredGrid::getExtension() const {
+    return "vtu";
 }
 
 }
