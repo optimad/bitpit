@@ -202,7 +202,7 @@ LevelSetBooleanResult<SourceLevelSetObject> LevelSetBooleanBaseObject<SourceLeve
         return LevelSetBooleanResult<SourceLevelSetObject>(getBooleanOperation());
     }
 
-    LevelSetBooleanResult<SourceLevelSetObject> result( getBooleanOperation(), m_sourceObjects[n], m_sourceObjects[n]->evalCellValue(id, signedLevelSet) );
+    LevelSetBooleanResult<SourceLevelSetObject> result( getBooleanOperation(), m_sourceObjects[0], m_sourceObjects[0]->evalCellValue(id, signedLevelSet) );
     for( size_t n=1; n<m_sourceObjects.size(); ++n){
         result.update(m_sourceObjects[n], m_sourceObjects[n]->evalCellValue(id, signedLevelSet));
     }
@@ -223,7 +223,7 @@ LevelSetBooleanResult<SourceLevelSetObject> LevelSetBooleanBaseObject<SourceLeve
         return LevelSetBooleanResult<SourceLevelSetObject>(getBooleanOperation());
     }
 
-    LevelSetBooleanResult<SourceLevelSetObject> result( getBooleanOperation(), m_sourceObjects[n], m_sourceObjects[n]->evalValue(coords, signedLevelSet) );
+    LevelSetBooleanResult<SourceLevelSetObject> result( getBooleanOperation(), m_sourceObjects[0], m_sourceObjects[0]->evalValue(coords, signedLevelSet) );
     for( size_t n=1; n<m_sourceObjects.size(); ++n){
         result.update(m_sourceObjects[n], m_sourceObjects[n]->evalValue(coords, signedLevelSet));
     }
