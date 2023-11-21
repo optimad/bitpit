@@ -660,7 +660,6 @@ int RBFKernel::solve()
         return -1;
     }
 
-    int  j, k;
     double dist;
 
     int nS      = getActiveCount();
@@ -677,8 +676,8 @@ int RBFKernel::solve()
     std::vector<double> A(lda * nS);
     std::vector<double> b(ldb * nrhs);
 
-    k=0;
-    for( j=0; j<nrhs; ++j) {
+    int k = 0;
+    for (int j = 0; j < nrhs; ++j) {
         for( const auto & i : activeSet ) {
             b[k] = m_value[j][i];
             ++k;
@@ -688,7 +687,7 @@ int RBFKernel::solve()
     k=0;
     for( const auto &i : activeSet ) {
         for( const auto &j : activeSet ){
-            dist = calcDist(j,i) / getSupportRadius(j);
+            dist = calcDist(j, i) / getSupportRadius(i); //order by column!
             A[k] = evalBasis( dist );
             k++;
         }
@@ -706,7 +705,7 @@ int RBFKernel::solve()
     m_weight.resize(nrhs);
 
     k=0;
-    for( j=0; j<nrhs; ++j) {
+    for (int j = 0; j < nrhs; ++j) {
         m_weight[j].resize(m_nodes,0);
 
         for( const auto &i : activeSet ) {
@@ -929,7 +928,6 @@ int RBFKernel::solveLSQ()
         return -1;
     }
 
-    int i, j, k;
     double dist;
 
     int nR      = getActiveCount();
@@ -939,8 +937,7 @@ int RBFKernel::solveLSQ()
     std::vector<int> activeSet( getActiveSet() );
 
     int     n ,m, lda, ldb, info, rank;
-    double  rcond = -1.0;
-    //double  rcond = 1.e-4;
+    double rcond = -1.0;
 
     m = nP;
     n = nR;
@@ -949,20 +946,20 @@ int RBFKernel::solveLSQ()
     ldb = std::max(n,m);
 
     std::vector<double> A(lda * n);
-    std::vector<double> b(ldb * nrhs);
+    std::vector<double> b(ldb * nrhs, 0.0);
     std::vector<double> s(m);
 
-    for( j=0; j<nrhs; ++j) {
-        for( i=0; i<nP; ++i) {
-            k = j*ldb + i;
+    for (int j = 0; j < nrhs; ++j) {
+        for (int i = 0; i < nP; ++i) {
+            int k = j * ldb + i;
             b[k] = m_value[j][i];
         }
     }
 
-    k=0;
+    int k = 0;
     for( const auto &i : activeSet ) {
-        for( const auto &j : activeSet ){
-            dist = calcDist(j,i) / getSupportRadius(j);
+        for (int j = 0; j < nP; ++j) {
+            dist = calcDist(j, i) / getSupportRadius(i); //in column format
             A[k] = evalBasis( dist );
             k++;
         }
@@ -976,7 +973,7 @@ int RBFKernel::solveLSQ()
 
     m_weight.resize(nrhs);
 
-    for( j=0; j<nrhs; ++j) {
+    for (int j = 0; j < nrhs; ++j) {
         m_weight[j].clear();
         m_weight[j].resize(m_nodes,0);
 
