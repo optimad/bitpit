@@ -189,6 +189,7 @@ public:
     void adaptionCleanUp(const std::vector<adaption::Info> & info);
 
     void reconstructFields(pod::PODField &field, pod::PODField &recon);
+    std::vector<std::vector<double>> projectField(pod::PODField &field);
     void dumpField(const std::string &name, const pod::PODField &field) const;
 
     void reconstructFields(PiercedStorage<double> &fields, VolumeKernel *mesh,
