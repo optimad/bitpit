@@ -199,6 +199,7 @@ public:
     void buildFieldsWithCoeff(std::vector<std::vector<double>> coeff_mat, pod::PODField &recon);
     void write(pod::PODField &snap, std::string file_name);
     void write(int mode_index, std::string file_name);
+    std::vector<std::vector<double>> projectField(pod::PODField &field);
 
 private:
     std::unique_ptr<PODKernel>              m_podkernel;                /**< POD computational kernel */
