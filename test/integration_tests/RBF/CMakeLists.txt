@@ -30,6 +30,7 @@ set(TESTS "")
 list(APPEND TESTS "test_RBF_00001")
 list(APPEND TESTS "test_RBF_00002")
 list(APPEND TESTS "test_RBF_00003")
+list(APPEND TESTS "test_RBF_00004")
 
 # Test extra modules
 set(TEST_EXTRA_MODULES "")

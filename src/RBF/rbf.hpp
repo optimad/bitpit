@@ -27,6 +27,8 @@
 
 #include <vector>
 #include <array>
+#include <set>
+#include "reconstruction.hpp"
 
 namespace bitpit{
 
@@ -64,6 +66,28 @@ enum class RBFMode {
 };
 
 class RBFKernel{
+    /*!
+     * Linear Polynomial class. A linear multivariate polynomial in function of the 
+     * variables defining the RBF nodes is used to regularize the interpolation 
+     * problem through RBFs. Used only when RBFMode::PARAM is enabled. 
+     * The LinearPolynomial class derives from ReconstructionPolynomial class
+     * that is intrisecally defined to work in a three dimensional space.
+     */
+    class LinearPolynomial : public ReconstructionPolynomial
+    {
+private:
+        int m_dim;                          /**< Polynomial variables space dimension */
+        int m_fields;                       /**< Number of equations of the polynomial object */
+
+    public:
+        LinearPolynomial();
+        void setDefault();
+        void clear();
+        void setDimension(int dim);
+        void setDataCount(int fields);
+        void evalBasis(const double *x, double *basis);
+        void initialize();
+    };
 
 private:
     int     m_fields;                               /**<Number of data fields defined on RBF nodes.*/
@@ -74,12 +98,15 @@ private:
 
     std::vector<double>                 m_error;    /**<Interpolation error of a field evaluated on each RBF node (auxiliary memeber used in Greedy algorithm).*/
 
-    protected:
+protected:
     std::vector<std::vector<double>>    m_value;    /**< displ value to be interpolated on RBF nodes */
     std::vector<std::vector<double>>    m_weight;   /**< weight of your RBF interpolation */
     std::vector<bool>                   m_activeNodes;   /**<Vector of active/inactive node (m_activeNodes[i] = true/false -> the i-th node is used/not used during RBF evaluation).*/   
     int m_maxFields;                                /**< fix the maximum number of fields that can be added to your class*/
     int m_nodes;                                    /**<Number of RBF nodes.*/
+    std::set<int> m_polyActiveBasis;                /**< Active terms of linear polynomial, -1 is constant, 0,1,2 the system coordinates */
+
+    LinearPolynomial m_polynomial;
 
 public:
     RBFKernel();
@@ -94,6 +121,10 @@ public:
     int                     getDataCount();
     int                     getActiveCount();
     std::vector<int>        getActiveSet();
+
+    void                    setPolynomialDimension(int dim);
+    int                     getPolynomialDimension();
+    int                     getPolynomialWeightsCount();
 
     bool                    isActive(int );
 
@@ -143,8 +174,11 @@ protected:
 private:
 
     virtual double calcDist(int i, int j) = 0;
-    virtual double calcDist(const std::array<double,3> & point, int j) = 0;
-
+    virtual double calcDist(const std::array<double,3> & point, int j)                  = 0;
+    virtual std::vector<double> evalPolynomialBasis(int i)                              = 0;
+    virtual std::vector<double> evalPolynomialBasis(const std::array<double,3> &point)  = 0;
+    virtual void initializePolynomialActiveBasis()                                      = 0;
+    virtual void initializePolynomial()                                                 = 0;
 };
 
 class RBF : public RBFKernel {
@@ -172,6 +206,10 @@ protected:
 private:
     double calcDist(int i, int j) override;
     double calcDist(const std::array<double,3> & point, int j) override;
+    void initializePolynomialActiveBasis() override;
+    void initializePolynomial() override;
+    std::vector<double> evalPolynomialBasis(int i) override;
+    std::vector<double> evalPolynomialBasis(const std::array<double, 3> &point) override;
 };
 
 /*!
