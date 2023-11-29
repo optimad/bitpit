@@ -2483,18 +2483,16 @@ std::vector<double> POD::fieldsMax(pod::PODField & snap)
 {
     std::vector<double> max;
     max.resize(m_nFields,0.0);
-
-    for (long id : snap.mask->getKernel()->getIds()){
-        std::size_t rawIndex = m_podkernel->getMesh()->getCells().getRawIndex(id);
+    for (long id : m_listActiveIDs) {
         if (m_nScalarFields){
-            double* datas = snap.scalar->rawData(rawIndex);
+            double* datas = snap.scalar->rawData(id);
             for (std::size_t i = 0; i < m_nScalarFields; ++i){
                 max[i] = std::max(max[i],std::abs(*datas));
                 datas++;
             }
         }
         if (m_nVectorFields){
-            std::array<double,3>* datav = snap.vector->rawData(rawIndex);
+            std::array<double,3>* datav = snap.vector->rawData(id);
             for (std::size_t i = m_nScalarFields; i < m_nFields; ++i){
                 max[i] = std::max(max[i],std::sqrt( dotProduct((*datav),(*datav)) ));
                 datav++;
