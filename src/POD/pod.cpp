@@ -2595,21 +2595,21 @@ std::vector<double> POD::fieldsMax(pod::PODField & snap)
 {
     std::vector<double> max;
     max.resize(m_nFields,0.0);
+    for (long id : m_listActiveIDs) {
+        std::size_t rawIndex = snap.mesh->getCells().getRawIndex(id);
 
-    for (long id : snap.mask->getKernel()->getIds()){
-        std::size_t rawIndex = m_podkernel->getMesh()->getCells().getRawIndex(id);
         if (m_nScalarFields){
-            double* datas = snap.scalar->rawData(rawIndex);
+            const double *data = snap.scalar->rawData(rawIndex);
             for (std::size_t i = 0; i < m_nScalarFields; ++i){
-                max[i] = std::max(max[i],std::abs(*datas));
-                datas++;
+                double fieldData = data[i];
+                max[i] = std::max(max[i], std::abs(fieldData));
             }
         }
         if (m_nVectorFields){
-            std::array<double,3>* datav = snap.vector->rawData(rawIndex);
+            const std::array<double,3> *data = snap.vector->rawData(rawIndex);
             for (std::size_t i = m_nScalarFields; i < m_nFields; ++i){
-                max[i] = std::max(max[i],std::sqrt( dotProduct((*datav),(*datav)) ));
-                datav++;
+                const std::array<double,3> &fieldData = data[i - m_nScalarFields];
+                max[i] = std::max(max[i], std::sqrt(dotProduct(fieldData, fieldData)));
             }
         }
     }
