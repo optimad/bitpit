@@ -1363,7 +1363,7 @@ void POD::reconstructFields(pod::PODField & field,  pod::PODField & reconi)
     reconi.mesh = field.mesh;
     reconi.mask = std::unique_ptr<PiercedStorage<bool>>(new PiercedStorage<bool>(*field.mask));
     evalReconstructionCoeffs(field);
-    buildFields(reconi);
+    buildFieldsWithCoeff(m_reconstructionCoeffs,reconi);
     if (m_errorMode != ErrorMode::NONE){
         if (m_errorMode == ErrorMode::SINGLE)
             initErrorMaps();
