@@ -3145,6 +3145,51 @@ void POD::compute()
 }
 
 /**
+ * Construct the linear combination of the POD modes with given input coefficients.
+ *
+ * \param[in] coeff_mat, coefficient matrix of dimension N_fields x N_modes to store the projection coefficient.
+ * \param[in,out] recon, PODField object to be populated with the linear combination.
+ */
+void POD::buildFieldsWithCoeff(std::vector<std::vector<double>> coeff_mat, pod::PODField &recon)
+{
+    // set up of the PODField members: scalar, vector, mesh and mask
+    recon.scalar = std::unique_ptr<pod::ScalarStorage>(new pod::ScalarStorage(m_nScalarFields, &m_podkernel->getMesh()->getCells()));
+    recon.vector = std::unique_ptr<pod::VectorStorage>(new pod::VectorStorage(m_nVectorFields, &m_podkernel->getMesh()->getCells()));
+    recon.scalar->fill(0.0);
+    recon.vector->fill(std::array<double, 3>{{0.0, 0.0, 0.0}});
+    recon.setMesh(m_podkernel->getMesh());
+    // Outer cycle over modes
+    for (std::size_t ir = 0; ir < m_nModes; ++ir) {
+        if (m_memoryMode == MemoryMode::MEMORY_LIGHT) {
+            readMode(ir);
+        }
+        // Outer cycle over cells
+        for (long id : m_listActiveIDs) {
+            if (m_nScalarFields) {
+                // Inner cycle over scalar fields
+                for (std::size_t isf = 0; isf < m_nScalarFields; ++isf) {
+                    double modes = m_modes[ir].scalar->at(id, isf);
+                    recon.scalar->at(id, isf) += modes * coeff_mat[isf][ir];
+                }
+            }
+            if (m_nVectorFields) {
+                // Inner cycle over vector fields
+                for (std::size_t ifv = 0; ifv < m_nVectorFields; ++ifv) {
+                    std::array<double,3> modev = m_modes[ir].vector->at(id,ifv);
+                    recon.vector->at(id, ifv) += modev * coeff_mat[m_nScalarFields+ifv][ir];
+                }
+            }
+        }
+        if (m_memoryMode == MemoryMode::MEMORY_LIGHT) {
+            m_modes[ir].clear();
+        }
+    }
+    if (m_useMean) {
+        sum(&recon, m_mean);
+    }
+}
+
+/**
  * Write a POD Field as VTK files.
  *
  * \param[in] field, PODField object.
