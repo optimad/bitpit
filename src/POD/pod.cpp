@@ -3250,4 +3250,103 @@ std::vector<std::vector<double>> POD::projectField(pod::PODField &field)
     return coeff_mat;
 }
 
+/**
+ * Reconstruct a field through POD. Use the input coefficients.
+ * Interface for for generic bitpit field storage. The reconstruction is performed
+ * only on selected cells.
+ *
+ * \param[in] coefficient matrix of size Number of fields x Number of modes.
+ * \param[in,out] fields Input and resulting reconstructed field.
+ * \param[in] scalarIds Ids of scalar fields in PiercedStorage.
+ * \param[in] podscalarIds Ids of scalar fields in POD modes.
+ * \param[in] vectorIds Ids of vector fields in PiercedStorage.
+ * \param[in] podvectorIds Ids of vector fields in POD modes.
+ * \param[in] targetCells Pointer to list of target cells for reconstruction (optional, default whole field).
+ */
+void POD::buildFieldsWithCoeff( std::vector<std::vector<double>> coeff_mat,
+        PiercedStorage<double> &fields,
+        const std::vector<std::size_t> &scalarIds, const std::vector<std::size_t> &podscalarIds,
+        const std::vector<std::array<std::size_t, 3>> &vectorIds, const std::vector<std::size_t> &podvectorIds,
+        const std::unordered_set<long> *targetCells)
+{
+    _buildFieldsWithCoeff(coeff_mat, fields, scalarIds, podscalarIds, vectorIds, podvectorIds, targetCells);
+}
+
+/**
+ * Reconstruct a field through POD. Use the input coefficients.
+ * Interface for for generic bitpit field storage. The reconstruction is performed
+ * only on selected cells.
+ *
+ * \param[in] coefficient matrix of size Number of fields x Number of modes.
+ * \param[in,out] fields Input and resulting reconstructed field.
+ * \param[in] scalarIds Ids of scalar fields in PiercedStorage.
+ * \param[in] podscalarIds Ids of scalar fields in POD modes.
+ * \param[in] vectorIds Ids of vector fields in PiercedStorage.
+ * \param[in] podvectorIds Ids of vector fields in POD modes.
+ * \param[in] targetCells Pointer to list of target cells for reconstruction (optional, default whole field).
+ */
+void POD::_buildFieldsWithCoeff(std::vector<std::vector<double>> coeff_mat,
+        PiercedStorage<double> &fields,
+        const std::vector<std::size_t> &scalarIds, const std::vector<std::size_t> &podscalarIds,
+        const std::vector<std::array<std::size_t, 3>> &vectorIds, const std::vector<std::size_t> &podvectorIds,
+        const std::unordered_set<long> *targetCells)
+{
+    std::size_t nsf = scalarIds.size();
+    std::size_t nvf = vectorIds.size();
+    if (nsf == 0 && nvf == 0) {
+        return;
+    }
+    std::unordered_set<long> targetCellsStorage;
+    if (!targetCells) {
+        for (const Cell &cell : m_podkernel->getMesh()->getCells()) {
+            targetCellsStorage.insert(cell.getId());
+        }
+        targetCells = &targetCellsStorage;
+    }
+    // Initialization of fields
+    for (const long id : *targetCells) {
+        std::size_t rawIndex = m_podkernel->getMesh()->getCells().getRawIndex(id);
+        double *recon = fields.rawData(rawIndex);
+        for (std::size_t ifs = 0; ifs < m_nScalarFields; ++ifs) {
+            double *reconsi = recon + scalarIds[ifs];
+            (*reconsi) = 0.;
+        }
+        for (std::size_t ifv = 0; ifv < m_nVectorFields; ++ifv) {
+            for (std::size_t j = 0; j < 3; ++j) {
+                double *reconvi = recon + vectorIds[ifv][j];
+                (*reconvi) = 0.;
+            }
+        }
+    }
+    // Reconstruction of fields
+    for (std::size_t ir = 0; ir < m_nModes; ++ir) {
+        if (m_memoryMode == MemoryMode::MEMORY_LIGHT) {
+            readMode(ir);
+        }
+        for (const long id : *targetCells) {
+            std::size_t rawIndex = m_podkernel->getMesh()->getCells().getRawIndex(id);
+            double *modes = m_modes[ir].scalar->rawData(rawIndex);
+            double *recon = fields.rawData(rawIndex);
+            for (std::size_t ifs = 0; ifs < m_nScalarFields; ++ifs) {
+                double *modesi = modes + podscalarIds[ifs];
+                double *reconsi = recon + scalarIds[ifs];
+                (*reconsi) += (*modesi) * coeff_mat[ifs][ir];
+            }
+            std::array<double,3> *modev = m_modes[ir].vector->rawData(rawIndex);
+            for (std::size_t ifv = 0; ifv < m_nVectorFields; ++ifv) {
+                std::array<double,3>* modevi = modev + podvectorIds[ifv];
+                for (std::size_t j = 0; j < 3; ++j) {
+                    double *reconvi = recon + vectorIds[ifv][j];
+                    (*reconvi) += (*modevi)[j] * coeff_mat[m_nScalarFields + ifv][ir];
+                }
+            }
+        }
+        if (m_memoryMode == MemoryMode::MEMORY_LIGHT) {
+            m_modes[ir].clear();
+        }
+    }
+    // Sum field and mean
+    sum(fields, m_mean, scalarIds, podscalarIds, vectorIds, podvectorIds, targetCells);
+}
+
 }

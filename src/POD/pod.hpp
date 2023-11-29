@@ -197,6 +197,11 @@ public:
     std::vector<double> fieldsl2norm(pod::PODField &snap);
     std::vector<double> fieldsMax(pod::PODField &snap);
     void buildFieldsWithCoeff(std::vector<std::vector<double>> coeff_mat, pod::PODField &recon);
+    void buildFieldsWithCoeff(std::vector<std::vector<double>> coeff_mat,
+            PiercedStorage<double> &fields,
+            const std::vector<std::size_t> &scalarIds, const std::vector<std::size_t> &podscalarIds,
+            const std::vector<std::array<std::size_t, 3>> &vectorIds, const std::vector<std::size_t> &podvectorIds,
+            const std::unordered_set<long> *targetCells = nullptr);
     void write(const pod::PODField &snap, std::string file_name) const;
     void write(int mode_index, std::string file_name);
     std::vector<std::vector<double>> projectField(pod::PODField &field);
@@ -303,6 +308,11 @@ private:
             const std::vector<std::array<std::size_t, 3>> &vectorIds, const std::vector<std::size_t> &podvectorIds,
             const std::unordered_set<long> *targetCells = nullptr);
     void _buildFields(PiercedStorage<double> &fields,
+            const std::vector<std::size_t> &scalarIds, const std::vector<std::size_t> &podscalarIds,
+            const std::vector<std::array<std::size_t, 3>> &vectorIds, const std::vector<std::size_t> &podvectorIds,
+            const std::unordered_set<long> *targetCells = nullptr);
+    void _buildFieldsWithCoeff(std::vector<std::vector<double>> coeff_mat,
+            PiercedStorage<double> &fields,
             const std::vector<std::size_t> &scalarIds, const std::vector<std::size_t> &podscalarIds,
             const std::vector<std::array<std::size_t, 3>> &vectorIds, const std::vector<std::size_t> &podvectorIds,
             const std::unordered_set<long> *targetCells = nullptr);
