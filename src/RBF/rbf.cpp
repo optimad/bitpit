@@ -1134,14 +1134,14 @@ int RBFKernel::getPolynomialWeightsCount()
  */
 RBFKernel::LinearPolynomial::LinearPolynomial()
 {
-    setDefault();
+    reset();
 }
 
 /*!
  * Set to default values the LinearPolynomial class.
  * Dimension and number of fields set to zero.
  */
-void RBFKernel::LinearPolynomial::setDefault()
+void RBFKernel::LinearPolynomial::reset()
 {
     m_dim    = 0;
     m_fields = 0;

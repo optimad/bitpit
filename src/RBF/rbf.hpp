@@ -25,10 +25,10 @@
 #ifndef __BITPIT_RBF_HPP__
 #define __BITPIT_RBF_HPP__
 
-#include <vector>
+#include "bitpit_discretization.hpp"
 #include <array>
 #include <set>
-#include "reconstruction.hpp"
+#include <vector>
 
 namespace bitpit{
 
@@ -82,7 +82,7 @@ private:
 
     public:
         LinearPolynomial();
-        void setDefault();
+        void reset();
         void clear();
         void setDimension(int dim);
         void setDataCount(int fields);
