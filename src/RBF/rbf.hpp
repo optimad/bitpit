@@ -70,7 +70,7 @@ class RBFKernel{
     /*!
      * Linear Polynomial class. A linear multivariate polynomial in function of the 
      * variables defining the RBF nodes is used to regularize the interpolation 
-     * problem through RBFs. Used only when RBFMode::PARAM is enabled. 
+     * problem through RBFs. It can be used only when RBFMode::INTERP is enabled. 
      * The LinearPolynomial class derives from ReconstructionPolynomial class
      * that is intrisecally defined to work in a three dimensional space.
      */
