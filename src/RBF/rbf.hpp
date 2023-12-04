@@ -53,6 +53,7 @@ enum class RBFBasisFunction {
     C1C2       = 12, /**< Compact biquadratic funct, C1 on r=0, C2 on r=1, 0 outside */
     C2C2       = 13, /**< Compact poly (degree 5) funct, C2 on r=0, C2 on r=1, 0 outside */
     COSINUS    = 14, /**< Compact cosinusoidal funct, value of 1 on r=0, 0 outside */
+    THINPLATE  = 15, /**< Non compact thin plate funct */
 };
 
 /*!
@@ -232,8 +233,8 @@ namespace rbf
     double                  c1c2(double);
     double                  c2c2(double);
     double                  cosinus(double);
-}
-
+    double                  thinplate(double);
+} // namespace rbf
 }
 
 #endif

@@ -64,14 +64,22 @@ int subtest_001()
     zDispl[3] = 1.;
 
     
-     //RBF used to directly interpolate zDispl field
-    bitpit::RBF   paraMorph;
-	RBFBasisFunction funct = RBFBasisFunction::WENDLANDC2;
+    // RBF used to directly interpolate zDispl field
+    std::vector<double> supportRadii;
+    supportRadii.resize(nCP);
+    supportRadii[0] = 1.;
+    supportRadii[1] = 0.75;
+    supportRadii[2] = 1.25;
+    supportRadii[3] = 0.75;
+
+    bitpit::RBF paraMorph;
+    RBFBasisFunction funct = RBFBasisFunction::WENDLANDC2;
 	paraMorph.setFunction(funct);
-    paraMorph.setSupportRadius(0.5) ;
-	
+    paraMorph.setSupportRadius(supportRadii);
+    paraMorph.enablePolynomial();
+
     std::vector<int> nIndex = paraMorph.addNode(controlNodes);
-	int nData = paraMorph.addData(zDispl);
+	paraMorph.addData(zDispl);
     int err = paraMorph.solve() ;
 	if(err > 0 ) 	return 1;
 	
@@ -92,7 +100,39 @@ int subtest_001()
     };
 
     double val = points[4][2];
-    return (!bitpit::utils::DoubleFloatingEqual()(val, 1.25));
+    bool check = !bitpit::utils::DoubleFloatingEqual()(val, 1.25);
+
+
+    // Use a different function
+    paraMorph.removeAllData();
+    funct = RBFBasisFunction::THINPLATE;
+    paraMorph.setFunction(funct);
+    paraMorph.setSupportRadius(1.);
+    paraMorph.enablePolynomial();
+
+    paraMorph.addData(zDispl);
+    err = paraMorph.solve();
+    if (err > 0)
+        return 1;
+
+    // reset moving points
+    points[0] = std::array<double, 3>({0., 0., 0.});
+    points[1] = std::array<double, 3>({0., 2., 0.});
+    points[2] = std::array<double, 3>({2., 2., 0.});
+    points[3] = std::array<double, 3>({2., 0., 0.});
+    points[4] = std::array<double, 3>({1., 1., 0.});
+
+    // move points
+    for (auto &point : points) {
+        std::cout << point << " -----> ";
+        disp = paraMorph.evalRBF(point);
+        point[2] += disp[0];
+        std::cout << point << std::endl;
+    };
+
+    val = points[4][2];
+    check != !bitpit::utils::DoubleFloatingEqual()(val, 1.25);
+    return check;
 }
 
 // ========================================================================== //

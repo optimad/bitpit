@@ -196,6 +196,11 @@ void RBFKernel::setFunction( RBFBasisFunction bfunc )
         m_typef = RBFBasisFunction::COSINUS;
         break;
 
+    case (RBFBasisFunction::THINPLATE):
+        setFunction(rbf::thinplate);
+        m_typef = RBFBasisFunction::THINPLATE;
+        break;
+
     default:
         setFunction( rbf::wendlandc2);
         m_typef = RBFBasisFunction::WENDLANDC2;
@@ -1701,4 +1706,18 @@ double rbf::c2c2( double dist )
         }
     }
 
+/*!
+ * Non compact thin plate spline function.
+ * @param[in] dist distance normalized with respect to support radius
+ * @return rbf value
+ */
+double rbf::thinplate(double dist)
+{
+    if (utils::DoubleFloatingGreater()(dist, 0.)) {
+        return dist * dist * std::log(dist);
+    } else {
+        return 0.;
+    }
 }
+
+} // namespace bitpit
