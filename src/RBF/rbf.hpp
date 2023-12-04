@@ -104,9 +104,9 @@ protected:
     std::vector<bool>                   m_activeNodes;   /**<Vector of active/inactive node (m_activeNodes[i] = true/false -> the i-th node is used/not used during RBF evaluation).*/   
     int m_maxFields;                                /**< fix the maximum number of fields that can be added to your class*/
     int m_nodes;                                    /**<Number of RBF nodes.*/
+    bool m_polyEnabled;                             /**< Enable/disable the use of the linear polynomial term in interpolation */
+    LinearPolynomial m_polynomial;                  /**< Linear polynomial object */
     std::set<int> m_polyActiveBasis;                /**< Active terms of linear polynomial, -1 is constant, 0,1,2 the system coordinates */
-
-    LinearPolynomial m_polynomial;
 
 public:
     RBFKernel();
@@ -122,7 +122,7 @@ public:
     int                     getActiveCount();
     std::vector<int>        getActiveSet();
 
-    void                    setPolynomialDimension(int dim);
+    void                    enablePolynomial(bool enable = true);
     int                     getPolynomialDimension();
     int                     getPolynomialWeightsCount();
 

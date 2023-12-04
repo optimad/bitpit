@@ -48,8 +48,8 @@ namespace bitpit {
  * Some internal methods of the class can change their behaviour according
  * to the class mode selected. Please check documentation of each single method to
  * appreciate the differences. Default mode of the class is the "INTERP" RBFMode::
- * In case of interpolation the contribution of a linear polynomial is added 
- * to regularize the interpolation problem.  
+ * In case of interpolation the contribution of a linear polynomial can be added 
+ * to regularize the interpolation problem by enabling the polynomial usage.   
  * The actual abstract class does not implement the type of node you want to use; it
  * can be a 3D point or an unstructured mesh. Anyway what you have to do in deriving your own
  * RBF class is to specify a type of node you want to use and implement an evaluator
@@ -76,6 +76,7 @@ RBFKernel::RBFKernel()
 
     setFunction( RBFBasisFunction::WENDLANDC2);
 
+    m_polyEnabled = false;
     m_polyActiveBasis.clear();
     m_polynomial.clear();
 }
@@ -89,7 +90,8 @@ RBFKernel::RBFKernel(const RBFKernel & other)
       m_fPtr(other.m_fPtr), m_error(other.m_error), m_value(other.m_value),
       m_weight(other.m_weight), m_activeNodes(other.m_activeNodes),
       m_maxFields(other.m_maxFields), m_nodes(other.m_nodes),
-      m_polyActiveBasis(other.m_polyActiveBasis), m_polynomial(other.m_polynomial)
+      m_polyEnabled(other.m_polyEnabled), m_polyActiveBasis(other.m_polyActiveBasis), 
+      m_polynomial(other.m_polynomial)
 {
 }
 
@@ -111,8 +113,9 @@ void RBFKernel::swap(RBFKernel &other) noexcept
    std::swap(m_activeNodes, other.m_activeNodes);
    std::swap(m_maxFields, other.m_maxFields);
    std::swap(m_nodes, other.m_nodes);
-    std::swap(m_polyActiveBasis, other.m_polyActiveBasis);
-    std::swap(m_polynomial, other.m_polynomial);
+   std::swap(m_polyEnabled, other.m_polyEnabled);
+   std::swap(m_polyActiveBasis, other.m_polyActiveBasis);
+   std::swap(m_polynomial, other.m_polynomial);
 }
 
 /*!
@@ -621,7 +624,7 @@ std::vector<double> RBFKernel::evalRBF( const std::array<double,3> &point)
     }
 
     // If INTERP mode add the polynomial contribution
-    if (m_mode == RBFMode::INTERP) {
+    if (m_mode == RBFMode::INTERP && m_polyEnabled) {
         for (j = 0; j < m_fields; ++j) {
             double *polynomialCoefficients = m_polynomial.getCoefficients(j);
             std::vector<double> basis      = evalPolynomialBasis(point);
@@ -666,7 +669,7 @@ std::vector<double> RBFKernel::evalRBF(int jnode)
     }
 
     // If INTERP mode add the polynomial contribution
-    if (m_mode == RBFMode::INTERP) {
+    if (m_mode == RBFMode::INTERP && m_polyEnabled) {
         for (j = 0; j < m_fields; ++j) {
             double *polynomialCoefficients = m_polynomial.getCoefficients(j);
             std::vector<double> basis      = evalPolynomialBasis(jnode);
@@ -694,17 +697,19 @@ int RBFKernel::solve()
         return -1;
     }
 
-    // Initialize polynomial
-    initializePolynomial();
+    if (m_polyEnabled) {
+        // Initialize polynomial
+        initializePolynomial();
 
-    // Check which parameter of the polynomial has to be activated
-    // in order to avoid undetermined system
-    initializePolynomialActiveBasis();
+        // Check which parameter of the polynomial has to be activated
+        // in order to avoid undetermined system
+        initializePolynomialActiveBasis();
+    }
 
     double dist;
 
     int nActive = getActiveCount();
-    int nPoly   = m_polyActiveBasis.size();
+    int nPoly   = m_polyEnabled ? m_polyActiveBasis.size() : 0;
     int nS      = nActive + nPoly;
     int nrhs    = getDataCount();
 
@@ -739,7 +744,7 @@ int RBFKernel::solve()
 
     // Filling terms given by the polynomial block.
     // Symmetric terms set in the loop.
-    if (nPoly != 0) {
+    if (m_polyEnabled) {
         for (int i = 0; i < nActive; ++i) {
             std::vector<double> polynomialTerms = evalPolynomialBasis(activeSet[i]);
             int j                               = 0;
@@ -771,12 +776,14 @@ int RBFKernel::solve()
         }
     }
 
-    for (int j = 0; j < nrhs; ++j) {
-        double *polynomialCoefficients = m_polynomial.getCoefficients(j);
-        int i                          = 0;
-        for (int iactive : m_polyActiveBasis) {
-            polynomialCoefficients[iactive] = b[j * ldb + nActive + i];
-            i++;
+    if (m_polyEnabled) {
+        for (int j = 0; j < nrhs; ++j) {
+            double *polynomialCoefficients = m_polynomial.getCoefficients(j);
+            int i                          = 0;
+            for (int iactive : m_polyActiveBasis) {
+                polynomialCoefficients[iactive] = b[j * ldb + nActive + i];
+                i++;
+            }
         }
     }
     return 0;
@@ -990,17 +997,19 @@ int RBFKernel::solveLSQ()
         return -1;
     }
 
-    // Initialize polynomial
-    initializePolynomial();
+    if (m_polyEnabled) {
+        // Initialize polynomial
+        initializePolynomial();
 
-    // Check which parameter of the polynomial has to be activated
-    // in order to avoid undetermined system
-    initializePolynomialActiveBasis();
+        // Check which parameter of the polynomial has to be activated
+        // in order to avoid undetermined system
+        initializePolynomialActiveBasis();
+    }
 
     double dist;
 
     int nActive = getActiveCount();
-    int nPoly   = getPolynomialWeightsCount();
+    int nPoly   = m_polyEnabled ? getPolynomialWeightsCount() : 0;
     int nS      = nActive + nPoly;
     int nP      = m_nodes;
     int nrhs    = getDataCount();
@@ -1030,20 +1039,20 @@ int RBFKernel::solveLSQ()
     int k = 0;
     for (const auto &i : activeSet) {
         for (int j = 0; j < nP; ++j) {
-            dist                = calcDist(j, i) / getSupportRadius(i); //order by column!
-            int row             = k % nP;
-            int col             = k / nP;
+            dist                 = calcDist(j, i) / getSupportRadius(i); //order by column!
+            int row              = k % nP;
+            int col              = k / nP;
             A[(col * ldb) + row] = evalBasis(dist);
             k++;
         }
     }
 
     // Filling column terms given by the polynomial block.
-    if (nPoly != 0) {
+    if (m_polyEnabled) {
         // Loop on columns
         for (int i = 0; i < nActive; ++i) {
             std::vector<double> polynomialTerms = evalPolynomialBasis(activeSet[i]);
-            int j = 0;
+            int j                               = 0;
             for (const double &val : polynomialTerms) {
                 A[lda * i + (nP + j)] = val;
                 j++;
@@ -1052,11 +1061,11 @@ int RBFKernel::solveLSQ()
     }
 
     // Filling row terms given by the polynomial block.
-    if (nPoly != 0) {
+    if (m_polyEnabled) {
         // Loop on rows
         for (int i = 0; i < nP; ++i) {
             std::vector<double> polynomialTerms = evalPolynomialBasis(i);
-            int j = 0;
+            int j                               = 0;
             for (const double &val : polynomialTerms) {
                 A[(lda * (nActive + j) + i)] = val;
                 j++;
@@ -1083,16 +1092,26 @@ int RBFKernel::solveLSQ()
         }
     }
 
-    for (int j = 0; j < nrhs; ++j) {
-        double *polynomialCoefficients = m_polynomial.getCoefficients(j);
-        int i                          = 0;
-        for (int iactive : m_polyActiveBasis) {
-            polynomialCoefficients[iactive] = b[j * ldb + nActive + i];
-            i++;
+    if (m_polyEnabled) {
+        for (int j = 0; j < nrhs; ++j) {
+            double *polynomialCoefficients = m_polynomial.getCoefficients(j);
+            int i                          = 0;
+            for (int iactive : m_polyActiveBasis) {
+                polynomialCoefficients[iactive] = b[j * ldb + nActive + i];
+                i++;
+            }
         }
     }
+        return 0;
+    }
 
-    return 0;
+/*!
+ * Enable/disable the use of polynomial term during interpolation.
+ * \param[in] enable true/false to enable/disable polynomial usage term 
+ */
+void RBFKernel::enablePolynomial(bool enable)
+{
+    m_polyEnabled = enable;
 }
 
 /*!
@@ -1405,11 +1424,10 @@ void RBF::initializePolynomialActiveBasis()
     // different from the reference ones and enable the related
     // polynomial term
     std::set<int> coordinatesToCheck({0, 1, 2});
-    double tol = 1.0e-12;
     for (const auto &i : activeSet) {
         std::array<double, 3> point = m_node[i];
         for (auto it = coordinatesToCheck.begin(); it != coordinatesToCheck.end();) {
-            if (!utils::DoubleFloatingEqual()(coord[*it], point[*it], tol, tol)) {
+            if (!utils::DoubleFloatingEqual()(coord[*it], point[*it])) {
                 m_polyActiveBasis.insert(*it+1);
                 it = coordinatesToCheck.erase(it);
             } else {
