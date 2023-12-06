@@ -143,7 +143,9 @@ void POD::clear()
     m_nModes = 0;
     m_nReconstructionSnapshots = 0;
 
-    m_podkernel->clearMapper();
+    if (m_podkernel) {
+        m_podkernel->clearMapper();
+    }
 
 # if BITPIT_ENABLE_MPI
     freeCommunicator();
