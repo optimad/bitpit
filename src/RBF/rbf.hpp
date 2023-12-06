@@ -82,7 +82,6 @@ private:
 
     public:
         LinearPolynomial();
-        void reset();
         void clear();
         void setDimension(int dim);
         void setDataCount(int fields);
