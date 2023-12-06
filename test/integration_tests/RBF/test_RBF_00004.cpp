@@ -131,7 +131,7 @@ int subtest_001()
     };
 
     val = points[4][2];
-    check != !bitpit::utils::DoubleFloatingEqual()(val, 1.25);
+    check = check || !bitpit::utils::DoubleFloatingEqual()(val, 1.25);
     return check;
 }
 
