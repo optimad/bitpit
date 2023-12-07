@@ -1411,7 +1411,7 @@ void RBF::initializePolynomialActiveBasis()
 
     // Initialize active terms for an only constant linear polynomial
     m_polyActiveBasis.clear();
-    m_polyActiveBasis.insert(0);
+    m_polyActiveBasis.push_back(0);
 
     // Initialize reference coordinates with the first node
     std::array<double, 3> coord(m_node[0]);
@@ -1419,15 +1419,12 @@ void RBF::initializePolynomialActiveBasis()
     // Check if at least one node has one of the coordinates
     // different from the reference ones and enable the related
     // polynomial term
-    std::set<int> coordinatesToCheck({0, 1, 2});
-    for (const auto &i : activeSet) {
-        std::array<double, 3> point = m_node[i];
-        for (auto it = coordinatesToCheck.begin(); it != coordinatesToCheck.end();) {
-            if (!utils::DoubleFloatingEqual()(coord[*it], point[*it])) {
-                m_polyActiveBasis.insert(*it+1);
-                it = coordinatesToCheck.erase(it);
-            } else {
-                ++it;
+    for (int d = 0; d < 2; ++d) {
+        for (const auto &i : activeSet) {
+            const std::array<double, 3> &point = m_node[i];
+            if (!utils::DoubleFloatingEqual()(coord[d], point[d])) {
+                utils::addToOrderedVector<int>(d + 1, m_polyActiveBasis);
+                break;
             }
         }
     }

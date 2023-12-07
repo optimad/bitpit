@@ -106,7 +106,7 @@ protected:
     int m_nodes;                                    /**<Number of RBF nodes.*/
     bool m_polyEnabled;                             /**< Enable/disable the use of the linear polynomial term in interpolation */
     LinearPolynomial m_polynomial;                  /**< Linear polynomial object */
-    std::set<int> m_polyActiveBasis;                /**< Active terms of linear polynomial, 0 is constant, i+1 the i-th system coordinate */
+    std::vector<int> m_polyActiveBasis;             /**< Active terms of linear polynomial, 0 is constant, i+1 the i-th system coordinate */
 
 public:
     RBFKernel();
