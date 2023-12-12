@@ -1753,7 +1753,10 @@ short LevelSetSegmentationObject::_evalSign(const std::array<double,3> &point, l
 {
     // Throw an error if the support is not valid
     if (support < 0) {
-        std::cout << "point " << point << std::endl;
+        if (empty()) {
+            return levelSetDefaults::SIGN;
+        }
+
         throw std::runtime_error("Unable to evaluate the sign: the support is not valid.");
     }
 
@@ -1777,11 +1780,11 @@ double LevelSetSegmentationObject::_evalValue(const std::array<double,3> &point,
     //
     // With an invalid support, only the unsigend levelset can be evaluated.
     if (support < 0) {
-        if (signedLevelSet) {
-            throw std::runtime_error("With an invalid support, only the unsigend levelset can be evaluated.");
+        if (!signedLevelSet || empty()) {
+            return levelSetDefaults::VALUE;
         }
 
-        return levelSetDefaults::VALUE;
+        throw std::runtime_error("With an invalid support, only the unsigend levelset can be evaluated.");
     }
 
     // Evaluate the distance of the point from the surface
@@ -1819,11 +1822,11 @@ std::array<double,3> LevelSetSegmentationObject::_evalGradient(const std::array<
     //
     // With an invalid support, only the unsigend levelset can be evaluated.
     if (support < 0) {
-        if (signedLevelSet) {
-            throw std::runtime_error("With an invalid support, only the unsigend levelset can be evaluated.");
+        if (!signedLevelSet || empty()) {
+            return levelSetDefaults::GRADIENT;
         }
 
-        return levelSetDefaults::GRADIENT;
+        throw std::runtime_error("With an invalid support, only the unsigend levelset can be evaluated.");
     }
 
     // Evaluate the distance of the point from the surface
@@ -1893,11 +1896,11 @@ std::array<double,3> LevelSetSegmentationObject::_evalNormal(const std::array<do
     //
     // With an invalid support, only the unsigend levelset can be evaluated.
     if (support < 0) {
-        if (signedLevelSet) {
-            throw std::runtime_error("With an invalid support, only the unsigend levelset can be evaluated.");
+        if (!signedLevelSet || empty()) {
+            return levelSetDefaults::NORMAL;
         }
 
-        return levelSetDefaults::NORMAL;
+        throw std::runtime_error("With an invalid support, only the unsigend levelset can be evaluated.");
     }
 
     // Evaluate the normal
