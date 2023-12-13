@@ -40,8 +40,8 @@ namespace bitpit{
  */
 FileHandler::FileHandler()
     : directory("./"), name("file"), appendix("dat"),
-      series(false), parallel(false),
-      counter(0), block(0) {
+      series(false), counter(0),
+      parallel(false), block(0) {
 }
 
 /*!
@@ -54,8 +54,8 @@ FileHandler::FileHandler()
  */
 FileHandler::FileHandler(const std::string &dir_, const std::string &name_, const std::string &app_)
     : directory(dir_), name(name_), appendix(app_),
-      series(false), parallel(false),
-      counter(0), block(0) {
+      series(false), counter(0),
+      parallel(false), block(0) {
 }
 
 /*!
@@ -77,8 +77,8 @@ FileHandler&    FileHandler::operator=(const FileHandler& other){
     name        = other.name ;
     appendix    = other.appendix ;
     series      = other.series ;
-    parallel    = other.parallel ;
     counter     = other.counter ;
+    parallel    = other.parallel ;
     block       = other.block ;
 
 
