@@ -391,11 +391,12 @@ set(BITPIT_LIBRARY ${PROJECT_NAME} CACHE INTERNAL "bitpit library name" FORCE)
 add_library(${BITPIT_LIBRARY})
 
 if(MSVC)
-    target_compile_features(${BITPIT_LIBRARY} PUBLIC cxx_std_11)
-    set_target_properties(${BITPIT_LIBRARY} PROPERTIES CXX_STANDARD 11)
-else()
     target_compile_features(${BITPIT_LIBRARY} PUBLIC cxx_std_14)
     set_target_properties(${BITPIT_LIBRARY} PROPERTIES CXX_STANDARD 14)
+
+else()
+    target_compile_features(${BITPIT_LIBRARY} PUBLIC cxx_std_11)
+    set_target_properties(${BITPIT_LIBRARY} PROPERTIES CXX_STANDARD 11)
 endif()
 
 set_target_properties(${BITPIT_LIBRARY} PROPERTIES CXX_STANDARD_REQUIRED ON)
@@ -1124,13 +1125,15 @@ endif()
 
 # Standard build types
 if(MSVC)
-    set(CMAKE_C_FLAGS_RELWITHDEBINFO "/O2 /Zi /Zo")
-    set(CMAKE_C_FLAGS_DEBUG "/Od /Zi")
-    set(CMAKE_C_FLAGS_RELEASE "/O2")
+    set(CMAKE_C_FLAGS_RELWITHDEBINFO "/O2 /Zi /Zo /Oy- /Ob0 /MDd")
+    set(CMAKE_C_FLAGS_DEBUG "/Od /Zi /Oy- /Ob0 /MDd")
+    set(CMAKE_C_FLAGS_RELEASE "/O2 /MD")
+    set(CMAKE_C_FLAGS_MINSIZEREL "/O1 /MD")
 
-    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "/O2 /Zi /Zo")
-    set(CMAKE_CXX_FLAGS_DEBUG "/Od /Zi")
-    set(CMAKE_CXX_FLAGS_RELEASE "/O2")
+    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "/O2 /Zi /Zo /Oy- /Ob0 /MDd")
+    set(CMAKE_CXX_FLAGS_DEBUG "/Od /Zi /Oy- /Ob0 /MDd")
+    set(CMAKE_CXX_FLAGS_RELEASE "/O2 /MD")
+    set(CMAKE_CXX_FLAGS_MINSIZEREL "/O1 /MD")
 
     # keep all warning always on - this is the policy of bitpit.
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3")
@@ -1326,3 +1329,7 @@ install(TARGETS ${BITPIT_LIBRARY}
     INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${CMAKE_PROJECT_NAME}
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${CMAKE_PROJECT_NAME}
 )
+if (MSVC)
+    #save the exported debug information (if any, see OPTIONAL) related to bitpit library
+    install(FILES $<TARGET_PDB_FILE:${BITPIT_LIBRARY}> DESTINATION ${CMAKE_INSTALL_LIBDIR} OPTIONAL)
+endif()
