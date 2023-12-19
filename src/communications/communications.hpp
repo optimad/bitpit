@@ -31,6 +31,7 @@
 #include <vector>
 #include <unordered_map>
 
+#include "bitpit_common.hpp"
 #include "bitpit_containers.hpp"
 
 #include "communications_buffers.hpp"
@@ -41,7 +42,7 @@ class DataCommunicator
 {
 
 public:
-    static const int TAG_AUTO = -1;
+    BITPIT_PUBLIC_API static const int TAG_AUTO = -1;
 
     DataCommunicator(MPI_Comm communicator);
     ~DataCommunicator();

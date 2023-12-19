@@ -27,6 +27,8 @@
 #include <memory>
 #include <string>
 
+#include "bitpit_common.hpp"
+
 #include "configuration_common.hpp"
 #include "configuration_config.hpp"
 
@@ -52,7 +54,7 @@ public:
     void write(config::SourceFormat format, std::string *content) const;
 
 private:
-    static const int VERSION_UNDEFINED;
+    BITPIT_PUBLIC_API static const int VERSION_UNDEFINED;
 
     std::string m_rootName;
 
@@ -92,7 +94,7 @@ private:
 */
 namespace config {
 
-    extern GlobalConfigParser & root;
+    extern BITPIT_PUBLIC_API GlobalConfigParser & root;
 
     void reset();
     void reset(const std::string &rootName);

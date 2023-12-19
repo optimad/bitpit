@@ -29,16 +29,18 @@
 #include <limits>
 #include <fstream>
 
+#include "bitpit_common.hpp"
+
 namespace bitpit {
 
 class BinaryArchive : protected std::fstream
 {
 
 public:
-    static const int HEADER_SIZE       = 1024;
-    static const int VERSION_UNDEFINED = - std::numeric_limits<int>::max();
+    BITPIT_PUBLIC_API static const int HEADER_SIZE       = 1024;
+    BITPIT_PUBLIC_API static const int VERSION_UNDEFINED = - std::numeric_limits<int>::max();
 
-    static const std::string EXTENSION_DEFAULT;
+    BITPIT_PUBLIC_API static const std::string EXTENSION_DEFAULT;
 
     static std::string generatePath(const std::string &name, int block = -1);
     static std::string generatePath(const std::string &name, const std::string &extension, int block = -1);

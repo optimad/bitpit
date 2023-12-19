@@ -37,12 +37,12 @@ namespace bitpit {
 class ReferenceElementInfo {
 
 public:
-    static const int MAX_ELEM_VERTICES = 8;
-    static const int MAX_ELEM_FACES    = 6;
-    static const int MAX_ELEM_EDGES    = 12;
+    BITPIT_PUBLIC_API static const int MAX_ELEM_VERTICES = 8;
+    BITPIT_PUBLIC_API static const int MAX_ELEM_FACES    = 6;
+    BITPIT_PUBLIC_API static const int MAX_ELEM_EDGES    = 12;
 
     static bool hasInfo(ElementType type);
-    static const ReferenceElementInfo & getInfo(ElementType type);
+    BITPIT_PUBLIC_API static const ReferenceElementInfo & getInfo(ElementType type);
 
     int dimension;
     ElementType type;
@@ -104,7 +104,7 @@ public:
 
     double evalVolume(const std::array<double, 3> *vertexCoords) const override;
 
-    const static ReferenceTetraInfo info;
+    BITPIT_PUBLIC_API static const ReferenceTetraInfo info;
 
 protected:
     ReferenceTetraInfo();
@@ -123,7 +123,7 @@ public:
 
     double evalVolume(const std::array<double, 3> *vertexCoords) const override;
 
-    const static ReferenceVoxelInfo info;
+    BITPIT_PUBLIC_API static const ReferenceVoxelInfo info;
 
 protected:
     ReferenceVoxelInfo();
@@ -140,7 +140,7 @@ friend class ReferenceElementInfo;
 public:
     double evalVolume(const std::array<double, 3> *vertexCoords) const override;
 
-    const static ReferenceHexahedronInfo info;
+    BITPIT_PUBLIC_API static const ReferenceHexahedronInfo info;
 
 protected:
     ReferenceHexahedronInfo();
@@ -157,7 +157,7 @@ friend class ReferenceElementInfo;
 public:
     double evalVolume(const std::array<double, 3> *vertexCoords) const override;
 
-    const static ReferencePyramidInfo info;
+    BITPIT_PUBLIC_API static const ReferencePyramidInfo info;
 
 protected:
     ReferencePyramidInfo();
@@ -174,7 +174,7 @@ friend class ReferenceElementInfo;
 public:
     double evalVolume(const std::array<double, 3> *vertexCoords) const override;
 
-    const static ReferenceWedgeInfo info;
+    BITPIT_PUBLIC_API static const ReferenceWedgeInfo info;
 
 protected:
     ReferenceWedgeInfo();
@@ -229,7 +229,7 @@ public:
     void evalPointProjection(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords, std::array<double, 3> *projection, double *distance) const override;
     double evalPointDistance(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords) const override;
 
-    const static ReferenceTriangleInfo info;
+    BITPIT_PUBLIC_API static const ReferenceTriangleInfo info;
 
 protected:
     ReferenceTriangleInfo();
@@ -257,7 +257,7 @@ public:
     bool areFacesCCWOrdered() const override;
     int getCCWOrderedFace(int n) const override;
 
-    const static ReferencePixelInfo info;
+    BITPIT_PUBLIC_API static const ReferencePixelInfo info;
 
 protected:
     ReferencePixelInfo();
@@ -279,7 +279,7 @@ public:
 
     std::array<double, 3> evalNormal(const std::array<double, 3> *vertexCoords, const std::array<double, 3> &point = {{0.5, 0.5, 0.5}}) const override;
 
-    const static ReferenceQuadInfo info;
+    BITPIT_PUBLIC_API static const ReferenceQuadInfo info;
 
 protected:
     ReferenceQuadInfo();
@@ -323,7 +323,7 @@ public:
     void evalPointProjection(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords, std::array<double, 3> *projection, double *distance) const override;
     double evalPointDistance(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords) const override;
 
-    const static ReferenceLineInfo info;
+    BITPIT_PUBLIC_API static const ReferenceLineInfo info;
 
 protected:
     ReferenceLineInfo();
@@ -359,7 +359,7 @@ public:
     void evalPointProjection(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords, std::array<double, 3> *projection, double *distance) const override;
     double evalPointDistance(const std::array<double, 3> &point, const std::array<double, 3> *vertexCoords) const override;
 
-    const static ReferenceVertexInfo info;
+    BITPIT_PUBLIC_API static const ReferenceVertexInfo info;
 
 protected:
     ReferenceVertexInfo();

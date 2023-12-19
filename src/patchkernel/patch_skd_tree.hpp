@@ -27,6 +27,8 @@
 
 #include "patch_kernel.hpp"
 
+#include "bitpit_common.hpp"
+
 namespace bitpit {
 
 class PatchSkdTree;
@@ -96,9 +98,9 @@ class SkdNode : public SkdBox {
 friend class PatchSkdTree;
 
 public:
-    static const std::size_t NULL_ID;
+    BITPIT_PUBLIC_API static const std::size_t NULL_ID;
 
-    constexpr static const int MAX_CHILDREN = 2;
+    BITPIT_PUBLIC_API constexpr static const int MAX_CHILDREN = 2;
 
     enum ChildLocation {
         CHILD_LEFT  = 0,

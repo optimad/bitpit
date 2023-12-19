@@ -30,6 +30,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "bitpit_common.hpp"
 #include "bitpit_containers.hpp"
 
 #include "element_type.hpp"
@@ -151,7 +152,7 @@ public:
 	static void renumberFaceStream(const PiercedStorage<long, long> &map, std::vector<long> *faceStream);
 	int getFaceStreamPosition(int face) const;
 
-	static const long NULL_ID;
+	BITPIT_PUBLIC_API static const long NULL_ID;
 
 	std::array<double, 3> evalCentroid(const std::array<double, 3> *coordinates) const;
 

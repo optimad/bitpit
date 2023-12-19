@@ -27,6 +27,7 @@
 
 #include "levelSetCommon.hpp"
 
+#include "bitpit_common.hpp"
 #include "bitpit_containers.hpp"
 #include "bitpit_patchkernel.hpp"
 
