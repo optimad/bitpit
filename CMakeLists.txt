@@ -369,8 +369,15 @@ set(BITPIT_LIBRARY ${PROJECT_NAME} CACHE INTERNAL "bitpit library name" FORCE)
 
 add_library(${BITPIT_LIBRARY})
 
-target_compile_features(${BITPIT_LIBRARY} PUBLIC cxx_std_11)
-set_target_properties(${BITPIT_LIBRARY} PROPERTIES CXX_STANDARD 11)
+if(MSVC)
+    target_compile_features(${BITPIT_LIBRARY} PUBLIC cxx_std_14)
+    set_target_properties(${BITPIT_LIBRARY} PROPERTIES CXX_STANDARD 14)
+
+else()
+    target_compile_features(${BITPIT_LIBRARY} PUBLIC cxx_std_11)
+    set_target_properties(${BITPIT_LIBRARY} PROPERTIES CXX_STANDARD 11)
+endif()
+
 set_target_properties(${BITPIT_LIBRARY} PROPERTIES CXX_STANDARD_REQUIRED ON)
 
 if (BITPIT_ENABLE_MPI)
@@ -396,14 +403,14 @@ if(DEFINED BITPIT_LTO_STRATEGY)
             if (NOT BUILD_SHARED_LIBS)
                 message(FATAL_ERROR "LTO can be enabled only when building a shared library." )
             endif()
-            if (MSYS OR MINGW)
-                message(FATAL_ERROR "LTO in not currently supported on MinGW/MSYS." )
+            if(MSYS OR MINGW OR MSVC)
+                message(FATAL_ERROR "LTO in not currently supported on Win.")
             endif()
             check_ipo_supported()
             set(ENABLE_LTO TRUE)
         elseif ("${BITPIT_LTO_STRATEGY}" STREQUAL "Auto")
-            if (NOT MSYS AND NOT MINGW)
-                if (BUILD_SHARED_LIBS)
+            if(NOT MSYS AND NOT MINGW AND NOT MSVC)
+                if(BUILD_SHARED_LIBS)
                     check_ipo_supported(RESULT LTO_SUPPORTED)
                     if (${LTO_SUPPORTED} AND "${CMAKE_BUILD_TYPE}" STREQUAL "Release")
                         set(ENABLE_LTO TRUE)
@@ -451,7 +458,11 @@ set(SANITIZE_MODULES "undefined;address")
 
 # Set build type variable
 if(NOT CMAKE_BUILD_TYPE)
-    set(SUPPORTED_BUILD_TYPE "Coverage" "Debug" "Release" "RelWithDebInfo" "RelWithSanitize" "MinSizeRel" "GNUProfiling" "ScalascaProfiling")
+    if(MSVC)
+        set(SUPPORTED_BUILD_TYPE "Coverage" "Debug" "Release" "RelWithDebInfo" "MinSizeRel")
+    else()
+        set(SUPPORTED_BUILD_TYPE "Coverage" "Debug" "Release" "RelWithDebInfo" "RelWithSanitize" "MinSizeRel" "GNUProfiling" "ScalascaProfiling")
+    endif()
 
     # Set default build type to Debug
     string(REPLACE ";" " " SUPPORTED_BUILD_TYPE_STRING "${SUPPORTED_BUILD_TYPE}")
@@ -700,6 +711,12 @@ endif()
 
 set(EXTERNAL_DEPS_PROCESS_LIST "")
 
+if(NOT MSVC)
+    LIST(APPEND EXTERNAL_DEPS_PROCESS_LIST "BoostTest")
+else()
+    message(WARNING "Unit Tests are disabled until compliancy with Visual Studio Boost.Test is verified")
+endif()
+
 foreach(MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
     isModuleEnabled(${MODULE_NAME} MODULE_ENABLED)
     if(MODULE_ENABLED)
@@ -730,21 +747,26 @@ list(REVERSE EXTERNAL_DEPS)
 list(REMOVE_DUPLICATES EXTERNAL_DEPS)
 
 # Enable additional languages
-set(BLAS_LANGUAGES "Fortran")
-set(CBLAS_LANGUAGES "C")
-set(LAPACK_LANGUAGES "Fortran")
-set(LAPACKE_LANGUAGES "C")
-set(METIS_LANGUAGES "C")
-set(PETSC_LANGUAGES "Fortran;C")
+if(MSVC)
+    enable_language("C")
+else()
+    set(BLAS_LANGUAGES "Fortran")
+    set(CBLAS_LANGUAGES "C")
+    set(LAPACK_LANGUAGES "Fortran")
+    set(LAPACKE_LANGUAGES "C")
+    set(METIS_LANGUAGES "C")
+    set(PETSC_LANGUAGES "Fortran;C")
 
-foreach(DEP_NAME IN LISTS EXTERNAL_DEPS)
-    string(TOUPPER ${DEP_NAME} UPPER_DEP_NAME)
-    if(DEFINED ${UPPER_DEP_NAME}_LANGUAGES)
-        foreach(LANGUAGE IN LISTS ${UPPER_DEP_NAME}_LANGUAGES)
-            enable_language(${LANGUAGE})
-        endforeach()
-    endif()
-endforeach()
+    foreach(DEP_NAME IN LISTS EXTERNAL_DEPS)
+        if(DEFINED ${DEP_NAME}_LANGUAGES)
+            string(TOUPPER ${DEP_NAME} UPPER_DEP_NAME)
+
+            foreach(LANGUAGE IN LISTS ${UPPER_DEP_NAME}_LANGUAGES)
+                enable_language(${LANGUAGE})
+            endforeach()
+        endif()
+    endforeach()
+endif()
 
 # Add external dependencies
 #
@@ -777,6 +799,7 @@ else()
     target_compile_definitions(${BITPIT_LIBRARY} PUBLIC "BITPIT_ENABLE_MPI=0")
 endif()
 unset(_MPI_index)
+
 
 list(FIND EXTERNAL_DEPS "BLAS" _BLAS_index)
 if (${_BLAS_index} GREATER -1)
@@ -937,7 +960,7 @@ foreach (VARIABLE_NAME IN LISTS BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS)
 endforeach ()
 
 # Windows shared libraries have to be linked against their dependencies.
-if (MINGW AND BUILD_SHARED_LIBS)
+if((MSVC OR MINGW) AND BUILD_SHARED_LIBS)
     target_link_libraries(${BITPIT_LIBRARY} ${BITPIT_EXTERNAL_LIBRARIES})
 endif()
 
@@ -1009,44 +1032,66 @@ if(CMAKE_BUILD_TYPE_LOWER MATCHES "sanitize")
     endif()
 endif()
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0")
-set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
-set(CMAKE_C_FLAGS_RELWITHSANITIZE "-O2 -g -fno-omit-frame-pointer -fno-common ${C_SANITIZE_MODULE_FLAGS}")
-set(CMAKE_C_FLAGS_DEBUG "-O0 -g")
-set(CMAKE_C_FLAGS_RELEASE "-O2")
+# Standard build types
+if(MSVC)
+    set(CMAKE_C_FLAGS_RELWITHDEBINFO "/O2 /Zi /Zo /Oy- /Ob0 /MDd")
+    set(CMAKE_C_FLAGS_DEBUG "/Od /Zi /Oy- /Ob0 /MDd")
+    set(CMAKE_C_FLAGS_RELEASE "/O2 /MD")
+    set(CMAKE_C_FLAGS_MINSIZEREL "/O1 /MD")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmessage-length=0")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
-set(CMAKE_CXX_FLAGS_RELWITHSANITIZE "-O2 -g -fno-omit-frame-pointer -fno-common ${CXX_SANITIZE_MODULE_FLAGS}")
-set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
-set(CMAKE_CXX_FLAGS_RELEASE "-O2")
+    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "/O2 /Zi /Zo /Oy- /Ob0 /MDd")
+    set(CMAKE_CXX_FLAGS_DEBUG "/Od /Zi /Oy- /Ob0 /MDd")
+    set(CMAKE_CXX_FLAGS_RELEASE "/O2 /MD")
+    set(CMAKE_CXX_FLAGS_MINSIZEREL "/O1 /MD")
 
-CHECK_CXX_COMPILER_FLAG("-Wall" CXX_SUPPORTS_WALL)
-if (CXX_SUPPORTS_WALL)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+    # keep all warning always on - this is the policy of bitpit.
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3")
+else()
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0")
+    set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
+    set(CMAKE_C_FLAGS_RELWITHSANITIZE "-O2 -g -fno-omit-frame-pointer -fno-common ${C_SANITIZE_MODULE_FLAGS}")
+    set(CMAKE_C_FLAGS_DEBUG "-O0 -g")
+    set(CMAKE_C_FLAGS_RELEASE "-O2")
+
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmessage-length=0")
+    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
+    set(CMAKE_CXX_FLAGS_RELWITHSANITIZE "-O2 -g -fno-omit-frame-pointer -fno-common ${CXX_SANITIZE_MODULE_FLAGS}")
+    set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O2")
+
+    CHECK_CXX_COMPILER_FLAG("-Wall" CXX_SUPPORTS_WALL)
+
+    if(CXX_SUPPORTS_WALL)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+    endif()
+
+    CHECK_CXX_COMPILER_FLAG("-Wextra" CXX_SUPPORTS_WEXTRA)
+
+    if(CXX_SUPPORTS_WEXTRA)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
+    endif()
+
+    CHECK_CXX_COMPILER_FLAG("-Wsuggest-override" CXX_SUPPORTS_WSUGGEST_OVERRIDE)
+
+    if(CXX_SUPPORTS_WSUGGEST_OVERRIDE)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wsuggest-override")
+    endif()
+
+    CHECK_C_COMPILER_FLAG("-Wall" C_SUPPORTS_WALL)
+
+    if(C_SUPPORTS_WALL)
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
+    endif()
+
+    CHECK_C_COMPILER_FLAG("-Wextra" C_SUPPORTS_WEXTRA)
+
+    if(C_SUPPORTS_WEXTRA)
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wextra")
+    endif()
+
+    set(CMAKE_EXE_LINKER_FLAGS_RELWITHSANITIZE "-fno-omit-frame-pointer -fno-common ${CXX_SANITIZE_MODULE_FLAGS}")
 endif()
-
-CHECK_CXX_COMPILER_FLAG("-Wextra" CXX_SUPPORTS_WEXTRA)
-if (CXX_SUPPORTS_WEXTRA)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
-endif()
-
-CHECK_CXX_COMPILER_FLAG("-Wsuggest-override" CXX_SUPPORTS_WSUGGEST_OVERRIDE)
-if (CXX_SUPPORTS_WSUGGEST_OVERRIDE)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wsuggest-override")
-endif()
-
-CHECK_C_COMPILER_FLAG("-Wall" C_SUPPORTS_WALL)
-if (C_SUPPORTS_WALL)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
-endif()
-
-CHECK_C_COMPILER_FLAG("-Wextra" C_SUPPORTS_WEXTRA)
-if (C_SUPPORTS_WEXTRA)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wextra")
-endif()
-
-set(CMAKE_EXE_LINKER_FLAGS_RELWITHSANITIZE "-fno-omit-frame-pointer -fno-common ${CXX_SANITIZE_MODULE_FLAGS}")
 
 # Coverage build type
 SET(CMAKE_C_FLAGS_COVERAGE "-g -O0 -fprofile-arcs -ftest-coverage" CACHE STRING
@@ -1196,3 +1241,8 @@ install(TARGETS ${BITPIT_LIBRARY}
         INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${CMAKE_PROJECT_NAME}
         PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${CMAKE_PROJECT_NAME}
        )
+
+if (MSVC)
+    #save the exported debug information (if any, see OPTIONAL) related to bitpit library
+    install(FILES $<TARGET_PDB_FILE:${BITPIT_LIBRARY}> DESTINATION ${CMAKE_INSTALL_LIBDIR} OPTIONAL)
+endif()
