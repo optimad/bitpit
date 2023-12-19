@@ -800,6 +800,12 @@ else()
 endif()
 unset(_MPI_index)
 
+if(MSVC)
+    # download directly libxml2, rapidjson
+    # through nuget system and attach it to current VS project
+    include("${CMAKE_CURRENT_LIST_DIR}/external/CMakeNuGetTools/bitpitNuGet.cmake")
+    bitpitNuGet()
+endif()
 
 list(FIND EXTERNAL_DEPS "BLAS" _BLAS_index)
 if (${_BLAS_index} GREATER -1)
