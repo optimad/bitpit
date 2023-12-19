@@ -131,6 +131,12 @@ if (LAPACK_FOUND)
       if(LAPACK_INCLUDE_DIRS)
         set(LAPACKE_INCLUDE_DIRS "${LAPACK_INCLUDE_DIRS}")
         set(LAPACKE_INCLUDE_DIRS_DEP "${LAPACK_INCLUDE_DIRS}")
+      else()
+        find_path(LAPACKE_INCLUDE_DIRS
+          NAMES lapacke.h mkl_lapacke.h
+          HINTS ${LAPACK_DIR}
+          PATH_SUFFIXES "include" "include/lapacke")
+        set(LAPACKE_INCLUDE_DIRS_DEP "${LAPACK_INCLUDE_DIRS}")
       endif()
       if (LAPACK_LINKER_FLAGS)
         set(LAPACKE_LINKER_FLAGS "${LAPACK_LINKER_FLAGS}")
@@ -139,7 +145,6 @@ if (LAPACK_FOUND)
   endif (NOT LAPACKE_STANDALONE)
 
   if (LAPACKE_STANDALONE OR NOT LAPACKE_WORKS)
-
     if(NOT LAPACKE_WORKS AND NOT LAPACKE_FIND_QUIETLY)
       message(STATUS "Looking for lapacke : test with lapack fails")
     endif()
@@ -187,19 +192,19 @@ if (LAPACK_FOUND)
     if(LAPACKE_INCDIR)
       set(LAPACKE_lapacke.h_DIRS "LAPACKE_lapacke.h_DIRS-NOTFOUND")
       find_path(LAPACKE_lapacke.h_DIRS
-        NAMES lapacke.h
+        NAMES lapacke.h mkl_lapacke.h
         HINTS ${LAPACKE_INCDIR})
     else()
       if(LAPACKE_DIR)
         set(LAPACKE_lapacke.h_DIRS "LAPACKE_lapacke.h_DIRS-NOTFOUND")
         find_path(LAPACKE_lapacke.h_DIRS
-          NAMES lapacke.h
+          NAMES lapacke.h mkl_lapacke.h
           HINTS ${LAPACKE_DIR}
           PATH_SUFFIXES "include" "include/lapacke")
       else()
         set(LAPACKE_lapacke.h_DIRS "LAPACKE_lapacke.h_DIRS-NOTFOUND")
         find_path(LAPACKE_lapacke.h_DIRS
-          NAMES lapacke.h
+          NAMES lapacke.h mkl_lapacke.h
           HINTS ${_inc_env})
       endif()
     endif()
@@ -212,7 +217,7 @@ if (LAPACK_FOUND)
     else ()
       set(LAPACKE_INCLUDE_DIRS "LAPACKE_INCLUDE_DIRS-NOTFOUND")
       if(NOT LAPACKE_FIND_QUIETLY)
-        message(STATUS "Looking for lapacke -- lapacke.h not found")
+        message(STATUS "Looking for lapacke -- lapacke.h/mkl_lapacke.h not found")
       endif()
     endif()
 
