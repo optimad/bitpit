@@ -82,6 +82,10 @@ if(BITPIT_BUILD_EXAMPLES)
         target_link_libraries(${EXAMPLE_NAME} ${BITPIT_LIBRARY})
         target_link_libraries(${EXAMPLE_NAME} ${BITPIT_EXTERNAL_LIBRARIES})
 
+        if (MSVC)
+            target_compile_definitions(${EXAMPLE_NAME} PRIVATE "_CRT_SECURE_NO_WARNINGS")
+        endif()
+
         install(TARGETS ${EXAMPLE_NAME} DESTINATION doc/${PROJECT_NAME}-${BITPIT_VERSION}/examples)
 
         foreach (MODULE_NAME IN LISTS BITPIT_MODULE_LIST)

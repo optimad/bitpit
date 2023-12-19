@@ -200,6 +200,11 @@ function(addTest TEST_NAME TEST_TYPE TEST_MODULES TEST_LIBRARIES WORKING_DIRECTO
     target_include_directories("${TEST_TARGET_NAME}" PRIVATE "${BITPIT_SOURCE_TEST_DIR}")
     target_include_directories("${TEST_TARGET_NAME}" PRIVATE "${BITPIT_SOURCE_TEST_DIR}/${TEST_TYPE}_tests")
 
+    # Suppress some warnings on MSVC
+    if (MSVC)
+        target_compile_definitions(${TEST_TARGET_NAME} PRIVATE "_CRT_SECURE_NO_WARNINGS")
+    endif()
+
     # Configure source formatting
     if (CLANG_FORMAT_EXECUTABLE)
         set(TEST_CLANG_FORMAT_TARGET "clang-format-${TEST_TARGET_NAME}")
