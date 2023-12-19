@@ -382,6 +382,12 @@ endif()
 mark_as_advanced(CBLAS_DIR)
 mark_as_advanced(CBLAS_DIR_FOUND)
 
+if(MSVC)
+  # hard-coded just for MKL distributions : put the include dir to CBLAS_DIR_FOUND/include
+  set(CBLAS_INCLUDE_DIRS "${CBLAS_DIR_FOUND}/include")
+endif()
+
+
 # check that CBLAS has been found
 # -------------------------------
 include(FindPackageHandleStandardArgs)
