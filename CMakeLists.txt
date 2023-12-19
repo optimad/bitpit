@@ -1063,6 +1063,11 @@ IF(NOT CMAKE_BUILD_TYPE_LOWER MATCHES "debug")
     target_compile_definitions(${BITPIT_LIBRARY} PRIVATE "NDEBUG")
 endif ()
 
+# Define a preprocessor macro to recognize when compiling a shared builds
+if(BUILD_SHARED_LIBS)
+    target_compile_definitions(${BITPIT_LIBRARY} PRIVATE "BITPIT_SHARED_COMPILATION")
+endif()
+
 # Define an alias for building with scalasca
 if (BITPIT_ENABLE_MPI)
     SET(C_FLAGS_INSTRUMENT   "-instrument mpicxx")

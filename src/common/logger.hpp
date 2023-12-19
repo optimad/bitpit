@@ -31,6 +31,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include "bitpit_common.hpp"
+
 #define BITPIT_DEBUG_COUT(...) BITPIT_OVERLOAD_CALL(BITPIT_DEBUG_COUT, __VA_ARGS__)
 #if BITPIT_ENABLE_DEBUG
 #define BITPIT_DEBUG_COUT_0()     bitpit::log::cout()
@@ -230,8 +232,8 @@ class LoggerManager
 {
 
 public:
-    static std::string BITPIT_LOG_NAME;
-    static std::string BITPIT_LOG_DIRECTORY;
+    BITPIT_PUBLIC_API static std::string BITPIT_LOG_NAME;
+    BITPIT_PUBLIC_API static std::string BITPIT_LOG_DIRECTORY;
 
     static LoggerManager & manager();
 

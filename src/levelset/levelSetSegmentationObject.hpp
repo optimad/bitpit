@@ -34,6 +34,7 @@
 #include "levelSetKernel.hpp"
 #include "levelSetObject.hpp"
 
+#include "bitpit_common.hpp"
 #include "bitpit_surfunstructured.hpp"
 #include "bitpit_volcartesian.hpp"
 #include "bitpit_voloctree.hpp"
@@ -53,7 +54,7 @@ public:
     typedef SurfUnstructured::CellIterator SegmentIterator;
     typedef SurfUnstructured::CellConstIterator SegmentConstIterator;
 
-    static const double DEFAULT_FEATURE_ANGLE;
+    BITPIT_PUBLIC_API static const double DEFAULT_FEATURE_ANGLE;
 
     LevelSetSegmentationSurfaceInfo();
     LevelSetSegmentationSurfaceInfo(const LevelSetSegmentationSurfaceInfo &other);
@@ -106,7 +107,7 @@ private:
 class LevelSetSegmentationBaseObject : public LevelSetObject {
 
 public:
-    static const double AUTOMATIC_SEARCH_RADIUS;
+    BITPIT_PUBLIC_API static const double AUTOMATIC_SEARCH_RADIUS;
 
     friend class LevelSetBooleanObject<LevelSetSegmentationBaseObject>;
 

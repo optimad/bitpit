@@ -44,7 +44,7 @@ static_assert(std::numeric_limits<id_t>::is_signed, "Index has to be signed!");
 public:
     typedef id_t id_type;
 
-    static const id_type NULL_ID;
+    BITPIT_PUBLIC_API static const id_type NULL_ID;
 
     IndexGenerator();
 

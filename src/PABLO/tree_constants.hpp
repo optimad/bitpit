@@ -28,6 +28,8 @@
 // =================================================================================== //
 // INCLUDES                                                                            //
 // =================================================================================== //
+#include "bitpit_common.hpp"
+
 #include <stdint.h>
 
 #include <array>
@@ -59,8 +61,8 @@ public:
 	// =================================================================================== //
 	// STATIC MEMBERS
 	// =================================================================================== //
-	static const TreeConstants & instance(uint8_t dim);
-	static const Instances & instances();
+	BITPIT_PUBLIC_API static const TreeConstants & instance(uint8_t dim);
+	BITPIT_PUBLIC_API static const Instances & instances();
 
 	// =================================================================================== //
 	// MEMBERS

@@ -28,15 +28,17 @@
 #include "patch_kernel.hpp"
 #include "line_kernel.hpp"
 
+#include "bitpit_common.hpp"
+
 namespace bitpit {
 
 class SurfaceKernel : public PatchKernel {
 
 public:
     // Static constant
-    static const unsigned short SELECT_TRIANGLE;
-    static const unsigned short SELECT_QUAD;
-    static const unsigned short SELECT_ALL;
+    BITPIT_PUBLIC_API static const unsigned short SELECT_TRIANGLE;
+    BITPIT_PUBLIC_API static const unsigned short SELECT_QUAD;
+    BITPIT_PUBLIC_API static const unsigned short SELECT_ALL;
 
     // Types definitions
     typedef double (SurfaceKernel::*eval_f_)(long, int &) const;

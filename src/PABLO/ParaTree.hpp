@@ -74,6 +74,8 @@
 #include <bitset>
 #include <algorithm>
 
+#include "bitpit_common.hpp"
+
 namespace bitpit {
 
     // =================================================================================== //
@@ -114,7 +116,7 @@ namespace bitpit {
         // MEMBERS																			   //
         // =================================================================================== //
     public:
-        static const std::string	DEFAULT_LOG_FILE;			/**<Default name of logger file.*/
+        BITPIT_PUBLIC_API static const std::string	DEFAULT_LOG_FILE;			/**<Default name of logger file.*/
 
         typedef std::unordered_map<int, std::array<uint32_t, 2>> ExchangeRanges;
 

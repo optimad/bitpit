@@ -29,6 +29,8 @@
 #include <iostream>
 #include <unordered_map>
 
+#include "bitpit_common.hpp"
+
 namespace bitpit {
 
 class PatchManager {
@@ -36,7 +38,7 @@ class PatchManager {
 friend class PatchKernel;
 
 public:
-	static int const AUTOMATIC_ID;
+	BITPIT_PUBLIC_API static const int AUTOMATIC_ID;
 
     static PatchManager & manager();
 
