@@ -80,6 +80,13 @@ function(configureModule MODULE_NAME)
         addModuleIncludeDirectories(${UPPER_MODULE_NAME}_TARGET_OBJECT ${MODULE_NAME})
 
         get_target_property(BITPIT_COMPILE_DEFINITIONS ${BITPIT_LIBRARY} COMPILE_DEFINITIONS)
+
+        # # MSVC need to have global(static) data exported manually with declspec.
+        # # So provide this additional preproc definition for the current target, to export methods from the library.
+        if(MSVC AND BUILD_SHARED_LIBS)
+            set(BITPIT_COMPILE_DEFINITIONS ${BITPIT_COMPILE_DEFINITIONS} "BITPIT_DLLGLOBALDATA_EXPORT")
+        endif()
+
         target_compile_definitions(${UPPER_MODULE_NAME}_TARGET_OBJECT PUBLIC ${BITPIT_COMPILE_DEFINITIONS})
 
         target_sources(${BITPIT_LIBRARY} PRIVATE $<TARGET_OBJECTS:${UPPER_MODULE_NAME}_TARGET_OBJECT>)
