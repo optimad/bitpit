@@ -91,7 +91,14 @@ int executeTest(int dimension, const ExpectedResults &expectedResults)
         }
     }
 
+# if defined(_MSC_VER) && BITPIT_ENABLE_DEBUG == 0
+    std::array<double, 3> cellCoords_BL = patch.evalCellCentroid(patch.getCellCartesianId(patch.getCellLinearId({0,0,0})));
+    //TODO MSVC puzzling error in optimized /O2 /O1 (Release versions): 
+    // using VolCartesian::evalCellCentroid(long id) instead of VolCartesian::evalCellCentroid(array ijk)
+    // get a crash with undefined error. 
+#else 
     std::array<double, 3> cellCoords_BL = patch.evalCellCentroid(patch.getCellLinearId({0,0,0}));
+#endif    
     log::cout() << "   - Bottom-left cell (BL cell) centroid: " << cellCoords_BL << std::endl;
     for (int d = 0; d < 3; ++d) {
         if (!utils::DoubleFloatingEqual()(cellCoords_BL[d], expectedResults.cellCoords_BL[d])) {
