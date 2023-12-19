@@ -35,7 +35,9 @@
  *
  * [1] https://gcc.gnu.org/bugzilla/show_bug.cgi?id=59087
  */
-#if defined(__clang__)
+#if defined(_MSC_VER)
+#    include <mkl_lapacke.h>    
+#elif defined(__clang__)
 #    include <lapacke.h>
 #elif defined(__ICC) || defined(__INTEL_COMPILER)
 #    include <lapacke.h>
