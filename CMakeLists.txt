@@ -63,7 +63,7 @@ set_property(CACHE BITPIT_LTO_STRATEGY PROPERTY STRINGS "Auto" "Enabled" "Disabl
 #------------------------------------------------------------------------------------#
 # Internal variables
 #------------------------------------------------------------------------------------#
-set(BITPIT_VERSION "1.9.0-devel" CACHE INTERNAL "Version number")
+set(BITPIT_VERSION "1.10.0-devel" CACHE INTERNAL "Version number")
 set(BITPIT_INSTALL_CMAKEDIR "${CMAKE_INSTALL_DATAROOTDIR}/${CMAKE_PROJECT_NAME}/cmake" CACHE INTERNAL "Directory in which cmake modules will be installed")
 
 #------------------------------------------------------------------------------------#
