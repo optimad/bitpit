@@ -1,0 +1,6 @@
+<map id="bitpit::LevelSetSegmentationKernel" name="bitpit::LevelSetSegmentationKernel">
+<area shape="rect" id="node1" title="Segmentation kernel." alt="" coords="5,7,192,47"/>
+<area shape="rect" id="node2" href="$classbitpit_1_1LevelSetSegmentationObject.html" title=" " alt="" coords="640,5,835,45"/>
+<area shape="rect" id="node4" href="$classbitpit_1_1LevelSetSegmentationObject.html" title=" " alt="" coords="241,35,452,75"/>
+<area shape="rect" id="node3" href="$classbitpit_1_1LevelSetMaskObject.html" title="Implements the levelset around a set of cells or interfaces of the kernel." alt="" coords="884,5,1061,45"/>
+</map>

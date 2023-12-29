@@ -1,4 +1,0 @@
-<map id="bitpit::SystemSparseMatrixAssembler" name="bitpit::SystemSparseMatrixAssembler">
-<area shape="rect" id="node1" title="The SystemSparseMatrixAssembler class defines an assembler for building the system matrix form a spar..." alt="" coords="16,80,195,121"/>
-<area shape="rect" id="node2" href="$classbitpit_1_1SystemMatrixAssembler.html" title="The SystemMatrixAssembler class provides an interface for defining system matrix assemblers." alt="" coords="5,5,205,32"/>
-</map>

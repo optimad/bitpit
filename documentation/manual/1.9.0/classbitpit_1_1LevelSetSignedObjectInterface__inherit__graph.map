@@ -1,0 +1,10 @@
+<map id="bitpit::LevelSetSignedObjectInterface" name="bitpit::LevelSetSignedObjectInterface">
+<area shape="rect" id="node1" title="The class LevelSetSignedObjectInterface allows to define objects that can store the signe on the whol..." alt="" coords="252,63,437,103"/>
+<area shape="rect" id="node3" href="$classbitpit_1_1LevelSetCachedObject.html" title=" " alt="" coords="895,5,1086,45"/>
+<area shape="rect" id="node4" href="$classbitpit_1_1LevelSetCachedObject.html" title="Interface class for all objects which need to store the discrete values of levelset function." alt="" coords="497,63,687,103"/>
+<area shape="rect" id="node8" href="$classbitpit_1_1LevelSetImmutableObject.html" title="The class LevelSetImmutableObject allows to define immutable objects." alt="" coords="487,127,697,167"/>
+<area shape="rect" id="node2" href="$classbitpit_1_1LevelSetObjectInterface.html" title=" " alt="" coords="5,70,203,95"/>
+<area shape="rect" id="node5" href="$classbitpit_1_1LevelSetSegmentationObject.html" title=" " alt="" coords="1284,101,1479,141"/>
+<area shape="rect" id="node7" href="$classbitpit_1_1LevelSetSegmentationObject.html" title=" " alt="" coords="885,131,1096,171"/>
+<area shape="rect" id="node6" href="$classbitpit_1_1LevelSetMaskObject.html" title="Implements the levelset around a set of cells or interfaces of the kernel." alt="" coords="1528,101,1705,141"/>
+</map>

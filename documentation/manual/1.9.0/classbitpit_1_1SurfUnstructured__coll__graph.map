@@ -1,0 +1,27 @@
+<map id="bitpit::SurfUnstructured" name="bitpit::SurfUnstructured">
+<area shape="rect" id="node1" title="The SurfUnstructured class defines an unstructured surface triangulation." alt="" coords="2683,167,2840,192"/>
+<area shape="rect" id="node2" href="$classbitpit_1_1SurfaceKernel.html" title="The SurfaceKernel class provides an interface for defining surface patches." alt="" coords="2495,167,2633,192"/>
+<area shape="rect" id="node3" href="$classbitpit_1_1PatchKernel.html" title="The PatchKernel class provides an interface for defining patches." alt="" coords="2319,167,2445,192"/>
+<area shape="rect" id="node4" href="$classbitpit_1_1VTKBaseStreamer.html" title="The base class to be used to derive VTK streamers form." alt="" coords="2023,64,2189,90"/>
+<area shape="rect" id="node5" href="$classbitpit_1_1PiercedVector.html" title=" " alt="" coords="2037,406,2175,446"/>
+<area shape="rect" id="node6" href="$classbitpit_1_1BasePiercedVector.html" title="Base class for pierced vectors." alt="" coords="1495,211,1663,236"/>
+<area shape="rect" id="node20" href="$classbitpit_1_1PiercedVector.html" title="Metafunction for generating a pierced vector." alt="" coords="1720,325,1859,365"/>
+<area shape="rect" id="node22" href="$classbitpit_1_1PiercedVector.html" title=" " alt="" coords="2037,197,2175,237"/>
+<area shape="rect" id="node24" href="$classbitpit_1_1PiercedVector.html" title=" " alt="" coords="2037,114,2175,154"/>
+<area shape="rect" id="node7" href="$classbitpit_1_1PiercedVectorKernel.html" title="Kernel of the pierced vector." alt="" coords="1492,390,1667,430"/>
+<area shape="rect" id="node8" href="$classbitpit_1_1BasePiercedVectorKernel.html" title="Base class for pierced vector kernels." alt="" coords="1271,358,1439,398"/>
+<area shape="rect" id="node9" href="$classbitpit_1_1PiercedKernel.html" title="Metafunction for generating a pierced kernel." alt="" coords="603,416,740,456"/>
+<area shape="rect" id="node10" href="$classbitpit_1_1BasePiercedKernel.html" title="Base class for the pierced kernel." alt="" coords="225,372,392,398"/>
+<area shape="rect" id="node18" href="$classbitpit_1_1PiercedKernel.html" title=" " alt="" coords="783,313,921,353"/>
+<area shape="rect" id="node19" href="$classbitpit_1_1PiercedKernel.html" title="Metafunction for generating a pierced kernel." alt="" coords="441,308,579,348"/>
+<area shape="rect" id="node11" href="$classbitpit_1_1PiercedSyncMaster.html" title="Base class for defining an object that acts like a master in pierced synchronization." alt="" coords="5,372,176,398"/>
+<area shape="rect" id="node12" href="$classbitpit_1_1PiercedVectorStorage.html" title="Kernel of the pierced vector." alt="" coords="1488,325,1671,365"/>
+<area shape="rect" id="node13" href="$classbitpit_1_1BasePiercedVectorStorage.html" title="Base class for pierced vector kernels." alt="" coords="1271,174,1439,214"/>
+<area shape="rect" id="node21" href="$classbitpit_1_1PiercedVectorStorage.html" title="Kernel of the pierced vector." alt="" coords="1488,261,1671,301"/>
+<area shape="rect" id="node23" href="$classbitpit_1_1PiercedVectorStorage.html" title="Kernel of the pierced vector." alt="" coords="1488,146,1671,186"/>
+<area shape="rect" id="node25" href="$classbitpit_1_1PiercedVectorStorage.html" title="Kernel of the pierced vector." alt="" coords="1488,82,1671,122"/>
+<area shape="rect" id="node14" href="$classbitpit_1_1PiercedStorage.html" title="Metafunction for generating a pierced storage." alt="" coords="1281,256,1428,296"/>
+<area shape="rect" id="node15" href="$classbitpit_1_1PiercedStorageSyncSlave.html" title="Base class for defining storages that acts like a slave in pierced synchronization." alt="" coords="1045,256,1221,296"/>
+<area shape="rect" id="node16" href="$classbitpit_1_1PiercedSyncSlave.html" title="Base class for defining an object that acts like a slave in pierced synchronization." alt="" coords="771,214,933,239"/>
+<area shape="rect" id="node17" href="$classbitpit_1_1BasePiercedStorage.html" title="Base class for the pierced storages." alt="" coords="764,263,940,288"/>
+</map>

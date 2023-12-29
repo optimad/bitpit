@@ -1,4 +1,0 @@
-<map id="bitpit::SurfaceSkdTree" name="bitpit::SurfaceSkdTree">
-<area shape="rect" id="node1" title="The SurfaceSkdTree implements a Bounding Volume Hierarchy tree for surface patches." alt="" coords="5,80,156,107"/>
-<area shape="rect" id="node2" href="$classbitpit_1_1PatchSkdTree.html" title="PatchSkdTree is the class that implements a spatial kd&#45;tree (skd&#45;tree) a bitpit patch." alt="" coords="11,5,150,32"/>
-</map>

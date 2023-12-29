@@ -1,0 +1,4 @@
+<map id="bitpit::ReconstructionKernel" name="bitpit::ReconstructionKernel">
+<area shape="rect" id="node1" title="The ReconstructionKernel class allows to evaluate the weight of a reconstruction polynomial previousl..." alt="" coords="5,5,185,31"/>
+<area shape="rect" id="node2" href="$classbitpit_1_1Reconstruction.html" title="The Reconstruction class allows to build and apply a polynomial reconstructions." alt="" coords="23,79,167,104"/>
+</map>

@@ -1,7 +1,0 @@
-<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" title=" " alt="" coords="5,33,139,60"/>
-<area shape="rect" id="node2" href="$classbitpit_1_1LevelSetNarrowBandCache.html" title="Narrow band cache." alt="" coords="471,30,666,71"/>
-<area shape="rect" id="node3" href="$classbitpit_1_1LevelSetSegmentationNarrowBandCache.html" title=" " alt="" coords="725,23,912,79"/>
-<area shape="rect" id="node4" href="$classbitpit_1_1LevelSetNarrowBandCacheBase.html" title="Base class for defining narrow band caches." alt="" coords="187,85,412,126"/>
-<area shape="rect" id="node5" href="$classbitpit_1_1LevelSetSegmentationNarrowBandCacheBase.html" title="Base class for defining segmentation narrow band caches." alt="" coords="460,96,677,152"/>
-</map>

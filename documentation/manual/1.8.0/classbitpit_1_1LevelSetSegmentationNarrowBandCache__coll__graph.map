@@ -1,7 +1,0 @@
-<map id="bitpit::LevelSetSegmentationNarrowBandCache&lt; storage_manager_t &gt;" name="bitpit::LevelSetSegmentationNarrowBandCache&lt; storage_manager_t &gt;">
-<area shape="rect" id="node1" title=" " alt="" coords="725,20,912,76"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,31,139,57"/>
-<area shape="rect" id="node3" href="$classbitpit_1_1LevelSetNarrowBandCache.html" title="Narrow band cache." alt="" coords="471,27,666,69"/>
-<area shape="rect" id="node4" href="$classbitpit_1_1LevelSetNarrowBandCacheBase.html" title="Base class for defining narrow band caches." alt="" coords="187,82,412,123"/>
-<area shape="rect" id="node5" href="$classbitpit_1_1LevelSetSegmentationNarrowBandCacheBase.html" title="Base class for defining segmentation narrow band caches." alt="" coords="460,93,677,149"/>
-</map>

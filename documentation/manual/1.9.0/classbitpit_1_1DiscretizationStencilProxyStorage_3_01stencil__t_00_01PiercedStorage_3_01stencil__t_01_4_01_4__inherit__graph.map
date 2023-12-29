@@ -1,0 +1,6 @@
+<map id="bitpit::DiscretizationStencilProxyStorage&lt; stencil_t, PiercedStorage&lt; stencil_t &gt; &gt;" name="bitpit::DiscretizationStencilProxyStorage&lt; stencil_t, PiercedStorage&lt; stencil_t &gt; &gt;">
+<area shape="rect" id="node1" title=" " alt="" coords="903,5,1103,60"/>
+<area shape="rect" id="node2" href="$classbitpit_1_1DiscretizationStencilProxyBaseStorage.html" title=" " alt="" coords="639,5,853,60"/>
+<area shape="rect" id="node3" href="$classbitpit_1_1DiscretizationStencilStorageInterface.html" title="The DiscretizationStencilStorageInterface class defines the interface for stencil storage." alt="" coords="5,17,197,57"/>
+<area shape="rect" id="node4" href="$classbitpit_1_1DiscretizationStencilProxyBaseStorage.html" title="The DiscretizationStencilProxyBaseStorage class defines a proxy for stencil storage." alt="" coords="247,41,428,96"/>
+</map>

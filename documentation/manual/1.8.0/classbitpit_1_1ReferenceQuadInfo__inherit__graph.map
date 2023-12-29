@@ -1,5 +1,0 @@
-<map id="bitpit::ReferenceQuadInfo" name="bitpit::ReferenceQuadInfo">
-<area shape="rect" id="node1" title="The ReferenceQuadInfo class defines the information about the reference quadrangle." alt="" coords="22,155,191,181"/>
-<area shape="rect" id="node2" href="$classbitpit_1_1Reference2DElementInfo.html" title="The Reference2DElementInfo class allows to define information about reference two&#45;dimensional element..." alt="" coords="5,80,208,107"/>
-<area shape="rect" id="node3" href="$classbitpit_1_1ReferenceElementInfo.html" title="The ReferenceElementInfo class allows to define information about reference elements." alt="" coords="13,5,200,32"/>
-</map>

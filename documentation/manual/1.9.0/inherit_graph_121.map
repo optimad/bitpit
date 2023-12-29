@@ -1,0 +1,7 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" title=" " alt="" coords="180,5,271,31"/>
+<area shape="rect" id="node2" href="$classbitpit_1_1LineStream.html" title="LineStream defines a stream for reading lines." alt="" coords="339,31,461,56"/>
+<area shape="rect" id="node3" title=" " alt="" coords="5,80,112,105"/>
+<area shape="rect" id="node4" href="$classbitpit_1_1LineBuffer.html" title="LineBuffer defines a buffer for reading lines." alt="" coords="167,55,283,80"/>
+<area shape="rect" id="node5" href="$classbitpit_1_1LoggerBuffer.html" title="Stream buffer for the message logger." alt="" coords="160,104,291,129"/>
+</map>

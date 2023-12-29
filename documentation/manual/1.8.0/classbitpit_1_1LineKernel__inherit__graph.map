@@ -1,6 +1,0 @@
-<map id="bitpit::LineKernel" name="bitpit::LineKernel">
-<area shape="rect" id="node1" title=" " alt="" coords="30,155,147,181"/>
-<area shape="rect" id="node4" href="$classbitpit_1_1LineUnstructured.html" title="The LineUnstructured class defines an unstructured line tasselation." alt="" coords="11,229,167,256"/>
-<area shape="rect" id="node2" href="$classbitpit_1_1PatchKernel.html" title="The PatchKernel class provides an interface for defining patches." alt="" coords="25,80,152,107"/>
-<area shape="rect" id="node3" href="$classbitpit_1_1VTKBaseStreamer.html" title="The base class to be used to derive VTK streamers form." alt="" coords="5,5,172,32"/>
-</map>

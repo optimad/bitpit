@@ -1,0 +1,4 @@
+<map id="MyLinearSolver" name="MyLinearSolver">
+<area shape="rect" id="node1" title="The class MyLinearSolver is derived form SystemSolver and it allows to solve the linear system using ..." alt="" coords="19,79,130,104"/>
+<area shape="rect" id="node2" href="$classbitpit_1_1SystemSolver.html" title="The SystemSolver class provides methods for building and solving large linear systems." alt="" coords="5,5,144,31"/>
+</map>

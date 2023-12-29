@@ -1,0 +1,4 @@
+<map id="bitpit::VTKNativeStreamer" name="bitpit::VTKNativeStreamer">
+<area shape="rect" id="node1" title="In VTKNativeStreamer all instances of classes derived from VTKBaseConatiner are stored...." alt="" coords="5,79,179,104"/>
+<area shape="rect" id="node2" href="$classbitpit_1_1VTKBaseStreamer.html" title="The base class to be used to derive VTK streamers form." alt="" coords="9,5,175,31"/>
+</map>

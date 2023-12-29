@@ -1,0 +1,4 @@
+<map id="bitpit::LevelSetCartesianKernel" name="bitpit::LevelSetCartesianKernel">
+<area shape="rect" id="node1" title="Implements LevelSetKernel for cartesian meshes." alt="" coords="5,79,169,119"/>
+<area shape="rect" id="node2" href="$classbitpit_1_1LevelSetKernel.html" title="Mesh specific implementation to calculate the levelset function." alt="" coords="16,5,159,31"/>
+</map>
