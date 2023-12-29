@@ -112,7 +112,9 @@ int subtest_001(int rank)
     // Create the patch
     log::cout() << "Creating patch..." << std::endl;
 
-    std::unique_ptr<VolUnstructured> patch = std::unique_ptr<VolUnstructured>(new VolUnstructured(3, MPI_COMM_WORLD, 3ul));
+    std::size_t haloSize = 3;
+
+    std::unique_ptr<VolUnstructured> patch = std::unique_ptr<VolUnstructured>(new VolUnstructured(3, MPI_COMM_WORLD, haloSize));
     if (rank == 0) {
         fillMesh(patch.get());
     }
