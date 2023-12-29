@@ -60,9 +60,8 @@ cmake ${BITPIT_SOURCE_DIR} \
     -DBITPIT_ENABLE_DOC="ON" \
     -DBITPIT_ENABLE_MPI="ON" \
     -DBLAS_VENDOR="Generic" \
-    -DLAPACKE_STATIC="ON" \
     -DPETSC_ARCH="" \
-    -DPETSC_DIR="/usr/lib64/mpi/gcc/openmpi4/lib64/petsc/3.14.5/linux-gnu-c-opt" \
+    -DPETSC_DIR="/usr/lib64/mpi/gcc/openmpi4/lib64/petsc/3.18.5/linux-gnu-c-opt" \
     -DMPI_INCLUDE_PATH="/usr/lib64/mpi/gcc/openmpi4/include/" \
     -DMPIEXEC_EXECUTABLE="/usr/lib64/mpi/gcc/openmpi4/bin/mpiexec" \
     -DMPI_CXX_COMPILER="/usr/lib64/mpi/gcc/openmpi4/bin/mpicxx" \
@@ -86,12 +85,11 @@ make DESTDIR=${MANUAL_BUILD_DIR} install/local
 # Copy the generated manual into the website
 cd ${MANUAL_BUILD_DIR}
 
-BITPIT_VERSION=`ls doc`
-BITPIT_VERSION=${BITPIT_VERSION/bitpit-/}
+BITPIT_VERSION=`ls share/doc/bitpit/`
 BITPIT_VERSION=${BITPIT_VERSION/\//}
 
 MANUAL_INSTALL_DIR="${JEKYLL_ROOT_DIR}/documentation/manual/${BITPIT_VERSION}"
 
 rm -rf "${MANUAL_INSTALL_DIR}"
 mkdir -p "${MANUAL_INSTALL_DIR}"
-cp -r "doc/bitpit-${BITPIT_VERSION}/html/"* "${MANUAL_INSTALL_DIR}"
+cp -r "share/doc/bitpit/${BITPIT_VERSION}/html/"* "${MANUAL_INSTALL_DIR}"
