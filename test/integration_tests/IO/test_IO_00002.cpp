@@ -94,8 +94,8 @@ int subtest_001()
     // Write the configuration file in XML and json
     std::cout << std::endl;
     std::cout << "Write configuration file..." << std::endl;
-    root.write("config_test00007_updated.xml");
-    root.write("config_test00007_updated.json");
+    root.write("config_test00002_updated.xml");
+    root.write("config_test00002_updated.json");
 
     return 0;
 }
