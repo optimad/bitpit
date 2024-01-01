@@ -9,14 +9,10 @@ bitpit depends on
 * (optionally) MPI implementation. It has been tested with OpenMPI >= 1.6.5.
 
 Some additional dependencies are required for building specific modules
-* libxml2 and its development headers are needed when compiling the 'IO'
+* boost and its development headers are needed when compiling the 'IO'
   module (please note that the 'IO' module is a dependecies for many other
   bitpit modules, the only modules that do not depend on 'IO' are the low
-  level modules like 'operators', 'containers', 'LA', and 'SA'). Moreover,
-  json support is automatically enabled if RapidJSON (version 1.1.0) libraries  
-  are installed on the system (https://github.com/Tencent/rapidjson): this is
-  a completely optional requirement, IO module will compile and work fine
-  with the only xml support too;   
+  level modules like 'operators', 'containers', 'LA', and 'SA').
 * blas, lapack, and lapacke are needed when compiling 'CG', 'RBF', and 'POD'
   modules.
     

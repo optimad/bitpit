@@ -33,21 +33,18 @@ using namespace bitpit;
 /*!
 * Subtest 001
 *
-* Testing json parser.
-* BEWARE: if bitpit has no JSON support (RapidJSON package not installed)
-* this test does nothing and return .
+* Testing JSON parser.
 */
 int subtest_001()
 {
-    std::cout << "Testing json configuraton parser features" << std::endl;
+    std::cout << "Testing JSON configuration parser features" << std::endl;
 
     // Declare a bitpit config parser with multisections enabled.
-    //
     config::reset("bitpit", 1, true);
 
     // Read the configuration file
     std::cout << std::endl;
-    std::cout << "Read json configuration file..." << std::endl;
+    std::cout << "Read JSON configuration file..." << std::endl;
 
     config::read("data/configuration.json");
 
@@ -79,22 +76,20 @@ int subtest_001()
     bool firstExistsBool = root["first"].get<bool>("exists");
     std::cout << "  - Section \"first\" has exists..." << firstExistsBool << std::endl;
 
-    std::cout << "  - Empty dummy option reading ... -" << root.getSection("first").get("dummy")<<" - "<< std::endl;
+    std::cout << "  - Empty dummy option reading ... -" << root.getSection("first").get("dummy") <<" - "<< std::endl;
 
     std::cout << "  - Non existent option with fallback..." << root.getSection("first").get("none", "111") << std::endl;
     std::cout << "  - Non existent option with fallback (int)..." << root.getSection("first").get<int>("none", 111) << std::endl;
     std::cout << "  - Non existent option with fallback (double)..." << root.getSection("first").get<double>("none", 111.111) << std::endl;
-
 
     Config::MultiSection multisections = root.getSections("ObjArray");
     for(auto sec : multisections){
         std::cout<<"  - ObjArray element has address "<< sec->get("Address") <<std::endl;
     }
 
-    // Write the configuration file in XML and json
+    // Write the configuration file
     std::cout << std::endl;
     std::cout << "Write configuration file..." << std::endl;
-    root.write("config_test00002_updated.xml");
     root.write("config_test00002_updated.json");
 
     return 0;
@@ -115,7 +110,6 @@ int main(int argc, char *argv[])
     // Initialize the logger
     log::manager().initialize(log::MODE_COMBINE);
 
-#if BITPIT_ENABLE_RAPIDJSON
     // Run the subtests
     log::cout() << "Testing json configuration parser" << std::endl;
 
@@ -129,9 +123,6 @@ int main(int argc, char *argv[])
         log::cout() << exception.what()<<std::endl;
         exit(1);
     }
-#else
-    log::cout() << "Skipping test: configuration parser was compiled without JSON support." << std::endl;
-#endif
 
 #if BITPIT_ENABLE_MPI==1
     MPI_Finalize();
