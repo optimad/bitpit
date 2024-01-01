@@ -33,78 +33,64 @@ using namespace bitpit;
 /*!
 * Subtest 001
 *
-* Testing basic configuraton parser features.
+* Testing basic configuration parser features.
 */
 int subtest_001()
 {
-    std::cout << "Testing basic configuraton parser features" << std::endl;
+    std::cout << "Testing XML configuration parser features" << std::endl;
 
-    // Reset global parset
-    //
-    // This is only neededto get customized root name and version number.
-    config::reset("bitpit", 1);
+    // Declare a bitpit config parser with multisections enabled.
+    config::reset("bitpit", 1, true);
 
     // Read the configuration file
     std::cout << std::endl;
-    std::cout << "Read configuration file..." << std::endl;
+    std::cout << "Read XML configuration file..." << std::endl;
+
     config::read("data/configuration.xml");
 
+    bitpit::GlobalConfigParser & root = config::root;
     // Dump the configuration
     std::cout << std::endl;
     std::cout << "Dump configuration..." << std::endl;
-    config::root.dump(std::cout, 1);
+    root.dump(std::cout, 1);
 
     // Access configuration
     std::cout << std::endl;
     std::cout << "Access configuration..." << std::endl;
-    std::cout << "  - Section \"first\" has color..." << config::root["first"].get("color") << std::endl;
-    std::cout << "  - Section \"second\" has color..." << config::root["second"].get("color") << std::endl;
-    std::cout << "  - Section \"first\" has distance..." << config::root.getSection("first").get("distance") << std::endl;
-    std::cout << "  - Section \"second\" has y data..." << config::root["second"]["data"].get("y") << std::endl;
-    std::cout << "  - Section \"first\" option count..." << config::root.getSection("first").getOptionCount() << std::endl;
-    std::cout << "  - Section \"first\" sub-section count..." << config::root.getSection("first").getSectionCount() << std::endl;
+    std::cout << "  - Section \"first\" has color..." << root["first"].get("color") << std::endl;
+    std::cout << "  - Section \"second\" has color..." << root["second"].get("color") << std::endl;
+    std::cout << "  - Section \"first\" has distance..." << root.getSection("first").get("distance") << std::endl;
+    std::cout << "  - Section \"second\" has y data..." << root["second"]["data"].get("y") << std::endl;
+    std::cout << "  - Section \"first\" option count..." << root.getSection("first").getOptionCount() << std::endl;
+    std::cout << "  - Section \"first\" sub-section count..." << root.getSection("first").getSectionCount() << std::endl;
 
-    int firstDistanceInt = config::root["first"].get<int>("distance");
+    int firstDistanceInt = root["first"].get<int>("distance");
     std::cout << "  - Section \"first\" has distance (int)..." << firstDistanceInt << std::endl;
 
-    double firstDistanceDouble = config::root["first"].get<double>("distance");
+    double firstDistanceDouble = root["first"].get<double>("distance");
     std::cout << "  - Section \"first\" has distance (double)..." << firstDistanceDouble << std::endl;
 
-    double secondDataDouble = config::root["second"]["data"].get<double>("y");
-    std::cout << "  - Section \"section\" has y data (double)..." << secondDataDouble << std::endl;
+    double secondDataDouble = root["second"]["data"].get<double>("y");
+    std::cout << "  - Section \"second\" has y data (double)..." << secondDataDouble << std::endl;
 
-    bool firstExistsBool = config::root["first"].get<bool>("exists");
-    std::cout << "  - Section \"first\" has distance..." << firstExistsBool << std::endl;
+    bool firstExistsBool = root["first"].get<bool>("exists");
+    std::cout << "  - Section \"first\" has exists..." << firstExistsBool << std::endl;
 
-    std::cout << "  - Non existent option with fallback..." << config::root.getSection("first").get("none", "111") << std::endl;
-    std::cout << "  - Non existent option with fallback (int)..." << config::root.getSection("first").get<int>("none", 111) << std::endl;
-    std::cout << "  - Non existent option with fallback (double)..." << config::root.getSection("first").get<double>("none", 111.111) << std::endl;
+    // std::cout << "  - Empty dummy option reading ... -" << root.getSection("first").get("dummy") <<" - "<< std::endl;
 
-    // Modify the configuration
-    std::cout << std::endl;
-    std::cout << "Modify configuration..." << std::endl;
+    std::cout << "  - Non existent option with fallback..." << root.getSection("first").get("none", "111") << std::endl;
+    std::cout << "  - Non existent option with fallback (int)..." << root.getSection("first").get<int>("none", 111) << std::endl;
+    std::cout << "  - Non existent option with fallback (double)..." << root.getSection("first").get<double>("none", 111.111) << std::endl;
 
-    config::root["first"].set("color", "purple");
-    config::root["second"].set("color", "orange");
-
-    config::root["first"].set("distance", 111);
-    config::root["second"].set("distance", 222);
-
-    config::root["first"].set("exists", true);
-    config::root["second"].set("exists", true);
-
-    config::root["first"]["data"].set("x", 111.111);
-    config::root["second"]["data"].set("y", 222.222);
-
-    // Dump the configuration
-    std::cout << std::endl;
-    std::cout << "Dump configuration..." << std::endl;
-    config::root.dump(std::cout, 1);
+    Config::MultiSection multisections = root.getSections("ObjArray");
+    for(auto sec : multisections){
+        std::cout<<"  - ObjArray element has address "<< sec->get("Address") <<std::endl;
+    }
 
     // Write the configuration file
     std::cout << std::endl;
     std::cout << "Write configuration file..." << std::endl;
-    config::write("configuration_updated.xml");
+    root.write("config_test00004_updated.xml");
 
     return 0;
 }

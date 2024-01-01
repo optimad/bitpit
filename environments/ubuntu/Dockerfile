@@ -11,12 +11,10 @@ RUN sed -i "s/htt[p|ps]:\/\/archive.ubuntu.com\/ubuntu\//mirror:\/\/mirrors.ubun
         liblapack-dev  \
         liblapacke-dev \
         mpich \
-        libxml2-dev \
         libmetis-dev \
         git \
         wget \
-        python3 \
-        rapidjson-dev
+        python3
 
 FROM bitpit-ubuntu-base AS bitpit-ubuntu-mpi
 LABEL stage=bitpit-ubuntu-mpi

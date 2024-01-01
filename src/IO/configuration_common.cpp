@@ -21,34 +21,43 @@
  *  along with bitpit. If not, see <http://www.gnu.org/licenses/>.
  *
 \*---------------------------------------------------------------------------*/
-#ifndef __BITPIT_CONFIGURATION_XML_HPP__
-#define __BITPIT_CONFIGURATION_XML_HPP__
 
-#include <libxml/tree.h>
-#include <libxml/xmlwriter.h>
-
-#include "configuration_config.hpp"
+#include "configuration_common.hpp"
 
 namespace bitpit {
 
 namespace config {
 
-namespace XML {
+/*!
+    Check if the specified file format has a root section.
 
-extern const std::string DEFAULT_ENCODING;
+    \param format is the format of the file
+    \result Return true if the specified file format has a root section, false otherwise.
+*/
+bool hasRootSection(FileFormat format)
+{
+    if (format == FILE_FORMAT_XML) {
+        return true;
+    }
 
-void readConfiguration(const std::string &filename, const std::string &rootname, bool checkVersion, int version, Config *rootConfig);
-void readNode(xmlNodePtr root, Config *config);
+    return false;
+}
 
-void writeConfiguration(const std::string &filename, const std::string & rootname, int version, const Config *rootConfig);
-void writeNode(xmlTextWriterPtr writer, const Config *config, const std::string &encoding = DEFAULT_ENCODING);
+/*!
+    Check if the specified file format supports arrays.
 
-xmlChar * encodeString(const std::string &in, const std::string &encoding);
+    \param format is the format of the file
+    \result Return true if the specified file format support arrays, false otherwise.
+*/
+bool hasArraySupport(FileFormat format)
+{
+    if (format == FILE_FORMAT_JSON) {
+        return true;
+    }
 
+    return false;
 }
 
 }
 
 }
-
-#endif

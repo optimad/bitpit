@@ -593,7 +593,7 @@ if (BITPIT_ENABLE_MPI)
 endif()
 set(OPERATORS_EXTERNAL_DEPS "")
 set(CONTAINERS_EXTERNAL_DEPS "")
-set(IO_EXTERNAL_DEPS "LibXml2;RapidJSON")
+set(IO_EXTERNAL_DEPS "Boost")
 set(COMMUNICATIONS_EXTERNAL_DEPS "MPI")
 set(LA_EXTERNAL_DEPS "PETSc")
 set(SA_EXTERNAL_DEPS "")
@@ -831,39 +831,6 @@ if (${_LAPACKE_index} GREATER -1)
 endif()
 unset(_LAPACKE_index)
 
-list(FIND EXTERNAL_DEPS "LibXml2" _LibXml2_index)
-if (${_LibXml2_index} GREATER -1)
-    find_package(LibXml2 REQUIRED)
-
-    list (INSERT BITPIT_EXTERNAL_DEPENDENCIES 0 "LibXml2")
-    list (INSERT BITPIT_EXTERNAL_VARIABLES_LIBRARIES 0 "LIBXML2_LIBRARIES")
-    list (INSERT BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS 0 "LIBXML2_INCLUDE_DIR")
-endif()
-unset(_LibXml2_index)
-
-list(FIND EXTERNAL_DEPS "RapidJSON" _RapidJSON_index)
-if (${_RapidJSON_index} GREATER -1)
-    find_package(RapidJSON 1.1.0 QUIET)
-    mark_as_advanced(RapidJSON_DIR)
-
-    if (RapidJSON_FOUND)
-        # RapidJSON library has been found
-        target_compile_definitions(${BITPIT_LIBRARY} PUBLIC "BITPIT_ENABLE_RAPIDJSON=1")
-
-        list (INSERT BITPIT_EXTERNAL_DEPENDENCIES 0 "RapidJSON")
-        list (INSERT BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS 0 "RAPIDJSON_INCLUDE_DIRS")
-
-        # Activate std::string RapidJSON compliancy
-        target_compile_definitions(${BITPIT_LIBRARY} PUBLIC "RAPIDJSON_HAS_STDSTRING=1")
-    else()
-        # RapidJSON library has not been found
-        target_compile_definitions(${BITPIT_LIBRARY} PUBLIC "BITPIT_ENABLE_RAPIDJSON=0")
-
-        message(STATUS "RapidJSON library not found, JSON support will be disabled.")
-    endif()
-endif()
-unset(_RapidJSON_index)
-
 list(FIND EXTERNAL_DEPS "PETSc" _PETSc_index)
 if (${_PETSc_index} GREATER -1)
     list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/external/PETSc/cmake")
@@ -890,15 +857,20 @@ if (${_PETSc_index} GREATER -1)
 endif()
 unset(_PETSc_index)
 
-list(FIND EXTERNAL_DEPS "BoostTest" _BoostTest_index)
-if (${_BoostTest_index} GREATER -1)
+list(FIND EXTERNAL_DEPS "Boost" _Boost_index)
+if (${_Boost_index} GREATER -1)
     set(BOOST_COMPONENTS "")
+    list(FIND EXTERNAL_DEPS "BoostTest" _BoostTest_index)
     if(${_BoostTest_index} GREATER -1)
         LIST(APPEND BOOST_COMPONENTS "unit_test_framework")
     endif()
     string (REPLACE ";" " " BOOST_COMPONENTS_STRING "${BOOST_COMPONENTS}")
 
-    FIND_PACKAGE(Boost 1.40 COMPONENTS "${BOOST_COMPONENTS_STRING}" REQUIRED)
+    if ("${BOOST_COMPONENTS}" STREQUAL "")
+        FIND_PACKAGE(Boost 1.40 REQUIRED)
+    else ()
+        FIND_PACKAGE(Boost 1.40 COMPONENTS "${BOOST_COMPONENTS_STRING}" REQUIRED)
+    endif ()
 
     list (INSERT BITPIT_EXTERNAL_DEPENDENCIES 0 "Boost")
     list (INSERT BITPIT_EXTERNAL_VARIABLES_LIBRARIES 0 "Boost_LIBRARIES")
