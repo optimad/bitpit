@@ -26,7 +26,6 @@
 
 #include <memory>
 #include <string>
-#include <unordered_map>
 
 #include "bitpit_api.hpp"
 #include "configuration_config.hpp"

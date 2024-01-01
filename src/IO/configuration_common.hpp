@@ -21,35 +21,24 @@
  *  along with bitpit. If not, see <http://www.gnu.org/licenses/>.
  *
 \*---------------------------------------------------------------------------*/
-#ifndef __BITPIT_CONFIGURATION_XML_HPP__
-#define __BITPIT_CONFIGURATION_XML_HPP__
-
-#include <libxml/tree.h>
-#include <libxml/xmlwriter.h>
-
-#include "configuration_config.hpp"
-#include "bitpit_api.hpp"
+#ifndef __BITPIT_CONFIGURATION_COMMON_HPP__
+#define __BITPIT_CONFIGURATION_COMMON_HPP__
 
 namespace bitpit {
 
 namespace config {
 
-namespace XML {
+enum FileFormat
+{
+    FILE_FORMAT_JSON,
+    FILE_FORMAT_XML,
+};
 
-extern BITPIT_API const std::string DEFAULT_ENCODING;
+bool hasRootSection(FileFormat format);
+bool hasArraySupport(FileFormat format);
 
-void readConfiguration(const std::string &filename, const std::string &rootname, bool checkVersion, int version, Config *rootConfig);
-void readNode(xmlNodePtr root, Config *config);
+} // namespace config
 
-void writeConfiguration(const std::string &filename, const std::string & rootname, int version, const Config *rootConfig);
-void writeNode(xmlTextWriterPtr writer, const Config *config, const std::string &encoding = DEFAULT_ENCODING);
-
-xmlChar * encodeString(const std::string &in, const std::string &encoding);
-
-}
-
-}
-
-}
+} // namespace bitpit
 
 #endif

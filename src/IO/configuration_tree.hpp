@@ -21,34 +21,34 @@
  *  along with bitpit. If not, see <http://www.gnu.org/licenses/>.
  *
 \*---------------------------------------------------------------------------*/
-#ifndef __BITPIT_CONFIGURATION_JSON_HPP__
-#define __BITPIT_CONFIGURATION_JSON_HPP__
-
-#if BITPIT_ENABLE_RAPIDJSON
-#include <rapidjson/document.h>
+#ifndef __BITPIT_CONFIGURATION_TREE_HPP__
+#define __BITPIT_CONFIGURATION_TREE_HPP__
 
 #include "configuration_config.hpp"
+#include "configuration_common.hpp"
+
+#include <boost/property_tree/ptree.hpp>
 
 namespace bitpit {
 
 namespace config {
 
-namespace JSON {
+namespace tree {
 
-void readConfiguration(const std::string &filename, Config *rootConfig);
-void readNode(const std::string &key, const rapidjson::Value &value, Config *config);
+void readConfiguration(const std::string &filename, FileFormat format, const std::string &rootname,
+                       bool checkVersion, int version, Config *rootConfig);
+void writeConfiguration(const std::string &filename, FileFormat format, const std::string &rootname,
+                        int version, const Config *rootConfig);
 
-void writeConfiguration(const std::string &filename, const Config *rootConfig, bool prettify = true);
-void writeNode(const Config *config, rapidjson::Value &rootJSONData, rapidjson::Document::AllocatorType &allocator);
+void importTree(boost::property_tree::ptree const &root, Config *config);
+void exportTree(const Config &config, bool areArraysAllowed, boost::property_tree::ptree *root);
 
-std::string decodeValue(const rapidjson::Value &value);
-rapidjson::Value encodeValue(const std::string &stringValue, rapidjson::Document::AllocatorType &allocator);
+std::string readNodeValue(const boost::property_tree::ptree &node);
+
+}
 
 }
 
 }
-
-}
-#endif
 
 #endif
