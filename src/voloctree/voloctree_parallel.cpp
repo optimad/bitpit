@@ -112,6 +112,10 @@ void VolOctree::_setHaloSize(std::size_t haloSize)
 /*!
 	Prepares the patch for performing the partitioning.
 
+	See PatchKernel::partitioningPrepare(bool trackPartitioning) for the
+	documentation about the tracking information that should be returned
+	when re-implmeneting by this function.
+
 	\param cellWeights are the weights of the cells, the weight represents the
 	relative computational cost associated to a specified cell. If no weight
 	is specified for a cell, the default weight will be used
@@ -147,21 +151,28 @@ std::vector<adaption::Info> VolOctree::_partitioningPrepare(const std::unordered
 			}
 
 			partitioningData.emplace_back();
-			adaption::Info &partitioningInfo = partitioningData.back();
-			partitioningInfo.entity = adaption::ENTITY_CELL;
-			partitioningInfo.type   = adaptionType;
-			partitioningInfo.rank   = receiver;
+			adaption::Info &partitioningCellInfo = partitioningData.back();
+			partitioningCellInfo.entity = adaption::ENTITY_CELL;
+			partitioningCellInfo.type   = adaptionType;
+			partitioningCellInfo.rank   = receiver;
 
 			const std::array<uint32_t, 2> &sendRange = entry.second;
 			uint32_t beginTreeId = sendRange[0];
 			uint32_t endTreeId   = sendRange[1];
-			partitioningInfo.previous.reserve(endTreeId - beginTreeId);
+			partitioningCellInfo.previous.reserve(endTreeId - beginTreeId);
 			for (uint32_t treeId = beginTreeId; treeId < endTreeId; ++treeId) {
 				OctantInfo octantInfo(treeId, true);
-				partitioningInfo.previous.emplace_back();
-				long &cellId = partitioningInfo.previous.back();
+				partitioningCellInfo.previous.emplace_back();
+				long &cellId = partitioningCellInfo.previous.back();
 				cellId = getOctantId(octantInfo);
 			}
+
+			partitioningData.emplace_back();
+			adaption::Info &partitioningVertexInfo = partitioningData.back();
+			partitioningVertexInfo.entity   = adaption::ENTITY_VERTEX;
+			partitioningVertexInfo.type     = adaption::TYPE_PARTITION_SEND;
+			partitioningVertexInfo.rank     = receiver;
+			partitioningVertexInfo.previous = getOrderedCellsVertices(partitioningCellInfo.previous, true, false);
 		}
 	}
 

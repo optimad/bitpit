@@ -252,15 +252,6 @@ void VolCartesian::reset()
 }
 
 /*!
-	Resest the interfaces of the patch.
-*/
-void VolCartesian::resetInterfaces()
-{
-	PatchKernel::resetInterfaces();
-}
-
-
-/*!
 	Internal function to update the adjacencies of the patch.
 
 	The function will always update the adjacencies of all the cells.
@@ -313,8 +304,13 @@ void VolCartesian::_updateAdjacencies()
 
 	It is not possible to partially update the interfaces of this patch.
 	The function will always update all the interfaces.
+
+	\param trackAdaption if set to true the changes to the patch will be tracked
+	\result If the adaption is tracked, returns a vector of adaption::Info
+	with all the changes done to the patch during the adaption, otherwise an
+	empty vector will be returned.
 */
-void VolCartesian::_updateInterfaces()
+std::vector<adaption::Info> VolCartesian::_updateInterfaces(bool trackAdaption)
 {
 	// Partial updates are not supported
 	CellConstIterator beginItr = cellConstBegin();
@@ -335,6 +331,7 @@ void VolCartesian::_updateInterfaces()
 	}
 
 	// Build interfaces
+	adaption::InfoCollection adaptionData;
 	if (getMemoryMode() == MemoryMode::MEMORY_NORMAL) {
 		int nCellFaces = 2 * getDimension();
 
@@ -353,6 +350,8 @@ void VolCartesian::_updateInterfaces()
 		}
 
 		// Build interfaces
+		std::vector<long> createdInterfaces;
+		createdInterfaces.reserve(m_nInterfaces);
 		for (Cell &cell : getCells()) {
 			long cellId = cell.getId();
 			for (int face = 0; face < nCellFaces; ++face) {
@@ -401,12 +400,24 @@ void VolCartesian::_updateInterfaces()
 				} else {
 					interface.unsetNeigh();
 				}
+
+				// Track changes
+				createdInterfaces.push_back(interfaceId);
 			}
 		}
 
 		// Disable advanced editing
 		setExpert(false);
+
+		// Track changes
+		if (trackAdaption) {
+			std::size_t adaptionInfoId = adaptionData.insert(adaption::TYPE_CREATION, adaption::ENTITY_INTERFACE);
+			adaption::Info &adaptionInfo = adaptionData[adaptionInfoId];
+			adaptionInfo.previous = std::move(createdInterfaces);
+		}
 	}
+
+	return adaptionData.dump();
 }
 
 /*!
@@ -1002,11 +1013,11 @@ double VolCartesian::getSpacing(int direction) const
 */
 std::vector<adaption::Info> VolCartesian::_spawn(bool trackSpawn)
 {
-	std::vector<adaption::Info> updateInfo;
+	std::vector<adaption::Info> adaptionData;
 
 	// If the patch is in 'normal' mode there is nothing to do.
 	if (getMemoryMode() == MEMORY_NORMAL) {
-		return updateInfo;
+		return adaptionData;
 	}
 
 	// Enable advanced editing
@@ -1021,8 +1032,8 @@ std::vector<adaption::Info> VolCartesian::_spawn(bool trackSpawn)
 
 	// Adaption info
 	if (trackSpawn) {
-		updateInfo.emplace_back();
-		adaption::Info &adaptionCellInfo = updateInfo.back();
+		adaptionData.emplace_back();
+		adaption::Info &adaptionCellInfo = adaptionData.back();
 		adaptionCellInfo.type   = adaption::TYPE_CREATION;
 		adaptionCellInfo.entity = adaption::ENTITY_CELL;
 		adaptionCellInfo.current.reserve(m_cells.size());
@@ -1032,8 +1043,19 @@ std::vector<adaption::Info> VolCartesian::_spawn(bool trackSpawn)
 			cellId = cell.getId();
 		}
 
-		updateInfo.emplace_back();
-		adaption::Info &adaptionInterfaceInfo = updateInfo.back();
+		adaptionData.emplace_back();
+		adaption::Info &adaptionVertexInfo = adaptionData.back();
+		adaptionVertexInfo.type   = adaption::TYPE_CREATION;
+		adaptionVertexInfo.entity = adaption::ENTITY_VERTEX;
+		adaptionVertexInfo.current.reserve(m_cells.size());
+		for (auto &vertex : m_vertices) {
+			adaptionVertexInfo.current.emplace_back();
+			long &vertexId = adaptionVertexInfo.current.back();
+			vertexId = vertex.getId();
+		}
+
+		adaptionData.emplace_back();
+		adaption::Info &adaptionInterfaceInfo = adaptionData.back();
 		adaptionInterfaceInfo.type   = adaption::TYPE_CREATION;
 		adaptionInterfaceInfo.entity = adaption::ENTITY_INTERFACE;
 		adaptionInterfaceInfo.current.reserve(m_interfaces.size());
@@ -1043,14 +1065,14 @@ std::vector<adaption::Info> VolCartesian::_spawn(bool trackSpawn)
 			interfaceId = interface.getId();
 		}
 	} else {
-		updateInfo.emplace_back();
+		adaptionData.emplace_back();
 	}
 
 	// Updating the adaption brings the patch is in normal memory mode
 	setMemoryMode(MemoryMode::MEMORY_NORMAL);
 
 	// Done
-	return updateInfo;
+	return adaptionData;
 }
 
 /*!

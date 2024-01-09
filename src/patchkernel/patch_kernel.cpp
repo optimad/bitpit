@@ -619,32 +619,32 @@ PatchKernel::~PatchKernel()
 */
 std::vector<adaption::Info> PatchKernel::update(bool trackAdaption, bool squeezeStorage)
 {
-	std::vector<adaption::Info> updateInfo;
+	std::vector<adaption::Info> adaptionData;
 
 	// Early return if the patch is not dirty
 	//
 	// If we need to squeeze the storage we need to perform the update also
 	// if the patch is not dirty.
 	if (!squeezeStorage && !isDirty(true)) {
-		return updateInfo;
+		return adaptionData;
 	}
 
 	// Finalize alterations
-	finalizeAlterations(squeezeStorage);
+	mergeAdaptionInfo(finalizeAlterations(trackAdaption, squeezeStorage), adaptionData);
 
 	// Spawn
 	bool spawnNeeed = (getSpawnStatus() == SPAWN_NEEDED);
 	if (spawnNeeed) {
-		mergeAdaptionInfo(spawn(trackAdaption), updateInfo);
+		mergeAdaptionInfo(spawn(trackAdaption), adaptionData);
 	}
 
 	// Adaption
 	bool adaptionDirty = (getAdaptionStatus(true) == ADAPTION_DIRTY);
 	if (adaptionDirty) {
-		mergeAdaptionInfo(adaption(trackAdaption, squeezeStorage), updateInfo);
+		mergeAdaptionInfo(adaption(trackAdaption, squeezeStorage), adaptionData);
 	}
 
-	return updateInfo;
+	return adaptionData;
 }
 
 /*!
@@ -676,7 +676,7 @@ void PatchKernel::simulateCellUpdate(const long id, adaption::Marker marker, std
 */
 std::vector<adaption::Info> PatchKernel::spawn(bool trackSpawn)
 {
-	std::vector<adaption::Info> spawnInfo;
+	std::vector<adaption::Info> spawnData;
 
 #if BITPIT_ENABLE_MPI==1
 	// This is a collevtive operation and should be called by all processes
@@ -689,11 +689,11 @@ std::vector<adaption::Info> PatchKernel::spawn(bool trackSpawn)
 	// Check spawn status
 	SpawnStatus spawnStatus = getSpawnStatus();
 	if (spawnStatus == SPAWN_UNNEEDED || spawnStatus == SPAWN_DONE) {
-		return spawnInfo;
+		return spawnData;
 	}
 
 	// Spawn the patch
-	spawnInfo = _spawn(trackSpawn);
+	spawnData = _spawn(trackSpawn);
 
 	// Finalize patch alterations
 	finalizeAlterations(true);
@@ -702,7 +702,7 @@ std::vector<adaption::Info> PatchKernel::spawn(bool trackSpawn)
 	setSpawnStatus(SPAWN_DONE);
 
 	// Done
-	return spawnInfo;
+	return spawnData;
 }
 
 /*!
@@ -717,23 +717,23 @@ std::vector<adaption::Info> PatchKernel::spawn(bool trackSpawn)
 */
 std::vector<adaption::Info> PatchKernel::adaption(bool trackAdaption, bool squeezeStorage)
 {
-	std::vector<adaption::Info> adaptionInfo;
+	std::vector<adaption::Info> adaptionData;
 
 	// Check adaption status
 	AdaptionStatus adaptionStatus = getAdaptionStatus(true);
 	if (adaptionStatus == ADAPTION_UNSUPPORTED || adaptionStatus == ADAPTION_CLEAN) {
-		return adaptionInfo;
+		return adaptionData;
 	} else if (adaptionStatus != ADAPTION_DIRTY) {
 		throw std::runtime_error ("An adaption is already in progress.");
 	}
 
 	adaptionPrepare(false);
 
-	adaptionInfo = adaptionAlter(trackAdaption, squeezeStorage);
+	adaptionData = adaptionAlter(trackAdaption, squeezeStorage);
 
 	adaptionCleanup();
 
-	return adaptionInfo;
+	return adaptionData;
 }
 
 /*!
@@ -743,6 +743,13 @@ std::vector<adaption::Info> PatchKernel::adaption(bool trackAdaption, bool squee
 	track the changes that will be performed to the patch. During this phase
 	no changes will be performed to the patch.
 
+	Tracking will only list changes that may data collection on the internal
+	data structured (e.g., adaption preparation will not track adaption of
+	ghost cells).
+
+	Information available for tracking purposes are the following:
+	 - internal cells that will be coarsened/refined.
+
 	\param trackAdaption if set to true the function will return the changes
 	that will be performed in the alter step
 	\result If the adaption is tracked, returns a vector of adaption::Info that
@@ -751,23 +758,23 @@ std::vector<adaption::Info> PatchKernel::adaption(bool trackAdaption, bool squee
 */
 std::vector<adaption::Info> PatchKernel::adaptionPrepare(bool trackAdaption)
 {
-	std::vector<adaption::Info> adaptionInfo;
+	std::vector<adaption::Info> adaptionData;
 
 	// Check adaption status
 	AdaptionStatus adaptionStatus = getAdaptionStatus(true);
 	if (adaptionStatus == ADAPTION_UNSUPPORTED || adaptionStatus == ADAPTION_CLEAN) {
-		return adaptionInfo;
+		return adaptionData;
 	} else if (adaptionStatus != ADAPTION_DIRTY) {
 		throw std::runtime_error ("An adaption is already in progress.");
 	}
 
 	// Execute the adaption preparation
-	adaptionInfo = _adaptionPrepare(trackAdaption);
+	adaptionData = _adaptionPrepare(trackAdaption);
 
 	// Update the status
 	setAdaptionStatus(ADAPTION_PREPARED);
 
-	return adaptionInfo;
+	return adaptionData;
 }
 
 /*!
@@ -775,7 +782,23 @@ std::vector<adaption::Info> PatchKernel::adaptionPrepare(bool trackAdaption)
 
 	The actual modification of the patch takes place during this phase. After
 	this phase the adaption is completed and the patch is in its final state.
-	Optionally the patch can track the changes performed to the patch.
+
+	Optionally, this funciton can track the changes performed to the patch.
+
+	Tracking information will not contain changes that involve data collection
+	on ghost data structured (e.g., ghost cells adaption is not tracked, only
+	deletion and creation of ghost cells will be tracked).
+
+	Information available for tracking purposes are the following:
+	 - internal cells that have been coarsened/refined;
+	 - new internal vertices that have been created;
+	 - internal vertices that have been deleted;
+	 - new ghost cells that have been created;
+	 - new ghost vertices that have been created;
+	 - ghost cells that have been deleted;
+	 - ghost vertices that have been deleted;
+	 - new interfaces that have been created;
+	 - interfaces that have been deleted.
 
 	\param trackAdaption if set to true the function will return the changes
 	done to the patch during the adaption
@@ -787,26 +810,26 @@ std::vector<adaption::Info> PatchKernel::adaptionPrepare(bool trackAdaption)
 */
 std::vector<adaption::Info> PatchKernel::adaptionAlter(bool trackAdaption, bool squeezeStorage)
 {
-	std::vector<adaption::Info> adaptionInfo;
+	std::vector<adaption::Info> adaptionData;
 
 	// Check adaption status
 	AdaptionStatus adaptionStatus = getAdaptionStatus();
 	if (adaptionStatus == ADAPTION_UNSUPPORTED || adaptionStatus == ADAPTION_CLEAN) {
-		return adaptionInfo;
+		return adaptionData;
 	} else if (adaptionStatus != ADAPTION_PREPARED) {
 		throw std::runtime_error ("The prepare function has not been called.");
 	}
 
 	// Adapt the patch
-	adaptionInfo = _adaptionAlter(trackAdaption);
+	mergeAdaptionInfo(_adaptionAlter(trackAdaption), adaptionData);
 
 	// Finalize patch alterations
-	finalizeAlterations(squeezeStorage);
+	mergeAdaptionInfo(finalizeAlterations(trackAdaption, squeezeStorage), adaptionData);
 
 	// Update the status
 	setAdaptionStatus(ADAPTION_ALTERED);
 
-	return adaptionInfo;
+	return adaptionData;
 }
 
 /*!
@@ -844,11 +867,15 @@ void PatchKernel::settleAdaptionMarkers()
 /*!
 	Finalize patch alterations.
 
+	\param trackAdaption if set to true the function will return the changes
+	that will be performed in the alter step
 	\param squeezeStorage if set to true patch data structures will be
 	squeezed
 */
-void PatchKernel::finalizeAlterations(bool squeezeStorage)
+std::vector<adaption::Info> PatchKernel::finalizeAlterations(bool trackAdaption, bool squeezeStorage)
 {
+	std::vector<adaption::Info> adaptionData;
+
 	// Flush vertex data structures
 	m_vertices.flush();
 
@@ -870,7 +897,7 @@ void PatchKernel::finalizeAlterations(bool squeezeStorage)
 	// Update interfaces
 	bool interfacesDirty = areInterfacesDirty();
 	if (interfacesDirty) {
-		updateInterfaces();
+		mergeAdaptionInfo(updateInterfaces(false, trackAdaption), adaptionData);
 	}
 
 	// Flush interfaces data structures
@@ -897,6 +924,8 @@ void PatchKernel::finalizeAlterations(bool squeezeStorage)
 	m_cells.sync();
 	m_interfaces.sync();
 	m_vertices.sync();
+
+	return adaptionData;
 }
 
 /*!
@@ -1043,25 +1072,29 @@ void PatchKernel::resetCells()
 
 	This function doesn't change the build strategy, it only resets the
 	existing interface.
+
+	\param trackAdaption if set to true the changes to the patch will be
+	tracked
 */
-void PatchKernel::resetInterfaces()
+std::vector<adaption::Info> PatchKernel::resetInterfaces(bool trackAdaption)
 {
+	std::vector<adaption::Info> adaptionData;
+
 	// Early return if no interfaces have been built
 	if (getInterfacesBuildStrategy() == INTERFACES_NONE) {
-		return;
+		return adaptionData;
 	}
 
-	// Prune stale interfaces
-	pruneStaleInterfaces();
-
 	// Reset the interfaces
-	_resetInterfaces(false);
-
-	// All remaining interfaces will be deleted
-	setInterfaceAlterationFlags(FLAG_DELETED);
+	adaptionData = _resetInterfaces(trackAdaption, false);
 
 	// Mark cell interfaces as dirty
 	setCellAlterationFlags(FLAG_INTERFACES_DIRTY);
+
+	// Clear list of altered interfaces
+	m_alteredInterfaces.clear();
+
+	return adaptionData;
 }
 
 /*!
@@ -1069,20 +1102,49 @@ void PatchKernel::resetInterfaces()
 
 	This function doesn't change the alteration flags.
 
+	\param trackAdaption if set to true the changes to the patch will be
+	tracked
 	\param release if it's true the memory hold by the interfaces will be
 	released, otherwise the interfaces will be reset but their memory will
-	not be relased
+	not be released
 */
-void PatchKernel::_resetInterfaces(bool release)
+std::vector<adaption::Info> PatchKernel::_resetInterfaces(bool trackAdaption, bool release)
 {
+	// Reset cell interfaces
 	for (auto &cell : m_cells) {
 		cell.resetInterfaces(!release);
 	}
 
+	// Track deleted interfaces
+	adaption::InfoCollection adaptionData;
+	if (trackAdaption) {
+		// Identify interior interfaces
+		std::unordered_set<long> internalInterfaces;
+		for (CellConstIterator cellItr = internalCellBegin(); cellItr != internalCellEnd(); ++cellItr) {
+			const Cell &cell = *cellItr;
+			const int nCellInterfaces = cell.getInterfaceCount();
+			const long *cellInterfaces = cell.getInterfaces();
+			for (int k = 0; k < nCellInterfaces; ++k) {
+				long interfaceId = cellInterfaces[k];
+				internalInterfaces.insert(interfaceId);
+			}
+		}
+
+		// Track interfaces that will be deleted
+		//
+		// Only interfaces on interior cells will be tracked.
+		std::size_t adaptionInfoId = adaptionData.insert(adaption::TYPE_DELETION, adaption::ENTITY_INTERFACE);
+		adaption::Info &adaptionInfo = adaptionData[adaptionInfoId];
+		adaptionInfo.previous = std::vector<long>(internalInterfaces.begin(), internalInterfaces.end());
+	}
+
+	// Delete interfaces
 	m_interfaces.clear(release);
 	if (m_interfaceIdGenerator) {
 		m_interfaceIdGenerator->reset();
 	}
+
+	return adaptionData.dump();
 }
 
 /*!
@@ -5211,6 +5273,9 @@ std::vector<adaption::Info> PatchKernel::_spawn(bool trackSpawn)
 
 	Default implementation is a no-op function.
 
+	See PatchKernel::adaptionPrepare(bool trackPartitioning) for the
+	documentation about the tracking information returned by this function.
+
 	\param trackAdaption if set to true the function will return the changes
 	that will be performed in the alter step
 	\result If the adaption is tracked, returns a vector of adaption::Info that
@@ -5228,6 +5293,9 @@ std::vector<adaption::Info> PatchKernel::_adaptionPrepare(bool trackAdaption)
 	Alter the patch performing the adaption.
 
 	Default implementation is a no-op function.
+
+	See PatchKernel::adaptionAlter(bool trackPartitioning) for the
+	documentation about the tracking information returned by this function.
 
 	\param trackAdaption if set to true the function will return the changes
 	done to the patch during the adaption
@@ -5803,6 +5871,86 @@ bool PatchKernel::isSameFace(const Cell &cell_A, int face_A, const Cell &cell_B,
 }
 
 /*!
+ * Get the vertices that are on the specified cells.
+ *
+ * The result will contain a list of unique interfaces that are on the given
+ * cells. The list will be populated iterating the cells and addding the
+ * interfaces as they are encountered.
+ *
+ * \param cellIds are the ids of the cell whose vertices will be gathered
+ * \param interior controls if interior vertices will be gathered
+ * \param ghost controls if ghost vertices will be gathered
+ * \result The vertices that are on the specified cells.
+ */
+std::vector<long> PatchKernel::getOrderedCellsVertices(const std::vector<long> &cellIds,
+                                                       bool interior, bool ghost) const
+{
+    std::vector<long> orderedVertices;
+#if BITPIT_ENABLE_MPI==1
+    if (!interior && (!ghost || !isPartitioned())) {
+        return orderedVertices;
+    }
+#else
+    if (!interior) {
+        return orderedVertices;
+    }
+#endif
+
+    std::unordered_set<long> verticesSet;
+    for (long cellId : cellIds) {
+        const Cell &cell = getCell(cellId);
+        for (long vertexId : cell.getVertexIds()) {
+            if (verticesSet.count(vertexId) == 0) {
+                continue;
+            }
+
+#if BITPIT_ENABLE_MPI==1
+            if (!interior || !ghost) {
+                auto vertexGhostInfoItr = m_ghostVertexInfo.find(vertexId);
+                if (!interior && vertexGhostInfoItr == m_ghostVertexInfo.cend()) {
+                    continue;
+                } else if (!ghost && vertexGhostInfoItr != m_ghostVertexInfo.cend()) {
+                    continue;
+                }
+            }
+#endif
+
+            verticesSet.insert(vertexId);
+            orderedVertices.push_back(vertexId);
+        }
+    }
+
+    return orderedVertices;
+}
+
+/*!
+ * Get the interfaces that are on the specified cells.
+ *
+ * The result will contain a list of unique interfaces that are on the given
+ * cells. The list will be populated iterating the cells and addding the
+ * interfaces as they are encountered.
+ */
+std::vector<long> PatchKernel::getOrderedCellsInterfaces(const std::vector<long> &cellIds) const
+{
+    std::vector<long> orderedInterfaces;
+    std::unordered_set<long> interfacesSet;
+    for (long cellId : cellIds) {
+        const Cell &cell = getCell(cellId);
+        const long *interfaces = cell.getInterfaces();
+        int nCellInterfaces = cell.getInterfaceCount();
+        for (int i = 0; i < nCellInterfaces; ++i) {
+            long interfaceId = interfaces[i];
+            if (interfacesSet.count(interfaceId) == 0) {
+                interfacesSet.insert(interfaceId);
+                orderedInterfaces.push_back(interfaceId);
+            }
+        }
+    }
+
+    return orderedInterfaces;
+}
+
+/*!
 	Returns the current adjacencies build strategy.
 
 	\return The current adjacencies build strategy.
@@ -6370,9 +6518,12 @@ void PatchKernel::buildInterfaces()
 	adjacencies are not yet initialized an exception is thrown.
 
 	\param strategy is the build strategy that will be used
+	\param trackAdaption if set to true the changes to the patch will be tracked
 */
-void PatchKernel::initializeInterfaces(InterfacesBuildStrategy strategy)
+std::vector<adaption::Info> PatchKernel::initializeInterfaces(InterfacesBuildStrategy strategy, bool trackAdaption)
 {
+	std::vector<adaption::Info> adaptionData;
+
 	// Interfaces need adjacencies
 	if (getAdjacenciesBuildStrategy() == ADJACENCIES_NONE) {
 		throw std::runtime_error ("Adjacencies are mandatory for building the interfaces.");
@@ -6384,10 +6535,10 @@ void PatchKernel::initializeInterfaces(InterfacesBuildStrategy strategy)
 	// Early return if we don't need interfaces
 	if (strategy == INTERFACES_NONE) {
 		if (currentStrategy != INTERFACES_NONE) {
-			destroyInterfaces();
+			mergeAdaptionInfo(destroyInterfaces(trackAdaption), adaptionData);
 		}
 
-		return;
+		return adaptionData;
 	}
 
 	// Update the build strategy
@@ -6396,10 +6547,12 @@ void PatchKernel::initializeInterfaces(InterfacesBuildStrategy strategy)
 	}
 
 	// Reset interfaces
-	resetInterfaces();
+	mergeAdaptionInfo(resetInterfaces(trackAdaption), adaptionData);
 
 	// Update the interfaces
-	updateInterfaces();
+	mergeAdaptionInfo(updateInterfaces(false, trackAdaption), adaptionData);
+
+	return adaptionData;
 }
 
 /*!
@@ -6407,19 +6560,22 @@ void PatchKernel::initializeInterfaces(InterfacesBuildStrategy strategy)
 
 	\param forcedUpdated if set to true, bounding box information will be
 	updated also if they are not marked as dirty
+	\param trackAdaption if set to true the changes to the patch will be tracked
 */
-void PatchKernel::updateInterfaces(bool forcedUpdated)
+std::vector<adaption::Info> PatchKernel::updateInterfaces(bool forcedUpdated, bool trackAdaption)
 {
+	std::vector<adaption::Info> adaptionData;
+
 	// Early return if interfaces are not built
 	InterfacesBuildStrategy currentStrategy = getInterfacesBuildStrategy();
 	if (currentStrategy == INTERFACES_NONE) {
-		return;
+		return adaptionData;
 	}
 
 	// Check if the interfaces are dirty
 	bool interfacesDirty = areInterfacesDirty();
 	if (!interfacesDirty && !forcedUpdated) {
-		return;
+		return adaptionData;
 	}
 
 	// Interfaces need up-to-date adjacencies
@@ -6433,10 +6589,10 @@ void PatchKernel::updateInterfaces(bool forcedUpdated)
 		setExpert(true);
 
 		// Prune stale interfaces
-		pruneStaleInterfaces();
+		mergeAdaptionInfo(pruneStaleInterfaces(trackAdaption), adaptionData);
 
 		// Update interfaces
-		_updateInterfaces();
+		mergeAdaptionInfo(_updateInterfaces(trackAdaption), adaptionData);
 
 		// Interfaces are now updated
 		unsetCellAlterationFlags(FLAG_INTERFACES_DIRTY);
@@ -6445,8 +6601,10 @@ void PatchKernel::updateInterfaces(bool forcedUpdated)
 		// Set original advanced editing status
 		setExpert(originalExpertStatus);
 	} else {
-		initializeInterfaces(currentStrategy);
+		mergeAdaptionInfo(initializeInterfaces(currentStrategy, trackAdaption), adaptionData);
 	}
+
+	return adaptionData;
 }
 
 /*!
@@ -6454,18 +6612,23 @@ void PatchKernel::updateInterfaces(bool forcedUpdated)
 
 	After deleting the interfaces, this function changes the build strategy
 	to "None".
+
+	\param trackAdaption if set to true the changes to the patch will be
+	tracked
 */
-void PatchKernel::destroyInterfaces()
+std::vector<adaption::Info> PatchKernel::destroyInterfaces(bool trackAdaption)
 {
+	std::vector<adaption::Info> adaptionData;
+
 	// Early return if no interfaces have been built
 	if (getInterfacesBuildStrategy() == INTERFACES_NONE) {
-		return;
+		return adaptionData;
 	}
 
-	// Destroy the interfaces
-	_resetInterfaces(true);
+	// Reset the interfaces
+	adaptionData = _resetInterfaces(trackAdaption, true);
 
-	// Clear list of cells with dirty adjacencies
+	// Clear list of cells with dirty interfaces
 	unsetCellAlterationFlags(FLAG_INTERFACES_DIRTY);
 
 	// Clear list of altered interfaces
@@ -6473,6 +6636,8 @@ void PatchKernel::destroyInterfaces()
 
 	// Set interface build strategy
 	setInterfacesBuildStrategy(INTERFACES_NONE);
+
+	return adaptionData;
 }
 
 /*!
@@ -6480,12 +6645,17 @@ void PatchKernel::destroyInterfaces()
 
 	The list of cells to process and the list of stale interfaces are filled
 	during cell deletion.
+
+	\param trackAdaption if set to true the changes to the patch will be tracked
+	\result If the adaption is tracked, returns a vector of adaption::Info
+	with all the changes done to the patch during the adaption, otherwise an
+	empty vector will be returned.
 */
-void PatchKernel::pruneStaleInterfaces()
+std::vector<adaption::Info> PatchKernel::pruneStaleInterfaces(bool trackAdaption)
 {
 	// Early return if no interfaces have been built
 	if (getInterfacesBuildStrategy() == INTERFACES_NONE) {
-		return;
+		return std::vector<adaption::Info>();
 	}
 
 	// Remove dangling interfaces from cells
@@ -6530,6 +6700,16 @@ void PatchKernel::pruneStaleInterfaces()
 		danglingInterfaces.push_back(interfaceId);
 	}
 	deleteInterfaces(danglingInterfaces);
+
+	// Track changes
+	adaption::InfoCollection adaptionData;
+	if (trackAdaption) {
+		std::size_t adaptionInfoId = adaptionData.insert(adaption::TYPE_DELETION, adaption::ENTITY_INTERFACE);
+		adaption::Info &adaptionInfo = adaptionData[adaptionInfoId];
+		adaptionInfo.previous = std::move(danglingInterfaces);
+	}
+
+	return adaptionData.dump();
 }
 
 /*!
@@ -6537,10 +6717,11 @@ void PatchKernel::pruneStaleInterfaces()
 
 	The function will process the cells whose interfaces have been marked as
 	dirty.
+
+	\param trackAdaption if set to true the changes to the patch will be tracked
 */
-void PatchKernel::_updateInterfaces()
+std::vector<adaption::Info> PatchKernel::_updateInterfaces(bool trackAdaption)
 {
-	//
 	// Update interfaces
 	//
 	// Adjacencies and interfaces of a face are paired: the i-th face adjacency
@@ -6552,6 +6733,7 @@ void PatchKernel::_updateInterfaces()
 	//
 	// On border faces of internal cells we need to build an interface, also
 	// if there are no adjacencies.
+	std::vector<long> createdInterfaces;
 	for (const auto &entry : m_alteredCells) {
 		AlterationFlags cellAlterationFlags = entry.second;
 		if (!testAlterationFlags(cellAlterationFlags, FLAG_INTERFACES_DIRTY)) {
@@ -6581,14 +6763,35 @@ void PatchKernel::_updateInterfaces()
 
 					int neighFace = findAdjoinNeighFace(cell, face, *neigh);
 
-					buildCellInterface(&cell, face, neigh, neighFace);
+					// Build the interface
+					InterfaceIterator interfaceIterator = buildCellInterface(&cell, face, neigh, neighFace);
+
+					// Track changes
+					if (trackAdaption) {
+						createdInterfaces.push_back(interfaceIterator.getId());
+					}
 				}
 			} else if (nFaceInterfaces == 0) {
 				// Internal borderes need an interface
-				buildCellInterface(&cell, face, nullptr, -1);
+				InterfaceIterator interfaceIterator = buildCellInterface(&cell, face, nullptr, -1);
+
+				// Track changes
+				if (trackAdaption) {
+					createdInterfaces.push_back(interfaceIterator.getId());
+				}
 			}
 		}
 	}
+
+	// Track changes
+	adaption::InfoCollection adaptionData;
+	if (trackAdaption) {
+		std::size_t adaptionInfoId = adaptionData.insert(adaption::TYPE_CREATION, adaption::ENTITY_INTERFACE);
+		adaption::Info &adaptionInfo = adaptionData[adaptionInfoId];
+		adaptionInfo.current = std::move(createdInterfaces);
+	}
+
+	return adaptionData.dump();
 }
 
 /*!
@@ -8436,12 +8639,15 @@ void PatchKernel::mergeAdaptionInfo(std::vector<adaption::Info> &&source, std::v
 {
 	if (source.empty()) {
 		return;
-	} else if (destination.empty()) {
+	}
+
+	if (destination.empty()) {
 		destination.swap(source);
 		return;
 	}
 
-	throw std::runtime_error ("Unable to merge the adaption info.");
+	destination.insert(destination.end(), std::make_move_iterator(source.begin()), std::make_move_iterator(source.end()));
+	source.clear();
 }
 
 }
