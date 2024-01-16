@@ -224,6 +224,33 @@ SparseMatrix::SparseMatrix(int blockSize, long nRows, long nCols, long nNZ)
 }
 #endif
 
+#if BITPIT_ENABLE_MPI==1
+/**
+* Copy constructor
+*/
+SparseMatrix::SparseMatrix(const SparseMatrix &other)
+    : m_blockSize(other.m_blockSize),
+      m_nRows(other.m_nRows),
+      m_nCols(other.m_nCols),
+      m_nNZ(other.m_nNZ),
+      m_maxRowNZ(other.m_maxRowNZ),
+      m_lastRow(other.m_lastRow),
+      m_assembled(other.m_assembled),
+      m_partitioned(other.m_partitioned),
+      m_global_nRows(other.m_global_nRows),
+      m_global_nCols(other.m_global_nCols),
+      m_global_nNZ(other.m_global_nNZ),
+      m_global_maxRowNZ(other.m_global_maxRowNZ),
+      m_global_rowOffset(other.m_global_rowOffset),
+      m_global_colOffset(other.m_global_colOffset),
+      m_pattern(other.m_pattern),
+      m_values (other.m_values)
+{
+    // Set the communicator
+    setCommunicator(other.m_communicator);
+}
+#endif
+
 /*!
  * Destructor
  */

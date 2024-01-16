@@ -47,6 +47,11 @@ public:
     SparseMatrix(MPI_Comm communicator, bool partitioned, int blockSize, long nRows, long nCols, long nNZ);
 #endif
 
+#if BITPIT_ENABLE_MPI==1
+    SparseMatrix(const SparseMatrix &other);
+    SparseMatrix(SparseMatrix &&other) = default;
+#endif
+
     ~SparseMatrix();
 
     void initialize(long nRows, long nCols, long nNZ);
