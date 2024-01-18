@@ -24,9 +24,6 @@
 
 #include "configuration_tree.hpp"
 
-#include <boost/property_tree/json_parser.hpp>
-#include <boost/property_tree/xml_parser.hpp>
-
 #include <unordered_set>
 
 namespace bitpit {
@@ -34,127 +31,6 @@ namespace bitpit {
 namespace config {
 
 namespace tree {
-
-/*!
-    Read the specified configuration file.
-
-    \param filename is the filename of the configuration file
-    \param format is the format of the file
-    \param rootname name of the root to assign to the configuration file
-    \param checkVersion boolean to enable the control of the version
-    \param version number of version to assign to the configuration file
-    \param rootConfig pointer to the configuration tree to be written on file
-    \param[in,out] rootConfig pointer to configuration tree to store data parsed from document.
-*/
-void readConfiguration(const std::string &filename, FileFormat format,
-                       const std::string &rootname, bool checkVersion,
-                       int version, Config *rootConfig)
-{
-    if (!rootConfig) {
-        throw std::runtime_error("config::tree::readConfiguration Null Config tree structure passed");
-    }
-
-    // Read property tree
-    boost::property_tree::ptree propertyTree;
-    if (format == FILE_FORMAT_XML) {
-        boost::property_tree::read_xml(filename, propertyTree);
-    } else if (format == FILE_FORMAT_JSON) {
-        boost::property_tree::read_json(filename, propertyTree);
-    }
-
-    // Check if a root node exists
-    bool hasRootNode = hasRootSection(format);
-
-    // Validate root node
-    if (hasRootNode) {
-        // Get the root node
-        auto rootNode = propertyTree.begin();
-
-        // Check if the root name matches the requested one
-        if (rootNode->first != rootname) {
-            throw std::runtime_error("The name of the root element is not \"" + rootname + "\"");
-        }
-
-        // Check if the version matches the requested one
-        if (checkVersion) {
-            try {
-                int fileVersion = rootNode->second.get<int>("<xmlattr>.version");
-                if (fileVersion != version) {
-                    throw std::runtime_error("The version of the configuration file is not not \"" + std::to_string(version) + "\"");
-                }
-            } catch (boost::property_tree::ptree_bad_path &error) {
-                throw std::runtime_error("Unable to identify the version of the configuration");
-            }
-        }
-    }
-
-    // Read configuration
-    const boost::property_tree::ptree *configTree;
-    if (hasRootNode) {
-        configTree = &(propertyTree.begin()->second);
-    } else {
-        configTree = &propertyTree;
-    }
-
-    importTree(*configTree, rootConfig);
-}
-
-/*!
-    Write the configuration to the specified file.
-
-    \param filename is the filename where the configuration will be written to
-    \param format is the format of the file
-    \param rootname name of the root to assign to the configuration file
-    \param version number of version to assign to the configuration file
-    \param rootConfig pointer to the configuration tree to be written on file
-*/
-void writeConfiguration(const std::string &filename, FileFormat format,
-                        const std::string &rootname, int version,
-                        const Config *rootConfig)
-{
-    if (!rootConfig) {
-        throw std::runtime_error("config::tree::writeConfiguration Null Config tree structure passed");
-    }
-
-
-    // Check if a root node exists
-    bool hasRootNode = hasRootSection(format);
-
-    // Create an empty property tree
-    boost::property_tree::ptree propertyTree;
-
-    // Create the root node
-    if (hasRootNode) {
-        // Create the root
-        propertyTree.put<std::string>(rootname, "");
-
-        // Get the root node
-        auto rootNode = propertyTree.begin();
-
-        // Add an attribute with version
-        rootNode->second.put<int>("<xmlattr>.version", version);
-    }
-
-    // Export the configuration into the property tree
-    boost::property_tree::ptree *configTree;
-    if (hasRootNode) {
-        configTree = &(propertyTree.begin()->second);
-    } else {
-        configTree = &propertyTree;
-    }
-
-    bool areArraysAllowed = hasArraySupport(format);
-
-    exportTree(*rootConfig, areArraysAllowed, configTree);
-
-    // Write the file
-    if (format == FILE_FORMAT_XML) {
-        boost::property_tree::xml_writer_settings<std::string> settings(' ', 4);
-        write_xml(filename, propertyTree, std::locale(), settings);
-    } else if (format == FILE_FORMAT_JSON) {
-        write_json(filename, propertyTree, std::locale(), true);
-    }
-}
 
 /*!
     Import the specified tree.
@@ -268,6 +144,23 @@ void exportTree(const Config &config, bool areArraysAllowed, boost::property_tre
         if (areArraysAllowed) {
             processedKeys.insert(key);
         }
+    }
+}
+
+/*!
+    Write the specified tree to the given file.
+
+    \param filename is the name of the configuration file
+    \param format is the format that will be used for writing the configuration
+    \param propertyTree is the property tree that will be written
+*/
+void writeTree(const std::string &filename, SourceFormat format, boost::property_tree::ptree &propertyTree)
+{
+    if (format == SOURCE_FORMAT_XML) {
+        boost::property_tree::xml_writer_settings<std::string> settings(' ', 4);
+        write_xml(filename, propertyTree, std::locale(), settings);
+    } else if (format == SOURCE_FORMAT_JSON) {
+        write_json(filename, propertyTree, std::locale(), true);
     }
 }
 

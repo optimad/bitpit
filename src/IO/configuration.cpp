@@ -28,6 +28,8 @@
 
 #include <stringUtils.hpp>
 
+#include <sstream>
+
 namespace bitpit {
 
 /*!
@@ -171,21 +173,50 @@ void ConfigParser::read(const std::string &filename, bool append)
         extension = utils::string::trim(extension);
     }
 
-    config::FileFormat fileFormat;
+    config::SourceFormat fileFormat;
     if (extension == "xml" || extension == "XML") {
-        fileFormat = config::FILE_FORMAT_XML;
+        fileFormat = config::SOURCE_FORMAT_XML;
     } else if (extension == "json" || extension == "JSON") {
-        fileFormat = config::FILE_FORMAT_JSON;
+        fileFormat = config::SOURCE_FORMAT_JSON;
     } else {
         throw std::runtime_error("ConfigParser::read - Unsupported file format");
     }
 
     bool checkFileVersion = false;
-    if (fileFormat == config::FILE_FORMAT_XML) {
+    if (fileFormat == config::SOURCE_FORMAT_XML) {
         checkFileVersion = m_checkVersion;
     }
 
     config::tree::readConfiguration(filename, fileFormat, m_rootName, checkFileVersion, m_version, this);
+}
+
+/*!
+    Read the specified content.
+
+    Configuration can be read from a content either in XML or JSON format.
+
+    \param format is the format of the content
+    \param content is the content that will be read
+    \param append controls if the configuration file will be appended to the
+    current configuration or if the current configuration will be overwritten
+    with the contents of the configuration file.
+*/
+void ConfigParser::read(config::SourceFormat format, const std::string &content, bool append)
+{
+    // Processing not-append requests
+    if (!append) {
+        clear();
+    }
+
+    // Read the configuration
+    bool checkFileVersion = false;
+    if (format == config::SOURCE_FORMAT_XML) {
+        checkFileVersion = m_checkVersion;
+    }
+
+    std::stringstream contentStream(content, std::ios_base::in | std::ios_base::out | std::ios_base::binary);
+
+    config::tree::readConfiguration(contentStream, format, m_rootName, checkFileVersion, m_version, this);
 }
 
 /*!
@@ -205,16 +236,32 @@ void ConfigParser::write(const std::string &filename) const
         extension = utils::string::trim(extension);
     }
 
-    config::FileFormat fileFormat;
+    config::SourceFormat fileFormat;
     if (extension == "xml" || extension == "XML") {
-        fileFormat = config::FILE_FORMAT_XML;
+        fileFormat = config::SOURCE_FORMAT_XML;
     } else if (extension == "json" || extension == "JSON") {
-        fileFormat = config::FILE_FORMAT_JSON;
+        fileFormat = config::SOURCE_FORMAT_JSON;
     } else {
         throw std::runtime_error("ConfigParser::read - Unsupported file format");
     }
 
     config::tree::writeConfiguration(filename, fileFormat, m_rootName, m_version, this);
+}
+
+/*!
+    Write the configuration to the specified string.
+
+    Configuration can be written either in XML or JSON format.
+
+    \param format is the format that will be used to write the configuration
+    \param content on output will contain the configuration in the specified format
+*/
+void ConfigParser::write(config::SourceFormat format, std::string *content) const
+{
+    std::stringstream contentStream;
+    config::tree::writeConfiguration(contentStream, format, m_rootName, m_version, this);
+
+    *content = contentStream.str();
 }
 
 /*!
@@ -357,6 +404,23 @@ namespace config {
     }
 
     /*!
+        Read the specified configuration file.
+
+        Configuration file can be either XML or JSON files (if JSON support was
+        found at compile time).
+
+        \param format is the format of the content
+        \param content is the content that will be read
+        \param append controls if the configuration file will be appended to the
+        current configuration or if the current configuration will be overwritten
+        with the contents of the configuration file.
+    */
+    void read(config::SourceFormat format, const std::string &content, bool append)
+    {
+        root.read(format, content, append);
+    }
+
+    /*!
         Write the configuration to the specified file.
 
         Configuration can be written either to XML or JSON files.
@@ -366,6 +430,19 @@ namespace config {
     void write(const std::string &filename)
     {
         root.write(filename);
+    }
+
+    /*!
+        Write the configuration to the specified string.
+
+        Configuration can be written either in XML or JSON format.
+
+        \param format is the format that will be used to write the configuration
+        \param content on output will contain the configuration in the specified format
+    */
+    void write(config::SourceFormat format, std::string *content)
+    {
+        root.write(format, content);
     }
 
 }

@@ -27,7 +27,9 @@
 #include "configuration_config.hpp"
 #include "configuration_common.hpp"
 
+#include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
 
 namespace bitpit {
 
@@ -35,13 +37,20 @@ namespace config {
 
 namespace tree {
 
-void readConfiguration(const std::string &filename, FileFormat format, const std::string &rootname,
+template<typename Source>
+void readConfiguration(Source &source, SourceFormat format, const std::string &rootName,
                        bool checkVersion, int version, Config *rootConfig);
-void writeConfiguration(const std::string &filename, FileFormat format, const std::string &rootname,
+template<typename Destination>
+void writeConfiguration(Destination &destination, SourceFormat format, const std::string &rootName,
                         int version, const Config *rootConfig);
 
 void importTree(boost::property_tree::ptree const &root, Config *config);
 void exportTree(const Config &config, bool areArraysAllowed, boost::property_tree::ptree *root);
+
+template<typename Destination>
+void writeTree(Destination &destination, SourceFormat format, boost::property_tree::ptree &propertyTree);
+
+void writeTree(const std::string &filename, SourceFormat format, boost::property_tree::ptree &propertyTree);
 
 std::string readNodeValue(const boost::property_tree::ptree &node);
 
@@ -50,5 +59,8 @@ std::string readNodeValue(const boost::property_tree::ptree &node);
 }
 
 }
+
+// Include template implementation
+#include "configuration_tree.tpp"
 
 #endif
