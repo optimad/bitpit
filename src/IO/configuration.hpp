@@ -38,14 +38,14 @@ class ConfigParser : public Config
 {
 
 public:
-    ConfigParser(const std::string &root);
-    ConfigParser(const std::string &root, bool multiSections);
-    ConfigParser(const std::string &root, int version);
-    ConfigParser(const std::string &root, int version, bool multiSections);
+    ConfigParser(const std::string &rootName);
+    ConfigParser(const std::string &rootName, bool multiSections);
+    ConfigParser(const std::string &rootName, int version);
+    ConfigParser(const std::string &rootName, int version, bool multiSections);
 
-    void reset(const std::string &root);
-    void reset(const std::string &root, int version);
-    void reset(const std::string &root, int version, bool multiSections);
+    void reset(const std::string &rootName);
+    void reset(const std::string &rootName, int version);
+    void reset(const std::string &rootName, int version, bool multiSections);
 
     void read(const std::string &filename, bool append = true);
     void write(const std::string &filename) const;
@@ -53,7 +53,7 @@ public:
 private:
     static const int VERSION_UNDEFINED;
 
-    std::string m_root;
+    std::string m_rootName;
 
     bool m_checkVersion;
     int m_version;
@@ -74,9 +74,9 @@ private:
     static std::unique_ptr<GlobalConfigParser> m_parser;
 
     GlobalConfigParser();
-    GlobalConfigParser(const std::string &name, int version);
-    GlobalConfigParser(const std::string &name, bool multiSections);
-    GlobalConfigParser(const std::string &name, int version, bool multiSections);
+    GlobalConfigParser(const std::string &rootName, int version);
+    GlobalConfigParser(const std::string &rootName, bool multiSections);
+    GlobalConfigParser(const std::string &rootName, int version, bool multiSections);
 
 
     GlobalConfigParser(GlobalConfigParser const&) = delete;
@@ -95,9 +95,9 @@ namespace config {
     extern BITPIT_API GlobalConfigParser & root;
 
     void reset();
-    void reset(const std::string &name);
-    void reset(const std::string &name, int version);
-    void reset(const std::string &name, int version, bool multiSections);
+    void reset(const std::string &rootName);
+    void reset(const std::string &rootName, int version);
+    void reset(const std::string &rootName, int version, bool multiSections);
 
     void read(const std::string &filename, bool append = true);
     void write(const std::string &filename);
