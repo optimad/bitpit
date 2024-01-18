@@ -47,62 +47,62 @@ const int ConfigParser::VERSION_UNDEFINED = -1;
 /*!
     Construct a new configuration parser.
 
-    \param root is the name of the root element
+    \param rootName is the name of the root element
 */
-ConfigParser::ConfigParser(const std::string &root)
+ConfigParser::ConfigParser(const std::string &rootName)
     : Config(false)
 {
-    reset(root);
+    reset(rootName);
 }
 
 /*!
     Construct a new configuration parser.
 
-    \param root is the name of the root element
+    \param rootName is the name of the root element
     \param multiSections if set to true the configuration parser will allow
     multiple sections with the same name
 */
-ConfigParser::ConfigParser(const std::string &root, bool multiSections)
+ConfigParser::ConfigParser(const std::string &rootName, bool multiSections)
     : Config(multiSections)
 {
-    reset(root);
+    reset(rootName);
 }
 
 /*!
     Construct a new configuration parser.
 
-    \param root is the name of the root element
+    \param rootName is the name of the root element
     \param version is the required version
 */
-ConfigParser::ConfigParser(const std::string &root, int version)
+ConfigParser::ConfigParser(const std::string &rootName, int version)
     : Config(false)
 {
-    reset(root, version);
+    reset(rootName, version);
 }
 
 /*!
     Construct a new configuration parser.
 
-    \param root is the name of the root element
+    \param rootName is the name of the root element
     \param version is the required version
     \param multiSections if set to true the configuration parser will allow
     multiple sections with the same name
 */
-ConfigParser::ConfigParser(const std::string &root, int version, bool multiSections)
+ConfigParser::ConfigParser(const std::string &rootName, int version, bool multiSections)
     : Config(multiSections)
 {
-    reset(root, version);
+    reset(rootName, version);
 }
 
 /*!
     Resets the configuration parser. MultiSection property set in construction
     is not affected.
 
-    \param root is the name of the root element
+    \param rootName is the name of the root element
 */
-void ConfigParser::reset(const std::string &root)
+void ConfigParser::reset(const std::string &rootName)
 {
-    m_root         = root;
+    m_rootName     = rootName;
     m_checkVersion = false;
     m_version      = VERSION_UNDEFINED;
 
@@ -113,12 +113,12 @@ void ConfigParser::reset(const std::string &root)
     Resets the configuration parser. MultiSections property set in construction
     is not affected.
 
-    \param root is the name of the root element
+    \param rootName is the name of the root element
     \param version is the version
 */
-void ConfigParser::reset(const std::string &root, int version)
+void ConfigParser::reset(const std::string &rootName, int version)
 {
-    m_root         = root;
+    m_rootName     = rootName;
     m_checkVersion = true;
     m_version      = version;
 
@@ -129,14 +129,14 @@ void ConfigParser::reset(const std::string &root, int version)
     Resets the configuration parser. MultiSections property set in construction
     is forced to the new value given by the parameter multiSection
 
-    \param root is the name of the root element
+    \param rootName is the name of the root element
     \param version is the version
     \param multiSections if set to true the configuration parser will allow
     multiple sections with the same name
 */
-void ConfigParser::reset(const std::string &root, int version, bool multiSections)
+void ConfigParser::reset(const std::string &rootName, int version, bool multiSections)
 {
-    m_root         = root;
+    m_rootName         = rootName;
     m_checkVersion = true;
     m_version      = version;
 
@@ -184,7 +184,7 @@ void ConfigParser::read(const std::string &filename, bool append)
         checkFileVersion = m_checkVersion;
     }
 
-    config::tree::readConfiguration(filename, fileFormat, m_root, checkFileVersion, m_version, this);
+    config::tree::readConfiguration(filename, fileFormat, m_rootName, checkFileVersion, m_version, this);
 }
 
 /*!
@@ -213,7 +213,7 @@ void ConfigParser::write(const std::string &filename) const
         throw std::runtime_error("ConfigParser::read - Unsupported file format");
     }
 
-    config::tree::writeConfiguration(filename, fileFormat, m_root, m_version, this);
+    config::tree::writeConfiguration(filename, fileFormat, m_rootName, m_version, this);
 }
 
 /*!
@@ -250,24 +250,24 @@ GlobalConfigParser::GlobalConfigParser()
 /*!
     Constructor a new parser.
 */
-GlobalConfigParser::GlobalConfigParser(const std::string &name, int version)
-    : ConfigParser(name, version)
+GlobalConfigParser::GlobalConfigParser(const std::string &rootName, int version)
+    : ConfigParser(rootName, version)
 {
 }
 
 /*!
     Constructor a new parser.
 */
-GlobalConfigParser::GlobalConfigParser(const std::string &name, bool multiSections)
-    : ConfigParser(name, DEFAULT_VERSION, multiSections)
+GlobalConfigParser::GlobalConfigParser(const std::string &rootName, bool multiSections)
+    : ConfigParser(rootName, DEFAULT_VERSION, multiSections)
 {
 }
 
 /*!
     Constructor a new parser.
 */
-GlobalConfigParser::GlobalConfigParser(const std::string &name, int version, bool multiSections)
-    : ConfigParser(name, version, multiSections)
+GlobalConfigParser::GlobalConfigParser(const std::string &rootName, int version, bool multiSections)
+    : ConfigParser(rootName, version, multiSections)
 {
 }
 
@@ -296,11 +296,11 @@ namespace config {
         Resets to custom root element name, all other options are forcefully
         reset to default. MultiSection property remains unaffected by the reset
 
-        \param name is the name of the root element
+        \param rootName is the name of the root element
     */
-    void reset(const std::string &name)
+    void reset(const std::string &rootName)
     {
-        root.reset(name);
+        root.reset(rootName);
     }
 
     /*!
@@ -308,24 +308,24 @@ namespace config {
         forcefully reset to default. MultiSection property remains unaffected by
         the reset.
 
-        \param name is the name of the root element
+        \param rootName is the name of the root element
         \param version is the version
     */
-    void reset(const std::string &name, int version)
+    void reset(const std::string &rootName, int version)
     {
-        root.reset(name, version);
+        root.reset(rootName, version);
     }
 
     /*!
         Resets to custom root element name, version and multiSections property
 
-        \param name is the name of the root element
+        \param rootName is the name of the root element
         \param version is the version
         \param multiSections boolean to control multiSections property of Config tree
     */
-    void reset(const std::string &name, int version, bool multiSections)
+    void reset(const std::string &rootName, int version, bool multiSections)
     {
-        root.reset(name, version, multiSections);
+        root.reset(rootName, version, multiSections);
     }
 
     /*!
