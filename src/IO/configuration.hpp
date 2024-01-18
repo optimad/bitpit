@@ -28,6 +28,7 @@
 #include <string>
 
 #include "bitpit_api.hpp"
+#include "configuration_common.hpp"
 #include "configuration_config.hpp"
 #include <string>
 
@@ -36,7 +37,6 @@ namespace bitpit {
 // Configuration file parser
 class ConfigParser : public Config
 {
-
 public:
     ConfigParser(const std::string &rootName);
     ConfigParser(const std::string &rootName, bool multiSections);
@@ -48,7 +48,9 @@ public:
     void reset(const std::string &rootName, int version, bool multiSections);
 
     void read(const std::string &filename, bool append = true);
+    void read(config::SourceFormat format, const std::string &content, bool append = true);
     void write(const std::string &filename) const;
+    void write(config::SourceFormat format, std::string *content) const;
 
 private:
     static const int VERSION_UNDEFINED;
@@ -57,15 +59,13 @@ private:
 
     bool m_checkVersion;
     int m_version;
-
 };
 
 // Global configuration file parser
 class GlobalConfigParser : public ConfigParser
 {
-
 public:
-    static GlobalConfigParser & parser();
+    static GlobalConfigParser &parser();
 
 private:
     static const std::string DEFAULT_ROOT_NAME;
@@ -78,12 +78,9 @@ private:
     GlobalConfigParser(const std::string &rootName, bool multiSections);
     GlobalConfigParser(const std::string &rootName, int version, bool multiSections);
 
-
-    GlobalConfigParser(GlobalConfigParser const&) = delete;
-    GlobalConfigParser& operator=(GlobalConfigParser const&) = delete;
-
+    GlobalConfigParser(GlobalConfigParser const &) = delete;
+    GlobalConfigParser &operator=(GlobalConfigParser const &) = delete;
 };
-
 
 /*!
     \ingroup Configuration
@@ -92,18 +89,20 @@ private:
 */
 namespace config {
 
-    extern BITPIT_API GlobalConfigParser & root;
+extern BITPIT_API GlobalConfigParser &root;
 
-    void reset();
-    void reset(const std::string &rootName);
-    void reset(const std::string &rootName, int version);
-    void reset(const std::string &rootName, int version, bool multiSections);
+void reset();
+void reset(const std::string &rootName);
+void reset(const std::string &rootName, int version);
+void reset(const std::string &rootName, int version, bool multiSections);
 
-    void read(const std::string &filename, bool append = true);
-    void write(const std::string &filename);
+void read(const std::string &filename, bool append = true);
+void read(config::SourceFormat format, const std::string &content, bool append = true);
+void write(const std::string &filename);
+void write(config::SourceFormat format, std::string *content);
 
-};
+}; // namespace config
 
-}
+} // namespace bitpit
 
 #endif
