@@ -79,7 +79,6 @@ private:
     GlobalConfigParser(const std::string &rootName, bool multiSections);
     GlobalConfigParser(const std::string &rootName, int version, bool multiSections);
 
-
     GlobalConfigParser(GlobalConfigParser const&) = delete;
     GlobalConfigParser& operator=(GlobalConfigParser const&) = delete;
 
