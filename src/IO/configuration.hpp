@@ -27,6 +27,7 @@
 #include <memory>
 #include <string>
 
+#include "configuration_common.hpp"
 #include "configuration_config.hpp"
 
 namespace bitpit {
@@ -46,7 +47,9 @@ public:
     void reset(const std::string &rootName, int version, bool multiSections);
 
     void read(const std::string &filename, bool append = true);
+    void read(config::SourceFormat format, const std::string &content, bool append = true);
     void write(const std::string &filename) const;
+    void write(config::SourceFormat format, std::string *content) const;
 
 private:
     static const int VERSION_UNDEFINED;
@@ -98,7 +101,9 @@ namespace config {
     void reset(const std::string &rootName, int version, bool multiSections);
 
     void read(const std::string &filename, bool append = true);
+    void read(config::SourceFormat format, const std::string &content, bool append = true);
     void write(const std::string &filename);
+    void write(config::SourceFormat format, std::string *content);
 
 };
 

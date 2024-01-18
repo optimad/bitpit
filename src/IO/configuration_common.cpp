@@ -29,14 +29,14 @@ namespace bitpit {
 namespace config {
 
 /*!
-    Check if the specified file format has a root section.
+    Check if the specified source format has a root section.
 
-    \param format is the format of the file
-    \result Return true if the specified file format has a root section, false otherwise.
+    \param format is the format of the source
+    \result Return true if the specified source format has a root section, false otherwise.
 */
-bool hasRootSection(FileFormat format)
+bool hasRootSection(SourceFormat format)
 {
-    if (format == FILE_FORMAT_XML) {
+    if (format == SOURCE_FORMAT_XML) {
         return true;
     }
 
@@ -44,14 +44,14 @@ bool hasRootSection(FileFormat format)
 }
 
 /*!
-    Check if the specified file format supports arrays.
+    Check if the specified source format supports arrays.
 
-    \param format is the format of the file
-    \result Return true if the specified file format support arrays, false otherwise.
+    \param format is the format of the source
+    \result Return true if the specified source format support arrays, false otherwise.
 */
-bool hasArraySupport(FileFormat format)
+bool hasArraySupport(SourceFormat format)
 {
-    if (format == FILE_FORMAT_JSON) {
+    if (format == SOURCE_FORMAT_JSON) {
         return true;
     }
 

@@ -28,13 +28,13 @@ namespace bitpit {
 
 namespace config {
 
-enum FileFormat {
-    FILE_FORMAT_JSON,
-    FILE_FORMAT_XML,
+enum SourceFormat {
+    SOURCE_FORMAT_JSON,
+    SOURCE_FORMAT_XML,
 };
 
-bool hasRootSection(FileFormat format);
-bool hasArraySupport(FileFormat format);
+bool hasRootSection(SourceFormat format);
+bool hasArraySupport(SourceFormat format);
 
 }
 
