@@ -39,7 +39,7 @@ namespace bitpit {
 */
 
 /*
-    Undefined versione
+    Undefined version.
 */
 const int ConfigParser::VERSION_UNDEFINED = -1;
 
@@ -95,8 +95,9 @@ ConfigParser::ConfigParser(const std::string &rootName, int version, bool multiS
 }
 
 /*!
-    Resets the configuration parser. MultiSection property set in construction
-    is not affected.
+    Resets the configuration parser.
+
+    MultiSection property set in construction is not affected.
 
     \param rootName is the name of the root element
 */
@@ -230,7 +231,7 @@ void ConfigParser::write(const std::string &filename) const
 std::unique_ptr<GlobalConfigParser> GlobalConfigParser::m_parser = nullptr;
 
 /*
-    Initialize the defualt name of the root element.
+    Initialize the default name of the root element.
 */
 const std::string GlobalConfigParser::DEFAULT_ROOT_NAME = "bitpit";
 
@@ -249,6 +250,9 @@ GlobalConfigParser::GlobalConfigParser()
 
 /*!
     Constructor a new parser.
+
+    \param rootName is the name of the root element
+    \param version is the required version
 */
 GlobalConfigParser::GlobalConfigParser(const std::string &rootName, int version)
     : ConfigParser(rootName, version)
@@ -257,6 +261,10 @@ GlobalConfigParser::GlobalConfigParser(const std::string &rootName, int version)
 
 /*!
     Constructor a new parser.
+
+    \param rootName is the name of the root element
+    \param multiSections if set to true the configuration parser will allow
+    multiple sections with the same name
 */
 GlobalConfigParser::GlobalConfigParser(const std::string &rootName, bool multiSections)
     : ConfigParser(rootName, DEFAULT_VERSION, multiSections)
@@ -265,6 +273,11 @@ GlobalConfigParser::GlobalConfigParser(const std::string &rootName, bool multiSe
 
 /*!
     Constructor a new parser.
+
+    \param rootName is the name of the root element
+    \param version is the required version
+    \param multiSections if set to true the configuration parser will allow
+    multiple sections with the same name
 */
 GlobalConfigParser::GlobalConfigParser(const std::string &rootName, int version, bool multiSections)
     : ConfigParser(rootName, version, multiSections)
