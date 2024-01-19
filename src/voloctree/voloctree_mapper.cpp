@@ -1232,32 +1232,51 @@ bool VolOctreeMapper::_recoverPartition()
     std::map<int, std::vector<Octant>> list_octant;
     std::map<int, std::vector<long>> list_id;
     std::map<int, std::vector<long>> list_globalId;
-    uint32_t idx = 0;
-    uint64_t morton = mappedPatch->getTree().getLastDescMorton(idx);
-    for (int reference_rank : toreference_rank[m_rank]) {
-        uint64_t reference_first_morton = partitionFDReference[reference_rank];
-        uint64_t reference_last_morton = partitionLDReference[reference_rank];
-        while (morton < reference_first_morton) {
-            idx++;
-            if (idx == mappedPatch->getTree().getNumOctants()) {
+
+    // Initialize idx position in mapped tree to the first mapped
+    // octant inside the overlapping region
+    std::vector<int>::iterator overlap_ref_rank_begin_it = toreference_rank[m_rank].begin();
+    std::vector<int>::iterator overlap_ref_rank_end_it = toreference_rank[m_rank].end();
+    if (overlap_ref_rank_begin_it != overlap_ref_rank_end_it) {
+        uint32_t first_overlap_map_idx = 0;
+        int first_overlap_ref_rank = *overlap_ref_rank_begin_it;
+        uint64_t reference_first_morton = partitionFDReference[first_overlap_ref_rank];
+        uint64_t first_overlap_map_morton = mappedPatch->getTree().getLastDescMorton(first_overlap_map_idx);
+        while (first_overlap_map_morton < reference_first_morton) {
+            first_overlap_map_idx++;
+            if (first_overlap_map_idx == mappedPatch->getTree().getNumOctants()) {
                 break;
             }
-            morton = mappedPatch->getTree().getLastDescMorton(idx);
+            first_overlap_map_morton = mappedPatch->getTree().getLastDescMorton(first_overlap_map_idx);
         }
-        while (morton < reference_last_morton) {
-            Octant oct = *mappedPatch->getTree().getOctant(idx);
-            list_octant[reference_rank].push_back(oct);
-            VolOctree::OctantInfo octantIfo(idx, true);
-            long id = mappedPatch->getOctantId(octantIfo);
-            list_id[reference_rank].push_back(id);
-            long globalId = mappedPatch->getTree().getGlobalIdx(idx);
-            list_globalId[reference_rank].push_back(globalId);
-            m_partitionIR.list_sent_octantIR.emplace_back(oct, id, globalId, reference_rank);
-            idx++;
-            if (idx == mappedPatch->getTree().getNumOctants()) {
-                break;
+
+        // Fill partitioning info structure with mapped octants in the
+        // overlapping region
+        if (first_overlap_map_idx < mappedPatch->getTree().getNumOctants() ) {
+            uint32_t idx = first_overlap_map_idx;
+            for (std::vector<int>::iterator ref_rank_it = overlap_ref_rank_begin_it; ref_rank_it != overlap_ref_rank_end_it; ++ref_rank_it) {
+                int reference_rank = *ref_rank_it;
+                uint64_t reference_last_morton = partitionLDReference[reference_rank];
+                uint64_t morton = mappedPatch->getTree().getMorton(idx);
+                while (morton < reference_last_morton) {
+                    Octant oct = *mappedPatch->getTree().getOctant(idx);
+                    list_octant[reference_rank].push_back(oct);
+                    VolOctree::OctantInfo octantIfo(idx, true);
+                    long id = mappedPatch->getOctantId(octantIfo);
+                    list_id[reference_rank].push_back(id);
+                    long globalId = mappedPatch->getTree().getGlobalIdx(idx);
+                    list_globalId[reference_rank].push_back(globalId);
+                    m_partitionIR.list_sent_octantIR.emplace_back(oct, id, globalId, reference_rank);
+                    idx++;
+                    if (idx == mappedPatch->getTree().getNumOctants()) {
+                        break;
+                    }
+                    morton = mappedPatch->getTree().getMorton(idx);
+                }
+                if (idx <= mappedPatch->getTree().getNumOctants() && idx > 0) {
+                    --idx;
+                }
             }
-            morton = mappedPatch->getTree().getMorton(idx);
         }
     }
 
