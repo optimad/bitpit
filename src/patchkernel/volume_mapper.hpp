@@ -108,6 +108,9 @@ public:
     void clearMapping();
     void clearInverseMapping();
 
+    const VolumeKernel *getReferencePatch() const;
+    const VolumeKernel *getMappedPatch() const;
+
     const bitpit::PiercedStorage<mapping::Info> & getMapping() const;
     const bitpit::PiercedStorage<mapping::Info> & getInverseMapping() const;
 
