@@ -118,6 +118,26 @@ void VolumeMapper::clearInverseMapping()
 }
 
 /**
+ * Get a constant point to the reference patch
+ *
+ * \return a constant pointer to the reference patch
+ */
+const bitpit::VolumeKernel *VolumeMapper::getReferencePatch() const
+{
+    return m_referencePatch;
+}
+
+/**
+ * Get a constant point to the mapped patch
+ *
+ * \return a constant pointer to the mapped patch
+ */
+const bitpit::VolumeKernel *VolumeMapper::getMappedPatch() const
+{
+    return m_mappedPatch;
+}
+
+/**
  * Get direct mapping
  */
 const bitpit::PiercedStorage<mapping::Info> & VolumeMapper::getMapping() const
