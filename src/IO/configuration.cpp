@@ -258,11 +258,10 @@ void ConfigParser::write(const std::string &filename) const
 */
 void ConfigParser::write(config::SourceFormat format, std::string *content) const
 {
-    std::stringstream contentStream(*content, std::ios_base::in | std::ios_base::out | std::ios_base::binary);
-
+    std::stringstream contentStream;
     config::tree::writeConfiguration(contentStream, format, m_rootName, m_version, this);
 
-    contentStream.flush();
+    *content = contentStream.str();
 }
 
 /*!
