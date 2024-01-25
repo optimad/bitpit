@@ -1,6 +1,6 @@
-build/
-release/
-debug/
+build*/
+release*/
+debug*/
 CMakeFiles/
 *.swp
 *~
@@ -10,3 +10,4 @@ CMakeFiles/
 .settings/
 .DS_Store
 .vscode
+
