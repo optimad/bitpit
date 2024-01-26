@@ -198,13 +198,36 @@ LevelSetBooleanOperation LevelSetBooleanBaseObject<SourceLevelSetObject>::getBoo
 template<typename SourceLevelSetObject>
 LevelSetBooleanResult<SourceLevelSetObject> LevelSetBooleanBaseObject<SourceLevelSetObject>::computeBooleanResult( long id, bool signedLevelSet ) const{
 
+    if (id == 21032) {
+        log::cout() << " computeBooleanResult A for cell " << id << std::endl;
+    }
+
+
     if (m_sourceObjects.empty()) {
         return LevelSetBooleanResult<SourceLevelSetObject>(getBooleanOperation());
     }
 
+    if (id == 21032) {
+        log::cout() << " computeBooleanResult B for cell " << id << std::endl;
+    }
+
+
     LevelSetBooleanResult<SourceLevelSetObject> result( getBooleanOperation(), m_sourceObjects[0], m_sourceObjects[0]->evalCellValue(id, signedLevelSet) );
+
+    if (id == 21032) {
+        log::cout() << " computeBooleanResult C for cell " << id << " result value " << result.getValue() << std::endl;
+    }
+
     for( size_t n=1; n<m_sourceObjects.size(); ++n){
-        result.update(m_sourceObjects[n], m_sourceObjects[n]->evalCellValue(id, signedLevelSet));
+        double value = m_sourceObjects[n]->evalCellValue(id, signedLevelSet);
+        result.update(m_sourceObjects[n], value);
+
+    if (id == 21032) {
+        log::cout() << " computeBooleanResult D for cell " << id << " source value " << value << std::endl;
+        log::cout() << " computeBooleanResult D for cell " << id << " result value " << result.getValue() << std::endl;
+    }
+
+
     }
 
     return result;
@@ -321,6 +344,11 @@ short LevelSetBooleanBaseObject<SourceLevelSetObject>::_evalCellSign(long id) co
  */
 template<typename SourceLevelSetObject>
 double LevelSetBooleanBaseObject<SourceLevelSetObject>::_evalCellValue(long id, bool signedLevelSet) const {
+
+    if (id == 21032) {
+        log::cout() << " _evalCellValue for cell " << id << std::endl;
+    }
+
     return _evalCellFunction<double>(id, signedLevelSet, [] (const LevelSetBooleanResult<SourceLevelSetObject> &result)
         {
             const LevelSetObject *resultObject = result.getObject();

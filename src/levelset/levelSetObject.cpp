@@ -576,6 +576,12 @@ void LevelSetObject::fillCellLocationCache()
 
     // Assign an unknown location to the internal cells.
     for (long cellId : internalCellIds) {
+
+            if (cellId == 21032) {
+                log::cout() << " INITIALIZE CELL ID " << cellId << std::endl;
+            }
+
+
         locationCache->insertEntry(cellId, static_cast<char>(LevelSetCellLocation::UNKNOWN));
     }
 
@@ -592,9 +598,26 @@ void LevelSetObject::fillCellLocationCache()
             // Fill location cache for cells geometrically inside the narrow band
             LevelSetCellLocation cellLocation = fillCellGeometricNarrowBandLocationCache(cellId);
 
+            if (cellId == 21032) {
+                log::cout() << " CELL ID " << cellId << std::endl;
+                log::cout() << "   - cellLocation = " << (int) cellLocation << std::endl;
+            }
+
             // Track intersected cells
             if (cellLocation == LevelSetCellLocation::NARROW_BAND_INTERSECTED) {
                 intersectedCellIds.push_back(cellId);
+
+            if (cellId == 21032) {
+                log::cout() << "   - intersected = YES " << std::endl;
+            }
+
+            }
+            else {
+
+            if (cellId == 21032) {
+                log::cout() << "   - intersected = NO " << std::endl;
+            }
+
             }
         }
     }
@@ -679,6 +702,11 @@ void LevelSetObject::fillCellLocationCache(const std::vector<adaption::Info> &ad
             // Assign an unknown location to the newly created cells
             locationCache->insertEntry(cellId, static_cast<char>(LevelSetCellLocation::UNKNOWN));
 
+
+            if (cellId == 21032) {
+                log::cout() << " UPDATE INITIAILZIE CELL ID " << cellId << std::endl;
+            }
+
             // Add internal cells to the process list
             bool isCellProcessable = true;
 #if BITPIT_ENABLE_MPI==1
@@ -710,9 +738,22 @@ void LevelSetObject::fillCellLocationCache(const std::vector<adaption::Info> &ad
             // Fill location cache for cells geometrically inside the narrow band
             LevelSetCellLocation cellLocation = fillCellGeometricNarrowBandLocationCache(cellId);
 
+
+            if (cellId == 21032) {
+                log::cout() << " UPDATE CELL ID " << cellId << std::endl;
+                log::cout() << "   - cellLocation = " << (int) cellLocation << std::endl;
+            }
+
             // Track intersected cells
             if (cellLocation == LevelSetCellLocation::NARROW_BAND_INTERSECTED) {
                 intersectedCellIds.insert(cellId);
+                if (cellId == 21032) {
+                    log::cout() << "   - intersected = YES "  << std::endl;
+                }
+            } else {
+                if (cellId == 21032) {
+                    log::cout() << "   - intersected = NO "  << std::endl;
+                }
             }
 
             // Remove from the list cell whose region has been identified
@@ -826,6 +867,14 @@ LevelSetCellLocation LevelSetObject::fillCellGeometricNarrowBandLocationCache(lo
     // Get cell information
     double cellCacheValue    = evalCellValue(id, CELL_CACHE_IS_SIGNED);
     double cellUnsigendValue = std::abs(cellCacheValue);
+
+            if (id == 21032) {
+                log::cout() << " fillCellGeometricNarrowBandLocationCache UPDATE CELL ID " << id << std::endl;
+                log::cout() << "   - cellCacheValue = " << cellCacheValue << std::endl;
+                log::cout() << "   - cellUnsigendValue = " << cellUnsigendValue << std::endl;
+            }
+
+
 
     // Identify cells that are geometrically inside the narrow band
     //
@@ -2101,8 +2150,8 @@ void LevelSetObject::flushVTKOutputData(std::fstream &stream, VTKFormat format, 
 
     case LevelSetField::GRADIENT:
     {
-        auto evaluator = [this] (long id) { return evalCellGradient(id, true); };
-        auto fallback = [] (long id) { BITPIT_UNUSED(id); return levelSetDefaults::GRADIENT; };
+        auto evaluator = [this] (long id) { return std::array<double, 3>{{(double)getCellLocation(id), 10., 20.}}; };
+        auto fallback = [this] (long id) { return std::array<double, 3>{{(double)getCellLocation(id), 10., 20.}}; };
         flushVTKOutputData<std::array<double, 3>>(stream, format, field, evaluator, fallback);
         break;
     }
@@ -2764,10 +2813,10 @@ std::vector<long> LevelSetObject::evalCellFullCacheFillIds(LevelSetZone zone, co
  */
 std::vector<long> LevelSetObject::evalCellCacheStaleIds(const std::vector<adaption::Info> &adaptionData) const
 {
-    // Early return if the object is empty
-    if (empty()) {
-        return std::vector<long>();
-    }
+    // // Early return if the object is empty
+    // if (empty()) {
+    //     return std::vector<long>();
+    // }
 
     // Identify cells whose entries should be pruned
     //

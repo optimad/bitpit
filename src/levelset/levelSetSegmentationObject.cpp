@@ -1547,6 +1547,16 @@ LevelSetCellLocation LevelSetSegmentationObject::fillCellGeometricNarrowBandLoca
     // Early return if the cell is geometrically outside the narrow band
     double searchRadius = std::max(m_kernel->computeCellBoundingRadius(id), m_narrowBandSize);
     long cellSupport = evalCellSupport(id, searchRadius);
+
+
+            if (id == 21032) {
+                log::cout() << " fillCellGeometricNarrowBandLocationCache UPDATE CELL ID " << id << std::endl;
+                log::cout() << "   - searchRadius = " << searchRadius << std::endl;
+                log::cout() << "   - cellSupport = " << cellSupport << std::endl;
+            }
+
+
+
     if (cellSupport < 0) {
         return LevelSetCellLocation::UNKNOWN;
     }

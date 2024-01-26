@@ -152,6 +152,18 @@ template<typename value_t, typename evaluator_t, typename fallback_t>
 void LevelSetObject::flushVTKOutputData(std::fstream &stream, VTKFormat format, LevelSetField field,
                                         const evaluator_t evaluator, const fallback_t fallback) const
 {
+        CellCacheCollection::Cache *cache = getFieldCellCache(field);
+        for (const Cell &cell : m_kernel->getMesh()->getVTKCellWriteRange()) {
+            long cellId = cell.getId();
+            if (cache && cache->contains(cellId)) {
+                flushValue(stream, format, evaluator(cellId));
+            } else {
+                flushValue(stream, format, fallback(cellId));
+            }
+        }
+
+        return;
+
     LevelSetCacheMode fieldCacheMode = getFieldCellCacheMode(field);
     switch (fieldCacheMode) {
 
@@ -224,13 +236,15 @@ template<typename value_t, typename evaluator_t, typename fallback_t>
 value_t LevelSetObject::evalCellFieldCached(LevelSetField field, long id, const evaluator_t &evaluator, const fallback_t &fallback) const
 {
     // Try fetching the field from the cache
-    CellCacheCollection::ValueCache<value_t> *cache = getFieldCellCache<value_t>(field);
-    if (cache) {
-        typename CellCacheCollection::ValueCache<value_t>::Entry cacheEntry = cache->findEntry(id);
-        if (cacheEntry.isValid()) {
-            return *cacheEntry;
+    // if (id != 21032) {
+        CellCacheCollection::ValueCache<value_t> *cache = getFieldCellCache<value_t>(field);
+        if (cache) {
+            typename CellCacheCollection::ValueCache<value_t>::Entry cacheEntry = cache->findEntry(id);
+            if (cacheEntry.isValid()) {
+                return *cacheEntry;
+            }
         }
-    }
+    // }
 
     // Evaluate the field
     value_t value = evalCellField<value_t>(field, id, evaluator, fallback);
