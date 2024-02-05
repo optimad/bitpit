@@ -16,7 +16,7 @@ jobs:
     name: Setup - Linux
     steps:
       - name: Checkout build environment information
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: bitpit
           sparse-checkout: |
@@ -59,7 +59,7 @@ jobs:
             debug: OFF
     steps:
       - name: Checkout bitpit
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Build bitpit
         shell: bash
         run: |
@@ -100,7 +100,7 @@ jobs:
           - mpi: ON
             debug: ON
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Build bitpit
         shell: cmd
         run: |
