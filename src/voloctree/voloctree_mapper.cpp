@@ -1229,7 +1229,7 @@ bool VolOctreeMapper::_recoverPartition()
     clearPartitionMappingLists();
 
     // Locally the mapped mesh build the lists of octants to send
-    std::map<int, std::vector<Octant>> list_octant;
+    std::map<int, std::vector<const Octant*>> list_octant;
     std::map<int, std::vector<long>> list_id;
     std::map<int, std::vector<long>> list_globalId;
 
@@ -1259,14 +1259,14 @@ bool VolOctreeMapper::_recoverPartition()
                 uint64_t reference_last_morton = partitionLDReference[reference_rank];
                 uint64_t morton = mappedPatch->getTree().getMorton(idx);
                 while (morton < reference_last_morton) {
-                    Octant oct = *mappedPatch->getTree().getOctant(idx);
+                    const Octant *oct = mappedPatch->getTree().getOctant(idx);
                     list_octant[reference_rank].push_back(oct);
                     VolOctree::OctantInfo octantIfo(idx, true);
                     long id = mappedPatch->getOctantId(octantIfo);
                     list_id[reference_rank].push_back(id);
                     long globalId = mappedPatch->getTree().getGlobalIdx(idx);
                     list_globalId[reference_rank].push_back(globalId);
-                    m_partitionIR.list_sent_octantIR.emplace_back(oct, id, globalId, reference_rank);
+                    m_partitionIR.list_sent_octantIR.emplace_back(*oct, id, globalId, reference_rank);
                     idx++;
                     if (idx == mappedPatch->getTree().getNumOctants()) {
                         break;
@@ -1295,7 +1295,7 @@ bool VolOctreeMapper::_recoverPartition()
     //
     // TODO: make accessible global variables in ParaTree
     for (int reference_rank : toreference_rank[m_rank]) {
-        const std::vector<Octant> &rankOctants = list_octant[reference_rank];
+        const std::vector<const Octant*> &rankOctants = list_octant[reference_rank];
         std::size_t nRankOctants = rankOctants.size();
 
         // Set buffer size
@@ -1306,7 +1306,7 @@ bool VolOctreeMapper::_recoverPartition()
         SendBuffer &sendBuffer = octCommunicator.getSendBuffer(reference_rank);
         sendBuffer << nRankOctants;
         for (std::size_t n = 0; n < nRankOctants; ++n) {
-            const Octant &octant = rankOctants[n];
+            const Octant &octant = *rankOctants[n];
             sendBuffer << octant;
 
             long id = list_id[reference_rank][n];
