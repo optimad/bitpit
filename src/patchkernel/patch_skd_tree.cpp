@@ -724,129 +724,120 @@ void SkdNode::updatePointClosestCell(const std::array<double, 3> &point, bool in
             continue;
         }
 
+        // Evaluate point projection
+        int nCellVertices = cell.getVertexCount();
+        BITPIT_CREATE_WORKSPACE(cellVertexCoordinates, std::array<double BITPIT_COMMA 3>, nCellVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
+        patch.getElementVertexCoordinates(cell, cellVertexCoordinates);
 
-        updatePointClosestCell(point, cell, closestId, closestDistance);
+        double cellDistance;
+        std::array<double, 3> cellProjection;
+        cell.evalPointProjection(point, cellVertexCoordinates, &cellProjection, &cellDistance);
+
+        // Check if the cell is closest that the current closest cell
+        bool isCellClosest = false;
+        if (utils::DoubleFloatingEqual()(cellDistance, *closestDistance, patch.getTol(), patch.getTol())) {
+            if (*closestId == Cell::NULL_ID) {
+                isCellClosest = true;
+            } else {
+                // Project point ont the closest cell
+                const Cell &closest = patch.getCell(*closestId);
+
+                int nClosestCellVertices = closest.getVertexCount();
+                BITPIT_CREATE_WORKSPACE(closestCellVertexCoordinates, std::array<double BITPIT_COMMA 3>, nClosestCellVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
+                patch.getElementVertexCoordinates(closest, closestCellVertexCoordinates);
+
+                double closestCellDistance;
+                std::array<double, 3> closestCellProjection;
+                closest.evalPointProjection(point, closestCellVertexCoordinates, &closestCellProjection, &closestCellDistance);
+
+                // Find normal of the cells at the centroids
+                //
+                // To be more precise, the normals should beevaluated on projection
+                // points.
+                std::array<double, 3> cellNormal    = cell.evalNormal(cellVertexCoordinates);
+                std::array<double, 3> closestNormal = closest.evalNormal(closestCellVertexCoordinates);
+
+                // Find cell more aligned with respect to the point
+                //
+                // We want to chhose the cell whose normal is most aligned towards
+                // the point.
+                double cellAligement    = dotProduct(cellNormal, point - cellProjection);
+                double closestAligement = dotProduct(closestNormal, point - closestCellProjection);
+
+                // The cell will be closest if it is more aligned than the current closest cell
+                if (cellAligement > closestAligement) {
+                    isCellClosest = true;
+                }
+            }
+        } else if (cellDistance < *closestDistance) {
+            isCellClosest = true;
+        }
+
+        // Update the closest cell
+        if (isCellClosest) {
+            *closestId       = cell.getId();
+            *closestDistance = cellDistance;
+        }
     }
 }
 
 /*!
-* Given the specified point find if the given cell is closer than the current
-* one.
+* Given the specified point find if, among the cells contained in the
+* bounding box associated to the node, there are cells closer to the
+* one received in input.
 *
-* If two cells have the same distance, the closest cell will be chosen using
-* the normal of the cells: the cell more "aligned" with the line that connect
-* the specified point and its projection onto the cell will be chosen.
+* In output all the cells at minimal distance from the given point are
+* provided.
 *
 * \param point is the point
-* \param cell is the cell
-* \param[in,out] closestId is the index of the closest cell, on output it will
-* be updated if the specified cell is closer than the current closest cell
-* \param[in,out] closestDistance is the distance of the closest cell, on output
-* it will be updated if the specified cell is closer than the current closest
-* cell
+* \param interiorCellsOnly if set to true, only interior cells will be considered,
+* it will be possible to consider non-interior cells only if the tree has been
+* instantiated with non-interior cells support enabled
+* \param[in,out] closestIds are the indices of the closest cells, on output it will
+* be updated if the specified cell is closer than the current closest cells or
+* it is at the same distance.
+* \param[in,out] closestDistance is the distance of the current closest cells,
+* on output it will be updated if closer cells are found
 */
-void SkdNode::updatePointClosestCell(const std::array<double, 3> &point, const Cell &cell,
-                                     long *closestId, double *closestDistance) const
+void SkdNode::updatePointClosestCells(const std::array<double, 3> &point, bool interiorCellsOnly,
+                                      std::vector<long> *closestIds, double *closestDistance) const
 {
-    const PatchKernel &patch = m_patchInfo->getPatch();
-
-    // Cell id
-    long cellId = cell.getId();
-
-    // Project the point on the cell
-    int nCellVertices = cell.getVertexCount();
-    BITPIT_CREATE_WORKSPACE(cellVertexCoordinates, std::array<double BITPIT_COMMA 3>, nCellVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
-    patch.getElementVertexCoordinates(cell, cellVertexCoordinates);
-
-    double cellDistance;
-    std::array<double, 3> cellProjection;
-    cell.evalPointProjection(point, cellVertexCoordinates, &cellProjection, &cellDistance);
-
-    // Detect if the specified cell is closer than the current closest cell
-    const int DISTANCE_CLOSER  = - 1;
-    const int DISTANCE_EQUAL   =   0;
-    const int DISTANCE_FARTHER =   1;
-
-    int distanceFlag = DISTANCE_FARTHER;
-    if (utils::DoubleFloatingEqual()(cellDistance, *closestDistance, patch.getTol(), patch.getTol())) {
-        distanceFlag = DISTANCE_EQUAL;
-    } else if (cellDistance < *closestDistance) {
-        distanceFlag = DISTANCE_CLOSER;
-    }
-
-    // Consider the case where no closest cell is defined
-    //
-    // Even if the id of the closest cell is null, we may have an
-    // estimated of the closest cell distance. We need to update
-    // the closest cell information only if the current cells is
-    // closer than the estimate.
-    if (*closestId == Cell::NULL_ID) {
-        if (distanceFlag != DISTANCE_FARTHER) {
-            *closestId       = cellId;
-            *closestDistance = cellDistance;
-        }
-
+    if (getCellCount() == 0) {
         return;
     }
 
-    // Update closest cell information accordingly to the distance flag:
-    //  - if the specified cell is closer the specified cell will become the
-    //    closest cell
-    //  - if the two cells have the same distance, the closest cell will be
-    //    chosen using the normal of the cells.
-    //  - if the specified cell is farther there is nothing to do;
-    switch (distanceFlag) {
+    const PatchKernel &patch = m_patchInfo->getPatch();
+    const PiercedVector<Cell> &cells = patch.getCells();
+    const std::vector<std::size_t> &cellRawIds = m_patchInfo->getCellRawIds();
 
-    case DISTANCE_CLOSER:
-    {
-        *closestId       = cellId;
-        *closestDistance = cellDistance;
-
-        break;
-    }
-
-    case DISTANCE_EQUAL:
-    {
-        // Project point ont the closest cell
-        const Cell &closest = patch.getCell(*closestId);
-
-        int nClosestCellVertices = closest.getVertexCount();
-        BITPIT_CREATE_WORKSPACE(closestCellVertexCoordinates, std::array<double BITPIT_COMMA 3>, nClosestCellVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
-        patch.getElementVertexCoordinates(closest, closestCellVertexCoordinates);
-
-        double closestCellDistance;
-        std::array<double, 3> closestCellProjection;
-        closest.evalPointProjection(point, closestCellVertexCoordinates, &closestCellProjection, &closestCellDistance);
-
-        // Find normal of the cells at the centroids
-        //
-        // To be more precise, the normals should beevaluated on projection
-        // points.
-        std::array<double, 3> cellNormal    = cell.evalNormal(cellVertexCoordinates);
-        std::array<double, 3> closestNormal = closest.evalNormal(closestCellVertexCoordinates);
-
-        // Find cell more aligned with respect to the point
-        //
-        // We want to chhose the cell whose normal is most aligned towards
-        // the point.
-        double cellAligement    = dotProduct(cellNormal, point - cellProjection);
-        double closestAligement = dotProduct(closestNormal, point - closestCellProjection);
-
-        // If the specified cell is more aligned than the closest cell, update
-        // the closest info.
-        if (cellAligement > closestAligement) {
-            *closestId       = cellId;
-            *closestDistance = cellDistance;
+    for (std::size_t n = m_cellRangeBegin; n < m_cellRangeEnd; n++) {
+        std::size_t cellRawId = cellRawIds[n];
+        const Cell &cell = cells.rawAt(cellRawId);
+        if (interiorCellsOnly && !cell.isInterior()) {
+            continue;
         }
 
-        break;
-    }
+        // Evaluate point projection
+        int nCellVertices = cell.getVertexCount();
+        BITPIT_CREATE_WORKSPACE(cellVertexCoordinates, std::array<double BITPIT_COMMA 3>, nCellVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
+        patch.getElementVertexCoordinates(cell, cellVertexCoordinates);
 
-    default:
-    {
-        // Nothing to do
-    }
+        double cellDistance;
+        std::array<double, 3> cellProjection;
+        cell.evalPointProjection(point, cellVertexCoordinates, &cellProjection, &cellDistance);
 
+        // Update the closest cell
+        //
+        // If the cell is closest that the current closest cells, the list should be cleard and
+        // the current cell should be added to it. If the cell has the same distance of the
+        // closest cells, it should be simply added to the list. If the cell i farther than the
+        // closest one, there is nothing to do.
+        if (utils::DoubleFloatingEqual()(cellDistance, *closestDistance, patch.getTol(), patch.getTol())) {
+            closestIds->push_back(cell.getId());
+        } else if (cellDistance < *closestDistance) {
+            closestIds->assign(1, cell.getId());
+            *closestDistance = cellDistance;
+        }
     }
 }
 

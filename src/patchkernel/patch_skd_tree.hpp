@@ -129,6 +129,7 @@ public:
 
     void findPointClosestCell(const std::array<double, 3> &point, bool interiorCellsOnly, long *closestId, double *closestDistance) const;
     void updatePointClosestCell(const std::array<double, 3> &point, bool interiorCellsOnly, long *closestId, double *closestDistance) const;
+    void updatePointClosestCells(const std::array<double, 3> &point, bool interiorCellsOnly, std::vector<long> *closestIds, double *closestDistance) const;
 
 private:
     const SkdPatchInfo *m_patchInfo;
@@ -139,8 +140,6 @@ private:
     std::array<std::size_t, MAX_CHILDREN> m_children;
 
     void initializeBoundingBox();
-
-    void updatePointClosestCell(const std::array<double, 3> &point, const Cell &cell, long *closestId, double *closestDistance) const;
 
 };
 
