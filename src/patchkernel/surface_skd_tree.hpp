@@ -57,6 +57,10 @@ public:
     long findPointClosestCell(int nPoints, const std::array<double, 3> *points, double maxDistance, long *ids, double *distances) const;
     long findPointClosestCell(int nPoints, const std::array<double, 3> *points, const double *maxDistances, long *ids, double *distances) const;
     long findPointClosestCell(int nPoints, const std::array<double, 3> *points, const double *maxDistances, bool interorOnly, long *ids, double *distances) const;
+
+    long findPointClosestCells(const std::array<double,3> &point, std::vector<long> &ids, double *distance) const;
+    long findPointClosestCells(const std::array<double, 3> &point, double maxDistance, std::vector<long> &ids, double *distance) const;
+    long findPointClosestCells(const std::array<double, 3> &point, double maxDistance, bool interorOnly, std::vector<long> &ids,  double *distance) const;
 #if BITPIT_ENABLE_MPI
     long findPointClosestGlobalCell(int nPoints, const std::array<double, 3> *points, long *ids, int *ranks, double *distances) const;
     long findPointClosestGlobalCell(int nPoints, const std::array<double, 3> *points, double maxDistance, long *ids, int *ranks, double *distances) const;
@@ -67,6 +71,15 @@ private:
     mutable std::vector<std::size_t> m_nodeStack;
     mutable std::vector<std::size_t> m_candidateIds;
     mutable std::vector<double> m_candidateMinDistances;
+
+    struct Candidates {
+        std::vector<std::size_t> *candidateIds = nullptr;
+        std::vector<double> *candidateMinDistances = nullptr;
+        std::vector<std::size_t> privateCandidateIds;
+        std::vector<double> privateCandidateMinDistances;
+    };
+
+    void findPointClosestCandidates(const std::array<double, 3> &point, double maxDistance, double *distance, Candidates &candidates) const;
 
 };
 

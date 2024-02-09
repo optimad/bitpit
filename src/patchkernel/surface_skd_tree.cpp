@@ -369,111 +369,20 @@ long SurfaceSkdTree::findPointClosestCell(const std::array<double, 3> &point, do
         return 0;
     }
 
-    // Initialize a distance estimate
-    //
-    // The real distance will be lesser than or equal to the estimate.
-    //
-    // Care must be taken to avoid overflow when performing the multiplication.
-    double squaredMaxDistance;
-    if (maxDistance <= 1. || maxDistance < std::numeric_limits<double>::max() / maxDistance) {
-        squaredMaxDistance = maxDistance * maxDistance;
-    } else {
-        squaredMaxDistance = std::numeric_limits<double>::max();
-    }
-
-    double squareDistanceEstimate = std::min(root.evalPointMaxSquareDistance(point), squaredMaxDistance);
-
-    // Get a list of candidates nodes
-    //
-    // If threads safe lookups are not needed, some temporary data structures
-    // are declared as member of the class to avoid their reallocation every
-    // time the function is called.
-    //
-    // First, we gather all the candidates and then we evaluate the distance
-    // of each candidate. Since distance estimate is constantly updated when
-    // new nodes are processed, the final estimate may be smaller than the
-    // minimum distance of some candidates. Processing the candidates after
-    // scanning all the tree, allows to discard some of them without the need
-    // of evaluating the exact distance.
-    std::unique_ptr<std::vector<std::size_t>> privateNodeStack;
-    std::unique_ptr<std::vector<std::size_t>> privateCandidateIds;
-    std::unique_ptr<std::vector<double>> privateCandidateMinDistances;
-
-    std::vector<std::size_t> *nodeStack;
-    std::vector<std::size_t> *candidateIds;
-    std::vector<double> *candidateMinDistances;
-    if (areLookupsThreadSafe()) {
-        privateNodeStack = std::unique_ptr<std::vector<std::size_t>>(new std::vector<std::size_t>());
-        privateCandidateIds = std::unique_ptr<std::vector<std::size_t>>(new std::vector<std::size_t>());
-        privateCandidateMinDistances = std::unique_ptr<std::vector<double>>(new std::vector<double>());
-
-        nodeStack = privateNodeStack.get();
-        candidateIds = privateCandidateIds.get();
-        candidateMinDistances = privateCandidateMinDistances.get();
-    } else {
-        m_nodeStack.clear();
-        m_candidateIds.clear();
-        m_candidateMinDistances.clear();
-
-        nodeStack = &m_nodeStack;
-        candidateIds = &m_candidateIds;
-        candidateMinDistances = &m_candidateMinDistances;
-    }
-
-    nodeStack->push_back(rootId);
-    while (!nodeStack->empty()) {
-        std::size_t nodeId = nodeStack->back();
-        const SkdNode &node = m_nodes[nodeId];
-        nodeStack->pop_back();
-
-        // Do not consider nodes with a minimum distance greater than
-        // the distance estimate
-        double nodeMinSquareDistance = node.evalPointMinSquareDistance(point);
-        if (utils::DoubleFloatingGreater()(nodeMinSquareDistance, squareDistanceEstimate, tolerance, tolerance)) {
-            continue;
-        }
-
-        // Update the distance estimate
-        //
-        // The real distance will be less than or equal to the estimate.
-        double nodeMaxSquareDistance = node.evalPointMaxSquareDistance(point);
-        squareDistanceEstimate = std::min(nodeMaxSquareDistance, squareDistanceEstimate);
-
-        // If the node is a leaf add it to the candidates, otherwise add its
-        // children to the stack.
-        bool isLeaf = true;
-        for (int i = SkdNode::CHILD_BEGIN; i != SkdNode::CHILD_END; ++i) {
-            SkdNode::ChildLocation childLocation = static_cast<SkdNode::ChildLocation>(i);
-            std::size_t childId = node.getChildId(childLocation);
-            if (childId != SkdNode::NULL_ID) {
-                isLeaf = false;
-                nodeStack->push_back(childId);
-            }
-        }
-
-        if (isLeaf) {
-            candidateIds->push_back(nodeId);
-            candidateMinDistances->push_back(std::sqrt(nodeMinSquareDistance));
-        }
-    }
+    Candidates candidates;
+    findPointClosestCandidates(point, maxDistance, distance, candidates);
 
     // Process the candidates and find the closest cell
-    if (!candidateIds->empty()) {
-        *distance = std::sqrt(squareDistanceEstimate);
-    } else {
-        *distance = std::numeric_limits<double>::max();
-    }
-
     long nDistanceEvaluations = 0;
-    for (std::size_t k = 0; k < candidateIds->size(); ++k) {
+    for (std::size_t k = 0; k < candidates.candidateIds->size(); ++k) {
         // Do not consider nodes with a minimum distance greater than the
         // distance estimate
-        if (utils::DoubleFloatingGreater()(candidateMinDistances->at(k), *distance, tolerance, tolerance)) {
+        if (utils::DoubleFloatingGreater()(candidates.candidateMinDistances->at(k), *distance, tolerance, tolerance)) {
             continue;
         }
 
         // Evaluate the distance
-        std::size_t nodeId = candidateIds->at(k);
+        std::size_t nodeId = candidates.candidateIds->at(k);
         const SkdNode &node = m_nodes[nodeId];
 
         node.updatePointClosestCell(point, interiorCellsOnly, id, distance);
@@ -579,6 +488,226 @@ long SurfaceSkdTree::findPointClosestCell(int nPoints, const std::array<double, 
     }
 
     return nDistanceEvaluations;
+}
+
+
+/*!
+* Given the specified point find the closest cells contained in the tree and
+* evaluate the distance between that cells and the given point. All the cells
+* at the same distance (using patch tolerance) are returned.
+*
+* \param[in] point is the point
+* \param[out] ids on output it will contain the ids of the closest cells.
+* If all cells contained in the tree are farther than the maximum
+* distance, the first element of the container will be set to the null id.
+* \param[in,out] distance on output it will contain the distance
+* between the point and closest cells. If all cells contained in the
+* tree are farther than the maximum distance, the function will return
+* the maximum representable distance.
+*/
+long SurfaceSkdTree::findPointClosestCells(const std::array<double, 3> &point, std::vector<long> &ids, double *distance) const
+{
+    return findPointClosestCells(point, std::numeric_limits<double>::max(), false, ids, distance);
+}
+
+/*!
+* Given the specified point find the closest cells contained in the tree and
+* evaluate the distance between that cells and the given point. All the cells
+* at the same distance (using patch tolerance) are returned.
+*
+* \param[in] point is the point
+* \param[in] maxDistance all cells whose distance is greater than
+* this parameters will not be considered for the evaluation of the
+* distance
+* \param[out] ids on output it will contain the ids of the closest cells.
+* If all cells contained in the tree are farther than the maximum
+* distance, the first element of the container will be set to the null id.
+* \param[out] distance on output it will contain the distance between
+* the point and closest cellss. If all cells contained in the tree are
+* farther than the maximum distance, the argument will be set to the
+* maximum representable distance
+*/
+long SurfaceSkdTree::findPointClosestCells(const std::array<double, 3> &point, double maxDistance,
+                                          std::vector<long> &ids, double *distance) const
+{
+    return findPointClosestCells(point, maxDistance, false, ids, distance);
+}
+
+/*!
+* Given the specified point find the closest cells contained in the tree and
+* evaluate the distance between that cells and the given point. All the cells
+* at the same distance (using patch tolerance) are returned.
+*
+* \param[in] point is the point
+* \param[in] maxDistance all cells whose distance is greater than
+* this parameters will not be considered for the evaluation of the
+* distance
+* \param[in] interiorCellsOnly if set to true, only interior cells will be considered,
+* it will be possible to consider non-interior cells only if the tree has been
+* instantiated with non-interior cells support enabled
+* \param[out] ids on output it will contain the ids of the closest cells.
+* If all cells contained in the tree are farther than the maximum
+* distance, the first element of the container will be set to the null id.
+* \param[out] distance on output it will contain the distance between
+* the point and closest cell. If all cells contained in the tree are
+* farther than the maximum distance, the argument will be set to the
+* maximum representable distance
+*/
+long SurfaceSkdTree::findPointClosestCells(const std::array<double, 3> &point, double maxDistance,
+                                          bool interiorCellsOnly, std::vector<long> &ids, double *distance) const
+{
+    // Tolerance for distance evaluations
+    const PatchKernel &patch = getPatch();
+    double tolerance = patch.getTol();
+
+    // Initialize the cell id
+    ids.resize(1, Cell::NULL_ID);
+
+    // Get the root of the tree
+    std::size_t rootId = 0;
+    const SkdNode &root = m_nodes[rootId];
+    if (root.isEmpty()) {
+        *distance = std::numeric_limits<double>::max();
+
+        return 0;
+    }
+
+    Candidates candidates;
+    findPointClosestCandidates(point, maxDistance, distance, candidates);
+
+    // Process the candidates and find the closest cell
+    long nDistanceEvaluations = 0;
+    for (std::size_t k = 0; k < candidates.candidateIds->size(); ++k) {
+        // Do not consider nodes with a minimum distance greater than the
+        // distance estimate
+        if (utils::DoubleFloatingGreater()(candidates.candidateMinDistances->at(k), *distance, tolerance, tolerance)) {
+            continue;
+        }
+
+        // Evaluate the distance
+        std::size_t nodeId = candidates.candidateIds->at(k);
+        const SkdNode &node = m_nodes[nodeId];
+
+        node.updatePointClosestCells(point, interiorCellsOnly, ids, distance);
+        ++nDistanceEvaluations;
+    }
+
+    return nDistanceEvaluations;
+}
+
+/*!
+* Given the specified point find the closest candidate cells contained
+* in the tree and estimate the minimum distance between that cells and
+* the given point.
+*
+* \param[in] point is the point
+* \param[in] maxDistance all cells whose distance is greater than
+* this parameters will not be considered for the evaluation of the
+* distance
+* \param[out] distanceEstimate on output it will contain the estimate
+* of the distance between the point and closest cell. If all cells
+* contained in the tree are farther than the maximum distance, the
+* argument will be set to the maximum representable distance
+*/
+void SurfaceSkdTree::findPointClosestCandidates(const std::array<double, 3> &point, double maxDistance,
+        double *distanceEstimate, Candidates &candidates) const
+{
+    // Tolerance for distance evaluations
+    const PatchKernel &patch = getPatch();
+    double tolerance = patch.getTol();
+
+    // Get the root of the tree
+    std::size_t rootId = 0;
+    const SkdNode &root = m_nodes[rootId];
+
+    // Initialize a distance estimate
+    //
+    // The real distance will be lesser than or equal to the estimate.
+    //
+    // Care must be taken to avoid overflow when performing the multiplication.
+    double squaredMaxDistance;
+    if (maxDistance <= 1. || maxDistance < std::numeric_limits<double>::max() / maxDistance) {
+        squaredMaxDistance = maxDistance * maxDistance;
+    } else {
+        squaredMaxDistance = std::numeric_limits<double>::max();
+    }
+
+    double squareDistanceEstimate = std::min(root.evalPointMaxSquareDistance(point), squaredMaxDistance);
+
+    // Get a list of candidates nodes
+    //
+    // If threads safe lookups are not needed, some temporary data structures
+    // are declared as member of the class to avoid their reallocation every
+    // time the function is called.
+    //
+    // First, we gather all the candidates and then we evaluate the distance
+    // of each candidate. Since distance estimate is constantly updated when
+    // new nodes are processed, the final estimate may be smaller than the
+    // minimum distance of some candidates. Processing the candidates after
+    // scanning all the tree, allows to discard some of them without the need
+    // of evaluating the exact distance.
+    std::unique_ptr<std::vector<std::size_t>> privateNodeStack;
+
+    std::vector<std::size_t> *nodeStack;
+    if (areLookupsThreadSafe()) {
+        privateNodeStack = std::unique_ptr<std::vector<std::size_t>>(new std::vector<std::size_t>());
+
+        nodeStack = privateNodeStack.get();
+        candidates.candidateIds = &(candidates.privateCandidateIds);
+        candidates.candidateMinDistances = &(candidates.privateCandidateMinDistances);
+    } else {
+        m_nodeStack.clear();
+        m_candidateIds.clear();
+        m_candidateMinDistances.clear();
+
+        nodeStack = &m_nodeStack;
+        candidates.candidateIds = &m_candidateIds;
+        candidates.candidateMinDistances = &m_candidateMinDistances;
+    }
+
+    nodeStack->push_back(rootId);
+    while (!nodeStack->empty()) {
+        std::size_t nodeId = nodeStack->back();
+        const SkdNode &node = m_nodes[nodeId];
+        nodeStack->pop_back();
+
+        // Do not consider nodes with a minimum distance greater than
+        // the distance estimate
+        double nodeMinSquareDistance = node.evalPointMinSquareDistance(point);
+        if (utils::DoubleFloatingGreater()(nodeMinSquareDistance, squareDistanceEstimate, tolerance, tolerance)) {
+            continue;
+        }
+
+        // Update the distance estimate
+        //
+        // The real distance will be less than or equal to the estimate.
+        double nodeMaxSquareDistance = node.evalPointMaxSquareDistance(point);
+        squareDistanceEstimate = std::min(nodeMaxSquareDistance, squareDistanceEstimate);
+
+        // If the node is a leaf add it to the candidates, otherwise add its
+        // children to the stack.
+        bool isLeaf = true;
+        for (int i = SkdNode::CHILD_BEGIN; i != SkdNode::CHILD_END; ++i) {
+            SkdNode::ChildLocation childLocation = static_cast<SkdNode::ChildLocation>(i);
+            std::size_t childId = node.getChildId(childLocation);
+            if (childId != SkdNode::NULL_ID) {
+                isLeaf = false;
+                nodeStack->push_back(childId);
+            }
+        }
+
+        if (isLeaf) {
+            candidates.candidateIds->push_back(nodeId);
+            candidates.candidateMinDistances->push_back(std::sqrt(nodeMinSquareDistance));
+        }
+    }
+
+    // Set the distance estimate
+    if (!candidates.candidateIds->empty()) {
+        *distanceEstimate = std::sqrt(squareDistanceEstimate);
+    } else {
+        *distanceEstimate = std::numeric_limits<double>::max();
+    }
 }
 
 #if BITPIT_ENABLE_MPI
