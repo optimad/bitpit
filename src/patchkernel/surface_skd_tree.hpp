@@ -68,19 +68,21 @@ public:
 #endif
 
 private:
-    mutable std::vector<std::size_t> m_nodeStack;
-    mutable std::vector<std::size_t> m_candidateIds;
-    mutable std::vector<double> m_candidateMinDistances;
-
-    struct Candidates {
-        std::vector<std::size_t> *candidateIds = nullptr;
-        std::vector<double> *candidateMinDistances = nullptr;
-        std::vector<std::size_t> privateCandidateIds;
-        std::vector<double> privateCandidateMinDistances;
+    struct ClosestCellCandidates {
+        void clear() {
+            nodeStack.clear();
+            ids.clear();
+            minDistances.clear();
+        }
+        std::vector<std::size_t> nodeStack;
+        std::vector<std::size_t> ids;
+        std::vector<double> minDistances;
+        double maxDistance;
     };
 
-    void findPointClosestCandidates(const std::array<double, 3> &point, double maxDistance, double *distance, Candidates &candidates) const;
+    void findPointClosestCandidates(const std::array<double, 3> &point, double maxDistance, ClosestCellCandidates *candidates) const;
 
+    mutable std::unique_ptr<ClosestCellCandidates> m_closestCellCandidates;
 };
 
 }
