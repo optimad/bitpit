@@ -26,6 +26,7 @@
 
 #include <memory>
 #include <map>
+#include <string>
 #include <vector>
 #include <string>
 
@@ -36,10 +37,18 @@ class Config
 {
 
 public:
+    typedef std::map<std::string, std::string> Attributes;
+
+    struct Option {
+        std::string value;
+        Attributes attributes;
+    };
+
+    typedef std::map<std::string, Option> Options;
+
     typedef Config Section;
     typedef std::vector<Section *> MultiSection;
     typedef std::vector<const Section *> ConstMultiSection;
-    typedef std::map<std::string, std::string> Options;
     typedef std::multimap<std::string, std::unique_ptr<Config>> Sections;
 
     Config(bool multiSections = false);
@@ -55,13 +64,26 @@ public:
 
     bool isMultiSectionsEnabled() const;
 
-    int getOptionCount() const;
-    Options & getOptions();
-    const Options & getOptions() const;
-    bool hasOption(const std::string &key) const;
     const std::string & get(const std::string &key) const;
     std::string get(const std::string &key, const std::string &fallback) const;
     void set(const std::string &key, const std::string &value);
+
+    const std::string & getAttribute(const std::string &key, const std::string &name) const;
+    std::string getAttribute(const std::string &key, const std::string &name, const std::string &fallback) const;
+    void setAttribute(const std::string &key, const std::string &name, const std::string &value);
+
+    int getOptionCount() const;
+    Options & getOptions();
+    const Options & getOptions() const;
+    Option & getOption(const std::string &key);
+    const Option & getOption(const std::string &key) const;
+    bool hasOption(const std::string &key) const;
+    void addOption(const std::string &key, const Option &option);
+    void addOption(const std::string &key, Option &&option);
+    void addOption(const std::string &key, const std::string &value);
+    void addOption(const std::string &key, std::string &&value);
+    void addOption(const std::string &key, const std::string &value, const Attributes &attributes);
+    void addOption(const std::string &key, std::string &&value, Attributes &&attributes);
     bool removeOption(const std::string &key);
 
     int getSectionCount() const;
@@ -91,6 +113,15 @@ public:
 
     template<typename T>
     void set(const std::string &key, const T &value);
+
+    template<typename T>
+    T getAttribute(const std::string &key, const std::string &name) const;
+
+    template<typename T>
+    T getAttribute(const std::string &key, const std::string &name, const T &fallback) const;
+
+    template<typename T>
+    void setAttribute(const std::string &key, const std::string &name, const T &value);
 
 protected:
     bool m_multiSections;

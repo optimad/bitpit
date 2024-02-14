@@ -41,7 +41,7 @@ template<typename T>
 T Config::get(const std::string &key) const
 {
     T value;
-    if (std::istringstream(get(key)) >> value) {
+    if (std::istringstream(getOption(key).value) >> value) {
         return value;
     } else {
         throw std::runtime_error("Unable to convert the option \"" + key + "\"");
@@ -80,7 +80,72 @@ void Config::set(const std::string &key, const T &value)
 {
     std::ostringstream valueStream;
     if (valueStream << value) {
-        set(key, valueStream.str());
+        getOption(key).value = valueStream.str();
+    } else {
+        throw std::runtime_error("Unable to convert the option \"" + key + "\"");
+    }
+}
+
+/*!
+    Gets the value of the specified option attribute.
+
+    If the option or the attribute does not exists, an exception is thrown.
+
+    \param key is the name of the option
+    \param name is the name of the attribute
+    \result The value of the specified attribute.
+*/
+template<typename T>
+T Config::getAttribute(const std::string &key, const std::string &name) const
+{
+    T value;
+    if (std::istringstream(getOption(key).attributes.at(name)) >> value) {
+        return value;
+    } else {
+        throw std::runtime_error("Unable to convert the option \"" + key + "\"");
+    }
+}
+
+/*!
+    Gets the value of the specified option attribute.
+
+    If the option does not exists, an exception will be thrown. However, if
+    the attribute do not exists, the fallback walue will be returned
+
+    \param key is the name of the option
+    \param name is the name of the attribute
+    \param fallback is the value that will be returned if the specified
+    attribute does not exist
+    \result The value of the specified attribute or the fallback value if
+    the options or the attribute does not exist.
+*/
+template<typename T>
+T Config::getAttribute(const std::string &key, const std::string &name, const T &fallback) const
+{
+    const Option &option = getOption(key);
+    if (option.attributes.count(name) > 0) {
+        return getAttribute<T>(key);
+    }
+
+    return fallback;
+}
+
+/*!
+    Set the value of the specified option attribute.
+
+    If the option does not exists, an exception will be thrown. However,
+    if the attribute does not exists, a new attribute will be added.
+
+    \param key is the name of the option
+    \param name is the name of the attribute
+    \param value is the value of the attribute
+*/
+template<typename T>
+void Config::setAttribute(const std::string &key, const std::string &name, const T &value)
+{
+    std::ostringstream valueStream;
+    if (valueStream << value) {
+        getOption(key).attributes[name] = valueStream.str();
     } else {
         throw std::runtime_error("Unable to convert the option \"" + key + "\"");
     }

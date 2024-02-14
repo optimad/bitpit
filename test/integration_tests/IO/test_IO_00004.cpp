@@ -59,8 +59,8 @@ int subtest_001()
     std::cout << "Access configuration..." << std::endl;
     std::cout << "  - Section \"first\" has color..." << config::root["first"].get("color") << std::endl;
     std::cout << "  - Section \"second\" has color..." << config::root["second"].get("color") << std::endl;
-    std::cout << "  - Section \"first\" has distance..." << config::root.getSection("first").get("distance") << std::endl;
-    std::cout << "  - Section \"second\" has y data..." << config::root["second"]["data"].get("y") << std::endl;
+    std::cout << "  - Section \"first\" has distance..." << config::root.getSection("first").get("distance") << " " << config::root.getSection("first").getAttribute("distance", "unit") << std::endl;
+    std::cout << "  - Section \"second\" has y data..." << config::root["second"]["data"].get("y") << " " << config::root.getSection("second").getSection("data").getAttribute("y", "unit", "kg") << std::endl;
     std::cout << "  - Section \"first\" option count..." << config::root.getSection("first").getOptionCount() << std::endl;
     std::cout << "  - Section \"first\" sub-section count..." << config::root.getSection("first").getSectionCount() << std::endl;
 
@@ -68,10 +68,16 @@ int subtest_001()
     std::cout << "  - Section \"first\" has distance (int)..." << firstDistanceInt << std::endl;
 
     double firstDistanceDouble = config::root["first"].get<double>("distance");
-    std::cout << "  - Section \"first\" has distance (double)..." << firstDistanceDouble << std::endl;
+    std::cout << "  - Section \"first\" has distance (double)..." << firstDistanceDouble << " " << config::root.getSection("first").getOption("distance").attributes["unit"] << std::endl;
 
     double secondDataDouble = config::root["second"]["data"].get<double>("y");
-    std::cout << "  - Section \"section\" has y data (double)..." << secondDataDouble << std::endl;
+    std::cout << "  - Section \"section\" has y data (double)..." << secondDataDouble << " " << config::root["second"]["data"].getAttribute("y", "unit", "kg") << std::endl;
+
+    double secondMinDataDouble = config::root["second"]["data"].getAttribute<double>("y", "min");
+    std::cout << "  - Section \"section\" has y min value (double)..." << secondMinDataDouble << std::endl;
+
+    double secondMaxDataDouble = config::root["second"]["data"].getAttribute<double>("y", "max");
+    std::cout << "  - Section \"section\" has y max value (double)..." << secondMaxDataDouble << std::endl;
 
     bool firstExistsBool = config::root["first"].get<bool>("exists");
     std::cout << "  - Section \"first\" has distance..." << firstExistsBool << std::endl;
@@ -88,12 +94,16 @@ int subtest_001()
     config::root["second"].set("color", "orange");
 
     config::root["first"].set("distance", 111);
-    config::root["second"].set("distance", 222);
+    config::root["first"].setAttribute("distance", "unit", "mi");
+    config::root["second"].getOption("distance").value = "111";
+    config::root["second"].getOption("distance").attributes["unit"] = "km";
 
     config::root["first"].set("exists", true);
     config::root["second"].set("exists", true);
 
+    config::root["first"]["data"].setAttribute("x", "max", 150);
     config::root["first"]["data"].set("x", 111.111);
+    config::root["second"]["data"].setAttribute("y", "max", 250);
     config::root["second"]["data"].set("y", 222.222);
 
     // Dump the configuration

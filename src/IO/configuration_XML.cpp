@@ -66,10 +66,22 @@ void readNode(xmlNodePtr root, Config *config)
             }
             readNode(node->children, section);
         } else {
+            Config::Option option;
+
             xmlChar *nodeContent = xmlNodeGetContent(node);
-            std::string value(reinterpret_cast<const char*>(nodeContent));
-            config->set(key, value);
+            option.value = reinterpret_cast<const char*>(nodeContent);
             xmlFree(nodeContent);
+
+            xmlAttr *attribute = node->properties;
+            while (attribute) {
+                xmlChar* attributeValue = xmlNodeListGetString(node->doc, attribute->children, 1);
+                option.attributes[reinterpret_cast<const char*>(attribute->name)] = reinterpret_cast<const char*>(attributeValue);
+                xmlFree(attributeValue);
+
+                attribute = attribute->next;
+            }
+
+            config->addOption(key, std::move(option));
         }
     }
 }
@@ -87,20 +99,49 @@ void writeNode(xmlTextWriterPtr writer, const Config *config, const std::string 
 
     // Write the options
     for (const auto &entry : config->getOptions()) {
-        const std::string &key   = entry.first;
-        const std::string &value = entry.second;
+        const std::string &key = entry.first;
+        const Config::Option &option = entry.second;
 
+        // Start option
         xmlChar *elementName = encodeString(key, encoding);
-        xmlChar *elementText = encodeString(value, encoding);
-        int status = xmlTextWriterWriteFormatElement(writer, BAD_CAST elementName, "%s", elementText);
-        if (elementText) {
-            xmlFree(elementText);
-        }
+        status = xmlTextWriterStartElement(writer, BAD_CAST elementName);
         if (elementName) {
             xmlFree(elementName);
         }
         if (status < 0) {
-            throw std::runtime_error("Error at xmlTextWriterWriteFormatElement");
+            throw std::runtime_error("Error at xmlTextWriterStartElement");
+        }
+
+        // Write option attributes
+        for (const auto &attributeEntry : option.attributes) {
+            xmlChar *attributeName  = encodeString(attributeEntry.first, encoding);
+            xmlChar *attributeValue = encodeString(attributeEntry.second, encoding);
+            status = xmlTextWriterWriteAttribute(writer, BAD_CAST attributeName, BAD_CAST attributeValue);
+            if (attributeValue) {
+                xmlFree(attributeValue);
+            }
+            if (attributeName) {
+                xmlFree(attributeName);
+            }
+            if (status < 0) {
+                throw std::runtime_error("Error at xmlTextWriterWriteAttribute");
+            }
+        }
+
+        // Write option value
+        xmlChar *elementText = encodeString(option.value, encoding);
+        status = xmlTextWriterWriteFormatString(writer, "%s", BAD_CAST elementText);
+        if (elementText) {
+            xmlFree(elementText);
+        }
+        if (status < 0) {
+            throw std::runtime_error("Error at xmlTextWriterStartElement");
+        }
+
+        // End option
+        status = xmlTextWriterEndElement(writer);
+        if (status < 0) {
+            throw std::runtime_error("Error at xmlTextWriterEndElement");
         }
     }
 

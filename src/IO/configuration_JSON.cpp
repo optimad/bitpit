@@ -264,13 +264,13 @@ void writeNode(const Config *config, rapidjson::Value &rootJSONData, rapidjson::
 {
     // Write the options
     for (const auto &entry : config->getOptions()) {
-        const std::string &configKey   = entry.first;
-        const std::string &configValue = entry.second;
+        const std::string &key = entry.first;
+        const Config::Option &option = entry.second;
 
         rapidjson::Value jsonKey;
-        jsonKey.SetString(configKey, allocator);
+        jsonKey.SetString(key, allocator);
 
-        rapidjson::Value jsonValue = encodeValue(configValue, allocator);
+        rapidjson::Value jsonValue = encodeValue(option.value, allocator);
 
         rootJSONData.AddMember(jsonKey, jsonValue, allocator);
     }
