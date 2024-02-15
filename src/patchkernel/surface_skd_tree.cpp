@@ -606,7 +606,7 @@ long SurfaceSkdTree::findPointClosestCells(const std::array<double, 3> &point, d
         std::size_t nodeId = closestCellCandidates->ids.at(k);
         const SkdNode &node = m_nodes[nodeId];
 
-        node.updatePointClosestCells(point, interiorCellsOnly, ids, distance);
+        node.updatePointClosestCells(point, interiorCellsOnly, &ids, distance);
         ++nDistanceEvaluations;
     }
 

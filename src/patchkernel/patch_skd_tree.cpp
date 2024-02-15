@@ -748,7 +748,7 @@ void SkdNode::updatePointClosestCell(const std::array<double, 3> &point, bool in
 * on output it will be updated if closer cells are found
 */
 void SkdNode::updatePointClosestCells(const std::array<double, 3> &point, bool interiorCellsOnly,
-                                     std::vector<long> &closestId, double *closestDistance) const
+                                      std::vector<long> *closestIds, double *closestDistance) const
 {
     if (getCellCount() == 0) {
         return;
@@ -765,8 +765,17 @@ void SkdNode::updatePointClosestCells(const std::array<double, 3> &point, bool i
             continue;
         }
 
-
-        updatePointClosestCells(point, cell, closestId, closestDistance);
+        long candidateClosestId         = Cell::NULL_ID;
+        double candidateClosestDistance = *closestDistance;
+        updatePointClosestCell(point, cell, &candidateClosestId, &candidateClosestDistance);
+        if (candidateClosestId != Cell::NULL_ID) {
+            if (utils::DoubleFloatingLess()(candidateClosestDistance, *closestDistance, patch.getTol(), patch.getTol())) {
+                closestIds->assign(1, candidateClosestId);
+                *closestDistance = candidateClosestDistance;
+            } else {
+                closestIds->push_back(candidateClosestId);
+            }
+        }
     }
 }
 
@@ -879,98 +888,6 @@ void SkdNode::updatePointClosestCell(const std::array<double, 3> &point, const C
             *closestId       = cellId;
             *closestDistance = cellDistance;
         }
-
-        break;
-    }
-
-    default:
-    {
-        // Nothing to do
-    }
-
-    }
-}
-
-/*!
-* Given the specified point find if the given cell is closer than the current
-* one.
-*
-* If the specified cell has the same distance of the closest cells, this cell
-* is added to the closest cells container
-*
-* \param point is the point
-* \param cell is the cell
-* \param[in,out] closestIds are the indices of the closest cells, on output it will
-* be updated if the specified cell is closer than the current closest cells or
-* it is at the same distance.
-* \param[in,out] closestDistance is the distance of the closest cells, on output
-* it will be updated if the specified cell is closer than the current closest
-* cells
-*/
-void SkdNode::updatePointClosestCells(const std::array<double, 3> &point, const Cell &cell,
-        std::vector<long> &closestIds, double *closestDistance) const
-{
-    const PatchKernel &patch = m_patchInfo->getPatch();
-
-    // Cell id
-    long cellId = cell.getId();
-
-    // Project the point on the cell
-    int nCellVertices = cell.getVertexCount();
-    BITPIT_CREATE_WORKSPACE(cellVertexCoordinates, std::array<double BITPIT_COMMA 3>, nCellVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
-    patch.getElementVertexCoordinates(cell, cellVertexCoordinates);
-
-    double cellDistance;
-    std::array<double, 3> cellProjection;
-    cell.evalPointProjection(point, cellVertexCoordinates, &cellProjection, &cellDistance);
-
-    // Detect if the specified cell is closer than the current closest cells
-    const int DISTANCE_CLOSER  = - 1;
-    const int DISTANCE_EQUAL   =   0;
-    const int DISTANCE_FARTHER =   1;
-
-    int distanceFlag = DISTANCE_FARTHER;
-    if (utils::DoubleFloatingEqual()(cellDistance, *closestDistance, patch.getTol(), patch.getTol())) {
-        distanceFlag = DISTANCE_EQUAL;
-    } else if (cellDistance < *closestDistance) {
-        distanceFlag = DISTANCE_CLOSER;
-    }
-
-    // Consider the case where no closest cell is defined
-    //
-    // Even if the id of the closest cell is null, we may have an
-    // estimated of the closest cell distance. We need to update
-    // the closest cell information only if the current cells is
-    // closer than the estimate.
-    if (closestIds[0] == Cell::NULL_ID) {
-        if (distanceFlag != DISTANCE_FARTHER) {
-            closestIds[0]       = cellId;
-            *closestDistance = cellDistance;
-        }
-
-        return;
-    }
-
-    // Update closest cells information accordingly to the distance flag:
-    //  - if the specified cell is closer the specified cell will become the
-    //    closest cell
-    //  - if the two cells have the same distance, the specified cell will be
-    //    added to the closest cells container.
-    //  - if the specified cell is farther there is nothing to do;
-    switch (distanceFlag) {
-
-    case DISTANCE_CLOSER:
-    {
-        closestIds.resize(1);
-        closestIds[0]       = cellId;
-        *closestDistance = cellDistance;
-
-        break;
-    }
-
-    case DISTANCE_EQUAL:
-    {
-        closestIds.push_back(cellId);
 
         break;
     }
