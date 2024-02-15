@@ -129,6 +129,12 @@ if (BLAS_FOUND)
       if(BLAS_INCLUDE_DIRS)
         set(CBLAS_INCLUDE_DIRS "${BLAS_INCLUDE_DIRS}")
         set(CBLAS_INCLUDE_DIRS_DEP "${BLAS_INCLUDE_DIRS_DEP}")
+      else()
+        find_path(CBLAS_INCLUDE_DIRS
+          NAMES cblas.h mkl_cblas.h
+          HINTS ${LAPACK_DIR}
+          PATH_SUFFIXES "include" "include/lapacke")
+        set(CBLAS_INCLUDE_DIRS_DEP "${CBLAS_INCLUDE_DIRS}")
       endif()
       if (BLAS_LINKER_FLAGS)
         set(CBLAS_LINKER_FLAGS "${BLAS_LINKER_FLAGS}")
