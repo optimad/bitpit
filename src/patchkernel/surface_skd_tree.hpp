@@ -57,10 +57,10 @@ public:
     long findPointClosestCell(int nPoints, const std::array<double, 3> *points, double maxDistance, long *ids, double *distances) const;
     long findPointClosestCell(int nPoints, const std::array<double, 3> *points, const double *maxDistances, long *ids, double *distances) const;
     long findPointClosestCell(int nPoints, const std::array<double, 3> *points, const double *maxDistances, bool interorOnly, long *ids, double *distances) const;
-
     long findPointClosestCells(const std::array<double,3> &point, std::vector<long> &ids, double *distance) const;
     long findPointClosestCells(const std::array<double, 3> &point, double maxDistance, std::vector<long> &ids, double *distance) const;
     long findPointClosestCells(const std::array<double, 3> &point, double maxDistance, bool interorOnly, std::vector<long> &ids,  double *distance) const;
+
 #if BITPIT_ENABLE_MPI
     long findPointClosestGlobalCell(int nPoints, const std::array<double, 3> *points, long *ids, int *ranks, double *distances) const;
     long findPointClosestGlobalCell(int nPoints, const std::array<double, 3> *points, double maxDistance, long *ids, int *ranks, double *distances) const;
@@ -69,15 +69,17 @@ public:
 
 private:
     struct ClosestCellCandidates {
-        void clear() {
-            nodeStack.clear();
-            ids.clear();
-            minDistances.clear();
-        }
         std::vector<std::size_t> nodeStack;
         std::vector<std::size_t> ids;
         std::vector<double> minDistances;
         double maxDistance;
+
+        void clear()
+        {
+            nodeStack.clear();
+            ids.clear();
+            minDistances.clear();
+        }
     };
 
     void findPointClosestCandidates(const std::array<double, 3> &point, double maxDistance, ClosestCellCandidates *candidates) const;
