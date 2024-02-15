@@ -24,11 +24,10 @@
 
 #include <cassert>
 #include <limits>
-#include <cblas.h>
-
 #include "bitpit_LA.hpp"
 #include "bitpit_operators.hpp"
 
+#include "bitpit_private_cblas.hpp"
 #include "bitpit_private_lapacke.hpp"
 
 #include "reconstruction.hpp"
