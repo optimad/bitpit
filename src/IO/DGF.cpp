@@ -900,9 +900,9 @@ unsigned int dgf::scanData(
 // ========================================================================== //
 
 // Local variables
-long int        current_pos;
-string          line, word;
-stringstream    sline;
+std::streamoff    current_pos;
+std::string       line, word;
+std::stringstream sline;
 
 // Counters
 // none
@@ -984,10 +984,10 @@ unsigned int dgf::scan(
 // ========================================================================== //
 
 // Local variables
-unsigned int    err = 0;
-long int        start_pos;
-string          line, word;
-stringstream    sline;
+unsigned int      err = 0;
+std::streamoff    start_pos;
+std::string       line, word;
+std::stringstream sline;
 
 // Counters
 int             n;
@@ -1097,9 +1097,9 @@ unsigned int dgf::checkData(
 // ========================================================================== //
 
 // Local variables
-long int        current_pos;
-string          line, word;
-stringstream    sline;
+std::streamoff    current_pos;
+std::string       line, word;
+std::stringstream sline;
 
 // Counters
 // none
@@ -1176,11 +1176,11 @@ unsigned int dgf::check(
 // ========================================================================== //
 
 // Local variables
-unsigned int    err = 0;
-long int        start_pos;
-int             loc_err;
-string          line, word;
-stringstream    sline;
+unsigned int      err = 0;
+std::streamoff    start_pos;
+int               loc_err;
+std::string       line, word;
+std::stringstream sline;
 
 // Counters
 // none
@@ -1280,10 +1280,10 @@ unsigned int dgf::readMesh(
 // ========================================================================== //
 
 // Local variables
-unsigned int    err = 0;
-long int        start_pos;
-string          line, word;
-stringstream    sline;
+unsigned int      err = 0;
+std::streamoff    start_pos;
+std::string       line, word;
+std::stringstream sline;
 
 // Counters
 // none
@@ -1368,10 +1368,10 @@ unsigned int dgf::readMesh(
 // ========================================================================== //
 
 // Local variables
-unsigned int    err = 0;
-long int        start_pos;
-string          line, word;
-stringstream    sline;
+unsigned int      err = 0;
+std::streamoff    start_pos;
+std::string       line, word;
+std::stringstream sline;
 
 // Counters
 // none

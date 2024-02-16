@@ -48,7 +48,7 @@ void VTKUnstructuredGrid::HomogeneousInfoStreamer::setElementType( VTKElementTyp
  * Sets the numer of elements to be written
  * @param[in] n number of cells in grid
  */
-void VTKUnstructuredGrid::HomogeneousInfoStreamer::setCellCount( long n){
+void VTKUnstructuredGrid::HomogeneousInfoStreamer::setCellCount( uint64_t n){
 
     m_nCells = n ;
 
@@ -78,7 +78,7 @@ void VTKUnstructuredGrid::HomogeneousInfoStreamer::flushData( std::fstream &str,
 
     if(name == "types" ){
         uint8_t type = (uint8_t) m_type ;
-        for( unsigned int i=0; i<m_nCells; ++i){
+        for( uint64_t i=0; i<m_nCells; ++i){
             flushValue(str, format, type );
         }
 
@@ -86,25 +86,25 @@ void VTKUnstructuredGrid::HomogeneousInfoStreamer::flushData( std::fstream &str,
         uint8_t     n = vtk::getElementNodeCount(m_type) ;
         if (connectivityDataType == VTKDataType::Int64 || connectivityDataType == VTKDataType::UInt64) {
             uint64_t    offset(0) ;
-            for( unsigned int i=0; i<m_nCells; ++i){
+            for( uint64_t i=0; i<m_nCells; ++i){
                 offset += n ;
                 flushValue(str, format, offset );
             }
         } else if (connectivityDataType == VTKDataType::Int32 || connectivityDataType == VTKDataType::UInt32) {
             uint32_t    offset(0) ;
-            for( unsigned int i=0; i<m_nCells; ++i){
+            for( uint64_t i=0; i<m_nCells; ++i){
                 offset += n ;
                 flushValue(str, format, offset );
             }
         } else if (connectivityDataType == VTKDataType::Int16 || connectivityDataType == VTKDataType::UInt16) {
             uint16_t    offset(0) ;
-            for( unsigned int i=0; i<m_nCells; ++i){
+            for( uint64_t i=0; i<m_nCells; ++i){
                 offset += n ;
                 flushValue(str, format, offset );
             }
         } else if (connectivityDataType == VTKDataType::Int8 || connectivityDataType == VTKDataType::UInt8) {
             uint8_t    offset(0) ;
-            for( unsigned int i=0; i<m_nCells; ++i){
+            for( uint64_t i=0; i<m_nCells; ++i){
                 offset += n ;
                 flushValue(str, format, offset );
             }

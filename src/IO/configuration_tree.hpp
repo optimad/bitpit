@@ -27,6 +27,8 @@
 #include "configuration_config.hpp"
 #include "configuration_common.hpp"
 
+#include "bitpit_common.hpp"
+
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>

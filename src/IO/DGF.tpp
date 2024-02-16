@@ -256,8 +256,8 @@ unsigned int readData(
 // ========================================================================== //
 
 // Local variables
-bool                check;
-long int            start_pos;
+bool                     check;
+std::streamoff           start_pos;
 std::string              word, line;
 std::stringstream        sline;
 
@@ -445,8 +445,8 @@ unsigned int readSimplexData(
 // ========================================================================== //
 
 // Local variables
-bool            check = false;
-long int        current_pos, start_pos;
+bool                 check = false;
+std::streamoff       current_pos, start_pos;
 std::string          header, line, word;
 std::stringstream    sline;
 

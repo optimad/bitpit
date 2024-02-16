@@ -69,7 +69,7 @@ void copyUntilEOFInString(std::fstream &str, char *&buffer, int &length)
 
     // Evaluate the length on file. This is a prediction of the maximum
     // number of charactes readable in the current file slot.
-    length = position_eof - position_insert;
+    length = static_cast<int>(position_eof - position_insert);
 
     // Instantiate a char vector for reading purposes
     std::vector<char> trybuf(length);
