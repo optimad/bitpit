@@ -483,7 +483,7 @@ int SurfUnstructured::importSTL(const std::string &filename, STLReader::Format f
             // we estimate the number of vertices assuming a closed triangulation
             // (this gives us the minimum number of nodes the triangulation could
             // possibly have).
-            nEstimatedVertices = 0.5 * nFacets + 2;
+            nEstimatedVertices = static_cast<std::size_t>(0.5 * nFacets) + 2;
         } else {
             nEstimatedVertices = nFacetVertices * nFacets;
         }
