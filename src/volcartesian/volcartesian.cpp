@@ -394,7 +394,7 @@ void VolCartesian::_updateInterfaces()
 				// Neighbour data
 				if (neighId >= 0) {
 					Cell &neigh = getCell(neighId);
-					int neighFace = 2 * std::floor(face / 2.) + (1 - face % 2);
+					int neighFace = 2 * static_cast<int>(std::floor(face / 2.)) + (1 - face % 2);
 
 					interface.setNeigh(neighId, neighFace);
 					neigh.setInterface(neighFace, 0, interfaceId);
@@ -893,7 +893,7 @@ double VolCartesian::evalInterfaceArea(long id) const
 {
 	const Interface &interface = getInterface(id);
 	int ownerFace = interface.getOwnerFace();
-	int direction = std::floor(ownerFace / 2.);
+	int direction = static_cast<int>(std::floor(ownerFace / 2.));
 
 	return m_interfaceArea[direction];
 }
@@ -1310,10 +1310,10 @@ std::array<int, 3> VolCartesian::locatePointCartesian(const std::array<double, 3
 		return ijk;
 	}
 
-	ijk[0] = std::floor((point[Vertex::COORD_X] - m_minCoords[Vertex::COORD_X]) / m_cellSpacings[Vertex::COORD_X]);
-	ijk[1] = std::floor((point[Vertex::COORD_Y] - m_minCoords[Vertex::COORD_Y]) / m_cellSpacings[Vertex::COORD_Y]);
+	ijk[0] = static_cast<int>(std::floor((point[Vertex::COORD_X] - m_minCoords[Vertex::COORD_X]) / m_cellSpacings[Vertex::COORD_X]));
+	ijk[1] = static_cast<int>(std::floor((point[Vertex::COORD_Y] - m_minCoords[Vertex::COORD_Y]) / m_cellSpacings[Vertex::COORD_Y]));
 	if (isThreeDimensional()) {
-		ijk[2] = std::floor((point[Vertex::COORD_Z] - m_minCoords[Vertex::COORD_Z]) / m_cellSpacings[Vertex::COORD_Z]);
+		ijk[2] = static_cast<int>(std::floor((point[Vertex::COORD_Z] - m_minCoords[Vertex::COORD_Z]) / m_cellSpacings[Vertex::COORD_Z]));
 	} else {
 		ijk[2] = -1;
 	}
@@ -1382,7 +1382,7 @@ std::array<int, 3> VolCartesian::locateClosestCellCartesian(const std::array<dou
 	std::array<int,3> ijk({{0,0,0}});
 
     for( int i=0; i<getDimension(); ++i){
-	    ijk[i] = std::floor((point[i] - m_minCoords[i]) / m_cellSpacings[i]);
+	    ijk[i] = static_cast<int>(std::floor((point[i] - m_minCoords[i]) / m_cellSpacings[i]));
         ijk[i] = std::max( ijk[i], 0 );
         ijk[i] = std::min( ijk[i], m_nCells1D[i]-1 );
     }
@@ -2134,7 +2134,7 @@ int VolCartesian::linearCellInterpolation(const std::array<double,3> &point,
 		int index_next = index_point + 1;
 
 		if (index_point < 0) {
-			cStencil[d][0] = 0.;
+			cStencil[d][0] = 0;
 			cWeights[d][0] = 1.;
 		} else if (index_next > m_nCells1D[d] - 1) {
 			cStencil[d][0] = m_nCells1D[d] - 1;
@@ -2157,7 +2157,7 @@ int VolCartesian::linearCellInterpolation(const std::array<double,3> &point,
 	}
 
 	for (int d = dimension; d < 3; ++d) {
-		cStencil[d][0] = 0.;
+		cStencil[d][0] = 0;
 		cWeights[d][0] = 1.;
 	}
 
@@ -2237,7 +2237,7 @@ int VolCartesian::linearVertexInterpolation(const std::array<double,3> &point,
 		cWeights[d][0] = 1.;
 	}
 
-	int stencilSize = pow(2, dimension);
+	int stencilSize = uipow(2, dimension);
 	stencil->resize(stencilSize);
 	weights->resize(stencilSize);
 
@@ -2320,7 +2320,7 @@ const std::vector<double> & VolCartesian::getCellCentroids(int direction) const
 std::array<int, 3> VolCartesian::getCellFaceNeighsCartesianId(long id, int face) const
 {
 	int neighSide      = face % 2;
-	int neighDirection = std::floor(face / 2);
+	int neighDirection = static_cast<int>(std::floor(face / 2));
 
 	std::array<int, 3> neighIjk(getCellCartesianId(id));
 	if (neighSide == 0) {
