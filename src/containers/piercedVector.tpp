@@ -823,6 +823,7 @@ void PiercedVector<value_t, id_t>::swap(PiercedVector &other) noexcept
         PiercedVectorStorage<value_t, id_t>::setDynamicKernel(this, PiercedVectorKernel<id_t>::SYNC_MODE_DISABLED);
         other.PiercedVectorStorage<value_t, id_t>::setDynamicKernel(&other, PiercedVectorKernel<id_t>::SYNC_MODE_DISABLED);
     } catch (const std::exception &exception) {
+        BITPIT_UNUSED(exception);
         assert(false && "Error while swapping the PiercedVector!");
         std::cout << "Error while swapping the PiercedVector!" << std::endl;
         exit(0);
