@@ -653,7 +653,7 @@ size_t                i;
 // COMPUTE ELEMENT-WISE POWER                                                         //
 // ================================================================================== //
 for (i = 0; i < d; i++) {
-    y[i] = pow(x[i], p);
+    y[i] = static_cast<T>(pow(x[i], p));
 } //next i
 
 return(y); };

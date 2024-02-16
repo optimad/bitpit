@@ -83,8 +83,8 @@ T uipow(const T & base, unsigned int exponent)
         // link:
         //
         //    https://en.wikipedia.org/wiki/Exponentiation_by_squaring
-        double result = 1.;
-        double base_work = base;
+        T result = static_cast<T>(1);
+        T base_work = base;
         while (exponent) {
             if (exponent % 2) {
                 result *= base_work;
