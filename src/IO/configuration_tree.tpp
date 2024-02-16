@@ -78,6 +78,7 @@ void readConfiguration(Source &source, SourceFormat format, const std::string &r
                     throw std::runtime_error("The version of the configuration file is not not \"" + std::to_string(version) + "\"");
                 }
             } catch (boost::property_tree::ptree_bad_path &error) {
+                BITPIT_UNUSED(error);
                 throw std::runtime_error("Unable to identify the version of the configuration");
             }
         }
