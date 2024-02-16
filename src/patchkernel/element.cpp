@@ -820,7 +820,7 @@ ConstProxyVector<int> Element::getFaceLocalConnect(int face) const
 			int vertexId = faceVertexIds[k];
 			auto localVertexIdItr = std::find(vertexIds.begin(), vertexIds.end(), vertexId);
 			assert(localVertexIdItr != vertexIds.end() && *localVertexIdItr == vertexId);
-			localFaceConnectStorage[localVertexOffset + k] = std::distance(vertexIds.begin(), localVertexIdItr);
+			localFaceConnectStorage[localVertexOffset + k] = static_cast<int>(std::distance(vertexIds.begin(), localVertexIdItr));
 		}
 
 		return localFaceConnect;
@@ -1024,7 +1024,7 @@ ConstProxyVector<int> Element::getEdgeLocalConnect(int edge) const
 			int vertexId = edgeVertexIds[k];
 			auto localVertexIdItr = std::find(vertexIds.begin(), vertexIds.end(), vertexId);
 			assert(localVertexIdItr != vertexIds.end() && *localVertexIdItr == vertexId);
-			localEdgeConnectStorage[k] = std::distance(vertexIds.begin(), localVertexIdItr);
+			localEdgeConnectStorage[k] = static_cast<int>(std::distance(vertexIds.begin(), localVertexIdItr));
 		}
 
 		return localEdgeConnect;
@@ -1303,12 +1303,12 @@ int Element::findVertex(long vertexId) const
 {
 	ConstProxyVector<long> cellVertexIds = getVertexIds();
 
-	int localVertexId = std::distance(cellVertexIds.begin(), std::find(cellVertexIds.begin(), cellVertexIds.end(), vertexId));
-	if (localVertexId >= (int) cellVertexIds.size()) {
+	auto localVertexItr = std::find(cellVertexIds.begin(), cellVertexIds.end(), vertexId);
+	if (localVertexItr == cellVertexIds.end()) {
 		return -1;
 	}
 
-	return localVertexId;
+	return static_cast<int>(std::distance(cellVertexIds.begin(), localVertexItr));
 }
 
 /*!

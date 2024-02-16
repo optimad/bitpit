@@ -50,7 +50,7 @@ namespace bitpit {
 /*!
 	Default cell weight used for patch partitioning
 */
-const int PatchKernel::DEFAULT_PARTITIONING_WEIGTH = 1.;
+const double PatchKernel::DEFAULT_PARTITIONING_WEIGTH = 1.;
 
 /*!
 	Initialize the MPI communicator to be used for parallel communications.
@@ -1920,9 +1920,9 @@ std::vector<adaption::Info> PatchKernel::_partitioningPrepare(const std::unorder
 		// Fill the cell ranks
 		int metisId = 0;
 		for (const Cell &cell : m_cells) {
-			int metisRank = elementRanks[metisId];
+			int metisRank = static_cast<int>(elementRanks[metisId]);
 			if (metisRank != getRank()) {
-				cellRanks[cell.getId()] = elementRanks[metisId];
+				cellRanks[cell.getId()] = metisRank;
 			}
 			++metisId;
 		}
