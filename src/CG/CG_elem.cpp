@@ -725,9 +725,9 @@ int convertBarycentricToFlagPolygon( std::size_t nLambda, double const *lambda, 
 
     } else if (count==2) {
         if (lastPositive != 0) {
-            count = - lastPositive;
+            count = - static_cast<int>(lastPositive);
         } else {
-            count = - nLambda;
+            count = - static_cast<int>(nLambda);
         }
 
     }
