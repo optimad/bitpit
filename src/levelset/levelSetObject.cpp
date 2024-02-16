@@ -161,6 +161,8 @@ LevelSetObject::~LevelSetObject() {
 
             enableVTKOutput(enabledOutputFieldset, false);
         } catch (const std::exception &exception) {
+            BITPIT_UNUSED(exception);
+
             // Nothing to do
         }
     }
