@@ -856,7 +856,7 @@ void LevelSetContainerCache<key_t, std::vector<value_t>>::restore(std::istream &
 template<typename key_t, typename value_t>
 key_t LevelSetContainerCache<key_t, std::vector<value_t>>::getKey(const const_iterator &itr) const
 {
-    return (itr - Base::m_container.begin());
+    return static_cast<key_t>((itr - Base::m_container.begin()));
 }
 
 /*!
