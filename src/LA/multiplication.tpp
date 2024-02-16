@@ -73,7 +73,7 @@ C.resize(m);
 
 // Perform product
 for (std::size_t i = 0; i < m; i++) {
-    C[i].resize(n, (T) 0.0);
+    C[i].resize(n, T{});
     for (std::size_t j = 0; j < n; j++) {
         C[i][j] = A * B[i][j];
     } //next j
@@ -270,11 +270,11 @@ if (l != m) {
 // ========================================================================== //
 
 // Resize vector
-C.resize(n, 0.0);
+C.resize(n, T{});
 
 // Compute matrix product
 for (std::size_t i = 0; i < n; i++) {
-    C[i] = 0.0;
+    C[i] = T{};
     for (std::size_t j = 0; j < m; j++) {
         C[i] += A[j]*B[j][i];
     } //next j
@@ -321,7 +321,7 @@ if (n == 0) {
 // COMPUTE THE MATRIX PRODUCT                                                 //
 // ========================================================================== //
 for (std::size_t i = 0; i < n; i++) {
-    C[i] = 0.0;
+    C[i] = T{};
     for (std::size_t j = 0; j < m; j++) {
         C[i] += A[j]*B[j][i];
     } //next j
@@ -381,11 +381,11 @@ if (l != n) {
 // ========================================================================== //
 
 // Resize vector
-C.resize(m, 0.0);
+C.resize(m, T{});
 
 // Compute matrix product
 for (std::size_t i = 0; i < m; i++) {
-    C[i] = 0.0;
+    C[i] = T{};
     for (std::size_t j = 0; j < n; j++) {
         C[i] += B[j]*A[i][j];
     } //next j
@@ -432,7 +432,7 @@ if (n == 0) {
 // COMPUTE THE MATRIX PRODUCT                                                 //
 // ========================================================================== //
 for (std::size_t i = 0; i < m; i++) {
-    C[i] = 0.0;
+    C[i] = T{};
     for (std::size_t j = 0; j < n; j++) {
         C[i] += B[j]*A[i][j];
     } //next j
@@ -499,9 +499,9 @@ if (n1 != m2) {
 C.resize(m1);
 
 for (std::size_t i = 0; i < m1; i++) {
-    C[i].resize(n2, (T) 0.0);
+    C[i].resize(n2, T{});
     for (std::size_t j = 0; j < n2; j++) {
-        C[i][j] = (T) 0.0;
+        C[i][j] = T{};
         for (std::size_t k = 0; k < n1; k++) {
             C[i][j] += A[i][k] * B[k][j];
         } //next k
@@ -555,7 +555,7 @@ if (l == 0) {
 // ========================================================================== //
 for (std::size_t i = 0; i < m; i++) {
     for (std::size_t j = 0; j < l; j++) {
-        C[i][j] = (T) 0.0;
+        C[i][j] = T{};
         for (std::size_t k = 0; k < n; k++) {
             C[i][j] += A[i][k] * B[k][j];
         } //next k
@@ -743,7 +743,7 @@ std::vector<T> matmul(
 
     std::size_t d1 = M.size();
 
-    std::vector<T>      z(d1,0.0);
+    std::vector<T>      z(d1, T{});
 
     for( std::size_t i=0; i<d1; i++){
         z[i]= dotProduct( M[i], x );
@@ -793,7 +793,7 @@ std::vector<std::vector<T>> tensorProduct(
 
     std::size_t  n = x.size();
     std::size_t  m = y.size();
-    std::vector<T>      row(m,0.0);
+    std::vector<T>      row(m, T{});
     std::vector<std::vector<T>> z(n,row) ;
 
     for( std::size_t i=0; i<n; i++){
