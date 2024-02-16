@@ -248,8 +248,6 @@ public:
 
     void solve();
 
-    std::size_t getRowStencilCount() const;
-
 protected:
     std::size_t nStencils;
 
