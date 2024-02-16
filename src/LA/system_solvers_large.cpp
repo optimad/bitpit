@@ -2520,6 +2520,8 @@ void SystemSolver::setReordering(long nRows, long nCols, const SystemMatrixOrder
         dynamic_cast<const NaturalSystemMatrixOrdering &>(reordering);
         return;
     } catch(const std::bad_cast &exception) {
+        BITPIT_UNUSED(exception);
+
         // A reordering other than the natural one has been passed
     }
 
