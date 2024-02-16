@@ -275,7 +275,7 @@ if ((j >= n) || (j < 0)) {
 // Resize output variables
 B.resize(m-1);
 for (int p = 0; p < m-1; ++p) {
-    B[p].resize(n-1, 0.0);
+    B[p].resize(n-1, T{});
 } //next p
 
 // Extract complement

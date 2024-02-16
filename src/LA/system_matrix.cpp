@@ -528,7 +528,7 @@ void SparseMatrix::display(std::ostream &stream, double negligiblity, int indent
     double elementValueSparsity = static_cast<double>(nElements - nNZElementValues) / nElements;
 
     // Evaluate local memory usage
-    double valueStorageMemory = nNZElements * sizeof(decltype(m_values)::value_type);
+    double valueStorageMemory = static_cast<double>(nNZElements * sizeof(decltype(m_values)::value_type));
 
     // Display local information
     stream << padding << "Local information: " << std::endl;
@@ -1380,13 +1380,13 @@ std::unique_ptr<SparseMatrix> SparseMatrix::computeTranspose() const
 #endif
 
     // Create an empty transpose pattern
-    std::vector<std::size_t> transposeRowSizes(transpose->m_nRows, 0.);
+    std::vector<std::size_t> transposeRowSizes(transpose->m_nRows, 0);
     for (int i = 0; i < m_nNZ; ++i) {
         long column = *(m_pattern.data() + i);
         ++transposeRowSizes[column];
     }
 
-    transpose->m_pattern.initialize(transpose->m_nRows, transposeRowSizes.data(), 0.);
+    transpose->m_pattern.initialize(transpose->m_nRows, transposeRowSizes.data(), static_cast<long>(0));
 
     // Create the empty storage for the values
     transpose->m_values.resize(m_blockSize * m_nNZ);
