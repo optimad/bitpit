@@ -783,7 +783,7 @@ protected:
 	typedef std::unordered_map<long, AlterationFlags> AlterationFlagsStorage;
 
 #if BITPIT_ENABLE_MPI==1
-	const static int DEFAULT_PARTITIONING_WEIGTH;
+	const static double DEFAULT_PARTITIONING_WEIGTH;
 #endif
 
 	const static AlterationFlags FLAG_NONE              = 0x0;

@@ -3212,7 +3212,7 @@ long PatchKernel::countFreeCells() const
 */
 long PatchKernel::countBorderCells() const
 {
-	double nBorderCells = 0;
+	long nBorderCells = 0;
 	for (const Cell &cell : m_cells) {
 		int nCellFaces = cell.getFaceCount();
 		for (int i = 0; i < nCellFaces; ++i) {
@@ -4870,7 +4870,7 @@ long PatchKernel::countFreeFaces() const
 */
 long PatchKernel::countBorderFaces() const
 {
-	double nBorderFaces = 0;
+	long nBorderFaces = 0;
 	for (const Cell &cell : m_cells) {
 		int nCellFaces = cell.getFaceCount();
 		for (int i = 0; i < nCellFaces; ++i) {
@@ -6183,7 +6183,7 @@ void PatchKernel::_updateAdjacencies()
 
 	// Create the adjacencies
 	std::unordered_set<CellHalfFace, CellHalfFace::Hasher> halfFaces;
-	halfFaces.reserve(0.5 * nMaxHalfFaces);
+	halfFaces.reserve(static_cast<std::size_t>(0.5 * nMaxHalfFaces));
 
 	std::vector<std::pair<Cell *, int>> matchingAdjacencies;
 	for (Cell *cell : processList) {
@@ -6770,7 +6770,7 @@ int PatchKernel::findAdjoinNeighFace(const Cell &cell, int cellFace, const Cell 
 	const int nNeighFaces = neigh.getFaceCount();
 
 	int nCandidates = 0;
-	BITPIT_CREATE_WORKSPACE(candidates, std::array<double BITPIT_COMMA 3>, nNeighFaces, ReferenceElementInfo::MAX_ELEM_FACES);
+	BITPIT_CREATE_WORKSPACE(candidates, std::array<int BITPIT_COMMA 3>, nNeighFaces, ReferenceElementInfo::MAX_ELEM_FACES);
 	for (int neighFace = 0; neighFace < nNeighFaces; neighFace++) {
 		int nFaceAdjacencies = neigh.getAdjacencyCount(neighFace);
 		const long *faceAdjacencies = neigh.getAdjacencies(neighFace);
