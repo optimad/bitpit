@@ -189,7 +189,7 @@ int                                 T, V, A, W;
 int                                 m;
 
 for (V = 0; V < nVertex; V++) {
-    map[V].fill(0.) ;
+    map[V].fill(0) ;
 };
 
 // ========================================================================== //
@@ -407,7 +407,7 @@ int                                 T, V, A, W;
 int                                 m;
 
 for (V = 0; V < nVertex; V++) {
-        map[V].fill(0.) ;
+        map[V].fill(0) ;
 };
 
 // ========================================================================== //
@@ -611,8 +611,8 @@ void gradLimiting2D(
 // ========================================================================== //
 
 // Local variables
-int                                 idummy;
-double                              ddummy;
+int                                 idummy = 0;
+double                              ddummy = 0.;
 std::vector<bool>                   inserted(nSimplex, false);
 std::vector< std::array<int,2> >    map(nSimplex), *map_ = &map;
 bitpit::MinPQueue<double, int>      heap(nSimplex, true, map_);
@@ -623,7 +623,7 @@ int                                 T, A;
 int                                 m;
 
 for (T = 0; T < nSimplex; T++) {
-        map[T].fill(0.) ;
+        map[T].fill(0) ;
 };
 
 // ========================================================================== //
