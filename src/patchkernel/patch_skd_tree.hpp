@@ -139,8 +139,6 @@ private:
 
     void initializeBoundingBox();
 
-    void updatePointClosestCell(const std::array<double, 3> &point, const Cell &cell, long *closestId, double *closestDistance) const;
-
 };
 
 #if BITPIT_ENABLE_MPI
