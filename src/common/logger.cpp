@@ -79,7 +79,7 @@ LoggerBuffer::LoggerBuffer(int nProcesses, int rank, std::size_t bufferSize)
 
     // Set parallel data
     if (m_nProcesses > 1) {
-        int nDigits = ceil(log10(m_nProcesses));
+        int nDigits = static_cast<int>(std::ceil(log10(m_nProcesses)));
         std::ostringstream convert;
         convert << std::setw(nDigits) << m_rank;
         m_rankPrefix = "#" + convert.str();
@@ -233,7 +233,7 @@ int LoggerBuffer::flush(bool terminate)
     }
 
     // Reset the internal pointer
-    pbump(bufferBegin - bufferEnd);
+    pbump(static_cast<int>(bufferBegin - bufferEnd));
 
     return 0;
 }
