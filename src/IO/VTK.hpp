@@ -26,6 +26,7 @@
 #ifndef __BITPIT_VTK_HPP__
 #define __BITPIT_VTK_HPP__
 
+#include <cstdint>
 #include <typeinfo>
 #include <type_traits>
 #include <vector>
@@ -436,14 +437,14 @@ class VTKUnstructuredGrid : public VTK {
 
             private:
                 VTKElementType          m_type ;                    /**< the type of cells */
-                long                    m_nCells ;                  /**< numer of cells */
+                uint64_t                m_nCells ;                  /**< numer of cells */
                 const VTKField         *m_connectivity ;            /**< connectivity field */
 
                 void                    flushData( std::fstream &, const std::string &, VTKFormat) override ;
 
             public:
                 void                    setElementType( VTKElementType) ;
-                void                    setCellCount( long) ;
+                void                    setCellCount( uint64_t) ;
                 void                    setConnectivityField( const VTKField *connectivity) ;
         };
 

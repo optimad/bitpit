@@ -361,7 +361,7 @@ int STLReader::inspectASCII(InspectionInfo *info)
 
     // Set cursor at file begin
     m_fileHandle.clear();
-    long start_pos = m_fileHandle.tellg();
+    std::streamoff start_pos = m_fileHandle.tellg();
     m_fileHandle.seekg(0);
 
     // Scan file
@@ -438,7 +438,7 @@ int STLReader::inspectSolidASCII(std::size_t *nFacets, std::array<bool, 6> *erro
 
     // Inspect the solid
     std::string word;
-    long last_valid_pos;
+    std::streamoff last_valid_pos;
 
     int inspectError = 0;
     while (true) {
@@ -502,7 +502,7 @@ int STLReader::inspectFacetASCII(std::array<bool, 6> *errors)
 
     // Check facet data
     std::string word;
-    long last_valid_pos;
+    std::streamoff last_valid_pos;
 
     last_valid_pos = m_fileHandle.tellg();
     m_lineStream.readLine(m_fileHandle);
@@ -599,7 +599,7 @@ int STLReader::inspectBinary(InspectionInfo *info)
 
     // Set cursor at file begin
     m_fileHandle.clear();
-    long start_pos = m_fileHandle.tellg();
+    std::streamoff start_pos = m_fileHandle.tellg();
     m_fileHandle.seekg(0);
 
     // Inspect header
@@ -986,8 +986,8 @@ int STLReader::readHeaderASCII(const std::string &solid, std::string *name, std:
     std::string word;
     std::string line;
 
-    long start_pos   = m_fileHandle.tellg();
-    long current_pos = start_pos + 1;
+    std::streamoff start_pos   = m_fileHandle.tellg();
+    std::streamoff current_pos = start_pos + 1;
 
     bool solidFound = false;
     bool wrapAround = solidKey.compare(ASCII_SOLID_BEGIN) != 0;
@@ -1118,7 +1118,7 @@ int STLReader::readFacetASCII(std::array<double, 3> *V0, std::array<double, 3> *
     // Read facet data
     std::string word;
     std::string value;
-    long last_valid_pos;
+    std::streamoff last_valid_pos;
 
     int error = 0;
     int nFacetVertices = 0;

@@ -1065,7 +1065,7 @@ void VTK::writeData( ){
         for( auto &field : m_data ){
             if( field.isEnabled() && field.getCodification() == VTKFormat::APPENDED && field.getLocation() == VTKLocation::POINT ) {
                 if( getHeaderType() == "UInt32"){
-                    uint32_t    nbytes = calcFieldSize(field) ;
+                    uint32_t    nbytes = static_cast<uint32_t>(calcFieldSize(field)) ;
                     genericIO::flushBINARY(str, nbytes) ;
                 }
 
@@ -1087,7 +1087,7 @@ void VTK::writeData( ){
             if( field.isEnabled() && field.getCodification() == VTKFormat::APPENDED && field.getLocation() == VTKLocation::CELL ) {
 
                 if( getHeaderType() == "UInt32"){
-                    uint32_t    nbytes = calcFieldSize(field) ;
+                    uint32_t    nbytes = static_cast<uint32_t>(calcFieldSize(field)) ;
                     genericIO::flushBINARY(str, nbytes) ;
                 }
 
@@ -1110,7 +1110,7 @@ void VTK::writeData( ){
         for( auto &field : m_geometry ){
             if( field.isEnabled() && field.getCodification() == VTKFormat::APPENDED ) {
                 if( getHeaderType() == "UInt32"){
-                    uint32_t    nbytes = calcFieldSize(field) ;
+                    uint32_t    nbytes = static_cast<uint32_t>(calcFieldSize(field)) ;
                     genericIO::flushBINARY(str, nbytes) ;
                 }
 
