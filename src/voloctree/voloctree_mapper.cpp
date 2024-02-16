@@ -216,7 +216,7 @@ void VolOctreeMapper::_mappingAdaptionReferenceUpdate(const std::vector<adaption
                                 if (it != (*mappingMapped)[idp].ids.end()) {
                                     (*mappingMapped)[idp].ids.erase(it);
 #if BITPIT_ENABLE_MPI
-                                    int dist = std::distance((*mappingMapped)[idp].ids.begin(), it);
+                                    int dist = static_cast<int>(std::distance((*mappingMapped)[idp].ids.begin(), it));
                                     (*mappingMapped)[idp].ranks.erase((*mappingMapped)[idp].ranks.begin()+dist);
 #endif
                                 }
@@ -225,7 +225,7 @@ void VolOctreeMapper::_mappingAdaptionReferenceUpdate(const std::vector<adaption
                                 mapping::Info &inverseMappingInfo = m_partitionIR.map_rank_inverseMapping[m_previousMapping[idprevious].ranks[imapped]][idp];
                                 std::vector<long>::iterator it = std::find(inverseMappingInfo.ids.begin(), inverseMappingInfo.ids.end(), idprevious);
                                 if (it != inverseMappingInfo.ids.end()) {
-                                    int dist = std::distance(inverseMappingInfo.ids.begin(), it);
+                                    int dist = static_cast<int>(std::distance(inverseMappingInfo.ids.begin(), it));
                                     inverseMappingInfo.ids.erase(it);
                                     inverseMappingInfo.ranks.erase(inverseMappingInfo.ranks.begin() + dist);
                                 }
@@ -518,7 +518,7 @@ void VolOctreeMapper::_mappingAdaptionMappedUpdate(const std::vector<adaption::I
                         if (it != (*mappingReference)[idp].ids.end()) {
                             (*mappingReference)[idp].ids.erase(it);
 #if BITPIT_ENABLE_MPI
-                            int dist = std::distance((*mappingReference)[idp].ids.begin(), it);
+                            int dist = static_cast<int>(std::distance((*mappingReference)[idp].ids.begin(), it));
                             (*mappingReference)[idp].ranks.erase((*mappingReference)[idp].ranks.begin()+dist);
 #endif
                         }

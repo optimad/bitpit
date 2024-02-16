@@ -224,8 +224,8 @@ VolOctree::VolOctree(int id, int dimension, const std::array<double, 3> &origin,
 
 	// Initialize refinement markers
 	if (m_tree->getNumOctants() > 0) {
-		double initial_level = ceil(log2(std::max(1., length / dh)));
-		m_tree->setMarker((uint32_t) 0, initial_level);
+		int initialLevel = static_cast<int>(std::ceil(log2(std::max(1., length / dh))));
+		m_tree->setMarker((uint32_t) 0, initialLevel);
 	}
 }
 
@@ -1110,14 +1110,14 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 	}
 
 	// Info on the tree
-	long nOctants = m_tree->getNumOctants();
-	long nPreviousOctants = m_octantToCell.size();
+	uint32_t nOctants = static_cast<uint32_t>(m_tree->getNumOctants());
+	uint32_t nPreviousOctants = static_cast<uint32_t>(m_octantToCell.size());
 
 	log::cout() << ">> Number of octants : " << nOctants << std::endl;
 
 	// Info on the tree
-	long nGhostsOctants = m_tree->getNumGhosts();
-	long nPreviousGhosts = m_ghostToCell.size();
+	uint32_t nGhostsOctants = static_cast<uint32_t>(m_tree->getNumGhosts());
+	uint32_t nPreviousGhosts = static_cast<uint32_t>(m_ghostToCell.size());
 
 	// Initialize tracking data
 	adaption::InfoCollection adaptionData;
@@ -1222,7 +1222,7 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 		if (importFromScratch) {
 			nCurrentTreeIds = nOctants - treeId;
 		} else if (adaptionType == adaption::TYPE_REFINEMENT) {
-			nCurrentTreeIds = pow(2, getDimension());
+			nCurrentTreeIds = uipow(2, getDimension());
 		} else {
 			nCurrentTreeIds = 1;
 		}
@@ -2180,7 +2180,7 @@ bool VolOctree::isPointInside(long id, const std::array<double, 3> &point) const
 	ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
 
     int lowerLeftVertex  = 0;
-	int upperRightVertex = pow(2, getDimension()) - 1;
+	int upperRightVertex = uipow(2, getDimension()) - 1;
 
 	const std::array<double, 3> &lowerLeft  = getVertexCoords(cellVertexIds[lowerLeftVertex]);
 	const std::array<double, 3> &upperRight = getVertexCoords(cellVertexIds[upperRightVertex]);
