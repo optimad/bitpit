@@ -115,7 +115,6 @@ int subtest_001(int rank)
 
     // Compute levelset in narrow band
     std::chrono::time_point<std::chrono::system_clock> start, end;
-    int elapsed_init, elapsed_part, elapsed_refi(0);
 
     start = std::chrono::system_clock::now();
 
@@ -143,7 +142,7 @@ int subtest_001(int rank)
 
     end = std::chrono::system_clock::now();
 
-    elapsed_init = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+    std::chrono::milliseconds elapsed_init = std::chrono::duration_cast<std::chrono::milliseconds>(end-start);
 
     object0.enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
     object0.enableVTKOutput(bitpit::LevelSetWriteField::SIGN);
@@ -162,12 +161,13 @@ int subtest_001(int rank)
     levelset.update(adaptionData) ;
     end = std::chrono::system_clock::now();
 
-    elapsed_part = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+    std::chrono::milliseconds elapsed_part = std::chrono::duration_cast<std::chrono::milliseconds>(end-start);
 
     mesh.getVTK().setName("levelset_parallel_002_partitioned");
     mesh.write() ;
 
     // Refinement
+    std::chrono::milliseconds elapsed_refi(0);
     mesh.getVTK().setCounter() ;
     mesh.getVTK().setName("levelset_parallel_002_refinement");
     for( int i=0; i<10; ++i){
@@ -190,14 +190,14 @@ int subtest_001(int rank)
         levelset.update(adaptionData) ;
         end = std::chrono::system_clock::now();
 
-        elapsed_refi += std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+        elapsed_refi += std::chrono::duration_cast<std::chrono::milliseconds>(end-start);
 
         mesh.write() ;
     }
 
-    bitpit::log::cout() << "elapsed time initialization " << elapsed_init << " ms" << std::endl;
-    bitpit::log::cout() << "elapsed time partitioning   " << elapsed_part << " ms" << std::endl;
-    bitpit::log::cout() << "elapsed time refinement     " << elapsed_refi << " ms" << std::endl;
+    bitpit::log::cout() << "elapsed time initialization " << elapsed_init.count() << " ms" << std::endl;
+    bitpit::log::cout() << "elapsed time partitioning   " << elapsed_part.count() << " ms" << std::endl;
+    bitpit::log::cout() << "elapsed time refinement     " << elapsed_refi.count() << " ms" << std::endl;
 
     return 0;
 }

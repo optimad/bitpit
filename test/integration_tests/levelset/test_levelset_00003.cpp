@@ -143,7 +143,7 @@ int subtest_001()
 
     // Create levelset
     std::chrono::time_point<std::chrono::system_clock> start, end;
-    int elapsed_init, elapsed_refi(0);
+    std::chrono::milliseconds elapsed_init, elapsed_refi(0);
     start = std::chrono::system_clock::now();
 
     bitpit::LevelSet levelset;
@@ -193,7 +193,7 @@ int subtest_001()
     object5.enableFieldCellCache(bitpit::LevelSetField::VALUE, bitpit::LevelSetCacheMode::FULL);
 
     end = std::chrono::system_clock::now();
-    elapsed_init = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+    elapsed_init = std::chrono::duration_cast<std::chrono::milliseconds>(end-start);
 
     // Write output
     bitpit::log::cout() << " - Writing output" << std::endl;
@@ -245,13 +245,13 @@ int subtest_001()
         levelset.update(adaptionData) ;
         end = std::chrono::system_clock::now();
 
-        elapsed_refi += std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+        elapsed_refi += std::chrono::duration_cast<std::chrono::milliseconds>(end-start);
 
         mesh.write() ;
     }
 
-    bitpit::log::cout() << "elapsed time initialization " << elapsed_init << " ms" << std::endl;
-    bitpit::log::cout() << "elapsed time refinement     " << elapsed_refi << " ms" << std::endl;
+    bitpit::log::cout() << "elapsed time initialization " << elapsed_init.count() << " ms" << std::endl;
+    bitpit::log::cout() << "elapsed time refinement     " << elapsed_refi.count() << " ms" << std::endl;
 
     return 0;
 };

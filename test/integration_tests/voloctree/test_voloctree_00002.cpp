@@ -47,7 +47,7 @@ void test_vertex_neighs(VolOctree *patch, std::vector<int> &vertexNeighData)
     }
 
     // Evaluate the vertex ring for some randome vertices
-    int nCellVertices = std::pow(2, patch->getDimension());
+    int nCellVertices = uipow(2, patch->getDimension());
 
     int nLevels = cellLevelGropus.size();
     for (const auto &entry : cellLevelGropus) {
@@ -103,7 +103,7 @@ void test_edge_neighs(VolOctree *patch, std::vector<int> &edgeNeighData)
     }
 
     // Evaluate the vertex ring for some randome vertices
-    int nCellVertices = std::pow(2, patch->getDimension());
+    int nCellVertices = uipow(2, patch->getDimension());
 
     int nLevels = cellLevelGropus.size();
     for (const auto &entry : cellLevelGropus) {

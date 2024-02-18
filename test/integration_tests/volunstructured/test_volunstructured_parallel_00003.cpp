@@ -203,11 +203,11 @@ int subtest_001(int rank)
     if (rank == 0) {
         int nProcs;
         MPI_Comm_size(patch->getCommunicator(), &nProcs);
-        std::size_t nMaxCellsPerProc = std::ceil((double) patch->getInternalCellCount() / nProcs);
+        std::size_t nMaxCellsPerProc = static_cast<std::size_t>(std::ceil((double) patch->getInternalCellCount() / nProcs));
 
         std::size_t index = 0;
         for (auto itr = patch->internalCellBegin(); itr != patch->internalCellEnd(); ++itr) {
-            int rank = std::floor((double) index / nMaxCellsPerProc);
+            int rank = static_cast<int>(std::floor((double) index / nMaxCellsPerProc));
             ++index;
 
             cellRanks[itr.getId()] = rank;

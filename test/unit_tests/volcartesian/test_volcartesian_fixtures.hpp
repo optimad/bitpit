@@ -46,9 +46,9 @@ struct TestPatchConstants {
     const double LENGTH_Y = 20.;
     const double LENGTH_Z = 30.;
 
-    const int N_CELLS_X = 5.;
-    const int N_CELLS_Y = 6.;
-    const int N_CELLS_Z = 7.;
+    const int N_CELLS_X = 5;
+    const int N_CELLS_Y = 6;
+    const int N_CELLS_Z = 7;
     const int N_CELLS   = N_CELLS_X * N_CELLS_Y * N_CELLS_Z;
 
     const int N_VERTICES_X = N_CELLS_X + 1;

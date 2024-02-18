@@ -69,9 +69,9 @@ int subtest_001(int rank)
 
     std::size_t nValues;
     if (rank == 0) {
-        nValues = SEND_SIZE_FROM_0_TO_1 / sizeof(DataType);
+        nValues = static_cast<std::size_t>(std::ceil(SEND_SIZE_FROM_0_TO_1 / sizeof(DataType)));
     } else {
-        nValues = SEND_SIZE_FROM_N_TO_0 / sizeof(DataType);
+        nValues = static_cast<std::size_t>(std::ceil(SEND_SIZE_FROM_N_TO_0 / sizeof(DataType)));
     }
 
     std::size_t dataSize = nValues * sizeof(DataType);

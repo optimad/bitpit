@@ -102,7 +102,6 @@ int subtest_001(int rank)
 
     // Compute level set in narrow band
     std::chrono::time_point<std::chrono::system_clock>    start, end;
-    int elapsed_init, elapsed_refi(0);
     start = std::chrono::system_clock::now();
 
     bitpit::LevelSet levelset;
@@ -115,7 +114,7 @@ int subtest_001(int rank)
     object.enableFieldCellCache(bitpit::LevelSetField::VALUE, bitpit::LevelSetCacheMode::FULL);
 
     end = std::chrono::system_clock::now();
-    elapsed_init = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+    std::chrono::milliseconds elapsed_init = std::chrono::duration_cast<std::chrono::milliseconds>(end-start);
 
     // Write mesh
     bitpit::log::cout() << " - Writing output" << std::endl;
@@ -127,6 +126,7 @@ int subtest_001(int rank)
     mesh.write();
 
     // Refinement
+    std::chrono::milliseconds elapsed_refi(0);
     std::vector<bitpit::adaption::Info> adaptionData;
     for (int i=0; i<3; ++i){
         for (auto & cell : mesh.getCells() ){
@@ -141,12 +141,12 @@ int subtest_001(int rank)
         levelset.update(adaptionData);
         end = std::chrono::system_clock::now();
 
-        elapsed_refi += std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+        elapsed_refi += std::chrono::duration_cast<std::chrono::milliseconds>(end-start);
         mesh.write();
     }
 
-    bitpit::log::cout() << " Elapsed time initialization " << elapsed_init << " ms" << std::endl;
-    bitpit::log::cout() << " Elapsed time refinement     " << elapsed_refi << " ms" << std::endl;
+    bitpit::log::cout() << " Elapsed time initialization " << elapsed_init.count() << " ms" << std::endl;
+    bitpit::log::cout() << " Elapsed time refinement     " << elapsed_refi.count() << " ms" << std::endl;
 
     return 0;
 }

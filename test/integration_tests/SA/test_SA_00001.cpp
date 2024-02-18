@@ -510,7 +510,7 @@ dvector1D                   x(2, -0.1);
     // Scope variables ------------------------------------------------------ //
     chrono::time_point<chrono::system_clock> start, end;
     int                                      i;
-    int                                      elapsed_seconds;
+    std::chrono::milliseconds                elapsed_seconds;
 
 
     // Output message ------------------------------------------------------- //
@@ -529,8 +529,8 @@ dvector1D                   x(2, -0.1);
         KD.insert(&X[i]);
     } //next i
     end = chrono::system_clock::now();
-    elapsed_seconds = chrono::duration_cast<chrono::milliseconds>(end-start).count();
-    cout << "elapsed time: " << elapsed_seconds << " ms" << endl;
+    elapsed_seconds = chrono::duration_cast<chrono::milliseconds>(end-start);
+    cout << "elapsed time: " << elapsed_seconds.count() << " ms" << endl;
 
     // output kd-tree ------------------------------------------------------- //
 //     for (i = 0; i < KD.n_nodes; i++) {

@@ -141,7 +141,7 @@ int subtest_001()
 
     // Compute level set in narrow band
     std::chrono::time_point<std::chrono::system_clock> start, end;
-    int elapsed_seconds;
+    std::chrono::milliseconds elapsed_seconds;
     start = std::chrono::system_clock::now();
 
     bitpit::LevelSet levelset ;
@@ -161,8 +161,8 @@ int subtest_001()
     object1->enableFieldCellCache(bitpit::LevelSetField::VALUE, bitpit::LevelSetCacheMode::FULL);
 
     end = std::chrono::system_clock::now();
-    elapsed_seconds = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
-    bitpit::log::cout() << "elapsed time: " << elapsed_seconds << " ms" << std::endl;
+    elapsed_seconds = std::chrono::duration_cast<std::chrono::milliseconds>(end-start);
+    bitpit::log::cout() << "elapsed time: " << elapsed_seconds.count() << " ms" << std::endl;
 
     bitpit::log::cout() << " - Writing output" << std::endl;
 

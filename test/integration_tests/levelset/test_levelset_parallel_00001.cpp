@@ -262,7 +262,7 @@ int subtest_001(int rank)
     object.enableFieldCellCache(bitpit::LevelSetField::VALUE, bitpit::LevelSetCacheMode::FULL);
 
     end = std::chrono::system_clock::now();
-    int elapsed_init = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+    std::chrono::milliseconds elapsed_init = std::chrono::duration_cast<std::chrono::milliseconds>(end-start);
 
     bitpit::log::cout() << " - Writing serial levelset" << std::endl;
 
@@ -282,7 +282,7 @@ int subtest_001(int rank)
     levelset.update(partitioningData) ;
     end = std::chrono::system_clock::now();
 
-    int elapsed_part = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+    std::chrono::milliseconds elapsed_part = std::chrono::duration_cast<std::chrono::milliseconds>(end-start);
 
     bitpit::log::cout() << " - Writing partitioned levelset" << std::endl;
     mesh->getVTK().setName("levelset_parallel_001_octree_partitioned") ;
@@ -292,7 +292,7 @@ int subtest_001(int rank)
     mesh->getVTK().setName("levelset_parallel_001_octree_refined") ;
     mesh->getVTK().setCounter() ;
 
-    int elapsed_refi = 0;
+    std::chrono::milliseconds elapsed_refi(0);
     for (int i=0; i<3; ++i) {
         for (const bitpit::Cell &cell : mesh->getCells()) {
             long id = cell.getId() ;
@@ -307,16 +307,16 @@ int subtest_001(int rank)
         levelset.update(adaptionData) ;
         end = std::chrono::system_clock::now();
 
-        elapsed_refi += std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+        elapsed_refi += std::chrono::duration_cast<std::chrono::milliseconds>(end-start);
 
         bitpit::log::cout() << " - Exporting serial levelset" << std::endl;
         mesh->write();
     }
 
     // Write elapsed times
-    bitpit::log::cout() << "elapsed time initialization " << elapsed_init << " ms" << std::endl;
-    bitpit::log::cout() << "elapsed time partitioning   " << elapsed_part << " ms" << std::endl;
-    bitpit::log::cout() << "elapsed time refinement     " << elapsed_refi << " ms" << std::endl;
+    bitpit::log::cout() << "elapsed time initialization " << elapsed_init.count() << " ms" << std::endl;
+    bitpit::log::cout() << "elapsed time partitioning   " << elapsed_part.count() << " ms" << std::endl;
+    bitpit::log::cout() << "elapsed time refinement     " << elapsed_refi.count() << " ms" << std::endl;
 
     return 0;
 }
@@ -370,7 +370,7 @@ int subtest_002(int rank)
     object.enableFieldCellCache(bitpit::LevelSetField::VALUE, bitpit::LevelSetCacheMode::FULL);
 
     end = std::chrono::system_clock::now();
-    int elapsed_init = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+    std::chrono::milliseconds elapsed_init = std::chrono::duration_cast<std::chrono::milliseconds>(end-start);
 
     bitpit::log::cout() << " - Exporting serial levelset" << std::endl;
 
@@ -387,11 +387,11 @@ int subtest_002(int rank)
     if (rank == 0) {
         int nProcs;
         MPI_Comm_size(mesh->getCommunicator(), &nProcs);
-        std::size_t nMaxCellsPerProc = std::ceil((double) mesh->getInternalCellCount() / nProcs);
+        std::size_t nMaxCellsPerProc = static_cast<std::size_t>(std::ceil((double) mesh->getInternalCellCount() / nProcs));
 
         std::size_t index = 0;
         for (auto itr = mesh->internalCellBegin(); itr != mesh->internalCellEnd(); ++itr) {
-            int rank = std::floor((double) index / nMaxCellsPerProc);
+            int rank = static_cast<int>(std::floor((double) index / nMaxCellsPerProc));
             ++index;
 
             cellRanks[itr.getId()] = rank;
@@ -405,15 +405,15 @@ int subtest_002(int rank)
     levelset.update(partitioningData) ;
     end = std::chrono::system_clock::now();
 
-    int elapsed_part = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+    std::chrono::milliseconds elapsed_part = std::chrono::duration_cast<std::chrono::milliseconds>(end-start);
 
     bitpit::log::cout() << " - Exporting partitioned levelset" << std::endl;
     mesh->getVTK().setName("levelset_parallel_001_unstructured_partitioned") ;
     mesh->write() ;
 
     // Write elapsed times
-    bitpit::log::cout() << "elapsed time initialization " << elapsed_init << " ms" << std::endl;
-    bitpit::log::cout() << "elapsed time partitioning   " << elapsed_part << " ms" << std::endl;
+    bitpit::log::cout() << "elapsed time initialization " << elapsed_init.count() << " ms" << std::endl;
+    bitpit::log::cout() << "elapsed time partitioning   " << elapsed_part.count() << " ms" << std::endl;
 
     return 0;
 }

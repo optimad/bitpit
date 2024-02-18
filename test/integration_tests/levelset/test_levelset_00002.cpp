@@ -289,8 +289,8 @@ int subtest_001()
     object->enableFieldCellCache(bitpit::LevelSetField::VALUE, bitpit::LevelSetCacheMode::FULL);
 
     std::chrono::time_point<std::chrono::system_clock> end = std::chrono::system_clock::now();
-    int elapsed_seconds = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
-    bitpit::log::cout() << "elapsed time: " << elapsed_seconds << " ms" << std::endl;
+    std::chrono::milliseconds elapsed_seconds = std::chrono::duration_cast<std::chrono::milliseconds>(end-start);
+    bitpit::log::cout() << "elapsed time: " << elapsed_seconds.count() << " ms" << std::endl;
 
     // Write output
     bitpit::log::cout() << " - Writing output" << std::endl;
@@ -347,8 +347,8 @@ int subtest_002()
     object->enableFieldCellCache(bitpit::LevelSetField::VALUE, bitpit::LevelSetCacheMode::FULL);
 
     std::chrono::time_point<std::chrono::system_clock> end = std::chrono::system_clock::now();
-    int elapsed_seconds = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
-    bitpit::log::cout() << "elapsed time: " << elapsed_seconds << " ms" << std::endl;
+    std::chrono::milliseconds elapsed_seconds = std::chrono::duration_cast<std::chrono::milliseconds>(end-start);
+    bitpit::log::cout() << "elapsed time: " << elapsed_seconds.count() << " ms" << std::endl;
 
     // Write output
     bitpit::log::cout() << " - Writing output" << std::endl;
@@ -407,8 +407,8 @@ int subtest_003()
     object->enableFieldCellCache(bitpit::LevelSetField::VALUE, bitpit::LevelSetCacheMode::FULL);
 
     std::chrono::time_point<std::chrono::system_clock> end = std::chrono::system_clock::now();
-    int elapsed_seconds = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
-    bitpit::log::cout() << "elapsed time: " << elapsed_seconds << " ms" << std::endl;
+    std::chrono::milliseconds elapsed_seconds = std::chrono::duration_cast<std::chrono::milliseconds>(end-start);
+    bitpit::log::cout() << "elapsed time: " << elapsed_seconds.count() << " ms" << std::endl;
 
     // Write output
     bitpit::log::cout() << " - Writing output" << std::endl;
@@ -466,8 +466,8 @@ int subtest_004()
     object->enableFieldCellCache(bitpit::LevelSetField::VALUE, bitpit::LevelSetCacheMode::FULL);
 
     std::chrono::time_point<std::chrono::system_clock> end = std::chrono::system_clock::now();
-    int elapsed_seconds = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
-    bitpit::log::cout() << "elapsed time: " << elapsed_seconds << " ms" << std::endl;
+    std::chrono::milliseconds elapsed_seconds = std::chrono::duration_cast<std::chrono::milliseconds>(end-start);
+    bitpit::log::cout() << "elapsed time: " << elapsed_seconds.count() << " ms" << std::endl;
 
     // Write output
     bitpit::log::cout() << " - Writing output" << std::endl;
