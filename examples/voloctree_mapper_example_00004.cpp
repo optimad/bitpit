@@ -388,7 +388,7 @@ void runReferenceAdaptation()
     log::cout() << std::endl;
     log::cout() << ">> Marking the cells to adapt... " << std::endl;
 
-    srand(1517497123);
+    std::srand(0);
 
     for (int i = 0; i < 30; ++i) {
         long cellId;
@@ -1064,7 +1064,7 @@ void runMappedAdaptation()
     log::cout() << std::endl;
     log::cout() << ">> Marking the cells to adapt... " << std::endl;
 
-    srand(1517497123);
+    std::srand(0);
 
     for (int i = 0; i < 300; ++i) {
         long cellId;

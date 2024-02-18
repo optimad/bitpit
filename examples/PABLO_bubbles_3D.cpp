@@ -88,7 +88,7 @@ void run()
 	uint32_t nocts = pabloBB.getNumOctants();
 
 	/**<Define and initialize a set of bubbles and their trajectories.*/
-	srand(time(NULL));
+	srand(0);
 
 #if BITPIT_ENABLE_MPI==1
 	int nb = 50;
