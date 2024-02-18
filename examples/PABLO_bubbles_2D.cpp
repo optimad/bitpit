@@ -86,10 +86,7 @@ void run()
 #endif
 
 	/**<Define and initialize a set of bubbles and their trajectories.*/
-	time_t Time = time(NULL);
-	srand(Time);
-	if(pabloBB.getRank() == 0)
-		cout << "the seed = " << Time << endl;
+	srand(0);
 
 #if BITPIT_ENABLE_MPI==1
 	int nb = 50;

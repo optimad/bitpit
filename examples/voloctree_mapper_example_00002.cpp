@@ -112,7 +112,7 @@ void run()
     patch_2D->partition(true);
 #endif
 
-    srand(1);
+    std::srand(0);
 
     /** Refine the patch */
     for (int k = 0; k < 4; ++k) {
