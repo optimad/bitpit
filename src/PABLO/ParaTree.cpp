@@ -5020,22 +5020,22 @@ namespace bitpit {
                     }
                 }
 
-                std::array<int64_t, 3> virtualOctantOrigin = {{octantCoord[0], octantCoord[1], octantCoord[2]}};
+                std::array<uint32_t, 3> virtualOctantOrigin = octantCoord;
                 if (isFacePeriodic) {
                     std::array<int64_t, 3> periodicOffset = m_octree.getPeriodicOffset(octant, i);
-                    virtualOctantOrigin[0] += periodicOffset[0];
-                    virtualOctantOrigin[1] += periodicOffset[1];
-                    virtualOctantOrigin[2] += periodicOffset[2];
+                    virtualOctantOrigin[0] = static_cast<uint32_t>(virtualOctantOrigin[0] + periodicOffset[0]);
+                    virtualOctantOrigin[1] = static_cast<uint32_t>(virtualOctantOrigin[1] + periodicOffset[1]);
+                    virtualOctantOrigin[2] = static_cast<uint32_t>(virtualOctantOrigin[2] + periodicOffset[2]);
                 }
 
                 m_octree.computeVirtualNeighOffsets(octantLevel, i, maxFaceNeighLevel, &virtualNeighOffsets);
 
                 bool isFacePbound = false;
                 for(const std::array<int64_t, 3> &virtualNeighOffset : virtualNeighOffsets){
-                    std::array<int64_t, 3> virtualNeighCoord = virtualOctantOrigin;
-                    virtualNeighCoord[0] += virtualNeighOffset[0];
-                    virtualNeighCoord[1] += virtualNeighOffset[1];
-                    virtualNeighCoord[2] += virtualNeighOffset[2];
+                    std::array<uint32_t, 3> virtualNeighCoord = virtualOctantOrigin;
+                    virtualNeighCoord[0] = static_cast<uint32_t>(virtualNeighCoord[0] + virtualNeighOffset[0]);
+                    virtualNeighCoord[1] = static_cast<uint32_t>(virtualNeighCoord[1] + virtualNeighOffset[1]);
+                    virtualNeighCoord[2] = static_cast<uint32_t>(virtualNeighCoord[2] + virtualNeighOffset[2]);
                     uint64_t virtualNeighMorton = PABLO::computeMorton(m_dim, virtualNeighCoord[0], virtualNeighCoord[1], virtualNeighCoord[2]);
 
                     int virtualNeighProc = findOwner(virtualNeighMorton);
@@ -5059,21 +5059,21 @@ namespace bitpit {
                     }
                 }
 
-                std::array<int64_t, 3> virtualOctantOrigin = {{octantCoord[0], octantCoord[1], octantCoord[2]}};
+                std::array<uint32_t, 3> virtualOctantOrigin = octantCoord;
                 if (isEdgePeriodic) {
                     std::array<int64_t, 3> periodicOffset = m_octree.getEdgePeriodicOffset(octant, e);
-                    virtualOctantOrigin[0] += periodicOffset[0];
-                    virtualOctantOrigin[1] += periodicOffset[1];
-                    virtualOctantOrigin[2] += periodicOffset[2];
+                    virtualOctantOrigin[0] = static_cast<uint32_t>(virtualOctantOrigin[0] + periodicOffset[0]);
+                    virtualOctantOrigin[1] = static_cast<uint32_t>(virtualOctantOrigin[1] + periodicOffset[1]);
+                    virtualOctantOrigin[2] = static_cast<uint32_t>(virtualOctantOrigin[2] + periodicOffset[2]);
                 }
 
                 m_octree.computeVirtualEdgeNeighOffsets(octantLevel, e, maxEdgeNeighLevel, &virtualNeighOffsets);
 
                 for(const std::array<int64_t, 3> &virtualNeighOffset : virtualNeighOffsets){
-                    std::array<int64_t, 3> virtualNeighCoord = virtualOctantOrigin;
-                    virtualNeighCoord[0] += virtualNeighOffset[0];
-                    virtualNeighCoord[1] += virtualNeighOffset[1];
-                    virtualNeighCoord[2] += virtualNeighOffset[2];
+                    std::array<uint32_t, 3> virtualNeighCoord = virtualOctantOrigin;
+                    virtualNeighCoord[0] = static_cast<uint32_t>(virtualNeighCoord[0] + virtualNeighOffset[0]);
+                    virtualNeighCoord[1] = static_cast<uint32_t>(virtualNeighCoord[1] + virtualNeighOffset[1]);
+                    virtualNeighCoord[2] = static_cast<uint32_t>(virtualNeighCoord[2] + virtualNeighOffset[2]);
                     uint64_t virtualNeighMorton = PABLO::computeMorton(m_dim, virtualNeighCoord[0], virtualNeighCoord[1], virtualNeighCoord[2]);
 
                     int virtualNeighProc = findOwner(virtualNeighMorton);
@@ -5094,21 +5094,21 @@ namespace bitpit {
                     }
                 }
 
-                std::array<int64_t, 3> virtualOctantOrigin = {{octantCoord[0], octantCoord[1], octantCoord[2]}};
+                std::array<uint32_t, 3> virtualOctantOrigin = octantCoord;
                 if (isNodePeriodic) {
                     std::array<int64_t, 3> periodicOffset = m_octree.getNodePeriodicOffset(octant, c);
-                    virtualOctantOrigin[0] += periodicOffset[0];
-                    virtualOctantOrigin[1] += periodicOffset[1];
-                    virtualOctantOrigin[2] += periodicOffset[2];
+                    virtualOctantOrigin[0] = static_cast<uint32_t>(virtualOctantOrigin[0] + periodicOffset[0]);
+                    virtualOctantOrigin[1] = static_cast<uint32_t>(virtualOctantOrigin[1] + periodicOffset[1]);
+                    virtualOctantOrigin[2] = static_cast<uint32_t>(virtualOctantOrigin[2] + periodicOffset[2]);
                 }
 
                 m_octree.computeVirtualNodeNeighOffsets(octantLevel, c, maxNodeNeighLevel, &virtualNeighOffsets);
 
                 for(const std::array<int64_t, 3> &virtualNeighOffset : virtualNeighOffsets){
-                    std::array<int64_t, 3> virtualNeighCoord = virtualOctantOrigin;
-                    virtualNeighCoord[0] += virtualNeighOffset[0];
-                    virtualNeighCoord[1] += virtualNeighOffset[1];
-                    virtualNeighCoord[2] += virtualNeighOffset[2];
+                    std::array<uint32_t, 3> virtualNeighCoord = virtualOctantOrigin;
+                    virtualNeighCoord[0] = static_cast<uint32_t>(virtualNeighCoord[0] + virtualNeighOffset[0]);
+                    virtualNeighCoord[1] = static_cast<uint32_t>(virtualNeighCoord[1] + virtualNeighOffset[1]);
+                    virtualNeighCoord[2] = static_cast<uint32_t>(virtualNeighCoord[2] + virtualNeighOffset[2]);
                     uint64_t virtualNeighMorton = PABLO::computeMorton(m_dim, virtualNeighCoord[0], virtualNeighCoord[1], virtualNeighCoord[2]);
 
                     int virtualNeighProc = findOwner(virtualNeighMorton);
