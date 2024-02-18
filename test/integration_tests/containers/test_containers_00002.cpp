@@ -476,7 +476,7 @@ int main(int argc, char *argv[])
 #endif
 
 	// Seed the random function
-	std::srand(1);
+	std::srand(0);
 
 	// Run the subtests
 	std::cout << "Testing PiercedVector" << std::endl;
