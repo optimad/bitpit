@@ -24,12 +24,12 @@
 
 #include <array>
 
-#define BITPIT_UNIT_TEST_SUITE_NAME unit_test_volcartesian_constructors
-#include "helpers/unit_test.hpp"
+#include "test_volcartesian_fixtures.hpp"
 
 #include "bitpit_volcartesian.hpp"
 
-#include "test_volcartesian_fixtures.hpp"
+#define BITPIT_UNIT_TEST_SUITE_NAME unit_test_volcartesian_constructors
+#include "helpers/unit_test.hpp"
 
 using namespace bitpit;
 
