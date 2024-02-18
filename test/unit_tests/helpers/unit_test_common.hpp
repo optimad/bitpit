@@ -29,6 +29,18 @@
 #define BOOST_TEST_MODULE BITPIT_UNIT_TEST_SUITE_NAME
 #include <boost/test/included/unit_test.hpp>
 
+#ifdef _MSC_VER
+#   ifdef min
+#       undef min
+#   endif
+#   ifdef max
+#       undef max
+#   endif
+#   ifdef interface
+#       undef interface
+#   endif
+#endif
+
 /*!
  * Display the name of the current unit test.
  *
