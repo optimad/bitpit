@@ -208,7 +208,7 @@ int main(int argc, char *argv[])
 	log::manager().initialize(log::MODE_COMBINE);
 
 	// Seed the random function
-	std::srand(1);
+	std::srand(0);
 
 	// Run the subtests
 	log::cout() << "Testing point localization in octree patches" << std::endl;

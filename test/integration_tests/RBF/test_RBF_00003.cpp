@@ -374,7 +374,7 @@ int subtest_001()
 		controlNodes[2] = std::array<double,3>{{lims[0][1], lims[1][1], lims[2][1]}};
 		controlNodes[3] = std::array<double,3>{{lims[0][0], lims[1][1], lims[2][1]}};
 		
-		srand(time(NULL));
+		std::srand(0);
 		for(int i=4; i<sizeCN; ++i){
 			for(int j=0; j<2; ++j){
 				double wg =  (double)(rand())/RAND_MAX;

@@ -517,7 +517,7 @@ dvector1D                   x(2, -0.1);
     cout << " - Generating k-d tree by element insertion" << endl;
 
     // Create vertex list --------------------------------------------------- //
-    srand(time(NULL));
+    std::srand(0);
     for (i = 0; i < N; i++) {
         X[i][0] = ((double) rand())/((double) RAND_MAX);
         X[i][1] = ((double) rand())/((double) RAND_MAX);
@@ -652,7 +652,7 @@ if (selection == 0) {
     ivector1D         list;
 
     // Initialize variables ------------------------------------------------- //
-    srand(time(NULL));
+    std::srand(0);
 
     // Output message ------------------------------------------------------- //
     cout << endl;
