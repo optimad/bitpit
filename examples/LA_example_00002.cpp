@@ -140,8 +140,7 @@ protected:
                 PCFactorSetLevels(preconditioner, this->m_KSPOptions.levels);
             }
         } else if (strcmp(preconditionerType, PCGAMG) == 0) {
-            log::cout() << "MULTIGRID SOLVER" << std::endl;
-            PetscReal thresholds[GAMG_MAX_LEVELS];
+            std::vector<PetscReal> thresholds(GAMG_MAX_LEVELS);
             for (int i = 0; i < GAMG_MAX_LEVELS; ++i) {
                 thresholds[i] = GAMG_THRESHOLD;
             }
@@ -157,7 +156,7 @@ protected:
 
             PCGAMGSetNlevels(preconditioner, GAMG_MAX_LEVELS);
 #if (PETSC_VERSION_MAJOR >= 3 && PETSC_VERSION_MINOR >= 16)
-            PCGAMGSetThreshold(preconditioner, thresholds, GAMG_MAX_LEVELS);
+            PCGAMGSetThreshold(preconditioner, thresholds.data(), GAMG_MAX_LEVELS);
             PCGAMGSetThresholdScale(preconditioner, GAMG_THRESHOLD_SCALE);
 #else
             PCGAMGSetThreshold(preconditioner, GAMG_THRESHOLD);
