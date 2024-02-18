@@ -236,12 +236,12 @@ void run(std::string filename,
 
     // Set levelset configuration
     bitpit::LevelSet levelset;
-    levelset.setPropagateSign(true);
-    levelset.setSizeNarrowBand(sqrt(3.0) * h);
+    levelset.setNarrowBandSize(sqrt(3.0) * h);
     levelset.setMesh(&mesh);
 
     int id0 = levelset.addObject(std::move(STL0), 0);
     const bitpit::LevelSetObject &object0 = levelset.getObject(id0);
+    levelset.getObject(id0).setCellBulkEvaluationMode(bitpit::LevelSetBulkEvaluationMode::SIGN_PROPAGATION);
     levelset.getObject(id0).enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
 
     // Write levelset information
@@ -254,7 +254,7 @@ void run(std::string filename,
     for (int r = 0; r < nb_adaptions; ++r) {
         for (auto &cell: mesh.getCells()) {
             long cellId = cell.getId();
-            if (std::abs(object0.getValue(cellId)) < mesh.evalCellSize(cellId))
+            if (object0.evalCellValue(cellId, false) < mesh.evalCellSize(cellId))
                 mesh.markCellForRefinement(cellId);
         }
         adaptionData_levelset = mesh.update(true);
@@ -337,7 +337,7 @@ void run(std::string filename,
     bitpit::log::cout() << "Adding nodes to the RBF" << std::endl;
     for (size_t it_RBF = 0; it_RBF < nP_total; it_RBF++) {
         nodes[it_RBF] = mesh.evalCellCentroid(it_RBF);
-        values[it_RBF] = levelset.getObject(id0).getValue(it_RBF);
+        values[it_RBF] = levelset.getObject(id0).evalCellValue(it_RBF, true);
         RBFObject.addNode(nodes[it_RBF]);
         radii[it_RBF] = mesh.evalCellSize(it_RBF) * radius_ratio;
     }
