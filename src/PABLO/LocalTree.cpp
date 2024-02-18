@@ -1027,22 +1027,22 @@ namespace bitpit {
 
         uint32_t size = oct->getLogicalSize();
 
-        std::array<int64_t, 3> coord = {{oct->getLogicalCoordinates(0), oct->getLogicalCoordinates(1), oct->getLogicalCoordinates(2)}};
+        std::array<uint32_t, 3> coord = oct->getLogicalCoordinates();
         if (isperiodic) {
             std::array<int64_t, 3> periodicOffset = getPeriodicOffset(*oct, iface);
-            coord[0] += periodicOffset[0];
-            coord[1] += periodicOffset[1];
-            coord[2] += periodicOffset[2];
+            coord[0] = static_cast<uint32_t>(coord[0] + periodicOffset[0]);
+            coord[1] = static_cast<uint32_t>(coord[1] + periodicOffset[1]);
+            coord[2] = static_cast<uint32_t>(coord[2] + periodicOffset[2]);
         }
 
         const int8_t (&cxyz)[3] = m_treeConstants->normals[iface];
 
         // Compute same-size virtual neighbour information
         std::array<int64_t, 3> sameSizeVirtualNeighOffset = computeFirstVirtualNeighOffset(level, iface, level);
-        std::array<int64_t, 3> sameSizeVirtualNeighCoord = coord;
-        sameSizeVirtualNeighCoord[0] += sameSizeVirtualNeighOffset[0];
-        sameSizeVirtualNeighCoord[1] += sameSizeVirtualNeighOffset[1];
-        sameSizeVirtualNeighCoord[2] += sameSizeVirtualNeighOffset[2];
+        std::array<uint32_t, 3> sameSizeVirtualNeighCoord = coord;
+        sameSizeVirtualNeighCoord[0] = static_cast<uint32_t>(sameSizeVirtualNeighCoord[0] + sameSizeVirtualNeighOffset[0]);
+        sameSizeVirtualNeighCoord[1] = static_cast<uint32_t>(sameSizeVirtualNeighCoord[1] + sameSizeVirtualNeighOffset[1]);
+        sameSizeVirtualNeighCoord[2] = static_cast<uint32_t>(sameSizeVirtualNeighCoord[2] + sameSizeVirtualNeighOffset[2]);
         uint64_t sameSizeVirtualNeighMorton = PABLO::computeMorton(m_dim, sameSizeVirtualNeighCoord[0], sameSizeVirtualNeighCoord[1], sameSizeVirtualNeighCoord[2]);
 
         //
@@ -1065,10 +1065,10 @@ namespace bitpit {
         // virtual neighbour.
         uint8_t maxNeighLevel = getMaxNeighLevel(*oct);
         std::array<int64_t, 3> lastCandidateOffset = computeLastVirtualNeighOffset(level, iface, maxNeighLevel);
-        std::array<int64_t, 3> lastCandidateCoord = coord;
-        lastCandidateCoord[0] += lastCandidateOffset[0];
-        lastCandidateCoord[1] += lastCandidateOffset[1];
-        lastCandidateCoord[2] += lastCandidateOffset[2];
+        std::array<uint32_t, 3> lastCandidateCoord = coord;
+        lastCandidateCoord[0] = static_cast<uint32_t>(lastCandidateCoord[0] + lastCandidateOffset[0]);
+        lastCandidateCoord[1] = static_cast<uint32_t>(lastCandidateCoord[1] + lastCandidateOffset[1]);
+        lastCandidateCoord[2] = static_cast<uint32_t>(lastCandidateCoord[2] + lastCandidateOffset[2]);
         uint64_t lastCandidateMorton = PABLO::computeMorton(m_dim, lastCandidateCoord[0], lastCandidateCoord[1], lastCandidateCoord[2]);
 
         // Search for neighbours of different sizes
@@ -1284,22 +1284,22 @@ namespace bitpit {
 
         uint32_t size = oct->getLogicalSize();
 
-        std::array<int64_t, 3> coord = {{oct->getLogicalCoordinates(0), oct->getLogicalCoordinates(1), oct->getLogicalCoordinates(2)}};
+        std::array<uint32_t, 3> coord = oct->getLogicalCoordinates();
         if (isperiodic) {
             std::array<int64_t, 3> periodicOffset = getEdgePeriodicOffset(*oct, iedge);
-            coord[0] += periodicOffset[0];
-            coord[1] += periodicOffset[1];
-            coord[2] += periodicOffset[2];
+            coord[0] = static_cast<uint32_t>(coord[0] + periodicOffset[0]);
+            coord[1] = static_cast<uint32_t>(coord[1] + periodicOffset[1]);
+            coord[2] = static_cast<uint32_t>(coord[2] + periodicOffset[2]);
         }
 
         const int8_t (&cxyz)[3] = m_treeConstants->edgeCoeffs[iedge];
 
         // Compute same-size virtual neighbour information
         std::array<int64_t, 3> sameSizeVirtualNeighOffset = computeFirstVirtualEdgeNeighOffset(level, iedge, level);
-        std::array<int64_t, 3> sameSizeVirtualNeighCoord = coord;
-        sameSizeVirtualNeighCoord[0] += sameSizeVirtualNeighOffset[0];
-        sameSizeVirtualNeighCoord[1] += sameSizeVirtualNeighOffset[1];
-        sameSizeVirtualNeighCoord[2] += sameSizeVirtualNeighOffset[2];
+        std::array<uint32_t, 3> sameSizeVirtualNeighCoord = coord;
+        sameSizeVirtualNeighCoord[0] = static_cast<uint32_t>(sameSizeVirtualNeighCoord[0] + sameSizeVirtualNeighOffset[0]);
+        sameSizeVirtualNeighCoord[1] = static_cast<uint32_t>(sameSizeVirtualNeighCoord[1] + sameSizeVirtualNeighOffset[1]);
+        sameSizeVirtualNeighCoord[2] = static_cast<uint32_t>(sameSizeVirtualNeighCoord[2] + sameSizeVirtualNeighOffset[2]);
         uint64_t sameSizeVirtualNeighMorton = PABLO::computeMorton(m_dim, sameSizeVirtualNeighCoord[0], sameSizeVirtualNeighCoord[1], sameSizeVirtualNeighCoord[2]);
 
         //
@@ -1322,10 +1322,10 @@ namespace bitpit {
         // virtual neighbour.
         uint8_t maxEdgeNeighLevel = getMaxEdgeNeighLevel(*oct);
         std::array<int64_t, 3> lastCandidateOffset = computeLastVirtualEdgeNeighOffset(level, iedge, maxEdgeNeighLevel);
-        std::array<int64_t, 3> lastCandidateCoord = coord;
-        lastCandidateCoord[0] += lastCandidateOffset[0];
-        lastCandidateCoord[1] += lastCandidateOffset[1];
-        lastCandidateCoord[2] += lastCandidateOffset[2];
+        std::array<uint32_t, 3> lastCandidateCoord = coord;
+        lastCandidateCoord[0] = static_cast<uint32_t>(lastCandidateCoord[0] + lastCandidateOffset[0]);
+        lastCandidateCoord[1] = static_cast<uint32_t>(lastCandidateCoord[1] + lastCandidateOffset[1]);
+        lastCandidateCoord[2] = static_cast<uint32_t>(lastCandidateCoord[2] + lastCandidateOffset[2]);
         uint64_t lastCandidateMorton = PABLO::computeMorton(m_dim, lastCandidateCoord[0], lastCandidateCoord[1], lastCandidateCoord[2]);
 
         // Search for neighbours of different sizes
@@ -1530,22 +1530,22 @@ namespace bitpit {
 
         uint32_t size = oct->getLogicalSize();
 
-        std::array<int64_t, 3> coord = {{oct->getLogicalCoordinates(0), oct->getLogicalCoordinates(1), oct->getLogicalCoordinates(2)}};
+        std::array<uint32_t, 3> coord = oct->getLogicalCoordinates();
         if (isperiodic) {
             std::array<int64_t, 3> periodicOffset = getNodePeriodicOffset(*oct, inode);
-            coord[0] += periodicOffset[0];
-            coord[1] += periodicOffset[1];
-            coord[2] += periodicOffset[2];
+            coord[0] = static_cast<uint32_t>(coord[0] + periodicOffset[0]);
+            coord[1] = static_cast<uint32_t>(coord[1] + periodicOffset[1]);
+            coord[2] = static_cast<uint32_t>(coord[2] + periodicOffset[2]);
         }
 
         const int8_t (&cxyz)[3] = m_treeConstants->nodeCoeffs[inode];
 
         // Compute same-size virtual neighbour information
         std::array<int64_t, 3> sameSizeVirtualNeighOffset = computeFirstVirtualNodeNeighOffset(level, inode, level);
-        std::array<int64_t, 3> sameSizeVirtualNeighCoord = coord;
-        sameSizeVirtualNeighCoord[0] += sameSizeVirtualNeighOffset[0];
-        sameSizeVirtualNeighCoord[1] += sameSizeVirtualNeighOffset[1];
-        sameSizeVirtualNeighCoord[2] += sameSizeVirtualNeighOffset[2];
+        std::array<uint32_t, 3> sameSizeVirtualNeighCoord = coord;
+        sameSizeVirtualNeighCoord[0] = static_cast<uint32_t>(sameSizeVirtualNeighCoord[0] + sameSizeVirtualNeighOffset[0]);
+        sameSizeVirtualNeighCoord[1] = static_cast<uint32_t>(sameSizeVirtualNeighCoord[1] + sameSizeVirtualNeighOffset[1]);
+        sameSizeVirtualNeighCoord[2] = static_cast<uint32_t>(sameSizeVirtualNeighCoord[2] + sameSizeVirtualNeighOffset[2]);
         uint64_t sameSizeVirtualNeighMorton = PABLO::computeMorton(m_dim, sameSizeVirtualNeighCoord[0], sameSizeVirtualNeighCoord[1], sameSizeVirtualNeighCoord[2]);
 
         //
@@ -1568,10 +1568,10 @@ namespace bitpit {
         // virtual neighbour.
         uint8_t maxNodeNeighLevel = getMaxNodeNeighLevel(*oct);
         std::array<int64_t, 3> lastCandidateOffset = computeLastVirtualNodeNeighOffset(level, inode, maxNodeNeighLevel);
-        std::array<int64_t, 3> lastCandidateCoord = coord;
-        lastCandidateCoord[0] += lastCandidateOffset[0];
-        lastCandidateCoord[1] += lastCandidateOffset[1];
-        lastCandidateCoord[2] += lastCandidateOffset[2];
+        std::array<uint32_t, 3> lastCandidateCoord = coord;
+        lastCandidateCoord[0] = static_cast<uint32_t>(lastCandidateCoord[0] + lastCandidateOffset[0]);
+        lastCandidateCoord[1] = static_cast<uint32_t>(lastCandidateCoord[1] + lastCandidateOffset[1]);
+        lastCandidateCoord[2] = static_cast<uint32_t>(lastCandidateCoord[2] + lastCandidateOffset[2]);
         uint64_t lastCandidateMorton = PABLO::computeMorton(m_dim, lastCandidateCoord[0], lastCandidateCoord[1], lastCandidateCoord[2]);
 
         // Search for neighbours of different sizes
