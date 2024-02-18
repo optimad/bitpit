@@ -578,25 +578,25 @@ int main(int argc, char *argv[])
 
 	int status;
 	try {
-		// status = subtest_001();
-		// if (status != 0) {
-		// 	return status;
-		// }
+		status = subtest_001();
+		if (status != 0) {
+			return status;
+		}
 
 		status = subtest_002();
 		if (status != 0) {
 			return status;
 		}
 
-		// status = subtest_003();
-		// if (status != 0) {
-		// 	return status;
-		// }
+		status = subtest_003();
+		if (status != 0) {
+			return status;
+		}
 
-		// status = subtest_004();
-		// if (status != 0) {
-		// 	return status;
-		// }
+		status = subtest_004();
+		if (status != 0) {
+			return status;
+		}
 	} catch (const std::exception &exception) {
 		log::cout() << exception.what();
 		exit(1);
