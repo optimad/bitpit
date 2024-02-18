@@ -48,6 +48,13 @@ public:
     std::vector<Data> &data;
     std::vector<Data> &ghostdata;
 
+    size_t size(const uint32_t e) const
+    {
+        BITPIT_UNUSED(e);
+
+        return fixedSize();
+    }
+
     size_t fixedSize() const
     {
         return sizeof(int) + DATA_SIZE*sizeof(double);
