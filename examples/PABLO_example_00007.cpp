@@ -351,7 +351,7 @@ int main(int argc, char *argv[])
 
 	// Initialize the logger
 	log::manager().initialize(log::MODE_SEPARATE, false, nProcs, rank);
-	log::cout() << log::fileVerbosity(log::INFO);
+	log::cout() << log::fileVerbosity(log::LEVEL_INFO);
 	log::cout() << log::disableConsole();
 
 	// Run the example

@@ -448,7 +448,7 @@ void VolOctree::initializeTree(std::unique_ptr<PabloUniform> *adopter)
 {
 	// Initialize logger
 #ifdef NDEBUG
-	m_tree->getLog().setVerbosities(log::WARNING);
+	m_tree->getLog().setVerbosities(log::LEVEL_WARNING);
 #endif
 
 #if BITPIT_ENABLE_MPI==1

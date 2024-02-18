@@ -54,14 +54,16 @@ namespace log {
     };
 
     enum Level {
-        QUIET = 60,
-        CRITICAL = 50,
-        ERROR = 40,
-        WARNING = 30,
-        INFO = 20,
-        NORMAL = INFO,
-        DEBUG = 10,
-        NOTSET = 0
+        LEVEL_QUIET = 60,
+        LEVEL_CRITICAL = 50,
+        LEVEL_ERROR = 40,
+        LEVEL_WARNING = 30,
+        LEVEL_INFO = 20,
+        LEVEL_DEBUG = 10,
+        LEVEL_NOTSET = 0,
+        QUIET = LEVEL_QUIET,
+        NORMAL = LEVEL_INFO,
+        DEBUG = LEVEL_DEBUG
     };
 
     enum Visibility {
@@ -149,9 +151,9 @@ public:
     void setIndentation(int delta);
     int getIndentation();
 
-    void disable(log::Level = log::Level::CRITICAL);
-    void disableConsole(log::Level = log::Level::CRITICAL);
-    void disableFile(log::Level = log::Level::CRITICAL);
+    void disable(log::Level = log::Level::LEVEL_CRITICAL);
+    void disableConsole(log::Level = log::Level::LEVEL_CRITICAL);
+    void disableFile(log::Level = log::Level::LEVEL_CRITICAL);
 
     void setDefaultSeverity(log::Level severity);
     log::Level getDefaultSeverity();
@@ -239,8 +241,8 @@ public:
 
     ~LoggerManager();
 
-    Logger & cout(log::Level defualtSeverity = log::Level::NOTSET, log::Visibility defualtVisibility = log::VISIBILITY_NOTSET);
-    Logger & cout(const std::string &name, log::Level defualtSeverity = log::Level::NOTSET, log::Visibility defualtVisibility = log::VISIBILITY_NOTSET);
+    Logger & cout(log::Level defualtSeverity = log::Level::LEVEL_NOTSET, log::Visibility defualtVisibility = log::VISIBILITY_NOTSET);
+    Logger & cout(const std::string &name, log::Level defualtSeverity = log::Level::LEVEL_NOTSET, log::Visibility defualtVisibility = log::VISIBILITY_NOTSET);
 
     Logger & critical(log::Visibility visibility = log::VISIBILITY_NOTSET);
     Logger & critical(const std::string &name,log::Visibility visibility = log::VISIBILITY_NOTSET);
@@ -321,8 +323,8 @@ namespace log {
     // Generic global functions
     LoggerManager & manager();
 
-    Logger & cout(log::Level defualtSeverity = log::Level::NOTSET, log::Visibility defualtVisibility = log::VISIBILITY_NOTSET);
-    Logger & cout(const std::string &name, log::Level defualtSeverity = log::Level::NOTSET, log::Visibility defualtVisibility = log::VISIBILITY_NOTSET);
+    Logger & cout(log::Level defualtSeverity = log::Level::LEVEL_NOTSET, log::Visibility defualtVisibility = log::VISIBILITY_NOTSET);
+    Logger & cout(const std::string &name, log::Level defualtSeverity = log::Level::LEVEL_NOTSET, log::Visibility defualtVisibility = log::VISIBILITY_NOTSET);
 
     Logger & critical(log::Visibility visibility = log::VISIBILITY_NOTSET);
     Logger & critical(const std::string &name, log::Visibility visibility = log::VISIBILITY_NOTSET);
@@ -391,14 +393,14 @@ namespace log {
     Logger & setFileVerbosity(Logger &logger, const log::Level &threshold);
     LoggerManipulator<log::Level> fileVerbosity(const log::Level &threshold);
 
-    Logger & disable(Logger &logger, const log::Level &verbosity = log::Level::CRITICAL);
-    LoggerManipulator<log::Level> disable(const log::Level &verbosity = log::Level::CRITICAL);
+    Logger & disable(Logger &logger, const log::Level &verbosity = log::Level::LEVEL_CRITICAL);
+    LoggerManipulator<log::Level> disable(const log::Level &verbosity = log::Level::LEVEL_CRITICAL);
 
-    Logger & disableConsole(Logger &logger, const log::Level &verbosity = log::Level::CRITICAL);
-    LoggerManipulator<log::Level> disableConsole(const log::Level &verbosity = log::Level::CRITICAL);
+    Logger & disableConsole(Logger &logger, const log::Level &verbosity = log::Level::LEVEL_CRITICAL);
+    LoggerManipulator<log::Level> disableConsole(const log::Level &verbosity = log::Level::LEVEL_CRITICAL);
 
-    Logger & disableFile(Logger &logger, const log::Level &verbosity = log::Level::CRITICAL);
-    LoggerManipulator<log::Level> disableFile(const log::Level &verbosity = log::Level::CRITICAL);
+    Logger & disableFile(Logger &logger, const log::Level &verbosity = log::Level::LEVEL_CRITICAL);
+    LoggerManipulator<log::Level> disableFile(const log::Level &verbosity = log::Level::LEVEL_CRITICAL);
 
     Logger & setIndentation(Logger &logger, const int &delta);
     LoggerManipulator<int> indent(int delta);

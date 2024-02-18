@@ -400,7 +400,7 @@ void read_podXML(const bitpit::Config::Section & slotXML, POD & podInst){
     }  
     podInst.setTargetErrorFields(tempsf,tempvf); 
 
-    log::cout().setDefaultSeverity(bitpit::log::INFO);
+    log::cout().setDefaultSeverity(bitpit::log::LEVEL_INFO);
     log::cout()<< "Finished reading XML dictionary"<<std::endl;
     log::cout().setDefaultSeverity(bitpit::log::DEBUG);
 
@@ -564,7 +564,7 @@ std::vector<bool> read_Dictionary(POD & podInst) {
     std::vector<bool> exeFlags;
     exeFlags.resize(3,false);
 
-    log::cout().setDefaultSeverity(bitpit::log::INFO);
+    log::cout().setDefaultSeverity(bitpit::log::LEVEL_INFO);
     log::cout()<< "Currently reading XML dictionary"<<std::endl;
     log::cout().setDefaultSeverity(bitpit::log::DEBUG);
 
@@ -577,7 +577,7 @@ std::vector<bool> read_Dictionary(POD & podInst) {
         log::cout() << "...Instantiated pod: "<< podInst.getName() << std::endl;
 
     }else{
-        log::cout().setDefaultSeverity(bitpit::log::INFO);
+        log::cout().setDefaultSeverity(bitpit::log::LEVEL_INFO);
         log::cout()<<"No POD section available in the XML dictionary"<<std::endl;
         log::cout().setDefaultSeverity(bitpit::log::DEBUG);
     }
@@ -619,7 +619,7 @@ std::vector<bool> read_Dictionary(POD & podInst) {
         }
 
     }else{
-        log::cout().setDefaultSeverity(bitpit::log::INFO);
+        log::cout().setDefaultSeverity(bitpit::log::LEVEL_INFO);
         log::cout()<<"No Database section available in the XML dictionary"<<std::endl;
         log::cout().setDefaultSeverity(bitpit::log::DEBUG);
     }
@@ -703,7 +703,7 @@ std::vector<bool> read_Dictionary(POD & podInst) {
     }else      
         exeFlags[0]=true;  
 
-    log::cout().setDefaultSeverity(bitpit::log::INFO);
+    log::cout().setDefaultSeverity(bitpit::log::LEVEL_INFO);
     log::cout()<< "Finished reading XML dictionary"<<std::endl;
     log::cout().setDefaultSeverity(bitpit::log::DEBUG);
 
@@ -721,13 +721,13 @@ void podcore(const InfoBitpodPP & info) {
     bitpit::log::cout(log);
     switch(int(info.vconsole)){
     case 1 :
-        bitpit::log::setConsoleVerbosity(log::cout(), bitpit::log::Verbosity::INFO);
+        bitpit::log::setConsoleVerbosity(log::cout(), bitpit::log::LEVEL_INFO);
         break;
     case 2 :
-        bitpit::log::setConsoleVerbosity(log::cout(), bitpit::log::Verbosity::DEBUG);
+        bitpit::log::setConsoleVerbosity(log::cout(), bitpit::log::LEVEL_DEBUG);
         break;
     case 0 :
-        bitpit::log::setConsoleVerbosity(log::cout(), bitpit::log::Verbosity::QUIET);
+        bitpit::log::setConsoleVerbosity(log::cout(), bitpit::log::LEVEL_QUIET);
         break;
     default:
         break;
@@ -735,13 +735,13 @@ void podcore(const InfoBitpodPP & info) {
 
     switch(int(info.vlog)){
     case 1 :
-        bitpit::log::setFileVerbosity(log::cout(), bitpit::log::Verbosity::INFO);
+        bitpit::log::setFileVerbosity(log::cout(), bitpit::log::LEVEL_INFO);
         break;
     case 2 :
-        bitpit::log::setFileVerbosity(log::cout(), bitpit::log::Verbosity::DEBUG);
+        bitpit::log::setFileVerbosity(log::cout(), bitpit::log::LEVEL_DEBUG);
         break;
     case 0 :
-        bitpit::log::setFileVerbosity(log::cout(), bitpit::log::Verbosity::QUIET);
+        bitpit::log::setFileVerbosity(log::cout(), bitpit::log::LEVEL_QUIET);
         break;
     default:
         break;
@@ -749,7 +749,7 @@ void podcore(const InfoBitpodPP & info) {
     }
 
     /*! Print resume args info.*/
-    log::cout().setDefaultSeverity(bitpit::log::INFO);
+    log::cout().setDefaultSeverity(bitpit::log::LEVEL_INFO);
     {
         std::vector<std::string> verb(3, "quiet");
         verb[1] = "normal";
@@ -774,7 +774,7 @@ void podcore(const InfoBitpodPP & info) {
     exes=read_Dictionary(podInst);
 
     /*! Execute */
-    log::cout().setDefaultSeverity(bitpit::log::INFO);
+    log::cout().setDefaultSeverity(bitpit::log::LEVEL_INFO);
     log::cout()<<"Execution of pod... ";
     log::cout().setDefaultSeverity(bitpit::log::DEBUG);
 
@@ -788,7 +788,7 @@ void podcore(const InfoBitpodPP & info) {
     if (exes[0])
         podInst.run();
 
-    log::cout().setDefaultSeverity(bitpit::log::INFO);
+    log::cout().setDefaultSeverity(bitpit::log::LEVEL_INFO);
     log::cout()<<"...execution of pod done"<<std::endl;
 
     log::cout().setDefaultSeverity(bitpit::log::DEBUG);
