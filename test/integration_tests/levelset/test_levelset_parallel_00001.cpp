@@ -444,10 +444,10 @@ int main(int argc, char *argv[])
             return status;
         }
 
-        // status = subtest_002(rank);
-        // if (status != 0) {
-        //     return status;
-        // }
+        status = subtest_002(rank);
+        if (status != 0) {
+            return status;
+        }
     } catch (const std::exception &exception) {
         bitpit::log::cout() << exception.what();
         exit(1);
