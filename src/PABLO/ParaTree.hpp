@@ -899,12 +899,12 @@ namespace bitpit {
                 }
 
                 if (hasResidentOctants) {
-                    uint32_t firstResidentGlobalOctantIdx = std::max(firstOctantGlobalIdx, newFirstOctantGlobalIdx);
-                    uint32_t lastResidentGlobalOctantIdx  = std::min(lastOctantGlobalIdx, newLastOctantGlobalIdx);
+                    uint64_t firstResidentGlobalOctantIdx = std::max(firstOctantGlobalIdx, newFirstOctantGlobalIdx);
+                    uint64_t lastResidentGlobalOctantIdx  = std::min(lastOctantGlobalIdx, newLastOctantGlobalIdx);
 
-                    uint32_t nofResidents = lastResidentGlobalOctantIdx - firstResidentGlobalOctantIdx + 1;
-                    uint32_t newFirstResidentOffsetIdx = firstResidentGlobalOctantIdx - newFirstOctantGlobalIdx;
-                    uint32_t firstResidentOffsetIdx = firstResidentGlobalOctantIdx - firstOctantGlobalIdx;
+                    uint32_t nofResidents              = static_cast<uint32_t>(lastResidentGlobalOctantIdx - firstResidentGlobalOctantIdx + 1);
+                    uint32_t newFirstResidentOffsetIdx = static_cast<uint32_t>(firstResidentGlobalOctantIdx - newFirstOctantGlobalIdx);
+                    uint32_t firstResidentOffsetIdx    = static_cast<uint32_t>(firstResidentGlobalOctantIdx - firstOctantGlobalIdx);
 
                     // If residents are moved closer to the head, we need to move
                     // them from the first to the last. Otherwise, if resident are
