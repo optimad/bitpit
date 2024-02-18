@@ -212,7 +212,7 @@ bool LevelSetContainerBaseCache<key_t, container_t, value_t, reference_t, const_
  * contain an actual entry associated with the key.
  */
 template<typename key_t, typename container_t, typename value_t, typename reference_t, typename const_reference_t>
-typename LevelSetValueCache<key_t, value_t>::Entry LevelSetContainerBaseCache<key_t, container_t, value_t, reference_t, const_reference_t>::findEntry(const key_t &key) const
+typename LevelSetContainerBaseCache<key_t, container_t, value_t, reference_t, const_reference_t>::Entry LevelSetContainerBaseCache<key_t, container_t, value_t, reference_t, const_reference_t>::findEntry(const key_t &key) const
 {
     const_iterator itr = find(key);
     if (itr != end()) {
@@ -233,7 +233,7 @@ typename LevelSetValueCache<key_t, value_t>::Entry LevelSetContainerBaseCache<ke
  * \result The entry associated with the key.
  */
 template<typename key_t, typename container_t, typename value_t, typename reference_t, typename const_reference_t>
-typename LevelSetValueCache<key_t, value_t>::Entry LevelSetContainerBaseCache<key_t, container_t, value_t, reference_t, const_reference_t>::insertEntry(const key_t &key, const value_t &value)
+typename LevelSetContainerBaseCache<key_t, container_t, value_t, reference_t, const_reference_t>::Entry LevelSetContainerBaseCache<key_t, container_t, value_t, reference_t, const_reference_t>::insertEntry(const key_t &key, const value_t &value)
 {
     const_iterator itr = insert(key, value);
 
@@ -251,7 +251,7 @@ typename LevelSetValueCache<key_t, value_t>::Entry LevelSetContainerBaseCache<ke
  * \result The entry associated with the key.
  */
 template<typename key_t, typename container_t, typename value_t, typename reference_t, typename const_reference_t>
-typename LevelSetValueCache<key_t, value_t>::Entry LevelSetContainerBaseCache<key_t, container_t, value_t, reference_t, const_reference_t>::insertEntry(const key_t &key, value_t &&value)
+typename LevelSetContainerBaseCache<key_t, container_t, value_t, reference_t, const_reference_t>::Entry LevelSetContainerBaseCache<key_t, container_t, value_t, reference_t, const_reference_t>::insertEntry(const key_t &key, value_t &&value)
 {
     const_iterator itr = insert(key, std::move(value));
 
