@@ -224,8 +224,8 @@ int subtest_001()
     sparseObject.enableFieldCellCache(bitpit::LevelSetField::VALUE, bitpit::LevelSetCacheMode::FULL);
 
     std::chrono::time_point<std::chrono::system_clock> endSparse = std::chrono::system_clock::now();
-    int elapsedTimeSparse = std::chrono::duration_cast<std::chrono::milliseconds>(endSparse - startSparse).count();
-    bitpit::log::cout() << "Computation completed in " << elapsedTimeSparse << " ms" << std::endl;
+    std::chrono::milliseconds elapsedTimeSparse = std::chrono::duration_cast<std::chrono::milliseconds>(endSparse - startSparse);
+    bitpit::log::cout() << "Computation completed in " << elapsedTimeSparse.count() << " ms" << std::endl;
 
     levelsetSparse.getObject(objectId).enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
     mesh->getVTK().setName("levelset_008_cartesian_default_sparse");
@@ -257,8 +257,8 @@ int subtest_001()
     denseObject.enableFieldCellCache(bitpit::LevelSetField::VALUE, bitpit::LevelSetCacheMode::FULL);
 
     std::chrono::time_point<std::chrono::system_clock> endDense = std::chrono::system_clock::now();
-    int elapsedTimeDense = std::chrono::duration_cast<std::chrono::milliseconds>(endDense - startDense).count();
-    bitpit::log::cout() << "Computation completed in " << elapsedTimeDense << " ms" << std::endl;
+    std::chrono::milliseconds elapsedTimeDense = std::chrono::duration_cast<std::chrono::milliseconds>(endDense - startDense);
+    bitpit::log::cout() << "Computation completed in " << elapsedTimeDense.count() << " ms" << std::endl;
 
     levelsetDense.getObject(objectId).enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
     mesh->getVTK().setName("levelset_008_cartesian_default_dense");
@@ -350,8 +350,8 @@ int subtest_002()
     sparseObject.enableFieldCellCache(bitpit::LevelSetField::VALUE, bitpit::LevelSetCacheMode::FULL);
 
     std::chrono::time_point<std::chrono::system_clock> endSparse = std::chrono::system_clock::now();
-    int elapsedTimeSparse = std::chrono::duration_cast<std::chrono::milliseconds>(endSparse - startSparse).count();
-    bitpit::log::cout() << "Computation completed in " << elapsedTimeSparse << " ms" << std::endl;
+    std::chrono::milliseconds elapsedTimeSparse = std::chrono::duration_cast<std::chrono::milliseconds>(endSparse - startSparse);
+    bitpit::log::cout() << "Computation completed in " << elapsedTimeSparse.count() << " ms" << std::endl;
 
     mesh->switchMemoryMode(bitpit::VolCartesian::MEMORY_NORMAL);
     mesh->initializeAdjacencies();
@@ -389,8 +389,8 @@ int subtest_002()
     denseObject.enableFieldCellCache(bitpit::LevelSetField::VALUE, bitpit::LevelSetCacheMode::FULL);
 
     std::chrono::time_point<std::chrono::system_clock> endDense = std::chrono::system_clock::now();
-    int elapsedTimeDense = std::chrono::duration_cast<std::chrono::milliseconds>(endDense - startDense).count();
-    bitpit::log::cout() << "Computation completed in " << elapsedTimeDense << " ms" << std::endl;
+    std::chrono::milliseconds elapsedTimeDense = std::chrono::duration_cast<std::chrono::milliseconds>(endDense - startDense);
+    bitpit::log::cout() << "Computation completed in " << elapsedTimeDense.count() << " ms" << std::endl;
 
     mesh->switchMemoryMode(bitpit::VolCartesian::MEMORY_NORMAL);
     mesh->initializeAdjacencies();
@@ -489,8 +489,8 @@ int subtest_003()
     sparseObject.enableFieldCellCache(bitpit::LevelSetField::VALUE, bitpit::LevelSetCacheMode::FULL);
 
     std::chrono::time_point<std::chrono::system_clock> endSparse = std::chrono::system_clock::now();
-    int elapsedTimeSparse = std::chrono::duration_cast<std::chrono::milliseconds>(endSparse - startSparse).count();
-    bitpit::log::cout() << "Computation completed in " << elapsedTimeSparse << " ms" << std::endl;
+    std::chrono::milliseconds elapsedTimeSparse = std::chrono::duration_cast<std::chrono::milliseconds>(endSparse - startSparse);
+    bitpit::log::cout() << "Computation completed in " << elapsedTimeSparse.count() << " ms" << std::endl;
 
     levelsetSparse.getObject(objectId).enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
     mesh->getVTK().setName("levelset_008_octree_sparse");
@@ -522,8 +522,8 @@ int subtest_003()
     denseObject.enableFieldCellCache(bitpit::LevelSetField::VALUE, bitpit::LevelSetCacheMode::FULL);
 
     std::chrono::time_point<std::chrono::system_clock> endDense = std::chrono::system_clock::now();
-    int elapsedTimeDense = std::chrono::duration_cast<std::chrono::milliseconds>(endDense - startDense).count();
-    bitpit::log::cout() << "Computation completed in " << elapsedTimeDense << " ms" << std::endl;
+    std::chrono::milliseconds elapsedTimeDense = std::chrono::duration_cast<std::chrono::milliseconds>(endDense - startDense);
+    bitpit::log::cout() << "Computation completed in " << elapsedTimeDense.count() << " ms" << std::endl;
 
     levelsetDense.getObject(objectId).enableVTKOutput(bitpit::LevelSetWriteField::VALUE);
     mesh->getVTK().setName("levelset_008_octree_dense");

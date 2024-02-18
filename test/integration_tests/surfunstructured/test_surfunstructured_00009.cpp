@@ -66,14 +66,13 @@ int subtest_001()
     log::cout() << std::endl;
     log::cout() << "Building skd-tree..." << std::endl;
 
-    int elapsed_initalization = 0;
     start = std::chrono::system_clock::now();
 
     SurfaceSkdTree searchTree(surfaceMesh.get());
     searchTree.build();
 
     end = std::chrono::system_clock::now();
-    elapsed_initalization = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+    std::chrono::milliseconds elapsed_initalization = std::chrono::duration_cast<std::chrono::milliseconds>(end-start);
 
     long treeDepth = searchTree.evalMaxDepth();
     log::cout() << "    Maximum tree depth................. " << treeDepth << std::endl;
@@ -94,7 +93,7 @@ int subtest_001()
     }
 
     log::cout() << std::endl;
-    log::cout() << "    Elapsed time for skd-tree initialization " << elapsed_initalization << " ms" << std::endl;
+    log::cout() << "    Elapsed time for skd-tree initialization " << elapsed_initalization.count() << " ms" << std::endl;
 
     // Evaluate the closest cells
     log::cout() << std::endl;
@@ -114,7 +113,6 @@ int subtest_001()
     expectedIds.push_back(8264);
     expectedIds.push_back(5934);
 
-    int elapsed_distance_evaluation = 0.;
     start = std::chrono::system_clock::now();
 
     std::size_t nPoints = points.size();
@@ -141,9 +139,9 @@ int subtest_001()
     }
 
     end = std::chrono::system_clock::now();
-    elapsed_distance_evaluation = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+    std::chrono::milliseconds elapsed_distance_evaluation = std::chrono::duration_cast<std::chrono::milliseconds>(end-start);
     log::cout() << std::endl;
-    log::cout() << "    Elapsed time for distance evaluation " << elapsed_distance_evaluation << " ms" << std::endl;
+    log::cout() << "    Elapsed time for distance evaluation " << elapsed_distance_evaluation.count() << " ms" << std::endl;
 
     return status;
 }
