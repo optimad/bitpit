@@ -448,9 +448,9 @@ Logger::Logger(const std::string &name, const std::shared_ptr<LoggerBuffer> &buf
     : std::ios(nullptr), std::ostream(nullptr),
       m_name(name),
       m_buffer(buffer), m_bufferSettings(std::make_shared<LoggerBuffer::Settings>()),
-      m_defaultSeverity(log::INFO), m_defaultVisibility(log::VISIBILITY_MASTER),
-      m_consoleDisabledThreshold(log::NOTSET), m_consoleVerbosityThreshold(log::INFO),
-      m_fileDisabledThreshold(log::NOTSET), m_fileVerbosityThreshold(log::INFO)
+      m_defaultSeverity(log::LEVEL_INFO), m_defaultVisibility(log::VISIBILITY_MASTER),
+      m_consoleDisabledThreshold(log::LEVEL_NOTSET), m_consoleVerbosityThreshold(log::LEVEL_INFO),
+      m_fileDisabledThreshold(log::LEVEL_NOTSET), m_fileVerbosityThreshold(log::LEVEL_INFO)
 {
     // St stream buffer
     basic_ios<char>::rdbuf(m_buffer.get());
@@ -537,7 +537,7 @@ void Logger::disableFile(log::Level level)
 void Logger::setDefaultSeverity(log::Level severity)
 {
     // Set default severity
-    assert(severity != log::Level::NOTSET);
+    assert(severity != log::Level::LEVEL_NOTSET);
     m_defaultSeverity = severity;
 }
 
@@ -1055,7 +1055,7 @@ Logger & LoggerManager::cout(const std::string &name, log::Level defaultSeverity
     Logger &logger = *(m_loggers.at(name));
 
     // Set default properties
-    if (defaultSeverity != log::Level::NOTSET) {
+    if (defaultSeverity != log::Level::LEVEL_NOTSET) {
         logger.setDefaultSeverity(defaultSeverity);
     }
 
@@ -1102,7 +1102,7 @@ Logger & LoggerManager::critical(log::Visibility defaultVisibility)
 */
 Logger & LoggerManager::critical(const std::string &name, log::Visibility defaultVisibility)
 {
-    return cout(name, log::Level::CRITICAL, defaultVisibility);
+    return cout(name, log::Level::LEVEL_CRITICAL, defaultVisibility);
 }
 
 /*!
@@ -1140,7 +1140,7 @@ Logger & LoggerManager::error(log::Visibility defaultVisibility)
 */
 Logger & LoggerManager::error(const std::string &name, log::Visibility defaultVisibility)
 {
-    return cout(name, log::Level::ERROR, defaultVisibility);
+    return cout(name, log::Level::LEVEL_ERROR, defaultVisibility);
 }
 
 /*!
@@ -1178,7 +1178,7 @@ Logger & LoggerManager::warning(log::Visibility defaultVisibility)
 */
 Logger & LoggerManager::warning(const std::string &name, log::Visibility defaultVisibility)
 {
-    return cout(name, log::Level::WARNING, defaultVisibility);
+    return cout(name, log::Level::LEVEL_WARNING, defaultVisibility);
 }
 
 /*!
@@ -1216,7 +1216,7 @@ Logger & LoggerManager::info(log::Visibility defaultVisibility)
 */
 Logger & LoggerManager::info(const std::string &name, log::Visibility defaultVisibility)
 {
-    return cout(name, log::Level::INFO, defaultVisibility);
+    return cout(name, log::Level::LEVEL_INFO, defaultVisibility);
 }
 
 /*!
@@ -1254,7 +1254,7 @@ Logger & LoggerManager::debug(log::Visibility defaultVisibility)
 */
 Logger & LoggerManager::debug(const std::string &name, log::Visibility defaultVisibility)
 {
-    return cout(name, log::Level::DEBUG, defaultVisibility);
+    return cout(name, log::Level::LEVEL_DEBUG, defaultVisibility);
 }
 
 /*!
