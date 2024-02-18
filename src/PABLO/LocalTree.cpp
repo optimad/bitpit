@@ -1080,7 +1080,7 @@ namespace bitpit {
                 for (int8_t idim=0; idim<m_dim; idim++){
                     coordtry[idim] = m_octants[candidateIdx].getLogicalCoordinates(idim);
 
-                    int32_t Dx     = int32_t(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
+                    int32_t Dx     = int32_t(int32_t(abs(cxyz[idim]))*(coordtry[idim] - coord[idim]));
                     int32_t Dxstar = int32_t((cxyz[idim]-1)/2)*(m_octants[candidateIdx].getLogicalSize()) + int32_t((cxyz[idim]+1)/2)*size;
                     if (Dx != Dxstar){
                         isNeighbourCandidate = false;
@@ -1172,7 +1172,7 @@ namespace bitpit {
                     for (int8_t idim=0; idim<m_dim; idim++){
                         coordtry[idim] = m_ghosts[candidateIdx].getLogicalCoordinates(idim);
 
-                        int32_t Dx     = int32_t(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
+                        int32_t Dx     = int32_t(int32_t(abs(cxyz[idim]))*(coordtry[idim] - coord[idim]));
                         int32_t Dxstar = int32_t((cxyz[idim]-1)/2)*(m_ghosts[candidateIdx].getLogicalSize()) + int32_t((cxyz[idim]+1)/2)*size;
                         if (Dx != Dxstar){
                             isNeighbourCandidate = false;
@@ -1434,7 +1434,7 @@ namespace bitpit {
                         if (leveltry > level){
                             u32array3 coord1 = {{1, 1, 1}};
                             for (int8_t idim=0; idim<m_dim; idim++){
-                                coord1[idim] = coord[idim] + size;
+                                coord1[idim] = int32_t(coord[idim]) + size;
                             }
 
                             if((abs(cxyz[0])*abs(cxyz[2])*((coordtry[1]>=coord[1])*(coordtry[1]<coord1[1]))) + (abs(cxyz[1])*abs(cxyz[2])*((coordtry[0]>=coord[0])*(coordtry[0]<coord1[0]))) + (abs(cxyz[0])*abs(cxyz[1])*((coordtry[2]>=coord[2])*(coordtry[2]<coord1[2])))){
@@ -2870,10 +2870,10 @@ namespace bitpit {
         for (uint64_t n = 0; n < (noctants + nghosts); n++){
             const Octant *octant;
             if (n < noctants) {
-                uint32_t octantId = n;
+                uint32_t octantId = static_cast<uint32_t>(n);
                 octant = &(m_octants[octantId]);
             } else {
-                uint32_t octantId = n - noctants;
+                uint32_t octantId = static_cast<uint32_t>(n - noctants);
                 octant = &(m_ghosts[octantId]);
             }
 
@@ -2908,10 +2908,10 @@ namespace bitpit {
             for (uint64_t n : nodeOctants.at(nodeKey)) {
                 std::vector<uint32_t> *octantConnect;
                 if (n < noctants) {
-                    uint32_t octantId = n;
+                    uint32_t octantId = static_cast<uint32_t>(n);
                     octantConnect = &(m_connectivity[octantId]);
                 } else {
-                    uint32_t octantId = n - noctants;
+                    uint32_t octantId = static_cast<uint32_t>(n - noctants);
                     octantConnect = &(m_ghostsConnectivity[octantId]);
                 }
 

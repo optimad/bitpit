@@ -523,7 +523,7 @@ namespace bitpit {
         uint32_t nOctants = getNumOctants();
         utils::binary::write(stream, nOctants);
 
-        uint32_t nGlobalOctants = getGlobalNumOctants();
+        uint64_t nGlobalOctants = getGlobalNumOctants();
         utils::binary::write(stream, nGlobalOctants);
 
         for (uint32_t i = 0; i < nOctants; i++) {
@@ -632,7 +632,7 @@ namespace bitpit {
         uint32_t nOctants;
         utils::binary::read(stream, nOctants);
 
-        uint32_t nGlobalOctants;
+        uint64_t nGlobalOctants;
         utils::binary::read(stream, nGlobalOctants);
         m_globalNumOctants = nGlobalOctants;
 
@@ -1633,7 +1633,7 @@ namespace bitpit {
         typename u64vector::const_iterator findResult;
         findResult = std::find(m_octree.m_globalIdxGhosts.begin(),m_octree.m_globalIdxGhosts.end(),gidx);
         if(findResult != m_octree.m_globalIdxGhosts.end()){
-            index = std::distance(m_octree.m_globalIdxGhosts.begin(),findResult);
+            index = static_cast<uint32_t>(std::distance(m_octree.m_globalIdxGhosts.begin(),findResult));
         }
         else{
             index = std::numeric_limits<uint32_t>::max();
@@ -3417,16 +3417,17 @@ namespace bitpit {
             isghost.resize(1);
             rank.resize(1);
             uint64_t gidx = getGlobalIdx(idx);
-            mapper[0] = gidx;
+            uint64_t previousIdx = gidx;
             for (int iproc=0; iproc<m_nproc; ++iproc){
                 if (m_partitionRangeGlobalIdx0[iproc]>=gidx){
                     if (iproc > 0)
-                        mapper[0] -= m_partitionRangeGlobalIdx0[iproc-1] + 1;
+                        previousIdx -= m_partitionRangeGlobalIdx0[iproc-1] + 1;
                     rank[0] = (m_lastOp == OP_LOADBALANCE_FIRST ? m_rank : iproc);
                     isghost[0] = false;
                     break;
                 }
             }
+            mapper[0] = static_cast<uint32_t>(previousIdx);
         }
     };
 
@@ -3942,7 +3943,7 @@ namespace bitpit {
         if (rankItr == m_partitionRangeGlobalIdx.end()) {
             ownerRank = -1;
         } else {
-            ownerRank = std::distance(m_partitionRangeGlobalIdx.begin(), rankItr);
+            ownerRank = static_cast<int>(std::distance(m_partitionRangeGlobalIdx.begin(), rankItr));
         }
 
         return ownerRank;
@@ -4458,7 +4459,7 @@ namespace bitpit {
         firstRankItr--;
 
         for (auto itr = firstRankItr; itr != offsets_B.end(); ++itr) {
-            int rank_B = std::distance(offsets_B.begin(), itr);
+            int rank_B = static_cast<int>(std::distance(offsets_B.begin(), itr));
             uint64_t beginGlobalId_B = offsets_B[rank_B];
             uint64_t endGlobalId_B   = offsets_B[rank_B + 1];
 
@@ -4769,7 +4770,7 @@ namespace bitpit {
                     break;
             }
         }
-        partition[m_nproc-1] = m_globalNumOctants - nAssigendOctants;
+        partition[m_nproc-1] = static_cast<uint32_t>(m_globalNumOctants - nAssigendOctants);
     };
 
     /*! Compute the partition of the octree over the processes (only compute the information about
@@ -4857,9 +4858,9 @@ namespace bitpit {
 
                 // Place istart at index of the last octant at new incoming process interface
                 if (m_rank!=0)
-                    istart = sum - m_partitionRangeGlobalIdx[m_rank-1] - 1;
+                    istart = static_cast<uint32_t>(sum - m_partitionRangeGlobalIdx[m_rank-1] - 1);
                 else
-                    istart = sum;
+                    istart = static_cast<uint32_t>(sum);
 
                 // Compute the rest w.r.t. the size of the octant of the same size
                 // of a compact family of the desired level
