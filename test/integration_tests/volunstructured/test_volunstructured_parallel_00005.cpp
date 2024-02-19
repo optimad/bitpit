@@ -90,7 +90,7 @@ int subtest_001()
 
     // Ghost vertices
     int rankDirection = (rank ? -1 : 1);
-    for (int j = 0; j < haloLayers; ++j) {
+    for (std::size_t j = 0; j < haloLayers; ++j) {
         for (int i = 0; i < nofCellPerDirection + 1; ++i) {
             std::array<double, 3> vertex = {{ i * cellSize, cellRankOffset + rankDirection * (j + 1) * cellSize , 0.00000000}};
             patch->addVertex(vertex,  vertexId);
@@ -101,7 +101,7 @@ int subtest_001()
     // Ghost cells
     int layer = 0;
     baseVertexId += rank * (nofCellPerDirection + 1);
-    for (int j = 0; j < haloLayers; ++j) {
+    for (std::size_t j = 0; j < haloLayers; ++j) {
         for (int i = 0; i < nofCellPerDirection; ++i) {
             std::vector<long> connectivity({{baseVertexId, baseVertexId + 1,
                 baseVertexId + rankDirection * nofCellPerDirection + (-2 * rank + 2), baseVertexId + rankDirection *  nofCellPerDirection + (-2 * rank + 1)}});
