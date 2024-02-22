@@ -678,6 +678,7 @@ public:
 	void displayInterfaces(std::ostream &out, unsigned int padding = 0) const;
 
 	VTKUnstructuredGrid & getVTK();
+	const VTKUnstructuredGrid & getVTK() const;
 	WriteTarget getVTKWriteTarget() const;
 	void setVTKWriteTarget(WriteTarget targetCells);
 	const CellConstRange getVTKCellWriteRange() const;
