@@ -469,6 +469,8 @@ namespace bitpit {
 
         void	reset(bool createRoot);
 
+        uint64_t	evalPointAnchorMorton(const double * point) const;
+
         // =================================================================================== //
         // OTHER OCTANT BASED METHODS												    	   //
         // =================================================================================== //
