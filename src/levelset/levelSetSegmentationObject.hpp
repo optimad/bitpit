@@ -70,7 +70,7 @@ public:
 
     double getFeatureAngle() const;
 
-    double evalDistance(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr) const;
+    double evalDistance(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, bool signedDistance) const;
     std::array<double, 3> evalDistanceVector(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr) const;
 
     std::array<double, 3> evalNormal(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr) const;

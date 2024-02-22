@@ -183,14 +183,16 @@ double LevelSetSegmentationSurfaceInfo::getFeatureAngle() const {
 }
 
 /*!
- * Evaluate the signed distance function at the specified point.
+ * Evaluate the distance function at the specified point.
  *
  * @param[in] point are the coordinates of point
  * @param[in] segmentItr is an iterator pointing to the closest segment
- * @return The signed distance function at the specified point.
+ * @param[in] signedDistance controls if the signed or unsigned distance will be evaluated
+ * @return The distance function at the specified point.
  */
 double LevelSetSegmentationSurfaceInfo::evalDistance(const std::array<double, 3> &point,
-                                                     const SegmentConstIterator &segmentItr) const
+                                                     const SegmentConstIterator &segmentItr,
+                                                     bool signedDistance) const
 {
     // Project the point on the surface and evaluate the point-projection vector
     int nSegmentVertices = segmentItr->getVertexCount();
@@ -200,6 +202,9 @@ double LevelSetSegmentationSurfaceInfo::evalDistance(const std::array<double, 3>
 
     // Evaluate unsigned distance
     double unsignedDistance = norm2(pointProjectionVector);
+    if (!signedDistance) {
+        return unsignedDistance;
+    }
 
     // Signed distance
     //
@@ -1762,7 +1767,7 @@ short LevelSetSegmentationObject::_evalSign(const std::array<double,3> &point, l
 
     LevelSetSegmentationSurfaceInfo::SegmentConstIterator supportItr = getSurface().getCellConstIterator(support);
 
-    return evalValueSign(m_surfaceInfo->evalDistance(point, supportItr));
+    return evalValueSign(m_surfaceInfo->evalDistance(point, supportItr, true));
 }
 
 /*!
@@ -1789,7 +1794,7 @@ double LevelSetSegmentationObject::_evalValue(const std::array<double,3> &point,
 
     // Evaluate the distance of the point from the surface
     LevelSetSegmentationSurfaceInfo::SegmentConstIterator supportItr = getSurface().getCellConstIterator(support);
-    double distance = m_surfaceInfo->evalDistance(point, supportItr);
+    double distance = m_surfaceInfo->evalDistance(point, supportItr, signedLevelSet);
 
     // Early return if the point lies on the surface
     if (evalValueSign(distance) == 0) {
@@ -1831,7 +1836,7 @@ std::array<double,3> LevelSetSegmentationObject::_evalGradient(const std::array<
 
     // Evaluate the distance of the point from the surface
     LevelSetSegmentationSurfaceInfo::SegmentConstIterator supportItr = getSurface().getCellConstIterator(support);
-    double distance = m_surfaceInfo->evalDistance(point, supportItr);
+    double distance = m_surfaceInfo->evalDistance(point, supportItr, signedLevelSet);
 
     // Early return if the point lies on the surface
     if (evalValueSign(distance) == 0) {
@@ -1843,12 +1848,7 @@ std::array<double,3> LevelSetSegmentationObject::_evalGradient(const std::array<
     }
 
     // Evaluate levelset gradient
-    std::array<double,3> gradient = m_surfaceInfo->evalDistanceVector(point, supportItr);
-    if (signedLevelSet) {
-        gradient /= distance;
-    } else {
-        gradient /= std::abs(distance);
-    }
+    std::array<double,3> gradient = m_surfaceInfo->evalDistanceVector(point, supportItr) / distance;
 
     return gradient;
 }
