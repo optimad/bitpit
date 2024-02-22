@@ -503,7 +503,7 @@ namespace bitpit {
         bool 		isNodeOnOctant(const Octant* nodeOctant, uint8_t nodeIndex, const Octant* octant) const;
         bool 		isEdgeOnOctant(const Octant* edgeOctant, uint8_t edgeIndex, const Octant* octant) const;
         bool 		isFaceOnOctant(const Octant* faceOctant, uint8_t faceIndex, const Octant* octant) const;
-        int 		getPointOwnerRank(darray3 point);
+        int 		getPointOwnerRank(const darray3 &point);
         uint8_t		getFamilySplittingNode(const Octant*) const;
         void		expectedOctantAdapt(const Octant* octant, int8_t marker, octvector* result) const;
 
