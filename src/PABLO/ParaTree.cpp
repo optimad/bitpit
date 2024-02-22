@@ -3225,28 +3225,20 @@ namespace bitpit {
         }///end ghosts search
     };
 
-    /** Get the octant owner rank of an input point.
+    /** Get the rank of the octant that contains the specified point.
      * \param[in] point Coordinates of target point.
      * \return Owner rank of target point (negative if out of global domain).
      */
     int
-    ParaTree::getPointOwnerRank(darray3 point){
-
+    ParaTree::getPointOwnerRank(const darray3 &point){
+        // Early return if the point is not associatd with a valid Morton
         uint64_t morton = evalPointAnchorMorton(point.data());
         if (morton == PABLO::INVALID_MORTON) {
             return -1;
         }
 
-        if (m_serial) {
-            return m_rank;
-        }
-
-        for (int p = 0; p < m_nproc; ++p){
-            if (morton <= m_partitionLastDesc[p] && morton >= m_partitionFirstDesc[p])
-                return p;
-        }
-
-        return -1;
+        // Identify that partition that contains the point
+        return findOwner(morton);
     };
 
     /** Evaluate the Morton number of the anchor associated with the specified point.
