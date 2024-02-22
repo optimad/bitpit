@@ -2207,9 +2207,12 @@ bool VolOctree::isPointInside(long id, const std::array<double, 3> &point) const
 */
 long VolOctree::locatePoint(const std::array<double, 3> &point) const
 {
+	log::cout() << " LOCATE POINT " << point << std::endl;
 	bool isGhost;
 	uint32_t treeId = m_tree->getPointOwnerIdx(point, isGhost);
 	if (treeId == std::numeric_limits<uint32_t>::max()) {
+	log::cout() << " NOT INSIDE " << std::endl;
+
 		return Element::NULL_ID;
 	}
 

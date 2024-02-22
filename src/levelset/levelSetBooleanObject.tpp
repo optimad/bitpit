@@ -78,14 +78,19 @@ void LevelSetBooleanResult<SourceLevelSetObject>::update(const SourceLevelSetObj
 
     // Update the result
     if( m_operation == LevelSetBooleanOperation::UNION){
+        log::cout() << " UNION " << m_value << " :: " << value << std::endl;
         if(m_value > value) {
             m_object     = object;
             m_objectSign = 1;
 
             m_value = m_objectSign * value;
+
+            log::cout() << " NEW VALUE " << m_value << " :: " << value << std::endl;
+
         }
 
     } else if ( m_operation == LevelSetBooleanOperation::INTERSECTION){
+        log::cout() << " INTERSECTION " << m_value << " :: " << value << std::endl;
         if(m_value < value) {
             m_object     = object;
             m_objectSign = 1;
@@ -94,6 +99,7 @@ void LevelSetBooleanResult<SourceLevelSetObject>::update(const SourceLevelSetObj
         }
 
     } else if ( m_operation == LevelSetBooleanOperation::SUBTRACTION){
+        log::cout() << " SUBTRACTION " << m_value << " :: " << value << std::endl;
         if(m_value < - value) {
             m_object     = object;
             m_objectSign = -1;

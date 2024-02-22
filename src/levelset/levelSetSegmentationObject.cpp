@@ -908,8 +908,11 @@ int LevelSetSegmentationBaseObject::_evalCellPart(long id) const
  */
 int LevelSetSegmentationBaseObject::_evalPart(const std::array<double,3> &point) const
 {
-    long support = evalSupport(point);
     const SurfUnstructured &surface = evalSurface(point);
+    log::cout() << "surface " << surface.getId() << std::endl;
+    log::cout() << "surface NAME " << surface.getVTK().getName() << std::endl;
+    long support = evalSupport(point);
+    log::cout() << "support " << support << std::endl;
     int part = surface.getCell(support).getPID();
 
     return part;
@@ -1759,8 +1762,17 @@ short LevelSetSegmentationObject::_evalSign(const std::array<double,3> &point, l
     // Throw an error if the support is not valid
     if (support < 0) {
         if (empty()) {
-            return levelSetDefaults::SIGN;
+            long cellId = m_kernel->getMesh()->locatePoint(point);
+                log::cout() << " cellId " << cellId << std::endl;
+
+            if (cellId != Cell::NULL_ID) {
+                log::cout() << " CELL SIGN " << evalCellSign(cellId) << std::endl;
+                return evalCellSign(cellId);
+            } else {
+                return levelSetDefaults::SIGN;
+            }
         }
+            return levelSetDefaults::SIGN;
 
         throw std::runtime_error("Unable to evaluate the sign: the support is not valid.");
     }
@@ -1786,7 +1798,15 @@ double LevelSetSegmentationObject::_evalValue(const std::array<double,3> &point,
     // With an invalid support, only the unsigend levelset can be evaluated.
     if (support < 0) {
         if (!signedLevelSet || empty()) {
-            return levelSetDefaults::VALUE;
+            short pointSign;
+            if (empty()) {
+                pointSign = _evalSign(point, support);
+                log::cout() << " POINT SIGN " << pointSign << std::endl;
+            } else {
+                pointSign = levelSetDefaults::SIGN;
+            }
+
+            return (pointSign * levelSetDefaults::VALUE);
         }
 
         throw std::runtime_error("With an invalid support, only the unsigend levelset can be evaluated.");
@@ -2120,7 +2140,11 @@ std::array<double,3> LevelSetBooleanObject<LevelSetSegmentationBaseObject>::_eva
  */
 int LevelSetBooleanObject<LevelSetSegmentationBaseObject>::_evalPart(const std::array<double,3> &point) const
 {
-    return getReferenceObject(point)->evalPart(point);
+    log::cout() << " EVA LPART " << std::endl;
+    int part = getReferenceObject(point)->evalPart(point);
+    log::cout() << " DONE EVA LPART " << std::endl;
+
+    return part;
 }
 
 /*!
