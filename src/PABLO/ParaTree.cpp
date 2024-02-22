@@ -3041,35 +3041,19 @@ namespace bitpit {
      */
     uint32_t
     ParaTree::getPointOwnerIdx(const double * point) const {
-        uint32_t noctants = m_octree.m_octants.size();
-        if(noctants==0)
-            return numeric_limits<uint32_t>::max();
-        uint32_t idxtry = noctants/2;
-        uint32_t x, y, z;
-        uint64_t morton;
-        int powner = 0;
-        //ParaTree works in [0,1] domain
-        if (point[0] > 1+m_tol || point[1] > 1+m_tol || point[2] > 1+m_tol
-            || point[0] < -m_tol || point[1] < -m_tol || point[2] < -m_tol){
+        uint64_t morton = evalPointAnchorMorton(point);
+        if (morton == PABLO::INVALID_MORTON) {
             return numeric_limits<uint32_t>::max();
         }
 
-        x = m_trans.mapX(std::min(std::max(point[0], 0.0), 1.0));
-        y = m_trans.mapY(std::min(std::max(point[1], 0.0), 1.0));
-        z = m_trans.mapZ(std::min(std::max(point[2], 0.0), 1.0));
-
-        uint32_t maxLength = getMaxLength();
-        if (x == maxLength) x = x - 1;
-        if (y == maxLength) y = y - 1;
-        if (z == maxLength) z = z - 1;
-        morton = PABLO::computeMorton(m_dim,x,y,z);
-
-
-        powner = 0;
+        int powner = 0;
         if(!m_serial) powner = findOwner(morton);
 
         if ((powner!=m_rank) && (!m_serial))
             return numeric_limits<uint32_t>::max();
+
+        uint32_t noctants = m_octree.m_octants.size();
+        uint32_t idxtry = noctants/2;
 
         int32_t jump = idxtry;
         while(abs(jump) > 0){
@@ -3120,34 +3104,17 @@ namespace bitpit {
      */
     uint32_t
     ParaTree::getPointOwnerIdx(const double * point, bool & isghost) const {
-        uint32_t noctants = m_octree.m_octants.size();
-        if(noctants==0)
-            return numeric_limits<uint32_t>::max();
-        uint32_t idxtry = noctants/2;
-        uint32_t x, y, z;
-        uint64_t morton, mortontry;
-        int powner = 0;
-        isghost = false;
-        //ParaTree works in [0,1] domain
-        if (point[0] > 1+m_tol || point[1] > 1+m_tol || point[2] > 1+m_tol
-            || point[0] < -m_tol || point[1] < -m_tol || point[2] < -m_tol){
+        uint64_t morton = evalPointAnchorMorton(point);
+        if (morton == PABLO::INVALID_MORTON) {
             return numeric_limits<uint32_t>::max();
         }
 
-        x = m_trans.mapX(std::min(std::max(point[0], 0.0), 1.0));
-        y = m_trans.mapY(std::min(std::max(point[1], 0.0), 1.0));
-        z = m_trans.mapZ(std::min(std::max(point[2], 0.0), 1.0));
-
-        uint32_t maxLength = getMaxLength();
-        if (x == maxLength) x = x - 1;
-        if (y == maxLength) y = y - 1;
-        if (z == maxLength) z = z - 1;
-        morton = PABLO::computeMorton(m_dim,x,y,z);
-
-
-        powner = 0;
+        int powner = 0;
         if(!m_serial) powner = findOwner(morton);
 
+        uint32_t noctants = m_octree.m_octants.size();
+        uint32_t idxtry = noctants/2;
+        uint64_t mortontry;
         if (powner==m_rank){
 
             int32_t jump = idxtry;
@@ -3265,40 +3232,14 @@ namespace bitpit {
     int
     ParaTree::getPointOwnerRank(darray3 point){
 
-        uint32_t x,y,z;
-        uint64_t morton;
-
-        if (point[0] > 1+m_tol || point[1] > 1+m_tol || point[2] > 1+m_tol
-            || point[0] < -m_tol || point[1] < -m_tol || point[2] < -m_tol){
-            return -1;
-        }
-        point[0] = min(max(point[0],0.0),1.0);
-        point[1] = min(max(point[1],0.0),1.0);
-        point[2] = min(max(point[2],0.0),1.0);
-
-        x = m_trans.mapX(point[0]);
-        y = m_trans.mapY(point[1]);
-        z = m_trans.mapZ(point[2]);
-
-        uint32_t maxLength = getMaxLength();
-        if ((x > maxLength) || (y > maxLength) || (z > maxLength)
-            || (point[0] < m_trans.m_origin[0]) || (point[1] < m_trans.m_origin[1]) || (point[2] < m_trans.m_origin[2])){
+        uint64_t morton = evalPointAnchorMorton(point.data());
+        if (morton == PABLO::INVALID_MORTON) {
             return -1;
         }
 
-        if (m_serial)
+        if (m_serial) {
             return m_rank;
-
-        if (x == maxLength)
-            x = x - 1;
-
-        if (y == maxLength)
-            y = y - 1;
-
-        if (z == maxLength)
-            z = z - 1;
-
-        morton = PABLO::computeMorton(m_dim, x, y, z);
+        }
 
         for (int p = 0; p < m_nproc; ++p){
             if (morton <= m_partitionLastDesc[p] && morton >= m_partitionFirstDesc[p])
@@ -3307,6 +3248,39 @@ namespace bitpit {
 
         return -1;
     };
+
+    /** Evaluate the Morton number of anchor for the specified point.
+     * The anchor of a point is the lower-left-back vertex of the smallest octant that contains
+     * the point.
+     * \param[in] point Coordinates of target point.
+     * \return The Morton number of anchor for the specified point.
+     */
+    uint64_t
+    ParaTree::evalPointAnchorMorton(const double * point) const {
+        // Early return if the tree is empty
+        if (m_octree.m_octants.empty()) {
+            return PABLO::INVALID_MORTON;
+        }
+
+        // Early return if the point is outside the domain
+        if (point[0] > 1+m_tol || point[1] > 1+m_tol || point[2] > 1+m_tol) {
+            return PABLO::INVALID_MORTON;
+        } else if (point[0] < -m_tol || point[1] < -m_tol || point[2] < -m_tol) {
+            return PABLO::INVALID_MORTON;
+        }
+
+        // Evaluate the Morton associated to the point
+        uint32_t x = m_trans.mapX(std::min(std::max(point[0], 0.0), 1.0));
+        uint32_t y = m_trans.mapY(std::min(std::max(point[1], 0.0), 1.0));
+        uint32_t z = m_trans.mapZ(std::min(std::max(point[2], 0.0), 1.0));
+
+        uint32_t maxLength = getMaxLength();
+        if (x == maxLength) x = x - 1;
+        if (y == maxLength) y = y - 1;
+        if (z == maxLength) z = z - 1;
+
+        return PABLO::computeMorton(m_dim, x, y, z);
+    }
 
     /** Get the local index of the node of a target octant, corresponding to the splitting node of its family; i.e. the index of the local node
      * coincident with the center point of its father.
