@@ -3041,60 +3041,27 @@ namespace bitpit {
      */
     uint32_t
     ParaTree::getPointOwnerIdx(const double * point) const {
+        // Evaluate the Morton associated with the point
         uint64_t morton = evalPointAnchorMorton(point);
         if (morton == PABLO::INVALID_MORTON) {
             return numeric_limits<uint32_t>::max();
         }
 
-        int powner = 0;
-        if(!m_serial) powner = findOwner(morton);
-
-        if ((powner!=m_rank) && (!m_serial))
+        // Early return if the point belongs to a ghost
+        if (findOwner(morton) != m_rank && (!m_serial)) {
             return numeric_limits<uint32_t>::max();
-
-        uint32_t noctants = m_octree.m_octants.size();
-        uint32_t idxtry = noctants/2;
-
-        int32_t jump = idxtry;
-        while(abs(jump) > 0){
-
-            uint64_t mortontry = m_octree.m_octants[idxtry].getMorton();
-            jump = ((mortontry<morton)-(mortontry>morton))*abs(jump)/2;
-            idxtry += jump;
-            if (idxtry > noctants-1){
-                if (jump > 0){
-                    idxtry = noctants - 1;
-                    jump = 0;
-                }
-                else if (jump < 0){
-                    idxtry = 0;
-                    jump = 0;
-                }
-            }
         }
-        if(m_octree.m_octants[idxtry].getMorton() == morton){
-            return idxtry;
-        }
-        else{
-            // Step until the mortontry lower than morton (one idx of distance)
-            {
-                while(m_octree.m_octants[idxtry].getMorton() < morton){
-                    idxtry++;
-                    if(idxtry > noctants-1){
-                        idxtry = noctants-1;
-                        break;
-                    }
-                }
-                while(m_octree.m_octants[idxtry].getMorton() > morton){
-                    idxtry--;
-                    if(idxtry > noctants-1){
-                        idxtry = 0;
-                        break;
-                    }
-                }
-            }
-            return idxtry;
-        }
+
+        // Identify the octant that contains the point
+        //
+        // If the owner of the point is an internal octant, decrementing the Morton upper bound
+        // by one will give us the requested octant.
+        uint32_t pointOwnerIdx;
+        uint64_t pointOwnerMorton;
+        m_octree.findMortonUpperBound(morton, m_octree.m_octants, &pointOwnerIdx, &pointOwnerMorton);
+        --pointOwnerIdx;
+
+        return pointOwnerIdx;
     };
 
     /** Get the octant owner of an input point.
@@ -3106,123 +3073,50 @@ namespace bitpit {
     ParaTree::getPointOwnerIdx(const double * point, bool & isghost) const {
         uint64_t morton = evalPointAnchorMorton(point);
         if (morton == PABLO::INVALID_MORTON) {
+            isghost = false;
+
             return numeric_limits<uint32_t>::max();
         }
 
-        int powner = 0;
-        if(!m_serial) powner = findOwner(morton);
+        // Check if the point belongs to a ghost
+        isghost = (findOwner(morton) != m_rank);
 
-        uint32_t noctants = m_octree.m_octants.size();
-        uint32_t idxtry = noctants/2;
-        uint64_t mortontry;
-        if (powner==m_rank){
+        // Identify the octant that contains the point
+        //
+        // If the owner of the point is an internal octant, decrementing the Morton upper bound
+        // by one will give us the requested octant. If the owner of the point is a ghost octant,
+        // we need to test all the octants before the Morton upper bound.
+        uint32_t pointOwnerIdx;
+        uint64_t pointOwnerMorton;
+        if (!isghost) {
+            m_octree.findMortonUpperBound(morton, m_octree.m_octants, &pointOwnerIdx, &pointOwnerMorton);
+            --pointOwnerIdx;
+        } else {
+            m_octree.findMortonUpperBound(morton, m_octree.m_ghosts, &pointOwnerIdx, &pointOwnerMorton);
+            while (pointOwnerIdx > 0) {
+                --pointOwnerIdx;
 
-            int32_t jump = idxtry;
-            while(abs(jump) > 0){
-                
-                mortontry = m_octree.m_octants[idxtry].getMorton();
-                jump = ((mortontry<morton)-(mortontry>morton))*abs(jump)/2;
-                idxtry += jump;
-                if (idxtry > noctants-1){
-                    if (jump > 0){
-                        idxtry = noctants - 1;
-                        jump = 0;
-                    }
-                    else if (jump < 0){
-                        idxtry = 0;
-                        jump = 0;
+                const Octant *octant = getGhostOctant(pointOwnerIdx);
+                darray3 octantAnchor = getCoordinates(octant);
+                double octantSize = getSize(octant);
+
+                bool found = true;
+                for (int i = 0; i < m_dim; ++i) {
+                    if (point[i] < octantAnchor[i] - m_tol || point[i] > (octantAnchor[i] + octantSize + m_tol)) {
+                        found = false;
+                        break;
                     }
                 }
-            }
-            if(m_octree.m_octants[idxtry].getMorton() == morton){
-                return idxtry;
-            }
-            else{
-                // Step until the mortontry lower than morton (one idx of distance)
-                {
-                    while(m_octree.m_octants[idxtry].getMorton() < morton){
-                        idxtry++;
-                        if(idxtry > noctants-1){
-                            idxtry = noctants-1;
-                            break;
-                        }
-                    }
-                    while(m_octree.m_octants[idxtry].getMorton() > morton){
-                        idxtry--;
-                        if(idxtry > noctants-1){
-                            idxtry = 0;
-                            break;
-                        }
-                    }
+
+                if (found) {
+                    return pointOwnerIdx;
                 }
-                return idxtry;
             }
-        }
-        else if((powner != m_rank) && m_serial){
+
             return numeric_limits<uint32_t>::max();
         }
-        else{
-            //GHOST SEARCH
-            uint32_t nghosts = m_octree.m_ghosts.size();
-            idxtry = nghosts/2;
-            int32_t jump = idxtry;
-            while(abs(jump) > 0){
-                
-                mortontry = m_octree.m_ghosts[idxtry].getMorton();
-                jump = ((mortontry<morton)-(mortontry>morton))*abs(jump)/2;
-                idxtry += jump;
-                if (idxtry > nghosts-1){
-                    if (jump > 0){
-                        idxtry = nghosts - 1;
-                        jump = 0;
-                    }
-                    else if (jump < 0){
-                        idxtry = 0;
-                        jump = 0;
-                    }
-                }
-            }
-            if(m_octree.m_ghosts[idxtry].getMorton() == morton){
-                isghost = true;
-                return idxtry;
-            }
-            else{
-                // Step until the mortontry lower than morton (one idx of distance)
-                {
-                    while(m_octree.m_ghosts[idxtry].getMorton() < morton){
-                        idxtry++;
-                        if(idxtry > nghosts-1){
-                            idxtry = nghosts-1;
-                            break;
-                        }
-                    }
-                    while(m_octree.m_ghosts[idxtry].getMorton() > morton){
-                        idxtry--;
-                        if(idxtry > nghosts-1){
-                            idxtry = 0;
-                            break;
-                        }
-                    }
-                }
 
-                const Octant* octtry = getGhostOctant(idxtry);
-                dvector anchor_idxtry = {{getX(octtry),getY(octtry),getZ(octtry)}};
-                double size_try = getSize(octtry);
-                bool isInIdxtry = true;
-
-                for(int i = 0; i < m_dim; ++i){
-                    isInIdxtry = isInIdxtry && (point[i] >= anchor_idxtry[i] && point[i] <= (anchor_idxtry[i] + size_try));
-                }
-
-                if( isInIdxtry){
-                    isghost = true;
-                    return idxtry;
-                }
-                else{
-                    return numeric_limits<uint32_t>::max();
-                }
-            }
-        }///end ghosts search
+        return pointOwnerIdx;
     };
 
     /** Get the rank of the octant that contains the specified point.
