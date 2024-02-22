@@ -903,6 +903,14 @@ bool LevelSetObject::isCellInNarrowBand(long id)const
  *
  * The value of the levelset is evaluated and compared with the specified narrow band size.
  *
+ * If a point is inside a cell that belongs to the narrow band because it is a neighbour of a
+ * cell with a different levelset sign, its function may identify the point as outside the
+ * narrow band. That's because it will only compare the levelset of the point with the narrow
+ * band size. The extreme case is when the narrow band size is set to zero and being a neighbour
+ * of a cell with a different levelset sign is the only criterion to identify cells inside the
+ * narrow band. In this situation, this function will identify as inside the narrow band only
+ * the points that lie on the levelset-zero iso surface.
+ *
  * \param point are the coordinates of the point
  * \result Return true if the cell is in the narrow band, false otherwise.
  */
