@@ -3042,7 +3042,7 @@ namespace bitpit {
     uint32_t
     ParaTree::getPointOwnerIdx(const double * point) const {
         // Evaluate the Morton associated with the point
-        uint64_t morton = evalPointVirtualOwnerMorton(point);
+        uint64_t morton = evalPointAnchorMorton(point);
         if (morton == PABLO::INVALID_MORTON) {
             return numeric_limits<uint32_t>::max();
         }
