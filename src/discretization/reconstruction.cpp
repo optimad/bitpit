@@ -202,7 +202,7 @@ uint16_t ReconstructionPolynomial::countDegreeCoefficients(uint8_t degree, uint8
         return 0;
     }
 
-    return (utils::factorial(dimensions - 1 + degree) / utils::factorial(dimensions - 1) / utils::factorial(degree));
+    return static_cast<uint16_t>(utils::factorial(dimensions - 1 + degree) / utils::factorial(dimensions - 1) / utils::factorial(degree));
 }
 
 /*!
@@ -3579,7 +3579,7 @@ void ReconstructionAssembler::computePseudoInverse(int m, int n, double zeroThre
     info = LAPACKE_dgesvd_work(LAPACK_COL_MAJOR, jobU, jobVT, m, n, A, m, m_sigma.data(), m_U.data(), m, m_Vt.data(), k,
                   m_SVDWorkspace.data(), workspaceSize);
 
-    workspaceSize = m_SVDWorkspace[0];
+    workspaceSize = static_cast<int>(m_SVDWorkspace[0]);
     if (workspaceSize > (int) m_SVDWorkspace.size()) {
         m_SVDWorkspace.resize(workspaceSize);
     }
