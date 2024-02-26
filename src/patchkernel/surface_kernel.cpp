@@ -695,26 +695,10 @@ std::array<double, 3> SurfaceKernel::evalFacetNormal(long id, const std::array<d
 */
 std::array<double, 3> SurfaceKernel::evalEdgeNormal(long id, int edge_id) const
 {
-    // ====================================================================== //
-    // VARIABLES DECLARATION                                                  //
-    // ====================================================================== //
+    std::array<double, 3> normal;
+    evalEdgeNormals(id, edge_id, std::numeric_limits<double>::max(), &normal, nullptr);
 
-    // Local variables
-    std::array<double, 3>               normal = evalFacetNormal(id);
-    const Cell                          *cell_ = &m_cells[id];
-    int                                 n_adj = cell_->getAdjacencyCount(edge_id);
-    const long                          *adjacencies = cell_->getAdjacencies(edge_id);
-
-    // ====================================================================== //
-    // COMPUTE EDGE NORMAL                                                    //
-    // ====================================================================== //
-    if (n_adj > 0) {
-        for (int i = 0; i < n_adj; ++i) {
-            normal += evalFacetNormal(adjacencies[i]);
-        } //next i
-        normal = normal/norm2(normal);
-    }
-    return(normal);
+    return normal;
 }
 
 /*!
@@ -885,6 +869,93 @@ void SurfaceKernel::evalVertexNormals(long id, int vertex, std::size_t nVertexNe
             double misalignment = std::acos(std::min(1.0, std::max(-1.0, dotProduct(neighNormal, cellNormal))));
             if (misalignment <= std::abs(limit)) {
                 *limitedNormal += neighVertexAngle * neighNormal;
+            }
+        }
+    }
+
+    // Normalize the unlimited normal
+    if (unlimitedNormal) {
+        *unlimitedNormal /= norm2(*unlimitedNormal);
+    }
+
+    // Normalize the unlimited normal
+    if (limitedNormal) {
+        *limitedNormal /= norm2(*limitedNormal);
+    }
+}
+
+/*!
+ * Evaluate unlimited and limited normal unit vectors at the specified local
+ * edge.
+ *
+ * Edge normal is computed as the arithmetic average of the normals to each
+ * facet incident to the edge. In case adjacencies are not built, the edge
+ * normal will be the same as the facet normal.
+ *
+ * When evaluating the limited normal, only the normals whose angle with
+ * respect to the considered cell is less that the specified limit are
+ * considered. Whereas, when evaluating the unlimited normal, all cells in
+ * the one-ring are considered.
+ *
+ * \param[in] id is the cell id
+ * \param[in] edge is the local edge id
+ * \param[in] limit is the maximum allowed misalignment between the normal
+ * of the reference cell and the normal of facets used for evaualting the
+ * edge normal
+ * \param[out] unlimitedNormal if a valid pointer is provided, on output will
+ * contain the unlimited normal
+ * \param[out] limitedNormal if a valid pointer is provided, on output will
+ * contain the limited normal
+*/
+void SurfaceKernel::evalEdgeNormals(long id, int edge, double limit,
+                                    std::array<double, 3> *unlimitedNormal,
+                                    std::array<double, 3> *limitedNormal) const
+{
+    // Early return if no calculation is needed
+    if (!unlimitedNormal && !limitedNormal) {
+        return;
+    }
+
+    // Get cell information
+    const Cell            &cell       = getCell(id);
+    std::array<double, 3> cellNormal  = evalFacetNormal(id);
+    int                   nEdgeNeighs = cell.getAdjacencyCount(edge);
+    const long            *edgeNeighs = cell.getAdjacencies(edge);
+
+    // Initialize unlimited normal
+    if (unlimitedNormal) {
+        *unlimitedNormal = cellNormal;
+    }
+
+    // Initialize limited normal
+    if (limitedNormal) {
+        *limitedNormal = cellNormal;
+    }
+
+    // Add contribution of neighbouring cells
+    for (std::size_t i = 0; i < nEdgeNeighs; ++i) {
+        // Get neighbour information
+        long                  neighId     = edgeNeighs[i];
+        std::array<double, 3> neighNormal = evalFacetNormal(neighId);
+
+        // Add contribution to unlimited normal
+        if (unlimitedNormal) {
+            *unlimitedNormal += neighNormal;
+        }
+
+        // Add contribution to limited normal
+        //
+        // Only the negihbours whose normal has a misalignment less then the
+        // specified limit are considered.
+        if (limitedNormal) {
+            // The argument of the acos function has to be in the range [-1, 1].
+            // Rounding errors may lead to a dot product slightly outside this
+            // range. Since the arguments of the dot product are unit vectors,
+            // we can safetly clamp the dot product result to be between -1 and
+            // 1.
+            double misalignment = std::acos(std::min(1.0, std::max(-1.0, dotProduct(neighNormal, cellNormal))));
+            if (misalignment <= std::abs(limit)) {
+                *limitedNormal += neighNormal;
             }
         }
     }
