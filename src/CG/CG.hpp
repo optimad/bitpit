@@ -240,6 +240,10 @@ bool intersectBoxCircle( array3D const &A0, array3D const &A1, array3D const &ce
 
 bool intersectBoxSphere( array3D const &A0, array3D const &A1, array3D const &centre, double radius, const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE);
 
+int getBoxFaceLocalIndex(int direction, bool front);
+bool intersectPlaneBoxFace(int i, array3D const &P, array3D const &n, array3D const &A0, array3D const &A1, int dim, const double distanceTolerance, std::vector<array3D> *interfacePoints, std::vector<array3D> *intersectionPoints);
+bool computeIntersectedBoxFaceData(int i, array3D const &P, array3D const &n, array3D const &A0, array3D const &A1, int dim, const double distanceTolerance, std::array<double, 3> *faceCentroid, double *faceArea, std::array<double, 3> *intersectionCentroid);
+
 void computeAABBSegment( array3D const &, array3D const &, array3D &, array3D & ) ;
 void computeAABBTriangle( array3D const &, array3D const &, array3D const &, array3D &, array3D & ) ;
 void computeAABBPolygon( std::vector<array3D> const &, array3D &, array3D & );

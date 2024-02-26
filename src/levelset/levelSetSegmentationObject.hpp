@@ -131,6 +131,8 @@ public:
     std::array<double,3> evalNormal(const std::array<double,3> &point, bool signedLevelSet) const;
     void evalProjection(const std::array<double,3> &point, bool signedLevelSet, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const;
 
+    LevelSetIntersectionStatus evalIntersectedInterfaceData(long id, int intrLocalId, bool signedLevelSet, std::array<double, 3> *centroid, double *area) const;
+
     BITPIT_DEPRECATED(int getPart(long cellId) const);
     BITPIT_DEPRECATED(std::array<double BITPIT_COMMA 3> getNormal(long cellId) const);
     BITPIT_DEPRECATED(long getSupport(long cellId) const);
@@ -149,7 +151,8 @@ protected:
     void fillFieldCellCache(LevelSetField field, long id) override;
     using LevelSetObject::fillFieldCellCache;
 
-    LevelSetIntersectionStatus _intersectSurface(long, double distance, LevelSetIntersectionMode=LevelSetIntersectionMode::FAST_FUZZY) const override;
+    LevelSetIntersectionStatus _intersectCellSurface(long, double distance, LevelSetIntersectionMode=LevelSetIntersectionMode::FAST_FUZZY) const override;
+    LevelSetIntersectionStatus _evalIntersectedInterfaceData(long id, int intrLocalId, bool signedLevelSet, double tolerance, std::array<double, 3> *centroid, double *area) const;
 
     virtual const SurfUnstructured & _evalCellSurface(long id) const = 0;
     virtual int _evalCellPart(long id) const;
@@ -216,6 +219,8 @@ protected:
     long _evalSupport(const std::array<double,3> &point) const override;
     long _evalSupport(const std::array<double,3> &point, double searchRadius) const override;
     std::array<double,3> _evalNormal(const std::array<double,3> &point, bool signedLevelSet) const override;
+
+    LevelSetIntersectionStatus _intersectInterfaceSurface(long id, int intrLocalId, double tolerance) const override;
 
 private:
     std::unique_ptr<LevelSetSegmentationSurfaceInfo> m_surfaceInfo;

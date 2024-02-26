@@ -2578,6 +2578,217 @@ bool intersectPointBox( array3D const &P, array3D const &B1, array3D const &B2, 
 }
 
 /*!
+ * Given a direction and a flag for the fornt or rear face, it returns the local index of the
+ * spacified box face.
+ *
+ * \param[in] direction dis the direction normal to the face (0, 1 or 2)
+ * \param[in] front true if the fron face of the box needs to be specified.
+ * \return the indexx of the box interface
+ */
+int getBoxFaceLocalIndex(int direction, bool front) {
+    if (direction == 0) {
+        if (front) {
+            return 1;
+        } else {
+            return 0;
+        }
+    } else if (direction == 1) {
+        if (front) {
+            return 3;
+        } else {
+            return 2;
+        }
+    } else if (direction == 2) {
+        if (front) {
+            return 5;
+        } else {
+            return 4;
+        }
+    } else {
+        assert(0);
+    }
+    return -1;
+}
+
+/*!
+ * Checks if plane intersects a box face and computes the nodes comprising the intersected face belonging
+ * to the subspace opposite of the one pointed by the plane's normal
+ *
+ * In the degenerate case where the box face belongs to the given plane the interface
+ * is not considered as intersected.
+ *
+ * \param[in] i face index
+ * \param[in] P point on plane
+ * \param[in] n normal to plane
+ * \param[in] A0 min point of box
+ * \param[in] A1 max point of box
+ * \param[in] dim number of dimensions
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
+ * \param[out] interfacePoints pointed vector holds the vertices defining the face intersection in counterclockwise order
+ * \param[out] intersectionPoints pointed vector holds the vertices of the face resulted from its intersection in counterclockwise order
+ * \return if intersect
+ */
+bool intersectPlaneBoxFace(int i, array3D const &P, array3D const &n, array3D const &A0, array3D const &A1, int dim, const double distanceTolerance, std::vector<array3D> *interfacePoints, std::vector<array3D> *intersectionPoints)
+{
+    bool intersect(false);
+    interfacePoints->clear();
+    intersectionPoints->clear();
+
+    // check if plane intersects the edges of the box face
+    // and store eventually intersection points
+    int edgeCount = (dim==2) ? 1 : 4;
+    array3D E0, E1, V;
+    double phi0, phi1;
+    if (dim==2) {
+        int v0 = boxEdgeVertexConnectivity[i][0];
+        int v1 = boxEdgeVertexConnectivity[i][1];
+
+        vertexOfBox(v0, A0, A1, E0 );
+        vertexOfBox(v1, A0, A1, E1 );
+
+        phi0 = dotProduct(E0 - P, n);
+        phi1 = dotProduct(E1 - P, n);
+
+        if (utils::DoubleFloatingGreater()(phi0, 0.0, distanceTolerance)) {
+            if (utils::DoubleFloatingGreater()(phi1, 0.0, distanceTolerance)) {
+                interfacePoints->push_back(E0);
+                interfacePoints->push_back(E1);
+            } else {
+                intersect = intersectSegmentPlane( E0, E1, P, n, V, distanceTolerance);
+                assert( intersect );
+                interfacePoints->push_back(E0);
+                interfacePoints->push_back(V);
+                intersectionPoints->push_back(V);
+            }
+        } else if (utils::DoubleFloatingGreater()(phi1, 0.0, distanceTolerance)) {
+            intersect = intersectSegmentPlane( E0, E1, P, n, V, distanceTolerance);
+            assert( intersect );
+            interfacePoints->push_back(V);
+            interfacePoints->push_back(E1);
+            intersectionPoints->push_back(V);
+        }
+        return intersect;
+    }
+
+    for(int m=0; m<edgeCount; ++m){
+        int next = (m + 1) % edgeCount;
+
+        int v0 = boxFaceVertexConnectivity[i][m];
+        int v1 = boxFaceVertexConnectivity[i][next];
+
+        vertexOfBox(v0, A0, A1, E0 );
+        vertexOfBox(v1, A0, A1, E1 );
+
+        phi0 = dotProduct(E0 - P, n);
+        phi1 = dotProduct(E1 - P, n);
+
+        if (utils::DoubleFloatingGreater()(phi0, 0.0, distanceTolerance)) {
+            if (utils::DoubleFloatingGreater()(phi1, 0.0, distanceTolerance)) {
+                interfacePoints->push_back(E0);
+            } else {
+                intersect = intersectSegmentPlane( E0, E1, P, n, V, distanceTolerance);
+                assert( intersect );
+                interfacePoints->push_back(E0);
+                interfacePoints->push_back(V);
+                intersectionPoints->push_back(V);
+            }
+        } else if (utils::DoubleFloatingGreater()(phi1, 0.0, distanceTolerance)) {
+            intersect = intersectSegmentPlane( E0, E1, P, n, V, distanceTolerance);
+            assert( intersect );
+            interfacePoints->push_back(V);
+            intersectionPoints->push_back(V);
+        }
+    }
+    return intersect;
+}
+
+/*!
+ * Firstly, it computes the  polygon defined by the intersection of a box face with a given plane
+ * Area is computed on the face part belonging to the subspace opposite of the one pointed by the
+ * surface normal. Then, computes the interface centroid, area, and the centroid of the segment
+ * created on the intersection between the interface and the plane.
+ *
+ * If there isn't any part of the interface in the active subspace it returns a zero
+ * vector for the two centroids and a zero value for the area.
+ *
+ * \param[in] i face index
+ * \param[in] P point on plane
+ * \param[in] n normal to plane
+ * \param[in] A0 min point of box
+ * \param[in] A1 max point of box
+ * \param[in] dim number of dimensions
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
+ * \param[out] faceCentroid is the centroid the intersected face computed as the arithmetic avretage of the face vertiecs
+ * \param[out] faceArea is the area of the intersected face
+ * \param[out] intersectionCentroid is the centroid of the intersection computed as the arithmetic avretage of the intersection points
+ * \return true if interface is intersected
+ */
+bool computeIntersectedBoxFaceData(int i, array3D const &P, array3D const &n, array3D const &A0, array3D const &A1, int dim, const double distanceTolerance, std::array<double, 3> *faceCentroid, double *faceArea, std::array<double, 3> *intersectionCentroid)
+{
+    std::vector<array3D> interfacePoints;
+    std::vector<array3D> intersectionPoints;
+    bool intersect = intersectPlaneBoxFace(i, P, n, A0, A1, dim, distanceTolerance, &interfacePoints, &intersectionPoints);
+
+    std::array<double, 3> centroid;
+    std::array<double, 3> *centroidPtr;
+    if (!faceCentroid && faceArea) {
+        centroidPtr = &centroid;
+    } else {
+        centroidPtr = faceCentroid;
+    }
+
+    // compute face centroid
+    if (centroidPtr) {
+        (*centroidPtr) = {0.0, 0.0, 0.0};
+        int nVertices = interfacePoints.size();
+        for (int i = 0; i < nVertices; ++i) {
+            (*centroidPtr) += interfacePoints[i];
+        }
+        if (nVertices != 0) {
+            (*centroidPtr) *= 1.0 / nVertices;
+        }
+    }
+
+    // compute face area
+    if (faceArea) {
+        if (dim==2) {
+            assert(interfacePoints.size() == 2);
+            (*faceArea) = norm2(interfacePoints[0] - interfacePoints[1]);
+        } else {
+           std::array<double, 3> dv1, dv2;
+           std::array<double, 3> area = {0.0, 0.0, 0.0};
+           int nVertices = interfacePoints.size();
+           for (int i = 0; i < nVertices; ++i) {
+               int iNext = (i + 1) % nVertices;
+
+               const std::array<double, 3> &vertex     = interfacePoints[i];
+               const std::array<double, 3> &nextVertex = interfacePoints[iNext];
+
+               dv1 = vertex - (*centroidPtr);
+               dv2 = nextVertex - (*centroidPtr);
+
+               area += crossProduct(dv1, dv2);
+           }
+           (*faceArea) = 0.5 * norm2(area);
+        }
+    }
+
+    // compute segment centroid
+    if (intersectionCentroid) {
+        (*intersectionCentroid) = {0.0, 0.0, 0.0};
+        int nVertices = intersectionPoints.size();
+        for (int i = 0; i < nVertices; ++i) {
+            (*intersectionCentroid) += intersectionPoints[i];
+        }
+        if (nVertices != 0) {
+            (*intersectionCentroid) *= 1.0 / nVertices;
+        }
+    }
+
+    return intersect;
+}
+
+/*!
  * computes axis aligned boundig box of a segment
  * \param[in] A start point of segment
  * \param[in] B end point of segment
