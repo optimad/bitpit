@@ -374,7 +374,7 @@ std::array<double,3> LevelSetSegmentationSurfaceInfo::computePseudoNormal(const 
         pseudoNormal = computeSegmentVertexNormal(segmentItr, vertex, false);
     } else {
         int edge = (- positionFlag) - 1;
-        pseudoNormal = computeSegmentEdgeNormal(segmentItr, edge);
+        pseudoNormal = computeSegmentEdgeNormal(segmentItr, edge, false);
     }
 
     return pseudoNormal;
@@ -436,25 +436,25 @@ std::array<double,3> LevelSetSegmentationSurfaceInfo::computeSegmentNormal(const
 /*!
  * Compute the normal of the specified triangle's edge.
  *
- * To reduce computational times, normals of vertices are cached.
- *
  * @param[in] segmentItr is an iterator pointing to the closest segment
  * @param[in] edge is the local index of the edge
+ * @param[in] limited is a flag controling if the limited or the unlimited normal will
+ * be evaluated
  * @return the normal of the specified triangle's edge
  */
-std::array<double,3> LevelSetSegmentationSurfaceInfo::computeSegmentEdgeNormal(const SegmentConstIterator &segmentItr, int edge ) const {
+std::array<double,3> LevelSetSegmentationSurfaceInfo::computeSegmentEdgeNormal(const SegmentConstIterator &segmentItr, int edge, bool limited ) const {
 
-    std::array<double,3> normal = computeSegmentNormal(segmentItr);
+    long segmentId = segmentItr.getId();
 
-    if (segmentItr->getAdjacencyCount(edge) > 0) {
-        long neighId = segmentItr->getAdjacency(edge);
-        SegmentConstIterator neighIterator = m_surface->getCellConstIterator(neighId);
+    std::array<double, 3> limitedEdgeNormal;
+    std::array<double, 3> unlimitedEdgeNormal;
+    m_surface->evalEdgeNormals(segmentId, edge, m_featureAngle, &unlimitedEdgeNormal, &limitedEdgeNormal) ;
 
-        normal += computeSegmentNormal(neighIterator);
-        normal /= norm2(normal);
+    if (limited) {
+        return limitedEdgeNormal;
     }
 
-    return normal;
+    return unlimitedEdgeNormal;
 }
 
 /*!
