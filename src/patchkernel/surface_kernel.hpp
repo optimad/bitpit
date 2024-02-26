@@ -69,6 +69,8 @@ public:
     std::array<double, 3> evalLimitedVertexNormal(long, int, std::size_t, const long *, double ) const;
     virtual void evalVertexNormals(long id, int vertex, std::size_t nVertexNeighs, const long *vertexNeighs, double limit,
                                    std::array<double, 3> *unlimitedNormal, std::array<double, 3> *limitedNormal) const;
+    virtual void evalEdgeNormals(long id, int edge, double limit, std::array<double, 3> *unlimitedNormal,
+                                 std::array<double, 3> *limitedNormal) const;
     double evalCellSize(long id) const override;
 
     bool isCellOrientationConsistent() const;
