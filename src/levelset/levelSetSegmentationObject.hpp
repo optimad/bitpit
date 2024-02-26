@@ -75,8 +75,6 @@ public:
 
     std::array<double, 3> evalNormal(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr) const;
 
-    void evalProjectionOnSurfaceInterpolation(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const;
-
 private:
     typedef std::pair<long, int> SegmentVertexKey;
 
@@ -95,10 +93,17 @@ private:
     mutable std::vector<bool> m_limitedSegmentVertexNormalValid;
     mutable std::unordered_map<SegmentVertexKey, std::array<double,3>, utils::hashing::hash<SegmentVertexKey>> m_limitedSegmentVertexNormalStorage;
 
-    void evalProjectionOnSurfaceInterpolationPoint(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const;
-    void evalProjectionOnSurfaceInterpolationLine(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const;
-    void evalProjectionOnSurfaceInterpolationTriangle(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const;
-    void evalProjectionOnSurfaceInterpolationPolygon(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const;
+    void evalProjectionOnVertex(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const;
+    void evalHighOrderProjectionOnLine(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const;
+    void evalHighOrderProjectionOnTriangle(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const;
+    void evalHighOrderProjectionOnPolygon(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const;
+    void evalHighOrderProjection(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const;
+
+    void evalLowOrderProjectionOnLine(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const;
+    void evalLowOrderProjectionOnTriangle(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const;
+    void evalLowOrderProjectionOnPolygon(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const;
+    void evalLowOrderProjection(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const;
+
     std::array<double, 3> evalProjection(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, double *lambda) const;
 
     std::array<double,3> computePseudoNormal( const SurfUnstructured::CellConstIterator &segmentIterator, const double *lambda ) const;

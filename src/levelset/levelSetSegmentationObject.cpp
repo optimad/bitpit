@@ -266,7 +266,7 @@ std::array<double, 3> LevelSetSegmentationSurfaceInfo::evalNormal(const std::arr
  * the points representing the specified segment. The surface passes from these
  * points and is verical to the normal vectors associated with them.
  *
- * In case the segment is just a point, the projection coisides with it.
+ * In case the segment is just a vertex, the projection coisides with it.
  *
  * @param[in] point are the coordinates of the given point
  * @param[in] segmentItr is an iterator pointing to the segment on which the surface
@@ -275,10 +275,10 @@ std::array<double, 3> LevelSetSegmentationSurfaceInfo::evalNormal(const std::arr
  * @param[out] projectionNormal The coordinates of the norrmal to the surface vector on the surface
  * projection point.
  */
-void LevelSetSegmentationSurfaceInfo::evalProjectionOnSurfaceInterpolationPoint(const std::array<double,3> &point,
-                                                                                const SegmentConstIterator &segmentItr,
-                                                                                std::array<double, 3> *projectionPoint,
-                                                                                std::array<double, 3> *projectionNormal) const
+void LevelSetSegmentationSurfaceInfo::evalProjectionOnVertex(const std::array<double,3> &point,
+                                                             const SegmentConstIterator &segmentItr,
+                                                             std::array<double, 3> *projectionPoint,
+                                                             std::array<double, 3> *projectionNormal) const
 {
     BITPIT_UNUSED(point);
 
@@ -308,10 +308,10 @@ void LevelSetSegmentationSurfaceInfo::evalProjectionOnSurfaceInterpolationPoint(
  * @param[out] projectionNormal The coordinates of the norrmal to the surface vector on the surface
  * projection point.
  */
-void LevelSetSegmentationSurfaceInfo::evalProjectionOnSurfaceInterpolationLine(const std::array<double,3> &point,
-                                                                               const SegmentConstIterator &segmentItr,
-                                                                               std::array<double, 3> *projectionPoint,
-                                                                               std::array<double, 3> *projectionNormal) const
+void LevelSetSegmentationSurfaceInfo::evalHighOrderProjectionOnLine(const std::array<double,3> &point,
+                                                                    const SegmentConstIterator &segmentItr,
+                                                                    std::array<double, 3> *projectionPoint,
+                                                                    std::array<double, 3> *projectionNormal) const
 {
     // Get segment
     const Cell &segment = *segmentItr;
@@ -393,10 +393,10 @@ void LevelSetSegmentationSurfaceInfo::evalProjectionOnSurfaceInterpolationLine(c
  * @param[out] projectionNormal The coordinates of the norrmal to the surface vector on the surface
  * projection point.
  */
-void LevelSetSegmentationSurfaceInfo::evalProjectionOnSurfaceInterpolationTriangle(const std::array<double,3> &point,
-                                                                                   const SegmentConstIterator &segmentItr,
-                                                                                   std::array<double, 3> *projectionPoint,
-                                                                                   std::array<double, 3> *projectionNormal) const
+void LevelSetSegmentationSurfaceInfo::evalHighOrderProjectionOnTriangle(const std::array<double,3> &point,
+                                                                        const SegmentConstIterator &segmentItr,
+                                                                        std::array<double, 3> *projectionPoint,
+                                                                        std::array<double, 3> *projectionNormal) const
 {
     // Get segment
     const Cell &segment = *segmentItr;
@@ -660,10 +660,10 @@ void LevelSetSegmentationSurfaceInfo::evalProjectionOnSurfaceInterpolationTriang
  * @param[out] projectionNormal The coordinates of the norrmal to the surface vector on the surface
  * projection point. It is computed approximately.
  */
-void LevelSetSegmentationSurfaceInfo::evalProjectionOnSurfaceInterpolationPolygon(const std::array<double,3> &point,
-                                                                                  const SegmentConstIterator &segmentItr,
-                                                                                  std::array<double, 3> *projectionPoint,
-                                                                                  std::array<double, 3> *projectionNormal) const
+void LevelSetSegmentationSurfaceInfo::evalHighOrderProjectionOnPolygon(const std::array<double,3> &point,
+                                                                       const SegmentConstIterator &segmentItr,
+                                                                       std::array<double, 3> *projectionPoint,
+                                                                       std::array<double, 3> *projectionNormal) const
 {
     // Get segment
     const Cell &segment = *segmentItr;
@@ -802,10 +802,10 @@ void LevelSetSegmentationSurfaceInfo::evalProjectionOnSurfaceInterpolationPolygo
  * @param[out] projectionNormal The coordinates of the norrmal to the surface vector on the surface
  * projection point.
  */
-void LevelSetSegmentationSurfaceInfo::evalProjectionOnSurfaceInterpolation(const std::array<double,3> &point,
-                                                                           const SegmentConstIterator &segmentItr,
-                                                                           std::array<double, 3> *projectionPoint,
-                                                                           std::array<double, 3> *projectionNormal) const
+void LevelSetSegmentationSurfaceInfo::evalHighOrderProjection(const std::array<double,3> &point,
+                                                              const SegmentConstIterator &segmentItr,
+                                                              std::array<double, 3> *projectionPoint,
+                                                              std::array<double, 3> *projectionNormal) const
 {
 
     const Cell &segment = *segmentItr;
@@ -814,29 +814,125 @@ void LevelSetSegmentationSurfaceInfo::evalProjectionOnSurfaceInterpolation(const
 
     case ElementType::VERTEX:
     {
-        evalProjectionOnSurfaceInterpolationPoint(point, segmentItr, projectionPoint, projectionNormal);
+        evalProjectionOnVertex(point, segmentItr, projectionPoint, projectionNormal);
         return;
     }
 
     case ElementType::LINE:
     {
-        evalProjectionOnSurfaceInterpolationLine(point, segmentItr, projectionPoint, projectionNormal);
+        evalHighOrderProjectionOnLine(point, segmentItr, projectionPoint, projectionNormal);
         return;
     }
 
     case ElementType::TRIANGLE:
     {
-        evalProjectionOnSurfaceInterpolationTriangle(point, segmentItr, projectionPoint, projectionNormal);
+        evalHighOrderProjectionOnTriangle(point, segmentItr, projectionPoint, projectionNormal);
         return;
     }
 
     default:
     {
-        evalProjectionOnSurfaceInterpolationPolygon(point, segmentItr, projectionPoint, projectionNormal);
+        evalHighOrderProjectionOnPolygon(point, segmentItr, projectionPoint, projectionNormal);
         return;
     }
 
     }
+}
+
+/*!
+ * Evaluate the projection of the given point on the specified linear segment.
+ *
+ * @param[in] point are the coordinates of point
+ * @param[in] segmentItr is an iterator pointing to the closest segment
+ * @param[out] lambda on output will contain the barycentric coordinates of the projection point
+ * @return The coordinates of the projection point.
+ */
+std::array<double, 3> LevelSetSegmentationSurfaceInfo::evalLowOrderProjectionOnLine(const std::array<double, 3> &point,
+                                                                                    const SegmentConstIterator &segmentItr,
+                                                                                    std::array<double, 3> *projectionPoint,
+                                                                                    std::array<double, 3> *projectionNormal) const
+{
+    const Cell &segment = *segmentItr;
+
+    ConstProxyVector<long> segmentVertexIds = segment.getVertexIds();
+
+    std::array<double,3> point0 = m_surface->getVertexCoords(segmentVertexIds[0]);
+    std::array<double,3> point1 = m_surface->getVertexCoords(segmentVertexIds[1]);
+
+    int nSegmentVertices = segment.getVertexCount();
+    BITPIT_CREATE_WORKSPACE(lambda, double, nSegmentVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
+    (*projectionPoint) = CGElem::projectPointSegment(point, point0, point1, lambda);
+
+    std::array<double, 3> normal0 = computeSegmentVertexNormal(segmentItr, 0, true);
+    std::array<double, 3> normal1 = computeSegmentVertexNormal(segmentItr, 1, true);
+
+    (*projectionNormal) = lambda[0] * normal0 + lambda[1] * normal[1];
+    (*projectionNormal) /= norm2((*projectionNormal));
+}
+
+/*!
+ * Evaluate the projection of the given point on the specified triangular segment.
+ *
+ * @param[in] point are the coordinates of point
+ * @param[in] segmentItr is an iterator pointing to the closest segment
+ * @param[out] lambda on output will contain the barycentric coordinates of the projection point
+ * @return The coordinates of the projection point.
+ */
+std::array<double, 3> LevelSetSegmentationSurfaceInfo::evalLowOrderProjectionOnTriangle(const std::array<double, 3> &point,
+                                                                                        const SegmentConstIterator &segmentItr,
+                                                                                        std::array<double, 3> *projectionPoint,
+                                                                                        std::array<double, 3> *projectionNormal) const
+{
+    const Cell &segment = *segmentItr;
+
+    ConstProxyVector<long> segmentVertexIds = segment.getVertexIds();
+
+    std::array<double,3> point0 = m_surface->getVertexCoords(segmentVertexIds[0]);
+    std::array<double,3> point1 = m_surface->getVertexCoords(segmentVertexIds[1]);
+    std::array<double,3> point2 = m_surface->getVertexCoords(segmentVertexIds[2]);
+
+    int nSegmentVertices = segment.getVertexCount();
+    BITPIT_CREATE_WORKSPACE(lambda, double, nSegmentVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
+    (*projectionPoint) = CGElem::projectPointTriangle(point, point0, point1, point2, lambda);
+
+    std::array<double, 3> normal0 = computeSegmentVertexNormal(segmentItr, 0, true);
+    std::array<double, 3> normal1 = computeSegmentVertexNormal(segmentItr, 1, true);
+    std::array<double, 3> normal3 = computeSegmentVertexNormal(segmentItr, 2, true);
+
+    (*projectionNormal) = lambda[0] * normal0 + lambda[1] * normal[1] + lambda[2] * normal[2];
+    (*projectionNormal) /= norm2((*projectionNormal));
+}
+
+/*!
+ * Evaluate the projection of the given point on the specified polygonalsegment.
+ *
+ * @param[in] point are the coordinates of point
+ * @param[in] segmentItr is an iterator pointing to the closest segment
+ * @param[out] lambda on output will contain the barycentric coordinates of the projection point
+ * @return The coordinates of the projection point.
+ */
+std::array<double, 3> LevelSetSegmentationSurfaceInfo::evalLowOrderProjectionOnPolygon(const std::array<double, 3> &point,
+                                                                                       const SegmentConstIterator &segmentItr,
+                                                                                       std::array<double, 3> *projectionPoint,
+                                                                                       std::array<double, 3> *projectionNormal) const
+{
+    const Cell &segment = *segmentItr;
+
+    ConstProxyVector<long> segmentVertexIds = m_surface->getFacetOrderedVertexIds(segment);
+
+    std::size_t nSegmentVertices = segmentVertexIds.size();
+    BITPIT_CREATE_WORKSPACE(segmentVertexCoors, std::array<double BITPIT_COMMA 3>, nSegmentVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
+    m_surface->getVertexCoords(segmentVertexIds.size(), segmentVertexIds.data(), segmentVertexCoors);
+
+    BITPIT_CREATE_WORKSPACE(lambda, double, nSegmentVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
+    (*projectionPoint) = CGElem::projectPointPolygon(point, nSegmentVertices, segmentVertexCoors, lambda);
+
+    std::size_t nSegmentVertices = segment.getVertexCount();
+    std::array<double,3> surfaceNormal = lambda[0] * computeSegmentVertexNormal(segmentItr, 0, true);
+    for (std::size_t i = 1; i < nSegmentVertices; ++i) {
+        (*projectionNormal) += lambda[i] * computeSegmentVertexNormal(segmentItr, i, true);
+    }
+    (*projectionNormal) /= norm2(*projectionNormal);
 }
 
 /*!
@@ -847,9 +943,10 @@ void LevelSetSegmentationSurfaceInfo::evalProjectionOnSurfaceInterpolation(const
  * @param[out] lambda on output will contain the barycentric coordinates of the projection point
  * @return The coordinates of the projection point.
  */
-std::array<double, 3> LevelSetSegmentationSurfaceInfo::evalProjection(const std::array<double, 3> &point,
-                                                                      const SegmentConstIterator &segmentItr,
-                                                                      double *lambda) const
+std::array<double, 3> LevelSetSegmentationSurfaceInfo::evalLowOrderProjection(const std::array<double, 3> &point,
+                                                                              const SegmentConstIterator &segmentItr,
+                                                                              std::array<double, 3> *projectionPoint,
+                                                                              std::array<double, 3> *projectionNormal) const
 {
     const Cell &segment = *segmentItr;
     ElementType segmentType = segment.getType();
@@ -857,36 +954,26 @@ std::array<double, 3> LevelSetSegmentationSurfaceInfo::evalProjection(const std:
 
     case ElementType::VERTEX :
     {
-        ConstProxyVector<long> segmentVertexIds = segment.getVertexIds();
-        long id = segmentVertexIds[0];
-        lambda[0] = 1.;
-        return m_surface->getVertexCoords(id);
+        evalProjectionOnVertex(point, segmentItr, projectionPoint, projectionNormal);
+        return;
     }
 
     case ElementType::LINE:
     {
-        ConstProxyVector<long> segmentVertexIds = segment.getVertexIds();
-        long id0 = segmentVertexIds[0];
-        long id1 = segmentVertexIds[1];
-        return CGElem::projectPointSegment(point, m_surface->getVertexCoords(id0), m_surface->getVertexCoords(id1), lambda);
+        evalLowOrderProjectionOnLine(point, segmentItr, projectionPoint, projectionNormal);
+        return;
     }
 
     case ElementType::TRIANGLE:
     {
-        ConstProxyVector<long> segmentVertexIds = segment.getVertexIds();
-        long id0 = segmentVertexIds[0];
-        long id1 = segmentVertexIds[1];
-        long id2 = segmentVertexIds[2];
-        return CGElem::projectPointTriangle(point, m_surface->getVertexCoords(id0), m_surface->getVertexCoords(id1), m_surface->getVertexCoords(id2), lambda);
+        evalLowOrderProjectionOnTriangle(point, segmentItr, projectionPoint, projectionNormal);
+        return;
     }
 
     default:
     {
-        ConstProxyVector<long> segmentVertexIds = m_surface->getFacetOrderedVertexIds(segment);
-        std::size_t nSegmentVertices = segmentVertexIds.size();
-        BITPIT_CREATE_WORKSPACE(segmentVertexCoors, std::array<double BITPIT_COMMA 3>, nSegmentVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
-        m_surface->getVertexCoords(segmentVertexIds.size(), segmentVertexIds.data(), segmentVertexCoors);
-        return CGElem::projectPointPolygon(point, nSegmentVertices, segmentVertexCoors, lambda);
+        evalLowOrderProjectionOnPolygon(point, segmentItr, projectionPoint, projectionNormal);
+        return;
     }
 
     }
