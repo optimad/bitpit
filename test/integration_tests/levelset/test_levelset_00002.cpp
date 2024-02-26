@@ -481,6 +481,79 @@ int subtest_004()
 }
 
 /*!
+* Subtest 005
+*
+* Testing projection on surface feature of a 3D levelset on a Cartesian mesh in default memory mode.
+*/
+int subtest_005()
+{
+    bitpit::log::cout() << std::endl;
+    bitpit::log::cout() << "Testing projection on curve feature of a three-dimensional levelset on a Cartesian mesh in default memory mode" << std::endl;
+
+    // Input geometry
+    bitpit::log::cout() << " - Loading geometry" << std::endl;
+
+    // Input geometry
+#if BITPIT_ENABLE_MPI
+    std::unique_ptr<bitpit::SurfUnstructured> segmentation( new bitpit::SurfUnstructured(2, MPI_COMM_NULL) );
+#else
+    std::unique_ptr<bitpit::SurfUnstructured> segmentation( new bitpit::SurfUnstructured(2) );
+#endif
+
+    segmentation->importSTL("./data/sphere.stl", true);
+
+    segmentation->deleteCoincidentVertices() ;
+    segmentation->initializeAdjacencies() ;
+
+    bitpit::log::cout() << "n. vertex: " << segmentation->getVertexCount() << std::endl;
+    bitpit::log::cout() << "n. simplex: " << segmentation->getCellCount() << std::endl;
+
+    // Create the mesh
+    bitpit::log::cout() << " - Setting mesh" << std::endl;
+
+    std::unique_ptr<bitpit::VolCartesian> mesh = generateCartesianMesh(*segmentation);
+    mesh->switchMemoryMode(bitpit::VolCartesian::MEMORY_NORMAL);
+    mesh->initializeAdjacencies();
+    mesh->update();
+
+    // Initialize levelset
+    bitpit::log::cout() << " - Initializing levelset" << std::endl;
+
+    int objectId = 0;
+    double limitAngle = 85.0 * M_PI / 180.0;
+
+    bitpit::LevelSet levelset ;
+    levelset.setMesh(mesh.get());
+    levelset.addObject(segmentation.get(), limitAngle, objectId);
+
+    // Compute levelset
+    bitpit::log::cout() << " - Evaluating levelset" << std::endl;
+
+    bitpit::LevelSetObject *object = levelset.getObjectPtr(objectId);
+    object->enableFieldCellCache(bitpit::LevelSetField::SIGN, bitpit::LevelSetCacheMode::FULL);
+    object->enableFieldCellCache(bitpit::LevelSetField::VALUE, bitpit::LevelSetCacheMode::FULL);
+
+    // Compute projections on curved surface
+    bitpit::LevelSetSegmentationBaseObject *levelSetSegmentation = dynamic_cast<bitpit::LevelSetSegmentationBaseObject *>(object);
+
+    int cellId = 0;
+    std::array<double, 3> point = mesh->evalCellCentroid(cellId);
+    std::array<double, 3> projectionPoint;
+    std::array<double, 3> projectionNormal;
+    levelSetSegmentation->evalProjectionOnSurfaceInterpolation(point, true, &projectionPoint, &projectionNormal);
+
+    std::array<double, 3> projectionPointTarget  = {-0.42738501907593, -0.57919419612192, -0.67702138948285};
+    std::array<double, 3> projectionNormalTarget = {-0.46202467342915, -0.54201153693076, -0.70196630615482};
+
+    double pointDeviation  = norm2(projectionPoint - projectionPointTarget);
+    double normalDeviation = norm2(projectionNormal - projectionNormalTarget);
+
+    double distanceTolerance = mesh->getTol();
+    return !(bitpit::utils::DoubleFloatingEqual()(pointDeviation, 0., distanceTolerance, distanceTolerance)
+           ||bitpit::utils::DoubleFloatingEqual()(normalDeviation, 0., distanceTolerance, distanceTolerance));
+}
+
+/*!
 * Main program.
 */
 int main(int argc, char *argv[])
@@ -516,6 +589,11 @@ int main(int argc, char *argv[])
 		}
 
 		status = subtest_004();
+		if (status != 0) {
+			return status;
+		}
+
+		status = subtest_005();
 		if (status != 0) {
 			return status;
 		}

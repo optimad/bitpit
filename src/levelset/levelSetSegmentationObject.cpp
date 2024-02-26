@@ -262,6 +262,584 @@ std::array<double, 3> LevelSetSegmentationSurfaceInfo::evalNormal(const std::arr
 }
 
 /*!
+ * Evaluate the projection of the given point on the surface created based on
+ * the points representing the specified segment. The surface passes from these
+ * points and is verical to the normal vectors associated with them.
+ *
+ * In case the segment is just a point, the projection coisides with it.
+ *
+ * @param[in] point are the coordinates of the given point
+ * @param[in] segmentItr is an iterator pointing to the segment on which the surface
+ * will be created.
+ * @param[out] projectionPoint The coordinates of the projection point on the surface.
+ * @param[out] projectionNormal The coordinates of the norrmal to the surface vector on the surface
+ * projection point.
+ */
+void LevelSetSegmentationSurfaceInfo::evalProjectionOnSurfaceInterpolationPoint(const std::array<double,3> &point,
+                                                                                const SegmentConstIterator &segmentItr,
+                                                                                std::array<double, 3> *projectionPoint,
+                                                                                std::array<double, 3> *projectionNormal) const
+{
+    BITPIT_UNUSED(point);
+
+    // Get segment
+    const Cell &segment = *segmentItr;
+
+    // Get vertex id
+    ConstProxyVector<long> segmentVertexIds = segment.getVertexIds();
+    long id = segmentVertexIds[0];
+
+    // Compute projection point and normal 
+    (*projectionPoint)  = m_surface->getVertexCoords(id);
+    (*projectionNormal) = m_surface->evalFacetNormal(segment.getId());
+}
+
+/*!
+ * Evaluate the projection of the given point on the surface created based on
+ * the points representing the specified segment. The surface passes from these
+ * points and is verical to the normal vectors associated with them.
+ *
+ * In case the segment is a line, the surface degenerates to a curve.
+ *
+ * @param[in] point are the coordinates of the given point
+ * @param[in] segmentItr is an iterator pointing to the segment on which the surface
+ * will be created.
+ * @param[out] projectionPoint The coordinates of the projection point on the surface.
+ * @param[out] projectionNormal The coordinates of the norrmal to the surface vector on the surface
+ * projection point.
+ */
+void LevelSetSegmentationSurfaceInfo::evalProjectionOnSurfaceInterpolationLine(const std::array<double,3> &point,
+                                                                               const SegmentConstIterator &segmentItr,
+                                                                               std::array<double, 3> *projectionPoint,
+                                                                               std::array<double, 3> *projectionNormal) const
+{
+    // Get segment
+    const Cell &segment = *segmentItr;
+
+    // Get segment vertices
+    ConstProxyVector<long> segmentVertexIds = segment.getVertexIds();
+
+    std::array<double,3> point0 = m_surface->getVertexCoords(segmentVertexIds[0]);
+    std::array<double,3> point1 = m_surface->getVertexCoords(segmentVertexIds[1]);
+
+    // Get projection point on segment
+    int nSegmentVertices = segment.getVertexCount();
+    BITPIT_CREATE_WORKSPACE(t, double, nSegmentVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
+    std::array<double, 3> point_s = CGElem::projectPointSegment(point, point0, point1, t);
+
+    // Early return if point_s consides with segment's node
+    double distanceTolerance = m_surface->getTol();
+    for (int i = 0; i < 2; ++i) {
+        if (utils::DoubleFloatingEqual()(t[i], 1., distanceTolerance, distanceTolerance)) {
+            (*projectionPoint)  = m_surface->getVertexCoords(segmentVertexIds[i]);
+            (*projectionNormal) = computeSegmentVertexNormal(segmentItr, i, true);
+            return;
+        }
+    }
+
+    // Get normal on segment
+    std::array<double, 3> facetNormal = m_surface->evalFacetNormal(segment.getId());
+    std::array<double, 3> normal_s = point - point_s;
+
+    double distance = norm2(normal_s);
+    if (utils::DoubleFloatingEqual()(distance, 0., distanceTolerance, distanceTolerance)) {
+        normal_s = facetNormal;
+    } else {
+        normal_s /= distance;
+        if (dotProduct(normal_s, facetNormal) < 0.0) {
+            normal_s *= -1.0;
+        }
+    }
+
+    // Get normals on segment's vertices
+    std::array<double, 3> normal0 = computeSegmentVertexNormal(segmentItr, 0, true);
+    std::array<double, 3> normal1 = computeSegmentVertexNormal(segmentItr, 1, true);
+
+    // Compute lambda coefficients
+    std::array<double, 3> edge = point1 - point0;
+    double lambda01 = -dotProduct(edge, normal0) / dotProduct(normal_s, normal0); 
+    double lambda10 =  dotProduct(edge, normal1) / dotProduct(normal_s, normal1); 
+
+    // Eval polynomial parameterizing the curve
+    double product1 = t[0] * t[1];
+    double product2 = lambda01 * t[0] + lambda10 * t[1];
+    double f        = product1 * product2;
+    double df       = product1 * (lambda01 - lambda10) + product2 * (t[1] - t[0]);
+
+    // Eval projection point on curve
+    (*projectionPoint) = point_s + f * normal_s;
+
+    // Eval normal vector on curve
+    double length = norm2(edge);
+    (*projectionNormal)  = df * edge + length * length * normal_s;
+    (*projectionNormal) /= norm2((*projectionNormal));
+
+    if (dotProduct(normal_s, (*projectionNormal)) < 0.0) {
+       (*projectionNormal) *= -1.0;
+    }
+}
+
+/*!
+ * Evaluate the projection of the given point on the surface created based on
+ * the points representing the specified segment. The surface passes from these
+ * points and is verical to the normal vectors associated with them.
+ *
+ * In this case the segment is a triangle.
+ *
+ * @param[in] point are the coordinates of the given point
+ * @param[in] segmentItr is an iterator pointing to the segment on which the surface
+ * will be created.
+ * @param[out] projectionPoint The coordinates of the projection point on the surface.
+ * @param[out] projectionNormal The coordinates of the norrmal to the surface vector on the surface
+ * projection point.
+ */
+void LevelSetSegmentationSurfaceInfo::evalProjectionOnSurfaceInterpolationTriangle(const std::array<double,3> &point,
+                                                                                   const SegmentConstIterator &segmentItr,
+                                                                                   std::array<double, 3> *projectionPoint,
+                                                                                   std::array<double, 3> *projectionNormal) const
+{
+    // Get segment
+    const Cell &segment = *segmentItr;
+
+    // Get segment vertices
+    ConstProxyVector<long> segmentVertexIds = segment.getVertexIds();
+
+    std::array<double,3> point0 = m_surface->getVertexCoords(segmentVertexIds[0]);
+    std::array<double,3> point1 = m_surface->getVertexCoords(segmentVertexIds[1]);
+    std::array<double,3> point2 = m_surface->getVertexCoords(segmentVertexIds[2]);
+
+    // Get projection point on segment
+    int nSegmentVertices = segment.getVertexCount();
+    BITPIT_CREATE_WORKSPACE(tau, double, nSegmentVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
+    std::array<double, 3> point_s = CGElem::projectPointTriangle(point, point0, point1, point2, tau);
+    std::array<double, 3> d0_point_s = point0 - point2;
+    std::array<double, 3> d1_point_s = point1 - point2;
+
+    // Early return if point_s consides with segment's node
+    double distanceTolerance = m_surface->getTol();
+    for (int i = 0; i < 3; ++i) {
+        if (utils::DoubleFloatingEqual()(tau[i], 1., distanceTolerance, distanceTolerance)) {
+            (*projectionPoint)  = m_surface->getVertexCoords(segmentVertexIds[i]);
+            (*projectionNormal) = computeSegmentVertexNormal(segmentItr, i, true);
+            return;
+        }
+    }
+
+    // Get normal on segment
+    std::array<double, 3> facetNormal = m_surface->evalFacetNormal(segment.getId());
+    std::array<double, 3> normal_s = point - point_s;
+
+    double distance = norm2(normal_s);
+    if (utils::DoubleFloatingEqual()(distance, 0., distanceTolerance, distanceTolerance)) {
+        normal_s = facetNormal;
+    } else {
+        normal_s /= distance;
+        if (dotProduct(normal_s, facetNormal) < 0.0) {
+            normal_s *= -1.0;
+        }
+    }
+
+    // Compute projection point and normal at each edge "e"
+    std::array< std::array<double, 3>, 3 > edgePoint_s;
+    std::array< std::array<double, 3>, 3 > d0_edgePoint_s;
+    std::array< std::array<double, 3>, 3 > d1_edgePoint_s;
+    std::array< std::array<double, 3>, 3 > edgePoint_p;
+    std::array< std::array<double, 3>, 3 > d0_edgePoint_p;
+    std::array< std::array<double, 3>, 3 > d1_edgePoint_p;
+    std::array< std::array<double, 3>, 3 > edgeNormal_p;
+    std::array< std::array<double, 3>, 3 > d0_edgeNormal_p;
+    std::array< std::array<double, 3>, 3 > d1_edgeNormal_p;
+    for (int e = 0; e < 3; e ++) {
+        // Get segment
+        const Cell &segment = *segmentItr;
+
+        // Get edge's local and global node ids
+        ConstProxyVector<int> edgeLocalVertexIds = segment.getFaceLocalVertexIds(e);
+        int localId0 = edgeLocalVertexIds[0]; 
+        int localId1 = edgeLocalVertexIds[1]; 
+        int id0      = segment.getVertexId(localId0);
+        int id1      = segment.getVertexId(localId1);
+
+        // Get vertex information
+        std::array<double,3> node0 = m_surface->getVertexCoords(id0);
+        std::array<double,3> node1 = m_surface->getVertexCoords(id1);
+
+        std::array<double, 3> normal0 = computeSegmentVertexNormal(segmentItr, localId0, true);
+        std::array<double, 3> normal1 = computeSegmentVertexNormal(segmentItr, localId1, true);
+
+        // Get edge normal
+        std::array<double, 3> edgeNormal_s = computeSegmentEdgeNormal(segmentItr, e, true);
+
+        // Compute projection coefficients
+        std::array<double, 3> edge = node1 - node0;
+        double p01 = dotProduct(point_s - node0, edge) / dotProduct(edge, edge);
+        double d0_p01;
+        double d1_p01;
+        if (p01 > 1.0) {
+            p01 = 1.0;
+            d0_p01 = 0.0;
+            d1_p01 = 0.0;
+        } else if (p01 < 0.0) {
+            p01 = 0.0;
+            d0_p01 = 0.0;
+            d1_p01 = 0.0;
+        } else {
+            d0_p01 = dotProduct(d0_point_s - node0, edge) / dotProduct(edge, edge);
+            d1_p01 = dotProduct(d1_point_s - node0, edge) / dotProduct(edge, edge);
+        }
+        double p10 = 1.0 - p01;
+        double d0_p10 = - d0_p01;
+        double d1_p10 = - d1_p01;
+
+        // Compute lambda coefficients
+        double lambda01 = -dotProduct(edge, normal0) / dotProduct(edgeNormal_s, normal0); 
+        double lambda10 =  dotProduct(edge, normal1) / dotProduct(edgeNormal_s, normal1); 
+
+        // Edge projection point
+        double product1   = p10 * p01;
+        double d_product1 = p01 - p10;
+
+        double product2   = lambda01 * p10 + lambda10 * p01;
+        double d_product2 = lambda01 - lambda10;
+
+        double f01     = product1 * product2;
+        double d_f01   = d_product1 * product2 + product1 * d_product2;
+        double d_d_f01 = 2.0 * (d_product1 * d_product2 - product2);
+
+        edgePoint_s[e] = p10 * node0 + p01 * node1;
+        std::array<double, 3> d_edgePoint_s = node0 - node1;
+
+        d0_edgePoint_s[e] = d_edgePoint_s  * d0_p10;
+        d1_edgePoint_s[e] = d_edgePoint_s  * d1_p10;
+
+        edgePoint_p[e] = edgePoint_s[e] + f01 * edgeNormal_s;
+        std::array<double, 3> d_edgePoint_p = d_edgePoint_s + d_f01 * edgeNormal_s;
+
+        d0_edgePoint_p[e] = d_edgePoint_p * d0_p10;
+        d1_edgePoint_p[e] = d_edgePoint_p * d1_p10;
+
+        // Edge surface normal
+        double length   = norm2(edge);
+        edgeNormal_p[e] = d_f01 * edge + length * length * edgeNormal_s;
+        std::array<double, 3> d_edgeNormal_p = d_d_f01 * edge;
+
+        double norm = norm2(edgeNormal_p[e]);
+        double d_norm = dotProduct(edgeNormal_p[e], d_edgeNormal_p) / norm;
+        edgeNormal_p[e] /= norm;
+        d_edgeNormal_p = (d_edgeNormal_p - edgeNormal_p[e] * d_norm) / norm;
+
+        d0_edgeNormal_p[e] = d_edgeNormal_p * d0_p10;
+        d1_edgeNormal_p[e] = d_edgeNormal_p * d1_p10;
+    }
+
+    // Project surface point to the intermediator polygon
+    double sum_t = 0.0;
+    double d0_sum_t = 0.0;
+    double d1_sum_t = 0.0;
+    std::array<double, 3> t;
+    std::array<double, 3> d0_t;
+    std::array<double, 3> d1_t;
+    for (int i = 0; i < 3; i ++) { // loop in vertices
+        int j = (i + 1) % 3;
+        int k = (i + 2) % 3;
+        std::array<double, 3> v1 = edgePoint_s[j] - point_s;
+        std::array<double, 3> d0_v1 = d0_edgePoint_s[j]- d0_point_s;
+        std::array<double, 3> d1_v1 = d1_edgePoint_s[j]- d1_point_s;
+
+        std::array<double, 3> v2 = edgePoint_s[k] - point_s;
+        std::array<double, 3> d0_v2 = d0_edgePoint_s[k]- d0_point_s;
+        std::array<double, 3> d1_v2 = d1_edgePoint_s[k]- d1_point_s;
+
+        std::array<double, 3> normal = crossProduct(v1, v2);
+        std::array<double, 3> d0_normal = crossProduct(d0_v1, v2) + crossProduct(v1, d0_v2);
+        std::array<double, 3> d1_normal = crossProduct(d1_v1, v2) + crossProduct(v1, d1_v2);
+
+        t[i] = norm2(normal);
+        d0_t[i] = dotProduct(normal, d0_normal) / t[i];
+        d1_t[i] = dotProduct(normal, d1_normal) / t[i];
+        sum_t += t[i];
+        d0_sum_t += d0_t[i];
+        d1_sum_t += d1_t[i];
+    }
+
+    std::array<double, 3> point_m    = {0.0, 0.0, 0.0};
+    std::array<double, 3> d0_point_m = {0.0, 0.0, 0.0};
+    std::array<double, 3> d1_point_m = {0.0, 0.0, 0.0};
+    for (int i = 0; i < 3; i ++) {
+        t[i] /= sum_t;
+        d0_t[i] = (d0_t[i] - t[i] * d0_sum_t) / sum_t;
+        d1_t[i] = (d1_t[i] - t[i] * d1_sum_t) / sum_t;
+        point_m += t[i] * edgePoint_p[i];
+        d0_point_m += d0_t[i] * edgePoint_p[i] + t[i] * d0_edgePoint_p[i];
+        d1_point_m += d1_t[i] * edgePoint_p[i] + t[i] * d1_edgePoint_p[i];
+    }
+
+    // Early return if point_s coinsides with a triangle
+    // edge (or a node of the intermediate triangle)
+    for (int i = 0; i < 3; ++i) {
+        if (utils::DoubleFloatingEqual()(t[i], 1., distanceTolerance, distanceTolerance)) {
+            (*projectionPoint)  = edgePoint_p[i];
+            (*projectionNormal) = edgeNormal_p[i];
+            return;
+        }
+    }
+
+    // Compute 2D f function
+    double f    = 0.0;
+    double d0_f = 0.0;
+    double d1_f = 0.0;
+    for (int e = 0; e < 3; e ++) {
+        int i = e;           // previous vertex
+        int j = (e + 1) % 3; // next vertex
+
+        // Get vertex information
+        std::array<double,3> &node_i    = edgePoint_p[i];
+        std::array<double,3> &d0_node_i = d0_edgePoint_p[i];
+        std::array<double,3> &d1_node_i = d1_edgePoint_p[i];
+
+        std::array<double,3> &node_j     = edgePoint_p[j];
+        std::array<double, 3> &d0_node_j = d0_edgeNormal_p[j];
+        std::array<double, 3> &d1_node_j = d1_edgeNormal_p[j];
+
+        std::array<double, 3> &normal_i    = edgeNormal_p[i];
+        std::array<double, 3> &d0_normal_i = d0_edgeNormal_p[i];
+        std::array<double, 3> &d1_normal_i = d1_edgeNormal_p[i];
+
+        std::array<double, 3> &normal_j    = edgeNormal_p[j];
+        std::array<double, 3> &d0_normal_j = d0_edgeNormal_p[j];
+        std::array<double, 3> &d1_normal_j = d1_edgeNormal_p[j];
+
+        // Compute lambda parameters
+        std::array<double, 3> edge    = node_j - node_i;
+        std::array<double, 3> d0_edge = d0_node_j - d0_node_i;
+        std::array<double, 3> d1_edge = d1_node_j - d1_node_i;
+
+        double lambda_ij    = -dotProduct(edge, normal_i) / dotProduct(normal_s, normal_i);
+        double d0_lambda_ij = -(dotProduct(edge - lambda_ij * normal_s, d0_normal_i) + dotProduct(d0_edge, normal_i)) / dotProduct(normal_s, normal_i);
+        double d1_lambda_ij = -(dotProduct(edge - lambda_ij * normal_s, d1_normal_i) + dotProduct(d1_edge, normal_i)) / dotProduct(normal_s, normal_i);
+
+        double lambda_ji    = dotProduct(edge, normal_j) / dotProduct(normal_s, normal_j);
+        double d0_lambda_ji = (dotProduct(edge - lambda_ji * normal_s, d0_normal_j) + dotProduct(d0_edge, normal_j)) / dotProduct(normal_s, normal_j);
+        double d1_lambda_ji = (dotProduct(edge - lambda_ji * normal_s, d1_normal_j) + dotProduct(d1_edge, normal_j)) / dotProduct(normal_s, normal_j);
+
+        // Compute contribution to the f function
+        f += t[i] * t[j] * (lambda_ij * t[i] + lambda_ji * t[j]);
+        d0_f += (d0_t[i] * t[j] + t[i] * d0_t[j]) * (lambda_ij * t[i] + lambda_ji * t[j])
+              + t[i] * t[j] * (d0_lambda_ij * t[i] + lambda_ij * d0_t[i] + d0_lambda_ji * t[j] + lambda_ji * d0_t[j]);
+        d1_f += (d1_t[i] * t[j] + t[i] * d1_t[j]) * (lambda_ij * t[i] + lambda_ji * t[j])
+              + t[i] * t[j] * (d1_lambda_ij * t[i] + lambda_ij * d1_t[i] + d1_lambda_ji * t[j] + lambda_ji * d1_t[j]);
+    }
+
+    // Compute projection point on curved surface
+    (*projectionPoint) = point_m + f * normal_s;
+
+    // Compute projection normal on curved surface
+    std::array<double, 3> d0_point_p = d0_point_m + d0_f * normal_s;
+    std::array<double, 3> d1_point_p = d1_point_m + d1_f * normal_s;
+
+    (*projectionNormal) = crossProduct(d0_point_p, d1_point_p);
+    (*projectionNormal) /= norm2((*projectionNormal));
+
+    if (dotProduct(normal_s, (*projectionNormal)) < 0.0) {
+       (*projectionNormal) *= -1.0;
+    }
+}
+
+/*!
+ * Evaluate the projection of the given point on the surface created based on
+ * the points representing the specified segment. The surface passes from these
+ * points and is verical to the normal vectors associated with them.
+ *
+ * In this case the segment is a non degenerated polygon. No checks are performed to
+ * find out if the specified polygon is degenerate.
+ *
+ * @param[in] point are the coordinates of the given point
+ * @param[in] segmentItr is an iterator pointing to the segment on which the surface
+ * will be created.
+ * @param[out] projectionPoint The coordinates of the projection point on the surface.
+ * @param[out] projectionNormal The coordinates of the norrmal to the surface vector on the surface
+ * projection point. It is computed approximately.
+ */
+void LevelSetSegmentationSurfaceInfo::evalProjectionOnSurfaceInterpolationPolygon(const std::array<double,3> &point,
+                                                                                  const SegmentConstIterator &segmentItr,
+                                                                                  std::array<double, 3> *projectionPoint,
+                                                                                  std::array<double, 3> *projectionNormal) const
+{
+    // Get segment
+    const Cell &segment = *segmentItr;
+
+    // Get projection point on segment
+    int nSegmentVertices = segment.getVertexCount();
+    BITPIT_CREATE_WORKSPACE(tau, double, nSegmentVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
+    std::array<double, 3> point_s = evalProjection(point, segmentItr, tau);
+
+    // Get normal on segment
+    std::array<double, 3> facetNormal = m_surface->evalFacetNormal(segment.getId());
+    std::array<double, 3> normal_s = point - point_s;
+    double distance = norm2(normal_s);
+    double distanceTolerance = m_surface->getTol();
+    if (utils::DoubleFloatingEqual()(distance, 0., distanceTolerance, distanceTolerance)) {
+        normal_s = facetNormal;
+    } else {
+        normal_s /= distance;
+        if (dotProduct(normal_s, facetNormal) < 0.0) {
+            normal_s *= -1.0;
+        }
+    }
+
+    // Compute projection point and normal at each edge "e"
+    int nSegmentEdges = nSegmentVertices;
+
+    BITPIT_CREATE_WORKSPACE(edgePoint_s, std::array<double BITPIT_COMMA 3>, nSegmentEdges, ReferenceElementInfo::MAX_ELEM_VERTICES);
+    BITPIT_CREATE_WORKSPACE(edgePoint_p, std::array<double BITPIT_COMMA 3>, nSegmentEdges, ReferenceElementInfo::MAX_ELEM_VERTICES);
+    BITPIT_CREATE_WORKSPACE(edgeNormal_p, std::array<double BITPIT_COMMA 3>, nSegmentEdges, ReferenceElementInfo::MAX_ELEM_VERTICES);
+    for (int e = 0; e < nSegmentEdges; e ++) {
+        // Get edge's local and global node ids
+        ConstProxyVector<int> edgeLocalVertexIds = segment.getFaceLocalVertexIds(e);
+        int localId0 = edgeLocalVertexIds[0]; 
+        int localId1 = edgeLocalVertexIds[1]; 
+        int id0      = segment.getVertexId(localId0);
+        int id1      = segment.getVertexId(localId1);
+
+        // Get vertex information
+        std::array<double,3> node0 = m_surface->getVertexCoords(id0);
+        std::array<double,3> node1 = m_surface->getVertexCoords(id1);
+
+        std::array<double, 3> normal0 = computeSegmentVertexNormal(segmentItr, localId0, true);
+        std::array<double, 3> normal1 = computeSegmentVertexNormal(segmentItr, localId1, true);
+
+        // Get edge normal
+        std::array<double, 3> edgeNormal_s = computeSegmentEdgeNormal(segmentItr, e, true);
+
+        // Compute projection coefficients
+        std::array<double, 3> edge = node1 - node0;
+        double p01 = dotProduct(point_s - node0, edge) / dotProduct(edge, edge);
+        p01 = std::max(std::min(p01, 1.0), 0.0);
+        double p10 = 1.0 - p01;
+
+        // Compute lambda coefficients
+        double lambda01 = -dotProduct(edge, normal0) / dotProduct(edgeNormal_s, normal0); 
+        double lambda10 =  dotProduct(edge, normal1) / dotProduct(edgeNormal_s, normal1); 
+
+        // Edge projection point
+        double product1 = p10 * p01;
+        double product2 = lambda01 * p10 + lambda10 * p01;
+
+        double f01   = product1 * product2;
+        double d_f01 = (p01 - p10) * product2 + product1 * (lambda01 - lambda10);
+
+        edgePoint_s[e] = p10 * node0 + p01 * node1;
+        edgePoint_p[e] = edgePoint_s[e] + f01 * edgeNormal_s;
+
+        // Edge surface normal
+        double length   = norm2(edge);
+        edgeNormal_p[e] = d_f01 * edge + length * length * edgeNormal_s;
+        double norm = norm2(edgeNormal_p[e]);
+        edgeNormal_p[e] /= norm;
+    }
+
+    // Project surface point to the intermediator polygon
+    BITPIT_CREATE_WORKSPACE(t, double, nSegmentVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
+    CGElem::computeGeneralizedBarycentric(point_s, nSegmentEdges, edgePoint_s, t);
+
+    std::array<double, 3> point_m = {0.0, 0.0, 0.0};
+    for (int i = 0; i < nSegmentVertices; ++i) {
+        point_m += edgePoint_p[i] * t[i];
+    }
+
+    // Early return if point_s coinsides with a polygon's
+    // edge (or a node of the intermediate polygon)
+    for (int i = 0; i < 3; ++i) {
+        if (utils::DoubleFloatingEqual()(t[i], 1., distanceTolerance, distanceTolerance)) {
+            (*projectionPoint)  = edgePoint_p[i];
+            return;
+        }
+    }
+
+    // Compute 2D f function
+    double f = 0.0;
+    std::array<std::array<double, 3>, 3> lambda;
+    for (int e = 0; e < 3; e ++) {
+        int i = e;           // previous vertex
+        int j = (e + 1) % 3; // next vertex
+
+        // Get vertex information
+        std::array<double,3> &node_i = edgePoint_p[i];
+        std::array<double,3> &node_j = edgePoint_p[j];
+
+        std::array<double, 3> &normal_i = edgeNormal_p[i];
+        std::array<double, 3> &normal_j = edgeNormal_p[j];
+
+        // Compute lambda parameters
+        std::array<double, 3> edge = node_j - node_i;
+        lambda[i][j] = -dotProduct(edge, normal_i) / dotProduct(normal_s, normal_i);
+        lambda[j][i] =  dotProduct(edge, normal_j) / dotProduct(normal_s, normal_j);
+
+        // Compute contribution to the f function
+        f += t[i] * t[j] * (lambda[i][j] * t[i] + lambda[j][i] * t[j]);
+    }
+
+    // Compute projection point on curved surface
+    (*projectionPoint) = point_m + f * normal_s;
+
+    // Eval normal vector on curved surface
+    (*projectionNormal) = computeSurfaceNormal(segmentItr, tau);
+
+    if (dotProduct(normal_s, (*projectionNormal)) < 0.0) {
+       (*projectionNormal) *= -1.0;
+    }
+}
+
+/*!
+ * Evaluate the projection of the given point on the surface created based on
+ * the points representing the specified segment. The surface passes from these
+ * points and is verical to the normal vectors associated with them.
+ *
+ * @param[in] point are the coordinates of the given point
+ * @param[in] segmentItr is an iterator pointing to the segment on which the surface
+ * will be created.
+ * @param[out] projectionPoint The coordinates of the projection point on the surface.
+ * @param[out] projectionNormal The coordinates of the norrmal to the surface vector on the surface
+ * projection point.
+ */
+void LevelSetSegmentationSurfaceInfo::evalProjectionOnSurfaceInterpolation(const std::array<double,3> &point,
+                                                                           const SegmentConstIterator &segmentItr,
+                                                                           std::array<double, 3> *projectionPoint,
+                                                                           std::array<double, 3> *projectionNormal) const
+{
+
+    const Cell &segment = *segmentItr;
+    ElementType segmentType = segment.getType();
+    switch (segmentType) {
+
+    case ElementType::VERTEX:
+    {
+        evalProjectionOnSurfaceInterpolationPoint(point, segmentItr, projectionPoint, projectionNormal);
+        return;
+    }
+
+    case ElementType::LINE:
+    {
+        evalProjectionOnSurfaceInterpolationLine(point, segmentItr, projectionPoint, projectionNormal);
+        return;
+    }
+
+    case ElementType::TRIANGLE:
+    {
+        evalProjectionOnSurfaceInterpolationTriangle(point, segmentItr, projectionPoint, projectionNormal);
+        return;
+    }
+
+    default:
+    {
+        evalProjectionOnSurfaceInterpolationPolygon(point, segmentItr, projectionPoint, projectionNormal);
+        return;
+    }
+
+    }
+}
+
+/*!
  * Evaluate the projection of the given point on the specified segment.
  *
  * @param[in] point are the coordinates of point
@@ -529,6 +1107,30 @@ std::array<double,3> LevelSetSegmentationSurfaceInfo::computeSegmentVertexNormal
     }
 
     return m_unlimitedVertexNormalsStorage.rawAt(vertexRawId);
+}
+
+/*!
+ * Compute the normal of the specified triangle's edge.
+ *
+ * @param[in] segmentItr is an iterator pointing to the closest segment
+ * @param[in] edge is the local index of the edge
+ * @param[in] limited is a flag controling if the limited or the unlimited normal will
+ * be evaluated
+ * @return the normal of the specified triangle's edge
+ */
+std::array<double,3> LevelSetSegmentationSurfaceInfo::computeSegmentEdgeNormal(const SegmentConstIterator &segmentItr, int edge, bool limited ) const {
+
+    long segmentId = segmentItr.getId();
+
+    std::array<double, 3> limitedEdgeNormal;
+    std::array<double, 3> unlimitedEdgeNormal;
+    m_surface->evalEdgeNormals(segmentId, edge, m_featureAngle, &unlimitedEdgeNormal, &limitedEdgeNormal) ;
+
+    if (limited) {
+        return limitedEdgeNormal;
+    }
+
+    return unlimitedEdgeNormal;
 }
 
 /*!
@@ -885,6 +1487,25 @@ long LevelSetSegmentationBaseObject::evalSupport(const std::array<double,3> &poi
 long LevelSetSegmentationBaseObject::evalSupport(const std::array<double,3> &point, double searchRadius) const
 {
     return _evalSupport(point, searchRadius);
+}
+
+/*!
+ * Evaluate the projection of the given point on the surface created based on
+ * the points representing the specified segment. The surface passes from these
+ * points and is verical to the normal vectors associated with them.
+ *
+ * @param[in] point are the coordinates of the given point
+ * @param[in] signedLevelSet controls if signed levelset function will be used
+ * @param[out] projectionPoint The coordinates of the projection point on the surface.
+ * @param[out] projectionNormal The coordinates of the norrmal to the surface vector on the surface
+ * projection point.
+ */
+void LevelSetSegmentationBaseObject::evalProjectionOnSurfaceInterpolation(const std::array<double,3> &point,
+                                                                          bool signedLevelSet,
+                                                                          std::array<double, 3> *projectionPoint,
+                                                                          std::array<double, 3> *projectionNormal) const
+{
+    _evalProjectionOnSurfaceInterpolation(point, signedLevelSet, projectionPoint, projectionNormal);
 }
 
 /*!
@@ -1750,6 +2371,36 @@ std::array<double,3> LevelSetSegmentationObject::_evalNormal(const std::array<do
 }
 
 /*!
+ * Evaluate the projection of the given point on the surface created based on
+ * the points representing the specified segment. The surface passes from these
+ * points and is verical to the normal vectors associated with them.
+ *
+ * @param[in] point are the coordinates of the given point
+ * @param[in] signedLevelSet controls if signed levelset function will be used
+ * @param[out] projectionPoint The coordinates of the projection point on the surface.
+ * @param[out] projectionNormal The coordinates of the norrmal to the surface vector on the surface
+ * projection point.
+ */
+void LevelSetSegmentationObject::_evalProjectionOnSurfaceInterpolation(const std::array<double,3> &point,
+                                                                       bool signedLevelSet,
+                                                                       std::array<double, 3> *projectionPoint,
+                                                                       std::array<double, 3> *projectionNormal) const
+{
+    // Get closest segment
+    long support = evalSupport(point);
+    LevelSetSegmentationSurfaceInfo::SegmentConstIterator segmentItr = getSurface().getCellConstIterator(support);
+
+    // Eval projection point and normal
+    m_surfaceInfo->evalProjectionOnSurfaceInterpolation(point, segmentItr, projectionPoint, projectionNormal);
+
+    // If an unsigned evaluation is requested, the orientation of the surface should be discarded
+    // and in order to have a normal that is agnostic with respect the two sides of the surface.
+    if (!signedLevelSet) {
+        (*projectionNormal) *= static_cast<double>(evalSign(point));
+    }
+}
+
+/*!
  * Evaluate levelset sign at the specified point.
  *
  * \param point are the coordinates of the point
@@ -2126,6 +2777,37 @@ int LevelSetBooleanObject<LevelSetSegmentationBaseObject>::_evalPart(const std::
 }
 
 /*!
+ * Evaluate the projection of the given point on the surface created based on
+ * the points representing the specified segment. The surface passes from these
+ * points and is verical to the normal vectors associated with them.
+ *
+ * @param[in] point are the coordinates of the given point
+ * @param[in] signedLevelSet controls if signed levelset function will be used
+ * @param[out] projectionPoint The coordinates of the projection point on the surface.
+ * @param[out] projectionNormal The coordinates of the norrmal to the surface vector on the surface
+ * projection point.
+ */
+void LevelSetBooleanObject<LevelSetSegmentationBaseObject>::_evalProjectionOnSurfaceInterpolation(const std::array<double,3> &point,
+                                                                                                  bool signedLevelSet,
+                                                                                                  std::array<double, 3> *projectionPoint,
+                                                                                                  std::array<double, 3> *projectionNormal) const
+{
+    return _evalFunction<void>(point, signedLevelSet, [&point, projectionPoint, projectionNormal, signedLevelSet] (const LevelSetBooleanResult<LevelSetSegmentationBaseObject> &result)
+        {
+            const LevelSetSegmentationBaseObject *resultObject = result.getObject();
+            if ( !resultObject ) {
+                (*projectionNormal) = levelSetDefaults::NORMAL;
+                (*projectionPoint)  = levelSetDefaults::POINT;
+            }
+
+            resultObject->evalProjectionOnSurfaceInterpolation(point, signedLevelSet, projectionPoint, projectionNormal);
+            if (signedLevelSet) {
+                (*projectionNormal) *= static_cast<double>(result.getObjectSign());
+            }
+        });
+}
+
+/*!
  * Constructor.
  *
  * \param[in] id identifier of object
@@ -2261,6 +2943,28 @@ std::array<double,3> LevelSetComplementObject<LevelSetSegmentationBaseObject>::_
     }
 
     return normal;
+}
+
+/*!
+ * Evaluate the projection of the given point on the surface created based on
+ * the points representing the specified segment. The surface passes from these
+ * points and is verical to the normal vectors associated with them.
+ *
+ * @param[in] point are the coordinates of the given point
+ * @param[in] signedLevelSet controls if signed levelset function will be used
+ * @param[out] projectionPoint The coordinates of the projection point on the surface.
+ * @param[out] projectionNormal The coordinates of the norrmal to the surface vector on the surface
+ * projection point.
+ */
+void LevelSetComplementObject<LevelSetSegmentationBaseObject>::_evalProjectionOnSurfaceInterpolation(const std::array<double,3> &point,
+                                                                                                     bool signedLevelSet,
+                                                                                                     std::array<double, 3> *projectionPoint,
+                                                                                                     std::array<double, 3> *projectionNormal) const
+{
+    getSourceObject()->evalProjectionOnSurfaceInterpolation(point, signedLevelSet, projectionPoint, projectionNormal);
+    if (signedLevelSet) {
+        (*projectionNormal) *= -1.;
+    }
 }
 
 }
