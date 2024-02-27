@@ -43,9 +43,11 @@ jobs:
             - liblapack-dev
             - liblapacke-dev
             - openmpi-bin
+            - libboost-all-dev
             - libopenmpi-dev
             - libpetsc3.6
             - libpetsc3.6.2-dev
+            - metis
         coverity_scan:
           project:
             name: optimad/bitpit
