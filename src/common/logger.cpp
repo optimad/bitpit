@@ -180,6 +180,8 @@ int LoggerBuffer::flush(bool terminate)
     }
 
     // Flush buffer a line at the time
+    static const std::string EMPTY_STRING = "";
+
     const char *lineBegin = nullptr;
     const char *lineEnd   = bufferBegin;
     while (lineEnd != bufferEnd) {
@@ -203,21 +205,21 @@ int LoggerBuffer::flush(bool terminate)
         }
 
         // Get timestamp
-        std::string consoleTimestamp;
-        std::string fileTimestamp;
+        std::string timestamp;
         if (m_settings->consoleTimestampEnabled || m_settings->fileTimestampEnabled) {
-            std::string timestamp = getTimestamp();
-            if (m_settings->consoleTimestampEnabled) {
-                consoleTimestamp = timestamp;
-            }
-            if (m_settings->fileTimestampEnabled) {
-                fileTimestamp = timestamp;
-            }
+            timestamp = getTimestamp();
         }
 
         // Flush line to console
         if (m_console && m_consoleEnabled) {
-            int status = flushLine(*m_console, lineBegin, lineEnd, consoleTimestamp, terminateLine);
+            const std::string *consoleTimestamp;
+            if (m_settings->consoleTimestampEnabled) {
+                consoleTimestamp = &timestamp;
+            } else {
+                consoleTimestamp = &EMPTY_STRING;
+            }
+
+            int status = flushLine(*m_console, lineBegin, lineEnd, *consoleTimestamp, terminateLine);
             if (status != 0) {
                 return status;
             }
@@ -225,7 +227,14 @@ int LoggerBuffer::flush(bool terminate)
 
         // Flush line to file
         if (m_file && m_fileEnabled && m_file->is_open()) {
-            int status = flushLine(*m_file, lineBegin, lineEnd, fileTimestamp, terminateLine);
+            const std::string *fileTimestamp;
+            if (m_settings->fileTimestampEnabled) {
+                fileTimestamp = &timestamp;
+            } else {
+                fileTimestamp = &EMPTY_STRING;
+            }
+
+            int status = flushLine(*m_file, lineBegin, lineEnd, *fileTimestamp, terminateLine);
             if (status != 0) {
                 return status;
             }
