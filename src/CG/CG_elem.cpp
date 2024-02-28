@@ -1271,7 +1271,8 @@ array3D projectPointPolygon( array3D const &P, std::size_t nV, array3D const *V,
     double distance, minDistance(std::numeric_limits<double>::max());
     int minTriangle = -1;
     array3D V0, V1, V2;
-    array3D localLambda, minLambda;
+    array3D localLambda = std::numeric_limits<double>::max() * array3D{{1., 1., 1.}};
+    array3D minLambda = std::numeric_limits<double>::max() * array3D{{1., 1., 1.}};
 
     // Compute the distance from each triangle in the simplex
     int triangleCount = polygonSubtriangleCount(nV, V);
