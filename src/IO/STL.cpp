@@ -386,9 +386,8 @@ int STLReader::inspectASCII(InspectionInfo *info)
             while (m_lineStream >> word) {
                 sname << word << " ";
             }
-            std::string name = sname.str();
-            utils::string::trim(name);
-            info->solidNames[solidIndex] = name;
+            info->solidNames[solidIndex] = sname.str();
+            utils::string::trim(info->solidNames[solidIndex]);
 
             // Get solid info
             inspectionError = inspectSolidASCII(info->solidFacetCount.data() + solidIndex, info->solidErrors.data() + solidIndex);
