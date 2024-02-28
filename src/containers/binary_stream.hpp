@@ -25,12 +25,13 @@
 #ifndef __BITPIT_BINARY_STREAM_HPP__
 #define __BITPIT_BINARY_STREAM_HPP__
 
-#include <vector>
-#include <string>
-#include <fstream>
-#include <cstring>
+#include <array>
 #include <iostream>
-#include <stdexcept>
+#include <map>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
 namespace bitpit {
 
@@ -38,21 +39,43 @@ namespace bitpit {
 class IBinaryStream;
 class OBinaryStream;
 
-template<typename T>
-IBinaryStream & operator>>(IBinaryStream &stream, T &data);
+template<typename T, std::size_t d>
+IBinaryStream &operator>>(IBinaryStream &stream, std::array<T, d> &data);
+template<typename T, std::size_t d>
+OBinaryStream &operator<<(OBinaryStream &stream, const std::array<T, d> &data);
 
 template<typename T>
 IBinaryStream& operator>>(IBinaryStream &stream, std::vector<T> &data);
-
-template<>
-IBinaryStream & operator>>(IBinaryStream &stream, std::string &data);
-
-template<typename T>
-OBinaryStream & operator<<(OBinaryStream &stream, const T &data);
-
 template<typename T>
 OBinaryStream& operator<<(OBinaryStream &stream, const std::vector<T> &data);
 
+template<typename K, typename T>
+IBinaryStream &operator>>(IBinaryStream &stream, std::pair<K, T> &data);
+template<typename K, typename T>
+OBinaryStream &operator<<(OBinaryStream &stream, const std::pair<K, T> &data);
+
+template<typename K, typename T>
+IBinaryStream &operator>>(IBinaryStream &stream, std::map<K, T> &data);
+template<typename K, typename T>
+OBinaryStream &operator<<(OBinaryStream &stream, const std::map<K, T> &data);
+
+template<typename K, typename T>
+IBinaryStream &operator>>(IBinaryStream &stream, std::unordered_map<K, T> &data);
+template<typename K, typename T>
+OBinaryStream &operator<<(OBinaryStream &stream, const std::unordered_map<K, T> &data);
+
+template<typename T>
+IBinaryStream &operator>>(IBinaryStream &stream, std::unordered_set<T> &data);
+template<typename T>
+OBinaryStream &operator<<(OBinaryStream &stream, const std::unordered_set<T> &data);
+
+template<typename T>
+IBinaryStream & operator>>(IBinaryStream &stream, T &data);
+template<typename T>
+OBinaryStream & operator<<(OBinaryStream &stream, const T &data);
+
+template<>
+IBinaryStream & operator>>(IBinaryStream &stream, std::string &data);
 template<>
 OBinaryStream & operator<<(OBinaryStream &stream, const std::string &data);
 
