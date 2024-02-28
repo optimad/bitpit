@@ -1622,6 +1622,7 @@ VolOctree::StitchInfo VolOctree::deleteCells(const std::vector<DeleteInfo> &dele
 			m_cellToOctant.erase(cellId);
 
 			auto octantToCellItr = m_octantToCell.find(treeId);
+			assert(octantToCellItr != m_octantToCell.end());
 			if (octantToCellItr->second == cellId) {
 				m_octantToCell.erase(octantToCellItr);
 			}
@@ -1629,6 +1630,7 @@ VolOctree::StitchInfo VolOctree::deleteCells(const std::vector<DeleteInfo> &dele
 			m_cellToGhost.erase(cellId);
 
 			auto ghostToCellItr = m_ghostToCell.find(treeId);
+			assert(ghostToCellItr != m_ghostToCell.end());
 			if (ghostToCellItr->second == cellId) {
 				m_ghostToCell.erase(ghostToCellItr);
 			}
