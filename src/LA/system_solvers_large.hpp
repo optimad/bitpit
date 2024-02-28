@@ -237,7 +237,6 @@ private:
     bool m_externalMPIInitialization;
     bool m_externalPETScInitialization;
 
-    bool m_optionsEditable;
     std::vector<std::string> m_options;
 
     bool m_logViewEnabled;
