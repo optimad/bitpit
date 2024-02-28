@@ -186,14 +186,23 @@ VTKUnstructuredGrid::VTKUnstructuredGrid( const std::string &dir, const std::str
  */
 void VTKUnstructuredGrid::setElementType( VTKElementType elementType ){
 
+    // Set element type
     m_elementType = elementType ;
-    if ( m_elementType == VTKElementType::UNDEFINED ) {
-        return;
-    }
 
     // Set homogeneous info streamer properties
     m_homogeneousInfoStreamer.setElementType( m_elementType );
-    m_homogeneousInfoStreamer.setConnectivityField( &(m_geometry[getFieldGeomId(VTKUnstructuredField::CONNECTIVITY)]) );
+    if ( m_elementType == VTKElementType::UNDEFINED ) {
+        m_homogeneousInfoStreamer.setConnectivityField( nullptr );
+        m_homogeneousInfoStreamer.setCellCount( 0 );
+    } else {
+        m_homogeneousInfoStreamer.setConnectivityField( &(m_geometry[getFieldGeomId(VTKUnstructuredField::CONNECTIVITY)]) );
+        m_homogeneousInfoStreamer.setCellCount( m_cells );
+    }
+
+    // Early return if the grid is not made homogeously of one element type
+    if ( m_elementType == VTKElementType::UNDEFINED ) {
+        return;
+    }
 
     // Types
     int types_gid = getFieldGeomId(VTKUnstructuredField::TYPES);
