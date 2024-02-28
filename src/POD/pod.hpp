@@ -133,7 +133,7 @@ public:
     double getEnergyLevel();
     void setErrorThreshold(double threshold);
     double getErrorThreshold(); 
-    void setTargetErrorFields(std::vector<std::string> &namesf, std::vector<std::array<std::string,3>> &namevf);
+    void setTargetErrorFields(const std::vector<std::string> &namesf, const std::vector<std::array<std::string,3>> &namevf);
 
     void setMeshType(MeshType type);
     void setMesh(const std::string &directory, const std::string &name);

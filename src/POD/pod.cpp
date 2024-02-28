@@ -364,21 +364,20 @@ double POD::getErrorThreshold()
  * \param[in] namesf is the vector of scalar fields names.
  * \param[in] namevf is the vector of vector fields names, arranged in vector components.
  */
-void POD::setTargetErrorFields(std::vector<std::string> &namesf, std::vector<std::array<std::string,3>> &namevf)
+void POD::setTargetErrorFields(const std::vector<std::string> &namesf, const std::vector<std::array<std::string,3>> &namevf)
 {
-    std::map<std::string, std::size_t> fields;
     std::size_t nsf= namesf.size();
     std::size_t nvf= namevf.size();
-    
+
+    m_nameTargetErrorFields.clear();
+
     for (std::size_t ifield=0; ifield<nsf; ++ifield)
-        fields[namesf[ifield]] = ifield; 
-    
+        m_nameTargetErrorFields[namesf[ifield]] = ifield;
+
     for (std::size_t ifield=0; ifield<nvf; ++ifield){
         for (std::size_t j=0; j<3; ++j)
-            fields[namevf[ifield][j]] = ifield*3+nsf+j;
-    }    
-        
-    m_nameTargetErrorFields = fields;
+            m_nameTargetErrorFields[namevf[ifield][j]] = ifield*3+nsf+j;
+    }
 }
 
 /**
