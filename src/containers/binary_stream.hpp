@@ -39,22 +39,22 @@ class IBinaryStream;
 class OBinaryStream;
 
 template<typename T>
-IBinaryStream & operator>>(IBinaryStream &stream, T &value);
+IBinaryStream & operator>>(IBinaryStream &stream, T &data);
 
 template<typename T>
-IBinaryStream& operator>>(IBinaryStream &stream, std::vector<T> &vector);
+IBinaryStream& operator>>(IBinaryStream &stream, std::vector<T> &data);
 
 template<>
-IBinaryStream & operator>>(IBinaryStream &stream, std::string &value);
+IBinaryStream & operator>>(IBinaryStream &stream, std::string &data);
 
 template<typename T>
-OBinaryStream & operator<<(OBinaryStream &stream, const T &value);
+OBinaryStream & operator<<(OBinaryStream &stream, const T &data);
 
 template<typename T>
-OBinaryStream& operator<<(OBinaryStream &stream, const std::vector<T> &vector);
+OBinaryStream& operator<<(OBinaryStream &stream, const std::vector<T> &data);
 
 template<>
-OBinaryStream & operator<<(OBinaryStream &stream, const std::string &value);
+OBinaryStream & operator<<(OBinaryStream &stream, const std::string &data);
 
 // Binary stream
 class BinaryStream {
@@ -102,7 +102,7 @@ private:
 class IBinaryStream : public BinaryStream {
 
 template<typename T>
-friend IBinaryStream & (operator>>)(IBinaryStream &stream, T &value);
+friend IBinaryStream & (operator>>)(IBinaryStream &stream, T &data);
 
 public:
     IBinaryStream(void);
@@ -120,7 +120,7 @@ public:
 class OBinaryStream : public BinaryStream {
 
 template<typename T>
-friend OBinaryStream & (operator<<)(OBinaryStream &stream, const T &value);
+friend OBinaryStream & (operator<<)(OBinaryStream &stream, const T &data);
 
 public:
     OBinaryStream();

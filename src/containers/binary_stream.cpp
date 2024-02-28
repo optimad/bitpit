@@ -34,10 +34,10 @@ namespace bitpit {
 * Stream a string from the binary stream.
 *
 * \param[in] stream input stream
-* \param[in] value is the string to be streamed
+* \param[in] data is the string to be streamed
 */
 template<>
-bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &stream, std::string &value)
+bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &stream, std::string &data)
 {
     std::size_t size;
     stream.read(reinterpret_cast<char *>(&size), sizeof(size));
@@ -45,9 +45,9 @@ bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &stream, std::string &va
     if (size > 0) {
         std::vector<char> buffer(size);
         stream.read(buffer.data(), size);
-        value.assign(buffer.data(), size);
+        data.assign(buffer.data(), size);
     } else {
-        value = "";
+        data = "";
     }
 
     return stream;
@@ -57,16 +57,16 @@ bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &stream, std::string &va
 * Stream a string to the binary stream.
 *
 * \param[in] stream is the output stream
-* \param[in] value is the string to be streamed
+* \param[in] data is the string to be streamed
 */
 template<>
-bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &stream, const std::string &value)
+bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &stream, const std::string &data)
 {
     std::size_t size = data.size();
     stream.write(reinterpret_cast<const char *>(&size), sizeof(size));
 
     if (size > 0) {
-        stream.write(value.c_str(), size);
+        stream.write(data.c_str(), size);
     }
 
     return stream;
