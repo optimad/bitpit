@@ -46,6 +46,8 @@ bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &stream, std::string &va
         std::vector<char> buffer(size);
         stream.read(buffer.data(), size);
         value.assign(buffer.data(), size);
+    } else {
+        value = "";
     }
 
     return stream;
