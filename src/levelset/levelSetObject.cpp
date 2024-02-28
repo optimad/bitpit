@@ -914,7 +914,7 @@ bool LevelSetObject::isInNarrowBand(const std::array<double,3> &point)const
     }
 
     // Early return if no narrow band was set
-    if (m_narrowBandSize != LEVELSET_NARROW_BAND_UNLIMITED) {
+    if (m_narrowBandSize == LEVELSET_NARROW_BAND_UNLIMITED) {
         return true;
     }
 
