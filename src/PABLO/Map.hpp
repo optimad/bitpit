@@ -121,10 +121,10 @@ private:
 	void mapCenter(double* & center, darray3 & mapcenter) const;
 	void mapCenter(darray3 & center, darray3 & mapcenter) const;
 	void mapNodes(uint32_t (*nodes)[3], darr3vector & mapnodes) const;
-	void mapNodes(u32arr3vector nodes, darr3vector & mapnodes) const;
+	void mapNodes(const u32arr3vector &nodes, darr3vector & mapnodes) const;
 	void mapNode(u32array3 & node, darray3 & mapnode) const;
 	void mapNodesIntersection(uint32_t (*nodes)[3], darr3vector & mapnodes) const;
-	void mapNodesIntersection(u32arr3vector nodes, darr3vector & mapnodes) const;
+	void mapNodesIntersection(const u32arr3vector &nodes, darr3vector & mapnodes) const;
 	void mapNormals(i8array3 normal, darray3 & mapnormal) const;
 
 };
