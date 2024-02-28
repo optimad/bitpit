@@ -1481,7 +1481,7 @@ LevelSetIntersectionStatus LevelSetObject::_intersectSurface(long id, double dis
 short LevelSetObject::evalCellSign(long id) const {
 
     // Define sign evaluators
-    auto evaluator = [this] (long id)
+    auto evaluator = [this] (long id) -> short
         {
             // Try fetching the sign from sign propagation
             CellCacheCollection::ValueCache<char> *propagatedSignCache = getCellCache<char>(m_cellPropagatedSignCacheId);
@@ -1511,7 +1511,7 @@ short LevelSetObject::evalCellSign(long id) const {
             return _evalCellSign(id);
         };
 
-    auto fallback = [this] (long id)
+    auto fallback = [this] (long id) -> short
         {
             // Try fetching the sign from sign propagation
             CellCacheCollection::ValueCache<char> *propagatedSignCache = getCellCache<char>(m_cellPropagatedSignCacheId);
@@ -1544,12 +1544,12 @@ double LevelSetObject::evalCellValue(long id, bool signedLevelSet) const {
     // Evaluate signed value
     //
     // The value stored in the cache is unsigned.
-    auto evaluator = [this] (long id)
+    auto evaluator = [this] (long id) -> double
         {
             return _evalCellValue(id, false);
         };
 
-    auto fallback = [] (long id)
+    auto fallback = [] (long id) -> double
         {
             BITPIT_UNUSED(id);
 
@@ -1577,12 +1577,12 @@ std::array<double,3> LevelSetObject::evalCellGradient(long id, bool signedLevelS
     // Evaluate signed gradient
     //
     // The gradient stored in the cache is unsigned.
-    auto evaluator = [this] (long id)
+    auto evaluator = [this] (long id) -> std::array<double, 3>
         {
             return _evalCellGradient(id, false);
         };
 
-    auto fallback = [] (long id)
+    auto fallback = [] (long id) -> const std::array<double, 3> &
         {
             BITPIT_UNUSED(id);
 
@@ -2098,24 +2098,24 @@ void LevelSetObject::flushVTKOutputData(std::fstream &stream, VTKFormat format, 
 
     case LevelSetField::VALUE:
     {
-        auto evaluator = [this] (long id) { return evalCellValue(id, true); };
-        auto fallback = [] (long id) { BITPIT_UNUSED(id); return levelSetDefaults::VALUE; };
+        auto evaluator = [this] (long id) -> double { return evalCellValue(id, true); };
+        auto fallback = [] (long id) -> double { BITPIT_UNUSED(id); return levelSetDefaults::VALUE; };
         flushVTKOutputData<double>(stream, format, field, evaluator, fallback);
         break;
     }
 
     case LevelSetField::SIGN:
     {
-        auto evaluator = [this] (long id) { return (short) evalCellSign(id); };
-        auto fallback = [] (long id) { BITPIT_UNUSED(id); return levelSetDefaults::SIGN; };
+        auto evaluator = [this] (long id) -> short { return (short) evalCellSign(id); };
+        auto fallback = [] (long id) -> short { BITPIT_UNUSED(id); return levelSetDefaults::SIGN; };
         flushVTKOutputData<short>(stream, format, field, evaluator, fallback);
         break;
     }
 
     case LevelSetField::GRADIENT:
     {
-        auto evaluator = [this] (long id) { return evalCellGradient(id, true); };
-        auto fallback = [] (long id) { BITPIT_UNUSED(id); return levelSetDefaults::GRADIENT; };
+        auto evaluator = [this] (long id) -> std::array<double, 3> { return evalCellGradient(id, true); };
+        auto fallback = [] (long id) -> const std::array<double, 3> & { BITPIT_UNUSED(id); return levelSetDefaults::GRADIENT; };
         flushVTKOutputData<std::array<double, 3>>(stream, format, field, evaluator, fallback);
         break;
     }
