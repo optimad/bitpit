@@ -25,6 +25,7 @@
 #include <cassert>
 #include <limits>
 #include <cmath>
+#include <cstring>
 
 #include "binary_stream.hpp"
 
