@@ -698,12 +698,12 @@ std::array<double,3> LevelSetSegmentationBaseObject::evalCellNormal(long id, boo
     // Evaluate signed normal
     //
     // The normal stored in the cache is unsigned.
-    auto evaluator = [this] (long id)
+    auto evaluator = [this] (long id) -> std::array<double,3>
         {
             return _evalCellNormal(id, false);
         };
 
-    auto fallback = [] (long id)
+    auto fallback = [] (long id) -> const std::array<double,3> &
         {
             BITPIT_UNUSED(id);
 
@@ -990,24 +990,24 @@ void LevelSetSegmentationBaseObject::flushVTKOutputData(std::fstream &stream, VT
 
     case LevelSetField::SUPPORT:
     {
-        auto evaluator = [this] (long id) { return evalCellSupport(id); };
-        auto fallback = [] (long id) { BITPIT_UNUSED(id); return levelSetDefaults::SUPPORT; };
+        auto evaluator = [this] (long id) -> long { return evalCellSupport(id); };
+        auto fallback = [] (long id) -> long { BITPIT_UNUSED(id); return levelSetDefaults::SUPPORT; };
         flushVTKOutputData<double>(stream, format, field, evaluator, fallback);
         break;
     }
 
     case LevelSetField::PART:
     {
-        auto evaluator = [this] (long id) { return evalCellPart(id); };
-        auto fallback = [] (long id) { BITPIT_UNUSED(id); return levelSetDefaults::PART; };
+        auto evaluator = [this] (long id) -> int { return evalCellPart(id); };
+        auto fallback = [] (long id) -> int { BITPIT_UNUSED(id); return levelSetDefaults::PART; };
         flushVTKOutputData<double>(stream, format, field, evaluator, fallback);
         break;
     }
 
     case LevelSetField::NORMAL:
     {
-        auto evaluator = [this] (long id) { return evalCellNormal(id, true); };
-        auto fallback = [] (long id) { BITPIT_UNUSED(id); return levelSetDefaults::NORMAL; };
+        auto evaluator = [this] (long id) -> std::array<double,3> { return evalCellNormal(id, true); };
+        auto fallback = [] (long id) -> const std::array<double,3> & { BITPIT_UNUSED(id); return levelSetDefaults::NORMAL; };
         flushVTKOutputData<double>(stream, format, field, evaluator, fallback);
         break;
     }
@@ -2038,7 +2038,7 @@ int LevelSetBooleanObject<LevelSetSegmentationBaseObject>::_evalCellPart(long id
  */
 std::array<double,3> LevelSetBooleanObject<LevelSetSegmentationBaseObject>::_evalCellNormal(long id, bool signedLevelSet) const
 {
-    return _evalCellFunction<std::array<double,3>>(id, signedLevelSet, [&id, signedLevelSet] (const LevelSetBooleanResult<LevelSetSegmentationBaseObject> &result)
+    return _evalCellFunction<std::array<double,3>>(id, signedLevelSet, [&id, signedLevelSet] (const LevelSetBooleanResult<LevelSetSegmentationBaseObject> &result) -> std::array<double,3>
         {
             const LevelSetSegmentationBaseObject *resultObject = result.getObject();
             if ( !resultObject ) {
