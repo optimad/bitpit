@@ -1006,8 +1006,13 @@ template<typename value_t, typename id_t>
 template<typename... Args, typename PiercedStorage<value_t>::template EnableIfHasInitialize<Args...> * >
 void PiercedStorage<value_t, id_t>::rawInitialize(std::size_t pos, Args&&... args)
 {
-    for (std::size_t k = 0; k < m_nFields; ++k) {
-        rawInitialize(pos, k, std::forward<Args>(args)...);
+    if (m_nFields == 0) {
+        return;
+    }
+
+    rawInitialize(pos, 0, std::forward<Args>(args)...);
+    for (std::size_t k = 1; k < m_nFields; ++k) {
+        rawAt(pos, k) = rawAt(pos, k - 1);
     }
 }
 
@@ -1062,8 +1067,13 @@ template<typename value_t, typename id_t>
 template<typename T, typename std::enable_if<!std::is_same<T, bool>::value>::type *, typename... Args>
 void PiercedStorage<value_t, id_t>::rawEmplace(std::size_t pos, Args&&... args)
 {
-    for (std::size_t k = 0; k < m_nFields; ++k) {
-        m_fields.emplace(m_fields.begin() + pos * m_nFields + k, std::forward<Args>(args)...);
+    if (m_nFields == 0) {
+        return;
+    }
+
+    m_fields.emplace(m_fields.begin() + pos * m_nFields, std::forward<Args>(args)...);
+    for (std::size_t k = 1; k < m_nFields; ++k) {
+        m_fields.emplace(m_fields.begin() + pos * m_nFields + k, value_t(rawAt(pos, k - 1)));
     }
 }
 
@@ -1092,8 +1102,13 @@ template<typename value_t, typename id_t>
 template<typename T, typename std::enable_if<!std::is_same<T, bool>::value>::type *, typename... Args>
 void PiercedStorage<value_t, id_t>::rawEmplaceBack(Args&&... args)
 {
-    for (std::size_t k = 0; k < m_nFields; ++k) {
-        m_fields.emplace_back(std::forward<Args>(args)...);
+    if (m_nFields == 0) {
+        return;
+    }
+
+    m_fields.emplace_back(std::forward<Args>(args)...);
+    for (std::size_t k = 1; k < m_nFields; ++k) {
+        m_fields.emplace_back(value_t(m_fields.back()));
     }
 }
 
@@ -1123,8 +1138,13 @@ template<typename value_t, typename id_t>
 template<typename... Args>
 void PiercedStorage<value_t, id_t>::rawEmreplace(std::size_t pos, Args&&... args)
 {
-    for (std::size_t k = 0; k < m_nFields; ++k) {
-        m_fields[pos * m_nFields + k] = value_t(std::forward<Args>(args)...);
+    if (m_nFields == 0) {
+        return;
+    }
+
+    rawAt(pos, 0) = value_t(std::forward<Args>(args)...);
+    for (std::size_t k = 1; k < m_nFields; ++k) {
+        rawAt(pos, k) = rawAt(pos, k - 1);
     }
 }
 
