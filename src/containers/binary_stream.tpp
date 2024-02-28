@@ -28,13 +28,13 @@ namespace bitpit {
 * Read the specified value from the stream.
 *
 * \param[in] stream is the input stream
-* \param[in] value is the value to be streamed
+* \param[in] data is the data to be streamed
 * \result Returns the updated input stream.
 */
 template<typename T>
-IBinaryStream& operator>>(IBinaryStream &stream, T &value)
+IBinaryStream& operator>>(IBinaryStream &stream, T &data)
 {
-    stream.read(reinterpret_cast<char *>(&value), sizeof(T));
+    stream.read(reinterpret_cast<char *>(&data), sizeof(T));
 
     return stream;
 }
@@ -46,17 +46,17 @@ IBinaryStream& operator>>(IBinaryStream &stream, T &value)
 * stream.
 *
 * \param[in] stream is the input stream
-* \param[in] vector is the vector to be streamed
+* \param[in] data is the data to be streamed
 * \result Returns the updated input stream.
 */
 template<typename T>
-IBinaryStream& operator>>(IBinaryStream &stream, std::vector<T> &vector)
+IBinaryStream& operator>>(IBinaryStream &stream, std::vector<T> &data)
 {
     std::size_t size;
     stream.read(reinterpret_cast<char *>(&size), sizeof(size));
-    vector.resize(size);
+    data.resize(size);
 
-    stream.read(reinterpret_cast<char *>(vector.data()), size * sizeof(T));
+    stream.read(reinterpret_cast<char *>(data.data()), size * sizeof(T));
 
     return stream;
 }
@@ -65,13 +65,13 @@ IBinaryStream& operator>>(IBinaryStream &stream, std::vector<T> &vector)
 * Write the specified value into the stream.
 *
 * \param[in] stream is the output stream
-* \param[in] value is the value to be streamed
+* \param[in] data is the data to be streamed
 * \result Returns the updated output stream.
 */
 template<typename T>
-OBinaryStream& operator<<(OBinaryStream &stream, const T &value)
+OBinaryStream& operator<<(OBinaryStream &stream, const T &data)
 {
-    stream.write(reinterpret_cast<const char *>(&value), sizeof(T));
+    stream.write(reinterpret_cast<const char *>(&data), sizeof(T));
 
     return stream;
 }
@@ -82,16 +82,16 @@ OBinaryStream& operator<<(OBinaryStream &stream, const T &value)
 * Along with vector data, also the size of the vector is stored into the
 * stream.
 *
-* \param[in] vector is the vector to be streamed
+* \param[in] data is the data to be streamed
 * \result Returns the updated output stream.
 */
 template<typename T>
-OBinaryStream& operator<<(OBinaryStream &stream, const std::vector<T> &vector)
+OBinaryStream& operator<<(OBinaryStream &stream, const std::vector<T> &data)
 {
-    std::size_t size = vector.size();
+    std::size_t size = data.size();
     stream.write(reinterpret_cast<const char *>(&size), sizeof(size));
 
-    stream.write(reinterpret_cast<const char *>(vector.data()), size * sizeof(T));
+    stream.write(reinterpret_cast<const char *>(data.data()), size * sizeof(T));
 
     return stream;
 }
