@@ -184,28 +184,75 @@ int subtest_001(
     // Scope variables -------------------------------------------------------------- //
     double                       x;
     std::vector<double>          v;
-    array<double, 3>             a;
-    string                       s0 = " 0.12 ";
-    string                       s1 = "  0.12 0.13 0.14 ";
-    string                       s2 = "  0.22 0.23 0.24 0.25";
+    array<double, 3>             a2;
+    array<double, 4>             a4;
+    array<double, 6>             a6;
+    string                       s0 = " \n\t 0.12 \n  ";
+    string                       s1 = " \f    0.12 0.13 0.14 \n ";
+    string                       s2 = " \t 0.22 0.23 0.24 0.25  \v\t  ";
+    string                       s3 = " \t ";
 
     // Padding strings -------------------------------------------------------------- //
     cout << "  std::string s0 = \"" << s0 << "\"" << endl;
     cout << "  std::string s1 = \"" << s1 << "\"" << endl;
     cout << "  std::string s2 = \"" << s2 << "\"" << endl;
+    cout << "  std::string s3 = \"" << s3 << "\"" << endl;
+    cout << endl;
+
     bitpit::utils::string::convertString(s0, x);
     cout << "  convertString(s0, x), x = " << x << endl;
+    cout << endl;
+
+    bitpit::utils::string::convertString(s3, x);
+    cout << "  convertString(s3, x), x = " << x << endl;
+    cout << endl;
+
     bitpit::utils::string::convertString(s1, v);
     cout << "  convertString(s1, v), v = ";
-	for (size_t i = 0; i < v.size(); ++i) {
-		cout << v[i] << "   ";
-	}
+    for (size_t i = 0; i < v.size(); ++i) {
+        cout << v[i] << "   ";
+    }
     cout << endl;
-    bitpit::utils::string::convertString(s2, a);
-    cout << "  convertString(s2, a), a = ";
-	for (size_t i = 0; i < a.size(); ++i) {
-		cout << a[i] << "   ";
-	}
+    cout << endl;
+
+    bitpit::utils::string::convertString(s3, v);
+    cout << "  convertString(s3, v), v = ";
+    for (size_t i = 0; i < v.size(); ++i) {
+        cout << v[i] << "   ";
+    }
+    cout << endl;
+    cout << endl;
+
+    bitpit::utils::string::convertString(s2, a2);
+    cout << "  convertString(s2, a2), a2 = ";
+    for (size_t i = 0; i < a2.size(); ++i) {
+        cout << a2[i] << "   ";
+    }
+    cout << endl;
+    cout << endl;
+
+    bitpit::utils::string::convertString(s2, a4);
+    cout << "  convertString(s2, a4), a4 = ";
+    for (size_t i = 0; i < a4.size(); ++i) {
+        cout << a4[i] << "   ";
+    }
+    cout << endl;
+    cout << endl;
+
+    bitpit::utils::string::convertString(s2, a6);
+    cout << "  convertString(s2, a6), a6 = ";
+    for (size_t i = 0; i < a6.size(); ++i) {
+        cout << a6[i] << "   ";
+    }
+    cout << endl;
+    cout << endl;
+
+    bitpit::utils::string::convertString(s3, a6);
+    cout << "  convertString(s3, a6), a6 = ";
+    for (size_t i = 0; i < a6.size(); ++i) {
+        cout << a6[i] << "   ";
+    }
+    cout << endl;
     cout << endl;
 }
 

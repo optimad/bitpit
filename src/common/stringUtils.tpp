@@ -192,33 +192,29 @@ inline bool keywordInString(const std::string &line, const std::string &key)
 * string
 */
 template <class T>
-void convertString(std::string input, T &output)
+void convertString(const std::string &input, T &output)
 {
-    trim(input);
+    std::size_t nValues = 0;
     std::stringstream ss(input);
-
-    T x;
-    std::vector<T> tmp;
+    ss >> std::ws;
     while (ss.good()) {
-        ss >> x;
-        tmp.push_back(x);
+        ++nValues;
+        if (nValues > 1) {
+            std::cout << " more than one element in string " << input   << std::endl;
+            std::cout << " assigning first element             "  << std::endl;
+            return;
+        }
+
+        ss >> output;
+        ss >> std::ws;
     }
 
-    if (tmp.size() == 0) {
+    if (nValues == 0) {
         std::cout << " no useful information in string " << input   << std::endl;
         std::cout << " casting zero                   " <<  std::endl;
 
-        x = static_cast<T> (0);
-    } else if (tmp.size() == 1) {
-        x = tmp[0];
-    } else if(tmp.size() > 1) {
-        std::cout << " more than one element in string " << input   << std::endl;
-        std::cout << " assigning first element             "  << std::endl;
-
-        x = tmp[0];
+        output = T{};
     }
-
-    output = x;
 }
 
 /*!
@@ -226,7 +222,7 @@ void convertString(std::string input, T &output)
 *
 * Convertes a string into a vector of fundamental data type.
 *
-* If no data of type T can be extracted from the input string a void vector is returned.
+* If no data of type T can be extracted from the input string an empty vector is returned.
 * Values extracted from string are pushed at the end of the vector.
 *
 * \param[in] input is the input string
@@ -234,26 +230,23 @@ void convertString(std::string input, T &output)
 * string
 */
 template <class T>
-void convertString(std::string input, std::vector<T> &output)
+void convertString(const std::string &input, std::vector<T> &output)
 {
     output.clear();
 
-    trim(input);
     std::stringstream ss(input);
-
-    T x;
-    std::vector<T> tmp;
+    ss >> std::ws;
     while (ss.good()) {
+        T x;
         ss >> x;
-        tmp.push_back(x);
+        ss >> std::ws;
+        output.push_back(std::move(x));
     }
 
-    if (tmp.size() == 0) {
+    if (output.empty()) {
         std::cout << " no useful information in string " << input   << std::endl;
-        std::cout << " returning void vector          " <<  std::endl;
+        std::cout << " returning empty vector          " <<  std::endl;
     };
-
-    output = tmp;
 }
 
 /*!
@@ -271,41 +264,29 @@ void convertString(std::string input, std::vector<T> &output)
 * string
 */
 template <class T, size_t n>
-void convertString(std::string input, std::array<T,n> &output)
+void convertString(const std::string &input, std::array<T,n> &output)
 {
-    T x;
-    std::vector<T> tmp;
-
-    tmp.clear();
-
-    trim(input);
+    std::size_t nValues = 0;
     std::stringstream ss(input);
-
+    ss >> std::ws;
     while (ss.good()) {
-        ss >> x;
-        tmp.push_back(x);
+        ++nValues;
+        if (nValues > n) {
+            std::cout << " more than " << n << " elements in string " << input   << std::endl;
+            std::cout << " assigning first " << n << " elements "   << std::endl;
+            return;
+        }
+
+        ss >> output[nValues - 1];
+        ss >> std::ws;
     }
 
-    if (tmp.size() < n) {
+    if (nValues < n) {
         std::cout << " not enough useful information in string " << input   << std::endl;
         std::cout << " casting zero into missing elements      " <<  std::endl;
 
-        x = static_cast<T>(0);
-        output.fill(x);
-
-        for(size_t i=0; i<tmp.size(); i++) {
-            output[i] = tmp[i];
-        }
-    } else if (tmp.size() == n) {
-        for(size_t i = 0; i < n; i++) {
-            output[i] = tmp[i];
-        }
-    } else if (tmp.size() > n) {
-        std::cout << " more than " << n << " elements in string " << input   << std::endl;
-        std::cout << " assigning first element " << n << " elements "   << std::endl;
-
-        for(size_t i = 0; i < n; i++) {
-            output[i] = tmp[i];
+        for(size_t i=nValues; i<n; i++) {
+            output[i] = T{};
         }
     }
 }

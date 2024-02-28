@@ -63,13 +63,13 @@ inline bool keywordInString(const std::string &line, const std::string &key);
 
 // Conversion
 template <class T>
-void convertString(std::string input, T &output);
+void convertString(const std::string &input, T &output);
 
 template <class T>
-void convertString(std::string input, std::vector<T> &output);
+void convertString(const std::string &input, std::vector<T> &output);
 
 template <class T, size_t n>
-void convertString(std::string input, std::array<T,n> &output);
+void convertString(const std::string &input, std::array<T,n> &output);
 
 }
 
