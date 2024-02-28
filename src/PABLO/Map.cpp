@@ -218,7 +218,7 @@ void Map::mapNodes(uint32_t (*nodes)[3], darr3vector & mapnodes) const {
  * \param[in] nodes Vector of coordinates of nodes from logical domain.
  * \param[out] mapnodes Coordinates of nodes in physical domain.
  */
-void Map::mapNodes(u32arr3vector nodes, darr3vector & mapnodes) const {
+void Map::mapNodes(const u32arr3vector &nodes, darr3vector & mapnodes) const {
 	mapnodes.resize(m_nnodes);
 	for (int i=0; i<m_nnodes; i++){
 		for (int j=0; j<3; j++){
@@ -254,7 +254,7 @@ void Map::mapNodesIntersection(uint32_t (*nodes)[3], darr3vector & mapnodes) con
  * \param[in] nodes Pointer to coordinates of nodes from logical domain.
  * \param[out] mapnodes Coordinates of nodes in physical domain.
  */
-void Map::mapNodesIntersection(u32arr3vector nodes, darr3vector & mapnodes) const {
+void Map::mapNodesIntersection(const u32arr3vector &nodes, darr3vector & mapnodes) const {
 	mapnodes.resize(m_nnodesPerFace);
 	for (int i=0; i<m_nnodesPerFace; i++){
 		for (int j=0; j<3; j++){
