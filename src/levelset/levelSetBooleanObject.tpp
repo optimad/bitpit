@@ -321,7 +321,7 @@ short LevelSetBooleanBaseObject<SourceLevelSetObject>::_evalCellSign(long id) co
  */
 template<typename SourceLevelSetObject>
 double LevelSetBooleanBaseObject<SourceLevelSetObject>::_evalCellValue(long id, bool signedLevelSet) const {
-    return _evalCellFunction<double>(id, signedLevelSet, [] (const LevelSetBooleanResult<SourceLevelSetObject> &result)
+    return _evalCellFunction<double>(id, signedLevelSet, [] (const LevelSetBooleanResult<SourceLevelSetObject> &result) -> double
         {
             const LevelSetObject *resultObject = result.getObject();
             if ( !resultObject ) {
@@ -340,7 +340,7 @@ double LevelSetBooleanBaseObject<SourceLevelSetObject>::_evalCellValue(long id, 
  */
 template<typename SourceLevelSetObject>
 std::array<double,3> LevelSetBooleanBaseObject<SourceLevelSetObject>::_evalCellGradient(long id, bool signedLevelSet) const {
-    return _evalCellFunction<std::array<double,3>>(id, signedLevelSet, [id, signedLevelSet] (const LevelSetBooleanResult<SourceLevelSetObject> &result)
+    return _evalCellFunction<std::array<double,3>>(id, signedLevelSet, [id, signedLevelSet] (const LevelSetBooleanResult<SourceLevelSetObject> &result) -> std::array<double, 3>
         {
             const LevelSetObject *resultObject = result.getObject();
             if ( !resultObject ) {
@@ -365,7 +365,7 @@ std::array<double,3> LevelSetBooleanBaseObject<SourceLevelSetObject>::_evalCellG
  */
 template<typename SourceLevelSetObject>
 double LevelSetBooleanBaseObject<SourceLevelSetObject>::_evalValue(const std::array<double,3> &point, bool signedLevelSet) const {
-    return _evalFunction<double>(point, signedLevelSet, [] (const LevelSetBooleanResult<SourceLevelSetObject> &result)
+    return _evalFunction<double>(point, signedLevelSet, [] (const LevelSetBooleanResult<SourceLevelSetObject> &result) -> double
         {
             const SourceLevelSetObject *resultObject = result.getObject();
             if ( !resultObject ) {
@@ -385,7 +385,7 @@ double LevelSetBooleanBaseObject<SourceLevelSetObject>::_evalValue(const std::ar
  */
 template<typename SourceLevelSetObject>
 std::array<double,3> LevelSetBooleanBaseObject<SourceLevelSetObject>::_evalGradient(const std::array<double,3> &point, bool signedLevelSet) const {
-    return _evalFunction<std::array<double,3>>(point, signedLevelSet, [&point, signedLevelSet] (const LevelSetBooleanResult<SourceLevelSetObject> &result)
+    return _evalFunction<std::array<double,3>>(point, signedLevelSet, [&point, signedLevelSet] (const LevelSetBooleanResult<SourceLevelSetObject> &result) -> std::array<double,3>
         {
             const LevelSetObject *resultObject = result.getObject();
             if ( !resultObject ) {
