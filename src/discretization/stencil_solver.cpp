@@ -26,6 +26,8 @@
 
 #include "stencil_solver.hpp"
 
+#include <cmath>
+
 namespace bitpit {
 
 // Explicit instantization
@@ -88,45 +90,34 @@ double DiscretizationStencilSolverAssembler<StencilVector>::getRawValue(const St
 /*!
  * Initialize block size.
  *
- * The block size is set equal to the square root of the weight size; if the
- * square root of the weight type is not an integer number, an exception is
- * throw.
+ * The block size is set equal to the square root of the weight/constant size; if the
+ * square root of the weight type is not an integer number, an exception is throw.
  *
- * Block size is evaluated from the first weight. If the size of the other
- * weights don't match the size of the first one, an exception is thrown
- * only when bitpit is compiled in debug mode, otherwise the error is
- * silently ignored.
+ * Block size is evaluated from the constant of the first stencil. If the size of the
+ * other weights don't match the size of the evaluated size, an exception is thrown
+ * only when bitpit is compiled in debug mode, otherwise the error is silently
+ * ignored.
  */
 template<>
 void DiscretizationStencilSolverAssembler<StencilBlock>::setBlockSize()
 {
     // Get block size
     //
-    // Block size is evaluated from the first weight.
+    // Block size is evaluated from the constant of the first stencil.
     //
-    // The block size is set equal to the square root of the weight size;
-    // if the square root of the weight type is not an integer number, an
-    // exception is throw.
-    m_blockSize = - 1;
-    for (long i = 0; i < getRowCount(); ++i) {
-        const StencilBlock &stencil = getRowStencil(i);
-        std::size_t stencilSize = stencil.size();
-        if (stencilSize == 0) {
-            break;
-        }
-
-        const StencilBlock::weight_type *weightData = stencil.weightData();
-        double blockSize = std::sqrt(weightData[0].size());
-        if (blockSize != std::sqrt(weightData[0].size())) {
-            throw std::runtime_error("Weights size should be a square.");
-        }
-        setBlockSize(static_cast<int>(blockSize));
-        break;
+    // The block size is set equal to the square root of the weight size; if the square
+    // root of the weight type is not an integer number, an exception is throw.
+    if (getRowCount() == 0) {
+        throw std::runtime_error("Unable to evaluate the block size.");
     }
 
-    if (m_blockSize == -1) {
-        throw std::runtime_error("All weights should have a size greater than zero.");
+    const StencilBlock &stencil = getRowStencil(0);
+    std::size_t stencilConstantSize = stencil.getConstant().size();
+    int blockSize = static_cast<int>(std::round(std::sqrt(stencilConstantSize)));
+    if (static_cast<std::size_t>(blockSize * blockSize) != stencilConstantSize) {
+        throw std::runtime_error("Weights size should be a square.");
     }
+    setBlockSize(blockSize);
 
 #ifdef DEBUG
     // Validate block size
@@ -138,12 +129,12 @@ void DiscretizationStencilSolverAssembler<StencilBlock>::setBlockSize()
         std::size_t stencilSize = stencil.size();
 
         for (std::size_t k = 0; k < stencilSize; ++k) {
-            if (weightData[k].size() != m_blockSize)) {
+            if (weightData[k].size() != m_blockSize * m_blockSize)) {
                 throw std::runtime_error("All stencils weights should have the same size.");
             }
         }
 
-        if (stencil.getConstant().size() != m_blockSize) {
+        if (stencil.getConstant().size() != m_blockSize * m_blockSize) {
             throw std::runtime_error("The stencils constant should have the same size of the stencil weights.");
         }
     }
