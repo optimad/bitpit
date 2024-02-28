@@ -1111,9 +1111,11 @@ void LevelSetObject::fillCellPropagatedSignCache()
                 // Set the sign of the cell
                 //
                 // If the sign of the cell has already been set, we check if it matches
-                // the seed sign and then we skip the cell.
-                //
-                // If the cell is a seed, we remove it from the seed list.
+                // the seed sign and then we skip the cell, otherwise we set the sign of
+                // the cell and we process its neighoburs. Once the sign of a cell is
+                // set, we can remove it form the seed list (there is no need to start
+                // again the porpagation from that cell, beause it will not reach any
+                // new portions of the domain).
                 if (cellId != seedId) {
                     CellCacheCollection::ValueCache<char>::Entry cellSignEntry = propagatedSignCache->findEntry(cellId);
                     if (cellSignEntry.isValid()) {
@@ -1125,10 +1127,9 @@ void LevelSetObject::fillCellPropagatedSignCache()
                         } else {
                             continue;
                         }
-
-                        seedIds.erase(cellId);
                     } else {
                         propagatedSignCache->insertEntry(cellId, seedSign);
+                        seedIds.erase(cellId);
                     }
                 }
 
