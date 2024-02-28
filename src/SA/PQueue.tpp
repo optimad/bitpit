@@ -331,8 +331,6 @@ void MinPQueue<T, T1>::heapify(
 
     // Local variables
     int             L, R, idummy, imap;
-    T               dummy;
-    T1              dummy2;
 
     // Counters
     // none
@@ -358,13 +356,13 @@ void MinPQueue<T, T1>::heapify(
 
     // Move up-heap
     if (idummy != i) {
-        dummy = keys[i];
+        T dummy = keys[i];
         keys[i] = keys[idummy];
         keys[idummy] = dummy;
         if (use_labels) {
-            dummy2 = labels[i];
+            T1 dummy2 = labels[i];
             labels[i] = labels[idummy];
-            labels[idummy] = dummy2;
+            labels[idummy] = std::move(dummy2);
         }
         if (map != NULL) {
             imap = (*map)[i][0];
