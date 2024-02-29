@@ -57,10 +57,11 @@ public:
     BITPIT_PUBLIC_API static const double DEFAULT_FEATURE_ANGLE;
 
     LevelSetSegmentationSurfaceInfo();
+    LevelSetSegmentationSurfaceInfo(LevelSetSurfaceSmooting surfaceSmoothing);
     LevelSetSegmentationSurfaceInfo(const LevelSetSegmentationSurfaceInfo &other);
     LevelSetSegmentationSurfaceInfo(LevelSetSegmentationSurfaceInfo &&other) = default;
-    LevelSetSegmentationSurfaceInfo(const SurfUnstructured *surface, double featureAngle);
-    LevelSetSegmentationSurfaceInfo(std::unique_ptr<const SurfUnstructured> &&surface, double featureAngle);
+    LevelSetSegmentationSurfaceInfo(const SurfUnstructured *surface, double featureAngle, LevelSetSurfaceSmooting surfaceSmoothing = LevelSetSurfaceSmooting::LOW_ORDER);
+    LevelSetSegmentationSurfaceInfo(std::unique_ptr<const SurfUnstructured> &&surface, double featureAngle, LevelSetSurfaceSmooting surfaceSmoothing = LevelSetSurfaceSmooting::LOW_ORDER);
 
     const SurfUnstructured & getSurface() const;
     void setSurface(std::unique_ptr<const SurfUnstructured> &&surface, double featureAngle = DEFAULT_FEATURE_ANGLE);
@@ -75,12 +76,18 @@ public:
 
     std::array<double, 3> evalNormal(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr) const;
 
+    void evalBarycentricCoordinates(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, double *lambda) const;
+    void evalProjection(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const;
+    void evalProjection(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, std::array<double, 3> *projectionPoint) const;
+    std::array<double, 3> evalProjection(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, double *lambda) const;
+
 private:
     typedef std::pair<long, int> SegmentVertexKey;
 
     const SurfUnstructured *m_surface;
     std::unique_ptr<const SurfUnstructured> m_ownedSurface;
     double m_featureAngle;
+    LevelSetSurfaceSmooting m_surfaceSmoothing;
 
     std::unique_ptr<SurfaceSkdTree> m_searchTree;
 
@@ -103,8 +110,6 @@ private:
     void evalLowOrderProjectionOnTriangle(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const;
     void evalLowOrderProjectionOnPolygon(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const;
     void evalLowOrderProjection(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const;
-
-    std::array<double, 3> evalProjection(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, double *lambda) const;
 
     std::array<double,3> computePseudoNormal( const SurfUnstructured::CellConstIterator &segmentIterator, const double *lambda ) const;
     std::array<double,3> computeSurfaceNormal( const SurfUnstructured::CellConstIterator &segmentIterator, const double *lambda ) const;
@@ -137,7 +142,7 @@ public:
     long evalSupport(const std::array<double,3> &point, double searchRadius) const;
     int evalPart(const std::array<double,3> &point) const;
     std::array<double,3> evalNormal(const std::array<double,3> &point, bool signedLevelSet) const;
-    void evalProjectionOnSurfaceInterpolation(const std::array<double,3> &point, bool signedLevelSet, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const;
+    void evalProjection(const std::array<double,3> &point, bool signedLevelSet, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const;
 
     BITPIT_DEPRECATED(int getPart(long cellId) const);
     BITPIT_DEPRECATED(std::array<double BITPIT_COMMA 3> getNormal(long cellId) const);
@@ -166,10 +171,10 @@ protected:
 
     virtual const SurfUnstructured & _evalSurface(const std::array<double,3> &point) const = 0;
     virtual int _evalPart(const std::array<double,3> &point) const;
-    virtual std::array<double,3> _evalNormal(const std::array<double,3> &point, bool signedLevelSet) const = 0;
+    std::array<double,3> _evalNormal(const std::array<double,3> &point, bool signedLevelSet) const;
     virtual long _evalSupport(const std::array<double,3> &point) const = 0;
     virtual long _evalSupport(const std::array<double,3> &point, double searchRadius) const = 0;
-    virtual void _evalProjectionOnSurfaceInterpolation(const std::array<double,3> &point, bool signedLevelSet, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const = 0;
+    virtual void _evalProjection(const std::array<double,3> &point, bool signedLevelSet, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const = 0;
 
     void addVTKOutputData(LevelSetField field, const std::string &objectName) override;
     std::string getVTKOutputFieldName(LevelSetField field) const override;
@@ -183,6 +188,7 @@ public:
     LevelSetSegmentationObject(int);
     LevelSetSegmentationObject(int, std::unique_ptr<const SurfUnstructured> &&surface, double featureAngle = 2. * BITPIT_PI);
     LevelSetSegmentationObject(int, const SurfUnstructured *surface, double featureAngle = 2. * BITPIT_PI);
+    LevelSetSegmentationObject(int, const SurfUnstructured *surface, double featureAngle, LevelSetSurfaceSmooting surfaceSmoothing);
     LevelSetSegmentationObject(const LevelSetSegmentationObject &other);
     LevelSetSegmentationObject(LevelSetSegmentationObject &&other) = default;
 
@@ -195,6 +201,7 @@ public:
     void setSurface(std::unique_ptr<const SurfUnstructured> &&surface, double featureAngle, bool force = false);
     void setSurface(const SurfUnstructured *surface, bool force = false);
     void setSurface(const SurfUnstructured *surface, double featureAngle, bool force = false);
+    void setSurface(const SurfUnstructured *surface, double featureAngle, LevelSetSurfaceSmooting surfaceSmoothing);
 
     const SurfaceSkdTree & getSearchTree() const;
 
@@ -221,8 +228,7 @@ protected:
     const SurfUnstructured & _evalSurface(const std::array<double,3> &point) const override;
     long _evalSupport(const std::array<double,3> &point) const override;
     long _evalSupport(const std::array<double,3> &point, double searchRadius) const override;
-    std::array<double,3> _evalNormal(const std::array<double,3> &point, bool signedLevelSet) const override;
-    void _evalProjectionOnSurfaceInterpolation(const std::array<double,3> &point, bool signedLevelSet, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const override;
+    void _evalProjection(const std::array<double,3> &point, bool signedLevelSet, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const override;
 
 private:
     std::unique_ptr<LevelSetSegmentationSurfaceInfo> m_surfaceInfo;
@@ -232,7 +238,7 @@ private:
     short _evalSign(const std::array<double,3> &point, long support) const;
     double _evalValue(const std::array<double,3> &point, long support, bool signedLevelSet) const;
     std::array<double,3> _evalGradient(const std::array<double,3> &point, long support, bool signedLevelSet) const;
-    std::array<double,3> _evalNormal(const std::array<double,3> &point, long support, bool signedLevelSet) const;
+    void _evalProjection(const std::array<double,3> &point, long support, bool signedLevelSet, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const;
 
 };
 
@@ -255,8 +261,7 @@ protected:
     long _evalSupport(const std::array<double,3> &point) const override;
     long _evalSupport(const std::array<double,3> &point, double searchRadius) const override;
     int _evalPart(const std::array<double,3> &point) const override;
-    std::array<double,3> _evalNormal(const std::array<double,3> &point, bool signedLevelSet) const override;
-    void _evalProjectionOnSurfaceInterpolation(const std::array<double,3> &point, bool signedLevelSet, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const override;
+    void _evalProjection(const std::array<double,3> &point, bool signedLevelSet, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const override;
 
 };
 
@@ -278,8 +283,7 @@ protected:
     long _evalSupport(const std::array<double,3> &point) const override;
     long _evalSupport(const std::array<double,3> &point, double searchRadius) const override;
     int _evalPart(const std::array<double,3> &point) const override;
-    std::array<double,3> _evalNormal(const std::array<double,3> &point, bool signedLevelSet) const override;
-    void _evalProjectionOnSurfaceInterpolation(const std::array<double,3> &point, bool signedLevelSet, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const override;
+    void _evalProjection(const std::array<double,3> &point, bool signedLevelSet, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const override;
 
 };
 

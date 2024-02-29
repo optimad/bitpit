@@ -229,7 +229,7 @@ int subtest_002()
 
     int objectId = 0;
     double limitAngle = 85.0 * M_PI / 180.0;
-    levelset.addObject(STL.get(), limitAngle, objectId);
+    levelset.addObject(STL.get(), limitAngle, bitpit::LevelSetSurfaceSmooting::HIGH_ORDER, objectId);
 
     bitpit::LevelSetObject *object = static_cast<bitpit::LevelSetObject *>(levelset.getObjectPtr(objectId));
 
@@ -244,7 +244,7 @@ int subtest_002()
     std::array<double, 3> projectionPoint;
     std::array<double, 3> projectionNormal;
         
-    levelSetSegmentation->evalProjectionOnSurfaceInterpolation(point, true, &projectionPoint, &projectionNormal);
+    levelSetSegmentation->evalProjection(point, true, &projectionPoint, &projectionNormal);
 
     end = std::chrono::system_clock::now();
     elapsed_seconds = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();

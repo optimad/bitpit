@@ -178,6 +178,15 @@ enum class LevelSetField{
 };
 
 /*!
+ * @ingroup levelsetEnums
+ * Enum class containing the possible order of surfacesmooting
+ */
+enum class LevelSetSurfaceSmooting{
+    LOW_ORDER,                      /**< level set high order surface smoothing */
+    HIGH_ORDER                      /**< level set low order surface smoothing */
+};
+
+/*!
  * Hasher for the LevelSetField enum.
  */
 struct LevelSetFieldHasher

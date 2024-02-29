@@ -524,7 +524,7 @@ int subtest_005()
 
     bitpit::LevelSet levelset ;
     levelset.setMesh(mesh.get());
-    levelset.addObject(segmentation.get(), limitAngle, objectId);
+    levelset.addObject(segmentation.get(), limitAngle, bitpit::LevelSetSurfaceSmooting::HIGH_ORDER, objectId);
 
     // Compute levelset
     bitpit::log::cout() << " - Evaluating levelset" << std::endl;
@@ -540,7 +540,7 @@ int subtest_005()
     std::array<double, 3> point = mesh->evalCellCentroid(cellId);
     std::array<double, 3> projectionPoint;
     std::array<double, 3> projectionNormal;
-    levelSetSegmentation->evalProjectionOnSurfaceInterpolation(point, true, &projectionPoint, &projectionNormal);
+    levelSetSegmentation->evalProjection(point, true, &projectionPoint, &projectionNormal);
 
     std::array<double, 3> projectionPointTarget  = {-0.42738501907593, -0.57919419612192, -0.67702138948285};
     std::array<double, 3> projectionNormalTarget = {-0.46202467342915, -0.54201153693076, -0.70196630615482};

@@ -47,7 +47,8 @@ const double LevelSetSegmentationSurfaceInfo::DEFAULT_FEATURE_ANGLE = 2. * BITPI
  */
 LevelSetSegmentationSurfaceInfo::LevelSetSegmentationSurfaceInfo()
     : m_surface(nullptr),
-      m_featureAngle(0)
+      m_featureAngle(0),
+      m_surfaceSmoothing(LevelSetSurfaceSmooting::LOW_ORDER)
 {
 }
 
@@ -57,6 +58,7 @@ LevelSetSegmentationSurfaceInfo::LevelSetSegmentationSurfaceInfo()
 LevelSetSegmentationSurfaceInfo::LevelSetSegmentationSurfaceInfo(const LevelSetSegmentationSurfaceInfo &other)
     : m_surface(other.m_surface),
       m_featureAngle(other.m_featureAngle),
+      m_surfaceSmoothing(other.m_surfaceSmoothing),
       m_segmentVertexOffset(other.m_segmentVertexOffset),
       m_segmentNormalsValid(other.m_segmentNormalsValid),
       m_segmentNormalsStorage(other.m_segmentNormalsStorage),
@@ -82,11 +84,25 @@ LevelSetSegmentationSurfaceInfo::LevelSetSegmentationSurfaceInfo(const LevelSetS
 /*!
  * Constructor
  *
+ * @param[in] surfaceSmoothing is the given surface snoothing order
+ */
+LevelSetSegmentationSurfaceInfo::LevelSetSegmentationSurfaceInfo(LevelSetSurfaceSmooting surfaceSmoothing)
+    : m_surface(nullptr),
+      m_featureAngle(0),
+      m_surfaceSmoothing(surfaceSmoothing)
+{
+}
+
+/*!
+ * Constructor
+ *
  * @param[in,out] surface pointer to surface
  * @param[in] featureAngle feature angle. If the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge
+ * @param[in] surfaceSmoothing is the given surface snoothing order
  */
-LevelSetSegmentationSurfaceInfo::LevelSetSegmentationSurfaceInfo(std::unique_ptr<const SurfUnstructured> &&surface, double featureAngle ) {
-
+LevelSetSegmentationSurfaceInfo::LevelSetSegmentationSurfaceInfo(std::unique_ptr<const SurfUnstructured> &&surface, double featureAngle, LevelSetSurfaceSmooting surfaceSmoothing)
+    : m_surfaceSmoothing(surfaceSmoothing)
+{
     setSurface(std::move(surface), featureAngle);
 }
 
@@ -95,9 +111,11 @@ LevelSetSegmentationSurfaceInfo::LevelSetSegmentationSurfaceInfo(std::unique_ptr
  *
  * @param[in] surface pointer to surface
  * @param[in] featureAngle feature angle. If the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge
+ * @param[in] surfaceSmoothing is the given surface snoothing order
  */
-LevelSetSegmentationSurfaceInfo::LevelSetSegmentationSurfaceInfo(const SurfUnstructured *surface, double featureAngle ) {
-
+LevelSetSegmentationSurfaceInfo::LevelSetSegmentationSurfaceInfo(const SurfUnstructured *surface, double featureAngle, LevelSetSurfaceSmooting surfaceSmoothing)
+    : m_surfaceSmoothing(surfaceSmoothing)
+{
     setSurface(surface, featureAngle);
 }
 
@@ -253,12 +271,13 @@ std::array<double, 3> LevelSetSegmentationSurfaceInfo::evalNormal(const std::arr
                                                                   const SegmentConstIterator &segmentItr) const
 {
     // Project the point on the surface and evaluate the point-projection vector
-    int nSegmentVertices = segmentItr->getVertexCount();
-    BITPIT_CREATE_WORKSPACE(lambda, double, nSegmentVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
-    evalProjection(point, segmentItr, lambda);
+    std::array<double, 3> projectionPoint;
+    std::array<double, 3> projectionNormal;
+    evalProjection(point, segmentItr, &projectionPoint, &projectionNormal);
 
-    // Evaluate normal
-    return computeSurfaceNormal(segmentItr, lambda);
+    BITPIT_UNUSED(projectionPoint);
+
+    return projectionNormal;
 }
 
 /*!
@@ -844,13 +863,13 @@ void LevelSetSegmentationSurfaceInfo::evalHighOrderProjection(const std::array<d
  *
  * @param[in] point are the coordinates of point
  * @param[in] segmentItr is an iterator pointing to the closest segment
- * @param[out] lambda on output will contain the barycentric coordinates of the projection point
- * @return The coordinates of the projection point.
+ * @param[out] projectionPoint The coordinates of the projection point on the surface.
+ * @param[out] projectionNormal The coordinates of the norrmal to the surface vector on the surface
  */
-std::array<double, 3> LevelSetSegmentationSurfaceInfo::evalLowOrderProjectionOnLine(const std::array<double, 3> &point,
-                                                                                    const SegmentConstIterator &segmentItr,
-                                                                                    std::array<double, 3> *projectionPoint,
-                                                                                    std::array<double, 3> *projectionNormal) const
+void LevelSetSegmentationSurfaceInfo::evalLowOrderProjectionOnLine(const std::array<double, 3> &point,
+                                                                   const SegmentConstIterator &segmentItr,
+                                                                   std::array<double, 3> *projectionPoint,
+                                                                   std::array<double, 3> *projectionNormal) const
 {
     const Cell &segment = *segmentItr;
 
@@ -866,7 +885,7 @@ std::array<double, 3> LevelSetSegmentationSurfaceInfo::evalLowOrderProjectionOnL
     std::array<double, 3> normal0 = computeSegmentVertexNormal(segmentItr, 0, true);
     std::array<double, 3> normal1 = computeSegmentVertexNormal(segmentItr, 1, true);
 
-    (*projectionNormal) = lambda[0] * normal0 + lambda[1] * normal[1];
+    (*projectionNormal) = lambda[0] * normal0 + lambda[1] * normal1;
     (*projectionNormal) /= norm2((*projectionNormal));
 }
 
@@ -875,13 +894,13 @@ std::array<double, 3> LevelSetSegmentationSurfaceInfo::evalLowOrderProjectionOnL
  *
  * @param[in] point are the coordinates of point
  * @param[in] segmentItr is an iterator pointing to the closest segment
- * @param[out] lambda on output will contain the barycentric coordinates of the projection point
- * @return The coordinates of the projection point.
+ * @param[out] projectionPoint The coordinates of the projection point on the surface.
+ * @param[out] projectionNormal The coordinates of the norrmal to the surface vector on the surface
  */
-std::array<double, 3> LevelSetSegmentationSurfaceInfo::evalLowOrderProjectionOnTriangle(const std::array<double, 3> &point,
-                                                                                        const SegmentConstIterator &segmentItr,
-                                                                                        std::array<double, 3> *projectionPoint,
-                                                                                        std::array<double, 3> *projectionNormal) const
+void LevelSetSegmentationSurfaceInfo::evalLowOrderProjectionOnTriangle(const std::array<double, 3> &point,
+                                                                       const SegmentConstIterator &segmentItr,
+                                                                       std::array<double, 3> *projectionPoint,
+                                                                       std::array<double, 3> *projectionNormal) const
 {
     const Cell &segment = *segmentItr;
 
@@ -897,9 +916,9 @@ std::array<double, 3> LevelSetSegmentationSurfaceInfo::evalLowOrderProjectionOnT
 
     std::array<double, 3> normal0 = computeSegmentVertexNormal(segmentItr, 0, true);
     std::array<double, 3> normal1 = computeSegmentVertexNormal(segmentItr, 1, true);
-    std::array<double, 3> normal3 = computeSegmentVertexNormal(segmentItr, 2, true);
+    std::array<double, 3> normal2 = computeSegmentVertexNormal(segmentItr, 2, true);
 
-    (*projectionNormal) = lambda[0] * normal0 + lambda[1] * normal[1] + lambda[2] * normal[2];
+    (*projectionNormal) = lambda[0] * normal0 + lambda[1] * normal1 + lambda[2] * normal2;
     (*projectionNormal) /= norm2((*projectionNormal));
 }
 
@@ -908,13 +927,13 @@ std::array<double, 3> LevelSetSegmentationSurfaceInfo::evalLowOrderProjectionOnT
  *
  * @param[in] point are the coordinates of point
  * @param[in] segmentItr is an iterator pointing to the closest segment
- * @param[out] lambda on output will contain the barycentric coordinates of the projection point
- * @return The coordinates of the projection point.
+ * @param[out] projectionPoint The coordinates of the projection point on the surface.
+ * @param[out] projectionNormal The coordinates of the norrmal to the surface vector on the surface
  */
-std::array<double, 3> LevelSetSegmentationSurfaceInfo::evalLowOrderProjectionOnPolygon(const std::array<double, 3> &point,
-                                                                                       const SegmentConstIterator &segmentItr,
-                                                                                       std::array<double, 3> *projectionPoint,
-                                                                                       std::array<double, 3> *projectionNormal) const
+void LevelSetSegmentationSurfaceInfo::evalLowOrderProjectionOnPolygon(const std::array<double, 3> &point,
+                                                                      const SegmentConstIterator &segmentItr,
+                                                                      std::array<double, 3> *projectionPoint,
+                                                                      std::array<double, 3> *projectionNormal) const
 {
     const Cell &segment = *segmentItr;
 
@@ -927,8 +946,7 @@ std::array<double, 3> LevelSetSegmentationSurfaceInfo::evalLowOrderProjectionOnP
     BITPIT_CREATE_WORKSPACE(lambda, double, nSegmentVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
     (*projectionPoint) = CGElem::projectPointPolygon(point, nSegmentVertices, segmentVertexCoors, lambda);
 
-    std::size_t nSegmentVertices = segment.getVertexCount();
-    std::array<double,3> surfaceNormal = lambda[0] * computeSegmentVertexNormal(segmentItr, 0, true);
+    (*projectionNormal) = lambda[0] * computeSegmentVertexNormal(segmentItr, 0, true);
     for (std::size_t i = 1; i < nSegmentVertices; ++i) {
         (*projectionNormal) += lambda[i] * computeSegmentVertexNormal(segmentItr, i, true);
     }
@@ -940,13 +958,13 @@ std::array<double, 3> LevelSetSegmentationSurfaceInfo::evalLowOrderProjectionOnP
  *
  * @param[in] point are the coordinates of point
  * @param[in] segmentItr is an iterator pointing to the closest segment
- * @param[out] lambda on output will contain the barycentric coordinates of the projection point
- * @return The coordinates of the projection point.
+ * @param[out] projectionPoint The coordinates of the projection point on the surface.
+ * @param[out] projectionNormal The coordinates of the norrmal to the surface vector on the surface
  */
-std::array<double, 3> LevelSetSegmentationSurfaceInfo::evalLowOrderProjection(const std::array<double, 3> &point,
-                                                                              const SegmentConstIterator &segmentItr,
-                                                                              std::array<double, 3> *projectionPoint,
-                                                                              std::array<double, 3> *projectionNormal) const
+void LevelSetSegmentationSurfaceInfo::evalLowOrderProjection(const std::array<double, 3> &point,
+                                                             const SegmentConstIterator &segmentItr,
+                                                             std::array<double, 3> *projectionPoint,
+                                                             std::array<double, 3> *projectionNormal) const
 {
     const Cell &segment = *segmentItr;
     ElementType segmentType = segment.getType();
@@ -977,6 +995,123 @@ std::array<double, 3> LevelSetSegmentationSurfaceInfo::evalLowOrderProjection(co
     }
 
     }
+}
+
+/*!
+ * Evaluate the baricentric coordinates of the given point on the specified segment.
+ *
+ * @param[in] point are the coordinates of point
+ * @param[in] segmentItr is an iterator pointing to the closest segment
+ * @param[out] lambda on output will contain the barycentric coordinates of the projection point
+ */
+void LevelSetSegmentationSurfaceInfo::evalBarycentricCoordinates(const std::array<double, 3> &point,
+                                                                 const SegmentConstIterator &segmentItr,
+                                                                 double *lambda) const
+{
+    const Cell &segment = *segmentItr;
+    ElementType segmentType = segment.getType();
+    switch (segmentType) {
+
+    case ElementType::VERTEX :
+    {
+        lambda[0] = 1.0;
+        return;
+    }
+
+    case ElementType::LINE:
+    {
+        ConstProxyVector<long> segmentVertexIds = segment.getVertexIds();
+
+        std::array<double,3> point0 = m_surface->getVertexCoords(segmentVertexIds[0]);
+        std::array<double,3> point1 = m_surface->getVertexCoords(segmentVertexIds[1]);
+
+        std::array<double, 3> projectionPoint = CGElem::projectPointSegment(point, point0, point1, lambda);
+        BITPIT_UNUSED(projectionPoint);
+        return;
+    }
+
+    case ElementType::TRIANGLE:
+    {
+        ConstProxyVector<long> segmentVertexIds = segment.getVertexIds();
+
+        std::array<double,3> point0 = m_surface->getVertexCoords(segmentVertexIds[0]);
+        std::array<double,3> point1 = m_surface->getVertexCoords(segmentVertexIds[1]);
+        std::array<double,3> point2 = m_surface->getVertexCoords(segmentVertexIds[2]);
+
+        std::array<double,3> projectionPoint = CGElem::projectPointTriangle(point, point0, point1, point2, lambda);
+        BITPIT_UNUSED(projectionPoint);
+        return;
+    }
+
+    default:
+    {
+        ConstProxyVector<long> segmentVertexIds = segment.getVertexIds();
+
+        std::size_t nSegmentVertices = segmentVertexIds.size();
+        BITPIT_CREATE_WORKSPACE(segmentVertexCoors, std::array<double BITPIT_COMMA 3>, nSegmentVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
+        m_surface->getVertexCoords(segmentVertexIds.size(), segmentVertexIds.data(), segmentVertexCoors);
+
+        std::array<double,3> projectionPoint = CGElem::projectPointPolygon(point, nSegmentVertices, segmentVertexCoors, lambda);
+        BITPIT_UNUSED(projectionPoint);
+        return;
+    }
+
+    }
+}
+
+/*!
+ * Evaluate the projection of the given point on the specified segment.
+ *
+ * @param[in] point are the coordinates of point
+ * @param[in] segmentItr is an iterator pointing to the closest segment
+ * @param[out] projectionPoint The coordinates of the projection point on the surface.
+ * @param[out] projectionNormal The coordinates of the norrmal to the surface vector on the surface
+ */
+void LevelSetSegmentationSurfaceInfo::evalProjection(const std::array<double, 3> &point,
+                                                     const SegmentConstIterator &segmentItr,
+                                                     std::array<double, 3> *projectionPoint,
+                                                     std::array<double, 3> *projectionNormal) const
+{
+    if (m_surfaceSmoothing == LevelSetSurfaceSmooting::HIGH_ORDER) {
+        evalHighOrderProjection(point, segmentItr, projectionPoint, projectionNormal);
+    } else {
+        evalLowOrderProjection(point, segmentItr, projectionPoint, projectionNormal);
+    }
+}
+
+/*!
+ * Evaluate the projection of the given point on the specified segment.
+ *
+ * @param[in] point are the coordinates of point
+ * @param[in] segmentItr is an iterator pointing to the closest segment
+ * @param[out] projectionPoint The coordinates of the projection point on the surface.
+ */
+void LevelSetSegmentationSurfaceInfo::evalProjection(const std::array<double, 3> &point,
+                                                     const SegmentConstIterator &segmentItr,
+                                                     std::array<double, 3> *projectionPoint) const
+{
+    std::array<double, 3> projectionNormal;
+    evalProjection(point, segmentItr, projectionPoint, &projectionNormal);
+
+    BITPIT_UNUSED(projectionNormal);
+}
+
+/*!
+ * Evaluate the projection of the given point on the specified segment.
+ *
+ * @param[in] point are the coordinates of point
+ * @param[in] segmentItr is an iterator pointing to the closest segment
+ * @param[out] lambda on output will contain the barycentric coordinates of the projection point
+ * @return The coordinates of the projection point.
+ */
+std::array<double, 3> LevelSetSegmentationSurfaceInfo::evalProjection(const std::array<double, 3> &point,
+                                                                      const SegmentConstIterator &segmentItr,
+                                                                      double *lambda) const
+{
+    std::array<double, 3> projectionPoint;
+    evalProjection(point, segmentItr, &projectionPoint);
+    evalBarycentricCoordinates(point, segmentItr, lambda);
+    return projectionPoint;
 }
 
 /*!
@@ -1549,7 +1684,26 @@ int LevelSetSegmentationBaseObject::evalPart(const std::array<double,3> &point) 
  */
 std::array<double,3> LevelSetSegmentationBaseObject::evalNormal(const std::array<double,3> &point, bool signedLevelSet) const
 {
-    return _evalNormal(point, signedLevelSet);
+    // Project the point on the surface and evaluate the point-projection vector
+    std::array<double, 3> projectionPoint;
+    std::array<double, 3> projectionNormal;
+    evalProjection(point, signedLevelSet, &projectionPoint, &projectionNormal);
+
+    BITPIT_UNUSED(projectionPoint);
+
+    return projectionNormal;
+}
+
+/*!
+ * Evaluate the normal of the surface at the segment closest to the specified point.
+ *
+ * \param point are the coordinates of the point
+ * \param signedLevelSet controls if signed levelset function will be used
+ * \result The normal of the surface at the segment closest to the specified point.
+ */
+std::array<double,3> LevelSetSegmentationBaseObject::_evalNormal(const std::array<double,3> &point, bool signedLevelSet) const
+{
+    return evalNormal(point, signedLevelSet);
 }
 
 /*!
@@ -1587,12 +1741,12 @@ long LevelSetSegmentationBaseObject::evalSupport(const std::array<double,3> &poi
  * @param[out] projectionNormal The coordinates of the norrmal to the surface vector on the surface
  * projection point.
  */
-void LevelSetSegmentationBaseObject::evalProjectionOnSurfaceInterpolation(const std::array<double,3> &point,
-                                                                          bool signedLevelSet,
-                                                                          std::array<double, 3> *projectionPoint,
-                                                                          std::array<double, 3> *projectionNormal) const
+void LevelSetSegmentationBaseObject::evalProjection(const std::array<double,3> &point,
+                                                    bool signedLevelSet,
+                                                    std::array<double, 3> *projectionPoint,
+                                                    std::array<double, 3> *projectionNormal) const
 {
-    _evalProjectionOnSurfaceInterpolation(point, signedLevelSet, projectionPoint, projectionNormal);
+    _evalProjection(point, signedLevelSet, projectionPoint, projectionNormal);
 }
 
 /*!
@@ -1870,6 +2024,19 @@ LevelSetSegmentationObject::LevelSetSegmentationObject(int id, const SurfUnstruc
 }
 
 /*!
+ * Constructor
+ * @param[in] id identifier of object
+ * @param[in] surface pointer to surface mesh
+ * @param[in] featureAngle feature angle; if the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge.
+ * @param[in] surfaceSmoothing is the given surface snoothing order
+ */
+LevelSetSegmentationObject::LevelSetSegmentationObject(int id, const SurfUnstructured *surface, double featureAngle, LevelSetSurfaceSmooting surfaceSmoothing)
+    : LevelSetSegmentationBaseObject(id)
+{
+    setSurface(surface, featureAngle, surfaceSmoothing);
+}
+
+/*!
  * Copy constructor.
  *
  * \param other is another object whose content is copied in this object
@@ -1982,7 +2149,7 @@ void LevelSetSegmentationObject::setSurface(const SurfUnstructured *surface, boo
  *
  * Unless explicitly forced, it is not possible to replace an existing surface. Also, when the
  * surface is replaced, the object will not recalculate the levelset on the newly set surface
- * (nor will tell the proxy objects that may depend depend on the current object to update the
+ * (nor will tell the proxy objects that may depend on the current object to update the
  * levelset values).
  *
  * @param[in] surface is the surface that will be set
@@ -2005,6 +2172,28 @@ void LevelSetSegmentationObject::setSurface(const SurfUnstructured *surface, dou
         // Since this is the first time we set the surface, there is no need
         // to clear the caches.
         m_surfaceInfo = std::unique_ptr<LevelSetSegmentationSurfaceInfo>(new LevelSetSegmentationSurfaceInfo(surface, featureAngle));
+    }
+}
+
+/*!
+ * Set the surface
+ *
+ * It is not possible to replace an existing surface.
+ *
+ * @param[in] surface is the surface that will be set
+ * @param[in] featureAngle is the angle that is used to identify sharp edges. If the angle between
+ * two segments is bigger than this angle, the enclosed edge is considered as a sharp edge
+ * @param[in] surfaceSmoothing is the given surface snoothing order
+ */
+void LevelSetSegmentationObject::setSurface(const SurfUnstructured *surface, double featureAngle, LevelSetSurfaceSmooting surfaceSmoothing){
+    if (m_surfaceInfo) {
+        throw std::runtime_error ("The surface can only be set once.");
+    } else {
+        // Set surface
+        //
+        // Since this is the first time we set the surface, there is no need
+        // to clear the caches.
+        m_surfaceInfo = std::unique_ptr<LevelSetSegmentationSurfaceInfo>(new LevelSetSegmentationSurfaceInfo(surface, featureAngle, surfaceSmoothing));
     }
 }
 
@@ -2386,7 +2575,13 @@ std::array<double,3> LevelSetSegmentationObject::_evalCellNormal(long id, bool s
     long support = evalCellSupport(id);
     std::array<double,3> centroid = m_kernel->computeCellCentroid(id);
 
-    return _evalNormal(centroid, support, signedLevelSet);
+    std::array<double, 3> projectionPoint;
+    std::array<double, 3> projectionNormal;
+    _evalProjection(centroid, support, signedLevelSet, &projectionPoint, &projectionNormal);
+
+    BITPIT_UNUSED(projectionPoint);
+
+    return projectionNormal;
 }
 
 /*!
@@ -2444,20 +2639,6 @@ std::array<double,3> LevelSetSegmentationObject::_evalGradient(const std::array<
 }
 
 /*!
- * Evaluate the normal of the surface at the segment closest to the specified point.
- *
- * \param point are the coordinates of the point
- * \param signedLevelSet controls if signed levelset function will be used
- * \result The normal of the surface at the segment closest to the specified point.
- */
-std::array<double,3> LevelSetSegmentationObject::_evalNormal(const std::array<double,3> &point, bool signedLevelSet) const
-{
-    long support = evalSupport(point);
-
-    return _evalNormal(point, support, signedLevelSet);
-}
-
-/*!
  * Evaluate the projection of the given point on the surface created based on
  * the points representing the specified segment. The surface passes from these
  * points and is verical to the normal vectors associated with them.
@@ -2468,23 +2649,15 @@ std::array<double,3> LevelSetSegmentationObject::_evalNormal(const std::array<do
  * @param[out] projectionNormal The coordinates of the norrmal to the surface vector on the surface
  * projection point.
  */
-void LevelSetSegmentationObject::_evalProjectionOnSurfaceInterpolation(const std::array<double,3> &point,
-                                                                       bool signedLevelSet,
-                                                                       std::array<double, 3> *projectionPoint,
-                                                                       std::array<double, 3> *projectionNormal) const
+void LevelSetSegmentationObject::_evalProjection(const std::array<double,3> &point,
+                                                 bool signedLevelSet,
+                                                 std::array<double, 3> *projectionPoint,
+                                                 std::array<double, 3> *projectionNormal) const
 {
     // Get closest segment
     long support = evalSupport(point);
-    LevelSetSegmentationSurfaceInfo::SegmentConstIterator segmentItr = getSurface().getCellConstIterator(support);
 
-    // Eval projection point and normal
-    m_surfaceInfo->evalProjectionOnSurfaceInterpolation(point, segmentItr, projectionPoint, projectionNormal);
-
-    // If an unsigned evaluation is requested, the orientation of the surface should be discarded
-    // and in order to have a normal that is agnostic with respect the two sides of the surface.
-    if (!signedLevelSet) {
-        (*projectionNormal) *= static_cast<double>(evalSign(point));
-    }
+    return _evalProjection(point, support, signedLevelSet, projectionPoint, projectionNormal);
 }
 
 /*!
@@ -2622,38 +2795,46 @@ long LevelSetSegmentationObject::_evalSupport(const std::array<double,3> &point,
 }
 
 /*!
- * Evaluate the normal of the surface at the segment closest to the specified point.
+ * Evaluate the projection of the given point on the surface created based on
+ * the points representing the specified segment. The surface passes from these
+ * points and is verical to the normal vectors associated with them.
  *
- * \param point are the coordinates of the point
+ * \param[in] point are the coordinates of the given point
  * \param support is the the closest segment to the specified point
- * \param signedLevelSet controls if signed levelset function will be used
- * \result The normal of the surface at the segment closest to the specified point.
+ * \param[in] signedLevelSet controls if signed levelset function will be used
+ * \param[out] projectionPoint The coordinates of the projection point on the surface.
+ * \param[out] projectionNormal The coordinates of the norrmal to the surface vector on the surface
+ * projection point.
  */
-std::array<double,3> LevelSetSegmentationObject::_evalNormal(const std::array<double,3> &point, long support,
-                                                             bool signedLevelSet) const
+void LevelSetSegmentationObject::_evalProjection(const std::array<double,3> &point,
+                                                 long support,
+                                                 bool signedLevelSet,
+                                                 std::array<double, 3> *projectionPoint,
+                                                 std::array<double, 3> *projectionNormal) const
 {
     // Early return if the support is not valid
     //
     // With an invalid support, only the unsigend levelset can be evaluated.
     if (support < 0) {
         if (!signedLevelSet || empty()) {
-            return levelSetDefaults::NORMAL;
+            (*projectionPoint) = levelSetDefaults::POINT;
+            (*projectionNormal) = levelSetDefaults::NORMAL;
         }
 
         throw std::runtime_error("With an invalid support, only the unsigend levelset can be evaluated.");
     }
 
-    // Evaluate the normal
-    //
+    // Get closest segment
+    LevelSetSegmentationSurfaceInfo::SegmentConstIterator segmentItr = getSurface().getCellConstIterator(support);
+
+    // Eval projection point and normal
+    m_surfaceInfo->evalProjection(point, segmentItr, projectionPoint, projectionNormal);
+
     // If an unsigned evaluation is requested, the orientation of the surface should be discarded
     // and in order to have a normal that is agnostic with respect the two sides of the surface.
-    LevelSetSegmentationSurfaceInfo::SegmentConstIterator supportItr = getSurface().getCellConstIterator(support);
-    std::array<double,3> normal = m_surfaceInfo->evalNormal(point, supportItr);
     if (!signedLevelSet) {
-        normal *= static_cast<double>(evalSign(point));
+        (*projectionNormal) *= static_cast<double>(evalSign(point));
     }
-
-    return normal;
 }
 
 /*!
@@ -2828,31 +3009,6 @@ long LevelSetBooleanObject<LevelSetSegmentationBaseObject>::_evalSupport(const s
 }
 
 /*!
- * Evaluate the normal of the surface at the segment closest to the specified point.
- *
- * \param point are the coordinates of the point
- * \param signedLevelSet controls if signed levelset function will be used
- * \result The normal of the surface at the segment closest to the specified point.
- */
-std::array<double,3> LevelSetBooleanObject<LevelSetSegmentationBaseObject>::_evalNormal(const std::array<double,3> &point, bool signedLevelSet) const
-{
-    return _evalFunction<std::array<double,3>>(point, signedLevelSet, [&point, signedLevelSet] (const LevelSetBooleanResult<LevelSetSegmentationBaseObject> &result)
-        {
-            const LevelSetSegmentationBaseObject *resultObject = result.getObject();
-            if ( !resultObject ) {
-                return levelSetDefaults::NORMAL;
-            }
-
-            std::array<double,3> normal = resultObject->evalNormal(point, signedLevelSet);
-            if (signedLevelSet) {
-                normal *= static_cast<double>(result.getObjectSign());
-            }
-
-            return normal;
-        });
-}
-
-/*!
  * Evaluate the part associated with the segment closest to the specified point.
  *
  * \param point are the coordinates of the point
@@ -2874,10 +3030,10 @@ int LevelSetBooleanObject<LevelSetSegmentationBaseObject>::_evalPart(const std::
  * @param[out] projectionNormal The coordinates of the norrmal to the surface vector on the surface
  * projection point.
  */
-void LevelSetBooleanObject<LevelSetSegmentationBaseObject>::_evalProjectionOnSurfaceInterpolation(const std::array<double,3> &point,
-                                                                                                  bool signedLevelSet,
-                                                                                                  std::array<double, 3> *projectionPoint,
-                                                                                                  std::array<double, 3> *projectionNormal) const
+void LevelSetBooleanObject<LevelSetSegmentationBaseObject>::_evalProjection(const std::array<double,3> &point,
+                                                                            bool signedLevelSet,
+                                                                            std::array<double, 3> *projectionPoint,
+                                                                            std::array<double, 3> *projectionNormal) const
 {
     return _evalFunction<void>(point, signedLevelSet, [&point, projectionPoint, projectionNormal, signedLevelSet] (const LevelSetBooleanResult<LevelSetSegmentationBaseObject> &result)
         {
@@ -2887,7 +3043,7 @@ void LevelSetBooleanObject<LevelSetSegmentationBaseObject>::_evalProjectionOnSur
                 (*projectionPoint)  = levelSetDefaults::POINT;
             }
 
-            resultObject->evalProjectionOnSurfaceInterpolation(point, signedLevelSet, projectionPoint, projectionNormal);
+            resultObject->evalProjection(point, signedLevelSet, projectionPoint, projectionNormal);
             if (signedLevelSet) {
                 (*projectionNormal) *= static_cast<double>(result.getObjectSign());
             }
@@ -3016,23 +3172,6 @@ int LevelSetComplementObject<LevelSetSegmentationBaseObject>::_evalPart(const st
 }
 
 /*!
- * Evaluate the normal of the surface at the segment closest to the specified point.
- *
- * \param point are the coordinates of the point
- * \param signedLevelSet controls if signed levelset function will be used
- * \result The normal of the surface at the segment closest to the specified point.
- */
-std::array<double,3> LevelSetComplementObject<LevelSetSegmentationBaseObject>::_evalNormal(const std::array<double,3> &point, bool signedLevelSet) const
-{
-    std::array<double,3> normal = getSourceObject()->evalNormal(point, signedLevelSet);
-    if (signedLevelSet) {
-        normal *= -1.;
-    }
-
-    return normal;
-}
-
-/*!
  * Evaluate the projection of the given point on the surface created based on
  * the points representing the specified segment. The surface passes from these
  * points and is verical to the normal vectors associated with them.
@@ -3043,12 +3182,12 @@ std::array<double,3> LevelSetComplementObject<LevelSetSegmentationBaseObject>::_
  * @param[out] projectionNormal The coordinates of the norrmal to the surface vector on the surface
  * projection point.
  */
-void LevelSetComplementObject<LevelSetSegmentationBaseObject>::_evalProjectionOnSurfaceInterpolation(const std::array<double,3> &point,
-                                                                                                     bool signedLevelSet,
-                                                                                                     std::array<double, 3> *projectionPoint,
-                                                                                                     std::array<double, 3> *projectionNormal) const
+void LevelSetComplementObject<LevelSetSegmentationBaseObject>::_evalProjection(const std::array<double,3> &point,
+                                                                               bool signedLevelSet,
+                                                                               std::array<double, 3> *projectionPoint,
+                                                                               std::array<double, 3> *projectionNormal) const
 {
-    getSourceObject()->evalProjectionOnSurfaceInterpolation(point, signedLevelSet, projectionPoint, projectionNormal);
+    getSourceObject()->evalProjection(point, signedLevelSet, projectionPoint, projectionNormal);
     if (signedLevelSet) {
         (*projectionNormal) *= -1.;
     }
