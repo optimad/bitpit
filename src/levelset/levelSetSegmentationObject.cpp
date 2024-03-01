@@ -310,7 +310,7 @@ void LevelSetSegmentationSurfaceInfo::evalProjectionOnVertex(const std::array<do
 
     // Compute projection point and normal 
     (*projectionPoint)  = m_surface->getVertexCoords(id);
-    (*projectionNormal) = m_surface->evalFacetNormal(segment.getId());
+    (*projectionNormal) = m_surface->evalVertexNormal(segment.getId());
 }
 
 /*!
@@ -357,7 +357,7 @@ void LevelSetSegmentationSurfaceInfo::evalHighOrderProjectionOnLine(const std::a
     }
 
     // Get normal on segment
-    std::array<double, 3> facetNormal = m_surface->evalFacetNormal(segment.getId());
+    std::array<double, 3> facetNormal =  computeSegmentNormal(segmentItr);
     std::array<double, 3> normal_s = point - point_s;
 
     double distance = norm2(normal_s);
@@ -445,7 +445,7 @@ void LevelSetSegmentationSurfaceInfo::evalHighOrderProjectionOnTriangle(const st
     }
 
     // Get normal on segment
-    std::array<double, 3> facetNormal = m_surface->evalFacetNormal(segment.getId());
+    std::array<double, 3> facetNormal = computeSegmentNormal(segmentItr);
     std::array<double, 3> normal_s = point - point_s;
 
     double distance = norm2(normal_s);
@@ -693,7 +693,7 @@ void LevelSetSegmentationSurfaceInfo::evalHighOrderProjectionOnPolygon(const std
     std::array<double, 3> point_s = evalProjection(point, segmentItr, tau);
 
     // Get normal on segment
-    std::array<double, 3> facetNormal = m_surface->evalFacetNormal(segment.getId());
+    std::array<double, 3> facetNormal = computeSegmentNormal(segmentItr);
     std::array<double, 3> normal_s = point - point_s;
     double distance = norm2(normal_s);
     double distanceTolerance = m_surface->getTol();
@@ -1174,7 +1174,7 @@ std::array<double,3> LevelSetSegmentationSurfaceInfo::computePseudoNormal(const 
         pseudoNormal = computeSegmentVertexNormal(segmentItr, vertex, false);
     } else {
         int edge = (- positionFlag) - 1;
-        pseudoNormal = computeSegmentEdgeNormal(segmentItr, edge);
+        pseudoNormal = computeSegmentEdgeNormal(segmentItr, edge, false);
     }
 
     return pseudoNormal;
@@ -1231,30 +1231,6 @@ std::array<double,3> LevelSetSegmentationSurfaceInfo::computeSegmentNormal(const
     }
 
     return *segmentNormal;
-}
-
-/*!
- * Compute the normal of the specified triangle's edge.
- *
- * To reduce computational times, normals of vertices are cached.
- *
- * @param[in] segmentItr is an iterator pointing to the closest segment
- * @param[in] edge is the local index of the edge
- * @return the normal of the specified triangle's edge
- */
-std::array<double,3> LevelSetSegmentationSurfaceInfo::computeSegmentEdgeNormal(const SegmentConstIterator &segmentItr, int edge ) const {
-
-    std::array<double,3> normal = computeSegmentNormal(segmentItr);
-
-    if (segmentItr->getAdjacencyCount(edge) > 0) {
-        long neighId = segmentItr->getAdjacency(edge);
-        SegmentConstIterator neighIterator = m_surface->getCellConstIterator(neighId);
-
-        normal += computeSegmentNormal(neighIterator);
-        normal /= norm2(normal);
-    }
-
-    return normal;
 }
 
 /*!
