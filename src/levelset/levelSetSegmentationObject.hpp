@@ -73,10 +73,12 @@ public:
     double getFeatureAngle() const;
     LevelSetSurfaceSmoothing getSurfaceSmoothing() const;
 
+    double evalDistance(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, bool signedDistance, std::array<double, 3> *distanceVector) const;
     double evalDistance(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, bool signedDistance) const;
     std::array<double, 3> evalDistanceVector(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr) const;
 
     std::array<double, 3> evalNormal(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr) const;
+    std::array<double,3> evalPseudoNormal(const SurfUnstructured::CellConstIterator &segmentIterator, const double *lambda) const;
 
     void evalProjection(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const;
     void evalProjection(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, std::array<double, 3> *projectionPoint) const;
