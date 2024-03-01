@@ -114,9 +114,8 @@ LevelSetSegmentationSurfaceInfo::LevelSetSegmentationSurfaceInfo(std::unique_ptr
  * @param[in] surfaceSmoothing is the given surface snoothing order
  */
 LevelSetSegmentationSurfaceInfo::LevelSetSegmentationSurfaceInfo(const SurfUnstructured *surface, double featureAngle, LevelSetSurfaceSmooting surfaceSmoothing)
-    : m_surfaceSmoothing(surfaceSmoothing)
 {
-    setSurface(surface, featureAngle);
+    setSurface(surface, featureAngle, surfaceSmoothing);
 }
 
 /*!
@@ -142,8 +141,9 @@ void LevelSetSegmentationSurfaceInfo::setSurface(std::unique_ptr<const SurfUnstr
  * Set the surface
  * @param[in] surface pointer to surface
  * @param[in] featureAngle feature angle. If the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge
+ * @param[in] surfaceSmoothing is the given surface snoothing order
  */
-void LevelSetSegmentationSurfaceInfo::setSurface(const SurfUnstructured *surface, double featureAngle){
+void LevelSetSegmentationSurfaceInfo::setSurface(const SurfUnstructured *surface, double featureAngle, LevelSetSurfaceSmooting surfaceSmoothing){
 
     // Check if adjacencies are built
     if (surface->getAdjacenciesBuildStrategy() == SurfUnstructured::ADJACENCIES_NONE) {
@@ -151,8 +151,9 @@ void LevelSetSegmentationSurfaceInfo::setSurface(const SurfUnstructured *surface
     }
 
     // Surface information
-    m_surface      = surface;
-    m_featureAngle = featureAngle;
+    m_surface          = surface;
+    m_featureAngle     = featureAngle;
+    m_surfaceSmoothing = surfaceSmoothing;
 
     // Segment vertices information
     m_segmentVertexOffset.unsetKernel();
@@ -185,6 +186,15 @@ void LevelSetSegmentationSurfaceInfo::setSurface(const SurfUnstructured *surface
 }
 
 /*!
+ * Set the surface
+ * @param[in] surface pointer to surface
+ * @param[in] featureAngle feature angle. If the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge
+ */
+void LevelSetSegmentationSurfaceInfo::setSurface(const SurfUnstructured *surface, double featureAngle){
+    setSurface(surface, featureAngle, LevelSetSurfaceSmooting::LOW_ORDER);
+}
+
+/*!
  * Get search tree
  * @return search tree;
  */
@@ -201,6 +211,15 @@ double LevelSetSegmentationSurfaceInfo::getFeatureAngle() const {
 }
 
 /*!
+ * Get smoothing order (low or high) imposed on surface when calculating the
+ * projection point and normal on the surface
+ * @return the ssurface smoothing order
+ */
+bitpit::LevelSetSurfaceSmooting LevelSetSegmentationSurfaceInfo::getSurfaceSmoothing() const {
+    return m_surfaceSmoothing;
+}
+
+/*!
  * Evaluate the distance function at the specified point.
  *
  * @param[in] point are the coordinates of point
@@ -213,10 +232,10 @@ double LevelSetSegmentationSurfaceInfo::evalDistance(const std::array<double, 3>
                                                      bool signedDistance) const
 {
     // Project the point on the surface and evaluate the point-projection vector
-    int nSegmentVertices = segmentItr->getVertexCount();
-    BITPIT_CREATE_WORKSPACE(lambda, double, nSegmentVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
-    std::array<double, 3> pointProjection = evalProjection(point, segmentItr, lambda);
-    std::array<double, 3> pointProjectionVector = point - pointProjection;
+    std::array<double, 3> projectionPoint;
+    std::array<double, 3> projectionNormal;
+    evalProjection(point, segmentItr, &projectionPoint, &projectionNormal);
+    std::array<double, 3> pointProjectionVector = point - projectionPoint;
 
     // Evaluate unsigned distance
     double unsignedDistance = norm2(pointProjectionVector);
@@ -229,8 +248,7 @@ double LevelSetSegmentationSurfaceInfo::evalDistance(const std::array<double, 3>
     // If the sign is null and the point doesn't lie on the segmentation, it lies on the normal
     // plane. This case is not supported, because it would require to evaluate the sign taking
     // into account the the curvature of the surface.
-    std::array<double, 3> pseudoNormal = computePseudoNormal(segmentItr, lambda);
-    double pointProjectionNormalComponent = dotProduct(pointProjectionVector, pseudoNormal);
+    double pointProjectionNormalComponent = dotProduct(pointProjectionVector, projectionNormal);
 
     double distanceTolerance = m_surface->getTol();
     if (utils::DoubleFloatingEqual()(pointProjectionNormalComponent, 0., distanceTolerance, distanceTolerance)) {
@@ -310,7 +328,7 @@ void LevelSetSegmentationSurfaceInfo::evalProjectionOnVertex(const std::array<do
 
     // Compute projection point and normal 
     (*projectionPoint)  = m_surface->getVertexCoords(id);
-    (*projectionNormal) = m_surface->evalVertexNormal(segment.getId());
+    (*projectionNormal) = {0., 0., 0.};
 }
 
 /*!
@@ -688,9 +706,9 @@ void LevelSetSegmentationSurfaceInfo::evalHighOrderProjectionOnPolygon(const std
     const Cell &segment = *segmentItr;
 
     // Get projection point on segment
-    int nSegmentVertices = segment.getVertexCount();
-    BITPIT_CREATE_WORKSPACE(tau, double, nSegmentVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
-    std::array<double, 3> point_s = evalProjection(point, segmentItr, tau);
+    std::array<double, 3> point_s;
+    std::array<double, 3> lowOrderProjectionNormal;
+    evalLowOrderProjectionOnPolygon(point, segmentItr, &point_s, &lowOrderProjectionNormal);
 
     // Get normal on segment
     std::array<double, 3> facetNormal = computeSegmentNormal(segmentItr);
@@ -707,7 +725,8 @@ void LevelSetSegmentationSurfaceInfo::evalHighOrderProjectionOnPolygon(const std
     }
 
     // Compute projection point and normal at each edge "e"
-    int nSegmentEdges = nSegmentVertices;
+    int nSegmentVertices = segment.getVertexCount();
+    int nSegmentEdges    = nSegmentVertices;
 
     BITPIT_CREATE_WORKSPACE(edgePoint_s, std::array<double BITPIT_COMMA 3>, nSegmentEdges, ReferenceElementInfo::MAX_ELEM_VERTICES);
     BITPIT_CREATE_WORKSPACE(edgePoint_p, std::array<double BITPIT_COMMA 3>, nSegmentEdges, ReferenceElementInfo::MAX_ELEM_VERTICES);
@@ -802,7 +821,7 @@ void LevelSetSegmentationSurfaceInfo::evalHighOrderProjectionOnPolygon(const std
     (*projectionPoint) = point_m + f * normal_s;
 
     // Eval normal vector on curved surface
-    (*projectionNormal) = computeSurfaceNormal(segmentItr, tau);
+    (*projectionNormal) = lowOrderProjectionNormal;
 
     if (dotProduct(normal_s, (*projectionNormal)) < 0.0) {
        (*projectionNormal) *= -1.0;
@@ -2190,6 +2209,15 @@ double LevelSetSegmentationObject::getFeatureAngle() const {
 }
 
 /*!
+ * Get smoothing order (low or high) imposed on surface when calculating the
+ * projection point and normal on the surface
+ * @return the ssurface smoothing order
+ */
+bitpit::LevelSetSurfaceSmooting LevelSetSegmentationObject::getSurfaceSmoothing() const {
+    return m_surfaceInfo->getSurfaceSmoothing();
+}
+
+/*!
  * Fill the cache that contains the zone associated to the cells.
  *
  * A cell can be either in the narrow band or in the bulk. It will be considered inside the narrow
@@ -2725,19 +2753,33 @@ std::array<double,3> LevelSetSegmentationObject::_evalGradient(const std::array<
 
     // Evaluate the distance of the point from the surface
     LevelSetSegmentationSurfaceInfo::SegmentConstIterator supportItr = getSurface().getCellConstIterator(support);
-    double distance = m_surfaceInfo->evalDistance(point, supportItr, signedLevelSet);
+    std::array<double, 3> projectionPoint;
+    std::array<double, 3> projectionNormal;
+    m_surfaceInfo->evalProjection(point, supportItr, &projectionPoint, &projectionNormal);
+
+    std::array<double, 3> gradient = point - projectionPoint;
+    double unsignedDistance = norm2(gradient);
 
     // Early return if the point lies on the surface
-    if (evalValueSign(distance) == 0) {
+    double distanceTolerance = m_surfaceInfo->getSurface().getTol();
+    if (utils::DoubleFloatingEqual()(unsignedDistance, 0., distanceTolerance, distanceTolerance)) {
         if (signedLevelSet) {
-            return m_surfaceInfo->evalNormal(point, supportItr);
+            return projectionNormal;
         } else {
             return {{0., 0., 0.}};
         }
     }
 
     // Evaluate levelset gradient
-    std::array<double,3> gradient = m_surfaceInfo->evalDistanceVector(point, supportItr) / distance;
+    if (signedLevelSet) {
+       double normalGradient = dotProduct(gradient, projectionNormal);
+       if (utils::DoubleFloatingEqual()(normalGradient, 0., distanceTolerance, distanceTolerance)) {
+            throw std::runtime_error("Unable to evaluate gradient: the point lies on the normal plane!");
+       }
+        gradient /= sign(normalGradient) * unsignedDistance;
+    } else {
+        gradient /= unsignedDistance;
+    }
 
     return gradient;
 }

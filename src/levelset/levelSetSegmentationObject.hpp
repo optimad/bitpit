@@ -66,10 +66,12 @@ public:
     const SurfUnstructured & getSurface() const;
     void setSurface(std::unique_ptr<const SurfUnstructured> &&surface, double featureAngle = DEFAULT_FEATURE_ANGLE);
     void setSurface(const SurfUnstructured *surface, double featureAngle = DEFAULT_FEATURE_ANGLE);
+    void setSurface(const SurfUnstructured *surface, double featureAngle, LevelSetSurfaceSmooting surfaceSmoothing);
 
     const SurfaceSkdTree & getSearchTree() const;
 
     double getFeatureAngle() const;
+    LevelSetSurfaceSmooting getSurfaceSmoothing() const;
 
     double evalDistance(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, bool signedDistance) const;
     std::array<double, 3> evalDistanceVector(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr) const;
@@ -205,6 +207,7 @@ public:
     const SurfaceSkdTree & getSearchTree() const;
 
     double getFeatureAngle() const;
+    LevelSetSurfaceSmooting getSurfaceSmoothing() const;
 
     BITPIT_DEPRECATED(double getMinSurfaceFeatureSize() const);
     BITPIT_DEPRECATED(double getMaxSurfaceFeatureSize() const);

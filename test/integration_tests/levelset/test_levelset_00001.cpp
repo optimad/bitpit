@@ -243,7 +243,7 @@ int subtest_002()
     std::array<double, 3> point = mesh.evalCellCentroid(cellId);
     std::array<double, 3> projectionPoint;
     std::array<double, 3> projectionNormal;
-        
+
     levelSetSegmentation->evalProjection(point, true, &projectionPoint, &projectionNormal);
 
     end = std::chrono::system_clock::now();
