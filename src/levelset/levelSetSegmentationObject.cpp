@@ -225,20 +225,22 @@ bitpit::LevelSetSurfaceSmoothing LevelSetSegmentationSurfaceInfo::getSurfaceSmoo
  * @param[in] point are the coordinates of point
  * @param[in] segmentItr is an iterator pointing to the closest segment
  * @param[in] signedDistance controls if the signed or unsigned distance will be evaluated
+ * @param[out] the distance function at the specified point
  * @return The distance function at the specified point.
  */
 double LevelSetSegmentationSurfaceInfo::evalDistance(const std::array<double, 3> &point,
                                                      const SegmentConstIterator &segmentItr,
-                                                     bool signedDistance) const
+                                                     bool signedDistance,
+                                                     std::array<double, 3> *distanceVector) const
 {
     // Project the point on the surface and evaluate the point-projection vector
     int nSegmentVertices = segmentItr->getVertexCount();
     BITPIT_CREATE_WORKSPACE(lambda, double, nSegmentVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
     std::array<double, 3> pointProjection = evalProjection(point, segmentItr, lambda);
-    std::array<double, 3> pointProjectionVector = point - pointProjection;
+    (*distanceVector) = point - pointProjection;
 
     // Evaluate unsigned distance
-    double unsignedDistance = norm2(pointProjectionVector);
+    double unsignedDistance = norm2(*distanceVector);
     if (!signedDistance) {
         return unsignedDistance;
     }
@@ -249,7 +251,7 @@ double LevelSetSegmentationSurfaceInfo::evalDistance(const std::array<double, 3>
     // plane. This case is not supported, because it would require to evaluate the sign taking
     // into account the the curvature of the surface.
     std::array<double, 3> pseudoNormal = computePseudoNormal(segmentItr, lambda);
-    double pointProjectionNormalComponent = dotProduct(pointProjectionVector, pseudoNormal);
+    double pointProjectionNormalComponent = dotProduct(*distanceVector, pseudoNormal);
 
     double distanceTolerance = m_surface->getTol();
     if (utils::DoubleFloatingEqual()(pointProjectionNormalComponent, 0., distanceTolerance, distanceTolerance)) {
@@ -260,6 +262,22 @@ double LevelSetSegmentationSurfaceInfo::evalDistance(const std::array<double, 3>
     }
 
     return sign(pointProjectionNormalComponent) * unsignedDistance;
+}
+
+/*!
+ * Evaluate the distance function at the specified point.
+ *
+ * @param[in] point are the coordinates of point
+ * @param[in] segmentItr is an iterator pointing to the closest segment
+ * @param[in] signedDistance controls if the signed or unsigned distance will be evaluated
+ * @return The distance function at the specified point.
+ */
+double LevelSetSegmentationSurfaceInfo::evalDistance(const std::array<double, 3> &point,
+                                                     const SegmentConstIterator &segmentItr,
+                                                     bool signedDistance) const
+{
+    std::array<double, 3> distanceVector;
+    return evalDistance(point, segmentItr, signedDistance, &distanceVector);
 }
 
 /*!
@@ -295,6 +313,19 @@ std::array<double, 3> LevelSetSegmentationSurfaceInfo::evalNormal(const std::arr
     evalProjection(point, segmentItr, &projectionPoint, &projectionNormal);
 
     return projectionNormal;
+}
+
+/*!
+ * Compute the pseudo-normal at specified point of the given segment.
+ *
+ * @param[in] segmentItr is an iterator pointing to the closest segment
+ * @param[in] lambda are the barycentric coordinates of the point
+ * @return the pseudo-normal at specified point of the given segment
+ */
+std::array<double,3> LevelSetSegmentationSurfaceInfo::evalPseudoNormal(const SegmentConstIterator &segmentItr,
+                                                                       const double *lambda ) const
+{
+    return computePseudoNormal(segmentItr, lambda);
 }
 
 /*!
@@ -3036,7 +3067,8 @@ std::array<double,3> LevelSetSegmentationObject::_evalGradient(const std::array<
 
     // Evaluate the distance of the point from the surface
     LevelSetSegmentationSurfaceInfo::SegmentConstIterator supportItr = getSurface().getCellConstIterator(support);
-    double distance = m_surfaceInfo->evalDistance(point, supportItr, signedLevelSet);
+    std::array<double,3> distanceVector;
+    double distance = m_surfaceInfo->evalDistance(point, supportItr, signedLevelSet, &distanceVector);
 
     // Early return if the point lies on the surface
     if (evalValueSign(distance) == 0) {
@@ -3048,7 +3080,7 @@ std::array<double,3> LevelSetSegmentationObject::_evalGradient(const std::array<
     }
 
     // Evaluate levelset gradient
-    std::array<double,3> gradient = m_surfaceInfo->evalDistanceVector(point, supportItr) / distance;
+    std::array<double,3> gradient = distanceVector / distance;
 
     return gradient;
 }
