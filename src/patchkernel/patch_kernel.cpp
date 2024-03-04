@@ -7812,6 +7812,16 @@ VTKUnstructuredGrid & PatchKernel::getVTK()
 }
 
 /*!
+	Get the VTK object.
+
+	\result The VTK object.
+*/
+const VTKUnstructuredGrid & PatchKernel::getVTK() const
+{
+	return m_vtk;
+}
+
+/*!
 	Get the VTK write target.
 
 	\result The VTK write target.

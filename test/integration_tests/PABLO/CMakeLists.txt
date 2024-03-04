@@ -40,6 +40,7 @@ if (BITPIT_ENABLE_MPI)
     list(APPEND TESTS "test_PABLO_parallel_00004")
     list(APPEND TESTS "test_PABLO_parallel_00005:4")
     list(APPEND TESTS "test_PABLO_parallel_00006:2")
+    list(APPEND TESTS "test_PABLO_parallel_00007:3")
 endif()
 
 # Test extra modules
