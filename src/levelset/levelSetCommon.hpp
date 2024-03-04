@@ -179,9 +179,9 @@ enum class LevelSetField{
 
 /*!
  * @ingroup levelsetEnums
- * Enum class containing the possible order of surfacesmooting
+ * Enum class containing the possible order of surface smooting
  */
-enum class LevelSetSurfaceSmooting{
+enum class LevelSetSurfaceSmoothing{
     LOW_ORDER,                      /**< level set high order surface smoothing */
     HIGH_ORDER                      /**< level set low order surface smoothing */
 };

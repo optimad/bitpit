@@ -245,7 +245,7 @@ int LevelSet::addObject( SurfUnstructured *segmentation, double angle, int id ) 
  * @param[in] id identifier of object; in case no id is provided the insertion
  * order will be used as identifier
  */
-int LevelSet::addObject( SurfUnstructured *segmentation, double angle, LevelSetSurfaceSmooting surfaceSmoothing, int id ) {
+int LevelSet::addObject( SurfUnstructured *segmentation, double angle, LevelSetSurfaceSmoothing surfaceSmoothing, int id ) {
 
     auto object = std::unique_ptr<LevelSetObject>(new LevelSetSegmentationObject(id, segmentation, angle, surfaceSmoothing));
 
@@ -301,7 +301,7 @@ int LevelSet::addObject( SurfaceKernel *segmentation, double angle, int id ) {
  * @param[in] id identifier of object; in case no id is provided the insertion
  * order will be used as identifier
  */
-int LevelSet::addObject( SurfaceKernel *segmentation, double angle, LevelSetSurfaceSmooting surfaceSmoothing, int id ) {
+int LevelSet::addObject( SurfaceKernel *segmentation, double angle, LevelSetSurfaceSmoothing surfaceSmoothing, int id ) {
 
     SurfUnstructured *surfUnstructured = dynamic_cast<SurfUnstructured *>(segmentation);
     if (!surfUnstructured) {

@@ -229,7 +229,7 @@ int subtest_002()
 
     int objectId = 0;
     double limitAngle = 85.0 * M_PI / 180.0;
-    levelset.addObject(STL.get(), limitAngle, bitpit::LevelSetSurfaceSmooting::HIGH_ORDER, objectId);
+    levelset.addObject(STL.get(), limitAngle, bitpit::LevelSetSurfaceSmoothing::HIGH_ORDER, objectId);
 
     bitpit::LevelSetObject *object = static_cast<bitpit::LevelSetObject *>(levelset.getObjectPtr(objectId));
 

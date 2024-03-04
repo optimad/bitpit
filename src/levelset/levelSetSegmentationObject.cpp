@@ -48,7 +48,7 @@ const double LevelSetSegmentationSurfaceInfo::DEFAULT_FEATURE_ANGLE = 2. * BITPI
 LevelSetSegmentationSurfaceInfo::LevelSetSegmentationSurfaceInfo()
     : m_surface(nullptr),
       m_featureAngle(0),
-      m_surfaceSmoothing(LevelSetSurfaceSmooting::LOW_ORDER)
+      m_surfaceSmoothing(LevelSetSurfaceSmoothing::LOW_ORDER)
 {
 }
 
@@ -86,7 +86,7 @@ LevelSetSegmentationSurfaceInfo::LevelSetSegmentationSurfaceInfo(const LevelSetS
  *
  * @param[in] surfaceSmoothing is the given surface snoothing order
  */
-LevelSetSegmentationSurfaceInfo::LevelSetSegmentationSurfaceInfo(LevelSetSurfaceSmooting surfaceSmoothing)
+LevelSetSegmentationSurfaceInfo::LevelSetSegmentationSurfaceInfo(LevelSetSurfaceSmoothing surfaceSmoothing)
     : m_surface(nullptr),
       m_featureAngle(0),
       m_surfaceSmoothing(surfaceSmoothing)
@@ -100,7 +100,7 @@ LevelSetSegmentationSurfaceInfo::LevelSetSegmentationSurfaceInfo(LevelSetSurface
  * @param[in] featureAngle feature angle. If the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge
  * @param[in] surfaceSmoothing is the given surface snoothing order
  */
-LevelSetSegmentationSurfaceInfo::LevelSetSegmentationSurfaceInfo(std::unique_ptr<const SurfUnstructured> &&surface, double featureAngle, LevelSetSurfaceSmooting surfaceSmoothing)
+LevelSetSegmentationSurfaceInfo::LevelSetSegmentationSurfaceInfo(std::unique_ptr<const SurfUnstructured> &&surface, double featureAngle, LevelSetSurfaceSmoothing surfaceSmoothing)
     : m_surfaceSmoothing(surfaceSmoothing)
 {
     setSurface(std::move(surface), featureAngle);
@@ -113,7 +113,7 @@ LevelSetSegmentationSurfaceInfo::LevelSetSegmentationSurfaceInfo(std::unique_ptr
  * @param[in] featureAngle feature angle. If the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge
  * @param[in] surfaceSmoothing is the given surface snoothing order
  */
-LevelSetSegmentationSurfaceInfo::LevelSetSegmentationSurfaceInfo(const SurfUnstructured *surface, double featureAngle, LevelSetSurfaceSmooting surfaceSmoothing)
+LevelSetSegmentationSurfaceInfo::LevelSetSegmentationSurfaceInfo(const SurfUnstructured *surface, double featureAngle, LevelSetSurfaceSmoothing surfaceSmoothing)
 {
     setSurface(surface, featureAngle, surfaceSmoothing);
 }
@@ -143,7 +143,7 @@ void LevelSetSegmentationSurfaceInfo::setSurface(std::unique_ptr<const SurfUnstr
  * @param[in] featureAngle feature angle. If the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge
  * @param[in] surfaceSmoothing is the given surface snoothing order
  */
-void LevelSetSegmentationSurfaceInfo::setSurface(const SurfUnstructured *surface, double featureAngle, LevelSetSurfaceSmooting surfaceSmoothing){
+void LevelSetSegmentationSurfaceInfo::setSurface(const SurfUnstructured *surface, double featureAngle, LevelSetSurfaceSmoothing surfaceSmoothing){
 
     // Check if adjacencies are built
     if (surface->getAdjacenciesBuildStrategy() == SurfUnstructured::ADJACENCIES_NONE) {
@@ -191,7 +191,7 @@ void LevelSetSegmentationSurfaceInfo::setSurface(const SurfUnstructured *surface
  * @param[in] featureAngle feature angle. If the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge
  */
 void LevelSetSegmentationSurfaceInfo::setSurface(const SurfUnstructured *surface, double featureAngle){
-    setSurface(surface, featureAngle, LevelSetSurfaceSmooting::LOW_ORDER);
+    setSurface(surface, featureAngle, LevelSetSurfaceSmoothing::LOW_ORDER);
 }
 
 /*!
@@ -215,7 +215,7 @@ double LevelSetSegmentationSurfaceInfo::getFeatureAngle() const {
  * projection point and normal on the surface
  * @return the ssurface smoothing order
  */
-bitpit::LevelSetSurfaceSmooting LevelSetSegmentationSurfaceInfo::getSurfaceSmoothing() const {
+bitpit::LevelSetSurfaceSmoothing LevelSetSegmentationSurfaceInfo::getSurfaceSmoothing() const {
     return m_surfaceSmoothing;
 }
 
@@ -1091,7 +1091,7 @@ void LevelSetSegmentationSurfaceInfo::evalProjection(const std::array<double, 3>
                                                      std::array<double, 3> *projectionPoint,
                                                      std::array<double, 3> *projectionNormal) const
 {
-    if (m_surfaceSmoothing == LevelSetSurfaceSmooting::HIGH_ORDER) {
+    if (m_surfaceSmoothing == LevelSetSurfaceSmoothing::HIGH_ORDER) {
         evalHighOrderProjection(point, segmentItr, projectionPoint, projectionNormal);
     } else {
         evalLowOrderProjection(point, segmentItr, projectionPoint, projectionNormal);
@@ -2025,7 +2025,7 @@ LevelSetSegmentationObject::LevelSetSegmentationObject(int id, const SurfUnstruc
  * @param[in] featureAngle feature angle; if the angle between two segments is bigger than this angle, the enclosed edge is considered as a sharp edge.
  * @param[in] surfaceSmoothing is the given surface snoothing order
  */
-LevelSetSegmentationObject::LevelSetSegmentationObject(int id, const SurfUnstructured *surface, double featureAngle, LevelSetSurfaceSmooting surfaceSmoothing)
+LevelSetSegmentationObject::LevelSetSegmentationObject(int id, const SurfUnstructured *surface, double featureAngle, LevelSetSurfaceSmoothing surfaceSmoothing)
     : LevelSetSegmentationBaseObject(id)
 {
     setSurface(surface, featureAngle, surfaceSmoothing);
@@ -2180,7 +2180,7 @@ void LevelSetSegmentationObject::setSurface(const SurfUnstructured *surface, dou
  * two segments is bigger than this angle, the enclosed edge is considered as a sharp edge
  * @param[in] surfaceSmoothing is the given surface snoothing order
  */
-void LevelSetSegmentationObject::setSurface(const SurfUnstructured *surface, double featureAngle, LevelSetSurfaceSmooting surfaceSmoothing){
+void LevelSetSegmentationObject::setSurface(const SurfUnstructured *surface, double featureAngle, LevelSetSurfaceSmoothing surfaceSmoothing){
     if (m_surfaceInfo) {
         throw std::runtime_error ("The surface can only be set once.");
     } else {
@@ -2213,7 +2213,7 @@ double LevelSetSegmentationObject::getFeatureAngle() const {
  * projection point and normal on the surface
  * @return the ssurface smoothing order
  */
-bitpit::LevelSetSurfaceSmooting LevelSetSegmentationObject::getSurfaceSmoothing() const {
+bitpit::LevelSetSurfaceSmoothing LevelSetSegmentationObject::getSurfaceSmoothing() const {
     return m_surfaceInfo->getSurfaceSmoothing();
 }
 

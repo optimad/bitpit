@@ -524,7 +524,7 @@ int subtest_005()
 
     bitpit::LevelSet levelset ;
     levelset.setMesh(mesh.get());
-    levelset.addObject(segmentation.get(), limitAngle, bitpit::LevelSetSurfaceSmooting::HIGH_ORDER, objectId);
+    levelset.addObject(segmentation.get(), limitAngle, bitpit::LevelSetSurfaceSmoothing::HIGH_ORDER, objectId);
 
     // Compute levelset
     bitpit::log::cout() << " - Evaluating levelset" << std::endl;
