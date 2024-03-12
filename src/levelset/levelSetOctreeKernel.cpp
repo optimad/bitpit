@@ -46,9 +46,9 @@ LevelSetOctreeKernel::LevelSetOctreeKernel(VolOctree &patch, LevelSetFillIn fill
     // Initialize cache
     CellCacheCollection &cacheCollection = getCellCacheCollection();
     if (fillIn == LevelSetFillIn::SPARSE) {
-        m_cellCentroidCacheId = cacheCollection.insert<CellSparseCacheContainer<std::array<double, 3>>>();
+        m_cellCentroidCacheId = cacheCollection.insert<CellSparseCacheContainer<std::array<double, 3>>>(CellCacheCollection::NULL_CACHE_ID);
     } else if (fillIn == LevelSetFillIn::DENSE) {
-        m_cellCentroidCacheId = cacheCollection.insert<CellDenseCacheContainer<std::array<double, 3>>>();
+        m_cellCentroidCacheId = cacheCollection.insert<CellDenseCacheContainer<std::array<double, 3>>>(CellCacheCollection::NULL_CACHE_ID);
     } else {
         m_cellCentroidCacheId = CellCacheCollection::NULL_CACHE_ID;
     }

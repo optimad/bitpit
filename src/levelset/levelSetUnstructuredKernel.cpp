@@ -44,13 +44,13 @@ LevelSetUnstructuredKernel::LevelSetUnstructuredKernel(VolUnstructured &patch, L
 
     CellCacheCollection &cacheCollection = getCellCacheCollection();
     if (fillIn == LevelSetFillIn::SPARSE) {
-        m_cellCentroidCacheId       = cacheCollection.insert<CellSparseCacheContainer<std::array<double, 3>>>();
-        m_cellTangentRadiusCacheId  = cacheCollection.insert<CellSparseCacheContainer<double>>();
-        m_cellBoundingRadiusCacheId = cacheCollection.insert<CellSparseCacheContainer<double>>();
+        m_cellCentroidCacheId       = cacheCollection.insert<CellSparseCacheContainer<std::array<double, 3>>>(CellCacheCollection::NULL_CACHE_ID);
+        m_cellTangentRadiusCacheId  = cacheCollection.insert<CellSparseCacheContainer<double>>(CellCacheCollection::NULL_CACHE_ID);
+        m_cellBoundingRadiusCacheId = cacheCollection.insert<CellSparseCacheContainer<double>>(CellCacheCollection::NULL_CACHE_ID);
     } else if (fillIn == LevelSetFillIn::DENSE) {
-        m_cellCentroidCacheId       = cacheCollection.insert<CellDenseCacheContainer<std::array<double, 3>>>();
-        m_cellTangentRadiusCacheId  = cacheCollection.insert<CellDenseCacheContainer<double>>();
-        m_cellBoundingRadiusCacheId = cacheCollection.insert<CellDenseCacheContainer<double>>();
+        m_cellCentroidCacheId       = cacheCollection.insert<CellDenseCacheContainer<std::array<double, 3>>>(CellCacheCollection::NULL_CACHE_ID);
+        m_cellTangentRadiusCacheId  = cacheCollection.insert<CellDenseCacheContainer<double>>(CellCacheCollection::NULL_CACHE_ID);
+        m_cellBoundingRadiusCacheId = cacheCollection.insert<CellDenseCacheContainer<double>>(CellCacheCollection::NULL_CACHE_ID);
     } else {
         m_cellCentroidCacheId       = CellCacheCollection::NULL_CACHE_ID;
         m_cellTangentRadiusCacheId  = CellCacheCollection::NULL_CACHE_ID;

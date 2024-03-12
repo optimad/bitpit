@@ -165,7 +165,7 @@ protected:
     virtual void                                fillCellLocationCache();
     virtual void                                fillCellLocationCache(const std::vector<adaption::Info> &adaptionData);
     virtual LevelSetCellLocation                fillCellGeometricNarrowBandLocationCache(long id);
-    virtual std::size_t                         createCellLocationCache();
+    virtual std::size_t                         createCellLocationCache(std::size_t cacheId = CellCacheCollection::NULL_CACHE_ID);
     void                                        destroyCellLocationCache();
 
     void                                        evaluateCellBulkData();
@@ -173,7 +173,7 @@ protected:
     void                                        destroyCellBulkData();
 
     virtual void                                fillCellPropagatedSignCache();
-    virtual std::size_t                         createCellPropagatedSignCache();
+    virtual std::size_t                         createCellPropagatedSignCache(std::size_t cacheId = CellCacheCollection::NULL_CACHE_ID);
     void                                        destroyCellPropagatedSignCache();
 
     virtual void                                dump(std::ostream &);
@@ -230,9 +230,9 @@ protected:
     CellCacheCollection::ValueCache<value_t> *  getFieldCellCache(LevelSetField field) const;
     CellCacheCollection::Cache *                getFieldCellCache(LevelSetField field) const;
     std::size_t                                 getFieldCellCacheId(LevelSetField field) const;
-    virtual std::size_t                         createFieldCellCache(LevelSetField field);
+    virtual std::size_t                         createFieldCellCache(LevelSetField field, std::size_t cacheId = CellCacheCollection::NULL_CACHE_ID);
     template<typename value_t>
-    std::size_t                                 createFieldCellCache(LevelSetField field);
+    std::size_t                                 createFieldCellCache(LevelSetField field, std::size_t cacheId = CellCacheCollection::NULL_CACHE_ID);
     virtual void                                destroyFieldCellCache(LevelSetField field);
 
 
@@ -241,7 +241,7 @@ protected:
     CellCacheCollection::ValueCache<value_t> *  getCellCache(std::size_t cacheId) const;
     CellCacheCollection::Cache *                getCellCache(std::size_t cacheId) const;
     template<typename value_t>
-    std::size_t                                 createCellCache(LevelSetFillIn expectedFillIn);
+    std::size_t                                 createCellCache(LevelSetFillIn expectedFillIn, std::size_t cacheId = CellCacheCollection::NULL_CACHE_ID);
     void                                        destroyCellCache(std::size_t cacheId);
 
     bool                                        hasVTKOutputData(LevelSetField field, const std::string &objectName) const;

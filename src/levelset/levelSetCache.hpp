@@ -657,7 +657,7 @@ public:
     const Item & at(std::size_t index) const;
 
     template<typename container_t, typename... Args>
-    std::size_t insert(Args&&... args);
+    std::size_t insert(std::size_t index, Args&&... args);
     void erase(std::size_t index);
 
     void clear();
@@ -682,9 +682,9 @@ public:
     ElementCacheCollection(const PiercedKernel<key_type> *kernel);
 
     template<typename container_t, typename... Args, typename std::enable_if<std::is_same<bitpit::PiercedStorage<typename container_t::value_type>, container_t>::value>::type * = nullptr>
-    std::size_t insert(Args&&... args);
+    std::size_t insert(std::size_t index, Args&&... args);
     template<typename container_t, typename... Args, typename std::enable_if<!std::is_same<bitpit::PiercedStorage<typename container_t::value_type>, container_t>::value>::type * = nullptr>
-    std::size_t insert(Args&&... args);
+    std::size_t insert(std::size_t index, Args&&... args);
 
 protected:
     const PiercedKernel<long> *m_kernel;

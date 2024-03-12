@@ -549,17 +549,19 @@ const double LevelSetSegmentationBaseObject::AUTOMATIC_SEARCH_RADIUS = -1;
  * Create the cache that will be used for storing cell information of the specified field.
  *
  * \param field is the field for which the caches will be registered
+ * \param cacheId is the id that will be associated with the cache, if a NULL_ID is specified
+ * the cache id will be assigned automatically
  * \result The id associated with the registered cache.
  */
-std::size_t LevelSetSegmentationBaseObject::createFieldCellCache(LevelSetField field)
+std::size_t LevelSetSegmentationBaseObject::createFieldCellCache(LevelSetField field, std::size_t cacheId)
 {
     switch(field) {
 
     case LevelSetField::SUPPORT:
-        return createFieldCellCache<long>(field);
+        return createFieldCellCache<long>(field, cacheId);
 
     default:
-        return LevelSetObject::createFieldCellCache(field);
+        return LevelSetObject::createFieldCellCache(field, cacheId);
 
     }
 }

@@ -71,15 +71,15 @@ typename LevelSetObject::CellCacheCollection::ValueCache<value_t> * LevelSetObje
  * Create the cache that will be used for storing cell information of the specified field.
  *
  * \param field is the field for which the caches will be added
+ * \param cacheId is the id that will be associated with the cache, if a NULL_ID is specified
+ * the cache id will be assigned automatically
  * \result The id associated with the registered cache.
  */
 template<typename value_t>
-std::size_t LevelSetObject::createFieldCellCache(LevelSetField field)
+std::size_t LevelSetObject::createFieldCellCache(LevelSetField field, std::size_t cacheId)
 {
     // Create cache
     LevelSetCacheMode cacheMode = getFieldCellCacheMode(field);
-
-    std::size_t cacheId;
     if (cacheMode != LevelSetCacheMode::NONE) {
         LevelSetFillIn expectedFillIn;
         if (m_kernel->getExpectedFillIn() == LevelSetFillIn::DENSE || cacheMode == LevelSetCacheMode::NARROW_BAND) {
@@ -88,7 +88,7 @@ std::size_t LevelSetObject::createFieldCellCache(LevelSetField field)
             expectedFillIn = LevelSetFillIn::SPARSE;
         }
 
-        cacheId = createCellCache<value_t>(expectedFillIn);
+        cacheId = createCellCache<value_t>(expectedFillIn, cacheId);
     } else {
         cacheId = CellCacheCollection::NULL_CACHE_ID;
     }
@@ -104,31 +104,43 @@ std::size_t LevelSetObject::createFieldCellCache(LevelSetField field)
  * Create the cache that will be used for storing cell information of the specified field.
  *
  * \param expectedFillIn is the expected fill-in of the cache
+ * \param cacheId is the id that will be associated with the cache, if a NULL_ID is specified
+ * the cache id will be assigned automatically
  * \result The id associated with the registered cache.
  */
 template<typename value_t>
-std::size_t LevelSetObject::createCellCache(LevelSetFillIn expectedFillIn)
+std::size_t LevelSetObject::createCellCache(LevelSetFillIn expectedFillIn, std::size_t cacheId)
 {
-    // Create the cache
-    std::size_t cacheId = CellCacheCollection::NULL_CACHE_ID;
     if (dynamic_cast<const LevelSetCartesianKernel *>(m_kernel)){
         if (expectedFillIn == LevelSetFillIn::DENSE) {
-            cacheId = m_cellCacheCollection->insert<LevelSetCartesianKernel::CellDenseCacheContainer<value_t>>();
+            cacheId = m_cellCacheCollection->insert<LevelSetCartesianKernel::CellDenseCacheContainer<value_t>>(cacheId);
         } else if (expectedFillIn == LevelSetFillIn::SPARSE) {
-            cacheId = m_cellCacheCollection->insert<LevelSetCartesianKernel::CellSparseCacheContainer<value_t>>();
+            cacheId = m_cellCacheCollection->insert<LevelSetCartesianKernel::CellSparseCacheContainer<value_t>>(cacheId);
+        } else {
+            BITPIT_UNREACHABLE("The fill in type is not supported!");
+            throw std::runtime_error("The fill in type is not supported!");
         }
     } else if (dynamic_cast<const LevelSetOctreeKernel *>(m_kernel)){
         if (expectedFillIn == LevelSetFillIn::DENSE) {
-            cacheId = m_cellCacheCollection->insert<LevelSetOctreeKernel::CellDenseCacheContainer<value_t>>();
+            cacheId = m_cellCacheCollection->insert<LevelSetOctreeKernel::CellDenseCacheContainer<value_t>>(cacheId);
         } else if (expectedFillIn == LevelSetFillIn::SPARSE) {
-            cacheId = m_cellCacheCollection->insert<LevelSetOctreeKernel::CellSparseCacheContainer<value_t>>();
+            cacheId = m_cellCacheCollection->insert<LevelSetOctreeKernel::CellSparseCacheContainer<value_t>>(cacheId);
+        } else {
+            BITPIT_UNREACHABLE("The fill in type is not supported!");
+            throw std::runtime_error("The fill in type is not supported!");
         }
     } else if (dynamic_cast<const LevelSetUnstructuredKernel *>(m_kernel)){
         if (expectedFillIn == LevelSetFillIn::DENSE) {
-            cacheId = m_cellCacheCollection->insert<LevelSetUnstructuredKernel::CellDenseCacheContainer<value_t>>();
+            cacheId = m_cellCacheCollection->insert<LevelSetUnstructuredKernel::CellDenseCacheContainer<value_t>>(cacheId);
         } else if (expectedFillIn == LevelSetFillIn::SPARSE) {
-            cacheId = m_cellCacheCollection->insert<LevelSetUnstructuredKernel::CellSparseCacheContainer<value_t>>();
+            cacheId = m_cellCacheCollection->insert<LevelSetUnstructuredKernel::CellSparseCacheContainer<value_t>>(cacheId);
+        } else {
+            BITPIT_UNREACHABLE("The fill in type is not supported!");
+            throw std::runtime_error("The fill in type is not supported!");
         }
+    } else {
+        BITPIT_UNREACHABLE("The kernel type is not supported!");
+        throw std::runtime_error("The kernel type is not supported!");
     }
 
     return cacheId;
