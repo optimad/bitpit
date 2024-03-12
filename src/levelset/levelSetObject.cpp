@@ -3064,16 +3064,16 @@ void LevelSetObject::fillFieldCellCache(LevelSetField field, const std::vector<l
     }
 
     // Get list of ghost exchange sources
-    std::set<long> ghostExchangeSources;
-    std::set<long> ghostExchangeTargets;
+    std::unordered_set<long> ghostExchangeSources;
+    std::unordered_set<long> ghostExchangeTargets;
 #if BITPIT_ENABLE_MPI
     for (const auto &entry : mesh.getGhostCellExchangeSources()) {
-        const std::vector<long> rankSourceList = entry.second;
+        const std::vector<long> &rankSourceList = entry.second;
         ghostExchangeSources.insert(rankSourceList.begin(), rankSourceList.end());
     }
 
     for (const auto &entry : mesh.getGhostCellExchangeTargets()) {
-        const std::vector<long> rankTargetList = entry.second;
+        const std::vector<long> &rankTargetList = entry.second;
         ghostExchangeTargets.insert(rankTargetList.begin(), rankTargetList.end());
     }
 #endif
