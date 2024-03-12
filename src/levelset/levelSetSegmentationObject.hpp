@@ -140,7 +140,7 @@ protected:
     LevelSetSegmentationBaseObject(int, const LevelSetSegmentationSurfaceInfo *surfaceInfo);
 
     using LevelSetObject::createFieldCellCache;
-    std::size_t createFieldCellCache(LevelSetField field) override;
+    std::size_t createFieldCellCache(LevelSetField field, std::size_t cacheId = CellCacheCollection::NULL_CACHE_ID) override;
     void fillFieldCellCache(LevelSetField field, long id) override;
     using LevelSetObject::fillFieldCellCache;
 

@@ -858,11 +858,13 @@ LevelSetCellLocation LevelSetObject::fillCellGeometricNarrowBandLocationCache(lo
 /**
  * Create the cache that will be used for storing cell location information.
  *
+ * \param cacheId is the id that will be associated with the cache, if a NULL_ID is specified
+ * the cache id will be assigned automatically
  * \result The id associated with the cache.
  */
-std::size_t LevelSetObject::createCellLocationCache()
+std::size_t LevelSetObject::createCellLocationCache(std::size_t cacheId)
 {
-    m_cellLocationCacheId = createCellCache<char>(LevelSetFillIn::DENSE);
+    m_cellLocationCacheId = createCellCache<char>(LevelSetFillIn::DENSE, cacheId);
 
     return m_cellLocationCacheId;
 }
@@ -1283,11 +1285,13 @@ void LevelSetObject::fillCellPropagatedSignCache()
 /**
  * Create the cache that will be used for storing cell propagated sign.
  *
+ * \param cacheId is the id that will be associated with the cache, if a NULL_ID is specified
+ * the cache id will be assigned automatically
  * \result The id associated with the cache.
  */
-std::size_t LevelSetObject::createCellPropagatedSignCache()
+std::size_t LevelSetObject::createCellPropagatedSignCache(std::size_t cacheId)
 {
-    m_cellPropagatedSignCacheId = createCellCache<char>(LevelSetFillIn::DENSE);
+    m_cellPropagatedSignCacheId = createCellCache<char>(LevelSetFillIn::DENSE, cacheId);
 
     return m_cellPropagatedSignCacheId;
 }
@@ -1795,14 +1799,11 @@ void LevelSetObject::restore( std::istream &stream ){
         if (hasCache) {
             // Create the cache
             if (cacheId == expectedCellLocationCacheId) {
-                createCellLocationCache();
-                assert(m_cellLocationCacheId == cacheId);
+                createCellLocationCache(cacheId);
             } else if (cacheId == expectedCellPropagatedSignCacheId) {
-                createCellPropagatedSignCache();
-                assert(cacheId == m_cellPropagatedSignCacheId);
+                createCellPropagatedSignCache(cacheId);
             } else if (field != LevelSetField::UNDEFINED) {
-                createFieldCellCache(field);
-                assert(cacheId == getFieldCellCacheId(field));
+                createFieldCellCache(field, cacheId);
             } else {
                 throw std::runtime_error("Unable to restore levelset object " + std::to_string(getId()) + "!");
             }
@@ -1810,6 +1811,7 @@ void LevelSetObject::restore( std::istream &stream ){
             // Restore cache contents
             CellCacheCollection::Cache *cache = getCellCache(cacheId);
             cache->restore(stream);
+        } else {
         }
     }
 
@@ -2833,20 +2835,22 @@ std::size_t LevelSetObject::getFieldCellCacheId(LevelSetField field) const
  * Create the cache that will be used for storing cell information of the specified field.
  *
  * \param field is the field for which the caches will be added
+ * \param cacheId is the id that will be associated with the cache, if a NULL_ID is specified
+ * the cache id will be assigned automatically
  * \result The id associated with the cache.
  */
-std::size_t LevelSetObject::createFieldCellCache(LevelSetField field)
+std::size_t LevelSetObject::createFieldCellCache(LevelSetField field, std::size_t cacheId)
 {
     switch(field) {
 
     case LevelSetField::VALUE:
-        return createFieldCellCache<double>(field);
+        return createFieldCellCache<double>(field, cacheId);
 
     case LevelSetField::SIGN:
-        return createFieldCellCache<short>(field);
+        return createFieldCellCache<short>(field, cacheId);
 
     case LevelSetField::GRADIENT:
-        return createFieldCellCache<std::array<double, 3>>(field);
+        return createFieldCellCache<std::array<double, 3>>(field, cacheId);
 
     default:
         throw std::runtime_error("The requested field is not supported!");

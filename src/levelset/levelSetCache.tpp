@@ -1752,37 +1752,52 @@ std::size_t LevelSetCacheCollection<key_t>::size() const
 }
 
 /*!
- * Insert a new cache.
+ * Insert a new cache with a specified index.
  *
+ * \param index is the index that will be assigned to the cache, if a NULL_ID is specified
+ * the index will be assigned automatically
  * \param args are the arguments that will be used to create the cache factory
  * \result The index associated with the newly created cache.
  */
 template<typename id_t>
 template<typename container_t, typename... Args>
-std::size_t LevelSetCacheCollection<id_t>::insert(Args&&... args)
+std::size_t LevelSetCacheCollection<id_t>::insert(std::size_t index, Args&&... args)
 {
+    std::size_t nCaches = m_caches.size();
+
+    // Assign an index to the cache
+    //
+    // If a null index is specified, an index will be generated automatically. The automatic
+    // generation process will first attempt to reuse a previously generated index using the
+    // following criteria: if an existing cache is not associated with a factory, it means
+    // that it has been erased and therefore the index can be reused. If no indexes can be
+    // reused, the newly created cache will be appended at the end of the collection.
+    if (index == NULL_CACHE_ID) {
+        index = 0;
+        while (index < nCaches) {
+            if (!m_caches[index].hasFactory()) {
+                break;
+            }
+            ++index;
+        }
+    }
+
     // Create the factory
     typedef typename LevelSetContainerCache<id_t, container_t>::value_type value_type;
 
     auto factory = std::shared_ptr<LevelSetValueCacheFactory<id_t, value_type>>(new LevelSetContainerCacheFactory<id_t, container_t>(std::forward<Args>(args)...));
 
-    // Search for an unused index
-    //
-    // If an index is not associated with a factory, it means that its corresponding cache has
-    // been erased and therefore the index can be re-used.
-    std::size_t nCaches = m_caches.size();
-    for (std::size_t index = 0; index < nCaches; ++index) {
-        if (!m_caches[index].hasFactory()) {
-            m_caches[index] = Item(factory);
-
-            return index;
+    // Create the cache
+    if (index < nCaches) {
+        m_caches.emplace(m_caches.begin() + index, factory);
+    } else {
+        for (std::size_t k = nCaches; k < index; ++k) {
+            m_caches.emplace_back(Item());
         }
+        m_caches.emplace_back(factory);
     }
 
-    // No indexes can be re-used, a new entry will be added.
-    m_caches.emplace_back(factory);
-
-    return nCaches;
+    return index;
 }
 
 /*!
@@ -1882,27 +1897,29 @@ const typename LevelSetCacheCollection<key_t>::Item & LevelSetCacheCollection<ke
 /*!
  * Insert a new cache.
  *
+ * \param index is the index that will be assigned to the cache
  * \param args are the arguments that will be used to create the cache factory
  * \result The index associated with the newly created cache.
  */
 template<typename container_t, typename... Args, typename std::enable_if<std::is_same<bitpit::PiercedStorage<typename container_t::value_type>, container_t>::value>::type *>
-std::size_t ElementCacheCollection::insert(Args&&... args)
+std::size_t ElementCacheCollection::insert(std::size_t index, Args&&... args)
 {
     PiercedSyncMaster::SyncMode cacheSyncMode = PiercedSyncMaster::SyncMode::SYNC_MODE_JOURNALED;
 
-    return LevelSetCacheCollection<long>::insert<container_t>(m_kernel, cacheSyncMode, std::forward<Args>(args)...);
+    return LevelSetCacheCollection<long>::insert<container_t>(index, m_kernel, cacheSyncMode, std::forward<Args>(args)...);
 }
 
 /*!
  * Insert a new cache.
  *
+ * \param index is the index that will be assigned to the cache
  * \param args are the arguments that will be used to create the cache factory
  * \result The index associated with the newly created cache.
  */
 template<typename container_t, typename... Args, typename std::enable_if<!std::is_same<bitpit::PiercedStorage<typename container_t::value_type>, container_t>::value>::type *>
-std::size_t ElementCacheCollection::insert(Args&&... args)
+std::size_t ElementCacheCollection::insert(std::size_t index, Args&&... args)
 {
-    return Base::insert<container_t, Args...>(std::forward<Args>(args)...);
+    return Base::insert<container_t, Args...>(index, std::forward<Args>(args)...);
 }
 
 }
