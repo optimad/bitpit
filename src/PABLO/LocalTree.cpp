@@ -425,7 +425,12 @@ namespace bitpit {
     // =================================================================================== //
 
     /*! Refine local tree: refine one time octants with marker >0
-     * \param[out] mapidx mapidx[i] = index in old octants vector of the new i-th octant (index of father if octant is new after refinement)
+     * \param[in,out] mapidx mapidx[i] = index in old octants vector of the new i-th octant (index
+     * of father if octant is new after refinement). On output the mapping will be updated to
+     * refelect the changes performed during the refinement. The mapping received in input should
+     * always define a valid mapping, this means that during the first refinement the identity
+     * mapping (mapidx[i] = i) should be provided. If an empty mapping is provided, the mapping
+     * will not be filled.
      * \return	true if additional refinement is needed in order to satisfy
      * the specified markers
      */
@@ -505,7 +510,7 @@ namespace bitpit {
 
                 // Update the mapping
                 if(!mapidx.empty()){
-                    mapidx[futureIdx] = idx;
+                    mapidx[futureIdx] = mapidx[idx];
                 }
 
                 // Update future octant index
@@ -522,7 +527,7 @@ namespace bitpit {
                 // Update the mapping
                 if(!mapidx.empty()){
                     for (uint8_t i=0; i<nChildren; i++){
-                        mapidx[firstChildIdx + i] = idx;
+                        mapidx[firstChildIdx + i] = mapidx[idx];
                     }
                 }
 
@@ -539,13 +544,6 @@ namespace bitpit {
 
                 // Update future octant index
                 futureIdx -= nChildren;
-            }
-        }
-
-        // Update the mapping for cells that have not been modified
-        if(!mapidx.empty()){
-            for (uint32_t idx=0; idx<firstRefinedIdx; ++idx) {
-                mapidx[idx] = idx;
             }
         }
 
