@@ -172,6 +172,75 @@ bool LevelSetKernel::intersectCellPlane( long id, const std::array<double,3> &ro
 }
 
 /*!
+ * Given a cell, considered as a box, and one of its interfaces, considered as one fo the six box
+ * interfaces, it computes the index corresponding to that box face based on the enumeration defined in
+ * CGElem namespace.
+ * The normal to the plane points towards the subspace.
+ *
+ * @param[in] id is the index of cell
+ * @param[in] intrLocalId is the local index of the interface for the given cell
+ * @return the index corresponding to the given box face 
+ */
+int LevelSetKernel::computeBoxFaceIndex( long id, int intrLocalId) {
+
+    // Get cell and interface
+    const Cell &cell = m_mesh->getCell(id);
+    const Interface &interface = cell.getInterface(intrLocalId);
+
+    // Evaluate interface normal
+    std::array<double, 3> coordinates;
+    m_mesh->getElementVertexCoordinates(interface, &coordinates);
+    std::array<double, 3> intrNormal = interface.evalNormal(&coordinates);
+
+    // Evaluate cell and interface centroids
+    std::array<double,3> cellCentroid      = m_mesh->evalElementCentroid(cell);
+    std::array<double,3> interfaceCentroid = m_mesh->evalElementCentroid(interface);
+
+    // Evaluate interface direction
+    double maxCoor = std::abs(intrNormal[0]);
+    int direction = 0;
+    for (int i = 1; i < 3; ++i) {
+        if (std::abs(intrNormal[i]) > maxCoor) {
+            maxCoor = std::abs(intrNormal[i]);
+            direction = i;
+        }
+    }
+    assert((utils::DoubleFloatingEqual()(maxCoor, 1.0, distanceTolerance)));
+
+    // Check if interface is in the front side
+    bool frontFace = (interfaceCentroid[direction] > cellCentroid[direction]);
+
+    // Get box face id
+    return CGElem::getBoxFaceLocalIndex(direction, frontFace);
+}
+
+/*!
+ * Computes the part of the interface belonging to the subspace defined by the given plane.
+ * The normal to the plane points opposite to the subspace.
+ *
+ * @param[in] id is the index of cell
+ * @param[in] intrLocalId is the local index of the interface for the given cell
+ * @param[in] root is a point on the plane
+ * @param[in] normal is the normal of the plane
+ * @param[in] tolerance is the tolerance used for distance comparisons
+ * @param[out] interfaceCentroid is the centroid the intersected face computed as the arithmetic avretage of the face vertiecs
+ * @param[out] interfaceArea is the area of the intersected face
+ * @param[out] intersectionCentroid is the centroid of the intersection computed as the arithmetic avretage of the intersection points
+ * @return true if interface is intersected
+ */
+bool LevelSetKernel::intersectInterfacePlane( long id, int intrLocalId, const std::array<double,3> &root, const std::array<double,3> &normal, double tolerance, std::array<double, 3> *interfaceCentroid, double *interfaceArea, std::array<double, 3> *intersectionCentroid ) {
+
+    int boxFaceId = computeBoxFaceIndex(id, intrLocalId);
+
+    std::array<double,3> minPoint;
+    std::array<double,3> maxPoint;
+    m_mesh->evalCellBoundingBox(id, &minPoint, &maxPoint);
+
+    int dim = m_mesh->getDimension();
+    return CGElem::computeIntersectedBoxFaceData(boxFaceId, root, normal, minPoint, maxPoint, dim, tolerance, interfaceCentroid, interfaceArea, intersectionCentroid);
+}
+
+/*!
  * Check if a point lies within the cell
  * @param[in] id is the cell index
  * @param[in] pointCoords are the point coordinates

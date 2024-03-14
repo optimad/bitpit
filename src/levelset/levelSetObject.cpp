@@ -834,7 +834,7 @@ LevelSetCellLocation LevelSetObject::fillCellGeometricNarrowBandLocationCache(lo
     // First we need to check if the cell intersectes the surface, and only if it
     // deosn't we should check if its distance is lower than the narrow band size.
     LevelSetCellLocation cellLocation = LevelSetCellLocation::UNKNOWN;
-    if (_intersectSurface(id, cellUnsigendValue, CELL_LOCATION_INTERSECTION_MODE) == LevelSetIntersectionStatus::TRUE) {
+    if (_intersectCellSurface(id, cellUnsigendValue, CELL_LOCATION_INTERSECTION_MODE) == LevelSetIntersectionStatus::TRUE) {
         cellLocation = LevelSetCellLocation::NARROW_BAND_INTERSECTED;
     } else if (cellUnsigendValue <= m_narrowBandSize) {
         cellLocation = LevelSetCellLocation::NARROW_BAND_DISTANCE;
@@ -1338,7 +1338,7 @@ void LevelSetObject::destroyCellPropagatedSignCache()
  * @param[in] mode describes the types of check that should be performed
  * @return indicator regarding intersection
  */
-LevelSetIntersectionStatus LevelSetObject::intersectSurface(long id, LevelSetIntersectionMode mode) const
+LevelSetIntersectionStatus LevelSetObject::intersectCellSurface(long id, LevelSetIntersectionMode mode) const
 {
     // Try evaluating intersection information from the cell location
     //
@@ -1361,7 +1361,31 @@ LevelSetIntersectionStatus LevelSetObject::intersectSurface(long id, LevelSetInt
     // Check for intersection with zero-levelset iso-surface
     double distance = evalCellValue(id, false);
 
-    return _intersectSurface(id, distance, mode);
+    return _intersectCellSurface(id, distance, mode);
+}
+
+/*!
+ * Check if the specified cell interface intersects the zero-levelset iso-surface.
+ *
+ * The iso-surface is considered planar.
+ *
+ * @param[in] id cell id
+ * @param[in] intrLocalId is the local index of the interface for the given cell
+ * @param[in] tolerance is the tolerance used for distance comparisons
+ */
+LevelSetIntersectionStatus LevelSetObject::_intersectInterfaceSurface(long id, int intrLocalId, double tolerance) const
+{
+    const Interface &interface = m_kernel->getMesh()->getCell(id).getInterface(intrLocalId);
+    std::array<double,3> centroid = m_kernel->getMesh()->evalElementCentroid(interface);
+
+    std::array<double,3> root = evalProjectionPoint(centroid);
+    std::array<double,3> normal = evalGradient(centroid, true);
+
+    if( m_kernel->intersectInterfacePlane(id, intrLocalId, root, normal, tolerance, nullptr, nullptr, nullptr) ){
+        return LevelSetIntersectionStatus::TRUE;
+    } else {
+        return LevelSetIntersectionStatus::FALSE;
+    }
 }
 
 /*!
@@ -1381,11 +1405,16 @@ LevelSetIntersectionStatus LevelSetObject::intersectSurface(long id, LevelSetInt
  * larger than the bounding radius LevelSetIntersectionStatus::FALSE is returned,
  * otherwise LevelSetIntersectionStatus::TRUE.
  *
- * If mode==LevelSetIntersectionMode::ACCURATE, the same checks of fuzzy mode are
+ * If mode==LevelSetIntersectionMode::ACCURATE_LOW_ORDER, the same checks of fuzzy mode are
  * performed, however, in the cases where fuzzy mode would return CLOSE, an additional
  * check on the intersection between the tangent plane at the projection point and the
  * cell is performed. Errors of the method are related to the ratio of surface curvature
  * over cell size.
+ *
+ * If mode==LevelSetIntersectionMode::ACCURATE_HIGH_ORDER, the same checks of the low order
+ * accurate mode, but the curvature of the zero level set is accounted as well. Each interface
+ * evaluates its own distance from it. Also, this is the only mode taking into consideration
+ * possible high order smoothing of the surface.
  *
  * The bounding sphere is the sphere with the minimum radius that contains all the
  * cell vertices and has the center in the cell centroid.
@@ -1399,7 +1428,7 @@ LevelSetIntersectionStatus LevelSetObject::intersectSurface(long id, LevelSetInt
  * @param[in] mode describes the types of check that should be performed
  * @return indicator regarding intersection
  */
-LevelSetIntersectionStatus LevelSetObject::_intersectSurface(long id, double distance, LevelSetIntersectionMode mode) const
+LevelSetIntersectionStatus LevelSetObject::_intersectCellSurface(long id, double distance, LevelSetIntersectionMode mode) const
 {
     double distanceTolerance = m_kernel->getDistanceTolerance();
 
@@ -1445,7 +1474,7 @@ LevelSetIntersectionStatus LevelSetObject::_intersectSurface(long id, double dis
             break;
         }
 
-        case LevelSetIntersectionMode::ACCURATE:
+        case LevelSetIntersectionMode::ACCURATE_LOW_ORDER:
         {
             double boundingSphere = m_kernel->computeCellBoundingRadius(id) ;
             if(utils::DoubleFloatingGreater()(distance, boundingSphere, distanceTolerance, distanceTolerance)){
@@ -1464,6 +1493,29 @@ LevelSetIntersectionStatus LevelSetObject::_intersectSurface(long id, double dis
             } else {
                 return LevelSetIntersectionStatus::FALSE;
             }
+
+            break;
+        }
+
+        case LevelSetIntersectionMode::ACCURATE_HIGH_ORDER:
+        {
+            double boundingSphere = m_kernel->computeCellBoundingRadius(id) ;
+            if(utils::DoubleFloatingGreater()(distance, boundingSphere, distanceTolerance, distanceTolerance)){
+                return LevelSetIntersectionStatus::FALSE;
+            }
+
+            double tangentSphere = m_kernel->computeCellTangentRadius(id) ;
+            if(utils::DoubleFloatingLessEqual()(distance, tangentSphere, distanceTolerance, distanceTolerance)){
+                return LevelSetIntersectionStatus::TRUE;
+            }
+
+            int nInterfaces = m_kernel->getMesh()->getCell(id).getInterfaceCount();
+            for (int i = 0; i < nInterfaces; ++i) {
+                if (_intersectInterfaceSurface(id, i, distanceTolerance) == LevelSetIntersectionStatus::TRUE) {
+                    return LevelSetIntersectionStatus::TRUE;
+                }
+            }
+            return LevelSetIntersectionStatus::FALSE;
 
             break;
         }

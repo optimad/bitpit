@@ -1457,6 +1457,89 @@ int LevelSetSegmentationBaseObject::evalCellPart(long id) const
 }
 
 /*!
+ * Check if the specified cell interface intersects the zero-levelset iso-surface.
+ * If an intersection is detected, the centroid and area of the intersected interface is computed.
+ *
+ * @param[in] id cell id
+ * @param[in] intrLocalId is the local index of the interface for the given cell
+ * @param[in] tolerance is the tolerance used for distance comparisons
+ * @param[in] signedLevelSet controls if signed levelset function will be used
+ * @param[in] tolerance is the tolerance used for distance comparisons
+ * @param[out] centroid is the centroid the intersected face computed as the arithmetic avretage of the face vertiecs
+ * @param[out] area is the area of the intersected face
+ * @return indicator regarding intersection
+ */
+LevelSetIntersectionStatus LevelSetSegmentationBaseObject::_evalIntersectedInterfaceData(long id, int intrLocalId, bool signedLevelSet, double tolerance, std::array<double, 3> *centroid, double *area) const
+{
+    // Evaluate projection of interface centroid on surface
+    const Interface &interface = m_kernel->getMesh()->getCell(id).getInterface(intrLocalId);
+    std::array<double,3> interfaceCentroid = m_kernel->getMesh()->evalElementCentroid(interface);
+
+    std::array<double,3> root;
+    std::array<double,3> normal;
+    evalProjection(interfaceCentroid, signedLevelSet, &root, &normal);
+
+    // Early return if projection point is not the closest point of the
+    // plane (defined by the projection point and projection normal) to
+    // the interface centroid
+    std::array<double,3> distanceVector = interfaceCentroid - normal;
+    double distance = norm2(distanceVector);
+    if (utils::DoubleFloatingGreater()(distance, 0.0, tolerance)) {
+        distanceVector *= 1.0 / distance;
+        double deviation = std::abs(dotProduct(distanceVector, normal));
+        if (!utils::DoubleFloatingEqual()(deviation, 1.0, tolerance)) {
+            return LevelSetIntersectionStatus::FALSE;
+        }
+    }
+
+    // Eval intersection between arbitrary 2D surface and planar interface
+    std::array<double, 3> intersection = interfaceCentroid;
+    std::array<double, 3> intersectionNew;
+    double residual    = tolerance + 1.0;
+    int iter           = 0;
+    int iterMax        = 5;
+    bool isIntersected = true;
+    while (residual > tolerance && iter < iterMax && isIntersected) {
+        ++ iter;
+
+        isIntersected = m_kernel->intersectInterfacePlane(id, intrLocalId, root, normal, tolerance, nullptr, nullptr, &intersectionNew);
+
+        evalProjection(intersectionNew, signedLevelSet, &root, &normal);
+ 
+        residual     = norm2(intersection - intersectionNew);
+        intersection = intersectionNew;
+    }
+
+    // Eval centroid and area of the intersected interface
+    if (isIntersected) {
+        isIntersected = m_kernel->intersectInterfacePlane(id, intrLocalId, root, normal, tolerance, centroid, area, nullptr);
+        if (isIntersected) {
+            return LevelSetIntersectionStatus::TRUE;
+        }
+    }
+    return LevelSetIntersectionStatus::FALSE;
+}
+
+/*!
+ * Check if the specified cell interface intersects the zero-levelset iso-surface.
+ * If an intersection is detected, the centroid and area of the intersected interface is computed.
+ *
+ * @param[in] id cell id
+ * @param[in] intrLocalId is the local index of the interface for the given cell
+ * @param[in] tolerance is the tolerance used for distance comparisons
+ * @param[in] signedLevelSet controls if signed levelset function will be used
+ * @param[out] centroid is the centroid the intersected face computed as the arithmetic avretage of the face vertiecs
+ * @param[out] area is the area of the intersected face
+ * @return indicator regarding intersection
+ */
+LevelSetIntersectionStatus LevelSetSegmentationBaseObject::evalIntersectedInterfaceData(long id, int intrLocalId, bool signedLevelSet, std::array<double, 3> *centroid, double *area) const
+{
+    double distanceTolerance = m_kernel->getDistanceTolerance();
+
+    _evalIntersectedInterfaceData(id, intrLocalId, signedLevelSet, distanceTolerance, centroid, area);
+}
+
+/*!
  * Check if cell intersects the surface.
  *
  * If mode==LevelSetIntersectionMode::FAST_FUZZY the method will compare the levelset
@@ -1473,11 +1556,17 @@ int LevelSetSegmentationBaseObject::evalCellPart(long id) const
  * larger than the bounding radius LevelSetIntersectionStatus::FALSE is returned,
  * otherwise LevelSetIntersectionStatus::TRUE.
  *
- * If mode==LevelSetIntersectionMode::ACCURATE, the same checks of fuzzy mode are
+ * If mode==LevelSetIntersectionMode::ACCURATE_LOW_ORDER, the same checks of fuzzy mode are
  * performed, however, in the cases where fuzzy mode would return CLOSE, an additional
  * check on the intersection between the tangent plane at the projection point and the
  * cell is performed. Errors of the method are related to the ratio of surface curvature
  * over cell size.
+ *
+ * If mode==LevelSetIntersectionMode::ACCURATE_HIGH_ORDER, the same checks of the low order
+ * accurate mode, but the curvature of the zero level set is accounted as well. Each interface
+ * evaluates its own distance from it. Also, this is the only mode taking into consideration
+ * possible high order smoothing of the surface.
+ *
  *
  * The bounding sphere is the sphere with the minimum radius that contains all the
  * cell vertices and has the center in the cell centroid.
@@ -1491,7 +1580,7 @@ int LevelSetSegmentationBaseObject::evalCellPart(long id) const
  * @param[in] mode describes the types of check that should be performed
  * @return indicator regarding intersection
  */
-LevelSetIntersectionStatus LevelSetSegmentationBaseObject::_intersectSurface(long id, double distance, LevelSetIntersectionMode mode) const
+LevelSetIntersectionStatus LevelSetSegmentationBaseObject::_intersectCellSurface(long id, double distance, LevelSetIntersectionMode mode) const
 {
     // Get surface information
     const SurfUnstructured &surface = evalCellSurface(id);
@@ -1502,7 +1591,7 @@ LevelSetIntersectionStatus LevelSetSegmentationBaseObject::_intersectSurface(lon
     }
 
     // Evaluate intersection using base class
-    return LevelSetObject::_intersectSurface(id, distance, mode);
+    return LevelSetObject::_intersectCellSurface(id, distance, mode);
 }
 
 /*!
@@ -2470,7 +2559,7 @@ LevelSetCellLocation LevelSetSegmentationObject::fillCellGeometricNarrowBandLoca
     // First we need to check if the cell intersectes the surface, and only if it
     // deosn't we should check if its distance is lower than the narrow band size.
     LevelSetCellLocation cellLocation = LevelSetCellLocation::UNKNOWN;
-    if (_intersectSurface(id, cellUnsigendValue, CELL_LOCATION_INTERSECTION_MODE) == LevelSetIntersectionStatus::TRUE) {
+    if (_intersectCellSurface(id, cellUnsigendValue, CELL_LOCATION_INTERSECTION_MODE) == LevelSetIntersectionStatus::TRUE) {
         cellLocation = LevelSetCellLocation::NARROW_BAND_INTERSECTED;
     } else if (cellUnsigendValue <= m_narrowBandSize) {
         cellLocation = LevelSetCellLocation::NARROW_BAND_DISTANCE;
@@ -2853,6 +2942,24 @@ void LevelSetSegmentationObject::_evalProjection(const std::array<double,3> &poi
     if (!signedLevelSet) {
         (*projectionNormal) *= static_cast<double>(evalSign(point));
     }
+}
+
+/*!
+ * Check if the specified cell interface intersects the zero-levelset iso-surface.
+ *
+ * @param[in] id cell id
+ * @param[in] intrLocalId is the local index of the interface for the given cell
+ * @param[in] tolerance is the tolerance used for distance comparisons
+ * @return indicator regarding intersection
+ */
+LevelSetIntersectionStatus LevelSetSegmentationObject::_intersectInterfaceSurface(long id, int intrLocalId, double tolerance) const
+{
+    // Early return if low order smoothing is chosen
+    if (m_surfaceInfo->getSurfaceSmoothing() == LevelSetSurfaceSmoothing::LOW_ORDER) {
+        return LevelSetObject::_intersectInterfaceSurface(id, intrLocalId, tolerance);
+    }
+
+    return _evalIntersectedInterfaceData(id, intrLocalId, false, tolerance, nullptr, nullptr);
 }
 
 /*!

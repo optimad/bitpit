@@ -119,7 +119,9 @@ enum class LevelSetIntersectionMode{
     FAST_FUZZY=0,                   /**< Compares levelset value to tangent and bounding radius of a cell */
     FAST_GUARANTEE_TRUE=1,          /**< All LevelSetIntersectionStatus::TRUE are accurate but LevelSetIntersectionStatus::FALSE may be wrong */
     FAST_GUARANTEE_FALSE=2,         /**< All LevelSetIntersectionStatus::FALSE are accurate but LevelSetIntersectionStatus::TRUE may be wrong */
-    ACCURATE=3                      /**< Accurate but more costly checks */
+    ACCURATE_LOW_ORDER=3,           /**< Accurate but more costly checks. Handles the zero level set as planar. */
+    ACCURATE_HIGH_ORDER=4,          /**< Accurate but more costly checks. Takes into consideration the curvature of the zero level set surface */
+    ACCURATE=ACCURATE_LOW_ORDER
 };
 
 /*!
