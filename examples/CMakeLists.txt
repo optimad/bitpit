@@ -77,8 +77,8 @@ if(BITPIT_BUILD_EXAMPLES)
 
         add_executable(${EXAMPLE_NAME} "${EXAMPLE_SOURCES}")
 
-        target_compile_features(${EXAMPLE_NAME} PUBLIC cxx_std_11)
-        set_target_properties(${EXAMPLE_NAME} PROPERTIES CXX_STANDARD 11)
+        target_compile_features(${EXAMPLE_NAME} PUBLIC cxx_std_17)
+        set_target_properties(${EXAMPLE_NAME} PROPERTIES CXX_STANDARD 17)
         set_target_properties(${EXAMPLE_NAME} PROPERTIES CXX_STANDARD_REQUIRED ON)
 
         target_link_libraries(${EXAMPLE_NAME} ${BITPIT_LIBRARY})

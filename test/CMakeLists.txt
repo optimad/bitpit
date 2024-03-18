@@ -183,8 +183,8 @@ function(addTest TEST_NAME TEST_TYPE TEST_MODULES TEST_LIBRARIES WORKING_DIRECTO
     # Add test target
     add_executable(${TEST_TARGET_NAME} "${TEST_NAME}.cpp")
 
-    target_compile_features(${TEST_TARGET_NAME} PUBLIC cxx_std_11)
-    set_target_properties(${TEST_TARGET_NAME} PROPERTIES CXX_STANDARD 11)
+    target_compile_features(${TEST_TARGET_NAME} PUBLIC cxx_std_17)
+    set_target_properties(${TEST_TARGET_NAME} PROPERTIES CXX_STANDARD 17)
     set_target_properties(${TEST_TARGET_NAME} PROPERTIES CXX_STANDARD_REQUIRED ON)
 
     target_link_libraries(${TEST_TARGET_NAME} ${BITPIT_LIBRARY})
