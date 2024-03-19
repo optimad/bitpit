@@ -174,7 +174,7 @@ public:
     void dump();
     void restore();
     void leave1out();    
-
+    void readSnapshot(const pod::SnapshotFile &snap, pod::PODField &fieldr);
     void evalMeanMesh();
     void fillListActiveIDs(const PiercedStorage<bool> &bfield);
     void evalCorrelation();
@@ -193,6 +193,18 @@ public:
     void reconstructFields(PiercedStorage<double> &fields, VolumeKernel *mesh,
             std::map<std::string, std::size_t> targetFields,
             const std::unordered_set<long> *targetCells);
+    void compute();
+    std::vector<double> fieldsl2norm(pod::PODField &snap);
+    std::vector<double> fieldsMax(pod::PODField &snap);
+    void buildFieldsWithCoeff(std::vector<std::vector<double>> coeff_mat, pod::PODField &recon);
+    void buildFieldsWithCoeff(std::vector<std::vector<double>> coeff_mat,
+            PiercedStorage<double> &fields,
+            const std::vector<std::size_t> &scalarIds, const std::vector<std::size_t> &podscalarIds,
+            const std::vector<std::array<std::size_t, 3>> &vectorIds, const std::vector<std::size_t> &podvectorIds,
+            const std::unordered_set<long> *targetCells = nullptr);
+    void write(const pod::PODField &snap, std::string file_name) const;
+    void write(int mode_index, std::string file_name);
+    std::vector<std::vector<double>> projectField(pod::PODField &field);
 
 private:
     std::unique_ptr<PODKernel>              m_podkernel;                /**< POD computational kernel */
@@ -270,7 +282,6 @@ private:
 
     void dumpMode(std::size_t ir);
 
-    void readSnapshot(const pod::SnapshotFile &snap, pod::PODField &fieldr);
     void readMode(std::size_t ir);
 
     double getCellVolume(long id);
@@ -278,8 +289,6 @@ private:
 
     void diff(pod::PODField * _a, const pod::PODMode &b);
     void sum(pod::PODField * _a, const pod::PODMode &b);
-    std::vector<double> fieldsl2norm(pod::PODField &snap);
-    std::vector<double> fieldsMax(pod::PODField &snap);    
 
 #if BITPIT_ENABLE_MPI
     void initializeCommunicator(MPI_Comm communicator);
@@ -299,6 +308,11 @@ private:
             const std::vector<std::array<std::size_t, 3>> &vectorIds, const std::vector<std::size_t> &podvectorIds,
             const std::unordered_set<long> *targetCells = nullptr);
     void _buildFields(PiercedStorage<double> &fields,
+            const std::vector<std::size_t> &scalarIds, const std::vector<std::size_t> &podscalarIds,
+            const std::vector<std::array<std::size_t, 3>> &vectorIds, const std::vector<std::size_t> &podvectorIds,
+            const std::unordered_set<long> *targetCells = nullptr);
+    void _buildFieldsWithCoeff(std::vector<std::vector<double>> coeff_mat,
+            PiercedStorage<double> &fields,
             const std::vector<std::size_t> &scalarIds, const std::vector<std::size_t> &podscalarIds,
             const std::vector<std::array<std::size_t, 3>> &vectorIds, const std::vector<std::size_t> &podvectorIds,
             const std::unordered_set<long> *targetCells = nullptr);

@@ -835,39 +835,8 @@ std::unique_ptr<PODKernel> & POD::getKernel()
  */
 void POD::run()
 {
-    if (m_runMode == RunMode::COMPUTE) {
-
-        // Evaluate mean field and mesh
-        log::cout() << "pod : computing mean field and pod mesh... " << std::endl;
-        evalMeanMesh();
-
-        // Initialize ID list
-        fillListActiveIDs(m_filter);
-
-        // Evaluate correlation matrices
-        log::cout() << "pod : computing correlation matrix... " << std::endl;
-        evalCorrelation();
-
-        // Compute eigenvalues and eigenvectors
-        log::cout() << "pod : computing eigenvectors... " << std::endl;
-        evalEigen();
-
-        // Compute POD modes
-        log::cout() << "pod : computing pod modes... " << std::endl;
-        evalModes();
-
-    } else if (m_runMode == RunMode::RESTORE) {
-
-        log::cout() << "pod : restore... " << std::endl;
-        restore();
-
-    }
-
-    // Dump pod
-    if (m_writeMode != WriteMode::NONE) {
-        log::cout() << "pod : dumping... " << std::endl;
-        dump();
-    }
+    // Compute the POD
+    compute();
 
     // Evaluate reconstruction
     evalReconstruction();
@@ -1394,7 +1363,7 @@ void POD::reconstructFields(pod::PODField & field,  pod::PODField & reconi)
     reconi.mesh = field.mesh;
     reconi.mask = std::unique_ptr<PiercedStorage<bool>>(new PiercedStorage<bool>(*field.mask));
     evalReconstructionCoeffs(field);
-    buildFields(reconi);
+    buildFieldsWithCoeff(m_reconstructionCoeffs,reconi);
     if (m_errorMode != ErrorMode::NONE){
         if (m_errorMode == ErrorMode::SINGLE)
             initErrorMaps();
@@ -1426,43 +1395,10 @@ void POD::evalReconstructionCoeffs(pod::PODField & field)
  */
 void POD::_evalReconstructionCoeffs(pod::PODField & field)
 {
-    if (m_useMean)
-        diff(&field, m_mean);
-    m_reconstructionCoeffs.clear();
-    m_reconstructionCoeffs.resize(m_nFields, std::vector<double>(m_nModes, 0.0));
-
-    // Evaluate minimization matrices
     evalMinimizationMatrices();
 
     // Evaluate RHS
-    for (std::size_t ir = 0; ir < m_nModes; ++ir){
-        if (m_memoryMode == MemoryMode::MEMORY_LIGHT)
-            readMode(ir);
-
-        std::unordered_set<long>::iterator it;
-        for (it = m_listActiveIDs.begin(); it != m_listActiveIDs.end(); ++it){
-            long id = *it;
-            std::size_t rawIndex = m_podkernel->getMesh()->getCells().getRawIndex(id);
-            if (m_nScalarFields){
-                double* modes = m_modes[ir].scalar->rawData(rawIndex);
-                double* datas = field.scalar->rawData(rawIndex);
-                for (std::size_t ifield = 0; ifield < m_nScalarFields; ++ifield){
-                    m_reconstructionCoeffs[ifield][ir] += (*datas)*(*modes)*getRawCellVolume(rawIndex);
-                    modes++;
-                    datas++;
-                }
-            }
-            if (m_nVectorFields){
-                std::array<double,3>* modev = m_modes[ir].vector->rawData(rawIndex);
-                std::array<double,3>* datav = field.vector->rawData(rawIndex);
-                for (std::size_t ifield = m_nScalarFields; ifield < m_nFields; ++ifield){
-                    m_reconstructionCoeffs[ifield][ir] += dotProduct((*datav),(*modev))*getRawCellVolume(rawIndex);
-                    modev++;
-                    datav++;
-                }
-            }
-        }
-    }
+    m_reconstructionCoeffs = projectField(field);
 
 # if BITPIT_ENABLE_MPI
     for (std::size_t i = 0; i < m_nFields; ++i)
@@ -1471,10 +1407,6 @@ void POD::_evalReconstructionCoeffs(pod::PODField & field)
 
     // Solve minimization
     solveMinimization(m_reconstructionCoeffs);
-
-    // Sum field and mean
-    if (m_useMean)
-        sum(&field, m_mean);
 }
 
 /**
@@ -2375,22 +2307,21 @@ void POD::dumpField(const std::string &name, const pod::PODField &field) const
         m_filter.dump(dataStream);
         utils::binary::write(dataStream,std::size_t(m_nScalarFields));
         if (m_nScalarFields) {
-            for (std::size_t i = 0; i < m_nScalarFields; ++i)
+            for (std::size_t i = 0; i < m_nScalarFields; ++i) {
                 utils::binary::write(dataStream, m_nameScalarFields[i]);
-
+            }
             field.scalar->dump(dataStream);
         }
 
         utils::binary::write(dataStream,std::size_t(m_nVectorFields));
         if (m_nVectorFields) {
-            for (std::size_t i = 0; i < m_nVectorFields; ++i)
+            for (std::size_t i = 0; i < m_nVectorFields; ++i) {
                 utils::binary::write(dataStream, m_nameVectorFields[i]);
-
+            }
             field.vector->dump(dataStream);
         }
         binaryWriter.close();
     }
-
     // Dumping mesh
     {
         std::string header = name;// + "mesh";
@@ -2399,55 +2330,9 @@ void POD::dumpField(const std::string &name, const pod::PODField &field) const
         field.mesh->dump(dataStream);
         binaryWriter.close();
     }
-
+    // write VTK file
     if (m_writeMode == WriteMode::DEBUG) {
-        std::vector<std::string > datastring;
-        m_podkernel->getMesh()->getVTK().setDirectory(m_directory);
-        field.mesh->getVTK().setName(name);
-        std::vector<std::vector<double>> fields(m_nScalarFields, std::vector<double>(field.mesh->getInternalCellCount(), 0.0));
-        std::vector<std::vector<std::array<double,3>>> fieldv(m_nVectorFields, std::vector<std::array<double,3>>(field.mesh->getInternalCellCount(), {{0.0, 0.0, 0.0}}));
-        for (std::size_t isf = 0; isf < m_nScalarFields; ++isf) {
-            int i=0;
-            for (const Cell &cell : field.mesh->getCells()) {
-                if (cell.isInterior()) {
-                    long id = cell.getId();
-                    fields[isf][i] = field.scalar->at(id, isf);
-                    ++i;
-                }
-            }
-            field.mesh->getVTK().addData(m_nameScalarFields[isf], VTKFieldType::SCALAR, VTKLocation::CELL, fields[isf]);
-            datastring.push_back(m_nameScalarFields[isf]);
-        }
-
-        for (std::size_t ivf = 0; ivf < m_nVectorFields; ++ivf) {
-            int i=0;
-            for (const Cell &cell : field.mesh->getCells()) {
-                if (cell.isInterior()) {
-                    long id = cell.getId();
-                    fieldv[ivf][i] = field.vector->at(id, ivf);
-                    ++i;
-                }
-            }
-            std::string vname= m_nameVectorFields[ivf][0].substr(0,m_nameVectorFields[ivf][0].size()-2);
-            field.mesh->getVTK().addData(vname, VTKFieldType::VECTOR, VTKLocation::CELL, fieldv[ivf]);
-            datastring.push_back(vname);
-        }
-
-        std::vector<uint8_t> mask(field.mesh->getInternalCellCount(), 0);
-        int i=0;
-        for (const Cell &cell : field.mesh->getCells()) {
-            if (cell.isInterior()) {
-                long id = cell.getId();
-                mask[i] = m_filter[id];
-                ++i;
-            }
-        }
-        field.mesh->getVTK().addData("filter", VTKFieldType::SCALAR, VTKLocation::CELL, mask);
-        datastring.push_back("filter");
-        field.mesh->write();
-
-        for (std::size_t is=0; is < datastring.size(); ++is)
-            field.mesh->getVTK().removeData(datastring[is]);
+        write(field, name);
     }
 }
 
@@ -2598,18 +2483,16 @@ std::vector<double> POD::fieldsMax(pod::PODField & snap)
 {
     std::vector<double> max;
     max.resize(m_nFields,0.0);
-
-    for (long id : snap.mask->getKernel()->getIds()){
-        std::size_t rawIndex = m_podkernel->getMesh()->getCells().getRawIndex(id);
+    for (long id : m_listActiveIDs) {
         if (m_nScalarFields){
-            double* datas = snap.scalar->rawData(rawIndex);
+            double* datas = snap.scalar->rawData(id);
             for (std::size_t i = 0; i < m_nScalarFields; ++i){
                 max[i] = std::max(max[i],std::abs(*datas));
                 datas++;
             }
         }
         if (m_nVectorFields){
-            std::array<double,3>* datav = snap.vector->rawData(rawIndex);
+            std::array<double,3>* datav = snap.vector->rawData(id);
             for (std::size_t i = m_nScalarFields; i < m_nFields; ++i){
                 max[i] = std::max(max[i],std::sqrt( dotProduct((*datav),(*datav)) ));
                 datav++;
@@ -3111,6 +2994,359 @@ void POD::sum(PiercedStorage<double> &fields, const pod::PODMode &mode,
         }
 
     }
+}
+
+/**
+ * Compute the POD over a set of given snapshots.
+ */
+void POD::compute()
+{
+    if (m_runMode == RunMode::COMPUTE) {
+        // Evaluate mean field and mesh
+        log::cout() << "pod : computing mean field and pod mesh... " << std::endl;
+        evalMeanMesh();
+        // Initialize ID list
+        fillListActiveIDs(m_filter);
+        // Evaluate correlation matrices
+        log::cout() << "pod : computing correlation matrix... " << std::endl;
+        evalCorrelation();
+        // Compute eigenvalues and eigenvectors
+        log::cout() << "pod : computing eigenvectors... " << std::endl;
+        evalEigen();
+        // Compute POD modes
+        log::cout() << "pod : computing pod modes... " << std::endl;
+        evalModes();
+        // Dump pod
+        if (m_writeMode != WriteMode::NONE) {
+            log::cout() << "pod : dumping... " << std::endl;
+            dump();
+        }
+    } else if (m_runMode == RunMode::RESTORE) {
+        log::cout() << "pod : restore... " << std::endl;
+        restore();
+    }
+}
+
+/**
+ * Construct the linear combination of the POD modes with given input coefficients.
+ *
+ * \param[in] coeff_mat, coefficient matrix of dimension N_fields x N_modes to store the projection coefficient.
+ * \param[in,out] recon, PODField object to be populated with the linear combination.
+ */
+void POD::buildFieldsWithCoeff(std::vector<std::vector<double>> coeff_mat, pod::PODField &recon)
+{
+    // set up of the PODField members: scalar, vector, mesh and mask
+    recon.scalar = std::unique_ptr<pod::ScalarStorage>(new pod::ScalarStorage(m_nScalarFields, &m_podkernel->getMesh()->getCells()));
+    recon.vector = std::unique_ptr<pod::VectorStorage>(new pod::VectorStorage(m_nVectorFields, &m_podkernel->getMesh()->getCells()));
+    recon.scalar->fill(0.0);
+    recon.vector->fill(std::array<double, 3>{{0.0, 0.0, 0.0}});
+    recon.setMesh(m_podkernel->getMesh());
+    // Outer cycle over modes
+    for (std::size_t ir = 0; ir < m_nModes; ++ir) {
+        if (m_memoryMode == MemoryMode::MEMORY_LIGHT) {
+            readMode(ir);
+        }
+        // Outer cycle over cells
+        for (long id : m_listActiveIDs) {
+            if (m_nScalarFields) {
+                // Inner cycle over scalar fields
+                for (std::size_t isf = 0; isf < m_nScalarFields; ++isf) {
+                    double modes = m_modes[ir].scalar->at(id, isf);
+                    recon.scalar->at(id, isf) += modes * coeff_mat[isf][ir];
+                }
+            }
+            if (m_nVectorFields) {
+                // Inner cycle over vector fields
+                for (std::size_t ifv = 0; ifv < m_nVectorFields; ++ifv) {
+                    std::array<double,3> modev = m_modes[ir].vector->at(id,ifv);
+                    recon.vector->at(id, ifv) += modev * coeff_mat[m_nScalarFields+ifv][ir];
+                }
+            }
+        }
+        if (m_memoryMode == MemoryMode::MEMORY_LIGHT) {
+            m_modes[ir].clear();
+        }
+    }
+    if (m_useMean) {
+        sum(&recon, m_mean);
+    }
+}
+
+/**
+ * Write a POD Field as VTK files.
+ *
+ * \param[in] field, PODField object.
+ * \param[in] file_name, string with the desired file name for the VTK file.
+ */
+void POD::write(const pod::PODField &field, std::string file_name) const
+{
+    log::cout()  << "Writing snapshot ... " << std::endl;
+    // set directory to write the VTK file.
+    m_podkernel->getMesh()->getVTK().setDirectory(m_directory);
+    // set up empty string to store fields name
+    std::vector<std::string > datastring;
+    field.mesh->getVTK().setName(file_name);
+    // set up matrix and vectors to populate the VTK file
+    std::vector<std::vector<double>> fields(m_nScalarFields, std::vector<double>(field.mesh->getInternalCellCount(), 0.0));
+    std::vector<std::vector<std::array<double,3>>> fieldv(m_nVectorFields, std::vector<std::array<double,3>>(field.mesh->getInternalCellCount(), {{0.0, 0.0, 0.0}}));
+    std::vector<uint8_t> field_mask(field.mesh->getInternalCellCount(), 0);
+    // populate the scalar fields matrix
+    for (std::size_t isf = 0; isf < m_nScalarFields; ++isf) {
+        int i=0;
+        for (const Cell &cell : field.mesh->getCells()) {
+            if (cell.isInterior()){
+                long id = cell.getId();
+                fields[isf][i] = field.scalar->at(id, isf);
+                ++i;
+            }
+        }
+        // add data to the VTK file and name them using the corresponding fields name of the pod object
+        field.mesh->getVTK().addData(m_nameScalarFields[isf], VTKFieldType::SCALAR, VTKLocation::CELL, fields[isf]);
+        datastring.push_back(m_nameScalarFields[isf]);
+    }
+    // populate the vector fields matrix
+    for (std::size_t ivf = 0; ivf < m_nVectorFields; ++ivf) {
+        int i=0;
+        for (const Cell &cell : field.mesh->getCells()) {
+            if (cell.isInterior()) {
+                long id = cell.getId();
+                fieldv[ivf][i] = field.vector->at(id, ivf);
+                ++i;
+            }
+        }
+        std::string vname= m_nameVectorFields[ivf][0].substr(0,m_nameVectorFields[ivf][0].size()-2);
+        // add data to the VTK file and name them using the corresponding fields name of the pod object
+        field.mesh->getVTK().addData(vname, VTKFieldType::VECTOR, VTKLocation::CELL, fieldv[ivf]);
+        datastring.push_back(vname);
+    }
+    // populate the mask vector
+    int j = 0;
+    for (const Cell &cell : field.mesh->getCells()) {
+        if (cell.isInterior()) {
+            long id = cell.getId();
+            field_mask[j] = m_filter[id];
+            ++j;
+        }
+    }
+    field.mesh->getVTK().addData("filter", VTKFieldType::SCALAR, VTKLocation::CELL, field_mask);
+    datastring.push_back("filter");
+    // write the VTK file
+    field.mesh->write();
+    // remove the data from the VTK member of the input PODField mesh
+    for (std::size_t is=0; is < datastring.size(); ++is) {
+        field.mesh->getVTK().removeData(datastring[is]);
+    }
+}
+
+/**
+ * Write a POD Mode as VTK files.
+ *
+ * \param[in] int, mode index.
+ * \param[in] file_name, string with the desired file name for the VTK file.
+ */
+void POD::write(int mode_index, std::string file_name)
+{
+    log::cout()  << "Writing mode ... " << std::endl;
+    // set up mesh
+    VolumeKernel* mode_mesh;
+    mode_mesh = m_podkernel->getMesh();
+    mode_mesh->getVTK().setName(file_name);
+    // set up empty string to store fields name
+    std::vector<std::string> datastring;
+    // set up matrix and vectors to populate the VTK file
+    std::vector<std::vector<double>> fields(m_nScalarFields, std::vector<double>(mode_mesh->getInternalCellCount(), 0.0));
+    std::vector<std::vector<std::array<double,3>>> fieldv(m_nVectorFields, std::vector<std::array<double,3>>(mode_mesh->getInternalCellCount(), {{0.0, 0.0, 0.0}}));
+    std::vector<uint8_t> mask(mode_mesh->getInternalCellCount(), 0);
+    // populate the scalar fields matrix
+    for (std::size_t isf = 0; isf < m_nScalarFields; ++isf) {
+        int i=0;
+        for (const Cell &cell : mode_mesh->getCells()) {
+            if (cell.isInterior()){
+                long id = cell.getId();
+                fields[isf][i] = m_modes[mode_index].scalar->at(id, isf);
+                ++i;
+            }
+        }
+        // add data to the VTK file and name them using the corresponding fields name of the pod object
+        mode_mesh->getVTK().addData(m_nameScalarFields[isf], VTKFieldType::SCALAR, VTKLocation::CELL, fields[isf]);
+        datastring.push_back(m_nameScalarFields[isf]);
+    }
+    // populate the vector fields matrix
+    for (std::size_t ivf = 0; ivf < m_nVectorFields; ++ivf) {
+        int i=0;
+        for (const Cell &cell : mode_mesh->getCells()) {
+            if (cell.isInterior()) {
+                long id = cell.getId();
+                fieldv[ivf][i] = m_modes[mode_index].vector->at(id, ivf);
+                ++i;
+            }
+        }
+        std::string vname= m_nameVectorFields[ivf][0].substr(0,m_nameVectorFields[ivf][0].size()-2);
+        // add data to the VTK file and name them using the corresponding fields name of the pod object
+        mode_mesh->getVTK().addData(vname, VTKFieldType::VECTOR, VTKLocation::CELL, fieldv[ivf]);
+        datastring.push_back(vname);
+    }
+    // populate the mask vector
+    int j=0;
+    for (const Cell &cell : mode_mesh->getCells()) {
+        if (cell.isInterior()) {
+            long id = cell.getId();
+            mask[j] = m_filter[id];
+            ++j;
+        }
+    }
+    mode_mesh->getVTK().addData("mask", VTKFieldType::SCALAR, VTKLocation::CELL, mask);
+    datastring.push_back("mask");
+    // write the VTK file
+    mode_mesh->write();
+    // remove the data from the VTK member of the input PODField mesh
+    for (std::size_t is=0; is < datastring.size(); ++is) {
+        mode_mesh->getVTK().removeData(datastring[is]);
+    }
+}
+
+/**
+ * Perform L2 projection of a filed over the POD space generated by the POD modes.
+ *
+ * \param[in/out] POD Field object.
+ * \param[out] matrix of size N_fields x N_modes with the coefficients of the L2 projection.
+ */
+std::vector<std::vector<double>> POD::projectField(pod::PODField &field)
+{
+    std::vector < std::vector<double>> coeff_mat;
+    coeff_mat.clear();
+    coeff_mat.resize(m_nFields, std::vector<double>(m_nModes,0.0));
+    if (m_useMean) {
+        diff(&field, m_mean);
+    }
+    // outer cycle over the POD modes
+    for (std::size_t ir = 0; ir < m_nModes; ++ir) {
+        if (m_memoryMode == MemoryMode::MEMORY_LIGHT)
+            readMode(ir);
+        // outer cycle over active cells
+        std::unordered_set<long>::iterator it;
+        for (long id : m_listActiveIDs) {
+            // inner cycle over scalar fields
+            if (m_nScalarFields) {
+                for (std::size_t ifs = 0; ifs < m_nScalarFields; ++ifs) {
+                    double modes = m_modes[ir].scalar-> at(id, ifs);
+                    double datas = field.scalar->at(id, ifs);
+                    coeff_mat[ifs][ir] += datas * modes * getRawCellVolume(id);
+                }
+            }
+            // inner cycle over vector fields
+            if (m_nVectorFields) {
+                for (std::size_t ifv = 0; ifv < m_nVectorFields; ++ifv) {
+                    std::array<double,3> modev = m_modes[ir].vector->at(id, ifv);
+                    std::array<double,3> datav = field.vector->at(id, ifv);
+                    coeff_mat[ifv+m_nScalarFields][ir] += dotProduct(datav,modev) * getRawCellVolume(id);
+                }
+            }
+        }
+    }
+    if (m_useMean) {
+        sum(&field, m_mean);
+    }
+    return coeff_mat;
+}
+
+/**
+ * Reconstruct a field through POD. Use the input coefficients.
+ * Interface for for generic bitpit field storage. The reconstruction is performed
+ * only on selected cells.
+ *
+ * \param[in] coefficient matrix of size Number of fields x Number of modes.
+ * \param[in,out] fields Input and resulting reconstructed field.
+ * \param[in] scalarIds Ids of scalar fields in PiercedStorage.
+ * \param[in] podscalarIds Ids of scalar fields in POD modes.
+ * \param[in] vectorIds Ids of vector fields in PiercedStorage.
+ * \param[in] podvectorIds Ids of vector fields in POD modes.
+ * \param[in] targetCells Pointer to list of target cells for reconstruction (optional, default whole field).
+ */
+void POD::buildFieldsWithCoeff( std::vector<std::vector<double>> coeff_mat,
+        PiercedStorage<double> &fields,
+        const std::vector<std::size_t> &scalarIds, const std::vector<std::size_t> &podscalarIds,
+        const std::vector<std::array<std::size_t, 3>> &vectorIds, const std::vector<std::size_t> &podvectorIds,
+        const std::unordered_set<long> *targetCells)
+{
+    _buildFieldsWithCoeff(coeff_mat, fields, scalarIds, podscalarIds, vectorIds, podvectorIds, targetCells);
+}
+
+/**
+ * Reconstruct a field through POD. Use the input coefficients.
+ * Interface for for generic bitpit field storage. The reconstruction is performed
+ * only on selected cells.
+ *
+ * \param[in] coefficient matrix of size Number of fields x Number of modes.
+ * \param[in,out] fields Input and resulting reconstructed field.
+ * \param[in] scalarIds Ids of scalar fields in PiercedStorage.
+ * \param[in] podscalarIds Ids of scalar fields in POD modes.
+ * \param[in] vectorIds Ids of vector fields in PiercedStorage.
+ * \param[in] podvectorIds Ids of vector fields in POD modes.
+ * \param[in] targetCells Pointer to list of target cells for reconstruction (optional, default whole field).
+ */
+void POD::_buildFieldsWithCoeff(std::vector<std::vector<double>> coeff_mat,
+        PiercedStorage<double> &fields,
+        const std::vector<std::size_t> &scalarIds, const std::vector<std::size_t> &podscalarIds,
+        const std::vector<std::array<std::size_t, 3>> &vectorIds, const std::vector<std::size_t> &podvectorIds,
+        const std::unordered_set<long> *targetCells)
+{
+    std::size_t nsf = scalarIds.size();
+    std::size_t nvf = vectorIds.size();
+    if (nsf == 0 && nvf == 0) {
+        return;
+    }
+    std::unordered_set<long> targetCellsStorage;
+    if (!targetCells) {
+        for (const Cell &cell : m_podkernel->getMesh()->getCells()) {
+            targetCellsStorage.insert(cell.getId());
+        }
+        targetCells = &targetCellsStorage;
+    }
+    // Initialization of fields
+    for (const long id : *targetCells) {
+        std::size_t rawIndex = m_podkernel->getMesh()->getCells().getRawIndex(id);
+        double *recon = fields.rawData(rawIndex);
+        for (std::size_t ifs = 0; ifs < m_nScalarFields; ++ifs) {
+            double *reconsi = recon + scalarIds[ifs];
+            (*reconsi) = 0.;
+        }
+        for (std::size_t ifv = 0; ifv < m_nVectorFields; ++ifv) {
+            for (std::size_t j = 0; j < 3; ++j) {
+                double *reconvi = recon + vectorIds[ifv][j];
+                (*reconvi) = 0.;
+            }
+        }
+    }
+    // Reconstruction of fields
+    for (std::size_t ir = 0; ir < m_nModes; ++ir) {
+        if (m_memoryMode == MemoryMode::MEMORY_LIGHT) {
+            readMode(ir);
+        }
+        for (const long id : *targetCells) {
+            std::size_t rawIndex = m_podkernel->getMesh()->getCells().getRawIndex(id);
+            double *modes = m_modes[ir].scalar->rawData(rawIndex);
+            double *recon = fields.rawData(rawIndex);
+            for (std::size_t ifs = 0; ifs < m_nScalarFields; ++ifs) {
+                double *modesi = modes + podscalarIds[ifs];
+                double *reconsi = recon + scalarIds[ifs];
+                (*reconsi) += (*modesi) * coeff_mat[ifs][ir];
+            }
+            std::array<double,3> *modev = m_modes[ir].vector->rawData(rawIndex);
+            for (std::size_t ifv = 0; ifv < m_nVectorFields; ++ifv) {
+                std::array<double,3>* modevi = modev + podvectorIds[ifv];
+                for (std::size_t j = 0; j < 3; ++j) {
+                    double *reconvi = recon + vectorIds[ifv][j];
+                    (*reconvi) += (*modevi)[j] * coeff_mat[m_nScalarFields + ifv][ir];
+                }
+            }
+        }
+        if (m_memoryMode == MemoryMode::MEMORY_LIGHT) {
+            m_modes[ir].clear();
+        }
+    }
+    // Sum field and mean
+    sum(fields, m_mean, scalarIds, podscalarIds, vectorIds, podvectorIds, targetCells);
 }
 
 }

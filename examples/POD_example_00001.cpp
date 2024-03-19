@@ -50,8 +50,8 @@ void run()
     POD pod;
 
     /**<Add snapshots to database.*/   
-    for (int i=0; i<11; i++)
-        pod.addSnapshot("./data", "test."+std::to_string(i));
+    for (int i=0; i<6; i++)
+        pod.addSnapshot("./data", "test_set2."+std::to_string(i));
 
     /**<Set POD.*/    
     pod.setMeshType(POD::MeshType::VOLOCTREE);
@@ -65,7 +65,7 @@ void run()
     pod.setName("pod.test.solver");
     
     /**<Add snapshot to be reconstructed.*/
-    pod.addReconstructionSnapshot("./data", "test.0");
+    pod.addReconstructionSnapshot("./data", "test_set2.0");
     
     /**<Compute the POD basis.*/ 
     pod.run();
