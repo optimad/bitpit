@@ -369,8 +369,8 @@ set(BITPIT_LIBRARY ${PROJECT_NAME} CACHE INTERNAL "bitpit library name" FORCE)
 
 add_library(${BITPIT_LIBRARY})
 
-target_compile_features(${BITPIT_LIBRARY} PUBLIC cxx_std_11)
-set_target_properties(${BITPIT_LIBRARY} PROPERTIES CXX_STANDARD 11)
+target_compile_features(${BITPIT_LIBRARY} PUBLIC cxx_std_17)
+set_target_properties(${BITPIT_LIBRARY} PROPERTIES CXX_STANDARD 17)
 set_target_properties(${BITPIT_LIBRARY} PROPERTIES CXX_STANDARD_REQUIRED ON)
 
 if (BITPIT_ENABLE_MPI)
