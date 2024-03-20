@@ -236,6 +236,7 @@ double LevelSetSegmentationSurfaceInfo::evalDistance(const std::array<double, 3>
     std::array<double, 3> projectionNormal;
     evalProjection(point, segmentItr, &projectionPoint, &projectionNormal);
     std::array<double, 3> pointProjectionVector = point - projectionPoint;
+    std::cout << " origin distance: point " << point << " projectionPoint " << projectionPoint << std::endl;
 
     // Evaluate unsigned distance
     double unsignedDistance = norm2(pointProjectionVector);
@@ -932,6 +933,13 @@ void LevelSetSegmentationSurfaceInfo::evalLowOrderProjectionOnTriangle(const std
     int nSegmentVertices = segment.getVertexCount();
     BITPIT_CREATE_WORKSPACE(lambda, double, nSegmentVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
     (*projectionPoint) = CGElem::projectPointTriangle(point, point0, point1, point2, lambda);
+    std::cout << " ------> " << std::endl;
+    std::cout << " p  " << point  << std::endl;
+    std::cout << " p0 " << point0 << std::endl;
+    std::cout << " p1 " << point1 << std::endl;
+    std::cout << " p2 " << point2 << std::endl;
+    std::cout << " lambda " << lambda[0] << " " << lambda[1] << " " << lambda[2] << std::endl;
+    std::cout << " <------ " << std::endl;
 
     std::array<double, 3> normal0 = computeSegmentVertexNormal(segmentItr, 0, true);
     std::array<double, 3> normal1 = computeSegmentVertexNormal(segmentItr, 1, true);
@@ -964,10 +972,20 @@ void LevelSetSegmentationSurfaceInfo::evalLowOrderProjectionOnPolygon(const std:
 
     BITPIT_CREATE_WORKSPACE(lambda, double, nSegmentVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
     (*projectionPoint) = CGElem::projectPointPolygon(point, nSegmentVertices, segmentVertexCoors, lambda);
+    std::cout << " ------> " << std::endl;
+    std::cout << " p  " << point  << std::endl;
+    std::cout << " p0 " << segmentVertexCoors[0] << std::endl;
+    std::cout << " p1 " << segmentVertexCoors[1] << std::endl;
+    std::cout << " p2 " << segmentVertexCoors[2] << std::endl;
+    std::cout << " p3 " << segmentVertexCoors[3] << std::endl;
+    std::cout << " lambda " << lambda[0] << " " << lambda[1] << " " << lambda[2] << " " << lambda[3] << std::endl;
+    std::cout << " <------ " << std::endl;
 
     (*projectionNormal) = lambda[0] * computeSegmentVertexNormal(segmentItr, 0, true);
+    std::cout << " n0 " << (*projectionNormal) << std::endl;
     for (std::size_t i = 1; i < nSegmentVertices; ++i) {
         (*projectionNormal) += lambda[i] * computeSegmentVertexNormal(segmentItr, i, true);
+         std::cout << " n" << i << " " << (*projectionNormal) << std::endl;
     }
     (*projectionNormal) /= norm2(*projectionNormal);
 }
@@ -987,29 +1005,34 @@ void LevelSetSegmentationSurfaceInfo::evalLowOrderProjection(const std::array<do
 {
     const Cell &segment = *segmentItr;
     ElementType segmentType = segment.getType();
+    std::cout << " segmentType " << segmentType << std::endl;
     switch (segmentType) {
 
-    case ElementType::VERTEX :
+    case ElementType::VERTEX:
     {
         evalProjectionOnVertex(point, segmentItr, projectionPoint, projectionNormal);
+        std::cout << " projection vertex " << point << " projectionPoint " << *projectionPoint << " projectionNormal " << *projectionNormal << std::endl;
         return;
     }
 
     case ElementType::LINE:
     {
         evalLowOrderProjectionOnLine(point, segmentItr, projectionPoint, projectionNormal);
+        std::cout << " projection line " << point << " projectionPoint " << *projectionPoint << " projectionNormal " << *projectionNormal << std::endl;
         return;
     }
 
     case ElementType::TRIANGLE:
     {
         evalLowOrderProjectionOnTriangle(point, segmentItr, projectionPoint, projectionNormal);
+        std::cout << " projection triangle " << point << " projectionPoint " << *projectionPoint << " projectionNormal " << *projectionNormal << std::endl;
         return;
     }
 
     default:
     {
         evalLowOrderProjectionOnPolygon(point, segmentItr, projectionPoint, projectionNormal);
+        std::cout << " projection polygon " << point << " projectionPoint " << *projectionPoint << " projectionNormal " << *projectionNormal << std::endl;
         return;
     }
 
@@ -1289,8 +1312,10 @@ std::array<double,3> LevelSetSegmentationSurfaceInfo::computeSegmentVertexNormal
         if (hasUnlimitedNormal) {
             limitedVertexNormal   = m_surface->evalLimitedVertexNormal(segmentId, vertex, vertexNeighbours.size(), vertexNeighbours.data(), m_featureAngle) ;
             unlimitedVertexNormal = m_unlimitedVertexNormalsStorage.rawAt(vertexRawId);
+            std::cout << " normal s " << (*segmentItr).getType() << " v " << vertex << " l " << limitedVertexNormal << std::endl;
         } else {
             m_surface->evalVertexNormals(segmentId, vertex, vertexNeighbours.size(), vertexNeighbours.data(), m_featureAngle, &unlimitedVertexNormal, &limitedVertexNormal) ;
+            std::cout << " normal s " << (*segmentItr).getType() << " v " << vertex << " nol " << unlimitedVertexNormal << " l " << limitedVertexNormal << std::endl;
         }
 
         // Store vertex limited normal
@@ -1303,6 +1328,7 @@ std::array<double,3> LevelSetSegmentationSurfaceInfo::computeSegmentVertexNormal
             if (misalignment >= m_surface->getTol()) {
                 std::pair<long, int> segmentVertexKey = std::make_pair(segmentId, vertex);
                 m_limitedSegmentVertexNormalStorage.insert({segmentVertexKey, std::move(limitedVertexNormal)}) ;
+                std::cout << " normal s " << (*segmentItr).getType() << " v " << vertex << " l2 " << limitedVertexNormal << std::endl;
             }
             m_limitedSegmentVertexNormalValid[m_segmentVertexOffset.rawAt(segmentRawId) + vertex] = true;
         }
@@ -1310,6 +1336,7 @@ std::array<double,3> LevelSetSegmentationSurfaceInfo::computeSegmentVertexNormal
         // Store vertex unlimited normal
         if (!hasUnlimitedNormal ) {
             m_unlimitedVertexNormalsStorage.rawAt(vertexRawId) = std::move(unlimitedVertexNormal);
+            std::cout << " normal s " << (*segmentItr).getType() << " v " << vertex << " unl2 " << unlimitedVertexNormal << std::endl;
             m_unlimitedVertexNormalsValid.rawAt(vertexRawId) = true ;
         }
     }
@@ -1471,25 +1498,30 @@ int LevelSetSegmentationBaseObject::evalCellPart(long id) const
  */
 LevelSetIntersectionStatus LevelSetSegmentationBaseObject::_evalIntersectedInterfaceData(long id, int intrLocalId, bool signedLevelSet, double tolerance, std::array<double, 3> *centroid, double *area) const
 {
+    //std::cout << " |---- " << intrLocalId << " ----| " << std::endl;
     // Evaluate projection of interface centroid on surface
-    const Interface &interface = m_kernel->getMesh()->getCell(id).getInterface(intrLocalId);
+    long intrGlobalId = m_kernel->getMesh()->getCell(id).getInterfaces()[intrLocalId];
+    //if (id == 29276 && intrLocalId == 5) std::cout << " intrGlobalId " << intrGlobalId << std::endl;
+    const Interface &interface = m_kernel->getMesh()->getInterface(intrGlobalId);
     std::array<double,3> interfaceCentroid = m_kernel->getMesh()->evalElementCentroid(interface);
 
     std::array<double,3> root;
     std::array<double,3> normal;
     evalProjection(interfaceCentroid, signedLevelSet, &root, &normal);
+    //std::cout << " xc " << interfaceCentroid << std::endl;
 
     // Early return if projection point is not the closest point of the
     // plane (defined by the projection point and projection normal) to
     // the interface centroid
-    std::array<double,3> distanceVector = interfaceCentroid - normal;
-    double distance = norm2(distanceVector);
-    if (utils::DoubleFloatingGreater()(distance, 0.0, tolerance)) {
-        distanceVector *= 1.0 / distance;
-        double deviation = std::abs(dotProduct(distanceVector, normal));
-        if (!utils::DoubleFloatingEqual()(deviation, 1.0, tolerance)) {
-            return LevelSetIntersectionStatus::FALSE;
-        }
+    long support = evalCellSupport(id);
+    const SurfUnstructured &surface = evalCellSurface(id);
+    LevelSetSegmentationSurfaceInfo::SegmentConstIterator segmentItr = surface.getCellConstIterator(support);
+    const Cell &segment = *segmentItr;
+    ElementType segmentType = segment.getType();
+    if (segmentType == ElementType::VERTEX) {
+        return LevelSetIntersectionStatus::FALSE;
+    } else if (m_kernel->getMesh()->getDimension() == 3 && segmentType == ElementType::LINE) {
+        return LevelSetIntersectionStatus::FALSE;
     }
 
     // Eval intersection between arbitrary 2D surface and planar interface
@@ -1508,11 +1540,13 @@ LevelSetIntersectionStatus LevelSetSegmentationBaseObject::_evalIntersectedInter
  
         residual     = norm2(intersection - intersectionNew);
         intersection = intersectionNew;
+        //std::cout << "     * iter " << iter << " isIntersected " << isIntersected << " res " << residual << " x " << intersection << std::endl;
     }
 
     // Eval centroid and area of the intersected interface
     if (isIntersected) {
         isIntersected = m_kernel->intersectInterfacePlane(id, intrLocalId, root, normal, tolerance, centroid, area, nullptr);
+        //std::cout << " final " << " isIntersected " << isIntersected << " area " << area << std::endl;
         if (isIntersected) {
             return LevelSetIntersectionStatus::TRUE;
         }
@@ -1536,7 +1570,7 @@ LevelSetIntersectionStatus LevelSetSegmentationBaseObject::evalIntersectedInterf
 {
     double distanceTolerance = m_kernel->getDistanceTolerance();
 
-    _evalIntersectedInterfaceData(id, intrLocalId, signedLevelSet, distanceTolerance, centroid, area);
+    return _evalIntersectedInterfaceData(id, intrLocalId, signedLevelSet, distanceTolerance, centroid, area);
 }
 
 /*!
@@ -2619,6 +2653,7 @@ double LevelSetSegmentationObject::_evalCellValue(long id, bool signedLevelSet) 
     long support = evalCellSupport(id);
     std::array<double,3> centroid = m_kernel->computeCellCentroid(id);
 
+    std::cout << " cell " << id << " value " <<  _evalValue(centroid, support, signedLevelSet) << std::endl;
     return _evalValue(centroid, support, signedLevelSet);
 }
 
@@ -2790,6 +2825,7 @@ double LevelSetSegmentationObject::_evalValue(const std::array<double,3> &point,
     // Early return if the support is not valid
     //
     // With an invalid support, only the unsigend levelset can be evaluated.
+    std::cout << " support " << support << std::endl;
     if (support < 0) {
         if (!signedLevelSet || empty()) {
             return levelSetDefaults::VALUE;
@@ -2801,6 +2837,9 @@ double LevelSetSegmentationObject::_evalValue(const std::array<double,3> &point,
     // Evaluate the distance of the point from the surface
     LevelSetSegmentationSurfaceInfo::SegmentConstIterator supportItr = getSurface().getCellConstIterator(support);
     double distance = m_surfaceInfo->evalDistance(point, supportItr, signedLevelSet);
+    const Cell &segment = *supportItr;
+    ElementType segmentType = segment.getType();
+    std::cout << " origin distance " << distance << " segmentType " << segmentType << std::endl;
 
     // Early return if the point lies on the surface
     if (evalValueSign(distance) == 0) {

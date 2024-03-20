@@ -181,11 +181,12 @@ bool LevelSetKernel::intersectCellPlane( long id, const std::array<double,3> &ro
  * @param[in] intrLocalId is the local index of the interface for the given cell
  * @return the index corresponding to the given box face 
  */
-int LevelSetKernel::computeBoxFaceIndex( long id, int intrLocalId) {
+int LevelSetKernel::computeBoxFaceIndex( long id, int intrLocalId, double tolerance) {
 
     // Get cell and interface
     const Cell &cell = m_mesh->getCell(id);
-    const Interface &interface = cell.getInterface(intrLocalId);
+    long intrGlobalId = cell.getInterfaces()[intrLocalId];
+    const Interface &interface = m_mesh->getInterface(intrGlobalId);
 
     // Evaluate interface normal
     std::array<double, 3> coordinates;
@@ -205,7 +206,7 @@ int LevelSetKernel::computeBoxFaceIndex( long id, int intrLocalId) {
             direction = i;
         }
     }
-    assert((utils::DoubleFloatingEqual()(maxCoor, 1.0, distanceTolerance)));
+    assert((utils::DoubleFloatingEqual()(maxCoor, 1.0, tolerance)));
 
     // Check if interface is in the front side
     bool frontFace = (interfaceCentroid[direction] > cellCentroid[direction]);
@@ -230,7 +231,7 @@ int LevelSetKernel::computeBoxFaceIndex( long id, int intrLocalId) {
  */
 bool LevelSetKernel::intersectInterfacePlane( long id, int intrLocalId, const std::array<double,3> &root, const std::array<double,3> &normal, double tolerance, std::array<double, 3> *interfaceCentroid, double *interfaceArea, std::array<double, 3> *intersectionCentroid ) {
 
-    int boxFaceId = computeBoxFaceIndex(id, intrLocalId);
+    int boxFaceId = computeBoxFaceIndex(id, intrLocalId, tolerance);
 
     std::array<double,3> minPoint;
     std::array<double,3> maxPoint;

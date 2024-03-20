@@ -79,7 +79,7 @@ class LevelSetKernel {
 
     virtual bool                                intersectCellPlane(long, const std::array<double,3> &, const std::array<double,3> &, double);
 
-    int                                         computeBoxFaceIndex( long id, int intrLocalId);
+    int                                         computeBoxFaceIndex( long id, int intrLocalId, double tolerance);
     bool                                        intersectInterfacePlane( long id, int intrLocalId, const std::array<double,3> &root, const std::array<double,3> &normal, double tolerance, std::array<double, 3> *interfaceCentroid, double *interfaceArea, std::array<double, 3> *intersectionCentroid );
 
     BITPIT_DEPRECATED(bool                      isPointInCell(long, const std::array<double,3> &) const);

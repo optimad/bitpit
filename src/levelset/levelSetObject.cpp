@@ -482,18 +482,22 @@ void LevelSetObject::destroyCellNarrowBandData( )
  */
 LevelSetCellLocation LevelSetObject::getCellLocation(long id) const
 {
+    if (id == 7805) std::cout << " cell location " << std::endl;
     // Early return if the object is empty
     if (empty()) {
+        if (id == 7805) std::cout << " OK1 " << std::endl;
         return LevelSetCellLocation::BULK;
     }
 
     // Early return if the narrow band is unlimited
     if (m_narrowBandSize == LEVELSET_NARROW_BAND_UNLIMITED) {
+        if (id == 7805) std::cout << " OK2 " << std::endl;
         return LevelSetCellLocation::NARROW_BAND_UNDEFINED;
     }
 
     // Early return if the narrow band cells has not been identified yet
     if (m_cellLocationCacheId == CellCacheCollection::NULL_CACHE_ID) {
+        if (id == 7805) std::cout << " OK3 " << std::endl;
         return LevelSetCellLocation::UNKNOWN;
     }
 
@@ -502,8 +506,10 @@ LevelSetCellLocation LevelSetObject::getCellLocation(long id) const
     CellCacheCollection::ValueCache<char>::Entry locationCacheEntry = locationCache->findEntry(id);
 
     if (locationCacheEntry.isValid()) {
+        if (id == 7805) std::cout << " OK4 " << std::endl;
         return static_cast<LevelSetCellLocation>(*locationCacheEntry);
     } else {
+        if (id == 7805) std::cout << " OK5 " << std::endl;
         return LevelSetCellLocation::UNKNOWN;
     }
 }
@@ -626,6 +632,7 @@ void LevelSetObject::fillCellLocationCache()
         CellCacheCollection::ValueCache<char>::Entry locationCacheEntry = locationCache->findEntry(cellId);
         assert(locationCacheEntry.isValid());
         if (static_cast<LevelSetCellLocation>(*locationCacheEntry) == LevelSetCellLocation::UNKNOWN) {
+            if (cellId == 7805) std::cout << " fill location0: bulk " << std::endl;
             locationCache->insertEntry(cellId, static_cast<char>(LevelSetCellLocation::BULK));
         }
     }
@@ -796,6 +803,7 @@ void LevelSetObject::fillCellLocationCache(const std::vector<adaption::Info> &ad
 
     // Cells whose location is still unknown are in the bulk
     for (long cellId : unknownZoneCellIds) {
+        if (cellId == 7805) std::cout << " fill location1: bulk " << std::endl;
         locationCache->insertEntry(cellId, static_cast<char>(LevelSetCellLocation::BULK));
     }
 
@@ -827,22 +835,26 @@ LevelSetCellLocation LevelSetObject::fillCellGeometricNarrowBandLocationCache(lo
 {
     // Get cell information
     double cellCacheValue    = evalCellValue(id, CELL_CACHE_IS_SIGNED);
-    double cellUnsigendValue = std::abs(cellCacheValue);
+    double cellUnsignedValue = std::abs(cellCacheValue);
 
     // Identify cells that are geometrically inside the narrow band
     //
     // First we need to check if the cell intersectes the surface, and only if it
     // deosn't we should check if its distance is lower than the narrow band size.
     LevelSetCellLocation cellLocation = LevelSetCellLocation::UNKNOWN;
-    if (_intersectCellSurface(id, cellUnsigendValue, CELL_LOCATION_INTERSECTION_MODE) == LevelSetIntersectionStatus::TRUE) {
+    std::cout << " narrow band " << id << " distance " << cellUnsignedValue << std::endl;
+    if (_intersectCellSurface(id, cellUnsignedValue, CELL_LOCATION_INTERSECTION_MODE) == LevelSetIntersectionStatus::TRUE) {
         cellLocation = LevelSetCellLocation::NARROW_BAND_INTERSECTED;
-    } else if (cellUnsigendValue <= m_narrowBandSize) {
+        if (id == 7805) std::cout << " narrow band: intersected " << std::endl;
+    } else if (cellUnsignedValue <= m_narrowBandSize) {
+        if (id == 7805) std::cout << " narrow band: distance " << std::endl;
         cellLocation = LevelSetCellLocation::NARROW_BAND_DISTANCE;
     }
 
     if (cellLocation != LevelSetCellLocation::UNKNOWN) {
         CellCacheCollection::ValueCache<char> *locationCache = getCellCache<char>(m_cellLocationCacheId);
         locationCache->insertEntry(id, static_cast<char>(cellLocation));
+        if (id == 7805) std::cout << " narrow band: cache " << std::endl;
     }
 
     // Fill the cache of the evaluated fields
@@ -1340,6 +1352,7 @@ void LevelSetObject::destroyCellPropagatedSignCache()
  */
 LevelSetIntersectionStatus LevelSetObject::intersectCellSurface(long id, LevelSetIntersectionMode mode) const
 {
+    if (id == 7805) std::cout << " intersect cell " << std::endl;
     // Try evaluating intersection information from the cell location
     //
     // Regardless from the requested mode, a cell can intersect the zero-levelset iso-surface
@@ -1349,17 +1362,21 @@ LevelSetIntersectionStatus LevelSetObject::intersectCellSurface(long id, LevelSe
     // intersection information directly from the location.
     LevelSetCellLocation cellLocation = getCellLocation(id);
     if (cellLocation == LevelSetCellLocation::BULK) {
+        if (id == 7805) std::cout << " cell location: bulk " << std::endl;
         return LevelSetIntersectionStatus::FALSE;
     } else if (mode == CELL_LOCATION_INTERSECTION_MODE) {
         if (cellLocation == LevelSetCellLocation::NARROW_BAND_INTERSECTED) {
+        if (id == 7805) std::cout << " cell location: narrow band " << std::endl;
             return LevelSetIntersectionStatus::TRUE;
         } else if (cellLocation != LevelSetCellLocation::NARROW_BAND_UNDEFINED) {
+            if (id == 7805) std::cout << " cell location: narrow band undefinded" << std::endl;
             return LevelSetIntersectionStatus::FALSE;
         }
     }
 
     // Check for intersection with zero-levelset iso-surface
     double distance = evalCellValue(id, false);
+    std::cout << " distance " << distance << std::endl;
 
     return _intersectCellSurface(id, distance, mode);
 }
@@ -1375,6 +1392,7 @@ LevelSetIntersectionStatus LevelSetObject::intersectCellSurface(long id, LevelSe
  */
 LevelSetIntersectionStatus LevelSetObject::_intersectInterfaceSurface(long id, int intrLocalId, double tolerance) const
 {
+    std::cout << " OK2 " << std::endl;
     const Interface &interface = m_kernel->getMesh()->getCell(id).getInterface(intrLocalId);
     std::array<double,3> centroid = m_kernel->getMesh()->evalElementCentroid(interface);
 
@@ -1476,21 +1494,26 @@ LevelSetIntersectionStatus LevelSetObject::_intersectCellSurface(long id, double
 
         case LevelSetIntersectionMode::ACCURATE_LOW_ORDER:
         {
+            std::cout << " intersect cell: accurate low order " << id << " distance " << distance << std::endl;
             double boundingSphere = m_kernel->computeCellBoundingRadius(id) ;
             if(utils::DoubleFloatingGreater()(distance, boundingSphere, distanceTolerance, distanceTolerance)){
+                std::cout << " intersect cell: accurate low order: false, bounding sphere " << std::endl;
                 return LevelSetIntersectionStatus::FALSE;
             }
 
             double tangentSphere = m_kernel->computeCellTangentRadius(id) ;
             if(utils::DoubleFloatingLessEqual()(distance, tangentSphere, distanceTolerance, distanceTolerance)){
+                std::cout << " intersect cell: accurate low order: true, tangent sphere " << std::endl;
                 return LevelSetIntersectionStatus::TRUE;
             }
 
             std::array<double,3> root = evalCellProjectionPoint(id);
             std::array<double,3> normal = evalCellGradient(id, true);
             if( m_kernel->intersectCellPlane(id,root,normal, distanceTolerance) ){
+                std::cout << " intersect cell: accurate low order: false, kernel, root " << root << " normal " << normal << std::endl;
                 return LevelSetIntersectionStatus::TRUE;
             } else {
+                std::cout << " intersect cell: accurate low order: true, kernel, root " << root << " normal " << normal << std::endl;
                 return LevelSetIntersectionStatus::FALSE;
             }
 
@@ -1499,18 +1522,20 @@ LevelSetIntersectionStatus LevelSetObject::_intersectCellSurface(long id, double
 
         case LevelSetIntersectionMode::ACCURATE_HIGH_ORDER:
         {
-            double boundingSphere = m_kernel->computeCellBoundingRadius(id) ;
-            if(utils::DoubleFloatingGreater()(distance, boundingSphere, distanceTolerance, distanceTolerance)){
-                return LevelSetIntersectionStatus::FALSE;
-            }
+            std::cout << " OK1 " << std::endl;
+            //double boundingSphere = m_kernel->computeCellBoundingRadius(id) ;
+            //if(utils::DoubleFloatingGreater()(distance, boundingSphere, distanceTolerance, distanceTolerance)){
+            //    return LevelSetIntersectionStatus::FALSE;
+            //}
 
-            double tangentSphere = m_kernel->computeCellTangentRadius(id) ;
-            if(utils::DoubleFloatingLessEqual()(distance, tangentSphere, distanceTolerance, distanceTolerance)){
-                return LevelSetIntersectionStatus::TRUE;
-            }
+            //double tangentSphere = m_kernel->computeCellTangentRadius(id) ;
+            //if(utils::DoubleFloatingLessEqual()(distance, tangentSphere, distanceTolerance, distanceTolerance)){
+            //    return LevelSetIntersectionStatus::TRUE;
+            //}
 
             int nInterfaces = m_kernel->getMesh()->getCell(id).getInterfaceCount();
             for (int i = 0; i < nInterfaces; ++i) {
+                std::cout << " OK3 " << i << std::endl;
                 if (_intersectInterfaceSurface(id, i, distanceTolerance) == LevelSetIntersectionStatus::TRUE) {
                     return LevelSetIntersectionStatus::TRUE;
                 }

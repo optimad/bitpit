@@ -80,8 +80,9 @@ public:
 	long * getInterfaces();
 	const long * getInterfaces(int face) const;
 	long * getInterfaces(int face);
-	int findInterface(int face, int interface);
-	int findInterface(int interface);
+	int findInterface(int face, long interface) const;
+	int findInterface(long interface) const;
+	//void findInterface(long interface, int *face, int *index) const;
 
 	void deleteAdjacencies();
 	void resetAdjacencies(bool storeAdjacencies = true);

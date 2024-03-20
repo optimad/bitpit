@@ -673,7 +673,7 @@ bool Element::hasSameConnect(const Element &other) const
 /*!
 	Gets the number of faces of the element.
 
-	\result The number of vertices of the element
+	\result The number of faces of the element
 */
 int Element::getFaceCount() const
 {

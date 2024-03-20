@@ -536,6 +536,17 @@ int subtest_005()
     // Compute projections on curved surface
     bitpit::LevelSetSegmentationBaseObject *levelSetSegmentation = dynamic_cast<bitpit::LevelSetSegmentationBaseObject *>(object);
 
+    //// !!!
+    //for (long cellId = 0; cellId < mesh->getCellCount(); ++cellId) {
+    //    if (cellId != 22302) continue;
+    //    bitpit::LevelSetIntersectionStatus status = levelSetSegmentation->intersectCellSurface(cellId, bitpit::LevelSetIntersectionMode::ACCURATE_HIGH_ORDER);
+    //    if (status == bitpit::LevelSetIntersectionStatus::TRUE) {
+    //        std::cout << " cellId " << cellId << std::endl;
+    //    }
+    //}
+    //std::cout << " FINE " << std::endl;
+    ////
+
     int cellId = 0;
     std::array<double, 3> point = mesh->evalCellCentroid(cellId);
     std::array<double, 3> projectionPoint;

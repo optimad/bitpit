@@ -632,9 +632,9 @@ long * Cell::getInterfaces(int face)
 	\param interface is the interface to look for
 	\result The position in the interface face list of the specfied interface.
 */
-int Cell::findInterface(int face, int interface)
+int Cell::findInterface(int face, long interface) const
 {
-	long *faceInterfaces = getInterfaces(face);
+	const long *faceInterfaces = getInterfaces(face);
 	int nFaceInterfaces = getInterfaceCount(face);
 	for (int i = 0; i < nFaceInterfaces; i++) {
 		if (faceInterfaces[i] == interface) {
@@ -655,7 +655,7 @@ int Cell::findInterface(int face, int interface)
 	\param interface is the interface to look for
 	\result The position in the interface cell list of the specfied interface.
 */
-int Cell::findInterface(int interface)
+int Cell::findInterface(long interface) const
 {
 	int nCellInterfaces = getInterfaceCount();
 	const long *interfaces = getInterfaces();
@@ -667,6 +667,34 @@ int Cell::findInterface(int interface)
 
 	return -1;
 }
+
+/*!
+	Find the specified interface among all the interfaces of the cell.
+
+	The function returns the face and index of the specified interface.
+  	If the cell doesn't contain the specified interface
+	the function returns a dummy position equal to -1.
+
+	\param interface is the interface to look for
+	\param face is the face where the given interface belongs
+	\param index is the index in the local face enumeration corresponding to the given interface
+*/
+/*void Cell::findInterface(long interface, int *face, int *index) const
+{
+	for (int i = 0; i < getFaceCount(); ++i) {
+	    int nCellInterfaces = getInterfaceCount(i);
+	    for (int j = 0; j < nCellInterfaces; ++j) {
+	    	if (getInterface(i, j) == interface) {
+                        (*face)  = i;
+                        (*index) = j;
+	    		return;
+	    	}
+	    }
+        }
+
+        (*face)  = -1;
+        (*index) = -1;
+}*/
 
 /*!
 	Deletes the adjacencies of the cell.
