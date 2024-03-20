@@ -1490,22 +1490,20 @@ void SystemSolver::matrixCreate(const SystemMatrixAssembler &assembler)
     }
 #endif
 
+    MatType matrixType;
+    MatGetType(m_A, &matrixType);
+    if (strcmp(matrixType, MATSEQAIJ) == 0) {
+        MatSeqAIJSetPreallocation(m_A, 0, d_nnz.data());
+    } else if (strcmp(matrixType, MATSEQBAIJ) == 0) {
+        MatSeqBAIJSetPreallocation(m_A, matrixBlockSize, 0, d_nnz.data());
 #if BITPIT_ENABLE_MPI == 1
-    if (m_partitioned) {
-        if (matrixBlockSize == 1) {
-            MatMPIAIJSetPreallocation(m_A, 0, d_nnz.data(), 0, o_nnz.data());
-        } else {
-            MatMPIBAIJSetPreallocation(m_A, matrixBlockSize, 0, d_nnz.data(), 0, o_nnz.data());
-        }
-    } else
+    } else if (strcmp(matrixType, MATMPIAIJ) == 0) {
+        MatMPIAIJSetPreallocation(m_A, 0, d_nnz.data(), 0, o_nnz.data());
+    } else if (strcmp(matrixType, MATMPIBAIJ) == 0) {
+        MatMPIBAIJSetPreallocation(m_A, matrixBlockSize, 0, d_nnz.data(), 0, o_nnz.data());
 #endif
-    {
-        if (matrixBlockSize == 1) {
-            MatSeqAIJSetPreallocation(m_A, 0, d_nnz.data());
-        } else {
-            MatSeqBAIJSetPreallocation(m_A, matrixBlockSize, 0, d_nnz.data());
-        }
-
+    } else {
+        throw std::runtime_error("Matrix format not supported.");
     }
 
     // Each process will only set values for its own rows
