@@ -28,6 +28,7 @@
 #include <unordered_set>
 
 #include "bitpit_common.hpp"
+#include "bitpit_operators.hpp"
 
 #include "system_solvers_large.hpp"
 
@@ -1366,7 +1367,8 @@ void SystemSolver::matrixCreate(int blockSize)
 #if BITPIT_ENABLE_MPI == 1
     if (m_partitioned) {
         if (blockSize > 1) {
-            MatSetType(m_A, MATMPIBAIJ);
+            // MatSetType(m_A, MATMPIBAIJ);
+            MatSetType(m_A, MATMPIAIJ);
         } else {
             MatSetType(m_A, MATMPIAIJ);
         }
@@ -1374,7 +1376,8 @@ void SystemSolver::matrixCreate(int blockSize)
 #endif
     {
         if (blockSize > 1) {
-            MatSetType(m_A, MATSEQBAIJ);
+            // MatSetType(m_A, MATSEQBAIJ);
+            MatSetType(m_A, MATSEQAIJ);
         } else {
             MatSetType(m_A, MATSEQAIJ);
         }
@@ -1417,7 +1420,7 @@ void SystemSolver::matrixCreate(const SystemMatrixAssembler &assembler)
         matrixBlockSize = assembler.getBlockSize();
     }
 
-    int blockExpansionSize = (matrixBlockSize != assemblerBlockSize) ? assemblerBlockSize : 1;
+    int blockExpansionSize = (true) ? assemblerBlockSize : 1;
 
     // Create the matrix
     matrixCreate(matrixBlockSize);
