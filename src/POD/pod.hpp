@@ -122,6 +122,7 @@ public:
     void addSnapshot(const std::string &directory, const std::string &name);
     void addSnapshot(const pod::SnapshotFile &file);
     void setSnapshots(const std::vector<pod::SnapshotFile> &database);
+    void readSnapshot(const pod::SnapshotFile &snap, pod::PODField &fieldr);
     void removeLeave1outSnapshot(const std::string &directory, const std::string &name);
     void removeLeave1outSnapshot(const pod::SnapshotFile &file);    
     void unsetLeave1outSnapshots();    
@@ -193,6 +194,9 @@ public:
     void reconstructFields(PiercedStorage<double> &fields, VolumeKernel *mesh,
             std::map<std::string, std::size_t> targetFields,
             const std::unordered_set<long> *targetCells);
+
+    std::vector<double> fieldsl2norm(pod::PODField &snap);
+    std::vector<double> fieldsMax(pod::PODField &snap);
 
 private:
     std::unique_ptr<PODKernel>              m_podkernel;                /**< POD computational kernel */
@@ -270,7 +274,6 @@ private:
 
     void dumpMode(std::size_t ir);
 
-    void readSnapshot(const pod::SnapshotFile &snap, pod::PODField &fieldr);
     void readMode(std::size_t ir);
 
     double getCellVolume(long id);
@@ -278,8 +281,6 @@ private:
 
     void diff(pod::PODField * _a, const pod::PODMode &b);
     void sum(pod::PODField * _a, const pod::PODMode &b);
-    std::vector<double> fieldsl2norm(pod::PODField &snap);
-    std::vector<double> fieldsMax(pod::PODField &snap);    
 
 #if BITPIT_ENABLE_MPI
     void initializeCommunicator(MPI_Comm communicator);
