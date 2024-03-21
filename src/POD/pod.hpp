@@ -252,7 +252,7 @@ private:
 
     const static int    ARCHIVE_VERSION = 0;
 
-    const double    m_tol = 1.0e-12;  /**<Tolerance for energy check.*/
+    const double    ENERGY_CHECK_TOLERANCE = 1.0e-12;  /**<Tolerance for energy check.*/
 
     void _evalMeanMesh();
     void checkModeCount(double *alambda, std::size_t ifield);

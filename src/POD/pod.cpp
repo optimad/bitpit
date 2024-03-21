@@ -83,7 +83,7 @@ POD::POD()
     m_nSnapshots = 0;
     m_nModes = std::numeric_limits<std::size_t>::max();
     m_nFields = 0;
-    m_energyLevel = 100 - m_tol;
+    m_energyLevel = 100 - ENERGY_CHECK_TOLERANCE;
     m_nScalarFields = 0;
     m_nVectorFields = 0;
     m_nReconstructionSnapshots = 0;
@@ -325,7 +325,7 @@ std::size_t POD::getModeCount()
  */
 void POD::setEnergyLevel(double energy)
 {
-    m_energyLevel = energy - m_tol;
+    m_energyLevel = energy - ENERGY_CHECK_TOLERANCE;
 }
 
 /**
@@ -335,7 +335,7 @@ void POD::setEnergyLevel(double energy)
  */
 double POD::getEnergyLevel()
 {
-    return m_energyLevel + m_tol;
+    return m_energyLevel + ENERGY_CHECK_TOLERANCE;
 }
 
 /**
