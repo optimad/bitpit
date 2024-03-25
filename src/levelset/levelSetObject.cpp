@@ -827,16 +827,16 @@ LevelSetCellLocation LevelSetObject::fillCellGeometricNarrowBandLocationCache(lo
 {
     // Get cell information
     double cellCacheValue    = evalCellValue(id, CELL_CACHE_IS_SIGNED);
-    double cellUnsigendValue = std::abs(cellCacheValue);
+    double cellUnsignedValue = std::abs(cellCacheValue);
 
     // Identify cells that are geometrically inside the narrow band
     //
     // First we need to check if the cell intersectes the surface, and only if it
     // deosn't we should check if its distance is lower than the narrow band size.
     LevelSetCellLocation cellLocation = LevelSetCellLocation::UNKNOWN;
-    if (_intersectSurface(id, cellUnsigendValue, CELL_LOCATION_INTERSECTION_MODE) == LevelSetIntersectionStatus::TRUE) {
+    if (_intersectSurface(id, cellUnsignedValue, CELL_LOCATION_INTERSECTION_MODE) == LevelSetIntersectionStatus::TRUE) {
         cellLocation = LevelSetCellLocation::NARROW_BAND_INTERSECTED;
-    } else if (cellUnsigendValue <= m_narrowBandSize) {
+    } else if (cellUnsignedValue <= m_narrowBandSize) {
         cellLocation = LevelSetCellLocation::NARROW_BAND_DISTANCE;
     }
 
