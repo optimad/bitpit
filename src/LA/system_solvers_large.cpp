@@ -589,6 +589,9 @@ bool PetscManager::initialize(bool debug)
     std::string help        = "None";
     std::string programName = "bitpit_petsc_manager";
 
+    // m_options.push_back("-info");
+    // m_options.push_back("-info :pc");
+
     int argc = 1 + m_options.size();
     char **argv = new char*[argc + 1];
     argv[0] = strdup(programName.data());
@@ -1414,11 +1417,13 @@ void SystemSolver::matrixCreate(const SystemMatrixAssembler &assembler)
     int assemblerBlockSize = assembler.getBlockSize();
 
     int matrixBlockSize;
-    if (m_flatten) {
-        matrixBlockSize = 1;
-    } else {
+    // if (m_flatten) {
+        // matrixBlockSize = 1;
+    // } else {
         matrixBlockSize = assembler.getBlockSize();
-    }
+    // }
+
+    std::cout << "XXX " << matrixBlockSize << std::endl;
 
     int blockExpansionSize = (true) ? assemblerBlockSize : 1;
 
