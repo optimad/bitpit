@@ -28,6 +28,7 @@
 #include <unordered_set>
 
 #include "bitpit_common.hpp"
+#include "bitpit_operators.hpp"
 
 #include "system_solvers_large.hpp"
 
@@ -728,8 +729,12 @@ SystemSolver::SystemSolver(bool transpose, bool debug)
 /*!
  * Constuctor
  *
- * \param flatten if set to true, the system matrix will be created with a
- * unitary block size, regardless of the blocks size of the assembler
+ * \param flatten if set to true, block size will not be taken into account when allocating
+ * the internal storage of the system matrix. Even when the internal storage is flat, block
+ * size information are available and can be used by the solver to speed up the solution of
+ * the system. However, since the internal storage doesn't take blocks into account, some
+ * low level operations (e.g., matrix-matrix multiplications) cannot use block information.
+ * Some algorithms for the solution of the system (e.g., mutligrid) requires a flat storage.
  * \param transpose if set to true, transposed system will be solved
  * \param debug if set to true, debug information will be printed
  */
@@ -764,8 +769,12 @@ SystemSolver::SystemSolver(const std::string &prefix, bool transpose, bool debug
  * Constuctor
  *
  * \param prefix is the prefix string to prepend to all option requests
- * \param flatten if set to true, the system matrix will be created with a
- * unitary block size, regardless of the blocks size of the assembler
+ * \param flatten if set to true, block size will not be taken into account when allocating
+ * the internal storage of the system matrix. Even when the internal storage is flat, block
+ * size information are available and can be used by the solver to speed up the solution of
+ * the system. However, since the internal storage doesn't take blocks into account, some
+ * low level operations (e.g., matrix-matrix multiplications) cannot use block information.
+ * Some algorithms for the solution of the system (e.g., mutligrid) requires a flat storage.
  * \param transpose if set to true, transposed system will be solved
  * \param debug if set to true, debug information will be printed
  */
@@ -849,11 +858,6 @@ void SystemSolver::clearWorkspace()
 /*!
  * Assembly the system.
  *
- * If the system was created with the flatten flag set to true, the system matrix
- * will be created with a unitary block size. Otherwise, the block size of the
- * system matrix will be set equal to the block size of the matrix received in
- * input.
- *
  * \param matrix is the matrix
  */
 void SystemSolver::assembly(const SparseMatrix &matrix)
@@ -863,11 +867,6 @@ void SystemSolver::assembly(const SparseMatrix &matrix)
 
 /*!
  * Assembly the system.
- *
- * If the system was created with the flatten flag set to true, the system matrix
- * will be created with a unitary block size. Otherwise, the block size of the
- * system matrix will be set equal to the block size of the matrix received in
- * input.
  *
  * \param matrix is the matrix
  * \param reordering is the reordering that will be applied when assemblying the
@@ -893,10 +892,6 @@ void SystemSolver::assembly(const SparseMatrix &matrix, const SystemMatrixOrderi
 /*!
  * Assembly the system.
  *
- * If the system was created with the flatten flag set to true, the system matrix
- * will be created with a unitary block size. Otherwise, the block size of the
- * system matrix will be set equal to the block size specified by the assembler.
- *
  * \param communicator is the MPI communicator
  * \param isPartitioned controls if the system is partitioned
  * \param assembler is the matrix assembler
@@ -908,10 +903,6 @@ void SystemSolver::assembly(MPI_Comm communicator, bool isPartitioned, const Sys
 
 /*!
  * Assembly the system.
- *
- * If the system was created with the flatten flag set to true, the system matrix
- * will be created with a unitary block size. Otherwise, the block size of the
- * system matrix will be set equal to the block size specified by the assembler.
  *
  * \param communicator is the MPI communicator
  * \param isPartitioned controls if the system is partitioned
@@ -925,10 +916,6 @@ void SystemSolver::assembly(MPI_Comm communicator, bool isPartitioned, const Sys
 /*!
  * Assembly the system.
  *
- * If the system was created with the flatten flag set to true, the system matrix
- * will be created with a unitary block size. Otherwise, the block size of the
- * system matrix will be set equal to the block size specified by the assembler.
- *
  * \param assembler is the matrix assembler
  */
 void SystemSolver::assembly(const SystemMatrixAssembler &assembler)
@@ -938,10 +925,6 @@ void SystemSolver::assembly(const SystemMatrixAssembler &assembler)
 
 /*!
  * Assembly the system.
- *
- * If the system was created with the flatten flag set to true, the system matrix
- * will be created with a unitary block size. Otherwise, the block size of the
- * system matrix will be set equal to the block size specified by the assembler.
  *
  * \param assembler is the matrix assembler
  * \param reordering is the reordering that will be applied when assemblying the
@@ -1365,7 +1348,7 @@ void SystemSolver::matrixCreate(int blockSize)
     // Set matrix type
 #if BITPIT_ENABLE_MPI == 1
     if (m_partitioned) {
-        if (blockSize > 1) {
+        if (!m_flatten && blockSize > 1) {
             MatSetType(m_A, MATMPIBAIJ);
         } else {
             MatSetType(m_A, MATMPIAIJ);
@@ -1373,7 +1356,7 @@ void SystemSolver::matrixCreate(int blockSize)
     } else
 #endif
     {
-        if (blockSize > 1) {
+        if (!m_flatten && blockSize > 1) {
             MatSetType(m_A, MATSEQBAIJ);
         } else {
             MatSetType(m_A, MATSEQAIJ);
@@ -1389,10 +1372,6 @@ void SystemSolver::matrixCreate(int blockSize)
 /*!
  * Create the matrix.
  *
- * If the system was created with the flatten flag set to true, the matrix will
- * be created with a unitary block size. Otherwise, the block size of the system
- * matrix will be set equal to the block size specified by the assembler.
- *
  * \param assembler is the matrix assembler
  */
 void SystemSolver::matrixCreate(const SystemMatrixAssembler &assembler)
@@ -1402,25 +1381,13 @@ void SystemSolver::matrixCreate(const SystemMatrixAssembler &assembler)
         ISGetIndices(m_rowReordering, &rowReordering);
     }
 
-    // Set block size
-    //
-    // When blocks are ignored, the PETSc matrix will be created with a unitary
-    // block size, regardless of the blocks size of the assembler. If this is
-    // the case, preallociation information provided by the assembler will be
-    // properly expanded to have preallocation information for each matrix row.
-    int assemblerBlockSize = assembler.getBlockSize();
-
-    int matrixBlockSize;
-    if (m_flatten) {
-        matrixBlockSize = 1;
-    } else {
-        matrixBlockSize = assembler.getBlockSize();
-    }
-
-    int blockExpansionSize = (matrixBlockSize != assemblerBlockSize) ? assemblerBlockSize : 1;
-
     // Create the matrix
+    int matrixBlockSize = assembler.getBlockSize();
+
     matrixCreate(matrixBlockSize);
+
+    MatType matrixType;
+    MatGetType(m_A, &matrixType);
 
     // Get sizes
     long nAssemblerRows = assembler.getRowCount();
@@ -1441,7 +1408,22 @@ void SystemSolver::matrixCreate(const SystemMatrixAssembler &assembler)
     MatSetSizes(m_A, nRowsElements, nColsElements, nGlobalRowsElements, nGlobalColsElements);
 
     // Preallocation information
-    long nPreallocationRows = blockExpansionSize * nAssemblerRows;
+    //
+    // When the internal storage of the system matrix was created without taking into account
+    // block information, preallociation information should be provided for each row of each
+    // block.
+    int preallocationExpansionSize;
+    if (strcmp(matrixType, MATSEQAIJ) == 0) {
+        preallocationExpansionSize = matrixBlockSize;
+#if BITPIT_ENABLE_MPI == 1
+    } else if (strcmp(matrixType, MATMPIAIJ) == 0) {
+        preallocationExpansionSize = matrixBlockSize;
+#endif
+    } else {
+        preallocationExpansionSize = 1;
+    }
+
+    long nPreallocationRows = preallocationExpansionSize * nAssemblerRows;
 
     std::vector<int> d_nnz(nPreallocationRows, 0);
     for (long n = 0; n < nAssemblerRows; ++n) {
@@ -1452,9 +1434,9 @@ void SystemSolver::matrixCreate(const SystemMatrixAssembler &assembler)
 
         int nAssemblerRowNZ = assembler.getRowNZCount(n);
 
-        long matrixRowOffset = matrixRow * blockExpansionSize;
-        for (int i = 0; i < blockExpansionSize; ++i) {
-            d_nnz[matrixRowOffset + i] = blockExpansionSize * nAssemblerRowNZ;
+        long matrixRowOffset = matrixRow * preallocationExpansionSize;
+        for (int i = 0; i < preallocationExpansionSize; ++i) {
+            d_nnz[matrixRowOffset + i] = preallocationExpansionSize * nAssemblerRowNZ;
         }
     }
 
@@ -1476,13 +1458,13 @@ void SystemSolver::matrixCreate(const SystemMatrixAssembler &assembler)
             assembler.getRowPattern(n, &assemblerRowPattern);
             int nAssemblerRowNZ = assemblerRowPattern.size();
 
-            long matrixRowOffset = matrixRow * blockExpansionSize;
+            long matrixRowOffset = matrixRow * preallocationExpansionSize;
             for (int k = 0; k < nAssemblerRowNZ; ++k) {
                 long id = assemblerRowPattern[k];
                 if (id < assemblerDiagonalBegin || id >= assemblerDiagonalEnd) {
-                    for (int i = 0; i < blockExpansionSize; ++i) {
-                        o_nnz[matrixRowOffset + i] += blockExpansionSize;
-                        d_nnz[matrixRowOffset + i] -= blockExpansionSize;
+                    for (int i = 0; i < preallocationExpansionSize; ++i) {
+                        o_nnz[matrixRowOffset + i] += preallocationExpansionSize;
+                        d_nnz[matrixRowOffset + i] -= preallocationExpansionSize;
                     }
                 }
             }
@@ -1490,8 +1472,6 @@ void SystemSolver::matrixCreate(const SystemMatrixAssembler &assembler)
     }
 #endif
 
-    MatType matrixType;
-    MatGetType(m_A, &matrixType);
     if (strcmp(matrixType, MATSEQAIJ) == 0) {
         MatSeqAIJSetPreallocation(m_A, 0, d_nnz.data());
     } else if (strcmp(matrixType, MATSEQBAIJ) == 0) {
