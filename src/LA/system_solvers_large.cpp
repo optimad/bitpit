@@ -1458,7 +1458,6 @@ void SystemSolver::matrixCreate(const SystemMatrixAssembler &assembler)
         }
     }
 
-
 #if BITPIT_ENABLE_MPI == 1
     std::vector<int> o_nnz(nPreallocationRows, 0);
     if (m_partitioned) {
@@ -1473,7 +1472,6 @@ void SystemSolver::matrixCreate(const SystemMatrixAssembler &assembler)
             if (rowReordering) {
                 matrixRow = rowReordering[matrixRow];
             }
-
 
             assembler.getRowPattern(n, &assemblerRowPattern);
             int nAssemblerRowNZ = assemblerRowPattern.size();
