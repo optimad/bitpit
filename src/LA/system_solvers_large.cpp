@@ -1628,8 +1628,6 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrix
     // Get the options for assembling the matrix
     SystemMatrixAssembler::AssemblyOptions assemblyOptions = assembler.getOptions();
 
-    PetscBool matrixSortedFull = (assemblyOptions.full && assemblyOptions.sorted) ? PETSC_TRUE : PETSC_FALSE;
-
 #if PETSC_VERSION_GE(3, 12, 0)
     // Check if it is possible to speedup insertion of values
     //
@@ -1640,8 +1638,27 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrix
     // will be faster.
     //
     // This options needs at least PETSc 3.12.
+    PetscBool matrixSortedFull = (assemblyOptions.full && assemblyOptions.sorted) ? PETSC_TRUE : PETSC_FALSE;
     MatSetOption(m_A, MAT_SORTED_FULL, matrixSortedFull);
 #endif
+
+    // Check if it possible to perform a fast update
+    //
+    // A fast update allows to set all the values of a row at once (without
+    // the need to get the row pattern), it can be performed if:
+    //  - the system matrix has already been assembled;
+    //  - the system matrix has a unitary block size;
+    //  - the assembler is providing all the values of the row;
+    //  - values provided by the assembler are sorted by ascending column.
+    //
+    // If fast update is used, row values will be set using a special PETSc
+    // function (MatSetValuesRow) that allows to set all the values of a
+    // row at once, without requiring the pattern of the row.
+    //
+    // Fast update is not related to the option MAT_SORTED_FULL, that option
+    // is used to speedup the standard function MatSetValues (which still
+    // requires the pattern of the row).
+    bool fastUpdate = isAssembled() && (matrixBlockSize == 1) && assemblyOptions.full && assemblyOptions.sorted;
 
     // Update element values
     //
@@ -1679,24 +1696,6 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrix
         }
 
         const PetscInt globalRow = rowGlobalOffset + row;
-
-        // Check if it possible to perform a fast update
-        //
-        // A fast update allows to set all the values of a row at once (without
-        // the need to get the row pattern), it can be performed if:
-        //  - the system matrix has already been assembled;
-        //  - the system matrix has a unitary block size;
-        //  - the assembler is providing all the values of the row;
-        //  - values provided by the assembler are sorted by ascending column.
-        //
-        // If fast update is used, row values will be set using a special PETSc
-        // function (MatSetValuesRow) that allows to set all the values of a
-        // row at once, without requiring the pattern of the row.
-        //
-        // Fast update is not related to the option MAT_SORTED_FULL, that option
-        // is used to speedup the standard function MatSetValues (which still
-        // requires the pattern of the row).
-        bool fastUpdate = isAssembled() && (matrixBlockSize == 1) && (matrixSortedFull == PETSC_TRUE);
 
         // Get row data
         if (fastUpdate) {
