@@ -1989,6 +1989,25 @@ long LevelSetSegmentationBaseObject::evalSupport(const std::array<double,3> &poi
 }
 
 /*!
+ * Evaluate the projection of the given point on the surface created based on
+ * the points representing the specified segment. The surface passes from these
+ * points and is verical to the normal vectors associated with them.
+ *
+ * @param[in] point are the coordinates of the given point
+ * @param[in] signedLevelSet controls if signed levelset function will be used
+ * @param[out] projectionPoint The coordinates of the projection point on the surface.
+ * @param[out] projectionNormal The coordinates of the norrmal to the surface vector on the surface
+ * projection point.
+ */
+void LevelSetSegmentationBaseObject::evalProjection(const std::array<double,3> &point,
+                                                    bool signedLevelSet,
+                                                    std::array<double, 3> *projectionPoint,
+                                                    std::array<double, 3> *projectionNormal) const
+{
+    _evalProjection(point, signedLevelSet, projectionPoint, projectionNormal);
+}
+
+/*!
  * Evaluate the part associated with the segment closest to the specified cell.
  *
  * \param id is the id of the cell
@@ -2905,6 +2924,28 @@ std::array<double,3> LevelSetSegmentationObject::_evalNormal(const std::array<do
 }
 
 /*!
+ * Evaluate the projection of the given point on the surface created based on
+ * the points representing the specified segment. The surface passes from these
+ * points and is verical to the normal vectors associated with them.
+ *
+ * @param[in] point are the coordinates of the given point
+ * @param[in] signedLevelSet controls if signed levelset function will be used
+ * @param[out] projectionPoint The coordinates of the projection point on the surface.
+ * @param[out] projectionNormal The coordinates of the norrmal to the surface vector on the surface
+ * projection point.
+ */
+void LevelSetSegmentationObject::_evalProjection(const std::array<double,3> &point,
+                                                 bool signedLevelSet,
+                                                 std::array<double, 3> *projectionPoint,
+                                                 std::array<double, 3> *projectionNormal) const
+{
+    // Get closest segment
+    long support = evalSupport(point);
+
+    return _evalProjection(point, support, signedLevelSet, projectionPoint, projectionNormal);
+}
+
+/*!
  * Evaluate levelset sign at the specified point.
  *
  * \param point are the coordinates of the point
@@ -3071,6 +3112,49 @@ std::array<double,3> LevelSetSegmentationObject::_evalNormal(const std::array<do
     }
 
     return normal;
+}
+
+/*!
+ * Evaluate the projection of the given point on the surface created based on
+ * the points representing the specified segment. The surface passes from these
+ * points and is verical to the normal vectors associated with them.
+ *
+ * \param[in] point are the coordinates of the given point
+ * \param support is the the closest segment to the specified point
+ * \param[in] signedLevelSet controls if signed levelset function will be used
+ * \param[out] projectionPoint The coordinates of the projection point on the surface.
+ * \param[out] projectionNormal The coordinates of the norrmal to the surface vector on the surface
+ * projection point.
+ */
+void LevelSetSegmentationObject::_evalProjection(const std::array<double,3> &point,
+                                                 long support,
+                                                 bool signedLevelSet,
+                                                 std::array<double, 3> *projectionPoint,
+                                                 std::array<double, 3> *projectionNormal) const
+{
+    // Early return if the support is not valid
+    //
+    // With an invalid support, only the unsigend levelset can be evaluated.
+    if (support < 0) {
+        if (!signedLevelSet || empty()) {
+            (*projectionPoint) = levelSetDefaults::POINT;
+            (*projectionNormal) = levelSetDefaults::NORMAL;
+        }
+
+        throw std::runtime_error("With an invalid support, only the unsigend levelset can be evaluated.");
+    }
+
+    // Get closest segment
+    LevelSetSegmentationSurfaceInfo::SegmentConstIterator segmentItr = getSurface().getCellConstIterator(support);
+
+    // Eval projection point and normal
+    m_surfaceInfo->evalProjection(point, segmentItr, projectionPoint, projectionNormal);
+
+    // If an unsigned evaluation is requested, the orientation of the surface should be discarded
+    // and in order to have a normal that is agnostic with respect the two sides of the surface.
+    if (!signedLevelSet) {
+        (*projectionNormal) *= static_cast<double>(evalSign(point));
+    }
 }
 
 /*!
@@ -3270,6 +3354,37 @@ std::array<double,3> LevelSetBooleanObject<LevelSetSegmentationBaseObject>::_eva
 }
 
 /*!
+ * Evaluate the projection of the given point on the surface created based on
+ * the points representing the specified segment. The surface passes from these
+ * points and is verical to the normal vectors associated with them.
+ *
+ * @param[in] point are the coordinates of the given point
+ * @param[in] signedLevelSet controls if signed levelset function will be used
+ * @param[out] projectionPoint The coordinates of the projection point on the surface.
+ * @param[out] projectionNormal The coordinates of the norrmal to the surface vector on the surface
+ * projection point.
+ */
+void LevelSetBooleanObject<LevelSetSegmentationBaseObject>::_evalProjection(const std::array<double,3> &point,
+                                                                            bool signedLevelSet,
+                                                                            std::array<double, 3> *projectionPoint,
+                                                                            std::array<double, 3> *projectionNormal) const
+{
+    return _evalFunction<void>(point, signedLevelSet, [&point, projectionPoint, projectionNormal, signedLevelSet] (const LevelSetBooleanResult<LevelSetSegmentationBaseObject> &result)
+        {
+            const LevelSetSegmentationBaseObject *resultObject = result.getObject();
+            if ( !resultObject ) {
+                (*projectionNormal) = levelSetDefaults::NORMAL;
+                (*projectionPoint)  = levelSetDefaults::POINT;
+            }
+
+            resultObject->evalProjection(point, signedLevelSet, projectionPoint, projectionNormal);
+            if (signedLevelSet) {
+                (*projectionNormal) *= static_cast<double>(result.getObjectSign());
+            }
+        });
+}
+
+/*!
  * Evaluate the part associated with the segment closest to the specified point.
  *
  * \param point are the coordinates of the point
@@ -3416,6 +3531,28 @@ std::array<double,3> LevelSetComplementObject<LevelSetSegmentationBaseObject>::_
     }
 
     return normal;
+}
+
+/*!
+ * Evaluate the projection of the given point on the surface created based on
+ * the points representing the specified segment. The surface passes from these
+ * points and is verical to the normal vectors associated with them.
+ *
+ * @param[in] point are the coordinates of the given point
+ * @param[in] signedLevelSet controls if signed levelset function will be used
+ * @param[out] projectionPoint The coordinates of the projection point on the surface.
+ * @param[out] projectionNormal The coordinates of the norrmal to the surface vector on the surface
+ * projection point.
+ */
+void LevelSetComplementObject<LevelSetSegmentationBaseObject>::_evalProjection(const std::array<double,3> &point,
+                                                                               bool signedLevelSet,
+                                                                               std::array<double, 3> *projectionPoint,
+                                                                               std::array<double, 3> *projectionNormal) const
+{
+    getSourceObject()->evalProjection(point, signedLevelSet, projectionPoint, projectionNormal);
+    if (signedLevelSet) {
+        (*projectionNormal) *= -1.;
+    }
 }
 
 }
