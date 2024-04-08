@@ -1635,11 +1635,122 @@ void POD::reconstructFields(pod::PODField & field,  pod::PODField & reconi)
     reconi.mesh = field.mesh;
     reconi.mask = std::unique_ptr<PiercedStorage<bool>>(new PiercedStorage<bool>(*field.mask));
     evalReconstructionCoeffs(field);
-    buildFields(reconi);
+    buildFields(m_reconstructionCoeffs, reconi);
     if (m_errorMode != ErrorMode::NONE){
         if (m_errorMode == ErrorMode::SINGLE)
             initErrorMaps();
         buildErrorMaps(field,reconi);
+    }
+
+}
+
+/**
+ * Field reconstruction.
+ * \param[in] field Original field (Note: it has to be defined on POD mesh).
+ * \param[out] reconi Reconstructed field.
+ */
+void POD::reconstructFields(const std::vector<std::vector<double>> &reconstructionCoeffs,
+                            pod::PODField & reconi)
+{
+    reconi.setMesh(m_podkernel->getMesh());
+    buildFields(reconstructionCoeffs, reconi);
+}
+
+/**
+ * Field reconstruction.
+ *
+ * \param[in,out] fields Original field used in the reconstruction. Only the values of \p targetCells are updated.
+ * \param[in] mesh Pointer to snapshot field
+ * \param[in] targetFields Map of names/ids of fields in PiercedStorage to reconstruct
+ * \param[in] targetCells Pointer to list of cell to be updated with the reconstructed values (optional, default whole field).
+ */
+void POD::reconstructFields(PiercedStorage<double> &fields, VolumeKernel *mesh,
+                            std::map<std::string, std::size_t> targetFields,
+                            const std::unordered_set<long> * targetCells)
+{
+    std::vector<std::size_t> podscalarIds;
+    std::vector<std::size_t> podvectorIds;
+
+    std::vector<std::size_t> scalarIds;
+    std::vector<std::array<std::size_t, 3>> vectorIds;
+
+    // Find scalar target fields
+    std::size_t count = 0;
+    for (const std::string &val : m_nameScalarFields) {
+        std::map<std::string, std::size_t>::iterator found = targetFields.find(val);
+        if (found != targetFields.end()) {
+            std::size_t ind = found->second;
+            podscalarIds.push_back(count);
+            scalarIds.push_back(ind);
+            targetFields.erase(found);
+            count++;
+        }
+    }
+
+    // Find vector target fields
+    count = 0;
+    for (const std::array<std::string,3> &valv : m_nameVectorFields) {
+        std::size_t ic = 0;
+        std::array<std::size_t,3> vectorarr;
+        std::array<std::string,3> toerase;
+        for (const std::string &val : valv) {
+            std::map<std::string, std::size_t>::iterator found = targetFields.find(val);
+            if (found != targetFields.end()) {
+                std::size_t ind = found->second;
+                vectorarr[ic] = ind;
+                toerase[ic] = val;
+                ic++;
+            }
+
+            if (ic == 3) {
+                podvectorIds.push_back(count);
+                vectorIds.push_back(vectorarr);
+                for (std::size_t i = 0; i < 3; ++i)
+                    targetFields.erase(toerase[i]);
+            }
+        }
+        count++;
+    }
+
+    if (targetFields.size() != 0) {
+        std::string verror = " ";
+        for (const auto &targetField : targetFields)
+            verror += targetField.first + " ";
+
+        throw std::runtime_error ("POD: fields not found in POD base or incomplete vector: " + verror);
+    }
+
+
+    if (m_staticMesh){
+
+        evalReconstructionCoeffs(fields, scalarIds, podscalarIds, vectorIds, podvectorIds);
+
+        buildFields(m_reconstructionCoeffs, fields, scalarIds, podscalarIds, vectorIds, podvectorIds, targetCells);
+
+    }
+    else{
+
+        //If mapping not computed, compute mapping of input mesh on pod mesh
+        if (m_podkernel->isMapperDirty())
+            _computeMapper(mesh);
+
+        // Map data fields on pod mesh
+        PiercedStorage<double> mappedFields = m_podkernel->mapFieldsToPOD(fields, mesh, &m_listActiveIDs, scalarIds, vectorIds);
+
+        evalReconstructionCoeffs(mappedFields, scalarIds, podscalarIds, vectorIds, podvectorIds);
+
+        //Map target cells
+        std::unordered_set<long> mappedCells;
+        std::unordered_set<long>* ptr_mappedCells = nullptr;
+        if (targetCells){
+            mappedCells = m_podkernel->mapCellsToPOD(targetCells);
+            ptr_mappedCells = &mappedCells;
+        }
+
+        buildFields(m_reconstructionCoeffs, mappedFields, scalarIds, podscalarIds, vectorIds, podvectorIds, ptr_mappedCells);
+
+        m_podkernel->mapFieldsFromPOD(fields, mesh, targetCells, mappedFields, scalarIds, vectorIds);
+
     }
 
 }
@@ -1674,54 +1785,6 @@ void POD::_evalReconstructionCoeffs(pod::PODField & field)
 
     // Solve minimization
     solveMinimization(m_reconstructionCoeffs);
-}
-
-/**
- * Reconstruct a field through POD. Use the m_reconstructionCoeffs already set.
- *
- * \param[out] recon Resulting snapshot field.
- */
-void POD::buildFields(pod::PODField & recon)
-{
-    recon.scalar = std::unique_ptr<pod::ScalarStorage>(new pod::ScalarStorage(m_nScalarFields, &m_podkernel->getMesh()->getCells()));
-    recon.vector = std::unique_ptr<pod::VectorStorage>(new pod::VectorStorage(m_nVectorFields, &m_podkernel->getMesh()->getCells()));
-    recon.scalar->fill(0.0);
-    recon.vector->fill(std::array<double, 3>{{0.0, 0.0, 0.0}});
-
-    for (std::size_t ir = 0; ir < m_nModes; ++ir){
-        if (m_memoryMode == MemoryMode::MEMORY_LIGHT)
-            readMode(ir);
-
-        for (long id : m_listActiveIDs){
-            std::size_t rawIndex = m_podkernel->getMesh()->getCells().getRawIndex(id);
-            if (m_nScalarFields){
-                double* recons = recon.scalar->rawData(rawIndex);
-                double* modes = m_modes[ir].scalar->rawData(rawIndex);
-                for (std::size_t ifs = 0; ifs < m_nScalarFields; ++ifs){
-                    *recons  = *recons + *modes*m_reconstructionCoeffs[ifs][ir];
-                    recons++;
-                    modes++;
-                }
-            }
-
-            if (m_nVectorFields){
-                std::array<double,3>* reconv = recon.vector->rawData(rawIndex);
-                std::array<double,3>* modev = m_modes[ir].vector->rawData(rawIndex);
-                for (std::size_t ifv = 0; ifv < m_nVectorFields; ++ifv){
-                    *reconv = *reconv + *modev*m_reconstructionCoeffs[m_nScalarFields+ifv][ir];
-                    reconv++;
-                    modev++;
-                }
-            }
-        }
-
-        if (m_memoryMode == MemoryMode::MEMORY_LIGHT)
-            m_modes[ir].clear();
-
-    }
-
-    if (m_useMean)
-        sum(&recon, m_mean);
 }
 
 /**
@@ -2677,105 +2740,6 @@ void POD::freeCommunicator()
 #endif
 
 /**
- * Field reconstruction.
- *
- * \param[in,out] fields Original field used in the reconstruction. Only the values of \p targetCells are updated.
- * \param[in] mesh Pointer to snapshot field
- * \param[in] targetFields Map of names/ids of fields in PiercedStorage to reconstruct
- * \param[in] targetCells Pointer to list of cell to be updated with the reconstructed values (optional, default whole field).
- */
-void POD::reconstructFields(PiercedStorage<double> &fields, VolumeKernel *mesh,
-        std::map<std::string, std::size_t> targetFields,
-        const std::unordered_set<long> * targetCells)
-{
-    std::vector<std::size_t> podscalarIds;
-    std::vector<std::size_t> podvectorIds;
-
-    std::vector<std::size_t> scalarIds;
-    std::vector<std::array<std::size_t, 3>> vectorIds;
-
-    // Find scalar target fields
-    std::size_t count = 0;
-    for (const std::string &val : m_nameScalarFields) {
-        std::map<std::string, std::size_t>::iterator found = targetFields.find(val);
-        if (found != targetFields.end()) {
-            std::size_t ind = found->second;
-            podscalarIds.push_back(count);
-            scalarIds.push_back(ind);
-            targetFields.erase(found);
-            count++;
-        }
-    }
-
-    // Find vector target fields
-    count = 0;
-    for (const std::array<std::string,3> &valv : m_nameVectorFields) {
-        std::size_t ic = 0;
-        std::array<std::size_t,3> vectorarr;
-        std::array<std::string,3> toerase;
-        for (const std::string &val : valv) {
-            std::map<std::string, std::size_t>::iterator found = targetFields.find(val);
-            if (found != targetFields.end()) {
-                std::size_t ind = found->second;
-                vectorarr[ic] = ind;
-                toerase[ic] = val;
-                ic++;
-            }
-
-            if (ic == 3) {
-                podvectorIds.push_back(count);
-                vectorIds.push_back(vectorarr);
-                for (std::size_t i = 0; i < 3; ++i)
-                    targetFields.erase(toerase[i]);
-            }
-        }
-        count++;
-    }
-
-    if (targetFields.size() != 0) {
-        std::string verror = " ";
-        for (const auto &targetField : targetFields)
-            verror += targetField.first + " ";
-
-        throw std::runtime_error ("POD: fields not found in POD base or incomplete vector: " + verror);
-    }
-
-
-    if (m_staticMesh){
-
-        evalReconstructionCoeffs(fields, scalarIds, podscalarIds, vectorIds, podvectorIds);
-
-        buildFields(fields, scalarIds, podscalarIds, vectorIds, podvectorIds, targetCells);
-
-    }
-    else{
-
-        //If mapping not computed, compute mapping of input mesh on pod mesh
-        if (m_podkernel->isMapperDirty())
-            _computeMapper(mesh);
-
-        // Map data fields on pod mesh
-        PiercedStorage<double> mappedFields = m_podkernel->mapFieldsToPOD(fields, mesh, &m_listActiveIDs, scalarIds, vectorIds);
-
-        evalReconstructionCoeffs(mappedFields, scalarIds, podscalarIds, vectorIds, podvectorIds);
-
-        //Map target cells
-        std::unordered_set<long> mappedCells;
-        std::unordered_set<long>* ptr_mappedCells = nullptr;
-        if (targetCells){
-            mappedCells = m_podkernel->mapCellsToPOD(targetCells);
-            ptr_mappedCells = &mappedCells;
-        }
-
-        buildFields(mappedFields, scalarIds, podscalarIds, vectorIds, podvectorIds, ptr_mappedCells);
-
-        m_podkernel->mapFieldsFromPOD(fields, mesh, targetCells, mappedFields, scalarIds, vectorIds);
-
-    }
-
-}
-
-/**
  * Evaluation of POD reconstruction coefficients.
  *
  * \param[in] fields Original input field (optimad solver format).
@@ -2864,31 +2828,63 @@ void POD::_evalReconstructionCoeffs(PiercedStorage<double> &fields,
 }
 
 /**
- * Reconstruct a field through POD. Use the m_reconstructionCoeffs already set.
- * Interface for hybrid code [optimad solver]. The reconstruction is performed
- * only on selected cells.
+ * Construct the linear combination of the POD modes with given input coefficients.
  *
- * \param[in,out] fields Input and resulting reconstructed field.
- * \param[in] scalarIds Ids of scalar fields in PiercedStorage.
- * \param[in] podscalarIds Ids of scalar fields in POD modes.
- * \param[in] vectorIds Ids of vector fields in PiercedStorage.
- * \param[in] podvectorIds Ids of vector fields in POD modes.
- * \param[in] targetCells Pointer to list of target cells for reconstruction (optional, default whole field).
+ * \param[in] reconstructionCoeffs, coefficient matrix of dimension N_fields x N_modes to store
+ * the projection coefficient.
+ * \param[in,out] recon, PODField object to be populated with the linear combination.
  */
-void POD::buildFields(PiercedStorage<double> &fields,
-        const std::vector<std::size_t> &scalarIds, const std::vector<std::size_t> &podscalarIds,
-        const std::vector<std::array<std::size_t, 3>> &vectorIds, const std::vector<std::size_t> &podvectorIds,
-        const std::unordered_set<long> *targetCells)
+void POD::buildFields(const std::vector<std::vector<double>> &reconstructionCoeffs, pod::PODField &recon)
 {
-    _buildFields(fields, scalarIds, podscalarIds, vectorIds, podvectorIds, targetCells);
+    // set up of the PODField members: scalar, vector
+    recon.scalar = std::unique_ptr<pod::ScalarStorage>(new pod::ScalarStorage(m_nScalarFields, &m_podkernel->getMesh()->getCells()));
+    recon.vector = std::unique_ptr<pod::VectorStorage>(new pod::VectorStorage(m_nVectorFields, &m_podkernel->getMesh()->getCells()));
+    recon.scalar->fill(0.0);
+    recon.vector->fill(std::array<double, 3>{{0.0, 0.0, 0.0}});
 
+    // Outer cycle over modes
+    for (std::size_t ir = 0; ir < m_nModes; ++ir) {
+        if (m_memoryMode == MemoryMode::MEMORY_LIGHT) {
+            readMode(ir);
+        }
+
+        // Outer cycle over cells
+        for (long id : m_listActiveIDs) {
+            std::size_t rawIndex = recon.mesh->getCells().getRawIndex(id);
+
+            // Inner cycle over scalar fields
+            if (m_nScalarFields) {
+                const double *modes = m_modes[ir].scalar->rawData(rawIndex);
+                for (std::size_t isf = 0; isf < m_nScalarFields; ++isf) {
+                    recon.scalar->at(id, isf) += modes[isf] * reconstructionCoeffs[isf][ir];
+                }
+            }
+
+            // Inner cycle over vector fields
+            if (m_nVectorFields) {
+                const std::array<double,3> *modes = m_modes[ir].vector->rawData(rawIndex);
+                for (std::size_t ifv = 0; ifv < m_nVectorFields; ++ifv) {
+                    recon.vector->at(id, ifv) += modes[ifv] * reconstructionCoeffs[m_nScalarFields+ifv][ir];
+                }
+            }
+        }
+
+        if (m_memoryMode == MemoryMode::MEMORY_LIGHT) {
+            m_modes[ir].clear();
+        }
+    }
+
+    if (m_useMean) {
+        sum(&recon, m_mean);
+    }
 }
 
 /**
- * Reconstruct a field through POD. Use the m_reconstructionCoeffs already set.
- * Interface for hybrid code [optimad solver]. The reconstruction is performed
+ * Reconstruct a field through POD. Use the input coefficients.
+ * Interface for for generic bitpit field storage. The reconstruction is performed
  * only on selected cells.
  *
+ * \param[in] reconstructionCoeffs matrix of size Number of fields x Number of modes.
  * \param[in,out] fields Input and resulting reconstructed field.
  * \param[in] scalarIds Ids of scalar fields in PiercedStorage.
  * \param[in] podscalarIds Ids of scalar fields in POD modes.
@@ -2896,10 +2892,10 @@ void POD::buildFields(PiercedStorage<double> &fields,
  * \param[in] podvectorIds Ids of vector fields in POD modes.
  * \param[in] targetCells Pointer to list of target cells for reconstruction (optional, default whole field).
  */
-void POD::_buildFields(PiercedStorage<double> &fields,
-        const std::vector<std::size_t> &scalarIds, const std::vector<std::size_t> &podscalarIds,
-        const std::vector<std::array<std::size_t, 3>> &vectorIds, const std::vector<std::size_t> &podvectorIds,
-        const std::unordered_set<long> *targetCells)
+void POD::buildFields(const std::vector<std::vector<double>> &reconstructionCoeffs, PiercedStorage<double> &fields,
+                      const std::vector<std::size_t> &scalarIds, const std::vector<std::size_t> &podscalarIds,
+                      const std::vector<std::array<std::size_t, 3>> &vectorIds, const std::vector<std::size_t> &podvectorIds,
+                      const std::unordered_set<long> *targetCells)
 {
     std::size_t nsf = scalarIds.size();
     std::size_t nvf = vectorIds.size();
@@ -2939,20 +2935,25 @@ void POD::_buildFields(PiercedStorage<double> &fields,
 
         for (const long id : *targetCells) {
             std::size_t rawIndex = m_podkernel->getMesh()->getCells().getRawIndex(id);
-            double *modes = m_modes[ir].scalar->rawData(rawIndex);
             double *recon = fields.rawData(rawIndex);
-            for (std::size_t ifs = 0; ifs < m_nScalarFields; ++ifs) {
-                double *modesi = modes + podscalarIds[ifs];
-                double *reconsi = recon + scalarIds[ifs];
-                (*reconsi) += (*modesi) * m_reconstructionCoeffs[ifs][ir];
+
+            if (m_nScalarFields > 0) {
+                const double *modes = m_modes[ir].scalar->rawData(rawIndex);
+                for (std::size_t ifs = 0; ifs < m_nScalarFields; ++ifs) {
+                    double *reconsi = recon + scalarIds[ifs];
+                    const double *modesi = modes + podscalarIds[ifs];
+                    (*reconsi) += (*modesi) * reconstructionCoeffs[ifs][ir];
+                }
             }
 
-            std::array<double,3> *modev = m_modes[ir].vector->rawData(rawIndex);
-            for (std::size_t ifv = 0; ifv < m_nVectorFields; ++ifv) {
-                std::array<double,3>* modevi = modev + podvectorIds[ifv];
-                for (std::size_t j = 0; j < 3; ++j) {
-                    double *reconvi = recon + vectorIds[ifv][j];
-                    (*reconvi) += (*modevi)[j] * m_reconstructionCoeffs[m_nScalarFields + ifv][ir];
+            if (m_nVectorFields > 0) {
+                const std::array<double,3> *modev = m_modes[ir].vector->rawData(rawIndex);
+                for (std::size_t ifv = 0; ifv < m_nVectorFields; ++ifv) {
+                    const std::array<double,3> * modevi = modev + podvectorIds[ifv];
+                    for (std::size_t j = 0; j < 3; ++j) {
+                        double *reconvi = recon + vectorIds[ifv][j];
+                        (*reconvi) += (*modevi)[j] * reconstructionCoeffs[m_nScalarFields + ifv][ir];
+                    }
                 }
             }
         }
