@@ -174,6 +174,93 @@ int subtest_001()
     return 0;
 }
 
+
+/*!
+* Subtest 002
+*
+* Testing projection on surface feature of a 2D levelset on a Cartesian mesh in default memory mode.
+*/
+int subtest_002()
+{
+    int dimensions(2) ;
+
+    // Input geometry
+#if BITPIT_ENABLE_MPI
+    std::unique_ptr<bitpit::SurfUnstructured> STL( new bitpit::SurfUnstructured(dimensions - 1,MPI_COMM_NULL) );
+#else
+    std::unique_ptr<bitpit::SurfUnstructured> STL( new bitpit::SurfUnstructured(dimensions - 1) );
+#endif
+
+    bitpit::log::cout() << " - Loading dgf geometry" << std::endl;
+
+    STL->importDGF("./data/naca0012_coarse.dgf", true);
+
+    STL->initializeAdjacencies();
+
+    bitpit::log::cout() << "n. vertex: " << STL->getVertexCount() << std::endl;
+    bitpit::log::cout() << "n. simplex: " << STL->getCellCount() << std::endl;
+
+    // create cartesian mesh around geometry 
+    bitpit::log::cout() << " - Setting mesh" << std::endl;
+    std::array<double,3> meshMin, meshMax, delta ;
+    std::array<int,3> nc = {{64, 64, 0}} ;
+
+    STL->getBoundingBox( meshMin, meshMax ) ;
+
+    delta = meshMax -meshMin ;
+    meshMin -=  0.1*delta ;
+    meshMax +=  0.1*delta ;
+
+    delta = meshMax -meshMin ;
+
+    bitpit::VolCartesian mesh( 1, dimensions, meshMin, delta, nc);
+    mesh.update() ;
+    mesh.initializeAdjacencies() ;
+    mesh.initializeInterfaces() ;
+
+    // Compute level set in narrow band
+    std::chrono::time_point<std::chrono::system_clock> start, end;
+    int elapsed_seconds;
+    start = std::chrono::system_clock::now();
+
+    bitpit::LevelSet levelset ;
+    levelset.setNarrowBandSize(0) ;
+    levelset.setMesh(&mesh) ;
+
+    int objectId = 0;
+    double limitAngle = 85.0 * BITPIT_PI / 180.0;
+    levelset.addObject(STL.get(), limitAngle, bitpit::LevelSetSurfaceSmoothing::HIGH_ORDER, objectId);
+
+    bitpit::LevelSetObject *object = static_cast<bitpit::LevelSetObject *>(levelset.getObjectPtr(objectId));
+
+    object->setCellBulkEvaluationMode(bitpit::LevelSetBulkEvaluationMode::SIGN_PROPAGATION);
+    object->enableFieldCellCache(bitpit::LevelSetField::VALUE, bitpit::LevelSetCacheMode::FULL);
+
+    // Compute projections on curved surface
+    bitpit::LevelSetSegmentationBaseObject *levelSetSegmentation = dynamic_cast<bitpit::LevelSetSegmentationBaseObject *>(object);
+
+    int cellId = 640;
+    std::array<double, 3> point = mesh.evalCellCentroid(cellId);
+    std::array<double, 3> projectionPoint;
+    std::array<double, 3> projectionNormal;
+
+    levelSetSegmentation->evalProjection(point, true, &projectionPoint, &projectionNormal);
+
+    end = std::chrono::system_clock::now();
+    elapsed_seconds = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+    bitpit::log::cout() << "elapsed time: " << elapsed_seconds << " ms" << std::endl;
+
+    std::array<double, 3> projectionPointTarget  = {0.0021934049109738, -0.008062212041176, 0.0};
+    std::array<double, 3> projectionNormalTarget = {-0.87574759289519, -0.48276925496379, 0.0};
+
+    double pointDeviation  = norm2(projectionPoint - projectionPointTarget);
+    double normalDeviation = norm2(projectionNormal - projectionNormalTarget);
+
+    double distanceTolerance = mesh.getTol();
+    return !(bitpit::utils::DoubleFloatingEqual()(pointDeviation, 0., distanceTolerance, distanceTolerance)
+           ||bitpit::utils::DoubleFloatingEqual()(normalDeviation, 0., distanceTolerance, distanceTolerance));
+}
+
 /*!
 * Main program.
 */
@@ -195,6 +282,11 @@ int main(int argc, char *argv[])
 	int status;
 	try {
 		status = subtest_001();
+		if (status != 0) {
+			return status;
+		}
+
+		status = subtest_002();
 		if (status != 0) {
 			return status;
 		}
