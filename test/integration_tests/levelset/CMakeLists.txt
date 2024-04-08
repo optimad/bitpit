@@ -55,8 +55,14 @@ unset(TESTS)
 
 # Data files
 add_custom_command(
+    TARGET "integration_test_levelset_00001" PRE_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/naca0012_coarse.dgf" "${CMAKE_CURRENT_BINARY_DIR}/data/naca0012_coarse.dgf"
+)
+
+add_custom_command(
     TARGET "integration_test_levelset_00002" PRE_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/cube.stl" "${CMAKE_CURRENT_BINARY_DIR}/data/cube.stl"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/sphere.stl" "${CMAKE_CURRENT_BINARY_DIR}/data/sphere.stl"
 )
 
 add_custom_command(

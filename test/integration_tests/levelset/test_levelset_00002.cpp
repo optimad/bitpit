@@ -481,6 +481,195 @@ int subtest_004()
 }
 
 /*!
+* Subtest 005
+*
+* Testing projection on surface feature of a 3D levelset on a Cartesian mesh in default memory mode.
+* Surface consist of triangular elements.
+*/
+int subtest_005()
+{
+    bitpit::log::cout() << std::endl;
+    bitpit::log::cout() << "Testing projection on curve feature of a three-dimensional levelset on a Cartesian mesh in default memory mode" << std::endl;
+
+    // Input geometry
+    bitpit::log::cout() << " - Loading geometry" << std::endl;
+
+    // Input geometry
+#if BITPIT_ENABLE_MPI
+    std::unique_ptr<bitpit::SurfUnstructured> segmentation( new bitpit::SurfUnstructured(2, MPI_COMM_NULL) );
+#else
+    std::unique_ptr<bitpit::SurfUnstructured> segmentation( new bitpit::SurfUnstructured(2) );
+#endif
+
+    segmentation->importSTL("./data/sphere.stl", true);
+
+    segmentation->deleteCoincidentVertices() ;
+    segmentation->initializeAdjacencies() ;
+
+    bitpit::log::cout() << "n. vertex: " << segmentation->getVertexCount() << std::endl;
+    bitpit::log::cout() << "n. simplex: " << segmentation->getCellCount() << std::endl;
+
+    // Create the mesh
+    bitpit::log::cout() << " - Setting mesh" << std::endl;
+
+    std::unique_ptr<bitpit::VolCartesian> mesh = generateCartesianMesh(*segmentation);
+    mesh->switchMemoryMode(bitpit::VolCartesian::MEMORY_NORMAL);
+    mesh->initializeAdjacencies();
+    mesh->update();
+
+    // Initialize levelset
+    bitpit::log::cout() << " - Initializing levelset" << std::endl;
+
+    std::chrono::time_point<std::chrono::system_clock> start, end;
+    int elapsed_seconds;
+    start = std::chrono::system_clock::now();
+
+    int objectId = 0;
+    double limitAngle = 85.0 * BITPIT_PI / 180.0;
+
+    bitpit::LevelSet levelset ;
+    levelset.setMesh(mesh.get());
+    levelset.addObject(segmentation.get(), limitAngle, bitpit::LevelSetSurfaceSmoothing::HIGH_ORDER, objectId);
+
+    // Compute levelset
+    bitpit::log::cout() << " - Evaluating levelset" << std::endl;
+
+    bitpit::LevelSetObject *object = levelset.getObjectPtr(objectId);
+    object->enableFieldCellCache(bitpit::LevelSetField::SIGN, bitpit::LevelSetCacheMode::FULL);
+    object->enableFieldCellCache(bitpit::LevelSetField::VALUE, bitpit::LevelSetCacheMode::FULL);
+
+    // Compute projections on curved surface
+    bitpit::LevelSetSegmentationBaseObject *levelSetSegmentation = dynamic_cast<bitpit::LevelSetSegmentationBaseObject *>(object);
+
+    int cellId = 0;
+    std::array<double, 3> point = mesh->evalCellCentroid(cellId);
+    std::array<double, 3> projectionPoint;
+    std::array<double, 3> projectionNormal;
+    levelSetSegmentation->evalProjection(point, true, &projectionPoint, &projectionNormal);
+
+    end = std::chrono::system_clock::now();
+    elapsed_seconds = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+    bitpit::log::cout() << "elapsed time: " << elapsed_seconds << " ms" << std::endl;
+
+    std::array<double, 3> projectionPointTarget  = {-0.42738501907593, -0.57919419612192, -0.67702138948285};
+    std::array<double, 3> projectionNormalTarget = {-0.46202467342915, -0.54201153693076, -0.70196630615482};
+
+    double pointDeviation  = norm2(projectionPoint - projectionPointTarget);
+    double normalDeviation = norm2(projectionNormal - projectionNormalTarget);
+
+    double distanceTolerance = mesh->getTol();
+    return !(bitpit::utils::DoubleFloatingEqual()(pointDeviation, 0., distanceTolerance, distanceTolerance)
+           ||bitpit::utils::DoubleFloatingEqual()(normalDeviation, 0., distanceTolerance, distanceTolerance));
+}
+
+/*!
+* Subtest 006
+*
+* Testing projection on surface feature of a 3D levelset on a Cartesian mesh in default memory mode.
+* Surface consist of polygonal elements.
+*/
+int subtest_006()
+{
+    bitpit::log::cout() << std::endl;
+    bitpit::log::cout() << "Testing projection on curve feature of a three-dimensional levelset on a Cartesian mesh in default memory mode" << std::endl;
+
+    int dimensions(3) ;
+
+    // Create the patch
+    bitpit::log::cout() << std::endl;
+    bitpit::log::cout() << "Creating 2D patch..." << std::endl;
+
+#if BITPIT_ENABLE_MPI
+	bitpit::SurfUnstructured patch(2, MPI_COMM_NULL);
+#else
+	bitpit::SurfUnstructured patch(2);
+#endif
+
+    patch.reserveVertices(8);
+    patch.reserveCells(6);
+
+    patch.addVertex({{0.0, 0.0, 0.0}}, 0);
+    patch.addVertex({{1.0, 0.0, 0.0}}, 1);
+    patch.addVertex({{0.0, 1.0, 0.0}}, 2);
+    patch.addVertex({{1.0, 1.0, 0.0}}, 3);
+    patch.addVertex({{0.0, 0.0, 1.0}}, 4);
+    patch.addVertex({{1.0, 0.0, 1.0}}, 5);
+    patch.addVertex({{0.0, 1.0, 1.0}}, 6);
+    patch.addVertex({{1.0, 1.0, 1.0}}, 7);
+
+    patch.addCell(bitpit::ElementType::POLYGON, std::vector<long>({{4, 0, 2, 3, 1}}));
+    patch.addCell(bitpit::ElementType::POLYGON, std::vector<long>({{4, 4, 5, 7, 6}}));
+    patch.addCell(bitpit::ElementType::POLYGON, std::vector<long>({{4, 0, 1, 5, 4}}));
+    patch.addCell(bitpit::ElementType::POLYGON, std::vector<long>({{4, 0, 4, 6, 2}}));
+    patch.addCell(bitpit::ElementType::POLYGON, std::vector<long>({{4, 2, 6, 7, 3}}));
+    patch.addCell(bitpit::ElementType::POLYGON, std::vector<long>({{4, 1, 3, 7, 5}}));
+
+    patch.update();
+    patch.initializeAdjacencies();
+    patch.update();
+
+    // Write patch
+    patch.write("cube");
+
+    // create cartesian mesh around geometry 
+    bitpit::log::cout() << " - Setting mesh" << std::endl;
+    std::array<double,3> meshMin = {-2., -2., -2.};
+    std::array<double,3> meshMax = {4., 4., 4.};
+    std::array<double,3> delta   = meshMax - meshMin;
+
+    std::array<int,3> nc = {{64, 64, 64}} ;
+
+    bitpit::VolCartesian mesh( 1, dimensions, meshMin, delta, nc);
+    mesh.update() ;
+    mesh.initializeAdjacencies() ;
+    mesh.initializeInterfaces() ;
+
+    // Compute level set in narrow band
+    bitpit::log::cout() << " - Initializing levelset" << std::endl;
+
+    std::chrono::time_point<std::chrono::system_clock> start, end;
+    int elapsed_seconds;
+    start = std::chrono::system_clock::now();
+
+    bitpit::LevelSet levelset ;
+    levelset.setNarrowBandSize(0) ;
+    levelset.setMesh(&mesh) ;
+
+    int objectId = 0;
+    double limitAngle = 100.0 * BITPIT_PI / 180.0;
+    levelset.addObject(&patch, limitAngle, bitpit::LevelSetSurfaceSmoothing::HIGH_ORDER, objectId);
+
+    bitpit::LevelSetObject *object = static_cast<bitpit::LevelSetObject *>(levelset.getObjectPtr(objectId));
+
+    object->setCellBulkEvaluationMode(bitpit::LevelSetBulkEvaluationMode::SIGN_PROPAGATION);
+    object->enableFieldCellCache(bitpit::LevelSetField::VALUE, bitpit::LevelSetCacheMode::FULL);
+
+    // Compute projections on curved surface
+    bitpit::LevelSetSegmentationBaseObject *levelSetSegmentation = dynamic_cast<bitpit::LevelSetSegmentationBaseObject *>(object);
+
+    int cellId = 1435;
+    std::array<double, 3> point = mesh.evalCellCentroid(cellId);
+    std::array<double, 3> projectionPoint;
+    std::array<double, 3> projectionNormal;
+
+    levelSetSegmentation->evalProjection(point, true, &projectionPoint, &projectionNormal);
+
+    end = std::chrono::system_clock::now();
+    elapsed_seconds = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+    bitpit::log::cout() << "elapsed time: " << elapsed_seconds << " ms" << std::endl;
+
+    std::array<double, 3> projectionPointTarget  = {0.578281707293995, -0.0118151563613565, -0.123062605538327};
+    std::array<double, 3> projectionNormalTarget = {0.00424393081250904, 0.0656816475038297, -0.997831604145931};
+
+    double pointDeviation  = norm2(projectionPoint - projectionPointTarget);
+    double normalDeviation = norm2(projectionNormal - projectionNormalTarget);
+
+    double distanceTolerance = mesh.getTol();
+    return !(bitpit::utils::DoubleFloatingEqual()(pointDeviation, 0., distanceTolerance, distanceTolerance)
+           ||bitpit::utils::DoubleFloatingEqual()(normalDeviation, 0., distanceTolerance, distanceTolerance));
+}
+
+/*!
 * Main program.
 */
 int main(int argc, char *argv[])
@@ -516,6 +705,16 @@ int main(int argc, char *argv[])
 		}
 
 		status = subtest_004();
+		if (status != 0) {
+			return status;
+		}
+
+		status = subtest_005();
+		if (status != 0) {
+			return status;
+		}
+
+		status = subtest_006();
 		if (status != 0) {
 			return status;
 		}
