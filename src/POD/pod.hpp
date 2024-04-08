@@ -194,12 +194,14 @@ public:
     void restoreDecomposition();
 
     void reconstructFields(pod::PODField &field, pod::PODField &recon);
-    std::vector<std::vector<double>> projectField(pod::PODField &field);
-    void dumpField(const std::string &name, const pod::PODField &field) const;
-
+    void reconstructFields(const std::vector<std::vector<double>> &coeffMatrix, pod::PODField &recon);
     void reconstructFields(PiercedStorage<double> &fields, VolumeKernel *mesh,
-            std::map<std::string, std::size_t> targetFields,
-            const std::unordered_set<long> *targetCells);
+                           std::map<std::string, std::size_t> targetFields,
+                           const std::unordered_set<long> *targetCells);
+
+    std::vector<std::vector<double>> projectField(pod::PODField &field);
+
+    void dumpField(const std::string &name, const pod::PODField &field) const;
 
     std::vector<double> fieldsl2norm(pod::PODField &snap);
     std::vector<double> fieldsMax(pod::PODField &snap);
@@ -274,7 +276,6 @@ private:
     void evalCorrelationTerm(int i, pod::PODField &snapi, int j, pod::PODField &snapj);
     void evalReconstructionCoeffs(pod::PODField &snapi);
     void _evalReconstructionCoeffs(pod::PODField &snapi);
-    void buildFields(pod::PODField &recon);
     void initErrorMaps();
     void buildErrorMaps(pod::PODField &snap, pod::PODField &recon);    
     void evalMinimizationMatrices();
@@ -304,11 +305,8 @@ private:
     void _evalReconstructionCoeffs(PiercedStorage<double> &fields,
             const std::vector<std::size_t> &scalarIds, const std::vector<std::size_t> &podscalarIds,
             const std::vector<std::array<std::size_t, 3>> &vectorIds, const std::vector<std::size_t> &podvectorIds);
-    void buildFields(PiercedStorage<double> &fields,
-            const std::vector<std::size_t> &scalarIds, const std::vector<std::size_t> &podscalarIds,
-            const std::vector<std::array<std::size_t, 3>> &vectorIds, const std::vector<std::size_t> &podvectorIds,
-            const std::unordered_set<long> *targetCells = nullptr);
-    void _buildFields(PiercedStorage<double> &fields,
+    void buildFields(const std::vector<std::vector<double>> &reconstructionCoeffs, pod::PODField &recon);
+    void buildFields(const std::vector<std::vector<double>> &reconstructionCoeffs, PiercedStorage<double> &fields,
             const std::vector<std::size_t> &scalarIds, const std::vector<std::size_t> &podscalarIds,
             const std::vector<std::array<std::size_t, 3>> &vectorIds, const std::vector<std::size_t> &podvectorIds,
             const std::unordered_set<long> *targetCells = nullptr);
