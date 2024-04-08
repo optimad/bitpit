@@ -171,7 +171,6 @@ protected:
 
     virtual const SurfUnstructured & _evalSurface(const std::array<double,3> &point) const = 0;
     virtual int _evalPart(const std::array<double,3> &point) const;
-    virtual std::array<double,3> _evalNormal(const std::array<double,3> &point, bool signedLevelSet) const = 0;
     virtual long _evalSupport(const std::array<double,3> &point) const = 0;
     virtual long _evalSupport(const std::array<double,3> &point, double searchRadius) const = 0;
     virtual void _evalProjection(const std::array<double,3> &point, bool signedLevelSet, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const = 0;
@@ -229,7 +228,6 @@ protected:
     const SurfUnstructured & _evalSurface(const std::array<double,3> &point) const override;
     long _evalSupport(const std::array<double,3> &point) const override;
     long _evalSupport(const std::array<double,3> &point, double searchRadius) const override;
-    std::array<double,3> _evalNormal(const std::array<double,3> &point, bool signedLevelSet) const override;
     void _evalProjection(const std::array<double,3> &point, bool signedLevelSet, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const override;
 
 private:
@@ -240,7 +238,6 @@ private:
     short _evalSign(const std::array<double,3> &point, long support) const;
     double _evalValue(const std::array<double,3> &point, long support, bool signedLevelSet) const;
     std::array<double,3> _evalGradient(const std::array<double,3> &point, long support, bool signedLevelSet) const;
-    std::array<double,3> _evalNormal(const std::array<double,3> &point, long support, bool signedLevelSet) const;
     void _evalProjection(const std::array<double,3> &point, long support, bool signedLevelSet, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const;
 
 };
@@ -264,7 +261,6 @@ protected:
     long _evalSupport(const std::array<double,3> &point) const override;
     long _evalSupport(const std::array<double,3> &point, double searchRadius) const override;
     int _evalPart(const std::array<double,3> &point) const override;
-    std::array<double,3> _evalNormal(const std::array<double,3> &point, bool signedLevelSet) const override;
     void _evalProjection(const std::array<double,3> &point, bool signedLevelSet, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const override;
 
 };
@@ -287,7 +283,6 @@ protected:
     long _evalSupport(const std::array<double,3> &point) const override;
     long _evalSupport(const std::array<double,3> &point, double searchRadius) const override;
     int _evalPart(const std::array<double,3> &point) const override;
-    std::array<double,3> _evalNormal(const std::array<double,3> &point, bool signedLevelSet) const override;
     void _evalProjection(const std::array<double,3> &point, bool signedLevelSet, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const override;
 
 };

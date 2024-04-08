@@ -290,12 +290,11 @@ std::array<double, 3> LevelSetSegmentationSurfaceInfo::evalNormal(const std::arr
                                                                   const SegmentConstIterator &segmentItr) const
 {
     // Project the point on the surface and evaluate the point-projection vector
-    int nSegmentVertices = segmentItr->getVertexCount();
-    BITPIT_CREATE_WORKSPACE(lambda, double, nSegmentVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
-    evalProjection(point, segmentItr, lambda);
+    std::array<double, 3> projectionPoint;
+    std::array<double, 3> projectionNormal;
+    evalProjection(point, segmentItr, &projectionPoint, &projectionNormal);
 
-    // Evaluate normal
-    return computeSurfaceNormal(segmentItr, lambda);
+    return projectionNormal;
 }
 
 /*!
@@ -1961,7 +1960,12 @@ int LevelSetSegmentationBaseObject::evalPart(const std::array<double,3> &point) 
  */
 std::array<double,3> LevelSetSegmentationBaseObject::evalNormal(const std::array<double,3> &point, bool signedLevelSet) const
 {
-    return _evalNormal(point, signedLevelSet);
+    // Project the point on the surface and evaluate the point-projection vector
+    std::array<double, 3> projectionPoint;
+    std::array<double, 3> projectionNormal;
+    evalProjection(point, signedLevelSet, &projectionPoint, &projectionNormal);
+
+    return projectionNormal;
 }
 
 /*!
@@ -2860,7 +2864,11 @@ std::array<double,3> LevelSetSegmentationObject::_evalCellNormal(long id, bool s
     long support = evalCellSupport(id);
     std::array<double,3> centroid = m_kernel->computeCellCentroid(id);
 
-    return _evalNormal(centroid, support, signedLevelSet);
+    std::array<double, 3> projectionPoint;
+    std::array<double, 3> projectionNormal;
+    _evalProjection(centroid, support, signedLevelSet, &projectionPoint, &projectionNormal);
+
+    return projectionNormal;
 }
 
 /*!
@@ -2915,20 +2923,6 @@ std::array<double,3> LevelSetSegmentationObject::_evalGradient(const std::array<
     long support = evalSupport(point);
 
     return _evalGradient(point, support, signedLevelSet);
-}
-
-/*!
- * Evaluate the normal of the surface at the segment closest to the specified point.
- *
- * \param point are the coordinates of the point
- * \param signedLevelSet controls if signed levelset function will be used
- * \result The normal of the surface at the segment closest to the specified point.
- */
-std::array<double,3> LevelSetSegmentationObject::_evalNormal(const std::array<double,3> &point, bool signedLevelSet) const
-{
-    long support = evalSupport(point);
-
-    return _evalNormal(point, support, signedLevelSet);
 }
 
 /*!
@@ -3085,41 +3079,6 @@ long LevelSetSegmentationObject::_evalSupport(const std::array<double,3> &point,
     m_surfaceInfo->getSearchTree().findPointClosestCell(point, searchRadius, &closestSegmentId, &closestDistance);
 
     return closestSegmentId;
-}
-
-/*!
- * Evaluate the normal of the surface at the segment closest to the specified point.
- *
- * \param point are the coordinates of the point
- * \param support is the the closest segment to the specified point
- * \param signedLevelSet controls if signed levelset function will be used
- * \result The normal of the surface at the segment closest to the specified point.
- */
-std::array<double,3> LevelSetSegmentationObject::_evalNormal(const std::array<double,3> &point, long support,
-                                                             bool signedLevelSet) const
-{
-    // Early return if the support is not valid
-    //
-    // With an invalid support, only the unsigend levelset can be evaluated.
-    if (support < 0) {
-        if (!signedLevelSet || empty()) {
-            return levelSetDefaults::NORMAL;
-        }
-
-        throw std::runtime_error("With an invalid support, only the unsigend levelset can be evaluated.");
-    }
-
-    // Evaluate the normal
-    //
-    // If an unsigned evaluation is requested, the orientation of the surface should be discarded
-    // and in order to have a normal that is agnostic with respect the two sides of the surface.
-    LevelSetSegmentationSurfaceInfo::SegmentConstIterator supportItr = getSurface().getCellConstIterator(support);
-    std::array<double,3> normal = m_surfaceInfo->evalNormal(point, supportItr);
-    if (!signedLevelSet) {
-        normal *= static_cast<double>(evalSign(point));
-    }
-
-    return normal;
 }
 
 /*!
@@ -3337,31 +3296,6 @@ long LevelSetBooleanObject<LevelSetSegmentationBaseObject>::_evalSupport(const s
 }
 
 /*!
- * Evaluate the normal of the surface at the segment closest to the specified point.
- *
- * \param point are the coordinates of the point
- * \param signedLevelSet controls if signed levelset function will be used
- * \result The normal of the surface at the segment closest to the specified point.
- */
-std::array<double,3> LevelSetBooleanObject<LevelSetSegmentationBaseObject>::_evalNormal(const std::array<double,3> &point, bool signedLevelSet) const
-{
-    return _evalFunction<std::array<double,3>>(point, signedLevelSet, [&point, signedLevelSet] (const LevelSetBooleanResult<LevelSetSegmentationBaseObject> &result)
-        {
-            const LevelSetSegmentationBaseObject *resultObject = result.getObject();
-            if ( !resultObject ) {
-                return levelSetDefaults::NORMAL;
-            }
-
-            std::array<double,3> normal = resultObject->evalNormal(point, signedLevelSet);
-            if (signedLevelSet) {
-                normal *= static_cast<double>(result.getObjectSign());
-            }
-
-            return normal;
-        });
-}
-
-/*!
  * Evaluate the projection of the given point on the surface created based on
  * the points representing the specified segment. The surface passes from these
  * points and is verical to the normal vectors associated with them.
@@ -3522,23 +3456,6 @@ long LevelSetComplementObject<LevelSetSegmentationBaseObject>::_evalSupport(cons
 int LevelSetComplementObject<LevelSetSegmentationBaseObject>::_evalPart(const std::array<double,3> &point) const
 {
     return getSourceObject()->evalPart(point);
-}
-
-/*!
- * Evaluate the normal of the surface at the segment closest to the specified point.
- *
- * \param point are the coordinates of the point
- * \param signedLevelSet controls if signed levelset function will be used
- * \result The normal of the surface at the segment closest to the specified point.
- */
-std::array<double,3> LevelSetComplementObject<LevelSetSegmentationBaseObject>::_evalNormal(const std::array<double,3> &point, bool signedLevelSet) const
-{
-    std::array<double,3> normal = getSourceObject()->evalNormal(point, signedLevelSet);
-    if (signedLevelSet) {
-        normal *= -1.;
-    }
-
-    return normal;
 }
 
 /*!
