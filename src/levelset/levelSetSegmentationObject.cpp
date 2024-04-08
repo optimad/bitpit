@@ -306,9 +306,9 @@ std::array<double, 3> LevelSetSegmentationSurfaceInfo::evalProjection(const std:
     {
         ConstProxyVector<long> segmentVertexIds = m_surface->getFacetOrderedVertexIds(segment);
         std::size_t nSegmentVertices = segmentVertexIds.size();
-        BITPIT_CREATE_WORKSPACE(segmentVertexCoors, std::array<double BITPIT_COMMA 3>, nSegmentVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
-        m_surface->getVertexCoords(segmentVertexIds.size(), segmentVertexIds.data(), segmentVertexCoors);
-        return CGElem::projectPointPolygon(point, nSegmentVertices, segmentVertexCoors, lambda);
+        BITPIT_CREATE_WORKSPACE(segmentVertexCoords, std::array<double BITPIT_COMMA 3>, nSegmentVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
+        m_surface->getVertexCoords(segmentVertexIds.size(), segmentVertexIds.data(), segmentVertexCoords);
+        return CGElem::projectPointPolygon(point, nSegmentVertices, segmentVertexCoords, lambda);
     }
 
     }
@@ -1207,7 +1207,7 @@ const SurfUnstructured & LevelSetSegmentationObject::getSurface() const {
  *
  * Unless explicitly forced, it is not possible to replace an existing surface. Also, when the
  * surface is replaced, the object will not recalculate the levelset on the newly set surface
- * (nor will tell the proxy objects that may depend depend on the current object to update the
+ * (nor will tell the proxy objects that may depend on the current object to update the
  * levelset values).
  *
  * The feature angle will be set to the defualt value specified by the constant
@@ -1225,7 +1225,7 @@ void LevelSetSegmentationObject::setSurface(std::unique_ptr<const SurfUnstructur
  *
  * Unless explicitly forced, it is not possible to replace an existing surface. Also, when the
  * surface is replaced, the object will not recalculate the levelset on the newly set surface
- * (nor will tell the proxy objects that may depend depend on the current object to update the
+ * (nor will tell the proxy objects that may depend on the current object to update the
  * levelset values).
  *
  * @param[in] surface is the surface that will be set
@@ -1256,7 +1256,7 @@ void LevelSetSegmentationObject::setSurface(std::unique_ptr<const SurfUnstructur
  *
  * Unless explicitly forced, it is not possible to replace an existing surface. Also, when the
  * surface is replaced, the object will not recalculate the levelset on the newly set surface
- * (nor will tell the proxy objects that may depend depend on the current object to update the
+ * (nor will tell the proxy objects that may depend on the current object to update the
  * levelset values).
  *
  * The feature angle will be set to the defualt value specified by the constant
@@ -1274,7 +1274,7 @@ void LevelSetSegmentationObject::setSurface(const SurfUnstructured *surface, boo
  *
  * Unless explicitly forced, it is not possible to replace an existing surface. Also, when the
  * surface is replaced, the object will not recalculate the levelset on the newly set surface
- * (nor will tell the proxy objects that may depend depend on the current object to update the
+ * (nor will tell the proxy objects that may depend on the current object to update the
  * levelset values).
  *
  * @param[in] surface is the surface that will be set
