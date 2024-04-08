@@ -2375,17 +2375,17 @@ void POD::dumpField(const std::string &name, const pod::PODField &field) const
         m_filter.dump(dataStream);
         utils::binary::write(dataStream,std::size_t(m_nScalarFields));
         if (m_nScalarFields) {
-            for (std::size_t i = 0; i < m_nScalarFields; ++i)
+            for (std::size_t i = 0; i < m_nScalarFields; ++i) {
                 utils::binary::write(dataStream, m_nameScalarFields[i]);
-
+            }
             field.scalar->dump(dataStream);
         }
 
         utils::binary::write(dataStream,std::size_t(m_nVectorFields));
         if (m_nVectorFields) {
-            for (std::size_t i = 0; i < m_nVectorFields; ++i)
+            for (std::size_t i = 0; i < m_nVectorFields; ++i) {
                 utils::binary::write(dataStream, m_nameVectorFields[i]);
-
+            }
             field.vector->dump(dataStream);
         }
         binaryWriter.close();
@@ -2913,14 +2913,15 @@ void POD::_buildFields(PiercedStorage<double> &fields,
 {
     std::size_t nsf = scalarIds.size();
     std::size_t nvf = vectorIds.size();
-    if (nsf == 0 && nvf == 0)
+    if (nsf == 0 && nvf == 0) {
         return;
+    }
 
     std::unordered_set<long> targetCellsStorage;
     if (!targetCells) {
-        for (const Cell &cell : m_podkernel->getMesh()->getCells())
+        for (const Cell &cell : m_podkernel->getMesh()->getCells()) {
             targetCellsStorage.insert(cell.getId());
-
+        }
         targetCells = &targetCellsStorage;
     }
 
@@ -2942,8 +2943,9 @@ void POD::_buildFields(PiercedStorage<double> &fields,
 
     // Reconstruction of fields
     for (std::size_t ir = 0; ir < m_nModes; ++ir) {
-        if (m_memoryMode == MemoryMode::MEMORY_LIGHT)
+        if (m_memoryMode == MemoryMode::MEMORY_LIGHT) {
             readMode(ir);
+        }
 
         for (const long id : *targetCells) {
             std::size_t rawIndex = m_podkernel->getMesh()->getCells().getRawIndex(id);
@@ -2965,8 +2967,9 @@ void POD::_buildFields(PiercedStorage<double> &fields,
             }
         }
 
-        if (m_memoryMode == MemoryMode::MEMORY_LIGHT)
+        if (m_memoryMode == MemoryMode::MEMORY_LIGHT) {
             m_modes[ir].clear();
+        }
     }
 
     // Sum field and mean
