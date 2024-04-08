@@ -78,6 +78,10 @@ public:
 
     std::array<double, 3> evalNormal(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr) const;
 
+    void evalProjection(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const;
+    void evalProjection(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, std::array<double, 3> *projectionPoint) const;
+    std::array<double, 3> evalProjection(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, double *lambda) const;
+
 private:
     typedef std::pair<long, int> SegmentVertexKey;
 
@@ -107,10 +111,6 @@ private:
     void evalLowOrderProjectionOnTriangle(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const;
     void evalLowOrderProjectionOnPolygon(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const;
     void evalLowOrderProjection(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const;
-
-    void evalProjection(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const;
-    void evalProjection(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, std::array<double, 3> *projectionPoint) const;
-    std::array<double, 3> evalProjection(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, double *lambda) const;
 
     std::array<double,3> computePseudoNormal( const SurfUnstructured::CellConstIterator &segmentIterator, const double *lambda ) const;
     std::array<double,3> computeSurfaceNormal( const SurfUnstructured::CellConstIterator &segmentIterator, const double *lambda ) const;
@@ -142,6 +142,7 @@ public:
     long evalSupport(const std::array<double,3> &point, double searchRadius) const;
     int evalPart(const std::array<double,3> &point) const;
     std::array<double,3> evalNormal(const std::array<double,3> &point, bool signedLevelSet) const;
+    void evalProjection(const std::array<double,3> &point, bool signedLevelSet, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const;
 
     BITPIT_DEPRECATED(int getPart(long cellId) const);
     BITPIT_DEPRECATED(std::array<double BITPIT_COMMA 3> getNormal(long cellId) const);
@@ -173,6 +174,7 @@ protected:
     virtual std::array<double,3> _evalNormal(const std::array<double,3> &point, bool signedLevelSet) const = 0;
     virtual long _evalSupport(const std::array<double,3> &point) const = 0;
     virtual long _evalSupport(const std::array<double,3> &point, double searchRadius) const = 0;
+    virtual void _evalProjection(const std::array<double,3> &point, bool signedLevelSet, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const = 0;
 
     void addVTKOutputData(LevelSetField field, const std::string &objectName) override;
     std::string getVTKOutputFieldName(LevelSetField field) const override;
@@ -228,6 +230,7 @@ protected:
     long _evalSupport(const std::array<double,3> &point) const override;
     long _evalSupport(const std::array<double,3> &point, double searchRadius) const override;
     std::array<double,3> _evalNormal(const std::array<double,3> &point, bool signedLevelSet) const override;
+    void _evalProjection(const std::array<double,3> &point, bool signedLevelSet, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const override;
 
 private:
     std::unique_ptr<LevelSetSegmentationSurfaceInfo> m_surfaceInfo;
@@ -238,6 +241,7 @@ private:
     double _evalValue(const std::array<double,3> &point, long support, bool signedLevelSet) const;
     std::array<double,3> _evalGradient(const std::array<double,3> &point, long support, bool signedLevelSet) const;
     std::array<double,3> _evalNormal(const std::array<double,3> &point, long support, bool signedLevelSet) const;
+    void _evalProjection(const std::array<double,3> &point, long support, bool signedLevelSet, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const;
 
 };
 
@@ -261,6 +265,7 @@ protected:
     long _evalSupport(const std::array<double,3> &point, double searchRadius) const override;
     int _evalPart(const std::array<double,3> &point) const override;
     std::array<double,3> _evalNormal(const std::array<double,3> &point, bool signedLevelSet) const override;
+    void _evalProjection(const std::array<double,3> &point, bool signedLevelSet, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const override;
 
 };
 
@@ -283,6 +288,7 @@ protected:
     long _evalSupport(const std::array<double,3> &point, double searchRadius) const override;
     int _evalPart(const std::array<double,3> &point) const override;
     std::array<double,3> _evalNormal(const std::array<double,3> &point, bool signedLevelSet) const override;
+    void _evalProjection(const std::array<double,3> &point, bool signedLevelSet, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const override;
 
 };
 
