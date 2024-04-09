@@ -2740,18 +2740,26 @@ LevelSetCellLocation LevelSetSegmentationObject::fillCellGeometricNarrowBandLoca
 
     // Update the cell location cache
     //
-    // First we need to check if the cell intersectes the surface, and only if it
-    // deosn't we should check if its distance is lower than the narrow band size.
+    // First we need to check if the cell intersects the surface, and only if it
+    // doesn't we  should check if its distance is lower than the narrow band size.
+    //
+    // When high order smoothing is active, there may be cells whose support is within the search
+    // radius, but they are not intersected and their distance is less than the narrow band size.
+    // These cells are not geometrically inside the narrow band, they are neighbours of cells
+    // geometrically inside the narrow band and as such it's up to the caller of this function to
+    // identify their cell location.
     LevelSetCellLocation cellLocation = LevelSetCellLocation::UNKNOWN;
     if (_intersectSurface(id, cellUnsigendValue, CELL_LOCATION_INTERSECTION_MODE) == LevelSetIntersectionStatus::TRUE) {
         cellLocation = LevelSetCellLocation::NARROW_BAND_INTERSECTED;
     } else if (cellUnsigendValue <= m_narrowBandSize) {
         cellLocation = LevelSetCellLocation::NARROW_BAND_DISTANCE;
     }
-    assert(cellLocation != LevelSetCellLocation::UNKNOWN);
+    assert((getSurfaceSmoothing() == LevelSetSurfaceSmoothing::HIGH_ORDER) || (cellLocation != LevelSetCellLocation::UNKNOWN));
 
-    CellCacheCollection::ValueCache<char> *locationCache = getCellCache<char>(m_cellLocationCacheId);
-    locationCache->insertEntry(id, static_cast<char>(cellLocation));
+    if (cellLocation != LevelSetCellLocation::UNKNOWN) {
+        CellCacheCollection::ValueCache<char> *locationCache = getCellCache<char>(m_cellLocationCacheId);
+        locationCache->insertEntry(id, static_cast<char>(cellLocation));
+    }
 
     // Fill the cache of the evaluated fields
     //
