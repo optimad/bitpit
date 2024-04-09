@@ -274,8 +274,6 @@ private:
     void _evalModes();
     void initCorrelation();
     void evalCorrelationTerm(int i, pod::PODField &snapi, int j, pod::PODField &snapj);
-    void evalReconstructionCoeffs(pod::PODField &snapi);
-    void _evalReconstructionCoeffs(pod::PODField &snapi);
     void initErrorMaps();
     void buildErrorMaps(pod::PODField &snap, pod::PODField &recon);    
     void evalMinimizationMatrices();
@@ -299,10 +297,8 @@ private:
     void freeCommunicator();
 #endif
 
+    void evalReconstructionCoeffs(pod::PODField &snapi);
     void evalReconstructionCoeffs(PiercedStorage<double> &fields,
-            const std::vector<std::size_t> &scalarIds, const std::vector<std::size_t> &podscalarIds,
-            const std::vector<std::array<std::size_t, 3>> &vectorIds, const std::vector<std::size_t> &podvectorIds);
-    void _evalReconstructionCoeffs(PiercedStorage<double> &fields,
             const std::vector<std::size_t> &scalarIds, const std::vector<std::size_t> &podscalarIds,
             const std::vector<std::array<std::size_t, 3>> &vectorIds, const std::vector<std::size_t> &podvectorIds);
     void buildFields(const std::vector<std::vector<double>> &reconstructionCoeffs, pod::PODField &recon);
