@@ -2525,24 +2525,21 @@ void POD::sum(pod::PODField* _a, const pod::PODMode& b)
     if (nsf){
         for (long id : a.scalar->getKernel()->getIds()){
             std::size_t rawIndex = m_podkernel->getMesh()->getCells().getRawIndex(id);
-            double* datasa = a.scalar->rawData(rawIndex);
-            double* datasb = b.scalar->rawData(rawIndex);;
+            double *dataa = a.scalar->rawData(rawIndex);
+            const double *datab = b.scalar->rawData(rawIndex);
             for (std::size_t i = 0; i < nsf; ++i){
-                *datasa = *datasa + *datasb;
-                datasa++;
-                datasb++;
+                dataa[i] += datab[i];
             }
         }
     }
     if (nvf){
         for (long id : a.scalar->getKernel()->getIds()){
             std::size_t rawIndex = m_podkernel->getMesh()->getCells().getRawIndex(id);
-            std::array<double,3>* datava = a.vector->rawData(rawIndex);
-            std::array<double,3>* datavb = b.vector->rawData(rawIndex);
-            for (std::size_t i = 0; i < nvf; ++i)
-                *datava = *datava + *datavb;
-            datava++;
-            datavb++;
+            std::array<double,3> *dataa = a.vector->rawData(rawIndex);
+            const std::array<double,3> *datab = b.vector->rawData(rawIndex);
+            for (std::size_t i = 0; i < nvf; ++i) {
+                dataa[i] += datab[i];
+            }
         }
     }
 }
