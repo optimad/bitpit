@@ -53,7 +53,7 @@ std::unique_ptr<patch_t> PatchKernel::clone(const patch_t *original)
 template<typename IdStorage>
 bool PatchKernel::deleteCells(const IdStorage &ids)
 {
-	if (!isExpert()) {
+	if (getAdaptionMode() != ADAPTION_MANUAL) {
 		return false;
 	}
 
@@ -104,7 +104,7 @@ bool PatchKernel::deleteCells(const IdStorage &ids)
 template<typename IdStorage>
 bool PatchKernel::deleteVertices(const IdStorage &ids)
 {
-	if (!isExpert()) {
+	if (getAdaptionMode() != ADAPTION_MANUAL) {
 		return false;
 	}
 
@@ -155,7 +155,7 @@ bool PatchKernel::deleteVertices(const IdStorage &ids)
 template<typename IdStorage>
 bool PatchKernel::deleteInterfaces(const IdStorage &ids)
 {
-	if (!isExpert()) {
+	if (getAdaptionMode() != ADAPTION_MANUAL) {
 		return false;
 	}
 

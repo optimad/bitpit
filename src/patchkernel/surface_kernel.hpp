@@ -99,13 +99,13 @@ private:
 
 protected:
 #if BITPIT_ENABLE_MPI==1
-    SurfaceKernel(MPI_Comm communicator, std::size_t haloSize, bool expert);
-    SurfaceKernel(int dimension, MPI_Comm communicator, std::size_t haloSize, bool expert);
-    SurfaceKernel(int id, int dimension, MPI_Comm communicator, std::size_t haloSize, bool expert);
+    SurfaceKernel(MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode);
+    SurfaceKernel(int dimension, MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode);
+    SurfaceKernel(int id, int dimension, MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode);
 #else
-    SurfaceKernel(bool expert);
-    SurfaceKernel(int dimension, bool expert);
-    SurfaceKernel(int id, int dimension, bool expert);
+    SurfaceKernel(AdaptionMode adaptionMode);
+    SurfaceKernel(int dimension, AdaptionMode adaptionMode);
+    SurfaceKernel(int id, int dimension, AdaptionMode adaptionMode);
 #endif
 
 };

@@ -52,7 +52,6 @@ int subtest_001()
 
     int myRank = surfaceMesh->getRank();
 
-    surfaceMesh->setExpert(true);
     if (myRank == 0) {
         surfaceMesh->importSTL("./data/buddha.stl");
         surfaceMesh->deleteCoincidentVertices();
@@ -281,7 +280,6 @@ int subtest_002()
 
     int myRank = surfaceMesh->getRank();
 
-    surfaceMesh->setExpert(true);
     if (myRank == 0) {
         surfaceMesh->importSTL("./data/buddha.stl");
         surfaceMesh->deleteCoincidentVertices();

@@ -74,13 +74,13 @@ namespace bitpit {
 	cells halo
 */
 VolOctree::VolOctree(MPI_Comm communicator, std::size_t haloSize)
-	: VolumeKernel(communicator, haloSize, false)
+	: VolumeKernel(communicator, haloSize, ADAPTION_AUTOMATIC)
 #else
 /*!
 	Creates an uninitialized serial patch.
 */
 VolOctree::VolOctree()
-	: VolumeKernel(false)
+	: VolumeKernel(ADAPTION_AUTOMATIC)
 #endif
 {
 	// Create the tree
@@ -169,7 +169,7 @@ VolOctree::VolOctree(int dimension, const std::array<double, 3> &origin, double 
 	cells halo
 */
 VolOctree::VolOctree(int id, int dimension, const std::array<double, 3> &origin, double length, double dh, MPI_Comm communicator, std::size_t haloSize)
-	: VolumeKernel(id, dimension, communicator, haloSize, false)
+	: VolumeKernel(id, dimension, communicator, haloSize, ADAPTION_AUTOMATIC)
 #else
 /*!
 	Creates a patch.
@@ -181,7 +181,7 @@ VolOctree::VolOctree(int id, int dimension, const std::array<double, 3> &origin,
 	\param dh is the maximum allowed cell size of the initial refinement
 */
 VolOctree::VolOctree(int id, int dimension, const std::array<double, 3> &origin, double length, double dh)
-	: VolumeKernel(id, dimension, false)
+	: VolumeKernel(id, dimension, ADAPTION_AUTOMATIC)
 #endif
 {
 	// Create the tree
@@ -243,7 +243,7 @@ VolOctree::VolOctree(int id, int dimension, const std::array<double, 3> &origin,
 	cells halo
 */
 VolOctree::VolOctree(std::istream &stream, MPI_Comm communicator, std::size_t haloSize)
-	: VolumeKernel(communicator, haloSize, false)
+	: VolumeKernel(communicator, haloSize, ADAPTION_AUTOMATIC)
 #else
 /*!
 	Creates a patch restoring the patch saved in the specified stream.
@@ -251,7 +251,7 @@ VolOctree::VolOctree(std::istream &stream, MPI_Comm communicator, std::size_t ha
 	\param stream is the stream to read from
 */
 VolOctree::VolOctree(std::istream &stream)
-	: VolumeKernel(false)
+	: VolumeKernel(ADAPTION_AUTOMATIC)
 #endif
 {
 	// Initialize the tree
@@ -305,9 +305,9 @@ VolOctree::VolOctree(std::unique_ptr<PabloUniform> &&tree, std::unique_ptr<Pablo
 */
 VolOctree::VolOctree(int id, std::unique_ptr<PabloUniform> &&tree, std::unique_ptr<PabloUniform> *adopter)
 #if BITPIT_ENABLE_MPI==1
-	: VolumeKernel(id, tree->getDim(), tree->getComm(), tree->getNofGhostLayers(), false)
+	: VolumeKernel(id, tree->getDim(), tree->getComm(), tree->getNofGhostLayers(), ADAPTION_AUTOMATIC)
 #else
-	: VolumeKernel(id, tree->getDim(), false)
+	: VolumeKernel(id, tree->getDim(), ADAPTION_AUTOMATIC)
 #endif
 {
 	// Associate the tree
@@ -488,9 +488,6 @@ void VolOctree::initialize()
 
 	// This patch need to be spawn
 	setSpawnStatus(SPAWN_NEEDED);
-
-	// This patch supports adaption
-	setAdaptionStatus(ADAPTION_CLEAN);
 
 	// Initialize the tolerance
 	//
@@ -1392,8 +1389,9 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 		}
 	}
 
-	// Enable advanced editing
-	setExpert(true);
+	// Enable manual adaption
+	AdaptionMode previousAdaptionMode = getAdaptionMode();
+	setAdaptionMode(ADAPTION_MANUAL);
 
 	// Renumber cells
 	renumberCells(renumberedOctants);
@@ -1502,8 +1500,8 @@ std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 
 	StitchInfo().swap(stitchInfo);
 
-	// Disable advanced editing
-	setExpert(false);
+	// Restore previous adaption mode
+	setAdaptionMode(previousAdaptionMode);
 
 	// Track mesh adaption
 	if (trackChanges) {
@@ -2344,8 +2342,9 @@ void VolOctree::_restore(std::istream &stream)
 	// Restore kernel of cell's containers
 	m_cells.restoreKernel(stream);
 
-	// Activate expert mode
-	setExpert(true);
+	// Enable manual adaption
+	AdaptionMode previousAdaptionMode = getAdaptionMode();
+	setAdaptionMode(ADAPTION_MANUAL);
 
 	// Restore cells
 	size_t nOctants       = m_tree->getNumOctants();
@@ -2367,8 +2366,8 @@ void VolOctree::_restore(std::istream &stream)
 	// Restore interfaces
 	restoreInterfaces(stream);
 
-	// De-activate expert mode
-	setExpert(false);
+	// Restore previous adaption mode
+	setAdaptionMode(previousAdaptionMode);
 
 	//
 	// Restore bounding box

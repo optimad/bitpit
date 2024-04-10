@@ -70,18 +70,18 @@ const unsigned short SurfaceKernel::SELECT_ALL      = 3;
 	will be created
 	\param haloSize is the size, expressed in number of layers, of the ghost
 	cells halo
-	\param expert if true, the expert mode will be enabled
+	\param adaptionMode is the adaption mode that will be used for the patch
 */
-SurfaceKernel::SurfaceKernel(MPI_Comm communicator, std::size_t haloSize, bool expert)
-	: PatchKernel(communicator, haloSize, expert)
+SurfaceKernel::SurfaceKernel(MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode)
+	: PatchKernel(communicator, haloSize, adaptionMode)
 #else
 /*!
 	Creates a patch.
 
-	\param expert if true, the expert mode will be enabled
+	\param adaptionMode is the adaption mode that will be used for the patch
 */
-SurfaceKernel::SurfaceKernel(bool expert)
-	: PatchKernel(expert)
+SurfaceKernel::SurfaceKernel(AdaptionMode adaptionMode)
+	: PatchKernel(adaptionMode)
 #endif
 {
 	initialize();
@@ -101,19 +101,19 @@ SurfaceKernel::SurfaceKernel(bool expert)
 	will be created
 	\param haloSize is the size, expressed in number of layers, of the ghost
 	cells halo
-	\param expert if true, the expert mode will be enabled
+	\param adaptionMode is the adaption mode that will be used for the patch
 */
-SurfaceKernel::SurfaceKernel(int dimension, MPI_Comm communicator, std::size_t haloSize, bool expert)
-	: PatchKernel(dimension, communicator, haloSize, expert)
+SurfaceKernel::SurfaceKernel(int dimension, MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode)
+	: PatchKernel(dimension, communicator, haloSize, adaptionMode)
 #else
 /*!
 	Creates a patch.
 
 	\param dimension is the dimension of the patch
-	\param expert if true, the expert mode will be enabled
+	\param adaptionMode is the adaption mode that will be used for the patch
 */
-SurfaceKernel::SurfaceKernel(int dimension, bool expert)
-	: PatchKernel(dimension, expert)
+SurfaceKernel::SurfaceKernel(int dimension, AdaptionMode adaptionMode)
+	: PatchKernel(dimension, adaptionMode)
 #endif
 {
     initialize();
@@ -134,20 +134,20 @@ SurfaceKernel::SurfaceKernel(int dimension, bool expert)
 	will be created
 	\param haloSize is the size, expressed in number of layers, of the ghost
 	cells halo
-	\param expert if true, the expert mode will be enabled
+	\param adaptionMode is the adaption mode that will be used for the patch
 */
-SurfaceKernel::SurfaceKernel(int id, int dimension, MPI_Comm communicator, std::size_t haloSize, bool expert)
-	: PatchKernel(id, dimension, communicator, haloSize, expert)
+SurfaceKernel::SurfaceKernel(int id, int dimension, MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode)
+	: PatchKernel(id, dimension, communicator, haloSize, adaptionMode)
 #else
 /*!
 	Creates a patch.
 
 	\param id is the id that will be assigned to the patch
 	\param dimension is the dimension of the patch
-	\param expert if true, the expert mode will be enabled
+	\param adaptionMode is the adaption mode that will be used for the patch
 */
-SurfaceKernel::SurfaceKernel(int id, int dimension, bool expert)
-	: PatchKernel(id, dimension, expert)
+SurfaceKernel::SurfaceKernel(int id, int dimension, AdaptionMode adaptionMode)
+	: PatchKernel(id, dimension, adaptionMode)
 #endif
 {
 }
