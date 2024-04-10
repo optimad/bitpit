@@ -131,8 +131,6 @@ protected:
 	void setCommunicator(MPI_Comm communicator) override;
 #endif
 
-	std::vector<adaption::Info> _spawn(bool trackSpawn) override;
-
 	void _updateAdjacencies() override;
 
 	std::vector<adaption::Info> _adaptionPrepare(bool trackAdaption) override;
