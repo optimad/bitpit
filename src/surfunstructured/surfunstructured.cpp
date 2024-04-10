@@ -53,13 +53,13 @@ namespace bitpit {
 	cells halo
 */
 SurfUnstructured::SurfUnstructured(MPI_Comm communicator, std::size_t haloSize)
-	: SurfaceKernel(communicator, haloSize, true)
+	: SurfaceKernel(communicator, haloSize, ADAPTION_MANUAL)
 #else
 /*!
 	Creates an uninitialized serial patch.
 */
 SurfUnstructured::SurfUnstructured()
-	: SurfaceKernel(true)
+	: SurfaceKernel(ADAPTION_MANUAL)
 #endif
 {
 }
@@ -79,7 +79,7 @@ SurfUnstructured::SurfUnstructured()
 	cells halo
 */
 SurfUnstructured::SurfUnstructured(int dimension, MPI_Comm communicator, std::size_t haloSize)
-	: SurfaceKernel(PatchManager::AUTOMATIC_ID, dimension, communicator, haloSize, true)
+	: SurfUnstructured(PatchManager::AUTOMATIC_ID, dimension, communicator, haloSize)
 #else
 /*!
 	Creates a patch.
@@ -87,7 +87,7 @@ SurfUnstructured::SurfUnstructured(int dimension, MPI_Comm communicator, std::si
 	\param dimension is the dimension of the patch
 */
 SurfUnstructured::SurfUnstructured(int dimension)
-	: SurfaceKernel(PatchManager::AUTOMATIC_ID, dimension, true)
+	: SurfUnstructured(PatchManager::AUTOMATIC_ID, dimension)
 #endif
 {
 }
@@ -108,7 +108,7 @@ SurfUnstructured::SurfUnstructured(int dimension)
 	cells halo
 */
 SurfUnstructured::SurfUnstructured(int id, int dimension, MPI_Comm communicator, std::size_t haloSize)
-	: SurfaceKernel(id, dimension, communicator, haloSize, true)
+	: SurfaceKernel(id, dimension, communicator, haloSize, ADAPTION_MANUAL)
 #else
 /*!
 	Creates a patch.
@@ -117,7 +117,7 @@ SurfUnstructured::SurfUnstructured(int id, int dimension, MPI_Comm communicator,
 	\param dimension is the dimension of the patch
 */
 SurfUnstructured::SurfUnstructured(int id, int dimension)
-	: SurfaceKernel(id, dimension, true)
+	: SurfaceKernel(id, dimension, ADAPTION_MANUAL)
 #endif
 {
 }
@@ -136,7 +136,7 @@ SurfUnstructured::SurfUnstructured(int id, int dimension)
 	cells halo
 */
 SurfUnstructured::SurfUnstructured(std::istream &stream, MPI_Comm communicator, std::size_t haloSize)
-	: SurfaceKernel(communicator, haloSize, false)
+	: SurfaceKernel(communicator, haloSize, ADAPTION_MANUAL)
 #else
 /*!
 	Creates a patch restoring the patch saved in the specified stream.
@@ -144,7 +144,7 @@ SurfUnstructured::SurfUnstructured(std::istream &stream, MPI_Comm communicator, 
 	\param stream is the stream to read from
 */
 SurfUnstructured::SurfUnstructured(std::istream &stream)
-	: SurfaceKernel(false)
+	: SurfaceKernel(ADAPTION_MANUAL)
 #endif
 {
 	// Restore the patch
