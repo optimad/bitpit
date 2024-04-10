@@ -49,13 +49,13 @@ private:
 
 protected:
 #if BITPIT_ENABLE_MPI==1
-    LineKernel(MPI_Comm communicator, std::size_t haloSize, bool expert);
-    LineKernel(int dimension, MPI_Comm communicator, std::size_t haloSize, bool expert);
-    LineKernel(int id, int dimension, MPI_Comm communicator, std::size_t haloSize, bool expert);
+    LineKernel(MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode);
+    LineKernel(int dimension, MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode);
+    LineKernel(int id, int dimension, MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode);
 #else
-    LineKernel(bool expert);
-    LineKernel(int dimension, bool expert);
-    LineKernel(int id, int dimension, bool expert);
+    LineKernel(AdaptionMode adaptionMode);
+    LineKernel(int dimension, AdaptionMode adaptionMode);
+    LineKernel(int id, int dimension, AdaptionMode adaptionMode);
 #endif
 
 };

@@ -43,13 +43,13 @@ public:
 
 protected:
 #if BITPIT_ENABLE_MPI==1
-    PointKernel(MPI_Comm communicator, bool expert);
-    PointKernel(int dimension, MPI_Comm communicator, bool expert);
-    PointKernel(int id, int dimension, MPI_Comm communicator, bool expert);
+    PointKernel(MPI_Comm communicator, AdaptionMode adaptionMode);
+    PointKernel(int dimension, MPI_Comm communicator, AdaptionMode adaptionMode);
+    PointKernel(int id, int dimension, MPI_Comm communicator, AdaptionMode adaptionMode);
 #else
-    PointKernel(bool expert);
-    PointKernel(int dimension, bool expert);
-    PointKernel(int id, int dimension, bool expert);
+    PointKernel(AdaptionMode adaptionMode);
+    PointKernel(int dimension, AdaptionMode adaptionMode);
+    PointKernel(int id, int dimension, AdaptionMode adaptionMode);
 #endif
 
 private:
