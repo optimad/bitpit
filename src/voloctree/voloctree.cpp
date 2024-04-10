@@ -482,12 +482,15 @@ void VolOctree::initialize()
 {
 	log::cout() << ">> Initializing Octree mesh" << std::endl;
 
+	// Set the adaption as clean
+	//
+	// Setting the adaptation as dirty guarantees that, at the first patch
+	// updated, all the data structures will be properly initialized.
+	setAdaptionStatus(ADAPTION_DIRTY);
+
 	// Reset the cell and interface type info
 	m_cellTypeInfo      = nullptr;
 	m_interfaceTypeInfo = nullptr;
-
-	// This patch need to be spawn
-	setSpawnStatus(SPAWN_NEEDED);
 
 	// Initialize the tolerance
 	//
@@ -923,26 +926,6 @@ int VolOctree::getCellFamilySplitLocalVertex(long id) const
 }
 
 /*!
-	Generates the patch.
-
-	\param trackSpawn if set to true the changes to the patch will be tracked
-	\result Returns a vector of adaption::Info that can be used to track
-	the changes done during the update.
-*/
-std::vector<adaption::Info> VolOctree::_spawn(bool trackSpawn)
-{
-	std::vector<adaption::Info> updateInfo;
-
-	// Perform initial import
-	if (empty()) {
-		m_tree->adapt();
-		updateInfo = sync(trackSpawn);
-	}
-
-	return updateInfo;
-}
-
-/*!
 	Prepares the patch for performing the adaption.
 
 	NOTE: only cells are tracked.
@@ -956,10 +939,6 @@ std::vector<adaption::Info> VolOctree::_spawn(bool trackSpawn)
 std::vector<adaption::Info> VolOctree::_adaptionPrepare(bool trackAdaption)
 {
 	BITPIT_UNUSED(trackAdaption);
-
-	if (getSpawnStatus() == SPAWN_NEEDED) {
-		throw std::runtime_error ("The initial import has not been performed.");
-	}
 
 	// Call pre-adapt routine
 	m_tree->preadapt();
