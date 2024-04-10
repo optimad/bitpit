@@ -470,9 +470,6 @@ void VolCartesian::initialize()
 	// Set the bounding box as frozen
 	setBoundingBoxFrozen(true);
 
-	// This patch need to be spawn
-	setSpawnStatus(SPAWN_NEEDED);
-
 	// Set the light memory mode
 	setMemoryMode(MemoryMode::MEMORY_LIGHT);
 
@@ -930,34 +927,44 @@ std::array<double, 3> VolCartesian::getSpacing() const
 */
 void VolCartesian::switchMemoryMode(MemoryMode mode)
 {
+	// Early return if the current memory mode matches the requested one
 	if (mode == getMemoryMode()) {
 		return;
 	}
 
-	// Update the data structures
+	// Update patch data structures
 	switch (mode) {
 
 	case MemoryMode::MEMORY_NORMAL:
-		// Spawn the patch to activate normal memory mode
-		spawn(false);
+	{
+		// Enable manual adaption
+		AdaptionMode previousAdaptionMode = getAdaptionMode();
+		setAdaptionMode(ADAPTION_MANUAL);
+
+		// Create the mesh
+		addVertices();
+		addCells();
+
+		// Restore previous adaption mode
+		setAdaptionMode(previousAdaptionMode);
 
 		break;
+	}
 
 	case MemoryMode::MEMORY_LIGHT:
+	{
 		// To put the patch in memory mode we need to reset the generic data
 		// of the patch, therefore we can call the 'reset' implementation of
 		// the kernel.
 		VolumeKernel::reset();
 
-		// Now the patch needs to be spawn
-		setSpawnStatus(SPAWN_NEEDED);
-
-		// Set the light memory mode
-		setMemoryMode(mode);
-
 		break;
+	}
 
 	}
+
+	// Set the requested memory mode
+	setMemoryMode(mode);
 }
 
 /*!
@@ -992,67 +999,6 @@ VolCartesian::MemoryMode VolCartesian::getMemoryMode() const
 double VolCartesian::getSpacing(int direction) const
 {
 	return m_cellSpacings[direction];
-}
-
-/*!
-	Generates the patch.
-
-	\param trackSpawn if set to true the changes to the patch will be tracked
-	\result Returns a vector of adaption::Info that can be used to track
-	the changes done during the update.
-*/
-std::vector<adaption::Info> VolCartesian::_spawn(bool trackSpawn)
-{
-	std::vector<adaption::Info> updateInfo;
-
-	// If the patch is in 'normal' mode there is nothing to do.
-	if (getMemoryMode() == MEMORY_NORMAL) {
-		return updateInfo;
-	}
-
-	// Enable manual adaption
-	AdaptionMode previousAdaptionMode = getAdaptionMode();
-	setAdaptionMode(ADAPTION_MANUAL);
-
-	// Definition of the mesh
-	addVertices();
-	addCells();
-
-	// Restore previous adaption mode
-	setAdaptionMode(previousAdaptionMode);
-
-	// Adaption info
-	if (trackSpawn) {
-		updateInfo.emplace_back();
-		adaption::Info &adaptionCellInfo = updateInfo.back();
-		adaptionCellInfo.type   = adaption::TYPE_CREATION;
-		adaptionCellInfo.entity = adaption::ENTITY_CELL;
-		adaptionCellInfo.current.reserve(m_cells.size());
-		for (auto &cell : m_cells) {
-			adaptionCellInfo.current.emplace_back();
-			long &cellId = adaptionCellInfo.current.back();
-			cellId = cell.getId();
-		}
-
-		updateInfo.emplace_back();
-		adaption::Info &adaptionInterfaceInfo = updateInfo.back();
-		adaptionInterfaceInfo.type   = adaption::TYPE_CREATION;
-		adaptionInterfaceInfo.entity = adaption::ENTITY_INTERFACE;
-		adaptionInterfaceInfo.current.reserve(m_interfaces.size());
-		for (auto &interface : m_interfaces) {
-			adaptionInterfaceInfo.current.emplace_back();
-			long &interfaceId = adaptionInterfaceInfo.current.back();
-			interfaceId = interface.getId();
-		}
-	} else {
-		updateInfo.emplace_back();
-	}
-
-	// Updating the adaption brings the patch is in normal memory mode
-	setMemoryMode(MemoryMode::MEMORY_NORMAL);
-
-	// Done
-	return updateInfo;
 }
 
 /*!
@@ -1173,9 +1119,6 @@ void VolCartesian::_dump(std::ostream &stream) const
  */
 void VolCartesian::_restore(std::istream &stream)
 {
-	// This patch need to be spawn
-	setSpawnStatus(SPAWN_NEEDED);
-
 	// Origin
 	std::array<double, 3> origin;
 	utils::binary::read(stream, origin[0]);
