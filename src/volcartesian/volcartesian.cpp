@@ -65,7 +65,7 @@ namespace bitpit {
 */
 VolCartesian::VolCartesian()
 #if BITPIT_ENABLE_MPI==1
-	: VolumeKernel(MPI_COMM_NULL, 0, ADAPTION_DISABLED)
+	: VolumeKernel(MPI_COMM_NULL, 0, ADAPTION_DISABLED, PARTITIONING_DISABLED)
 #else
 	: VolumeKernel(ADAPTION_DISABLED)
 #endif
@@ -103,7 +103,7 @@ VolCartesian::VolCartesian(int id, int dimension,
                                const std::array<double, 3> &lengths,
                                const std::array<int, 3> &nCells)
 #if BITPIT_ENABLE_MPI==1
-	: VolumeKernel(id, dimension, MPI_COMM_NULL, 0, ADAPTION_DISABLED)
+	: VolumeKernel(id, dimension, MPI_COMM_NULL, 0, ADAPTION_DISABLED, PARTITIONING_DISABLED)
 #else
 	: VolumeKernel(id, dimension, ADAPTION_DISABLED)
 #endif
@@ -144,7 +144,7 @@ VolCartesian::VolCartesian(int id, int dimension,
                                const std::array<double, 3> &origin,
                                double length, int nCells)
 #if BITPIT_ENABLE_MPI==1
-	: VolumeKernel(id, dimension, MPI_COMM_NULL, 0, ADAPTION_DISABLED)
+	: VolumeKernel(id, dimension, MPI_COMM_NULL, 0, ADAPTION_DISABLED, PARTITIONING_DISABLED)
 #else
 	: VolumeKernel(id, dimension, ADAPTION_DISABLED)
 #endif
@@ -185,7 +185,7 @@ VolCartesian::VolCartesian(int id, int dimension,
                                const std::array<double, 3> &origin,
                                double length, double dh)
 #if BITPIT_ENABLE_MPI==1
-	: VolumeKernel(id, dimension, MPI_COMM_NULL, 0, ADAPTION_DISABLED)
+	: VolumeKernel(id, dimension, MPI_COMM_NULL, 0, ADAPTION_DISABLED, PARTITIONING_DISABLED)
 #else
 	: VolumeKernel(id, dimension, ADAPTION_DISABLED)
 #endif
@@ -206,7 +206,7 @@ VolCartesian::VolCartesian(int id, int dimension,
 */
 VolCartesian::VolCartesian(std::istream &stream)
 #if BITPIT_ENABLE_MPI==1
-	: VolumeKernel(MPI_COMM_NULL, 0, ADAPTION_DISABLED)
+	: VolumeKernel(MPI_COMM_NULL, 0, ADAPTION_DISABLED, PARTITIONING_DISABLED)
 #else
 	: VolumeKernel(ADAPTION_DISABLED)
 #endif

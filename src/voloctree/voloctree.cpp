@@ -74,7 +74,7 @@ namespace bitpit {
 	cells halo
 */
 VolOctree::VolOctree(MPI_Comm communicator, std::size_t haloSize)
-	: VolumeKernel(communicator, haloSize, ADAPTION_AUTOMATIC)
+	: VolumeKernel(communicator, haloSize, ADAPTION_AUTOMATIC, PARTITIONING_ENABLED)
 #else
 /*!
 	Creates an uninitialized serial patch.
@@ -169,7 +169,7 @@ VolOctree::VolOctree(int dimension, const std::array<double, 3> &origin, double 
 	cells halo
 */
 VolOctree::VolOctree(int id, int dimension, const std::array<double, 3> &origin, double length, double dh, MPI_Comm communicator, std::size_t haloSize)
-	: VolumeKernel(id, dimension, communicator, haloSize, ADAPTION_AUTOMATIC)
+	: VolumeKernel(id, dimension, communicator, haloSize, ADAPTION_AUTOMATIC, PARTITIONING_ENABLED)
 #else
 /*!
 	Creates a patch.
@@ -243,7 +243,7 @@ VolOctree::VolOctree(int id, int dimension, const std::array<double, 3> &origin,
 	cells halo
 */
 VolOctree::VolOctree(std::istream &stream, MPI_Comm communicator, std::size_t haloSize)
-	: VolumeKernel(communicator, haloSize, ADAPTION_AUTOMATIC)
+	: VolumeKernel(communicator, haloSize, ADAPTION_AUTOMATIC, PARTITIONING_ENABLED)
 #else
 /*!
 	Creates a patch restoring the patch saved in the specified stream.
@@ -305,7 +305,7 @@ VolOctree::VolOctree(std::unique_ptr<PabloUniform> &&tree, std::unique_ptr<Pablo
 */
 VolOctree::VolOctree(int id, std::unique_ptr<PabloUniform> &&tree, std::unique_ptr<PabloUniform> *adopter)
 #if BITPIT_ENABLE_MPI==1
-	: VolumeKernel(id, tree->getDim(), tree->getComm(), tree->getNofGhostLayers(), ADAPTION_AUTOMATIC)
+	: VolumeKernel(id, tree->getDim(), tree->getComm(), tree->getNofGhostLayers(), ADAPTION_AUTOMATIC, PARTITIONING_ENABLED)
 #else
 	: VolumeKernel(id, tree->getDim(), ADAPTION_AUTOMATIC)
 #endif

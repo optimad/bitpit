@@ -362,10 +362,17 @@ public:
 	};
 
 	/*!
+		Partitioning mode
+	*/
+	enum PartitioningMode {
+		PARTITIONING_DISABLED = -1, //! No partitioning can be performed
+		PARTITIONING_ENABLED //! The patch can be partitioned across the processes
+	};
+
+	/*!
 		Partitioning status
 	*/
 	enum PartitioningStatus {
-		PARTITIONING_UNSUPPORTED = -1,
 		PARTITIONING_CLEAN,
 		PARTITIONING_PREPARED,
 		PARTITIONING_ALTERED
@@ -749,6 +756,7 @@ public:
 	bool isPartitioned() const;
 	bool isPartitioningSupported() const;
 	bool arePartitioningInfoDirty(bool global = true) const;
+	PartitioningMode getPartitioningMode() const;
 	PartitioningStatus getPartitioningStatus(bool global = false) const;
 	double evalPartitioningUnbalance() const;
 	double evalPartitioningUnbalance(const std::unordered_map<long, double> &cellWeights) const;
@@ -813,9 +821,9 @@ protected:
 	AlterationFlagsStorage m_alteredInterfaces;
 
 #if BITPIT_ENABLE_MPI==1
-	PatchKernel(MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode);
-	PatchKernel(int dimension, MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode);
-	PatchKernel(int id, int dimension, MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode);
+	PatchKernel(MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode, PartitioningMode partitioningMode);
+	PatchKernel(int dimension, MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode, PartitioningMode partitioningMode);
+	PatchKernel(int id, int dimension, MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode, PartitioningMode partitioningMode);
 #else
 	PatchKernel(AdaptionMode adaptionMode);
 	PatchKernel(int dimension, AdaptionMode adaptionMode);
@@ -950,6 +958,7 @@ protected:
 	virtual void _setHaloSize(std::size_t haloSize);
 
 	void setPartitioned(bool partitioned);
+	void setPartitioningMode(PartitioningMode mode);
 	void setPartitioningStatus(PartitioningStatus status);
 	virtual std::vector<adaption::Info> _partitioningPrepare(const std::unordered_map<long, double> &cellWeights, double defaultWeight, bool trackPartitioning);
 	virtual std::vector<adaption::Info> _partitioningPrepare(const std::unordered_map<long, int> &cellRanks, bool trackPartitioning);
@@ -1032,6 +1041,7 @@ private:
 	int m_nProcessors;
 #if BITPIT_ENABLE_MPI==1
 	MPI_Comm m_communicator;
+	PartitioningMode m_partitioningMode;
 	PartitioningStatus m_partitioningStatus;
 
 	int m_owner;

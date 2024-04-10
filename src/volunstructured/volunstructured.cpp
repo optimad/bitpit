@@ -54,7 +54,7 @@ namespace bitpit {
 	cells halo
 */
 VolUnstructured::VolUnstructured(MPI_Comm communicator, std::size_t haloSize)
-	: VolumeKernel(communicator, haloSize, ADAPTION_MANUAL)
+	: VolumeKernel(communicator, haloSize, ADAPTION_MANUAL, PARTITIONING_ENABLED)
 #else
 /*!
 	Creates an uninitialized serial patch.
@@ -111,7 +111,7 @@ VolUnstructured::VolUnstructured(int dimension)
 	cells halo
 */
 VolUnstructured::VolUnstructured(int id, int dimension, MPI_Comm communicator, std::size_t haloSize)
-	: VolumeKernel(id, dimension, communicator, haloSize, ADAPTION_MANUAL)
+	: VolumeKernel(id, dimension, communicator, haloSize, ADAPTION_MANUAL, PARTITIONING_ENABLED)
 #else
 /*!
 	Creates a patch.

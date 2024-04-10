@@ -39,8 +39,9 @@ namespace bitpit {
 	will be created
 	\param adaptionMode is the adaption mode that will be used for the patch
 */
-PointKernel::PointKernel(MPI_Comm communicator, AdaptionMode adaptionMode)
-	: PatchKernel(communicator, 0, adaptionMode)
+PointKernel::PointKernel(MPI_Comm communicator,
+                         AdaptionMode adaptionMode, PartitioningMode partitioningMode)
+	: PatchKernel(communicator, 0, adaptionMode, partitioningMode)
 #else
 /*!
 	Creates a patch.
@@ -67,15 +68,20 @@ PointKernel::PointKernel(AdaptionMode adaptionMode)
 	among the processes. If a null comunicator is provided, a serial patch
 	will be created
 	\param adaptionMode is the adaption mode that will be used for the patch
+	\param partitioningMode is the partitioning mode that will be used for the
+	patch
 */
-PointKernel::PointKernel(int dimension, MPI_Comm communicator, AdaptionMode adaptionMode)
-	: PatchKernel(dimension, communicator, 0, adaptionMode)
+PointKernel::PointKernel(int dimension, MPI_Comm communicator,
+                         AdaptionMode adaptionMode, PartitioningMode partitioningMode)
+	: PatchKernel(dimension, communicator, 0, adaptionMode, partitioningMode)
 #else
 /*!
 	Creates a patch.
 
 	\param dimension is the dimension of the patch
 	\param adaptionMode is the adaption mode that will be used for the patch
+	\param partitioningMode is the partitioning mode that will be used for the
+	patch
 */
 PointKernel::PointKernel(int dimension, AdaptionMode adaptionMode)
 	: PatchKernel(dimension, adaptionMode)
@@ -98,9 +104,12 @@ PointKernel::PointKernel(int dimension, AdaptionMode adaptionMode)
 	among the processes. If a null comunicator is provided, a serial patch
 	will be created
 	\param adaptionMode is the adaption mode that will be used for the patch
+	\param partitioningMode is the partitioning mode that will be used for the
+	patch
 */
-PointKernel::PointKernel(int id, int dimension, MPI_Comm communicator, AdaptionMode adaptionMode)
-	: PatchKernel(id, dimension, communicator, 0, adaptionMode)
+PointKernel::PointKernel(int id, int dimension, MPI_Comm communicator,
+                         AdaptionMode adaptionMode, PartitioningMode partitioningMode)
+	: PatchKernel(id, dimension, communicator, 0, adaptionMode, partitioningMode)
 #else
 /*!
 	Creates a patch.
