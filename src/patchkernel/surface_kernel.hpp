@@ -99,9 +99,9 @@ private:
 
 protected:
 #if BITPIT_ENABLE_MPI==1
-    SurfaceKernel(MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode);
-    SurfaceKernel(int dimension, MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode);
-    SurfaceKernel(int id, int dimension, MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode);
+    SurfaceKernel(MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode, PartitioningMode partitioningMode);
+    SurfaceKernel(int dimension, MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode, PartitioningMode partitioningMode);
+    SurfaceKernel(int id, int dimension, MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode, PartitioningMode partitioningMode);
 #else
     SurfaceKernel(AdaptionMode adaptionMode);
     SurfaceKernel(int dimension, AdaptionMode adaptionMode);
