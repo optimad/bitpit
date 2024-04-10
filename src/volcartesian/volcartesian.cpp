@@ -65,9 +65,9 @@ namespace bitpit {
 */
 VolCartesian::VolCartesian()
 #if BITPIT_ENABLE_MPI==1
-	: VolumeKernel(MPI_COMM_NULL, 0, false)
+	: VolumeKernel(MPI_COMM_NULL, 0, ADAPTION_DISABLED)
 #else
-	: VolumeKernel(false)
+	: VolumeKernel(ADAPTION_DISABLED)
 #endif
 {
 	initialize();
@@ -103,9 +103,9 @@ VolCartesian::VolCartesian(int id, int dimension,
                                const std::array<double, 3> &lengths,
                                const std::array<int, 3> &nCells)
 #if BITPIT_ENABLE_MPI==1
-	: VolumeKernel(id, dimension, MPI_COMM_NULL, 0, false)
+	: VolumeKernel(id, dimension, MPI_COMM_NULL, 0, ADAPTION_DISABLED)
 #else
-	: VolumeKernel(id, dimension, false)
+	: VolumeKernel(id, dimension, ADAPTION_DISABLED)
 #endif
 {
 	initialize();
@@ -144,9 +144,9 @@ VolCartesian::VolCartesian(int id, int dimension,
                                const std::array<double, 3> &origin,
                                double length, int nCells)
 #if BITPIT_ENABLE_MPI==1
-	: VolumeKernel(id, dimension, MPI_COMM_NULL, 0, false)
+	: VolumeKernel(id, dimension, MPI_COMM_NULL, 0, ADAPTION_DISABLED)
 #else
-	: VolumeKernel(id, dimension, false)
+	: VolumeKernel(id, dimension, ADAPTION_DISABLED)
 #endif
 {
 	initialize();
@@ -185,9 +185,9 @@ VolCartesian::VolCartesian(int id, int dimension,
                                const std::array<double, 3> &origin,
                                double length, double dh)
 #if BITPIT_ENABLE_MPI==1
-	: VolumeKernel(id, dimension, MPI_COMM_NULL, 0, false)
+	: VolumeKernel(id, dimension, MPI_COMM_NULL, 0, ADAPTION_DISABLED)
 #else
-	: VolumeKernel(id, dimension, false)
+	: VolumeKernel(id, dimension, ADAPTION_DISABLED)
 #endif
 {
 	initialize();
@@ -206,9 +206,9 @@ VolCartesian::VolCartesian(int id, int dimension,
 */
 VolCartesian::VolCartesian(std::istream &stream)
 #if BITPIT_ENABLE_MPI==1
-	: VolumeKernel(MPI_COMM_NULL, 0, false)
+	: VolumeKernel(MPI_COMM_NULL, 0, ADAPTION_DISABLED)
 #else
-	: VolumeKernel(false)
+	: VolumeKernel(ADAPTION_DISABLED)
 #endif
 {
 	initialize();
@@ -344,8 +344,9 @@ void VolCartesian::_updateInterfaces()
 		const ReferenceElementInfo &interfaceTypeInfo = ReferenceElementInfo::getInfo(interfaceType);
 		const int nInterfaceVertices = interfaceTypeInfo.nVertices;
 
-		// Enable advanced editing
-		setExpert(true);
+		// Enable manual adaption
+		AdaptionMode previousAdaptionMode = getAdaptionMode();
+		setAdaptionMode(ADAPTION_MANUAL);
 
 		// Initialize interfaces
 		for (Cell &cell : getCells()) {
@@ -404,8 +405,8 @@ void VolCartesian::_updateInterfaces()
 			}
 		}
 
-		// Disable advanced editing
-		setExpert(false);
+		// Restore previous adaption mode
+		setAdaptionMode(previousAdaptionMode);
 	}
 }
 
@@ -1009,15 +1010,16 @@ std::vector<adaption::Info> VolCartesian::_spawn(bool trackSpawn)
 		return updateInfo;
 	}
 
-	// Enable advanced editing
-	setExpert(true);
+	// Enable manual adaption
+	AdaptionMode previousAdaptionMode = getAdaptionMode();
+	setAdaptionMode(ADAPTION_MANUAL);
 
 	// Definition of the mesh
 	addVertices();
 	addCells();
 
-	// Disable advanced editing
-	setExpert(false);
+	// Restore previous adaption mode
+	setAdaptionMode(previousAdaptionMode);
 
 	// Adaption info
 	if (trackSpawn) {

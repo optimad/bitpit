@@ -56,13 +56,13 @@ public:
 
 protected:
 #if BITPIT_ENABLE_MPI==1
-	VolumeKernel(MPI_Comm communicator, std::size_t haloSize, bool expert);
-	VolumeKernel(int dimension, MPI_Comm communicator, std::size_t haloSize, bool expert);
-	VolumeKernel(int id, int dimension, MPI_Comm communicator, std::size_t haloSize, bool expert);
+	VolumeKernel(MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode);
+	VolumeKernel(int dimension, MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode);
+	VolumeKernel(int id, int dimension, MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode);
 #else
-	VolumeKernel(bool expert);
-	VolumeKernel(int dimension, bool expert);
-	VolumeKernel(int id, int dimension, bool expert);
+	VolumeKernel(AdaptionMode adaptionMode);
+	VolumeKernel(int dimension, AdaptionMode adaptionMode);
+	VolumeKernel(int id, int dimension, AdaptionMode adaptionMode);
 #endif
 
 };

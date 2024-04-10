@@ -243,18 +243,6 @@ vector<long>                            cell_list;
 // none
 
 // ========================================================================== //
-// INITIALIZE MESH PARAMETERS                                                 //
-// ========================================================================== //
-{
-    // Scope variables ------------------------------------------------------ //
-    // none
-
-    // Enable changes ------------------------------------------------------- //
-    mesh.setExpert(true);
-    //mesh.setParallel(1 ,0);
-}
-
-// ========================================================================== //
 // OUTPUT MESSAGE                                                             //
 // ========================================================================== //
 {
@@ -280,9 +268,6 @@ vector<long>                            cell_list;
     LineUnstructured                    envelope(1);
 #endif
     vector<long>                        ring1, ring1_expected{6,7,8,21,22,23,30,31,32};
-
-    // Set envelope attributes ---------------------------------------------- //
-    envelope.setExpert(true);
 
     // Generate a dummy triangulation --------------------------------------- //
     log::cout() << "** Generating non-manifold surface triangulation" << endl;
@@ -355,9 +340,6 @@ vector<long>                            cell_list;
     LineUnstructured                    envelope(1);
 #endif
     vector<long>                        ring1, ring1_expected{6,8,21,22,23,30,31,32};
-
-    // Set envelope attributes ---------------------------------------------- //
-    envelope.setExpert(true);
 
     // Backup copy of cells ------------------------------------------------- //
     log::cout() << "** Removing cell ID 5, 7, and 17" << endl;
@@ -440,9 +422,6 @@ vector<long>                            cell_list;
 #endif
     vector<long>                        ring1, ring1_expected{4,6,7,19,20,21};
     SurfUnstructured::CellIterator      it;
-
-    // Set envelope attributes ---------------------------------------------- //
-    envelope.setExpert(true);
 
     // Insert cells --------------------------------------------------------- //
     log::cout() << "** inserting previously deleted cells" << endl;
@@ -574,17 +553,6 @@ vector<bool>                    internal;
 
 // Counters
 int                             i;
-
-// ========================================================================== //
-// INITIALIZE MESH PARAMETERS                                                 //
-// ========================================================================== //
-{
-    // Scope variables ------------------------------------------------------ //
-    // none
-
-    // Enable changes ------------------------------------------------------- //
-    mesh.setExpert(true);
-}
 
 // ========================================================================== //
 // OUTPUT MESSAGE                                                             //

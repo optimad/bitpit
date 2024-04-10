@@ -206,7 +206,6 @@ int subtest_001()
 #else
 	SurfUnstructured                        mesh(2);
 #endif
-	mesh.setExpert(true);
 
 	// Generate a Dummy Triangulation
 	generateTestTriangulation(mesh);

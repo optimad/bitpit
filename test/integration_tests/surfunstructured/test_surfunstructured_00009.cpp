@@ -53,7 +53,6 @@ int subtest_001()
 #else
     std::unique_ptr<SurfUnstructured> surfaceMesh(new SurfUnstructured (2));
 #endif
-    surfaceMesh->setExpert(true);
     surfaceMesh->importSTL("./data/buddha.stl", STLReader::FormatUnknown, true);
     surfaceMesh->initializeAdjacencies();
     surfaceMesh->getVTK().setName("skd_test_STL");

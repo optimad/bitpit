@@ -339,10 +339,22 @@ public:
 	};
 
 	/*!
+		Adaption mode
+	*/
+	enum AdaptionMode {
+		ADAPTION_DISABLED  = -1, //! No adaption can be performed
+		ADAPTION_AUTOMATIC, //! Adaption is performed specifying which cells should be
+		                    //! refined/coarsen and then the patch will perform all the
+		                    //! alterations needed to fulfill the adaption requests
+		ADAPTION_MANUAL, //! Allows to use low level function to add and delete individual
+		                 //! cells and vertices. It's up to the user to guarantee the
+		                 //! consistency of the patch
+	};
+
+	/*!
 		Adaption status
 	*/
 	enum AdaptionStatus {
-		ADAPTION_UNSUPPORTED = -1,
 		ADAPTION_CLEAN,
 		ADAPTION_DIRTY,
 		ADAPTION_PREPARED,
@@ -388,6 +400,7 @@ public:
 	std::vector<adaption::Info> spawn(bool trackSpawn);
 
 	bool isAdaptionSupported() const;
+	AdaptionMode getAdaptionMode() const;
 	AdaptionStatus getAdaptionStatus(bool global = false) const;
 	std::vector<adaption::Info> adaption(bool trackAdaption = true, bool squeezeStorage = false);
 	std::vector<adaption::Info> adaptionPrepare(bool trackAdaption = true);
@@ -403,7 +416,7 @@ public:
 	void enableCellBalancing(long id, bool enabled);
 
 	bool isDirty(bool global = false) const;
-	bool isExpert() const;
+	BITPIT_DEPRECATED(bool isExpert() const);
 
 	int getId() const;
 	int getDimension() const;
@@ -800,13 +813,13 @@ protected:
 	AlterationFlagsStorage m_alteredInterfaces;
 
 #if BITPIT_ENABLE_MPI==1
-	PatchKernel(MPI_Comm communicator, std::size_t haloSize, bool expert);
-	PatchKernel(int dimension, MPI_Comm communicator, std::size_t haloSize, bool expert);
-	PatchKernel(int id, int dimension, MPI_Comm communicator, std::size_t haloSize, bool expert);
+	PatchKernel(MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode);
+	PatchKernel(int dimension, MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode);
+	PatchKernel(int id, int dimension, MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode);
 #else
-	PatchKernel(bool expert);
-	PatchKernel(int dimension, bool expert);
-	PatchKernel(int id, int dimension, bool expert);
+	PatchKernel(AdaptionMode adaptionMode);
+	PatchKernel(int dimension, AdaptionMode adaptionMode);
+	PatchKernel(int id, int dimension, AdaptionMode adaptionMode);
 #endif
 	PatchKernel(const PatchKernel &other);
 	PatchKernel & operator=(const PatchKernel &other) = delete;
@@ -898,6 +911,7 @@ protected:
 	void setSpawnStatus(SpawnStatus status);
 	virtual std::vector<adaption::Info> _spawn(bool trackAdaption);
 
+	void setAdaptionMode(AdaptionMode mode);
 	void setAdaptionStatus(AdaptionStatus status);
 	virtual std::vector<adaption::Info> _adaptionPrepare(bool trackAdaption);
 	virtual std::vector<adaption::Info> _adaptionAlter(bool trackAdaption);
@@ -925,7 +939,7 @@ protected:
 	virtual void _writePrepare();
 	virtual void _writeFinalize();
 
-	void setExpert(bool expert);
+	BITPIT_DEPRECATED(void setExpert(bool expert));
 
 	void extractEnvelope(PatchKernel &envelope) const;
 
@@ -1005,9 +1019,8 @@ private:
 
 	SpawnStatus m_spawnStatus;
 
+	AdaptionMode m_adaptionMode;
 	AdaptionStatus m_adaptionStatus;
-
-	bool m_expert;
 
 	int m_id;
 	int m_dimension;
