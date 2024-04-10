@@ -56,9 +56,9 @@ public:
 
 protected:
 #if BITPIT_ENABLE_MPI==1
-	VolumeKernel(MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode);
-	VolumeKernel(int dimension, MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode);
-	VolumeKernel(int id, int dimension, MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode);
+	VolumeKernel(MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode, PartitioningMode partitioningMode);
+	VolumeKernel(int dimension, MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode, PartitioningMode partitioningMode);
+	VolumeKernel(int id, int dimension, MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode, PartitioningMode partitioningMode);
 #else
 	VolumeKernel(AdaptionMode adaptionMode);
 	VolumeKernel(int dimension, AdaptionMode adaptionMode);

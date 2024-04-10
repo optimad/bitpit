@@ -1695,7 +1695,36 @@ bool PatchKernel::isPartitioned() const
 */
 bool PatchKernel::isPartitioningSupported() const
 {
-    return (getPartitioningStatus() != PARTITIONING_UNSUPPORTED);
+    return (getPartitioningMode() != PARTITIONING_DISABLED);
+}
+
+/*!
+	Returns the current partitioning mode.
+
+	Partitioning mode tells if the patch can be partitioned across the processes.
+
+	The following partitioning modes are supported:
+	 - disabled, no partitioning can be performed;
+	 - enabled, the patch can be partitioned across the processes.
+
+	\return The current partitioning mode.
+*/
+PatchKernel::PartitioningMode PatchKernel::getPartitioningMode() const
+{
+	return m_partitioningMode;
+}
+
+/*!
+	Set the current partitioning mode.
+
+	See PatchKernel::getPartitioningMode() for a list of supported partitioning
+	modes.
+
+	\param mode is the partitioning mode that will be set
+*/
+void PatchKernel::setPartitioningMode(PartitioningMode mode)
+{
+	m_partitioningMode = mode;
 }
 
 /*!

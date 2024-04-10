@@ -50,7 +50,7 @@ namespace bitpit {
     among the processes
 */
 LineUnstructured::LineUnstructured(MPI_Comm communicator)
-    : LineKernel(communicator, 1, ADAPTION_MANUAL)
+    : LineKernel(communicator, 1, ADAPTION_MANUAL, PARTITIONING_ENABLED)
 #else
 /*!
     Creates an uninitialized serial patch.
@@ -74,7 +74,7 @@ LineUnstructured::LineUnstructured()
     among the processes
 */
 LineUnstructured::LineUnstructured(int dimension, MPI_Comm communicator)
-    : LineKernel(PatchManager::AUTOMATIC_ID, dimension, communicator, 1, ADAPTION_MANUAL)
+    : LineKernel(PatchManager::AUTOMATIC_ID, dimension, communicator, 1, ADAPTION_MANUAL, PARTITIONING_ENABLED)
 #else
 /*!
     Creates a patch.
@@ -101,7 +101,7 @@ LineUnstructured::LineUnstructured(int dimension)
     among the processes
 */
 LineUnstructured::LineUnstructured(int id, int dimension, MPI_Comm communicator)
-    : LineKernel(id, dimension, communicator, 1, ADAPTION_MANUAL)
+    : LineKernel(id, dimension, communicator, 1, ADAPTION_MANUAL, PARTITIONING_ENABLED)
 #else
 /*!
     Creates a patch.
@@ -127,7 +127,7 @@ LineUnstructured::LineUnstructured(int id, int dimension)
     among the processes
 */
 LineUnstructured::LineUnstructured(std::istream &stream, MPI_Comm communicator)
-    : LineKernel(communicator, 1, ADAPTION_MANUAL)
+    : LineKernel(communicator, 1, ADAPTION_MANUAL, PARTITIONING_ENABLED)
 #else
 /*!
     Creates a patch restoring the patch saved in the specified stream.

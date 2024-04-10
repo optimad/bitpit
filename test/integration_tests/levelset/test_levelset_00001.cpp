@@ -124,7 +124,7 @@ int subtest_001()
     delta = meshMax -meshMin ;
 
     bitpit::VolCartesian mesh( 1, dimensions, meshMin, delta, nc);
-    mesh.update() ;
+    mesh.switchMemoryMode(bitpit::VolCartesian::MEMORY_NORMAL) ;
     mesh.initializeAdjacencies() ;
     mesh.initializeInterfaces() ;
 
