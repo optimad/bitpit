@@ -53,7 +53,7 @@ namespace bitpit {
 	cells halo
 */
 SurfUnstructured::SurfUnstructured(MPI_Comm communicator, std::size_t haloSize)
-	: SurfaceKernel(communicator, haloSize, ADAPTION_MANUAL)
+	: SurfaceKernel(communicator, haloSize, ADAPTION_MANUAL, PARTITIONING_ENABLED)
 #else
 /*!
 	Creates an uninitialized serial patch.
@@ -108,7 +108,7 @@ SurfUnstructured::SurfUnstructured(int dimension)
 	cells halo
 */
 SurfUnstructured::SurfUnstructured(int id, int dimension, MPI_Comm communicator, std::size_t haloSize)
-	: SurfaceKernel(id, dimension, communicator, haloSize, ADAPTION_MANUAL)
+	: SurfaceKernel(id, dimension, communicator, haloSize, ADAPTION_MANUAL, PARTITIONING_ENABLED)
 #else
 /*!
 	Creates a patch.
@@ -136,7 +136,7 @@ SurfUnstructured::SurfUnstructured(int id, int dimension)
 	cells halo
 */
 SurfUnstructured::SurfUnstructured(std::istream &stream, MPI_Comm communicator, std::size_t haloSize)
-	: SurfaceKernel(communicator, haloSize, ADAPTION_MANUAL)
+	: SurfaceKernel(communicator, haloSize, ADAPTION_MANUAL, PARTITIONING_ENABLED)
 #else
 /*!
 	Creates a patch restoring the patch saved in the specified stream.

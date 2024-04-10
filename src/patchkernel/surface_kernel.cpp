@@ -71,9 +71,12 @@ const unsigned short SurfaceKernel::SELECT_ALL      = 3;
 	\param haloSize is the size, expressed in number of layers, of the ghost
 	cells halo
 	\param adaptionMode is the adaption mode that will be used for the patch
+	\param partitioningMode is the partitioning mode that will be used for the
+	patch
 */
-SurfaceKernel::SurfaceKernel(MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode)
-	: PatchKernel(communicator, haloSize, adaptionMode)
+SurfaceKernel::SurfaceKernel(MPI_Comm communicator, std::size_t haloSize,
+                             AdaptionMode adaptionMode, PartitioningMode partitioningMode)
+	: PatchKernel(communicator, haloSize, adaptionMode, partitioningMode)
 #else
 /*!
 	Creates a patch.
@@ -102,9 +105,12 @@ SurfaceKernel::SurfaceKernel(AdaptionMode adaptionMode)
 	\param haloSize is the size, expressed in number of layers, of the ghost
 	cells halo
 	\param adaptionMode is the adaption mode that will be used for the patch
+	\param partitioningMode is the partitioning mode that will be used for the
+	patch
 */
-SurfaceKernel::SurfaceKernel(int dimension, MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode)
-	: PatchKernel(dimension, communicator, haloSize, adaptionMode)
+SurfaceKernel::SurfaceKernel(int dimension, MPI_Comm communicator, std::size_t haloSize,
+                             AdaptionMode adaptionMode, PartitioningMode partitioningMode)
+	: PatchKernel(dimension, communicator, haloSize, adaptionMode, partitioningMode)
 #else
 /*!
 	Creates a patch.
@@ -135,9 +141,12 @@ SurfaceKernel::SurfaceKernel(int dimension, AdaptionMode adaptionMode)
 	\param haloSize is the size, expressed in number of layers, of the ghost
 	cells halo
 	\param adaptionMode is the adaption mode that will be used for the patch
+	\param partitioningMode is the partitioning mode that will be used for the
+	patch
 */
-SurfaceKernel::SurfaceKernel(int id, int dimension, MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode)
-	: PatchKernel(id, dimension, communicator, haloSize, adaptionMode)
+SurfaceKernel::SurfaceKernel(int id, int dimension, MPI_Comm communicator, std::size_t haloSize,
+                             AdaptionMode adaptionMode, PartitioningMode partitioningMode)
+	: PatchKernel(id, dimension, communicator, haloSize, adaptionMode, partitioningMode)
 #else
 /*!
 	Creates a patch.

@@ -49,7 +49,7 @@ namespace bitpit {
     among the processes
 */
 PointCloud::PointCloud(MPI_Comm communicator)
-    : PointKernel(communicator, ADAPTION_MANUAL)
+    : PointKernel(communicator, ADAPTION_MANUAL, PARTITIONING_DISABLED)
 #else
 /*!
     Creates an uninitialized serial patch.
@@ -73,7 +73,7 @@ PointCloud::PointCloud()
     among the processes
 */
 PointCloud::PointCloud(int dimension, MPI_Comm communicator)
-    : PointKernel(PatchManager::AUTOMATIC_ID, dimension, communicator, ADAPTION_MANUAL)
+    : PointKernel(PatchManager::AUTOMATIC_ID, dimension, communicator, ADAPTION_MANUAL, PARTITIONING_DISABLED)
 #else
 /*!
     Creates a patch.
@@ -100,7 +100,7 @@ PointCloud::PointCloud(int dimension)
     among the processes
 */
 PointCloud::PointCloud(int id, int dimension, MPI_Comm communicator)
-    : PointKernel(id, dimension, communicator, ADAPTION_MANUAL)
+    : PointKernel(id, dimension, communicator, ADAPTION_MANUAL, PARTITIONING_DISABLED)
 #else
 /*!
     Creates a patch.
@@ -126,7 +126,7 @@ PointCloud::PointCloud(int id, int dimension)
     among the processes
 */
 PointCloud::PointCloud(std::istream &stream, MPI_Comm communicator)
-    : PointKernel(communicator, ADAPTION_MANUAL)
+    : PointKernel(communicator, ADAPTION_MANUAL, PARTITIONING_DISABLED)
 #else
 /*!
     Creates a patch restoring the patch saved in the specified stream.

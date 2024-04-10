@@ -50,9 +50,12 @@ namespace bitpit {
 	\param haloSize is the size, expressed in number of layers, of the ghost
 	cells halo
 	\param adaptionMode is the adaption mode that will be used for the patch
+	\param partitioningMode is the partitioning mode that will be used for the
+	patch
 */
-VolumeKernel::VolumeKernel(MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode)
-	: PatchKernel(communicator, haloSize, adaptionMode)
+VolumeKernel::VolumeKernel(MPI_Comm communicator, std::size_t haloSize,
+                           AdaptionMode adaptionMode, PartitioningMode partitioningMode)
+	: PatchKernel(communicator, haloSize, adaptionMode, partitioningMode)
 #else
 /*!
 	Creates a patch.
@@ -80,9 +83,12 @@ VolumeKernel::VolumeKernel(AdaptionMode adaptionMode)
 	\param haloSize is the size, expressed in number of layers, of the ghost
 	cells halo
 	\param adaptionMode is the adaption mode that will be used for the patch
+	\param partitioningMode is the partitioning mode that will be used for the
+	patch
 */
-VolumeKernel::VolumeKernel(int dimension, MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode)
-	: PatchKernel(dimension, communicator, haloSize, adaptionMode)
+VolumeKernel::VolumeKernel(int dimension, MPI_Comm communicator, std::size_t haloSize,
+                           AdaptionMode adaptionMode, PartitioningMode partitioningMode)
+	: PatchKernel(dimension, communicator, haloSize, adaptionMode, partitioningMode)
 #else
 /*!
 	Creates a patch.
@@ -112,9 +118,12 @@ VolumeKernel::VolumeKernel(int dimension, AdaptionMode adaptionMode)
 	\param haloSize is the size, expressed in number of layers, of the ghost
 	cells halo
 	\param adaptionMode is the adaption mode that will be used for the patch
+	\param partitioningMode is the partitioning mode that will be used for the
+	patch
 */
-VolumeKernel::VolumeKernel(int id, int dimension, MPI_Comm communicator, std::size_t haloSize, AdaptionMode adaptionMode)
-	: PatchKernel(id, dimension, communicator, haloSize, adaptionMode)
+VolumeKernel::VolumeKernel(int id, int dimension, MPI_Comm communicator, std::size_t haloSize,
+                           AdaptionMode adaptionMode, PartitioningMode partitioningMode)
+	: PatchKernel(id, dimension, communicator, haloSize, adaptionMode, partitioningMode)
 #else
 /*!
 	Creates a patch.
