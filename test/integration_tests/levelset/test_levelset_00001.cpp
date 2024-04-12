@@ -178,7 +178,8 @@ int subtest_001()
 /*!
 * Subtest 002
 *
-* Testing projection on surface feature of a 2D levelset on a Cartesian mesh in default memory mode.
+* Testing projection and interface intersection on surface feature of a 2D levelset on
+* a Cartesian mesh in default memory mode.
 */
 int subtest_002()
 {
@@ -214,9 +215,10 @@ int subtest_002()
     delta = meshMax -meshMin ;
 
     bitpit::VolCartesian mesh( 1, dimensions, meshMin, delta, nc);
-    mesh.update() ;
+    mesh.switchMemoryMode(bitpit::VolCartesian::MEMORY_NORMAL);
     mesh.initializeAdjacencies() ;
     mesh.initializeInterfaces() ;
+    mesh.update() ;
 
     // Compute level set in narrow band
     std::chrono::time_point<std::chrono::system_clock> start, end;
@@ -246,10 +248,6 @@ int subtest_002()
 
     levelSetSegmentation->evalProjection(point, true, &projectionPoint, &projectionNormal);
 
-    end = std::chrono::system_clock::now();
-    elapsed_seconds = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
-    bitpit::log::cout() << "elapsed time: " << elapsed_seconds << " ms" << std::endl;
-
     std::array<double, 3> projectionPointTarget  = {0.0021934049109738, -0.008062212041176, 0.0};
     std::array<double, 3> projectionNormalTarget = {-0.87574759289519, -0.48276925496379, 0.0};
 
@@ -257,8 +255,42 @@ int subtest_002()
     double normalDeviation = norm2(projectionNormal - projectionNormalTarget);
 
     double distanceTolerance = mesh.getTol();
-    return !(bitpit::utils::DoubleFloatingEqual()(pointDeviation, 0., distanceTolerance, distanceTolerance)
-           ||bitpit::utils::DoubleFloatingEqual()(normalDeviation, 0., distanceTolerance, distanceTolerance));
+    bool projectionFound = (bitpit::utils::DoubleFloatingEqual()(pointDeviation, 0., distanceTolerance, distanceTolerance)
+                         && bitpit::utils::DoubleFloatingEqual()(normalDeviation, 0., distanceTolerance, distanceTolerance));
+
+    // Compute intersected interface
+    int intrId = 744;
+
+    std::array<std::array<double, 3>, 2> intersection;
+    std::vector<std::array<double, 3>> polygon;
+    bool intersectionFound = (levelSetSegmentation->isInterfaceIntersected(intrId, false, &intersection, &polygon) == bitpit::LevelSetIntersectionStatus::TRUE);
+
+    std::array<double, 3> intersectionMean = 0.5 * (intersection[0] + intersection[1]);
+
+    int size = polygon.size();
+    std::unique_ptr<long[]> connectivity(new long[size + 1]);
+    connectivity[0] = size;
+    for (int i = 0; i < size; ++i) {
+        connectivity[i + 1] = i;
+    }
+
+    bitpit::Element element(0, bitpit::ElementType::POLYGON, std::move(connectivity));
+    std::array<double, 3> polygonMean = element.evalCentroid(polygon.data());
+
+    std::array<double, 3> intersectionMeanTarget = {0.234654275, -0.059034230965178, 0.0};
+    std::array<double, 3> polygonMeanTarget      = {0.234654275, -0.059897734876829, 0.0};
+
+    double intersectionDeviation = norm2(intersectionMean - intersectionMeanTarget);
+    double polygonDeviation      = norm2(polygonMean - polygonMeanTarget);
+
+    intersectionFound = intersectionFound && (bitpit::utils::DoubleFloatingEqual()(intersectionDeviation, 0., distanceTolerance, distanceTolerance)
+                       && bitpit::utils::DoubleFloatingEqual()(polygonDeviation, 0., distanceTolerance, distanceTolerance));
+
+    end = std::chrono::system_clock::now();
+    elapsed_seconds = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+    bitpit::log::cout() << "elapsed time: " << elapsed_seconds << " ms" << std::endl;
+
+    return !(projectionFound && intersectionFound);
 }
 
 /*!

@@ -483,8 +483,8 @@ int subtest_004()
 /*!
 * Subtest 005
 *
-* Testing projection on surface feature of a 3D levelset on a Cartesian mesh in default memory mode.
-* Surface consist of triangular elements.
+* Testing projection and interface intersection on surface feature of a 3D levelset on a Cartesian mesh
+* in default memory mode. Surface consist of triangular elements.
 */
 int subtest_005()
 {
@@ -515,6 +515,7 @@ int subtest_005()
     std::unique_ptr<bitpit::VolCartesian> mesh = generateCartesianMesh(*segmentation);
     mesh->switchMemoryMode(bitpit::VolCartesian::MEMORY_NORMAL);
     mesh->initializeAdjacencies();
+    mesh->initializeInterfaces() ;
     mesh->update();
 
     // Initialize levelset
@@ -558,8 +559,42 @@ int subtest_005()
     double normalDeviation = norm2(projectionNormal - projectionNormalTarget);
 
     double distanceTolerance = mesh->getTol();
-    return !(bitpit::utils::DoubleFloatingEqual()(pointDeviation, 0., distanceTolerance, distanceTolerance)
-           ||bitpit::utils::DoubleFloatingEqual()(normalDeviation, 0., distanceTolerance, distanceTolerance));
+    bool projectionFound = (bitpit::utils::DoubleFloatingEqual()(pointDeviation, 0., distanceTolerance, distanceTolerance)
+                         && bitpit::utils::DoubleFloatingEqual()(normalDeviation, 0., distanceTolerance, distanceTolerance));
+
+    // Compute intersected interface
+    int intrId = 71736;
+
+    std::array<std::array<double, 3>, 2> intersection;
+    std::vector<std::array<double, 3>> polygon;
+    bool intersectionFound = (levelSetSegmentation->isInterfaceIntersected(intrId, false, &intersection, &polygon) == bitpit::LevelSetIntersectionStatus::TRUE);
+
+    std::array<double, 3> intersectionMean = 0.5 * (intersection[0] + intersection[1]);
+
+    int size = polygon.size();
+    std::unique_ptr<long[]> connectivity(new long[size + 1]);
+    connectivity[0] = size;
+    for (int i = 0; i < size; ++i) {
+        connectivity[i + 1] = i;
+    }
+
+    bitpit::Element element(0, bitpit::ElementType::POLYGON, std::move(connectivity));
+    std::array<double, 3> polygonMean = element.evalCentroid(polygon.data());
+
+    std::array<double, 3> intersectionMeanTarget = {-0.0534969303756953, -0.0926593981683255, -0.99584790177713};
+    std::array<double, 3> polygonMeanTarget      = {-0.0534969303756953, -0.0926593981683255, -1.00417395088856};
+
+    double intersectionDeviation = norm2(intersectionMean - intersectionMeanTarget);
+    double polygonDeviation      = norm2(polygonMean - polygonMeanTarget);
+
+    intersectionFound = intersectionFound && (bitpit::utils::DoubleFloatingEqual()(intersectionDeviation, 0., distanceTolerance, distanceTolerance)
+                       && bitpit::utils::DoubleFloatingEqual()(polygonDeviation, 0., distanceTolerance, distanceTolerance));
+
+    end = std::chrono::system_clock::now();
+    elapsed_seconds = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+    bitpit::log::cout() << "elapsed time: " << elapsed_seconds << " ms" << std::endl;
+
+    return !(projectionFound && intersectionFound);
 }
 
 /*!
