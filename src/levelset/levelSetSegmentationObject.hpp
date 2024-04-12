@@ -165,6 +165,7 @@ protected:
     using LevelSetObject::fillFieldCellCache;
 
     LevelSetIntersectionStatus _isCellIntersected(long, double distance, LevelSetIntersectionMode=LevelSetIntersectionMode::FAST_FUZZY) const override;
+    virtual LevelSetIntersectionStatus _isInterfaceIntersected(long id, bool invert, std::array<std::array<double, 3>, 2> *intersection, std::vector<std::array<double, 3>> *polygon) const override;
 
     virtual const SurfUnstructured & _evalCellSurface(long id) const = 0;
     virtual int _evalCellPart(long id) const;
@@ -231,6 +232,8 @@ protected:
     long _evalSupport(const std::array<double,3> &point) const override;
     long _evalSupport(const std::array<double,3> &point, double searchRadius) const override;
     void _evalProjection(const std::array<double,3> &point, bool signedLevelSet, std::array<double, 3> *projectionPoint, std::array<double, 3> *projectionNormal) const override;
+
+    LevelSetIntersectionStatus _isInterfaceIntersected(long id, bool invert, std::array<std::array<double, 3>, 2> *intersection, std::vector<std::array<double, 3>> *polygon) const override;
 
 private:
     std::unique_ptr<LevelSetSegmentationSurfaceInfo> m_surfaceInfo;

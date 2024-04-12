@@ -1403,6 +1403,47 @@ LevelSetIntersectionStatus LevelSetObject::isCellIntersected(long id, LevelSetIn
 }
 
 /*!
+ * Check if the specified interface intersects the zero-levelset iso-surface.
+ *
+ * The iso-surface is considered planar. Calculate the intersection
+ * as a segment defined by two points and the part of the interface belonging to the subspace
+ * of negative level-set. If the interface is not intersected, an empty polygon is returned. 
+ * The interface belonging to the possitive level-set subspace is returned if the
+ * "invert" argument is false.
+ *
+ * @param[in] id is the interface index
+ * @param[in] invert when false the part of the  interface occupying the possitive levelset area is returned
+ * @param[in] signedLevelSet controls if signed levelset function will be used
+ * @param[out] intersection If intersects, return the cutting segment. In case of a liner interface
+ * the intersection degenerates to a point which coincides with the begining and the ending
+ * of the segment
+ * @param[out] polygon is the polygon constructed by the interface intersection placed on the
+ * opposite subspace of the one pointed by the plane's normal
+ * @return the level set status
+ */
+LevelSetIntersectionStatus LevelSetObject::isInterfaceIntersected(long id, bool invert,
+                                                                  std::array<std::array<double, 3>, 2> *intersection,
+                                                                  std::vector<std::array<double, 3>> *polygon) const
+{
+    return _isInterfaceIntersected(id, invert, intersection, polygon);
+}
+
+/*!
+ * Check if the specified interface intersects the zero-levelset iso-surface.
+ *
+ * The iso-surface is considered planar.
+ *
+ * @param[in] id is the interface index
+ * @return the level set status
+ */
+LevelSetIntersectionStatus LevelSetObject::isInterfaceIntersected(long id) const
+{
+    std::array<std::array<double, 3>, 2> intersection;
+    std::vector<std::array<double, 3>> polygon;
+    return isInterfaceIntersected(id, false, &intersection, &polygon);
+}
+
+/*!
  * Check if the specified cell intersects the zero-levelset iso-surface.
  *
  * If mode==LevelSetIntersectionMode::FAST_FUZZY the method will compare the levelset
@@ -1509,6 +1550,44 @@ LevelSetIntersectionStatus LevelSetObject::_isCellIntersected(long id, double di
 
     BITPIT_UNREACHABLE("cannot reach");
 
+}
+
+/*!
+ * Check if the specified interface intersects the zero-levelset iso-surface.
+ *
+ * The iso-surface is considered planar. Calculate the intersection
+ * as a segment defined by two points and the part of the interface belonging to the subspace
+ * of negative level-set. If the interface is not intersected, an empty polygon is returned. 
+ * The interface belonging to the possitive level-set subspace is returned if the
+ * "invert" argument is false.
+ *
+ * @param[in] id is the interface index
+ * @param[in] invert when false the part of the  interface occupying the possitive levelset area is returned
+ * @param[out] intersection If intersects, return the cutting segment. In case of a liner interface
+ * the intersection degenerates to a point which coincides with the begining and the ending
+ * of the segment
+ * @param[out] polygon is the polygon constructed by the interface intersection placed on the
+ * opposite subspace of the one pointed by the plane's normal
+ * @return the level set status
+ */
+LevelSetIntersectionStatus LevelSetObject::_isInterfaceIntersected(long id, bool invert,
+                                                                   std::array<std::array<double, 3>, 2> *intersection,
+                                                                   std::vector<std::array<double, 3>> *polygon) const
+{
+    const Interface &interface = m_kernel->getMesh()->getInterface(id);
+    std::array<double,3> centroid = m_kernel->getMesh()->evalElementCentroid(interface);
+
+    std::array<double,3> root = evalProjectionPoint(centroid);
+    std::array<double,3> normal = evalGradient(centroid, true);
+    if (!invert) {
+        normal *= -1.;
+    }
+
+    if( m_kernel->getMesh()->intersectInterfacePlane(id, root, normal, intersection, polygon) ){
+        return LevelSetIntersectionStatus::TRUE;
+    } else {
+        return LevelSetIntersectionStatus::FALSE;
+    }
 }
 
 /*!
