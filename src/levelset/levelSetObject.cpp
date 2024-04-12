@@ -834,7 +834,7 @@ LevelSetCellLocation LevelSetObject::fillCellGeometricNarrowBandLocationCache(lo
     // First we need to check if the cell intersectes the surface, and only if it
     // deosn't we should check if its distance is lower than the narrow band size.
     LevelSetCellLocation cellLocation = LevelSetCellLocation::UNKNOWN;
-    if (_intersectSurface(id, cellUnsignedValue, CELL_LOCATION_INTERSECTION_MODE) == LevelSetIntersectionStatus::TRUE) {
+    if (_isCellIntersected(id, cellUnsignedValue, CELL_LOCATION_INTERSECTION_MODE) == LevelSetIntersectionStatus::TRUE) {
         cellLocation = LevelSetCellLocation::NARROW_BAND_INTERSECTED;
     } else if (cellUnsignedValue <= m_narrowBandSize) {
         cellLocation = LevelSetCellLocation::NARROW_BAND_DISTANCE;
@@ -1340,6 +1340,44 @@ void LevelSetObject::destroyCellPropagatedSignCache()
  */
 LevelSetIntersectionStatus LevelSetObject::intersectSurface(long id, LevelSetIntersectionMode mode) const
 {
+    return isCellIntersected(id, mode);
+}
+
+/*!
+ * Function for checking if the specified cell intersects the zero-levelset iso-surface.
+ *
+ * If mode==LevelSetIntersectionMode::FAST_FUZZY the method will compare the levelset
+ * value to tangent and bounding radius of a cell. If the value is smaller than the
+ * tangent radius LevelSetIntersectionStatus::TRUE is returned, if it is larger than the
+ * bounding radius LevelSetIntersectionStatus::FALSE is returned. If it is in-between
+ * LevelSetIntersectionStatus::CLOSE is returned.
+ *
+ * If mode==LevelSetIntersectionMode::FAST_GUARANTEE_TRUE and the levelset value is
+ * smaller than the rangent radius LevelSetIntersectionStatus::TRUE is returned,
+ * otherwise LevelSetIntersectionStatus::FALSE.
+ *
+ * If mode==LevelSetIntersectionMode::FAST_GURANTEE_FALSE and the levelset value is
+ * larger than the bounding radius LevelSetIntersectionStatus::FALSE is returned,
+ * otherwise LevelSetIntersectionStatus::TRUE.
+ *
+ * If mode==LevelSetIntersectionMode::ACCURATE, the same checks of fuzzy mode are
+ * performed, however, in the cases where fuzzy mode would return CLOSE, an additional
+ * check on the intersection between the tangent plane at the projection point and the
+ * cell is performed. Errors of the method are related to the ratio of surface curvature
+ * over cell size.
+ *
+ * The bounding sphere is the sphere with the minimum radius that contains all the
+ * cell vertices and has the center in the cell centroid.
+ *
+ * The tangent sphere is a sphere having the center in the level centroid and tangent
+ * to the cell.
+ *
+ * @param[in] id cell id
+ * @param[in] mode describes the types of check that should be performed
+ * @return indicator regarding intersection
+ */
+LevelSetIntersectionStatus LevelSetObject::isCellIntersected(long id, LevelSetIntersectionMode mode) const
+{
     // Try evaluating intersection information from the cell location
     //
     // Regardless from the requested mode, a cell can intersect the zero-levelset iso-surface
@@ -1361,7 +1399,7 @@ LevelSetIntersectionStatus LevelSetObject::intersectSurface(long id, LevelSetInt
     // Check for intersection with zero-levelset iso-surface
     double distance = evalCellValue(id, false);
 
-    return _intersectSurface(id, distance, mode);
+    return _isCellIntersected(id, distance, mode);
 }
 
 /*!
@@ -1399,7 +1437,7 @@ LevelSetIntersectionStatus LevelSetObject::intersectSurface(long id, LevelSetInt
  * @param[in] mode describes the types of check that should be performed
  * @return indicator regarding intersection
  */
-LevelSetIntersectionStatus LevelSetObject::_intersectSurface(long id, double distance, LevelSetIntersectionMode mode) const
+LevelSetIntersectionStatus LevelSetObject::_isCellIntersected(long id, double distance, LevelSetIntersectionMode mode) const
 {
     double distanceTolerance = m_kernel->getDistanceTolerance();
 

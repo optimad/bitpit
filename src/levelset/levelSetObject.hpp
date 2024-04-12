@@ -90,7 +90,8 @@ public:
     virtual bool                                isCellInNarrowBand(long id) const;
     virtual bool                                isInNarrowBand(const std::array<double,3> &point) const;
 
-    LevelSetIntersectionStatus                  intersectSurface(long, LevelSetIntersectionMode=LevelSetIntersectionMode::FAST_FUZZY) const;
+    BITPIT_DEPRECATED(LevelSetIntersectionStatus intersectSurface(long, LevelSetIntersectionMode=LevelSetIntersectionMode::FAST_FUZZY) const);
+    LevelSetIntersectionStatus                  isCellIntersected(long, LevelSetIntersectionMode=LevelSetIntersectionMode::FAST_FUZZY) const;
 
     virtual short                               evalCellSign(long id) const;
     virtual double                              evalCellValue(long id, bool signedLevelSet) const;
@@ -179,7 +180,7 @@ protected:
     virtual void                                dump(std::ostream &);
     virtual void                                restore(std::istream &);
 
-    virtual LevelSetIntersectionStatus          _intersectSurface(long, double distance, LevelSetIntersectionMode=LevelSetIntersectionMode::FAST_FUZZY) const;
+    virtual LevelSetIntersectionStatus          _isCellIntersected(long, double distance, LevelSetIntersectionMode=LevelSetIntersectionMode::FAST_FUZZY) const;
 
     virtual short                               _evalCellSign(long id) const = 0;
     virtual double                              _evalCellValue(long id, bool signedLevelSet) const = 0;

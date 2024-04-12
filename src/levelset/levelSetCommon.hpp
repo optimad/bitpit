@@ -102,7 +102,7 @@ enum class LevelSetBooleanOperation{
 /*!
  * @ingroup levelsetEnums
  * Enum class defining the intersection between a cell and the zero levelset.
- * For details see LevelSetObject::intersectSurface()
+ * For details see LevelSetObject::isCellIntersected()
  */
 enum class LevelSetIntersectionStatus{
     FALSE=0,                                                            /**< Cell does not intersect zero levelset */
