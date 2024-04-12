@@ -1803,7 +1803,7 @@ int LevelSetSegmentationBaseObject::evalCellPart(long id) const
  * @param[in] mode describes the types of check that should be performed
  * @return indicator regarding intersection
  */
-LevelSetIntersectionStatus LevelSetSegmentationBaseObject::_intersectSurface(long id, double distance, LevelSetIntersectionMode mode) const
+LevelSetIntersectionStatus LevelSetSegmentationBaseObject::_isCellIntersected(long id, double distance, LevelSetIntersectionMode mode) const
 {
     // Get surface information
     const SurfUnstructured &surface = evalCellSurface(id);
@@ -1814,7 +1814,7 @@ LevelSetIntersectionStatus LevelSetSegmentationBaseObject::_intersectSurface(lon
     }
 
     // Evaluate intersection using base class
-    return LevelSetObject::_intersectSurface(id, distance, mode);
+    return LevelSetObject::_isCellIntersected(id, distance, mode);
 }
 
 /*!
@@ -2790,7 +2790,7 @@ LevelSetCellLocation LevelSetSegmentationObject::fillCellGeometricNarrowBandLoca
     // geometrically inside the narrow band and as such it's up to the caller of this function to
     // identify their cell location.
     LevelSetCellLocation cellLocation = LevelSetCellLocation::UNKNOWN;
-    if (_intersectSurface(id, cellUnsigendValue, CELL_LOCATION_INTERSECTION_MODE) == LevelSetIntersectionStatus::TRUE) {
+    if (_isCellIntersected(id, cellUnsigendValue, CELL_LOCATION_INTERSECTION_MODE) == LevelSetIntersectionStatus::TRUE) {
         cellLocation = LevelSetCellLocation::NARROW_BAND_INTERSECTED;
     } else if (cellUnsigendValue <= m_narrowBandSize) {
         cellLocation = LevelSetCellLocation::NARROW_BAND_DISTANCE;
