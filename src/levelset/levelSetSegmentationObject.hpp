@@ -164,7 +164,7 @@ protected:
     void fillFieldCellCache(LevelSetField field, long id) override;
     using LevelSetObject::fillFieldCellCache;
 
-    LevelSetIntersectionStatus _intersectSurface(long, double distance, LevelSetIntersectionMode=LevelSetIntersectionMode::FAST_FUZZY) const override;
+    LevelSetIntersectionStatus _isCellIntersected(long, double distance, LevelSetIntersectionMode=LevelSetIntersectionMode::FAST_FUZZY) const override;
 
     virtual const SurfUnstructured & _evalCellSurface(long id) const = 0;
     virtual int _evalCellPart(long id) const;
