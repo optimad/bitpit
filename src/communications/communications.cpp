@@ -76,6 +76,32 @@ DataCommunicator::~DataCommunicator()
 }
 
 /*!
+    Gets the rank in the MPI communicator
+
+    \return the MPI rank.
+*/
+int DataCommunicator::getRank() const
+{
+    int rank;
+    MPI_Comm_rank(m_communicator, &rank);
+
+    return rank;
+}
+
+/*!
+    Gets the number of processes in the MPI communicator
+
+    \return The number of processes in the MPI communicator.
+*/
+int DataCommunicator::getProcessorCount() const
+{
+    int nProcs;
+    MPI_Comm_size(m_communicator, &nProcs);
+
+    return nProcs;
+}
+
+/*!
 	Gets the MPI communicator
 
 	\return The MPI communicator.
