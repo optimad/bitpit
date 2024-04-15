@@ -49,6 +49,9 @@ public:
 
     const MPI_Comm & getCommunicator() const;
 
+    int getRank() const;
+    int getProcessorCount() const;
+
     void finalize(bool synchronous = false);
 
     void setTag(int exchangeTag);
