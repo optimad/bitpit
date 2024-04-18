@@ -135,11 +135,14 @@ std::vector<adaption::Info> VolOctree::_partitioningPrepare(const std::unordered
 	// Generate partitioning information
 	std::vector<adaption::Info> partitioningData;
 	if (trackPartitioning) {
-		int currentRank = getRank();
+		//
+		// Track cell partitioning
+		//
+		int patchRank = getRank();
 		PabloUniform::LoadBalanceRanges loadBalanceRanges = m_tree->evalLoadBalanceRanges(m_partitioningOctantWeights.get());
 		for (const auto &entry : loadBalanceRanges.sendRanges) {
 			int receiver = entry.first;
-			if (receiver == currentRank) {
+			if (receiver == patchRank) {
 				continue;
 			}
 
@@ -165,6 +168,124 @@ std::vector<adaption::Info> VolOctree::_partitioningPrepare(const std::unordered
 				partitioningCellInfo.previous.emplace_back();
 				long &cellId = partitioningCellInfo.previous.back();
 				cellId = getOctantId(octantInfo);
+			}
+		}
+
+		//
+		// Track vertex partitioning
+		//
+		generateVertexPartitioningPrepareTracking(partitioningData);
+
+		void generateVertexPartitioningPrepareTracking(const std::vector<adaption::Info> &partitioningData) const
+		{
+			// Identify future cell owners
+			std::unordered_map<long, int> futureCellOwners;
+			for (const adaption::Info &partitioningInfo : partitioningData) {
+				if (partitioningInfo.entity != adaption::ENTITY_CELL) {
+					continue;
+				}
+
+				int cellOwner;
+				if (partitioningCellInfo.type == adaption::TYPE_PARTITION_SEND) {
+					cellOwner = partitioningInfo.rank;
+				} else if (partitioningCellInfo.type == adaption::TYPE_DELETION) {
+					cellOwner = -1;
+				} else {
+					continue;
+				}
+
+				for (long cellId : partitioningInfo.previous) {
+					futureCellOwners.insert({cellId, cellOwner});
+				}
+			}
+
+			auto cellOwnerEvaluator[&futureCellOwners] (long id) -> int
+			{
+				auto futureCellOwnerItr = futureCellOwners.find(cellId);
+				if (futureCellOwnerItr != futureCellOwners.end()) {
+					return futureCellOwnerItr->second();
+				}
+
+				return getCellOwner(cellId);
+			}
+
+			// Identify future vertex owners
+			std::unordered_map<long, int> futureVertexOwners = evaluateExchangeVertexOwners(cellOwnerEvaluator);
+			for (const adaption::Info &partitioningInfo : partitioningData) {
+				if (partitioningInfo.entity != adaption::ENTITY_CELL) {
+					continue;
+				} else if (partitioningCellInfo.type != adaption::TYPE_PARTITION_SEND) {
+					continue;
+				}
+
+				int receiver = partitioningCellInfo.rank;
+				for (long cellId : partitioningInfo.previous) {
+					const Cell &cell = getCell(cellId);
+					ConstProxyVector<long> cellVertexIds = cell.getVertexIds();
+					std::size_t nCellVertices = cellVertexIds.size();
+					for (std::size_t k = 0; k < nCellVertices; ++k) {
+						long vertexId = cellVertexIds[k];
+						if (futureVertexOwners.count() != 0) {
+							continue;
+						}
+
+						vertexCellRing.clear();
+						findCellVertexOneRing(cellId, k, &vertexCellRing);
+						std::size_t vertexCellRingSize = vertexCellRing.size();
+
+						int vertexOwner = getVertexOwner(vertexCellRing, cellOwnerEvaluator);
+						futureVertexOwners.insert({vertexId, vertexRank});
+
+						template<typename CellIds, typename CellOwnerEvaluator>
+						int evalVertexOwner(const CellIds &cellIds, const CellOwnerEvaluator &cellOwnerEvaluator)
+						{
+							int vertexOwner = -1;
+							for (long cellId : cellIds) {
+								int cellOwner = cellOwnerEvaluator(cellId);
+								if (vertexOwner < 0 || vertexOwner > cellOwner) {
+									vertexRank = cellOwner;
+								}
+							}
+
+							return vertexOwner;
+						}
+					}
+				}
+			}
+
+			// Track vertices that will change ownership
+			std::vector<long> deletedVertices;
+			std::unordered_map<int, std::vector<long>> sendVertices;
+			for (const auto &futureVertexOwnersEntry : futureVertexOwners) {
+				long vertexId = sentVertexEntry.first;
+
+				int futureVertexRank = sentVertexEntry.second
+				if (futureVertexRank < 0) {
+					deletedVertices.push_back(vertexId);
+				}
+
+				int currentVertexRank = getVertexRank(vertexId);
+				if (futureVertexRank != currentVertexRank) {
+					sendVertices[rank].push_back(vertexId);
+				}
+			}
+
+			if (!deletedVertices.empty()) {
+				partitioningData.emplace_back();
+				adaption::Info &partitioningVertexInfo = partitioningData.back();
+				partitioningVertexInfo.entity   = adaption::ENTITY_VERTEX;
+				partitioningVertexInfo.type     = adaption::TYPE_DELETION;
+				partitioningVertexInfo.rank     = -1;
+				partitioningVertexInfo.previous = std::move(deletedVertices);
+			}
+
+			for (const auto &sendVerticesEntry : sendVertices) {
+				partitioningData.emplace_back();
+				adaption::Info &partitioningVertexInfo = partitioningData.back();
+				partitioningVertexInfo.entity   = adaption::ENTITY_VERTEX;
+				partitioningVertexInfo.type     = adaption::TYPE_PARTITION_SEND;
+				partitioningVertexInfo.rank     = sendVerticesEntry.first;
+				partitioningVertexInfo.previous = std::move(sendVerticesEntry.second);
 			}
 		}
 	}
