@@ -3011,7 +3011,7 @@ void ReconstructionKernel::computeGradientLimitedWeights(int nEquations, uint8_t
 
     // Constant polynomial
     if (ENABLE_FAST_PATH_OPTIMIZATIONS && degree == 0) {
-        std::fill_n(gradientWeights[0].data(), 3 * nEquations, 0.);
+        std::fill_n(gradientWeights, nEquations, std::array<double, 3>{0., 0., 0.});
 
         return;
     }
@@ -3023,31 +3023,24 @@ void ReconstructionKernel::computeGradientLimitedWeights(int nEquations, uint8_t
     int polynomialWeightsRowCount = getEquationCount();
     const double *polynomialWeights = getPolynomialWeights();
 
-    BITPIT_CREATE_WORKSPACE(dcsi, double, nCoeffs, MAX_STACK_WORKSPACE_SIZE);
-
-    std::array<double, 3> direction = {{0., 0., 0.}};
+    BITPIT_CREATE_WORKSPACE(dcsi, double, nCoeffs * dimensions, 3 * MAX_STACK_WORKSPACE_SIZE);
     for (int d = 0; d < dimensions; ++d) {
         // Select derivative direction
+        std::array<double, 3> direction = {{0., 0., 0.}};
         direction[d] = 1.;
 
-        // Evaluate basis
-        ReconstructionPolynomial::evalPointBasisDerivatives(degree, dimensions, origin, point, direction, dcsi);
+        // Evaluate basis derivatives
+        int offset = linearalgebra::linearIndexColMajor(0, d, nCoeffs, dimensions);
+
+        ReconstructionPolynomial::evalPointBasisDerivatives(degree, dimensions, origin, point, direction, dcsi + offset);
         if (limiters) {
-            applyLimiter(degree, limiters, dcsi);
+            applyLimiter(degree, limiters, dcsi + offset);
         }
-
-        // Generic polynomial
-        //
-        // Weights are stored in contiguous three-dimensional arrays, this
-        // means we can access the weights of the current dimensions using
-        // the dimension as offset and a stride of three elements
-        cblas_dgemv(CBLAS_ORDER::CblasColMajor, CBLAS_TRANSPOSE::CblasNoTrans,
-                    nEquations, nCoeffs, 1., polynomialWeights, polynomialWeightsRowCount,
-                    dcsi, 1, 0, gradientWeights->data() + d, 3);
-
-        // Reset direction
-        direction[d] = 0.;
     }
+
+    cblas_dgemm(CBLAS_ORDER::CblasColMajor, CBLAS_TRANSPOSE::CblasTrans, CBLAS_TRANSPOSE::CblasTrans,
+                dimensions, nEquations, nCoeffs, 1., dcsi, nCoeffs, polynomialWeights, polynomialWeightsRowCount,
+                0., gradientWeights[0].data(), 3);
 
     // Explicitly zero unused components
     if (dimensions != ReconstructionPolynomial::MAX_DIMENSIONS) {
