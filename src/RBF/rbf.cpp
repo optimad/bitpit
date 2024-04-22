@@ -246,7 +246,7 @@ int RBFKernel::getActiveCount(  )
 {
     int nActive(0);
 
-    for( auto && active : m_activeNodes)
+    for( bool active : m_activeNodes)
         nActive += (int) active;
 
     return nActive;
@@ -263,7 +263,7 @@ std::vector<int> RBFKernel::getActiveSet(  )
 
     activeSet.reserve( getActiveCount() );
 
-    for( auto && active : m_activeNodes) {
+    for( bool active : m_activeNodes) {
         if( active )
             activeSet.push_back(i);
         ++i;
@@ -324,9 +324,7 @@ bool RBFKernel::activateNode(const std::vector<int> & list)
  */
 void RBFKernel::activateAllNodes()
 {
-    for(auto && active : m_activeNodes) {
-        active = true;
-    }
+    std::fill(m_activeNodes.begin(), m_activeNodes.end(), true);
 }
 
 /*!
@@ -367,9 +365,7 @@ bool RBFKernel::deactivateNode(const std::vector<int> & list)
  */
 void RBFKernel::deactivateAllNodes()
 {
-    for(auto && active : m_activeNodes) {
-        active = false;
-    }
+    std::fill(m_activeNodes.begin(), m_activeNodes.end(), false);
 }
 
 /*!
@@ -713,7 +709,9 @@ int RBFKernel::solve()
 
     double dist;
 
-    int nActive = getActiveCount();
+    std::vector<int> activeSet = getActiveSet();
+    int nActive = activeSet.size();
+
     int nPoly   = m_polyEnabled ? m_polyActiveBasis.size() : 0;
     int nS      = nActive + nPoly;
     int nrhs    = getDataCount();
@@ -724,7 +722,6 @@ int RBFKernel::solve()
 
     std::vector<int> ipiv(nS);
 
-    std::vector<int> activeSet( getActiveSet() );
 
     std::vector<double> A(lda * nS);
     std::vector<double> b(ldb * nrhs);
@@ -811,8 +808,7 @@ int RBFKernel::greedy( double tolerance)
 
     m_error.resize(m_nodes);
 
-    for( auto && active : m_activeNodes )
-        active = false;
+    deactivateAllNodes();
 
     for( i=0; i<m_nodes; ++i){
 
@@ -1013,13 +1009,13 @@ int RBFKernel::solveLSQ()
 
     double dist;
 
-    int nActive = getActiveCount();
+    std::vector<int> activeSet = getActiveSet();
+    int nActive = activeSet.size();
+
     int nPoly   = m_polyEnabled ? getPolynomialWeightsCount() : 0;
     int nS      = nActive + nPoly;
     int nP      = m_nodes;
     int nrhs    = getDataCount();
-
-    std::vector<int> activeSet( getActiveSet() );
 
     int     n ,m, lda, ldb, info, rank;
     double rcond = -1.0;
