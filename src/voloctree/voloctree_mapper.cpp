@@ -1714,7 +1714,9 @@ void VolOctreeMapper::_communicateMappedAdaptionInfo(const std::vector<adaption:
             int mentity;
             recvBuffer >> mentity;
 
-            mapping::Info info;
+            m_partitionIR.map_rank_inverseMapping[rank].erase(id);
+            auto infoItr = m_partitionIR.map_rank_previousMapping[rank].insert({id, mapping::Info()}).first;
+            mapping::Info &info = infoItr->second;
             info.type = mapping::Type(mtype);
             info.entity = mapping::Entity(mentity);
             int nmap;
@@ -1725,8 +1727,6 @@ void VolOctreeMapper::_communicateMappedAdaptionInfo(const std::vector<adaption:
                 info.ids.push_back(idref);
                 info.ranks.push_back(m_rank);
             }
-            m_partitionIR.map_rank_previousMapping[rank][id] = info;
-            m_partitionIR.map_rank_inverseMapping[rank].erase(id);
         }
 
         int nofInfo;
@@ -1738,7 +1738,8 @@ void VolOctreeMapper::_communicateMappedAdaptionInfo(const std::vector<adaption:
             int entity;
             recvBuffer >> entity;
 
-            adaption::Info info;
+            adaptionInfoRef->emplace_back();
+            adaption::Info &info = adaptionInfoRef->back();
             info.type = adaption::Type(type);
             info.entity = adaption::Entity(entity);
             int ncurrent;
@@ -1758,7 +1759,6 @@ void VolOctreeMapper::_communicateMappedAdaptionInfo(const std::vector<adaption:
             int arank;
             recvBuffer >> arank;
             info.rank = arank;
-            adaptionInfoRef->push_back(info);
         }
 
         ++nCompletedRecvs;
