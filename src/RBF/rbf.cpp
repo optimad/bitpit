@@ -562,30 +562,17 @@ bool RBFKernel::removeData(int id)
  */
 bool RBFKernel::removeData(std::vector<int> & list)
 {
-    std::set<int> setList;
-    for(int id : list) setList.insert(id);
+    // List should be processed in reversed order because data
+    // are removed using their position in the storages.
+    std::sort(list.begin(), list.end(), std::greater<int>());
 
-    int extracted = 0;
-    for(int id : setList) {
-        if(id>=0 && id <m_fields){
-            m_fields--;
-            int index = id-extracted;
-            assert(index >= 0);
-            if (m_mode == RBFMode::INTERP) {
-                assert((std::size_t) index < m_value.size());
-                auto valueItr = m_value.begin() + index;
-                m_value.erase(valueItr);
-            } else {
-                assert((std::size_t) index < m_weight.size());
-                auto weightItr = m_weight.begin() + index;
-                m_weight.erase(weightItr);
-            }
-
-            extracted++;
-        }
+    int nInitialFields = getDataCount();
+    for(int id : list) {
+        removeData(id);
     }
+    int nFinalFields = getDataCount();
 
-    return(extracted == (int)(list.size()));
+    return ((nInitialFields - nFinalFields) == static_cast<int>(list.size()));
 }
 
 /*!
