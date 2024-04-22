@@ -243,7 +243,7 @@ VolOctree::VolOctree(int id, int dimension, const std::array<double, 3> &origin,
 	cells halo
 */
 VolOctree::VolOctree(std::istream &stream, MPI_Comm communicator, std::size_t haloSize)
-	: VolumeKernel(communicator, haloSize, false)
+	: VolOctree(communicator, haloSize)
 #else
 /*!
 	Creates a patch restoring the patch saved in the specified stream.
@@ -251,19 +251,9 @@ VolOctree::VolOctree(std::istream &stream, MPI_Comm communicator, std::size_t ha
 	\param stream is the stream to read from
 */
 VolOctree::VolOctree(std::istream &stream)
-	: VolumeKernel(false)
+	: VolOctree()
 #endif
 {
-	// Initialize the tree
-#if BITPIT_ENABLE_MPI==1
-	initializeTree(nullptr, haloSize);
-#else
-	initializeTree(nullptr);
-#endif
-
-	// Initialize the patch
-	initialize();
-
 	// Restore the patch
 	restore(stream);
 }
