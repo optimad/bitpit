@@ -1328,28 +1328,17 @@ bool RBF::removeNode(int id)
  */
 bool RBF::removeNode(std::vector<int> & list)
 {
-    std::set<int> setList;
+    // List should be processed in reversed order because nodes
+    // are removed using their position in the storages.
+    std::sort(list.begin(), list.end(), std::greater<int>());
+
+    int nInitialNodes = getTotalNodesCount();
     for(int id : list) {
-        setList.insert(id);
+        removeNode(id);
     }
+    int nFinalNodes = getTotalNodesCount();
 
-    int extracted = 0;
-    for(int id : setList) {
-        if(id>=0 && id <m_nodes){
-            m_nodes--;
-            int index = id-extracted;
-            assert(index >= 0);
-            assert((std::size_t) index < m_node.size());
-            auto nodeItr = m_node.begin() + index;
-            m_node.erase(nodeItr);
-            assert((std::size_t) index < m_activeNodes.size());
-            auto activeNodeItr = m_activeNodes.begin() + index;
-            m_activeNodes.erase(activeNodeItr);
-            extracted++;
-        }
-    }
-
-    return(extracted == (int)(list.size()));
+    return ((nInitialNodes - nFinalNodes) == static_cast<int>(list.size()));
 }
 
 /*!
