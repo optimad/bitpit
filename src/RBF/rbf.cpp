@@ -313,7 +313,7 @@ bool RBFKernel::activateNode(const std::vector<int> & list)
     }
 
     bool check = true;
-    for(auto && index : list) {
+    for(int index : list) {
         check = check && activateNode(index);
     }
     return check;
@@ -356,7 +356,7 @@ bool RBFKernel::deactivateNode(const std::vector<int> & list)
     }
 
     bool check = true;
-    for(auto && index : list) {
+    for(int index : list) {
         check = check && deactivateNode(index);
     }
     return check;
@@ -567,10 +567,10 @@ bool RBFKernel::removeData(int id)
 bool RBFKernel::removeData(std::vector<int> & list)
 {
     std::set<int> setList;
-    for(auto && id : list) setList.insert(id);
+    for(int id : list) setList.insert(id);
 
     int extracted = 0;
-    for(auto && id : setList) {
+    for(int id : setList) {
         if(id>=0 && id <m_fields){
             m_fields--;
             int index = id-extracted;
@@ -1346,12 +1346,12 @@ bool RBF::removeNode(int id)
 bool RBF::removeNode(std::vector<int> & list)
 {
     std::set<int> setList;
-    for(auto && id : list) {
+    for(int id : list) {
         setList.insert(id);
     }
 
     int extracted = 0;
-    for(auto && id : setList) {
+    for(int id : setList) {
         if(id>=0 && id <m_nodes){
             m_nodes--;
             int index = id-extracted;
