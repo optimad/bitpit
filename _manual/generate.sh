@@ -11,7 +11,7 @@ MANUAL_BUILD_DIR="${MANUAL_ROOT_DIR}/build"
 # Generate build directory
 rm -rf "${MANUAL_BUILD_DIR}"
 mkdir "${MANUAL_BUILD_DIR}"
-mkdir "${MANUAL_BUILD_DIR}/_doxygen_templates"
+mkdir "${MANUAL_BUILD_DIR}/doxygen_templates"
 cd "${MANUAL_BUILD_DIR}"
 
 # Link files needed by jekyll
@@ -20,8 +20,8 @@ cp -r "${MANUAL_ROOT_DIR}/_layouts" "${MANUAL_BUILD_DIR}"
 cp -r "${MANUAL_ROOT_DIR}/stylesheets" "${MANUAL_BUILD_DIR}"
 cp "${JEKYLL_ROOT_DIR}/_includes/"* "${MANUAL_BUILD_DIR}/_includes/"
 cp "${JEKYLL_ROOT_DIR}/_layouts/"* "${MANUAL_BUILD_DIR}/_layouts/"
-cp "${MANUAL_ROOT_DIR}/doxygen_footer.html" "${MANUAL_BUILD_DIR}"
-cp "${MANUAL_ROOT_DIR}/doxygen_header.html" "${MANUAL_BUILD_DIR}"
+cp "${MANUAL_ROOT_DIR}/doxygen_footer.html" "${MANUAL_BUILD_DIR}/doxygen_templates"
+cp "${MANUAL_ROOT_DIR}/doxygen_header.html" "${MANUAL_BUILD_DIR}/doxygen_templates"
 
 # Configration files needed by jekyll
 JEKYLL_CONFIG_GLOBAL="${JEKYLL_ROOT_DIR}/_config.yml"
