@@ -1,0 +1,7 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" href="$classbitpit_1_1ReconstructionAssembler.html" title="The ReconstructionAssembler class allows to define reconstruction polynomial." alt="" coords="5,5,212,31"/>
+<area shape="rect" id="Node000001" href="$classbitpit_1_1Reconstruction.html" title="The Reconstruction class allows to build and apply a polynomial reconstructions." alt="" coords="260,31,404,56"/>
+<area shape="poly" id="edge185_Node000000_Node000001" title=" " alt="" coords="226,29,260,33,260,38,226,34"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1ReconstructionKernel.html" title="The ReconstructionKernel class allows to evaluate the weight of a reconstruction polynomial previousl..." alt="" coords="19,55,199,80"/>
+<area shape="poly" id="edge186_Node000002_Node000001" title=" " alt="" coords="212,54,260,48,260,54,213,59"/>
+</map>

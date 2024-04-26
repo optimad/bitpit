@@ -1,8 +1,0 @@
-<map id="bitpit::LevelSetDirectStorageManager" name="bitpit::LevelSetDirectStorageManager">
-<area shape="rect" id="node1" title="Is the template class for defining levelset storages managers that don&#39;t need a kernel." alt="" coords="612,78,799,118"/>
-<area shape="rect" id="node4" href="$classbitpit_1_1LevelSetNarrowBandCacheBase.html" title=" " alt="" coords="848,5,1080,60"/>
-<area shape="rect" id="node5" href="$classbitpit_1_1LevelSetNarrowBandCache_3_01LevelSetDirectStorageManager_01_4.html" title=" " alt="" coords="1129,71,1393,111"/>
-<area shape="rect" id="node6" href="$classbitpit_1_1LevelSetSegmentationNarrowBandCache_3_01LevelSetDirectStorageManager_01_4.html" title=" " alt="" coords="1443,105,1672,160"/>
-<area shape="rect" id="node2" href="$classbitpit_1_1LevelSetStorageManager.html" title=" " alt="" coords="360,78,563,118"/>
-<area shape="rect" id="node3" href="$classbitpit_1_1LevelSetStorageManager.html" title="Is the template class for defining levelset storages managers." alt="" coords="5,78,208,118"/>
-</map>

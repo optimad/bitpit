@@ -1,9 +1,0 @@
-<map id="bitpit::LevelSetInternalPiercedStorageManager" name="bitpit::LevelSetInternalPiercedStorageManager">
-<area shape="rect" id="node1" title="Is the template class for defining levelset storages managers whose kernel is an internal PiercedKern..." alt="" coords="876,78,1037,118"/>
-<area shape="rect" id="node5" href="$classbitpit_1_1LevelSetNarrowBandCacheBase.html" title=" " alt="" coords="1087,5,1325,60"/>
-<area shape="rect" id="node6" href="$classbitpit_1_1LevelSetNarrowBandCache_3_01LevelSetInternalPiercedStorageManager_01_4.html" title=" " alt="" coords="1375,56,1584,111"/>
-<area shape="rect" id="node7" href="$classbitpit_1_1LevelSetSegmentationNarrowBandCache_3_01LevelSetInternalPiercedStorageManager_01_4.html" title=" " alt="" coords="1633,105,1871,160"/>
-<area shape="rect" id="node2" href="$classbitpit_1_1LevelSetExternalPiercedStorageManager.html" title="Is the template class for defining levelset storages managers whose kernel is an external PiercedKern..." alt="" coords="665,78,827,118"/>
-<area shape="rect" id="node3" href="$classbitpit_1_1LevelSetStorageManager.html" title=" " alt="" coords="413,78,616,118"/>
-<area shape="rect" id="node4" href="$classbitpit_1_1LevelSetStorageManager.html" title="Is the template class for defining levelset storages managers." alt="" coords="5,78,208,118"/>
-</map>

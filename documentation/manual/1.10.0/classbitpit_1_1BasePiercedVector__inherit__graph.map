@@ -1,0 +1,17 @@
+<map id="bitpit::BasePiercedVector" name="bitpit::BasePiercedVector">
+<area shape="rect" id="Node000001" title="Base class for pierced vectors." alt="" coords="5,141,173,166"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1PiercedVector.html" title=" " alt="" coords="525,95,664,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="127,132,197,103,290,75,342,65,395,59,449,59,502,67,534,78,563,92,560,97,532,83,501,72,449,64,396,64,343,70,291,80,199,108,129,137"/>
+<area shape="rect" id="Node000003" href="$classbitpit_1_1PiercedVector.html" title=" " alt="" coords="525,5,664,45"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="113,129,161,92,190,74,222,60,301,38,383,26,460,20,525,20,525,25,460,26,383,31,302,43,224,65,193,79,164,97,116,133"/>
+<area shape="rect" id="Node000004" href="$classbitpit_1_1PiercedVector.html" title=" " alt="" coords="525,265,664,305"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="115,173,163,211,192,230,224,244,302,267,383,279,460,285,525,286,525,291,460,290,383,285,301,272,222,249,190,234,160,216,112,177"/>
+<area shape="rect" id="Node000005" href="$classbitpit_1_1PiercedVector.html" title=" " alt="" coords="525,173,664,213"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="134,169,246,210,315,229,386,244,444,252,469,251,501,244,536,230,566,211,569,216,538,235,502,249,470,256,444,257,385,249,314,235,245,215,132,174"/>
+<area shape="rect" id="Node000006" href="$classbitpit_1_1PiercedVector.html" title="Metafunction for generating a pierced vector." alt="" coords="223,133,361,173"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="187,151,222,151,222,156,187,156"/>
+<area shape="poly" id="edge6_Node000006_Node000002" title=" " alt="" coords="375,142,501,127,525,123,525,129,502,132,375,147"/>
+<area shape="poly" id="edge7_Node000006_Node000003" title=" " alt="" coords="352,126,545,43,547,48,354,131"/>
+<area shape="poly" id="edge8_Node000006_Node000004" title=" " alt="" coords="343,177,386,199,541,263,539,268,384,204,341,182"/>
+<area shape="poly" id="edge9_Node000006_Node000005" title=" " alt="" coords="375,162,525,182,525,187,375,167"/>
+</map>

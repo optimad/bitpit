@@ -1,0 +1,5 @@
+<map id="bitpit::DGFObj" name="bitpit::DGFObj">
+<area shape="rect" id="Node000001" title="Interface to DGF I/O function." alt="" coords="9,93,115,119"/>
+<area shape="rect" id="Node000002" href="$structbitpit_1_1DGFData.html" title="structure holding meta&#45;information" alt="" coords="5,5,119,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="65,45,65,93,59,93,59,45"/>
+</map>

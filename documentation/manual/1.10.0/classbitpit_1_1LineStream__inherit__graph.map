@@ -1,0 +1,9 @@
+<map id="bitpit::LineStream" name="bitpit::LineStream">
+<area shape="rect" id="Node000001" title="LineStream defines a stream for reading lines." alt="" coords="66,152,189,177"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1LineBuffer.html" title="LineBuffer defines a buffer for reading lines." alt="" coords="5,79,121,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="85,113,119,150,115,154,81,116"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="10,5,117,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="66,44,66,79,61,79,61,44"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="146,79,237,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="174,116,140,154,136,150,170,113"/>
+</map>

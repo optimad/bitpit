@@ -1,0 +1,11 @@
+<map id="bitpit::SystemSparseMatrixAssembler" name="bitpit::SystemSparseMatrixAssembler">
+<area shape="rect" id="Node000001" title="The SystemSparseMatrixAssembler class defines an assembler for building the system matrix form a spar..." alt="" coords="37,284,216,324"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1SystemMatrixAssembler.html" title="The SystemMatrixAssembler class provides an interface for defining system matrix assemblers." alt="" coords="5,196,205,221"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="114,234,125,283,120,284,108,235"/>
+<area shape="rect" id="Node000003" href="$classbitpit_1_1SparseMatrix.html" title="Sparse matrix." alt="" coords="230,196,365,221"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="266,230,163,286,160,281,263,225"/>
+<area shape="rect" id="Node000004" href="$classbitpit_1_1FlatVector2D.html" title=" " alt="" coords="231,93,364,133"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="300,147,300,196,295,196,295,147"/>
+<area shape="rect" id="Node000005" href="$classbitpit_1_1FlatVector2D.html" title="Metafunction for generation of a flattened vector of vectors." alt="" coords="215,5,380,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="300,44,300,93,295,93,295,44"/>
+</map>

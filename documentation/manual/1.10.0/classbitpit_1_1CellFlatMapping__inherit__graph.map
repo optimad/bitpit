@@ -1,0 +1,5 @@
+<map id="bitpit::CellFlatMapping" name="bitpit::CellFlatMapping">
+<area shape="rect" id="Node000001" title="The CellFlatMapping class allows to generate a cell mapping between an id&#45;base numeration to a contin..." alt="" coords="5,79,156,104"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1FlatMapping.html" title="The FlatMapping class allows to generate a mapping between an id&#45;base numeration to a continuous&#45;inde..." alt="" coords="17,5,145,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="83,44,83,79,78,79,78,44"/>
+</map>

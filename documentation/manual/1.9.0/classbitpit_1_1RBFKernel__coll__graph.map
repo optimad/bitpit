@@ -1,5 +1,0 @@
-<map id="bitpit::RBFKernel" name="bitpit::RBFKernel">
-<area shape="rect" id="node1" title="Base class to handle Radial Basis Function with a large set of nodes." alt="" coords="49,183,169,208"/>
-<area shape="rect" id="node2" title=" " alt="" coords="45,80,173,120"/>
-<area shape="rect" id="node3" href="$classbitpit_1_1ReconstructionPolynomial.html" title="The ReconstructionPolynomial class allows to apply a reconstruction polynomial previously assembled." alt="" coords="5,5,213,31"/>
-</map>

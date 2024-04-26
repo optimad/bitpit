@@ -1,6 +1,0 @@
-<map id="bitpit::VolUnstructured" name="bitpit::VolUnstructured">
-<area shape="rect" id="node1" title="The VolUnstructured class defines a dummy unstructured volume patch." alt="" coords="13,225,164,251"/>
-<area shape="rect" id="node2" href="$classbitpit_1_1VolumeKernel.html" title="The VolumeKernel class provides an interface for defining volume patches." alt="" coords="21,152,157,177"/>
-<area shape="rect" id="node3" href="$classbitpit_1_1PatchKernel.html" title="The PatchKernel class provides an interface for defining patches." alt="" coords="25,79,152,104"/>
-<area shape="rect" id="node4" href="$classbitpit_1_1VTKBaseStreamer.html" title="The base class to be used to derive VTK streamers form." alt="" coords="5,5,172,31"/>
-</map>

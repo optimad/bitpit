@@ -1,5 +1,0 @@
-<map id="bitpit::PiercedKernel&lt; id_t &gt;" name="bitpit::PiercedKernel&lt; id_t &gt;">
-<area shape="rect" id="node1" title="Metafunction for generating a pierced kernel." alt="" coords="22,152,159,192"/>
-<area shape="rect" id="node2" href="$classbitpit_1_1BasePiercedKernel.html" title="Base class for the pierced kernel." alt="" coords="7,79,174,104"/>
-<area shape="rect" id="node3" href="$classbitpit_1_1PiercedSyncMaster.html" title="Base class for defining an object that acts like a master in pierced synchronization." alt="" coords="5,5,176,31"/>
-</map>

@@ -1,0 +1,13 @@
+<map id="bitpit::LevelSetSegmentationBaseObject" name="bitpit::LevelSetSegmentationBaseObject">
+<area shape="rect" id="Node000001" title="Implements visitor pattern fo segmentated geometries." alt="" coords="413,49,600,89"/>
+<area shape="rect" id="Node000004" href="$classbitpit_1_1LevelSetProxyObject.html" title=" " alt="" coords="648,5,884,60"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="613,51,647,46,648,52,614,56"/>
+<area shape="rect" id="Node000005" href="$classbitpit_1_1LevelSetSegmentationObject.html" title="Implements visitor pattern fo segmentated geometries." alt="" coords="673,85,859,125"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="614,81,673,89,672,94,613,86"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1LevelSetObject.html" title="Interface class for all objects with respect to whom the levelset function may be computed." alt="" coords="220,56,365,81"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="379,66,413,66,413,71,379,71"/>
+<area shape="rect" id="Node000003" href="$classbitpit_1_1VTKBaseStreamer.html" title="The base class to be used to derive VTK streamers form." alt="" coords="5,56,172,81"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="186,66,220,66,220,71,186,71"/>
+<area shape="rect" id="Node000006" href="$classbitpit_1_1LevelSetMaskObject.html" title="Implements the levelset around a set of cells or interfaces of the kernel." alt="" coords="932,92,1109,117"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="873,102,932,102,932,107,873,107"/>
+</map>

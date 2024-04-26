@@ -1,0 +1,7 @@
+<map id="bitpit::ReferenceVertexInfo" name="bitpit::ReferenceVertexInfo">
+<area shape="rect" id="Node000001" title="The ReferenceVertexInfo class defines the information about the reference vertex." alt="" coords="19,152,195,177"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1Reference0DElementInfo.html" title="The Reference0DElementInfo class allows to define information about reference zero&#45;dimensional elemen..." alt="" coords="5,79,208,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="109,118,109,152,104,152,104,118"/>
+<area shape="rect" id="Node000003" href="$classbitpit_1_1ReferenceElementInfo.html" title="The ReferenceElementInfo class allows to define information about reference elements." alt="" coords="13,5,200,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="109,44,109,79,104,79,104,44"/>
+</map>

@@ -1,8 +1,0 @@
-<map id="bitpit::LevelSetCachedKernel&lt; CellCacheEntry &gt;" name="bitpit::LevelSetCachedKernel&lt; CellCacheEntry &gt;">
-<area shape="rect" id="node1" title="Mesh specific implementation to calculate the levelset function." alt="" coords="197,39,385,79"/>
-<area shape="rect" id="node3" href="$classbitpit_1_1LevelSetCachedKernel.html" title=" " alt="" coords="618,5,846,45"/>
-<area shape="rect" id="node5" href="$classbitpit_1_1LevelSetCachedKernel.html" title=" " alt="" coords="600,69,864,109"/>
-<area shape="rect" id="node2" href="$classbitpit_1_1LevelSetKernel.html" title="Mesh specific implementation to calculate the levelset function." alt="" coords="5,46,148,71"/>
-<area shape="rect" id="node4" href="$classbitpit_1_1LevelSetOctreeKernel.html" title="Implements LevelSetKernel for octree meshes." alt="" coords="913,13,1096,38"/>
-<area shape="rect" id="node6" href="$classbitpit_1_1LevelSetUnstructuredKernel.html" title="Implements LevelSetKernel for unstructured meshes." alt="" coords="913,69,1096,109"/>
-</map>

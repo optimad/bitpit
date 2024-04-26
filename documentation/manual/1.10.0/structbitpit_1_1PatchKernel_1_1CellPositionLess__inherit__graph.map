@@ -1,0 +1,7 @@
+<map id="bitpit::PatchKernel::CellPositionLess" name="bitpit::PatchKernel::CellPositionLess">
+<area shape="rect" id="Node000001" title=" " alt="" coords="13,93,141,133"/>
+<area shape="rect" id="Node000003" href="$structbitpit_1_1PatchKernel_1_1CellPositionGreater.html" title=" " alt="" coords="5,181,148,221"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="79,147,79,181,74,181,74,147"/>
+<area shape="rect" id="Node000002" href="$structbitpit_1_1PatchKernel_1_1PointPositionLess.html" title=" " alt="" coords="9,5,144,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="79,59,79,93,74,93,74,59"/>
+</map>

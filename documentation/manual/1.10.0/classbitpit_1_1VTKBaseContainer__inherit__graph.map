@@ -1,0 +1,5 @@
+<map id="bitpit::VTKBaseContainer" name="bitpit::VTKBaseContainer">
+<area shape="rect" id="Node000001" title="An interface class to all containers that are batively supported by VTK." alt="" coords="25,5,194,31"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1VTKVectorContainer.html" title="Implementation of VTKBaseContainer in order to support natively std::vector in VTK." alt="" coords="5,79,213,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="112,44,112,79,107,79,107,44"/>
+</map>

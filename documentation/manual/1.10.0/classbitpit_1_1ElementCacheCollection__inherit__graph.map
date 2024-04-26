@@ -1,0 +1,7 @@
+<map id="bitpit::ElementCacheCollection" name="bitpit::ElementCacheCollection">
+<area shape="rect" id="Node000001" title="The class ElementCacheCollection allows to store a collection of caches for the elements of a mesh." alt="" coords="6,197,207,223"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1LevelSetCacheCollection.html" title=" " alt="" coords="5,108,208,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="109,162,109,197,104,197,104,162"/>
+<area shape="rect" id="Node000003" href="$classbitpit_1_1LevelSetCacheCollection.html" title="The class LevelSetCacheCollection allows to store a collection of caches." alt="" coords="5,5,208,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="109,59,109,108,104,108,104,59"/>
+</map>

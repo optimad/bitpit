@@ -1,7 +1,0 @@
-<map id="bitpit::ProxyVectorStorageInterface&lt; pointer_t, const_pointer_t &gt;" name="bitpit::ProxyVectorStorageInterface&lt; pointer_t, const_pointer_t &gt;">
-<area shape="rect" id="node1" title="Interface for ProxyVector storages." alt="" coords="5,84,181,139"/>
-<area shape="rect" id="node2" href="$classbitpit_1_1ProxyVectorDummyStorage.html" title="Metafunction for generating ProxyVector dummy storages." alt="" coords="395,5,570,60"/>
-<area shape="rect" id="node3" href="$classbitpit_1_1ProxyVectorStorageInterface.html" title=" " alt="" coords="395,84,571,139"/>
-<area shape="rect" id="node4" href="$classbitpit_1_1ProxyVectorStorageInterface.html" title=" " alt="" coords="396,163,569,233"/>
-<area shape="rect" id="node5" href="$classbitpit_1_1ProxyVectorStorage.html" title="Metafunction for generating ProxyVector storages." alt="" coords="620,171,793,225"/>
-</map>

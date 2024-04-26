@@ -1,7 +1,0 @@
-<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classbitpit_1_1DiscretizationStencilStorageInterface.html" title="The DiscretizationStencilStorageInterface class defines the interface for stencil storage." alt="" coords="5,53,197,93"/>
-<area shape="rect" id="node2" href="$classbitpit_1_1DiscretizationStencilProxyBaseStorage.html" title=" " alt="" coords="245,5,460,60"/>
-<area shape="rect" id="node4" href="$classbitpit_1_1DiscretizationStencilProxyBaseStorage.html" title="The DiscretizationStencilProxyBaseStorage class defines a proxy for stencil storage." alt="" coords="262,84,443,139"/>
-<area shape="rect" id="node3" href="$classbitpit_1_1DiscretizationStencilProxyStorage_3_01stencil__t_00_01PiercedStorage_3_01stencil__t_01_4_01_4.html" title=" " alt="" coords="508,5,708,60"/>
-<area shape="rect" id="node5" href="$classbitpit_1_1DiscretizationStencilProxyStorage.html" title=" " alt="" coords="519,84,697,139"/>
-</map>

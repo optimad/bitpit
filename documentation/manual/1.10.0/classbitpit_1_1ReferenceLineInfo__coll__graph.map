@@ -1,0 +1,8 @@
+<map id="bitpit::ReferenceLineInfo" name="bitpit::ReferenceLineInfo">
+<area shape="rect" id="Node000001" title="The ReferenceLineInfo class defines the information about the reference line." alt="" coords="25,155,188,180"/>
+<area shape="poly" id="edge3_Node000001_Node000001" title=" " alt="" coords="203,160,215,167,206,174,189,177,188,171,204,169,209,167,201,165"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1Reference1DElementInfo.html" title="The Reference1DElementInfo class allows to define information about reference one&#45;dimensional element..." alt="" coords="5,80,208,105"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="109,120,109,154,104,154,104,120"/>
+<area shape="rect" id="Node000003" href="$classbitpit_1_1ReferenceElementInfo.html" title="The ReferenceElementInfo class allows to define information about reference elements." alt="" coords="13,5,200,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="109,45,109,80,104,80,104,45"/>
+</map>

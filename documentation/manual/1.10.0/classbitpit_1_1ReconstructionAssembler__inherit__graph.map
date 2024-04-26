@@ -1,0 +1,5 @@
+<map id="bitpit::ReconstructionAssembler" name="bitpit::ReconstructionAssembler">
+<area shape="rect" id="Node000001" title="The ReconstructionAssembler class allows to define reconstruction polynomial." alt="" coords="5,5,212,31"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1Reconstruction.html" title="The Reconstruction class allows to build and apply a polynomial reconstructions." alt="" coords="37,79,181,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="111,44,111,79,106,79,106,44"/>
+</map>

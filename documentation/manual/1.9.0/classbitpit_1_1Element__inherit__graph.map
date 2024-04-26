@@ -1,5 +1,0 @@
-<map id="bitpit::Element" name="bitpit::Element">
-<area shape="rect" id="node1" title="The Element class provides an interface for defining elements." alt="" coords="51,5,157,31"/>
-<area shape="rect" id="node2" href="$classbitpit_1_1Cell.html" title="The Cell class defines the cells." alt="" coords="5,79,85,104"/>
-<area shape="rect" id="node3" href="$classbitpit_1_1Interface.html" title="The Interface class defines the interfaces among cells." alt="" coords="109,79,219,104"/>
-</map>

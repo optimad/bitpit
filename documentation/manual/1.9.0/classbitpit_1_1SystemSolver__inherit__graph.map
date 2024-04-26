@@ -1,5 +1,0 @@
-<map id="bitpit::SystemSolver" name="bitpit::SystemSolver">
-<area shape="rect" id="node1" title="The SystemSolver class provides methods for building and solving large linear systems." alt="" coords="75,5,214,31"/>
-<area shape="rect" id="node2" href="$classMyLinearSolver.html" title="The class MyLinearSolver is derived form SystemSolver and it allows to solve the linear system using ..." alt="" coords="5,86,116,111"/>
-<area shape="rect" id="node3" href="$classbitpit_1_1DiscretizationStencilSolver.html" title=" " alt="" coords="140,79,317,119"/>
-</map>

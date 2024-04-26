@@ -1,0 +1,26 @@
+<map id="bitpit::ElementHalfItem&lt; DerivedElement &gt;" name="bitpit::ElementHalfItem&lt; DerivedElement &gt;">
+<area shape="rect" id="Node000001" title="The ElementHalfItem class is the base calss for defining element half&#45;edge and half&#45;faces." alt="" coords="5,172,160,212"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1ElementHalfEdge.html" title=" " alt="" coords="679,15,837,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="101,159,135,115,158,93,183,75,244,45,310,24,377,11,445,4,511,3,574,5,679,17,678,22,573,11,511,8,446,10,378,16,311,29,246,50,185,80,161,97,139,119,105,162"/>
+<area shape="rect" id="Node000004" href="$classbitpit_1_1ElementHalfFace.html" title=" " alt="" coords="679,132,837,172"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="173,172,184,171,315,155,419,147,522,145,655,147,678,147,678,152,655,152,522,151,419,152,316,160,184,176,174,178"/>
+<area shape="rect" id="Node000006" href="$classbitpit_1_1ElementHalfFace.html" title=" " alt="" coords="679,208,837,248"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="174,203,340,221,431,225,523,225,679,226,679,231,523,231,431,231,340,227,174,208"/>
+<area shape="rect" id="Node000008" href="$classbitpit_1_1ElementHalfEdge.html" title="The ElementHalfEdge class defines element half&#45;edge items." alt="" coords="340,53,499,93"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="111,161,144,133,183,110,222,95,262,85,339,74,340,79,263,90,223,100,185,114,147,137,114,165"/>
+<area shape="rect" id="Node000009" href="$classbitpit_1_1ElementHalfFace.html" title="The ElementHalfFace class defines element half&#45;faces." alt="" coords="340,172,499,212"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="174,189,340,189,340,195,174,195"/>
+<area shape="rect" id="Node000010" href="$classbitpit_1_1ElementHalfItem.html" title=" " alt="" coords="342,292,497,332"/>
+<area shape="poly" id="edge12_Node000001_Node000010" title=" " alt="" coords="109,221,142,257,163,273,185,286,224,300,264,308,342,314,342,319,263,314,222,305,183,291,160,277,139,260,105,225"/>
+<area shape="rect" id="Node000011" href="$classbitpit_1_1ElementHalfItem.html" title=" " alt="" coords="342,356,497,396"/>
+<area shape="poly" id="edge13_Node000001_Node000011" title=" " alt="" coords="100,223,133,281,157,309,185,333,223,351,263,364,303,371,342,374,341,380,303,376,261,369,221,356,183,337,153,313,129,284,95,226"/>
+<area shape="rect" id="Node000003" href="$classbitpit_1_1QualifiedCellHalfEdge.html" title=" " alt="" coords="911,15,1065,55"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="851,32,911,32,911,37,851,37"/>
+<area shape="rect" id="Node000005" href="$classbitpit_1_1QualifiedCellHalfFace.html" title="The QualifiedCellHalfFace class defines cell half&#45;faces." alt="" coords="911,132,1065,172"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="851,149,911,149,911,155,851,155"/>
+<area shape="rect" id="Node000007" href="$classbitpit_1_1QualifiedInterfaceHalfEdge.html" title="The QualifiedInterfaceHalfEdge class defines interface half&#45;edges." alt="" coords="887,208,1089,248"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="851,225,887,225,887,231,851,231"/>
+<area shape="poly" id="edge8_Node000008_Node000002" title=" " alt="" coords="512,62,654,47,678,44,679,49,655,52,513,68"/>
+<area shape="poly" id="edge10_Node000009_Node000004" title=" " alt="" coords="512,178,678,159,679,164,513,184"/>
+<area shape="poly" id="edge11_Node000009_Node000006" title=" " alt="" coords="513,205,523,207,679,221,678,226,522,212,512,211"/>
+</map>

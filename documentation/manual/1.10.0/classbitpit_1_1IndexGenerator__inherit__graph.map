@@ -1,0 +1,9 @@
+<map id="bitpit::IndexGenerator&lt; id_t &gt;" name="bitpit::IndexGenerator&lt; id_t &gt;">
+<area shape="rect" id="Node000001" title="The IndexGenerator class allows to generate unique ids." alt="" coords="147,5,294,45"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1IndexGenerator.html" title=" " alt="" coords="19,108,166,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="187,56,118,110,115,106,184,52"/>
+<area shape="rect" id="Node000004" href="$classbitpit_1_1IndexGenerator.html" title=" " alt="" coords="190,108,337,148"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="236,57,258,107,253,109,231,59"/>
+<area shape="rect" id="Node000003" href="$classbitpit_1_1CommunicationTags.html" title="The CommunicationTags oversee the handling of the communication tags." alt="" coords="5,197,180,223"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="95,162,95,197,90,197,90,162"/>
+</map>

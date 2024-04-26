@@ -1,0 +1,16 @@
+<map id="bitpit::PiercedStorageSyncSlave&lt; id_t &gt;" name="bitpit::PiercedStorageSyncSlave&lt; id_t &gt;">
+<area shape="rect" id="Node000001" title="Base class for defining storages that acts like a slave in pierced synchronization." alt="" coords="192,360,368,400"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1PiercedSyncSlave.html" title="Base class for defining an object that acts like a slave in pierced synchronization." alt="" coords="5,265,168,290"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="122,294,245,357,242,362,120,299"/>
+<area shape="rect" id="Node000003" href="$classbitpit_1_1BasePiercedStorage.html" title="Base class for the pierced storages." alt="" coords="192,265,368,290"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="283,304,283,360,277,360,277,304"/>
+<area shape="rect" id="Node000004" href="$classbitpit_1_1PiercedKernel.html" title=" " alt="" coords="393,257,530,297"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="417,306,315,362,313,358,414,302"/>
+<area shape="rect" id="Node000005" href="$classbitpit_1_1BasePiercedKernel.html" title="Base class for the pierced kernel." alt="" coords="357,80,523,105"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="445,119,452,194,461,257,456,258,447,195,439,120"/>
+<area shape="rect" id="Node000007" href="$classbitpit_1_1PiercedKernel.html" title="Metafunction for generating a pierced kernel." alt="" coords="462,155,599,195"/>
+<area shape="poly" id="edge7_Node000007_Node000005" title=" " alt="" coords="465,112,511,153,508,157,462,116"/>
+<area shape="rect" id="Node000006" href="$classbitpit_1_1PiercedSyncMaster.html" title="Base class for defining an object that acts like a master in pierced synchronization." alt="" coords="355,5,525,31"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="443,45,443,80,437,80,437,45"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="512,208,477,259,472,256,508,205"/>
+</map>

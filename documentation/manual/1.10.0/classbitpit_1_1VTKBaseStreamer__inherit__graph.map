@@ -1,0 +1,83 @@
+<map id="bitpit::VTKBaseStreamer" name="bitpit::VTKBaseStreamer">
+<area shape="rect" id="Node000001" title="The base class to be used to derive VTK streamers form." alt="" coords="5,562,172,588"/>
+<area shape="rect" id="Node000002" href="$classFieldStreamer.html" title=" " alt="" coords="265,414,367,440"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="106,550,154,499,185,472,220,449,264,433,265,438,223,453,189,476,158,503,110,554"/>
+<area shape="rect" id="Node000003" href="$classbitpit_1_1LevelSetObject.html" title="Interface class for all objects with respect to whom the levelset function may be computed." alt="" coords="243,464,389,489"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="119,553,165,525,220,498,254,487,256,492,222,503,168,529,121,557"/>
+<area shape="rect" id="Node000023" href="$classbitpit_1_1POD.html" title="The POD (Proper Orthogonal Decomposition) class provides an interface for defining POD object." alt="" coords="273,513,359,538"/>
+<area shape="poly" id="edge28_Node000001_Node000023" title=" " alt="" coords="160,557,272,532,273,538,162,562"/>
+<area shape="rect" id="Node000024" href="$classbitpit_1_1PODKernel.html" title="The PODKernel class provides an interface to manage the mesh dependent members and functions of a POD..." alt="" coords="255,562,377,588"/>
+<area shape="poly" id="edge29_Node000001_Node000024" title=" " alt="" coords="186,572,254,572,254,578,186,578"/>
+<area shape="rect" id="Node000026" href="$classbitpit_1_1PatchKernel.html" title="The PatchKernel class provides an interface for defining patches." alt="" coords="253,612,379,637"/>
+<area shape="poly" id="edge31_Node000001_Node000026" title=" " alt="" coords="162,588,257,609,256,614,161,593"/>
+<area shape="rect" id="Node000037" href="$classbitpit_1_1VTKNativeStreamer.html" title="In VTKNativeStreamer all instances of classes derived from VTKBaseConatiner are stored...." alt="" coords="229,661,403,686"/>
+<area shape="poly" id="edge42_Node000001_Node000037" title=" " alt="" coords="122,593,168,620,222,646,260,658,258,664,220,651,166,625,119,597"/>
+<area shape="rect" id="Node000038" href="$classbitpit_1_1VTKUnstructuredGrid_1_1HomogeneousInfoStreamer.html" title=" " alt="" coords="221,711,411,751"/>
+<area shape="poly" id="edge43_Node000001_Node000038" title=" " alt="" coords="111,596,159,646,190,672,223,695,249,709,247,713,220,700,186,676,155,650,107,600"/>
+<area shape="rect" id="Node000004" href="$classbitpit_1_1LevelSetProxyObject.html" title=" " alt="" coords="904,11,1135,51"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="399,457,409,449,419,433,426,409,436,349,445,288,450,262,458,242,501,167,542,112,566,89,594,68,670,30,730,12,793,4,855,4,912,8,911,14,855,9,793,9,731,17,672,35,597,73,569,93,546,115,505,170,462,244,455,263,450,289,442,350,432,411,424,435,413,453,403,461"/>
+<area shape="rect" id="Node000005" href="$classbitpit_1_1LevelSetProxyObject.html" title="Interface class for all objects, which depend on other LevelSetObjects." alt="" coords="464,256,643,310"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="395,456,409,449,449,417,484,380,534,309,538,312,488,383,453,421,412,453,398,461"/>
+<area shape="rect" id="Node000020" href="$classbitpit_1_1LevelSetSegmentationBaseObject.html" title="Implements visitor pattern fo segmentated geometries." alt="" coords="460,474,647,514"/>
+<area shape="poly" id="edge24_Node000003_Node000020" title=" " alt="" coords="403,480,460,484,460,490,402,485"/>
+<area shape="poly" id="edge22_Node000005_Node000004" title=" " alt="" coords="565,242,581,204,603,163,632,123,669,90,697,75,722,66,769,61,817,64,877,59,930,48,931,54,878,64,817,69,769,67,723,71,699,79,672,95,636,126,607,166,585,207,570,244"/>
+<area shape="rect" id="Node000006" href="$classbitpit_1_1LevelSetBooleanBaseObject.html" title=" " alt="" coords="1679,100,1863,140"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="645,244,653,223,654,202,656,183,669,165,694,157,745,151,915,141,1453,123,1678,119,1678,124,1453,128,915,146,745,156,695,162,672,169,661,185,659,203,658,224,650,246"/>
+<area shape="rect" id="Node000008" href="$classbitpit_1_1LevelSetBooleanBaseObject.html" title=" " alt="" coords="1655,177,1887,232"/>
+<area shape="poly" id="edge7_Node000005_Node000008" title=" " alt="" coords="656,272,670,271,1050,247,1429,224,1654,209,1655,215,1429,230,1050,252,671,276,657,277"/>
+<area shape="rect" id="Node000010" href="$classbitpit_1_1LevelSetComplementBaseObject.html" title=" " alt="" coords="1669,323,1872,363"/>
+<area shape="poly" id="edge9_Node000005_Node000010" title=" " alt="" coords="656,284,1081,303,1631,331,1669,333,1669,339,1631,336,1081,308,656,290"/>
+<area shape="rect" id="Node000012" href="$classbitpit_1_1LevelSetComplementBaseObject.html" title=" " alt="" coords="1655,388,1887,442"/>
+<area shape="poly" id="edge11_Node000005_Node000012" title=" " alt="" coords="657,305,898,358,1042,384,1187,404,1320,414,1453,415,1654,415,1654,420,1453,420,1320,419,1186,410,1041,389,897,363,656,311"/>
+<area shape="rect" id="Node000014" href="$classbitpit_1_1LevelSetProxyObject.html" title=" " alt="" coords="930,162,1109,217"/>
+<area shape="poly" id="edge13_Node000005_Node000014" title=" " alt="" coords="626,248,670,234,737,219,806,207,929,193,930,198,806,212,738,224,671,239,628,253"/>
+<area shape="rect" id="Node000019" href="$classbitpit_1_1LevelSetProxyObject.html" title=" " alt="" coords="901,434,1137,489"/>
+<area shape="poly" id="edge23_Node000005_Node000019" title=" " alt="" coords="571,322,587,356,609,393,637,428,672,454,711,466,769,471,901,469,901,474,768,476,710,471,669,459,633,431,604,396,582,359,566,324"/>
+<area shape="rect" id="Node000007" href="$classbitpit_1_1LevelSetBooleanObject_3_01LevelSetObject_01_4.html" title=" " alt="" coords="1962,100,2154,140"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="1876,118,1962,118,1962,123,1876,123"/>
+<area shape="rect" id="Node000009" href="$classbitpit_1_1LevelSetBooleanObject_3_01LevelSetSegmentationBaseObject_01_4.html" title=" " alt="" coords="1936,184,2180,224"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="1901,202,1936,202,1936,207,1901,207"/>
+<area shape="rect" id="Node000011" href="$classbitpit_1_1LevelSetComplementObject_3_01LevelSetObject_01_4.html" title=" " alt="" coords="1967,323,2149,363"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="1886,340,1967,340,1967,346,1886,346"/>
+<area shape="rect" id="Node000013" href="$classbitpit_1_1LevelSetComplementObject_3_01LevelSetSegmentationBaseObject_01_4.html" title=" " alt="" coords="1942,388,2174,442"/>
+<area shape="poly" id="edge12_Node000012_Node000013" title=" " alt="" coords="1901,412,1942,412,1942,418,1901,418"/>
+<area shape="rect" id="Node000015" href="$classbitpit_1_1LevelSetBooleanBaseObject.html" title="Base class which deals with boolean operation between two LevelSetObjects." alt="" coords="1201,175,1415,215"/>
+<area shape="poly" id="edge14_Node000014_Node000015" title=" " alt="" coords="1122,189,1201,190,1201,196,1122,194"/>
+<area shape="rect" id="Node000017" href="$classbitpit_1_1LevelSetComplementBaseObject.html" title="Base class that allows to evaluate the complement of a LevelSetObjects." alt="" coords="1187,355,1429,395"/>
+<area shape="poly" id="edge18_Node000014_Node000017" title=" " alt="" coords="1076,222,1277,353,1274,357,1073,227"/>
+<area shape="poly" id="edge16_Node000015_Node000006" title=" " alt="" coords="1428,173,1453,168,1678,132,1679,137,1454,174,1429,178"/>
+<area shape="poly" id="edge17_Node000015_Node000008" title=" " alt="" coords="1428,197,1453,198,1655,201,1654,206,1453,203,1428,202"/>
+<area shape="rect" id="Node000016" href="$classbitpit_1_1LevelSetBooleanObject.html" title="Class which deals with boolean operation between two LevelSetObjects." alt="" coords="1675,259,1867,299"/>
+<area shape="poly" id="edge15_Node000015_Node000016" title=" " alt="" coords="1429,214,1675,259,1674,264,1428,219"/>
+<area shape="poly" id="edge20_Node000017_Node000010" title=" " alt="" coords="1443,363,1669,347,1669,353,1444,368"/>
+<area shape="poly" id="edge21_Node000017_Node000012" title=" " alt="" coords="1428,394,1454,398,1557,406,1655,411,1654,416,1556,412,1453,403,1427,400"/>
+<area shape="rect" id="Node000018" href="$classbitpit_1_1LevelSetComplementObject.html" title="Class that allows to evaluate the complement of a LevelSetObjects." alt="" coords="1664,467,1877,507"/>
+<area shape="poly" id="edge19_Node000017_Node000018" title=" " alt="" coords="1387,396,1454,415,1670,464,1669,470,1453,420,1386,402"/>
+<area shape="poly" id="edge25_Node000020_Node000019" title=" " alt="" coords="660,491,765,488,877,480,901,478,901,483,878,486,766,493,661,496"/>
+<area shape="rect" id="Node000021" href="$classbitpit_1_1LevelSetSegmentationObject.html" title="Implements visitor pattern fo segmentated geometries." alt="" coords="926,515,1113,555"/>
+<area shape="poly" id="edge26_Node000020_Node000021" title=" " alt="" coords="661,500,926,524,925,529,660,506"/>
+<area shape="rect" id="Node000022" href="$classbitpit_1_1LevelSetMaskObject.html" title="Implements the levelset around a set of cells or interfaces of the kernel." alt="" coords="1219,522,1397,548"/>
+<area shape="poly" id="edge27_Node000021_Node000022" title=" " alt="" coords="1126,532,1219,532,1219,538,1126,538"/>
+<area shape="rect" id="Node000025" href="$classbitpit_1_1PODVolOctree.html" title="The PODVolOctree is the specialized class of PODKernel for VolOctree meshes." alt="" coords="482,538,625,564"/>
+<area shape="poly" id="edge30_Node000024_Node000025" title=" " alt="" coords="391,565,482,556,482,561,391,570"/>
+<area shape="rect" id="Node000027" href="$classbitpit_1_1LineKernel.html" title=" " alt="" coords="495,588,612,613"/>
+<area shape="poly" id="edge32_Node000026_Node000027" title=" " alt="" coords="393,614,494,604,495,609,393,619"/>
+<area shape="rect" id="Node000029" href="$classbitpit_1_1PointKernel.html" title=" " alt="" coords="492,637,615,662"/>
+<area shape="poly" id="edge34_Node000026_Node000029" title=" " alt="" coords="393,630,492,641,492,646,393,635"/>
+<area shape="rect" id="Node000031" href="$classbitpit_1_1SurfaceKernel.html" title="The SurfaceKernel class provides an interface for defining surface patches." alt="" coords="484,686,623,712"/>
+<area shape="poly" id="edge36_Node000026_Node000031" title=" " alt="" coords="389,638,412,646,437,659,461,671,499,684,498,689,459,676,434,663,410,651,387,643"/>
+<area shape="rect" id="Node000033" href="$classbitpit_1_1VolumeKernel.html" title="The VolumeKernel class provides an interface for defining volume patches." alt="" coords="485,760,621,785"/>
+<area shape="poly" id="edge38_Node000026_Node000033" title=" " alt="" coords="394,636,412,646,430,665,439,684,447,703,462,722,490,742,519,757,517,762,487,747,458,726,442,706,434,686,426,668,409,650,391,640"/>
+<area shape="rect" id="Node000028" href="$classbitpit_1_1LineUnstructured.html" title="The LineUnstructured class defines an unstructured line tasselation." alt="" coords="941,588,1097,613"/>
+<area shape="poly" id="edge33_Node000027_Node000028" title=" " alt="" coords="626,598,941,598,941,603,626,603"/>
+<area shape="rect" id="Node000030" href="$classbitpit_1_1PointCloud.html" title="The PointCloud class defines a point cloud." alt="" coords="959,637,1080,662"/>
+<area shape="poly" id="edge35_Node000029_Node000030" title=" " alt="" coords="628,647,958,647,958,652,628,652"/>
+<area shape="rect" id="Node000032" href="$classbitpit_1_1SurfUnstructured.html" title="The SurfUnstructured class defines an unstructured surface triangulation." alt="" coords="941,686,1098,712"/>
+<area shape="poly" id="edge37_Node000031_Node000032" title=" " alt="" coords="636,696,940,696,940,702,636,702"/>
+<area shape="rect" id="Node000034" href="$classbitpit_1_1VolCartesian.html" title="The VolCartesian defines a Cartesian patch." alt="" coords="953,736,1085,761"/>
+<area shape="poly" id="edge39_Node000033_Node000034" title=" " alt="" coords="635,766,953,749,953,754,635,771"/>
+<area shape="rect" id="Node000035" href="$classbitpit_1_1VolOctree.html" title="The VolOctree defines a Octree patch." alt="" coords="962,785,1077,810"/>
+<area shape="poly" id="edge40_Node000033_Node000035" title=" " alt="" coords="635,774,962,792,962,797,635,779"/>
+<area shape="rect" id="Node000036" href="$classbitpit_1_1VolUnstructured.html" title="The VolUnstructured class defines a dummy unstructured volume patch." alt="" coords="944,834,1095,860"/>
+<area shape="poly" id="edge41_Node000033_Node000036" title=" " alt="" coords="635,785,671,791,944,834,943,839,670,796,634,790"/>
+</map>

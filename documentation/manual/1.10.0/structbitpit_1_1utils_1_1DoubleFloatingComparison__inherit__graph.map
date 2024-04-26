@@ -1,0 +1,13 @@
+<map id="bitpit::utils::DoubleFloatingComparison" name="bitpit::utils::DoubleFloatingComparison">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,133,181,173"/>
+<area shape="rect" id="Node000002" href="$structbitpit_1_1utils_1_1DoubleFloatingEqual.html" title=" " alt="" coords="243,5,419,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="127,123,173,88,228,55,256,43,258,48,231,60,176,92,130,127"/>
+<area shape="rect" id="Node000003" href="$structbitpit_1_1utils_1_1DoubleFloatingGreater.html" title=" " alt="" coords="243,69,419,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="181,127,256,107,257,112,182,132"/>
+<area shape="rect" id="Node000004" href="$structbitpit_1_1utils_1_1DoubleFloatingGreaterEqual.html" title=" " alt="" coords="243,133,419,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="195,151,243,151,243,156,195,156"/>
+<area shape="rect" id="Node000005" href="$structbitpit_1_1utils_1_1DoubleFloatingLess.html" title=" " alt="" coords="229,198,433,223"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="191,174,279,195,277,201,189,179"/>
+<area shape="rect" id="Node000006" href="$structbitpit_1_1utils_1_1DoubleFloatingLessEqual.html" title=" " alt="" coords="243,248,419,288"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="136,179,181,206,230,232,263,245,261,250,228,237,178,211,133,183"/>
+</map>

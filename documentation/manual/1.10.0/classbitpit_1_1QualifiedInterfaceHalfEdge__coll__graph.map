@@ -1,0 +1,16 @@
+<map id="bitpit::QualifiedInterfaceHalfEdge&lt; QualifiedInterface &gt;" name="bitpit::QualifiedInterfaceHalfEdge&lt; QualifiedInterface &gt;">
+<area shape="rect" id="Node000001" title="The QualifiedInterfaceHalfEdge class defines interface half&#45;edges." alt="" coords="1427,33,1629,73"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1ElementHalfFace.html" title=" " alt="" coords="1219,33,1377,73"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1391,51,1427,51,1427,56,1391,56"/>
+<area shape="rect" id="Node000003" href="$classbitpit_1_1ElementHalfItem.html" title="The ElementHalfItem class is the base calss for defining element half&#45;edge and half&#45;faces." alt="" coords="701,5,856,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="870,26,1195,41,1218,43,1218,48,1195,47,870,31"/>
+<area shape="rect" id="Node000004" href="$classbitpit_1_1ProxyVector.html" title=" " alt="" coords="269,33,397,73"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="411,46,701,27,701,33,411,51"/>
+<area shape="rect" id="Node000007" href="$classbitpit_1_1ElementHalfItem.html" title="The ElementHalfItem class is the base calss for defining element half&#45;edge and half&#45;faces." alt="" coords="523,63,677,103"/>
+<area shape="poly" id="edge7_Node000007_Node000004" title=" " alt="" coords="411,65,422,67,523,76,522,81,421,72,411,71"/>
+<area shape="rect" id="Node000005" href="$classbitpit_1_1ProxyVector.html" title="Metafunction for generating a list of elements that can be either stored in an external vectror or,..." alt="" coords="5,33,168,73"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="182,51,269,51,269,56,182,56"/>
+<area shape="rect" id="Node000006" href="$classbitpit_1_1ElementHalfFace.html" title="The ElementHalfFace class defines element half&#45;faces." alt="" coords="880,63,1039,103"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="1052,72,1218,58,1218,63,1053,77"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="691,80,880,80,880,85,691,85"/>
+</map>

@@ -1,4 +1,0 @@
-<map id="bitpit::RBFKernel" name="bitpit::RBFKernel">
-<area shape="rect" id="node1" title="Base class to handle Radial Basis Function with a large set of nodes." alt="" coords="5,5,125,31"/>
-<area shape="rect" id="node2" href="$classbitpit_1_1RBF.html" title="Class to handle Radial Basis Function with a large set of 3D points as nodes." alt="" coords="23,79,107,104"/>
-</map>

@@ -1,6 +1,0 @@
-<map id="bitpit::SystemMatrixAssembler" name="bitpit::SystemMatrixAssembler">
-<area shape="rect" id="node1" title="The SystemMatrixAssembler class provides an interface for defining system matrix assemblers." alt="" coords="108,5,308,31"/>
-<area shape="rect" id="node2" href="$classbitpit_1_1StencilSolverAssembler.html" title=" " alt="" coords="5,86,200,111"/>
-<area shape="rect" id="node4" href="$classbitpit_1_1SystemSparseMatrixAssembler.html" title="The SystemSparseMatrixAssembler class defines an assembler for building the system matrix form a spar..." alt="" coords="224,79,403,119"/>
-<area shape="rect" id="node3" href="$classbitpit_1_1DiscretizationStencilSolverAssembler.html" title="The DiscretizationStencilSolverAssembler class defines an assembler for building the stencil solver." alt="" coords="6,167,199,207"/>
-</map>

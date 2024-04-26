@@ -1,0 +1,7 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" href="$classbitpit_1_1SystemSolver.html" title="The SystemSolver class provides methods for building and solving large linear systems." alt="" coords="5,35,144,60"/>
+<area shape="rect" id="Node000001" href="$classMyLinearSolver.html" title="The class MyLinearSolver is derived form SystemSolver and it allows to solve the linear system using ..." alt="" coords="225,5,336,31"/>
+<area shape="poly" id="edge209_Node000000_Node000001" title=" " alt="" coords="158,33,225,23,225,28,158,38"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1DiscretizationStencilSolver.html" title=" " alt="" coords="192,55,369,95"/>
+<area shape="poly" id="edge210_Node000000_Node000002" title=" " alt="" coords="158,56,192,61,191,66,157,61"/>
+</map>

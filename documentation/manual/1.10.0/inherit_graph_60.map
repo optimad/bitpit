@@ -1,0 +1,5 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" href="$classbitpit_1_1ParaTree.html" title="Para Tree is the user interface class." alt="" coords="5,5,115,31"/>
+<area shape="rect" id="Node000001" href="$classbitpit_1_1PabloUniform.html" title="PABLO Uniform is an example of user class derived from ParaTree to map ParaTree in a uniform (square/..." alt="" coords="163,5,299,31"/>
+<area shape="poly" id="edge161_Node000000_Node000001" title=" " alt="" coords="128,15,163,15,163,21,128,21"/>
+</map>

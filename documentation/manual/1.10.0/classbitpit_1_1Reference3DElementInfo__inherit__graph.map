@@ -1,0 +1,15 @@
+<map id="bitpit::Reference3DElementInfo" name="bitpit::Reference3DElementInfo">
+<area shape="rect" id="Node000001" title="The Reference3DElementInfo class allows to define information about reference three&#45;dimensional eleme..." alt="" coords="240,104,443,129"/>
+<area shape="rect" id="Node000003" href="$classbitpit_1_1ReferenceHexahedronInfo.html" title="The ReferenceHexahedronInfo class defines the information about the reference hexahedron." alt="" coords="491,5,697,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="374,95,428,67,490,39,528,28,529,33,492,45,430,71,377,100"/>
+<area shape="rect" id="Node000004" href="$classbitpit_1_1ReferencePyramidInfo.html" title="The ReferencePyramidInfo class defines the information about the reference pyramid." alt="" coords="501,55,687,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="420,99,528,77,529,83,421,104"/>
+<area shape="rect" id="Node000005" href="$classbitpit_1_1ReferenceTetraInfo.html" title="The ReferenceTetraInfo class defines the information about the reference tetrahedron." alt="" coords="511,104,677,129"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="457,114,510,114,510,119,457,119"/>
+<area shape="rect" id="Node000006" href="$classbitpit_1_1ReferenceVoxelInfo.html" title="The ReferenceVoxelInfo class defines the information about the reference voxel." alt="" coords="509,153,679,179"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="421,129,529,151,528,156,420,135"/>
+<area shape="rect" id="Node000007" href="$classbitpit_1_1ReferenceWedgeInfo.html" title="The ReferenceWedgeInfo class defines the information about the reference wedge." alt="" coords="505,203,683,228"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="377,134,430,162,492,189,529,200,528,205,490,194,428,167,374,138"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1ReferenceElementInfo.html" title="The ReferenceElementInfo class allows to define information about reference elements." alt="" coords="5,104,192,129"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="206,114,240,114,240,119,206,119"/>
+</map>

@@ -1,0 +1,23 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" href="$classbitpit_1_1PiercedSyncAction.html" title="Action for pierced synchronization." alt="" coords="5,301,173,326"/>
+<area shape="rect" id="Node000001" href="$classbitpit_1_1PiercedKernel_1_1ClearAction.html" title=" " alt="" coords="239,5,382,45"/>
+<area shape="poly" id="edge172_Node000000_Node000001" title=" " alt="" coords="94,287,110,238,135,176,171,112,194,82,220,55,238,43,241,47,223,59,198,85,175,115,139,179,115,240,100,288"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1PiercedKernel_1_1EraseAction.html" title=" " alt="" coords="237,69,384,109"/>
+<area shape="poly" id="edge173_Node000000_Node000002" title=" " alt="" coords="99,287,118,250,144,205,178,159,220,119,239,107,242,112,223,123,182,163,149,208,122,252,104,289"/>
+<area shape="rect" id="Node000003" href="$classbitpit_1_1PiercedKernel_1_1FillAction.html" title=" " alt="" coords="242,133,379,173"/>
+<area shape="poly" id="edge174_Node000000_Node000003" title=" " alt="" coords="107,288,155,236,186,208,220,183,243,171,245,176,223,188,189,212,159,240,111,292"/>
+<area shape="rect" id="Node000004" href="$classbitpit_1_1PiercedKernel_1_1MoveAction.html" title=" " alt="" coords="239,197,382,237"/>
+<area shape="poly" id="edge175_Node000000_Node000004" title=" " alt="" coords="126,292,220,247,250,235,252,240,222,252,128,297"/>
+<area shape="rect" id="Node000005" href="$classbitpit_1_1PiercedKernel_1_1ReserveAction.html" title=" " alt="" coords="231,261,391,301"/>
+<area shape="poly" id="edge176_Node000000_Node000005" title=" " alt="" coords="186,297,230,290,231,296,187,302"/>
+<area shape="rect" id="Node000006" href="$classbitpit_1_1PiercedKernel_1_1ResizeAction.html" title=" " alt="" coords="235,325,387,365"/>
+<area shape="poly" id="edge177_Node000000_Node000006" title=" " alt="" coords="187,325,235,332,234,337,186,330"/>
+<area shape="rect" id="Node000007" href="$classbitpit_1_1PiercedKernel_1_1ShrinkToFitAction.html" title=" " alt="" coords="221,389,400,429"/>
+<area shape="poly" id="edge178_Node000000_Node000007" title=" " alt="" coords="128,330,222,375,252,387,250,392,220,380,126,335"/>
+<area shape="rect" id="Node000008" href="$classbitpit_1_1PiercedKernel_1_1SortAction.html" title=" " alt="" coords="242,453,379,493"/>
+<area shape="poly" id="edge179_Node000000_Node000008" title=" " alt="" coords="111,335,159,387,189,415,223,439,245,451,243,455,220,444,186,419,155,391,107,338"/>
+<area shape="rect" id="Node000009" href="$classbitpit_1_1PiercedKernel_1_1SqueezeAction.html" title=" " alt="" coords="229,517,392,557"/>
+<area shape="poly" id="edge180_Node000000_Node000009" title=" " alt="" coords="104,338,122,374,149,419,182,464,223,503,242,515,239,520,220,507,178,467,144,422,118,377,99,340"/>
+<area shape="rect" id="Node000010" href="$classbitpit_1_1PiercedKernel_1_1SwapAction.html" title=" " alt="" coords="239,581,383,621"/>
+<area shape="poly" id="edge181_Node000000_Node000010" title=" " alt="" coords="100,338,115,387,139,448,175,512,198,541,223,567,240,579,237,583,220,571,194,545,171,515,135,450,110,389,94,340"/>
+</map>

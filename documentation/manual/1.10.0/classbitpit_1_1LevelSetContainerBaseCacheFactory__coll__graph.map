@@ -1,0 +1,10 @@
+<map id="bitpit::LevelSetContainerBaseCacheFactory&lt; key_t, container_t &gt;" name="bitpit::LevelSetContainerBaseCacheFactory&lt; key_t, container_t &gt;">
+<area shape="rect" id="Node000001" title="The class LevelSetContainerBaseCacheFactory provides basic functionalities for cache factories." alt="" coords="905,13,1088,67"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1LevelSetValueCacheFactory.html" title=" " alt="" coords="632,5,856,75"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="870,37,905,37,905,43,870,43"/>
+<area shape="rect" id="Node000003" href="$classbitpit_1_1LevelSetCacheFactory.html" title="The class LevelSetCacheFactory provides basic functionalities for cache factories." alt="" coords="5,17,196,57"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="210,28,396,21,608,24,632,25,632,31,608,29,396,27,210,33"/>
+<area shape="rect" id="Node000004" href="$classbitpit_1_1LevelSetValueCacheFactory.html" title="The class LevelSetValueCacheFactory provides basic functionalities for cache factories." alt="" coords="245,48,423,88"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="210,49,245,54,245,59,209,54"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="436,68,447,68,527,71,608,68,631,65,632,70,608,73,527,77,447,73,436,73"/>
+</map>

@@ -1,0 +1,19 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" href="$classbitpit_1_1ElementHalfItem.html" title="The ElementHalfItem class is the base calss for defining element half&#45;edge and half&#45;faces." alt="" coords="5,133,160,173"/>
+<area shape="rect" id="Node000001" href="$classbitpit_1_1ElementHalfEdge.html" title=" " alt="" coords="208,5,367,45"/>
+<area shape="poly" id="edge75_Node000000_Node000001" title=" " alt="" coords="115,122,157,88,207,55,231,43,233,48,209,60,160,93,118,126"/>
+<area shape="rect" id="Node000003" href="$classbitpit_1_1ElementHalfFace.html" title=" " alt="" coords="208,69,367,109"/>
+<area shape="poly" id="edge77_Node000000_Node000003" title=" " alt="" coords="160,127,222,107,224,112,161,132"/>
+<area shape="rect" id="Node000005" href="$classbitpit_1_1ElementHalfFace.html" title=" " alt="" coords="208,133,367,173"/>
+<area shape="poly" id="edge79_Node000000_Node000005" title=" " alt="" coords="174,151,208,151,208,156,174,156"/>
+<area shape="rect" id="Node000007" href="$classbitpit_1_1ElementHalfEdge.html" title="The ElementHalfEdge class defines element half&#45;edge items." alt="" coords="208,197,367,237"/>
+<area shape="poly" id="edge81_Node000000_Node000007" title=" " alt="" coords="161,175,224,195,222,200,160,180"/>
+<area shape="rect" id="Node000008" href="$classbitpit_1_1ElementHalfFace.html" title="The ElementHalfFace class defines element half&#45;faces." alt="" coords="208,261,367,301"/>
+<area shape="poly" id="edge82_Node000000_Node000008" title=" " alt="" coords="118,180,160,214,209,247,233,259,231,264,207,252,157,218,115,184"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1QualifiedCellHalfEdge.html" title=" " alt="" coords="439,5,593,45"/>
+<area shape="poly" id="edge76_Node000001_Node000002" title=" " alt="" coords="381,23,438,23,438,28,381,28"/>
+<area shape="rect" id="Node000004" href="$classbitpit_1_1QualifiedCellHalfFace.html" title="The QualifiedCellHalfFace class defines cell half&#45;faces." alt="" coords="439,69,593,109"/>
+<area shape="poly" id="edge78_Node000003_Node000004" title=" " alt="" coords="381,87,438,87,438,92,381,92"/>
+<area shape="rect" id="Node000006" href="$classbitpit_1_1QualifiedInterfaceHalfEdge.html" title="The QualifiedInterfaceHalfEdge class defines interface half&#45;edges." alt="" coords="415,133,617,173"/>
+<area shape="poly" id="edge80_Node000005_Node000006" title=" " alt="" coords="381,151,415,151,415,156,381,156"/>
+</map>

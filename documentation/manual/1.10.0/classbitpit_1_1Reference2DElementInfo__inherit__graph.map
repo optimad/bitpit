@@ -1,0 +1,11 @@
+<map id="bitpit::Reference2DElementInfo" name="bitpit::Reference2DElementInfo">
+<area shape="rect" id="Node000001" title="The Reference2DElementInfo class allows to define information about reference two&#45;dimensional element..." alt="" coords="179,79,382,104"/>
+<area shape="rect" id="Node000003" href="$classbitpit_1_1ReferencePixelInfo.html" title="The ReferencePixelInfo class defines the information about the reference pixel." alt="" coords="5,152,172,177"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="238,111,121,154,119,149,236,106"/>
+<area shape="rect" id="Node000004" href="$classbitpit_1_1ReferenceQuadInfo.html" title="The ReferenceQuadInfo class defines the information about the reference quadrangle." alt="" coords="196,152,365,177"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="283,118,283,152,278,152,278,118"/>
+<area shape="rect" id="Node000005" href="$classbitpit_1_1ReferenceTriangleInfo.html" title="The ReferenceTriangleInfo class defines the information about the reference triangle." alt="" coords="389,152,572,177"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="327,106,449,149,447,154,325,111"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1ReferenceElementInfo.html" title="The ReferenceElementInfo class allows to define information about reference elements." alt="" coords="187,5,374,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="283,44,283,79,278,79,278,44"/>
+</map>

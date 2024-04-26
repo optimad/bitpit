@@ -1,0 +1,5 @@
+<map id="bitpit::ParaTree" name="bitpit::ParaTree">
+<area shape="rect" id="Node000001" title="Para Tree is the user interface class." alt="" coords="19,5,128,31"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1PabloUniform.html" title="PABLO Uniform is an example of user class derived from ParaTree to map ParaTree in a uniform (square/..." alt="" coords="5,79,141,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="76,44,76,79,71,79,71,44"/>
+</map>

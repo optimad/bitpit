@@ -1,9 +1,0 @@
-<map id="bitpit::LevelSetImmutableObject&lt; narrow_band_cache_t &gt;" name="bitpit::LevelSetImmutableObject&lt; narrow_band_cache_t &gt;">
-<area shape="rect" id="node1" title="The class LevelSetImmutableObject allows to define immutable objects." alt="" coords="524,87,735,127"/>
-<area shape="rect" id="node2" href="$classbitpit_1_1LevelSetObject.html" title="Interface class for all objects with respect to whom the levelset function may be computed." alt="" coords="291,5,436,31"/>
-<area shape="rect" id="node3" href="$classbitpit_1_1VTKBaseStreamer.html" title="The base class to be used to derive VTK streamers form." alt="" coords="21,5,187,31"/>
-<area shape="rect" id="node4" href="$classbitpit_1_1LevelSetObjectInterface.html" title=" " alt="" coords="5,63,203,88"/>
-<area shape="rect" id="node6" href="$classbitpit_1_1LevelSetCachedObjectInterface.html" title="The class LevelSetCachedObjectInterface allows to define objects that cache narrow band information." alt="" coords="251,55,476,95"/>
-<area shape="rect" id="node7" href="$classbitpit_1_1LevelSetSignedObjectInterface.html" title="The class LevelSetSignedObjectInterface allows to define objects that can store the signe on the whol..." alt="" coords="271,119,456,159"/>
-<area shape="rect" id="node5" href="$classbitpit_1_1LevelSetImmutableObjectBase.html" title=" " alt="" coords="279,183,447,223"/>
-</map>

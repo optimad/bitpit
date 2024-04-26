@@ -1,0 +1,5 @@
+<map id="bitpit::SkdNode" name="bitpit::SkdNode">
+<area shape="rect" id="Node000001" title="The SkdPatchInfo class defines a node of the skd&#45;tree." alt="" coords="5,79,116,104"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1SkdBox.html" title="The SkdBox class defines a box." alt="" coords="9,5,112,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="63,44,63,79,58,79,58,44"/>
+</map>

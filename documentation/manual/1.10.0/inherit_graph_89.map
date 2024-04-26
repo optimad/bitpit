@@ -1,0 +1,7 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" href="$classbitpit_1_1STLBase.html" title="Base class for the STL writer and the STL reader." alt="" coords="5,31,116,56"/>
+<area shape="rect" id="Node000001" href="$classbitpit_1_1STLReader.html" title="Class for reading ASCII and binary STL files." alt="" coords="164,5,287,31"/>
+<area shape="poly" id="edge202_Node000000_Node000001" title=" " alt="" coords="130,30,163,25,164,30,130,35"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1STLWriter.html" title="Class for writing ASCII and binary STL files." alt="" coords="168,55,283,80"/>
+<area shape="poly" id="edge203_Node000000_Node000002" title=" " alt="" coords="130,51,168,56,167,62,129,56"/>
+</map>

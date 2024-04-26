@@ -1,0 +1,31 @@
+<map id="bitpit::ReferenceElementInfo" name="bitpit::ReferenceElementInfo">
+<area shape="rect" id="Node000001" title="The ReferenceElementInfo class allows to define information about reference elements." alt="" coords="5,105,192,131"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1Reference0DElementInfo.html" title="The Reference0DElementInfo class allows to define information about reference zero&#45;dimensional elemen..." alt="" coords="240,12,443,37"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="137,97,239,53,293,35,295,40,241,58,139,102"/>
+<area shape="rect" id="Node000004" href="$classbitpit_1_1Reference1DElementInfo.html" title="The Reference1DElementInfo class allows to define information about reference one&#45;dimensional element..." alt="" coords="240,68,443,93"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="195,101,258,91,259,96,196,106"/>
+<area shape="rect" id="Node000006" href="$classbitpit_1_1Reference2DElementInfo.html" title="The Reference2DElementInfo class allows to define information about reference two&#45;dimensional element..." alt="" coords="240,129,443,155"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="206,126,240,129,239,135,205,131"/>
+<area shape="rect" id="Node000010" href="$classbitpit_1_1Reference3DElementInfo.html" title="The Reference3DElementInfo class allows to define information about reference three&#45;dimensional eleme..." alt="" coords="240,325,443,351"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="126,138,328,323,324,327,122,142"/>
+<area shape="rect" id="Node000003" href="$classbitpit_1_1ReferenceVertexInfo.html" title="The ReferenceVertexInfo class defines the information about the reference vertex." alt="" coords="506,5,682,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="457,19,506,18,506,23,457,24"/>
+<area shape="rect" id="Node000005" href="$classbitpit_1_1ReferenceLineInfo.html" title="The ReferenceLineInfo class defines the information about the reference line." alt="" coords="513,55,675,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="456,72,512,69,513,74,457,77"/>
+<area shape="rect" id="Node000007" href="$classbitpit_1_1ReferencePixelInfo.html" title="The ReferencePixelInfo class defines the information about the reference pixel." alt="" coords="511,104,677,129"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="456,128,510,122,511,128,457,133"/>
+<area shape="rect" id="Node000008" href="$classbitpit_1_1ReferenceQuadInfo.html" title="The ReferenceQuadInfo class defines the information about the reference quadrangle." alt="" coords="509,153,679,179"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="457,150,510,155,509,161,456,156"/>
+<area shape="rect" id="Node000009" href="$classbitpit_1_1ReferenceTriangleInfo.html" title="The ReferenceTriangleInfo class defines the information about the reference triangle." alt="" coords="503,203,685,228"/>
+<area shape="poly" id="edge8_Node000006_Node000009" title=" " alt="" coords="393,157,491,187,539,200,538,205,490,193,392,162"/>
+<area shape="rect" id="Node000011" href="$classbitpit_1_1ReferenceHexahedronInfo.html" title="The ReferenceHexahedronInfo class defines the information about the reference hexahedron." alt="" coords="491,252,697,277"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="389,318,490,286,534,275,535,280,491,291,391,323"/>
+<area shape="rect" id="Node000012" href="$classbitpit_1_1ReferencePyramidInfo.html" title="The ReferencePyramidInfo class defines the information about the reference pyramid." alt="" coords="501,301,687,327"/>
+<area shape="poly" id="edge11_Node000010_Node000012" title=" " alt="" coords="456,324,500,320,501,326,457,330"/>
+<area shape="rect" id="Node000013" href="$classbitpit_1_1ReferenceTetraInfo.html" title="The ReferenceTetraInfo class defines the information about the reference tetrahedron." alt="" coords="511,351,677,376"/>
+<area shape="poly" id="edge12_Node000010_Node000013" title=" " alt="" coords="457,347,511,352,510,358,456,352"/>
+<area shape="rect" id="Node000014" href="$classbitpit_1_1ReferenceVoxelInfo.html" title="The ReferenceVoxelInfo class defines the information about the reference voxel." alt="" coords="509,400,679,425"/>
+<area shape="poly" id="edge13_Node000010_Node000014" title=" " alt="" coords="392,353,491,385,539,397,537,402,490,390,390,358"/>
+<area shape="rect" id="Node000015" href="$classbitpit_1_1ReferenceWedgeInfo.html" title="The ReferenceWedgeInfo class defines the information about the reference wedge." alt="" coords="505,449,683,475"/>
+<area shape="poly" id="edge14_Node000010_Node000015" title=" " alt="" coords="370,357,424,396,492,434,528,447,526,452,490,439,422,401,367,362"/>
+</map>

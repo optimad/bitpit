@@ -1,7 +1,0 @@
-<map id="bitpit::LevelSetComplementObject" name="bitpit::LevelSetComplementObject">
-<area shape="rect" id="node1" title="Class that allows to evaluate the complement of a LevelSetObjects." alt="" coords="101,225,282,265"/>
-<area shape="rect" id="node2" href="$classbitpit_1_1LevelSetProxyObject.html" title="Interface class for all objects, which depend on other LevelSetObjects." alt="" coords="102,152,281,177"/>
-<area shape="rect" id="node3" href="$classbitpit_1_1LevelSetObject.html" title="Interface class for all objects with respect to whom the levelset function may be computed." alt="" coords="119,79,264,104"/>
-<area shape="rect" id="node4" href="$classbitpit_1_1VTKBaseStreamer.html" title="The base class to be used to derive VTK streamers form." alt="" coords="5,5,172,31"/>
-<area shape="rect" id="node5" href="$classbitpit_1_1LevelSetObjectInterface.html" title=" " alt="" coords="197,5,394,31"/>
-</map>

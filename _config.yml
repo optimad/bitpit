@@ -39,7 +39,7 @@ sections:
                 url: installation.html
             manual:
                 name: Programmer's manual
-                url: manual/1.9.0/index.html
+                url: manual/1.10.0/index.html
 
     downloads:
         name: Downloads

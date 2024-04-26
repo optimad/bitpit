@@ -1,0 +1,16 @@
+<map id="bitpit::ElementCacheCollection" name="bitpit::ElementCacheCollection">
+<area shape="rect" id="Node000001" title="The class ElementCacheCollection allows to store a collection of caches for the elements of a mesh." alt="" coords="1053,45,1255,70"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1LevelSetCacheCollection.html" title=" " alt="" coords="745,5,948,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="962,35,1053,44,1053,50,961,40"/>
+<area shape="rect" id="Node000003" href="$classbitpit_1_1LevelSetCacheCollection.html" title="The class LevelSetCacheCollection allows to store a collection of caches." alt="" coords="441,5,644,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="658,23,745,23,745,28,658,28"/>
+<area shape="rect" id="Node000004" href="$classbitpit_1_1PiercedKernel.html" title=" " alt="" coords="778,69,915,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="929,78,1053,65,1053,70,930,83"/>
+<area shape="rect" id="Node000005" href="$classbitpit_1_1BasePiercedKernel.html" title="Base class for the pierced kernel." alt="" coords="225,102,392,127"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="406,106,416,105,778,89,778,95,416,111,406,111"/>
+<area shape="rect" id="Node000007" href="$classbitpit_1_1PiercedKernel.html" title="Metafunction for generating a pierced kernel." alt="" coords="474,123,611,163"/>
+<area shape="poly" id="edge7_Node000007_Node000005" title=" " alt="" coords="406,124,474,132,474,137,405,129"/>
+<area shape="rect" id="Node000006" href="$classbitpit_1_1PiercedSyncMaster.html" title="Base class for defining an object that acts like a master in pierced synchronization." alt="" coords="5,102,176,127"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="190,112,225,112,225,117,190,117"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="625,131,721,116,777,104,778,109,722,121,626,136"/>
+</map>

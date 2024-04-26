@@ -1,0 +1,7 @@
+<map id="bitpit::STLBase" name="bitpit::STLBase">
+<area shape="rect" id="Node000001" title="Base class for the STL writer and the STL reader." alt="" coords="82,5,193,31"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1STLReader.html" title="Class for reading ASCII and binary STL files." alt="" coords="5,79,128,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="118,43,80,80,76,77,114,39"/>
+<area shape="rect" id="Node000003" href="$classbitpit_1_1STLWriter.html" title="Class for writing ASCII and binary STL files." alt="" coords="152,79,267,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="161,39,200,77,196,80,157,43"/>
+</map>
