@@ -1258,21 +1258,8 @@ void SystemSolver::solve()
         removeNullSpaceFromRHS();
     }
 
-    // Solve the system
-    if (!m_transpose) {
-        m_KSPStatus.error = KSPSolve(m_KSP, m_rhs, m_solution);
-    } else {
-        m_KSPStatus.error = KSPSolveTranspose(m_KSP, m_rhs, m_solution);
-    }
-
-    // Set solver info
-    if (m_KSPStatus.error == 0) {
-        KSPGetIterationNumber(m_KSP, &m_KSPStatus.its);
-        KSPGetConvergedReason(m_KSP, &m_KSPStatus.convergence);
-    } else {
-        m_KSPStatus.its         = -1;
-        m_KSPStatus.convergence = KSP_DIVERGED_BREAKDOWN;
-    }
+    // Solve KSP
+    solveKSP();
 
     // Perfrom actions after KSP solution
     postKSPSolveActions();
@@ -1301,6 +1288,26 @@ void SystemSolver::solve(const std::vector<double> &rhs, std::vector<double> *so
 }
 
 /*!
+ * Solve KSP.
+ */
+void SystemSolver::solveKSP()
+{
+    PetscErrorCode solverError;
+    if (!m_transpose) {
+        solverError = KSPSolve(m_KSP, m_rhs, m_solution);
+    } else {
+        solverError = KSPSolveTranspose(m_KSP, m_rhs, m_solution);
+    }
+
+    if (solverError) {
+        const char *petscMessage = nullptr;
+        PetscErrorMessage(solverError, &petscMessage, nullptr);
+        std::string message = "Unable to solver the system. " + std::string(petscMessage);
+        throw std::runtime_error(message);
+    }
+}
+
+/*!
  * Pre-solve actions.
  */
 void SystemSolver::preKSPSolveActions()
@@ -1314,6 +1321,9 @@ void SystemSolver::preKSPSolveActions()
  */
 void SystemSolver::postKSPSolveActions()
 {
+    // Fill status of KSP
+    fillKSPStatus();
+
     // Reorder vectors
     vectorsReorder(false);
 }
@@ -2694,6 +2704,27 @@ const KSPOptions & SystemSolver::getKSPOptions() const
 const KSPStatus & SystemSolver::getKSPStatus() const
 {
     return m_KSPStatus;
+}
+
+/*!
+ * Fill information about the status of the KSP.
+ */
+void SystemSolver::fillKSPStatus()
+{
+    fillKSPStatus(m_KSP, &m_KSPStatus);
+}
+
+/*!
+ * Fill information about the status of the specified KSP.
+ *
+ * \param ksp is the KSP the status will be fetched from
+ * \param status on output will contain the status of the KSP
+ */
+void SystemSolver::fillKSPStatus(KSP ksp, KSPStatus *status) const
+{
+    status->error = 0;
+    KSPGetIterationNumber(ksp, &(status->its));
+    KSPGetConvergedReason(ksp, &(status->convergence));
 }
 
 #if BITPIT_ENABLE_MPI==1

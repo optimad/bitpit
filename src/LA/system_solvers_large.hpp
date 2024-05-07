@@ -375,8 +375,12 @@ protected:
     virtual void preKSPSetupActions();
     virtual void postKSPSetupActions();
 
+    virtual void solveKSP();
     virtual void preKSPSolveActions();
     virtual void postKSPSolveActions();
+
+    virtual void fillKSPStatus();
+    virtual void fillKSPStatus(KSP ksp, KSPStatus *status) const;
 
     std::string getInfoFilePath(const std::string &directory, const std::string &prefix) const;
     std::string getMatrixFilePath(const std::string &directory, const std::string &prefix) const;
