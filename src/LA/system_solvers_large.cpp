@@ -2616,12 +2616,28 @@ void SystemSolver::prepareKSP()
 
     // Set up
     if (setupNeeded) {
+        // Initialize preconditioner
+        PC preconditioner;
+        KSPGetPC(m_KSP, &preconditioner);
+        PCSetFromOptions(preconditioner);
+
+        // Perform actions before PC set up
+        prePCSetupActions();
+
+        // Set up PC
+        setupPC();
+
+        // Perform actions after PC set up
+        postPCSetupActions()
+
+        // Initialize solver
+        KSPSetFromOptions(m_KSP);
+
         // Perform actions before KSP set up
         preKSPSetupActions();
 
-        // KSP set up
-        KSPSetFromOptions(m_KSP);
-        KSPSetUp(m_KSP);
+        // Set up KSP
+        setupKSP();
 
         // Perform actions after KSP set up
         postKSPSetupActions();
@@ -2668,11 +2684,15 @@ void SystemSolver::destroyKSP()
 }
 
 /*!
- * Perform actions before KSP setup.
+ * Set up the preconditioner.
  */
-void SystemSolver::preKSPSetupActions()
+void SystemSolver::setupPC()
 {
-    // Preconditioner configuration
+    // Get preconditioner
+    PC preconditioner;
+    KSPGetPC(m_KSP, &preconditioner);
+
+    // Set preconditioner type
     PCType preconditionerType;
 #if BITPIT_ENABLE_MPI == 1
     if (isPartitioned()) {
@@ -2684,9 +2704,9 @@ void SystemSolver::preKSPSetupActions()
     preconditionerType = PCILU;
 #endif
 
-    PC preconditioner;
-    KSPGetPC(m_KSP, &preconditioner);
     PCSetType(preconditioner, preconditionerType);
+
+    // Configure preconditioner
     if (strcmp(preconditionerType, PCASM) == 0) {
         if (m_KSPOptions.overlap != PETSC_DEFAULT) {
             PCASMSetOverlap(preconditioner, m_KSPOptions.overlap);
@@ -2697,30 +2717,8 @@ void SystemSolver::preKSPSetupActions()
         }
     }
 
-    // Solver configuration
-    KSPSetType(m_KSP, KSPFGMRES);
-    if (m_KSPOptions.restart != PETSC_DEFAULT) {
-        KSPGMRESSetRestart(m_KSP, m_KSPOptions.restart);
-    }
-    if (m_KSPOptions.rtol != PETSC_DEFAULT || m_KSPOptions.atol != PETSC_DEFAULT || m_KSPOptions.maxits != PETSC_DEFAULT) {
-        KSPSetTolerances(m_KSP, m_KSPOptions.rtol, m_KSPOptions.atol, PETSC_DEFAULT, m_KSPOptions.maxits);
-    }
-    KSPSetInitialGuessNonzero(m_KSP, PETSC_TRUE);
-}
+    PCSetUp(preconditioner);
 
-/*!
- * Perform actions after KSP setup.
- */
-void SystemSolver::postKSPSetupActions()
-{
-    // Get preconditioner information
-    PC preconditioner;
-    KSPGetPC(m_KSP, &preconditioner);
-
-    PCType preconditionerType;
-    PCGetType(preconditioner, &preconditionerType);
-
-    // Set ASM sub block preconditioners
     if (strcmp(preconditionerType, PCASM) == 0) {
         KSP *subksp;
         PC subpc;
@@ -2737,6 +2735,55 @@ void SystemSolver::postKSPSetupActions()
             }
         }
     }
+}
+
+/*!
+ * Perform actions before preconditioner setup.
+ */
+void SystemSolver::prePCSetupActions()
+{
+    // Nothing to do
+}
+
+/*!
+ * Perform actions after preconditioner setup.
+ */
+void SystemSolver::postPCSetupActions()
+{
+    // Nothing to do
+}
+
+/*!
+ * Set up the KSP.
+ */
+void SystemSolver::setupKSP()
+{
+    KSPSetType(m_KSP, KSPFGMRES);
+    if (m_KSPOptions.restart != PETSC_DEFAULT) {
+        KSPGMRESSetRestart(m_KSP, m_KSPOptions.restart);
+    }
+    if (m_KSPOptions.rtol != PETSC_DEFAULT || m_KSPOptions.atol != PETSC_DEFAULT || m_KSPOptions.maxits != PETSC_DEFAULT) {
+        KSPSetTolerances(m_KSP, m_KSPOptions.rtol, m_KSPOptions.atol, PETSC_DEFAULT, m_KSPOptions.maxits);
+    }
+    KSPSetInitialGuessNonzero(m_KSP, PETSC_TRUE);
+
+    KSPSetUp(m_KSP);
+}
+
+/*!
+ * Perform actions before KSP setup.
+ */
+void SystemSolver::preKSPSetupActions()
+{
+    // Nothing to do
+}
+
+/*!
+ * Set up the KSP.
+ */
+void SystemSolver::postKSPSetupActions()
+{
+    // Nothing to do
 }
 
 /*!

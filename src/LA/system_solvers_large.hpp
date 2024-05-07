@@ -375,6 +375,11 @@ protected:
     void createKSP();
     void destroyKSP();
 
+    virtual void setupPC();
+    virtual void prePCSetupActions();
+    virtual void postPCSetupActions();
+
+    virtual void setupKSP();
     virtual void preKSPSetupActions();
     virtual void postKSPSetupActions();
 
