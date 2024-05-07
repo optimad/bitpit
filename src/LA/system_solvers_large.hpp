@@ -36,22 +36,19 @@
 namespace bitpit {
 
 struct KSPOptions {
-    PetscInt restart;
-    PetscInt maxits;
-    PetscScalar rtol;
-    PetscScalar atol;
+    PetscInt overlap; //! Overlap between a pair of subdomains for the partitioned preconditioner
+    PetscInt levels; //! Number of levels of fill used by the preconditioner.
 
-    PetscInt overlap;
-    PetscInt levels;
-
-    PetscInt sublevels;
-    PetscScalar subrtol;
+    PetscBool initial_non_zero; //! Tells the iterative solver that the initial guess is nonzero
+    PetscInt restart; //! Number of iterations at which the GMRES method restarts
+    PetscInt maxits; //! Maximum number of iterations
+    PetscScalar rtol; //! Relative convergence tolerance, relative decrease in the preconditioned residual norm
+    PetscScalar atol; //! Absolute convergence tolerance, absolute size of the preconditioned residual norm
 
     KSPOptions()
-        : restart(PETSC_DEFAULT), maxits(PETSC_DEFAULT),
-          rtol(PETSC_DEFAULT), atol(PETSC_DEFAULT),
-          overlap(PETSC_DEFAULT), levels(PETSC_DEFAULT),
-          sublevels(PETSC_DEFAULT), subrtol(PETSC_DEFAULT)
+        : overlap(PETSC_DEFAULT), levels(PETSC_DEFAULT),
+          initial_non_zero(PETSC_TRUE), restart(PETSC_DEFAULT),
+          maxits(PETSC_DEFAULT), rtol(PETSC_DEFAULT), atol(PETSC_DEFAULT)
     {
     }
 };

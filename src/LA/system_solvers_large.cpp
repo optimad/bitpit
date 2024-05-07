@@ -27,6 +27,8 @@
 #include <string>
 #include <unordered_set>
 
+#include "petscksp.h"
+
 #include "bitpit_common.hpp"
 #include "bitpit_containers.hpp"
 #include "bitpit_operators.hpp"
@@ -2681,18 +2683,19 @@ void SystemSolver::postKSPSetupActions()
 
     // Set ASM sub block preconditioners
     if (strcmp(preconditionerType, PCASM) == 0) {
-        KSP *subksp;
-        PC subpc;
-        PetscInt nlocal, first;
-        PCASMGetSubKSP(preconditioner, &nlocal, &first, &subksp);
-        for (PetscInt i = 0; i < nlocal; ++i) {
-            KSPGetPC(subksp[i], &subpc);
-            PCSetType(subpc, PCILU);
-            if (m_KSPOptions.sublevels != PETSC_DEFAULT) {
-                PCFactorSetLevels(subpc, m_KSPOptions.sublevels);
-            }
-            if (m_KSPOptions.subrtol != PETSC_DEFAULT) {
-                KSPSetTolerances(subksp[i], m_KSPOptions.subrtol, PETSC_DEFAULT, PETSC_DEFAULT, PETSC_DEFAULT);
+        KSP *subKSPs;
+        PetscInt nSubKSPs;
+        PCASMGetSubKSP(preconditioner, &nSubKSPs, PETSC_NULL, &subKSPs);
+
+        for (PetscInt i = 0; i < nSubKSPs; ++i) {
+            KSP subKSP = subKSPs[i];
+            KSPSetType(subKSP, KSPPREONLY);
+
+            PC subPC;
+            KSPGetPC(subKSP, &subPC);
+            PCSetType(subPC, PCILU);
+            if (m_KSPOptions.levels != PETSC_DEFAULT) {
+                PCFactorSetLevels(subPC, m_KSPOptions.levels);
             }
         }
     }
