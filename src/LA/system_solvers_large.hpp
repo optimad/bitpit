@@ -36,22 +36,19 @@
 namespace bitpit {
 
 struct KSPOptions {
-    PetscInt restart;
+    PetscInt asm_overlap;
+    PetscInt ilu_levels;
+
     PetscInt maxits;
     PetscScalar rtol;
     PetscScalar atol;
-
-    PetscInt overlap;
-    PetscInt levels;
-
-    PetscInt sublevels;
-    PetscScalar subrtol;
+    PetscBool initial_non_zero;
+    PetscInt restart;
 
     KSPOptions()
-        : restart(PETSC_DEFAULT), maxits(PETSC_DEFAULT),
-          rtol(PETSC_DEFAULT), atol(PETSC_DEFAULT),
-          overlap(PETSC_DEFAULT), levels(PETSC_DEFAULT),
-          sublevels(PETSC_DEFAULT), subrtol(PETSC_DEFAULT)
+        : asm_overlap(PETSC_DEFAULT), ilu_levels(PETSC_DEFAULT),
+          maxits(PETSC_DEFAULT), rtol(PETSC_DEFAULT), atol(PETSC_DEFAULT),
+          initial_non_zero(PETSC_TRUE), restart(PETSC_DEFAULT)
     {
     }
 };

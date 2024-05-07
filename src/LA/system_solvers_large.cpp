@@ -2708,30 +2708,29 @@ void SystemSolver::setupPC()
 
     // Configure preconditioner
     if (strcmp(preconditionerType, PCASM) == 0) {
-        if (m_KSPOptions.overlap != PETSC_DEFAULT) {
-            PCASMSetOverlap(preconditioner, m_KSPOptions.overlap);
+        if (m_KSPOptions.asm_overlap != PETSC_DEFAULT) {
+            PCASMSetOverlap(preconditioner, m_KSPOptions.asm_overlap);
         }
     } else if (strcmp(preconditionerType, PCILU) == 0) {
-        if (m_KSPOptions.levels != PETSC_DEFAULT) {
-            PCFactorSetLevels(preconditioner, m_KSPOptions.levels);
+        if (m_KSPOptions.ilu_levels != PETSC_DEFAULT) {
+            PCFactorSetLevels(preconditioner, m_KSPOptions.ilu_levels);
         }
     }
 
     PCSetUp(preconditioner);
 
     if (strcmp(preconditionerType, PCASM) == 0) {
-        KSP *subksp;
-        PC subpc;
-        PetscInt nlocal, first;
-        PCASMGetSubKSP(preconditioner, &nlocal, &first, &subksp);
-        for (PetscInt i = 0; i < nlocal; ++i) {
-            KSPGetPC(subksp[i], &subpc);
-            PCSetType(subpc, PCILU);
-            if (m_KSPOptions.sublevels != PETSC_DEFAULT) {
-                PCFactorSetLevels(subpc, m_KSPOptions.sublevels);
-            }
-            if (m_KSPOptions.subrtol != PETSC_DEFAULT) {
-                KSPSetTolerances(subksp[i], m_KSPOptions.subrtol, PETSC_DEFAULT, PETSC_DEFAULT, PETSC_DEFAULT);
+        KSP *subKSPs;
+        PetscInt nSubKSPs;
+        PCASMGetSubKSP(preconditioner, &nSubKSPs, nullptr, &subKSPs);
+        for (PetscInt i = 0; i < nSubKSPs; ++i) {
+            KSPSetType(m_KSP, KSPPREONLY);
+
+            PC subPC;
+            KSPGetPC(subKSPs[i], &subPC);
+            PCSetType(subPC, PCILU);
+            if (m_KSPOptions.ilu_levels != PETSC_DEFAULT) {
+                PCFactorSetLevels(subPC, m_KSPOptions.ilu_levels);
             }
         }
     }
@@ -2765,7 +2764,7 @@ void SystemSolver::setupKSP()
     if (m_KSPOptions.rtol != PETSC_DEFAULT || m_KSPOptions.atol != PETSC_DEFAULT || m_KSPOptions.maxits != PETSC_DEFAULT) {
         KSPSetTolerances(m_KSP, m_KSPOptions.rtol, m_KSPOptions.atol, PETSC_DEFAULT, m_KSPOptions.maxits);
     }
-    KSPSetInitialGuessNonzero(m_KSP, PETSC_TRUE);
+    KSPSetInitialGuessNonzero(m_KSP, m_KSPOptions.initial_non_zero);
 
     KSPSetUp(m_KSP);
 }
