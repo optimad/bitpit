@@ -1281,17 +1281,8 @@ void SystemSolver::solve()
     // Perfrom actions before KSP solution
     preKSPSolveActions();
 
-    // Force consistency
-    if (m_forceConsistency) {
-        removeNullSpaceFromRHS();
-    }
-
-    // Solve the system
-    if (!m_transpose) {
-        m_KSPStatus.error = KSPSolve(m_KSP, m_rhs, m_solution);
-    } else {
-        m_KSPStatus.error = KSPSolveTranspose(m_KSP, m_rhs, m_solution);
-    }
+    // Solve KSP
+    solveKSP();
 
     // Set solver info
     if (m_KSPStatus.error == 0) {
@@ -1329,12 +1320,29 @@ void SystemSolver::solve(const std::vector<double> &rhs, std::vector<double> *so
 }
 
 /*!
+ * Solve KSP.
+ */
+void SystemSolver::solveKSP()
+{
+    if (!m_transpose) {
+        m_KSPStatus.error = KSPSolve(m_KSP, m_rhs, m_solution);
+    } else {
+        m_KSPStatus.error = KSPSolveTranspose(m_KSP, m_rhs, m_solution);
+    }
+}
+
+/*!
  * Pre-solve actions.
  */
 void SystemSolver::preKSPSolveActions()
 {
     // Reorder vectors
     vectorsReorder(true);
+
+    // Force consistency
+    if (m_forceConsistency) {
+        removeNullSpaceFromRHS();
+    }
 }
 
 /*!

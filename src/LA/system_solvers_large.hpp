@@ -378,6 +378,7 @@ protected:
     virtual void preKSPSetupActions();
     virtual void postKSPSetupActions();
 
+    virtual void solveKSP();
     virtual void preKSPSolveActions();
     virtual void postKSPSolveActions();
 
