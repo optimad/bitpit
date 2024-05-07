@@ -2666,11 +2666,8 @@ void SystemSolver::postKSPSetupActions()
         for (PetscInt i = 0; i < nlocal; ++i) {
             KSPGetPC(subksp[i], &subpc);
             PCSetType(subpc, PCILU);
-            if (m_KSPOptions.sublevels != PETSC_DEFAULT) {
-                PCFactorSetLevels(subpc, m_KSPOptions.sublevels);
-            }
-            if (m_KSPOptions.subrtol != PETSC_DEFAULT) {
-                KSPSetTolerances(subksp[i], m_KSPOptions.subrtol, PETSC_DEFAULT, PETSC_DEFAULT, PETSC_DEFAULT);
+            if (m_KSPOptions.levels != PETSC_DEFAULT) {
+                PCFactorSetLevels(subpc, m_KSPOptions.levels);
             }
         }
     }
