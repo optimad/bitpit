@@ -134,7 +134,6 @@ int run(int rank, int nProcs)
     options.atol        = 1e-50;
     options.rtol        = 1e-7;
     options.maxits      = 100;
-    options.subrtol     = 1e-7;
 
     // Solve System
     log::cout() << "Solve linear system..." << std::endl;
