@@ -28,6 +28,7 @@
 #include <unordered_set>
 
 #include "bitpit_common.hpp"
+#include "bitpit_containers.hpp"
 #include "bitpit_operators.hpp"
 
 #include "system_solvers_large.hpp"
