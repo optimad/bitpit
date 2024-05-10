@@ -1238,18 +1238,6 @@ bool SystemSolver::isAssembled() const
 }
 
 /*!
- * Check if the system is set up.
- *
- * This function is deprecated, it will always return true.
- *
- * \return Returns true if the system is set up, false otherwise.
- */
-bool SystemSolver::isSetUp() const
-{
-    return true;
-}
-
-/*!
  * Solve the system
  */
 void SystemSolver::solve()
@@ -2526,16 +2514,6 @@ void SystemSolver::clearReordering()
     if (m_colReordering) {
         ISDestroy(&m_colReordering);
     }
-}
-
-/*!
- * Setup the system.
- *
- * This function is deprecated, there is no need to call it.
- */
-void SystemSolver::setUp()
-{
-    // Nothing to do
 }
 
 /*!

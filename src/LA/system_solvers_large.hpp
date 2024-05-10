@@ -282,9 +282,6 @@ public:
     void update(const SystemMatrixAssembler &assembler);
     void update(long nRows, const long *rows, const SystemMatrixAssembler &assembler);
 
-    BITPIT_DEPRECATED(void setUp());
-    BITPIT_DEPRECATED(bool isSetUp() const);
-
     bool getTranspose() const;
     void setTranspose(bool transpose);
 
