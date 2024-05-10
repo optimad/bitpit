@@ -1581,8 +1581,12 @@ void SystemSolver::matrixDestroy()
 /*!
  * Update the specified rows of the matrix.
  *
- * The contents of the specified rows will be replaced by the specified
- * elements.
+ * The contents of the specified rows will be replaced by the data provided by the given
+ * assembler. If the matrix has not been assembled yet, both the pattern and the values
+ * of the matrix will be updated. After the matrix has been assembled only the values
+ * will be updated.
+ *
+ * The block size of the assembler should be equal to the block size of the matrix.
  *
  * \param nRows is the number of rows that will be updated
  * \param rows are the local indices of the rows that will be updated, if a
@@ -1596,11 +1600,10 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrix
     m_KSPDirty = true;
 
     // Get block size
-    const int matrixBlockSize    = getBlockSize();
-    const int assemblerBlockSize = assembler.getBlockSize();
-    if (assemblerBlockSize != matrixBlockSize && matrixBlockSize != 1) {
+    const int blockSize = getBlockSize();
+    if (assembler.getBlockSize() != blockSize) {
         std::string message = "Unable to update the matrix.";
-        message += " The block size of the assembler is not compatible with the block size of the system matrix.";
+        message += " The block size of the assembler is not equal to the block size of the system matrix.";
         throw std::runtime_error(message);
     }
 
@@ -1619,12 +1622,12 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrix
     PetscInt colGlobalBegin;
     PetscInt colGlobalEnd;
     MatGetOwnershipRangeColumn(m_A, &colGlobalBegin, &colGlobalEnd);
-    colGlobalBegin /= assemblerBlockSize;
-    colGlobalEnd /= assemblerBlockSize;
+    colGlobalBegin /= blockSize;
+    colGlobalEnd /= blockSize;
 
     PetscInt rowGlobalOffset;
     MatGetOwnershipRange(m_A, &rowGlobalOffset, nullptr);
-    rowGlobalOffset /= assemblerBlockSize;
+    rowGlobalOffset /= blockSize;
 
     // Get the options for assembling the matrix
     SystemMatrixAssembler::AssemblyOptions assemblyOptions = assembler.getOptions();
@@ -1659,7 +1662,7 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrix
     // Fast update is not related to the option MAT_SORTED_FULL, that option
     // is used to speedup the standard function MatSetValues (which still
     // requires the pattern of the row).
-    bool fastUpdate = isAssembled() && (matrixBlockSize == 1) && assemblyOptions.full && assemblyOptions.sorted;
+    bool fastUpdate = isAssembled() && (blockSize == 1) && assemblyOptions.full && assemblyOptions.sorted;
 
     // Update element values
     //
@@ -1671,13 +1674,12 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrix
 
     ConstProxyVector<long> rowPattern(static_cast<std::size_t>(0), static_cast<std::size_t>(maxRowNZ));
     std::vector<PetscInt> petscRowPattern(maxRowNZ);
-    std::vector<PetscInt> petscMatrixRowPattern(assemblerBlockSize * maxRowNZ);
 
     ConstProxyVector<double> rowValues;
     std::vector<PetscScalar> petscRowValuesStorage;
     const PetscScalar *petscRowValues;
     if (!valuesDirectUpdate) {
-        long maxRowNZElements = assemblerBlockSize * assemblerBlockSize * maxRowNZ;
+        long maxRowNZElements = blockSize * blockSize * maxRowNZ;
         rowValues.set(ConstProxyVector<double>::INTERNAL_STORAGE, 0, maxRowNZElements);
         petscRowValuesStorage.resize(maxRowNZElements);
         petscRowValues = petscRowValuesStorage.data();
@@ -1705,6 +1707,10 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrix
             assembler.getRowData(n, &rowPattern, &rowValues);
         }
 
+        if (rowValues.size() == 0) {
+            continue;
+        }
+
         // Get values in PETSc format
         if (valuesDirectUpdate) {
             petscRowValues = reinterpret_cast<const PetscScalar *>(rowValues.data());
@@ -1713,28 +1719,10 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrix
         }
 
         if (fastUpdate) {
-            // Set values
-            if (assemblerBlockSize == 1) {
-                MatSetValuesRow(m_A, globalRow, petscRowValues);
-            } else {
-                const int nMatrixRowValues = rowValues.size() / assemblerBlockSize;
-
-                PetscInt matrixGlobalRow = globalRow * assemblerBlockSize;
-                const PetscScalar *petscMatrixRowValues = petscRowValues;
-                for (int k = 0; k < assemblerBlockSize; ++k) {
-                    MatSetValuesRow(m_A, matrixGlobalRow, petscMatrixRowValues);
-                    ++matrixGlobalRow;
-                    petscMatrixRowValues += nMatrixRowValues;
-                }
-            }
+            MatSetValuesRow(m_A, globalRow, petscRowValues);
         } else {
-            // Get the size of the pattern
-            const int rowPatternSize = rowPattern.size();
-            if (rowPatternSize == 0) {
-                continue;
-            }
-
             // Get pattern in PETSc format
+            const int rowPatternSize = rowPattern.size();
             for (int k = 0; k < rowPatternSize; ++k) {
                 long globalCol = rowPattern[k];
                 if (colReordering) {
@@ -1749,30 +1737,10 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrix
             }
 
             // Set data
-            if (matrixBlockSize > 1) {
+            if (blockSize > 1) {
                 MatSetValuesBlocked(m_A, 1, &globalRow, rowPatternSize, petscRowPattern.data(), petscRowValues, INSERT_VALUES);
             } else {
-                if (assemblerBlockSize == 1) {
-                    MatSetValues(m_A, 1, &globalRow, rowPatternSize, petscRowPattern.data(), petscRowValues, INSERT_VALUES);
-                } else {
-                    // Expand the pattern to get a values for each element
-                    const int matrixRowPatternSize = rowPatternSize * assemblerBlockSize;
-                    for (int k = 0; k < rowPatternSize; ++k) {
-                        int matrixPattenOffset = k * assemblerBlockSize;
-                        for (int n = 0; n < assemblerBlockSize; ++n) {
-                            petscMatrixRowPattern[matrixPattenOffset + n] = assemblerBlockSize * petscRowPattern[k] + n;
-                        }
-                    }
-
-                    // Set data
-                    PetscInt matrixGlobalRow = globalRow * assemblerBlockSize;
-                    const PetscScalar *petscMatrixRowValues = petscRowValues;
-                    for (int k = 0; k < assemblerBlockSize; ++k) {
-                        MatSetValues(m_A, 1, &matrixGlobalRow, matrixRowPatternSize, petscMatrixRowPattern.data(), petscMatrixRowValues, INSERT_VALUES);
-                        ++matrixGlobalRow;
-                        petscMatrixRowValues += matrixRowPatternSize;
-                    }
-                }
+                MatSetValues(m_A, 1, &globalRow, rowPatternSize, petscRowPattern.data(), petscRowValues, INSERT_VALUES);
             }
         }
     }
