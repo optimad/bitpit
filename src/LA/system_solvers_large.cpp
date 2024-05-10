@@ -1670,10 +1670,18 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrix
     // bitpit a direct update can be performed, otherwise the matrix is updated
     // using intermediate data storages.
     const long maxRowNZ = std::max(assembler.getMaxRowNZCount(), 0L);
-    bool valuesDirectUpdate = (sizeof(double) == sizeof(PetscScalar));
 
-    ConstProxyVector<long> rowPattern(static_cast<std::size_t>(0), static_cast<std::size_t>(maxRowNZ));
-    std::vector<PetscInt> petscRowPattern(maxRowNZ);
+    bool patternDirectUpdate = !colReordering && (sizeof(long) == sizeof(PetscInt));
+    bool valuesDirectUpdate  = (sizeof(double) == sizeof(PetscScalar));
+
+    ConstProxyVector<long> rowPattern;
+    std::vector<PetscInt> petscRowPatternStorage;
+    const PetscInt *petscRowPattern;
+    if (!patternDirectUpdate) {
+        rowPattern.set(ConstProxyVector<long>::INTERNAL_STORAGE, 0, maxRowNZ);
+        petscRowPatternStorage.resize(maxRowNZ);
+        petscRowPattern = petscRowPatternStorage.data();
+    }
 
     ConstProxyVector<double> rowValues;
     std::vector<PetscScalar> petscRowValuesStorage;
@@ -1712,6 +1720,8 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrix
         }
 
         // Get values in PETSc format
+        const std::size_t rowPatternSize = rowPattern.size();
+
         if (valuesDirectUpdate) {
             petscRowValues = reinterpret_cast<const PetscScalar *>(rowValues.data());
         } else {
@@ -1722,25 +1732,28 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrix
             MatSetValuesRow(m_A, globalRow, petscRowValues);
         } else {
             // Get pattern in PETSc format
-            const int rowPatternSize = rowPattern.size();
-            for (int k = 0; k < rowPatternSize; ++k) {
-                long globalCol = rowPattern[k];
-                if (colReordering) {
-                    if (globalCol >= colGlobalBegin && globalCol < colGlobalEnd) {
-                        long col = globalCol - colGlobalBegin;
-                        col = colReordering[col];
-                        globalCol = colGlobalBegin + col;
+            if (patternDirectUpdate) {
+                petscRowPattern = reinterpret_cast<const PetscInt *>(rowPattern.data());
+            } else {
+                for (std::size_t k = 0; k < rowPatternSize; ++k) {
+                    long globalCol = rowPattern[k];
+                    if (colReordering) {
+                        if (globalCol >= colGlobalBegin && globalCol < colGlobalEnd) {
+                            long col = globalCol - colGlobalBegin;
+                            col = colReordering[col];
+                            globalCol = colGlobalBegin + col;
+                        }
                     }
-                }
 
-                petscRowPattern[k] = globalCol;
+                    petscRowPatternStorage[k] = globalCol;
+                }
             }
 
             // Set data
             if (blockSize > 1) {
-                MatSetValuesBlocked(m_A, 1, &globalRow, rowPatternSize, petscRowPattern.data(), petscRowValues, INSERT_VALUES);
+                MatSetValuesBlocked(m_A, 1, &globalRow, rowPatternSize, petscRowPattern, petscRowValues, INSERT_VALUES);
             } else {
-                MatSetValues(m_A, 1, &globalRow, rowPatternSize, petscRowPattern.data(), petscRowValues, INSERT_VALUES);
+                MatSetValues(m_A, 1, &globalRow, rowPatternSize, petscRowPattern, petscRowValues, INSERT_VALUES);
             }
         }
     }
