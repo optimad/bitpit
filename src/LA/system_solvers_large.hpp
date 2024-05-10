@@ -307,10 +307,6 @@ public:
     void restoreSystem(const std::string &directory, const std::string &prefix = "");
 #endif
 
-    void exportMatrix(const std::string &filePath, FileFormat exportFormat = FILE_BINARY) const;
-    void exportRHS(const std::string &filePath, FileFormat exportFormat = FILE_BINARY) const;
-    void exportSolution(const std::string &filePath, FileFormat exportFormat = FILE_BINARY) const;
-
     virtual void setNullSpace();
     void unsetNullSpace();
 
@@ -318,19 +314,24 @@ public:
     const KSPOptions & getKSPOptions() const;
     const KSPStatus & getKSPStatus() const;
 
+    virtual void exportMatrix(const std::string &filePath, FileFormat exportFormat = FILE_BINARY) const;
+    virtual void importMatrix(const std::string &filePath);
+
     double * getRHSRawPtr();
     const double * getRHSRawPtr() const;
     const double * getRHSRawReadPtr() const;
     void restoreRHSRawPtr(double *raw_rhs);
     void restoreRHSRawReadPtr(const double *raw_rhs) const;
-    void fillRHS(const std::string &filePath);
+    virtual void exportRHS(const std::string &filePath, FileFormat exportFormat = FILE_BINARY) const;
+    virtual void importRHS(const std::string &filePath);
 
     double * getSolutionRawPtr();
     const double * getSolutionRawPtr() const;
     const double * getSolutionRawReadPtr() const;
     void restoreSolutionRawPtr(double *raw_solution);
     void restoreSolutionRawReadPtr(const double *raw_solution) const;
-    void fillSolution(const std::string &filePath);
+    virtual void exportSolution(const std::string &filePath, FileFormat exportFormat = FILE_BINARY) const;
+    virtual void importSolution(const std::string &filePath);
 
     bool isForceConsistencyEnabled() const;
     void enableForceConsistency(bool enable);
@@ -347,19 +348,19 @@ protected:
     KSPOptions m_KSPOptions;
     KSPStatus m_KSPStatus;
 
-    void matrixCreate(int blockSize);
-    void matrixCreate(const SystemMatrixAssembler &assembler);
-    void matrixFill(const SystemMatrixAssembler &assembler);
-    void matrixFill(const std::string &filePath);
-    void matrixDestroy();
-    void matrixUpdate(long nRows, const long *rows, const SystemMatrixAssembler &assembler);
+    virtual void matrixCreate(const SystemMatrixAssembler &assembler);
+    virtual void matrixFill(const SystemMatrixAssembler &assembler);
+    virtual void matrixUpdate(long nRows, const long *rows, const SystemMatrixAssembler &assembler);
+    virtual void matrixDump(std::ostream &stream, const std::string &directory, const std::string &prefix) const;
+    virtual void matrixRestore(std::istream &stream, const std::string &directory, const std::string &prefix);
+    virtual void matrixDestroy();
 
-    void vectorsCreate();
-    void vectorsReorder(bool invert);
-    void vectorsFill(const std::vector<double> &rhs, std::vector<double> *solution);
-    void vectorsFill(const std::string &rhsFilePath, const std::string &solutionFilePath);
-    void vectorsDestroy();
-    void vectorsExport(std::vector<double> *solution);
+    virtual void vectorsCreate();
+    virtual void vectorsFill(const std::vector<double> &rhs, const std::vector<double> &solution);
+    virtual void vectorsReorder(bool invert);
+    virtual void vectorsDump(std::ostream &stream, const std::string &directory, const std::string &prefix) const;
+    virtual void vectorsRestore(std::istream &stream, const std::string &directory, const std::string &prefix);
+    virtual void vectorsDestroy();
 
     void clearReordering();
     void setReordering(long nRows, long nCols, const SystemMatrixOrdering &reordering);
@@ -386,10 +387,25 @@ protected:
     virtual void fillKSPStatus();
     virtual void fillKSPStatus(KSP ksp, KSPStatus *status) const;
 
+    void createMatrix(int rowBlockSize, int colBlockSize, Mat *matrix) const;
+    void fillMatrix(Mat matrix, const std::string &filePath) const;
+    void dumpMatrix(Mat matrix, std::ostream &stream, const std::string &directory, const std::string &name) const;
+    void restoreMatrix(std::istream &stream, const std::string &directory, const std::string &name, Mat *matrix) const;
+    void exportMatrix(Mat matrix, const std::string &filePath, FileFormat fileFormat) const;
+    void destroyMatrix(Mat *matrix) const;
+
+    void createVector(int blockSize, Vec *vector) const;
+    void fillVector(Vec vector, const std::string &filePath) const;
+    void fillVector(Vec vector, const std::vector<double> &data) const;
+    void reorderVector(Vec vector, IS permutations, bool invert) const;
+    void dumpVector(Vec vector, std::ostream &stream, const std::string &directory, const std::string &name) const;
+    void restoreVector(std::istream &stream, const std::string &directory, const std::string &name, Vec *vector) const;
+    void exportVector(Vec vector, const std::string &filePath, FileFormat fileFormat) const;
+    void exportVector(Vec vector, std::vector<double> *data) const;
+    void destroyVector(Vec *vector) const;
+
     std::string getInfoFilePath(const std::string &directory, const std::string &prefix) const;
-    std::string getMatrixFilePath(const std::string &directory, const std::string &prefix) const;
-    std::string getRHSFilePath(const std::string &directory, const std::string &prefix) const;
-    std::string getSolutionFilePath(const std::string &directory, const std::string &prefix) const;
+    std::string getDataFilePath(const std::string &directory, const std::string &name) const;
 
 #if BITPIT_ENABLE_MPI==1
     const MPI_Comm & getCommunicator() const;

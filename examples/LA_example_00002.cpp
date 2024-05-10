@@ -225,10 +225,10 @@ int run(int rank, int nProcs)
         }
         restoredSolver.restoreSolutionRawPtr(computedSolution);
 
-        // Fill solution with solution from outside
+        // Import solution with solution from outside
         log::cout() << "Restoring solution..." << std::endl;
         std::string solutionPath = solverPath + "example_linear_system_solution.txt";
-        restoredSolver.fillSolution(solutionPath);
+        restoredSolver.importSolution(solutionPath);
         log::cout() << "Solution restored." << std::endl;
 
         // Set comparison tolerance to the linear system relative tolerance
