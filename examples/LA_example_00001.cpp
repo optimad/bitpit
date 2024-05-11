@@ -40,15 +40,15 @@ using namespace bitpit;
  * This example builds a small linear system, it dumps it to the disk,
  * it solves the linear system and it exports the solution to disk.
  * Destination of dump files is ./data/ folder and they are:
- * example_initialized_linear_system_info.txt
- * example_initialized_linear_system_A.txt.info
- * example_initialized_linear_system_A.txt
- * example_initialized_linear_system_solution.txt.info
- * example_initialized_linear_system_solution.txt
- * example_initialized_linear_system_rhs.txt.info
- * example_initialized_linear_system_rhs.txt
- * example_linear_system_solution.txt.info
- * example_linear_system_solution.txt
+ * example_initialized_linear_system_info.dat
+ * example_initialized_linear_system_A.dat.info
+ * example_initialized_linear_system_A.dat
+ * example_initialized_linear_system_solution.dat.info
+ * example_initialized_linear_system_solution.dat
+ * example_initialized_linear_system_rhs.dat.info
+ * example_initialized_linear_system_rhs.dat
+ * example_linear_system_solution.dat.info
+ * example_linear_system_solution.dat
  *
  * <b>To run</b>: ./LA_example_00001.cpp \n
  */
@@ -127,7 +127,7 @@ int run(int rank, int nProcs)
     // Dump system
     log::cout() << "Dumping initialized linear system..." << std::endl;
 
-    solver.dumpSystem("./data/", "example_initialized_linear_system_");
+    solver.dumpSystem("bitpit linear system", "data/", "example_initialized_linear_system_");
 
     // Set KSP
     KSPOptions &options = solver.getKSPOptions();
@@ -141,7 +141,7 @@ int run(int rank, int nProcs)
 
     // Export solution
     log::cout() << "Export solution..." << std::endl;
-    std::string solutionPath = std::string("./data/") + std::string("example_linear_system_solution.txt");
+    std::string solutionPath = std::string("./data/") + std::string("example_linear_system_solution.dat");
     solver.exportSolution(solutionPath, bitpit::SystemSolver::FILE_BINARY);
 
     return 0;

@@ -41,15 +41,15 @@ using namespace bitpit;
  * It compares the computed solution with a restored solution,
  * using the same tolerance used by the linear system solver.
  * Input data are in ./data folder and they are:
- *    example_initialized_linear_system_info.txt
- *    example_initialized_linear_system_A.txt.info
- *    example_initialized_linear_system_A.txt
- *    example_initialized_linear_system_solution.txt.info
- *    example_initialized_linear_system_solution.txt
- *    example_initialized_linear_system_rhs.txt.info
- *    example_initialized_linear_system_rhs.txt
- *    example_linear_system_solution.txt.info
- *    example_linear_system_solution.txt
+ *    example_initialized_linear_system_info.dat
+ *    example_initialized_linear_system_A.dat.info
+ *    example_initialized_linear_system_A.dat
+ *    example_initialized_linear_system_solution.dat.info
+ *    example_initialized_linear_system_solution.dat
+ *    example_initialized_linear_system_rhs.dat.info
+ *    example_initialized_linear_system_rhs.dat
+ *    example_linear_system_solution.dat.info
+ *    example_linear_system_solution.dat
  *
  * The user can rename their files using the standard names above
  * to run a custom case.
@@ -174,7 +174,7 @@ int run(int rank, int nProcs)
 
     // Restore solver with initial guess
     log::cout() << "Restoring linear system ..." << std::endl;
-    std::string solverPath = "./data/";
+    std::string solverPath = "data/";
     bool multigrid         = false;
     bool debug             = false;
     bool transpose         = false;
@@ -227,7 +227,7 @@ int run(int rank, int nProcs)
 
         // Import solution with solution from outside
         log::cout() << "Restoring solution..." << std::endl;
-        std::string solutionPath = solverPath + "example_linear_system_solution.txt";
+        std::string solutionPath = solverPath + "example_linear_system_solution.dat";
         restoredSolver.importSolution(solutionPath);
         log::cout() << "Solution restored." << std::endl;
 
