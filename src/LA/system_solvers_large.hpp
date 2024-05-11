@@ -300,7 +300,7 @@ public:
     void solve();
     void solve(const std::vector<double> &rhs, std::vector<double> *solution);
 
-    void dumpSystem(const std::string &directory, const std::string &prefix = "") const;
+    void dumpSystem(const std::string &header, const std::string &directory, const std::string &prefix = "") const;
 #if BITPIT_ENABLE_MPI==1
     void restoreSystem(MPI_Comm communicator, const std::string &directory, const std::string &prefix = "");
 #else
@@ -347,6 +347,8 @@ protected:
     KSP m_KSP;
     KSPOptions m_KSPOptions;
     KSPStatus m_KSPStatus;
+
+    virtual int getDumpVersion() const;
 
     virtual void matrixCreate(const SystemMatrixAssembler &assembler);
     virtual void matrixFill(const SystemMatrixAssembler &assembler);
@@ -441,6 +443,8 @@ private:
     void resetPermutations();
 
     void removeNullSpaceFromRHS();
+
+    int getBinaryArchiveBlock() const;
 
 };
 
