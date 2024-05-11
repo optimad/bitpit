@@ -108,8 +108,8 @@ void BinaryArchive::open(const std::string &name, const std::string &extension,
 
     m_path = generatePath(name, extension, block);
     std::fstream::open(m_path.c_str(), std::ios::binary | mode);
-    if (fail() && bad()) {
-        return;
+    if (!good()) {
+        throw std::runtime_error("Unable to open the binary archive \"" + getPath() + "\".");
     }
 }
 
