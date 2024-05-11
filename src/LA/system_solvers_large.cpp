@@ -1368,8 +1368,8 @@ void SystemSolver::matrixCreate(const SystemMatrixAssembler &assembler)
     }
 
     // Create the matrix
-    int matrixBlockSize = assembler.getBlockSize();
-    createMatrix(matrixBlockSize, matrixBlockSize, &m_A);
+    int blockSize = assembler.getBlockSize();
+    createMatrix(blockSize, blockSize, &m_A);
 
     MatType matrixType;
     MatGetType(m_A, &matrixType);
@@ -1395,14 +1395,14 @@ void SystemSolver::matrixCreate(const SystemMatrixAssembler &assembler)
     // Preallocation information
     //
     // When the internal storage of the system matrix was created without taking into account
-    // block information, preallociation information should be provided for each row of each
+    // block information, preallocation information should be provided for each row of each
     // block.
     int preallocationExpansionSize;
     if (strcmp(matrixType, MATSEQAIJ) == 0) {
-        preallocationExpansionSize = matrixBlockSize;
+        preallocationExpansionSize = blockSize;
 #if BITPIT_ENABLE_MPI == 1
     } else if (strcmp(matrixType, MATMPIAIJ) == 0) {
-        preallocationExpansionSize = matrixBlockSize;
+        preallocationExpansionSize = blockSize;
 #endif
     } else {
         preallocationExpansionSize = 1;
@@ -1460,12 +1460,12 @@ void SystemSolver::matrixCreate(const SystemMatrixAssembler &assembler)
     if (strcmp(matrixType, MATSEQAIJ) == 0) {
         MatSeqAIJSetPreallocation(m_A, 0, d_nnz.data());
     } else if (strcmp(matrixType, MATSEQBAIJ) == 0) {
-        MatSeqBAIJSetPreallocation(m_A, matrixBlockSize, 0, d_nnz.data());
+        MatSeqBAIJSetPreallocation(m_A, blockSize, 0, d_nnz.data());
 #if BITPIT_ENABLE_MPI == 1
     } else if (strcmp(matrixType, MATMPIAIJ) == 0) {
         MatMPIAIJSetPreallocation(m_A, 0, d_nnz.data(), 0, o_nnz.data());
     } else if (strcmp(matrixType, MATMPIBAIJ) == 0) {
-        MatMPIBAIJSetPreallocation(m_A, matrixBlockSize, 0, d_nnz.data(), 0, o_nnz.data());
+        MatMPIBAIJSetPreallocation(m_A, blockSize, 0, d_nnz.data(), 0, o_nnz.data());
 #endif
     } else {
         throw std::runtime_error("Matrix format not supported.");
