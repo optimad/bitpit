@@ -1203,6 +1203,11 @@ std::vector<long> SparseMatrix::extractGhostGlobalCols() const
 /**
 * Add a row.
 *
+* The values of the row are stored using a block-row-major order: the rows of the single
+* block elements are stored consecutively:
+*
+*       <row_1_block_1><row_1_block_2>...<row_2_block_1><row_2_block_2>...
+*
 * \param rowPattern are the indexes of the non-zero columns of the matrix
 * \param rowValues are the values of the non-zero columns of the matrix
 */
@@ -1213,6 +1218,11 @@ void SparseMatrix::addRow(const std::vector<long> &rowPattern, const std::vector
 
 /**
 * Add a row.
+*
+* The values of the row are stored using a block-row-major order: the rows of the single
+* block elements are stored consecutively:
+*
+*       <row_1_block_1><row_1_block_2>...<row_2_block_1><row_2_block_2>...
 *
 * \param nRowNZ is the number of non-zero elements in the row
 * \param rowPattern are the indexes of the non-zero columns of the matrix
@@ -1329,6 +1339,11 @@ const long * SparseMatrix::getRowPatternData(long row) const
 /**
 * Get a constant pointer to the internal values of the specified row.
 *
+* The data of the row is stored using a block-row-major order: the rows of the single
+* block elements are stored consecutively:
+*
+*       <row_1_block_1><row_1_block_2>...<row_2_block_1><row_2_block_2>...
+*
 * \param row is the row
 * \result A constant pointer to the internal values of the specified row.
 */
@@ -1339,6 +1354,11 @@ double * SparseMatrix::getRowValuesData(long row)
 
 /**
 * Get a constant pointer to the internal values of the specified row.
+*
+* The data of the row is stored using a block-row-major order: the rows of the single
+* block elements are stored consecutively:
+*
+*       <row_1_block_1><row_1_block_2>...<row_2_block_1><row_2_block_2>...
 *
 * \param row is the row
 * \result A constant pointer to the internal values of the specified row.
