@@ -96,7 +96,7 @@ int subtest_001(int rank, int nProcs)
     // Dump system
     log::cout() << "Dumping system..." << std::endl;
 
-    solver.dumpSystem(".", "test_parallel_00003_");
+    solver.dumpSystem("bitpit linear system", ".", "test_parallel_00003_");
 
     // Restore system
     log::cout() << "Restoring system..." << std::endl;
