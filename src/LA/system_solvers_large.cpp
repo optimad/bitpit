@@ -155,7 +155,7 @@ bool SystemSolver::getTranspose() const
  * Set the transpose flag.
  *
  * If the system is already assembled and the transpose flag needs to be changed,
- * both the soltion vector and the RHS one will be destroyed and re-created.
+ * both the solution vector and the RHS one will be destroyed and re-created.
  *
  * If the transpose flag needs to be changed, the workspaces associated wit the
  * system will be cleared.
@@ -199,7 +199,7 @@ int SystemSparseMatrixAssembler::getBlockSize() const
  *
  * If the matrix is a block matrix (i.e., the block size is greater than one),
  * this function will return the number of block rows, where a block row is
- * defined as a group of blockSize matrix rows.
+ * defined as a group of block-size matrix rows.
  *
  * \result The number of (block) rows handled by the assembler.
  */
@@ -213,7 +213,7 @@ long SystemSparseMatrixAssembler::getRowCount() const
  *
  * If the matrix is a block matrix (i.e., the block size is greater than one),
  * this function will return the number of block columns, where a block column
- * is defined as a group of blockSize matrix columns.
+ * is defined as a group of block-size matrix columns.
  *
  * \result The number of (block) columns handled by the assembler.
  */
@@ -258,7 +258,7 @@ long SystemSparseMatrixAssembler::getColElementCount() const
  *
  * If the matrix is a block matrix (i.e., the block size is greater than one),
  * this function will return the global number of block rows, where a block row
- * is defined as a group of blockSize matrix rows.
+ * is defined as a group of block-size matrix rows.
  *
  * \result The number of global rows handled by the assembler.
  */
@@ -272,7 +272,7 @@ long SystemSparseMatrixAssembler::getRowGlobalCount() const
  *
  * If the matrix is a block matrix (i.e., the block size is greater than one),
  * this function will return the global number of block columns, where a block
- * column is defined as a group of blockSize matrix columns.
+ * column is defined as a group of block-size matrix columns.
  *
  * \result The number of global (block) columns handled by the assembler.
  */
@@ -388,7 +388,7 @@ long SystemSparseMatrixAssembler::getMaxRowNZCount() const
  *
  * If the matrix is a block matrix (i.e., the block size is greater than one),
  * this function will return the global ids of the block columns of the row,
- * where a block column is defined as a group of blockSize matrix columns.
+ * where a block column is defined as a group of block-size matrix columns.
  *
  * \param rowIndex is the index of the row in the assembler
  * \param pattern on output will contain the pattern of the specified (block) row
@@ -403,7 +403,7 @@ void SystemSparseMatrixAssembler::getRowPattern(long rowIndex, ConstProxyVector<
  *
  * If the matrix is a block matrix (i.e., the block size is greater than one),
  * this function will return the values of all the elements of a block row,
- * where a block column is defined as a group of blockSize matrix columns. The
+ * where a block column is defined as a group of block-size matrix columns. The
  * values are returned as a row-oriented logically two-dimensional array of
  * values.
  *
@@ -422,11 +422,11 @@ void SystemSparseMatrixAssembler::getRowValues(long rowIndex, ConstProxyVector<d
  *
  * If the matrix is a block matrix (i.e., the block size is greater than one),
  * the pattern defines the global ids of the block columns of the row, where a
- * block column is defined as a group of blockSize matrix columns.
+ * block column is defined as a group of block-size matrix columns.
  *
  * If the matrix is a block matrix (i.e., the block size is greater than one),
  * the values contain of all the elements of a block row, where a block column
- * is defined as a group of blockSize matrix columns. The values are returned
+ * is defined as a group of block-size matrix columns. The values are returned
  * as a row-oriented logically two-dimensional array of values.
  *
  * \param rowIndex is the index of the row in the assembler
@@ -587,7 +587,7 @@ bool PetscManager::areOptionsEditable() const
  *
  * \param debug if set to true, turns on logging of objects and events, once
  * the logging is enabled it cannot be disabled
- * \result Return true is PETSc hase been initialized by this function, false
+ * \result Return true is PETSc has been initialized by this function, false
  * if PETSc was already initialized.
  */
 bool PetscManager::initialize(bool debug)
@@ -724,7 +724,23 @@ bool PetscManager::finalize()
  *
  * When blocking is used, row and column indexes will count the number of blocks
  * in the row/column direction, not the number of rows/columns of the matrix.
+ *
  */
+#if BITPIT_ENABLE_MPI==1
+/*!
+ * The system is solved using a flexible GMRES iterative method. If the system
+ * is partitioned it is preconditioned using the (restricted) additive Schwarz
+ * method (ASM). On each block of the ASM preconditioner an incomplete LU
+ * factorization (ILU) is used. There is one block per process. If the system
+ * is not partitioned it is preconditioned using the incomplete LU factorization
+ * (ILU).
+ */
+#else
+/*!
+ * The system is solved using a flexible GMRES iterative method preconditioned
+ * using the incomplete LU factorization (ILU).
+ */
+#endif
 
 PetscManager SystemSolver::m_petscManager = PetscManager();
 
@@ -760,7 +776,7 @@ SystemSolver::SystemSolver(bool transpose, bool debug)
  * size information are available and can be used by the solver to speed up the solution of
  * the system. However, since the internal storage doesn't take blocks into account, some
  * low level operations (e.g., matrix-matrix multiplications) cannot use block information.
- * Some algorithms for the solution of the system (e.g., mutligrid) requires a flat storage.
+ * Some algorithms for the solution of the system (e.g., multigrid) requires a flat storage.
  * \param transpose if set to true, transposed system will be solved
  * \param debug if set to true, debug information will be printed
  */
@@ -800,7 +816,7 @@ SystemSolver::SystemSolver(const std::string &prefix, bool transpose, bool debug
  * size information are available and can be used by the solver to speed up the solution of
  * the system. However, since the internal storage doesn't take blocks into account, some
  * low level operations (e.g., matrix-matrix multiplications) cannot use block information.
- * Some algorithms for the solution of the system (e.g., mutligrid) requires a flat storage.
+ * Some algorithms for the solution of the system (e.g., multigrid) requires a flat storage.
  * \param transpose if set to true, transposed system will be solved
  * \param debug if set to true, debug information will be printed
  */
@@ -869,7 +885,7 @@ void SystemSolver::clear()
 }
 
 /*!
- * Clear and release the memory of all data structures needed for the solution of the system
+ * Clear and release the memory of all data structures needed for the solution of the system.
  *
  * These data structures will be re-created the next time the system will be solved.
  */
@@ -895,8 +911,7 @@ void SystemSolver::assembly(const SparseMatrix &matrix)
  * Assembly the system.
  *
  * \param matrix is the matrix
- * \param reordering is the reordering that will be applied when assemblying the
- * system
+ * \param reordering is the reordering that will be applied when assembling the system
  */
 void SystemSolver::assembly(const SparseMatrix &matrix, const SystemMatrixOrdering &reordering)
 {
@@ -1045,7 +1060,7 @@ int SystemSolver::getBlockSize() const
  *
  * If the matrix is a block matrix (i.e., the block size is greater than one),
  * this function will return the number of block rows, where a block row is
- * defined as a group of blockSize matrix rows.
+ * defined as a group of block-size matrix rows.
  *
  * \result The number of rows of the system.
  */
@@ -1067,7 +1082,7 @@ long SystemSolver::getRowCount() const
  *
  * If the matrix is a block matrix (i.e., the block size is greater than one),
  * this function will return the number of block columns, where a block column
- * is defined as a group of blockSize matrix columns.
+ * is defined as a group of block-size matrix columns.
  *
  * \result The number of columns of the system.
  */
@@ -1132,7 +1147,7 @@ long SystemSolver::getColElementCount() const
  *
  * If the matrix is a block matrix (i.e., the block size is greater than one),
  * this function will return the global number of block rows, where a block row
- * is defined as a group of blockSize matrix rows.
+ * is defined as a group of block-size matrix rows.
  *
  * \result The number of global rows
  */
@@ -1154,7 +1169,7 @@ long SystemSolver::getRowGlobalCount() const
  *
  * If the matrix is a block matrix (i.e., the block size is greater than one),
  * this function will return the global number of block columns, where a block
- * column is defined as a group of blockSize matrix columns.
+ * column is defined as a group of block-size matrix columns.
  *
  * \result The number of global (block) columns.
  */
@@ -1245,13 +1260,13 @@ void SystemSolver::solve()
     // Prepare the KSP
     prepareKSP();
 
-    // Perfrom actions before KSP solution
+    // Perform actions before KSP solution
     preKSPSolveActions();
 
     // Solve KSP
     solveKSP();
 
-    // Perfrom actions after KSP solution
+    // Perform actions after KSP solution
     postKSPSolveActions();
 
     // Finalize the KSP
@@ -1372,7 +1387,7 @@ void SystemSolver::matrixCreate(const SystemMatrixAssembler &assembler)
 
     MatSetSizes(m_A, nRowsElements, nColsElements, nGlobalRowsElements, nGlobalColsElements);
 
-    // Preallocation information
+    // Allocate storage
     //
     // When the internal storage of the system matrix was created without taking into account
     // block information, preallocation information should be provided for each row of each
@@ -2704,7 +2719,7 @@ void SystemSolver::unsetNullSpace()
 }
 
 /*!
- * Set the reordering that will be applied when assemblying the matrix.
+ * Set the reordering that will be applied when assembling the matrix.
  *
  * Reordering will be applied when the system is assembled and its sole purpose
  * is to speed up the resolution of the system (e.g., reorder can be used to
@@ -2762,9 +2777,9 @@ void SystemSolver::setReordering(long nRows, long nCols, const SystemMatrixOrder
 }
 
 /*!
- * Clear the reordering that will be applied when assemblying the matrix.
+ * Clear the reordering that will be applied when assembling the matrix.
  *
- * The function will clear any reordering preiously set. With no reordering
+ * The function will clear any reordering previously set. With no reordering
  * defined, the matrix will be assembled using its natural ordering.
  */
 void SystemSolver::clearReordering()
@@ -2779,7 +2794,7 @@ void SystemSolver::clearReordering()
 }
 
 /*!
- * Prepare the KSP for solving the system.
+ * Prepare the KSP before the solution of the system.
  */
 void SystemSolver::prepareKSP()
 {
@@ -2788,7 +2803,7 @@ void SystemSolver::prepareKSP()
         throw std::runtime_error("Unable to solve the system. The system is not yet assembled.");
     }
 
-    // Early return if the preconditioner can be reused
+    // Early return if the KSP can be reused
     if (!m_KSPDirty) {
         return;
     }
@@ -2832,7 +2847,7 @@ void SystemSolver::prepareKSP()
 }
 
 /*!
- * Finalize the KSP after the system has been solved.
+ * Finalize the KSP after the solution of the system.
  */
 void SystemSolver::finalizeKSP()
 {
@@ -2992,9 +3007,9 @@ void SystemSolver::postKrylovSetupActions()
 }
 
 /*!
- * Get a reference to the options associated to the Kryolov solver.
+ * Get a reference to the options associated to the Krylov solver.
  *
- * \return A reference to the options associated to the Kryolov solver.
+ * \return A reference to the options associated to the Krylov solver.
  */
 KSPOptions & SystemSolver::getKSPOptions()
 {
@@ -3002,9 +3017,9 @@ KSPOptions & SystemSolver::getKSPOptions()
 }
 
 /*!
- * Get a constant reference to the options associated to the Kryolov solver.
+ * Get a constant reference to the options associated to the Krylov solver.
  *
- * \return A constant reference to the options associated to the Kryolov solver.
+ * \return A constant reference to the options associated to the Krylov solver.
  */
 const KSPOptions & SystemSolver::getKSPOptions() const
 {
@@ -3012,9 +3027,9 @@ const KSPOptions & SystemSolver::getKSPOptions() const
 }
 
 /*!
- * Get a constant reference to the status of the Kryolov solver.
+ * Get a constant reference to the status of the Krylov solver.
  *
- * \return A constant reference to the status of the Kryolov solver.
+ * \return A constant reference to the status of the Krylov solver.
  */
 const KSPStatus & SystemSolver::getKSPStatus() const
 {
