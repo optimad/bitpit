@@ -229,6 +229,8 @@ template<typename stencil_t>
 class DiscretizationStencilSolver : public SystemSolver {
 
 public:
+    typedef StencilSolverAssembler Assembler;
+
     DiscretizationStencilSolver(bool debug = false);
     DiscretizationStencilSolver(bool transpose, bool debug);
     DiscretizationStencilSolver(bool flatten, bool transpose, bool debug);
@@ -237,17 +239,19 @@ public:
     DiscretizationStencilSolver(const std::string &prefix, bool flatten, bool transpose, bool debug = false);
 
     void clear(bool release = false);
+
     template<typename stencil_container_t = std::vector<stencil_t>>
     void assembly(const stencil_container_t &stencils);
     void assembly(const DiscretizationStencilSolverAssembler<stencil_t> &assembler);
-    void assembly(const StencilSolverAssembler &assembler);
+    void assembly(const Assembler &assembler);
+
     template<typename stencil_container_t = std::vector<stencil_t>>
     void update(const stencil_container_t &stencils);
     template<typename stencil_container_t = std::vector<stencil_t>>
     void update(const std::vector<long> &rows, const stencil_container_t &stencils);
     template<typename stencil_container_t = std::vector<stencil_t>>
     void update(std::size_t nRows, const long *rows, const stencil_container_t &stencils);
-    void update(std::size_t nRows, const long *rows, const StencilSolverAssembler &assembler);
+    void update(std::size_t nRows, const long *rows, const Assembler &assembler);
     void update(std::size_t nRows, const long *rows, const DiscretizationStencilSolverAssembler<stencil_t> &assembler);
 
     void solve();
@@ -257,8 +261,11 @@ protected:
 
     std::vector<double> m_constants;
 
-    void assembleConstants(const StencilSolverAssembler &assembler);
-    void updateConstants(std::size_t nRows, const long *rows, const StencilSolverAssembler &assembler);
+    using SystemSolver::assembly;
+    using SystemSolver::update;
+
+    void assembleConstants(const Assembler &assembler);
+    void updateConstants(std::size_t nRows, const long *rows, const Assembler &assembler);
 
 };
 

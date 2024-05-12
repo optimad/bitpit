@@ -256,6 +256,8 @@ private:
 class SystemSolver {
 
 public:
+    typedef SystemMatrixAssembler Assembler;
+
     enum FileFormat {
         FILE_BINARY,
         FILE_ASCII
@@ -273,16 +275,17 @@ public:
     virtual void clear();
     virtual void clearWorkspace();
 
+    bool isAssembled() const;
+
     void assembly(const SparseMatrix &matrix);
     void assembly(const SparseMatrix &matrix, const SystemMatrixOrdering &reordering);
-    void assembly(const SystemMatrixAssembler &assembler);
-    void assembly(const SystemMatrixAssembler &assembler, const SystemMatrixOrdering &reordering);
-    bool isAssembled() const;
+    void assembly(const Assembler &assembler);
+    void assembly(const Assembler &assembler, const SystemMatrixOrdering &reordering);
 
     void update(const SparseMatrix &elements);
     void update(long nRows, const long *rows, const SparseMatrix &elements);
-    void update(const SystemMatrixAssembler &assembler);
-    void update(long nRows, const long *rows, const SystemMatrixAssembler &assembler);
+    void update(const Assembler &assembler);
+    void update(long nRows, const long *rows, const Assembler &assembler);
 
     bool getTranspose() const;
     void setTranspose(bool transpose);
@@ -356,9 +359,15 @@ protected:
 
     virtual int getDumpVersion() const;
 
-    virtual void matrixCreate(const SystemMatrixAssembler &assembler);
-    virtual void matrixFill(const SystemMatrixAssembler &assembler);
-    virtual void matrixUpdate(long nRows, const long *rows, const SystemMatrixAssembler &assembler);
+    template<typename Assembler>
+    void matrixCreate(const Assembler &assembler);
+    void matrixCreate(const Assembler &assembler);
+    template<typename Assembler>
+    void matrixFill(const Assembler &assembler);
+    void matrixFill(const Assembler &assembler);
+    template<typename Assembler>
+    void matrixUpdate(long nRows, const long *rows, const Assembler &assembler);
+    void matrixUpdate(long nRows, const long *rows, const Assembler &assembler);
     virtual void matrixDump(std::ostream &stream, const std::string &directory, const std::string &prefix) const;
     virtual void matrixRestore(std::istream &stream, const std::string &directory, const std::string &prefix);
     virtual void matrixDestroy();
@@ -372,6 +381,12 @@ protected:
 
     void clearReordering();
     void setReordering(long nRows, long nCols, const SystemMatrixOrdering &reordering);
+
+    template<typename DerivedSystemSolver>
+    void assembly(const typename DerivedSystemSolver::Assembler &assembler, const SystemMatrixOrdering &reordering);
+
+    template<typename DerivedSystemSolver>
+    void update(long nRows, const long *rows, const typename DerivedSystemSolver::Assembler &assembler);
 
     virtual void prepareKSP();
     virtual void finalizeKSP();

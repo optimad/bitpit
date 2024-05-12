@@ -75,6 +75,69 @@ long ProxySystemMatrixOrdering<RowRankStorage, ColRankStorage>::getColRank(long 
     return (*m_colRankStorage)[col];
 }
 
+/*!
+ * Assembly the system.
+ *
+ * \param assembler is the matrix assembler
+ * \param reordering is the reordering that will be applied when assemblying the system
+ */
+template<typename DerivedSystemSolver>
+void SystemSolver::assembly(const typename DerivedSystemSolver::Assembler &assembler,
+                            const SystemMatrixOrdering &reordering)
+{
+    // Clear the system
+    clear();
+
+    // Set reordering
+    setReordering(assembler.getRowCount(), assembler.getColCount(), reordering);
+
+#if BITPIT_ENABLE_MPI == 1
+    // Set the communicator
+    setCommunicator(assembler.getCommunicator());
+
+    // Detect if the system is partitioned
+    m_partitioned = assembler.isPartitioned();
+#endif
+
+    // Initialize matrix
+    static_cast<DerivedSystemSolver &>(*this).matrixCreate(assembler);
+    static_cast<DerivedSystemSolver &>(*this).matrixFill(assembler);
+
+    // Initialize RHS and solution vectors
+    vectorsCreate();
+
+    // The system is now assembled
+    m_assembled = true;
+
+    // Initialize KSP options
+    initializeKSPOptions();
+
+    // Initialize KSP statuses
+    initializeKSPStatus();
+}
+
+/*!
+ * Update the system.
+ *
+ * Only the values of the system matrix can be updated, once the system is
+ * assembled its pattern cannot be modified.
+ *
+ * \param nRows is the number of rows that will be updated
+ * \param rows are the indices of the rows that will be updated
+ * \param assembler is the matrix assembler for the rows that will be updated
+ */
+template<typename DerivedSystemSolver>
+void SystemSolver::update(long nRows, const long *rows, const typename DerivedSystemSolver::Assembler &assembler)
+{
+    // Check if the system is assembled
+    if (!isAssembled()) {
+        throw std::runtime_error("Unable to update the system. The system is not yet assembled.");
+    }
+
+    // Update matrix
+    static_cast<DerivedSystemSolver &>(*this).matrixUpdate(nRows, rows, assembler);
+}
+
 }
 
 #endif
