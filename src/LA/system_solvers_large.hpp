@@ -134,6 +134,11 @@ public:
 
     virtual ~SystemMatrixAssembler() = default;
 
+#if BITPIT_ENABLE_MPI==1
+    virtual bool isPartitioned() const = 0;
+    virtual const MPI_Comm & getCommunicator() const = 0;
+#endif
+
     virtual AssemblyOptions getOptions() const = 0;
 
     virtual int getBlockSize() const = 0;
@@ -174,6 +179,11 @@ class SystemSparseMatrixAssembler : public SystemMatrixAssembler {
 
 public:
     SystemSparseMatrixAssembler(const SparseMatrix *matrix);
+
+#if BITPIT_ENABLE_MPI==1
+    bool isPartitioned() const override;
+    const MPI_Comm & getCommunicator() const override;
+#endif
 
     AssemblyOptions getOptions() const override;
 
@@ -265,13 +275,8 @@ public:
 
     void assembly(const SparseMatrix &matrix);
     void assembly(const SparseMatrix &matrix, const SystemMatrixOrdering &reordering);
-#if BITPIT_ENABLE_MPI==1
-    void assembly(MPI_Comm communicator, bool isPartitioned, const SystemMatrixAssembler &assembler);
-    void assembly(MPI_Comm communicator, bool isPartitioned, const SystemMatrixAssembler &assembler, const SystemMatrixOrdering &reordering);
-#else
     void assembly(const SystemMatrixAssembler &assembler);
     void assembly(const SystemMatrixAssembler &assembler, const SystemMatrixOrdering &reordering);
-#endif
     bool isAssembled() const;
 
     void update(const SparseMatrix &elements);
