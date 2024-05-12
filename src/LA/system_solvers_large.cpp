@@ -932,7 +932,7 @@ void SystemSolver::assembly(const SparseMatrix &matrix, const SystemMatrixOrderi
 
     // Assembly the system matrix
     SystemSparseMatrixAssembler assembler(&matrix);
-    assembly(assembler, reordering);
+    assembly<SystemSolver>(static_cast<const Assembler &>(assembler), reordering);
 }
 
 /*!
@@ -942,7 +942,7 @@ void SystemSolver::assembly(const SparseMatrix &matrix, const SystemMatrixOrderi
  *
  * \param assembler is the matrix assembler
  */
-void SystemSolver::assembly(const SystemMatrixAssembler &assembler)
+void SystemSolver::assembly(const Assembler &assembler)
 {
     assembly(assembler, NaturalSystemMatrixOrdering());
 }
@@ -953,53 +953,11 @@ void SystemSolver::assembly(const SystemMatrixAssembler &assembler)
  * After assembying th system solver, its options will be reset.
  *
  * \param assembler is the matrix assembler
- * \param reordering is the reordering that will be applied when assemblying the
- * system
+ * \param reordering is the reordering that will be applied when assembling the system
  */
-void SystemSolver::assembly(const SystemMatrixAssembler &assembler, const SystemMatrixOrdering &reordering)
+void SystemSolver::assembly(const Assembler &assembler, const SystemMatrixOrdering &reordering)
 {
-    // Clear the system
-    clear();
-
-    // Set reordering
-    setReordering(assembler.getRowCount(), assembler.getColCount(), reordering);
-
-#if BITPIT_ENABLE_MPI == 1
-    // Set the communicator
-    setCommunicator(assembler.getCommunicator());
-
-    // Detect if the system is partitioned
-    m_partitioned = assembler.isPartitioned();
-#endif
-
-    // Initialize matrix
-    matrixCreate(assembler);
-    matrixFill(assembler);
-
-    // Initialize RHS and solution vectors
-    vectorsCreate();
-
-    // The system is now assembled
-    m_assembled = true;
-
-    // Initialize KSP options
-    initializeKSPOptions();
-
-    // Initialize KSP statuses
-    initializeKSPStatus();
-}
-
-/*!
- * Update all the rows of the system.
- *
- * Only the values of the system matrix can be updated, once the system is
- * assembled its pattern cannot be modified.
- *
- * \param elements are the elements that will be used to update the rows
- */
-void SystemSolver::update(const SparseMatrix &elements)
-{
-    update(getRowCount(), nullptr, elements);
+    assembly<SystemSolver>(assembler, reordering);
 }
 
 /*!
@@ -1021,7 +979,7 @@ void SystemSolver::update(long nRows, const long *rows, const SparseMatrix &elem
 
     // Update matrix
     SystemSparseMatrixAssembler assembler(&elements);
-    update(nRows, rows, assembler);
+    update<SystemSolver>(nRows, rows, static_cast<const Assembler &>(assembler));
 }
 
 /*!
@@ -1032,7 +990,7 @@ void SystemSolver::update(long nRows, const long *rows, const SparseMatrix &elem
  *
  * \param assembler is the matrix assembler for the rows that will be updated
  */
-void SystemSolver::update(const SystemMatrixAssembler &assembler)
+void SystemSolver::update(const Assembler &assembler)
 {
     update(getRowCount(), nullptr, assembler);
 }
@@ -1047,15 +1005,9 @@ void SystemSolver::update(const SystemMatrixAssembler &assembler)
  * \param rows are the indices of the rows that will be updated
  * \param assembler is the matrix assembler for the rows that will be updated
  */
-void SystemSolver::update(long nRows, const long *rows, const SystemMatrixAssembler &assembler)
+void SystemSolver::update(long nRows, const long *rows, const Assembler &assembler)
 {
-    // Check if the system is assembled
-    if (!isAssembled()) {
-        throw std::runtime_error("Unable to update the system. The system is not yet assembled.");
-    }
-
-    // Update matrix
-    matrixUpdate(nRows, rows, assembler);
+    update<SystemSolver>(nRows, rows, assembler);
 }
 
 /*!
@@ -1371,11 +1323,11 @@ int SystemSolver::getDumpVersion() const
 }
 
 /*!
- * Create the matrix.
+ * Assemble the matrix.
  *
  * \param assembler is the matrix assembler
  */
-void SystemSolver::matrixCreate(const SystemMatrixAssembler &assembler)
+void SystemSolver::matrixAssembly(const Assembler &assembler)
 {
     const PetscInt *rowReordering = nullptr;
     if (m_rowReordering) {
@@ -1500,19 +1452,6 @@ void SystemSolver::matrixCreate(const SystemMatrixAssembler &assembler)
     if (m_rowReordering) {
         ISRestoreIndices(m_rowReordering, &rowReordering);
     }
-}
-
-/*!
- * Fills the matrix reading its contents from the specified assembler.
- *
- * \param assembler is the matrix assembler
- */
-void SystemSolver::matrixFill(const SystemMatrixAssembler &assembler)
-{
-    // Check if the matrix exists
-    if (!m_A) {
-        throw std::runtime_error("Matrix should be created before filling it.");
-    }
 
     // Fill matrix
     matrixUpdate(assembler.getRowCount(), nullptr, assembler);
@@ -1540,7 +1479,7 @@ void SystemSolver::matrixFill(const SystemMatrixAssembler &assembler)
  * from 0 to (nRows - 1).
  * \param assembler is the matrix assembler for the rows that will be updated
  */
-void SystemSolver::matrixUpdate(long nRows, const long *rows, const SystemMatrixAssembler &assembler)
+void SystemSolver::matrixUpdate(long nRows, const long *rows, const Assembler &assembler)
 {
     // Updating the matrix invalidates the KSP
     m_KSPDirty = true;
