@@ -1030,11 +1030,7 @@ void DiscretizationStencilSolver<stencil_t>::assembly(const stencil_container_t 
 #endif
 
     // Assembly the system
-#if BITPIT_ENABLE_MPI==1
-    assembly(communicator, partitioned, assembler);
-#else
     assembly(assembler);
-#endif
 }
 
 /*!
@@ -1043,25 +1039,10 @@ void DiscretizationStencilSolver<stencil_t>::assembly(const stencil_container_t 
 * \param assembler is the solver assembler
 */
 template<typename stencil_t>
-void DiscretizationStencilSolver<stencil_t>::assembly(const DiscretizationStencilSolverAssembler<stencil_t> &assembler)
-{
-    auto discretizationAssembler = dynamic_cast<const DiscretizationStencilSolverAssembler<stencil_t> *>(&assembler);
-    if (!discretizationAssembler) {
-        throw std::runtime_error("Unable to update the stencil solver: assembler is not a DiscretizationStencilSolverAssembler.");
-    }
-    assembly(static_cast<const StencilSolverAssembler &>(assembler));
-}
-
-/*!
-* Assembly the stencil solver.
-*
-* \param assembler is the solver assembler
-*/
-template<typename stencil_t>
-void DiscretizationStencilSolver<stencil_t>::assembly(const StencilSolverAssembler &assembler)
+void DiscretizationStencilSolver<stencil_t>::assembly(const Assembler &assembler)
 {
     // Assembly system
-    SystemSolver::assembly(assembler);
+    SystemSolver::assembly(static_cast<const SystemSolver::Assembler &>(assembler));
 
     // Assemble constants
     assembleConstants(assembler);
@@ -1137,34 +1118,10 @@ void DiscretizationStencilSolver<stencil_t>::update(std::size_t nRows, const lon
  */
 template<typename stencil_t>
 void DiscretizationStencilSolver<stencil_t>::update(std::size_t nRows, const long *rows,
-                                                    const StencilSolverAssembler &assembler)
-{
-    auto discretizationAssembler = dynamic_cast<const DiscretizationStencilSolverAssembler<stencil_t> *>(&assembler);
-    if (!discretizationAssembler) {
-        throw std::runtime_error("Unable to update the stencil solver: assembler is not a DiscretizationStencilSolverAssembler.");
-    }
-
-    update(nRows, rows, *discretizationAssembler);
-}
-
-/*!
- * Update the stencil solver.
- *
- * Only the values of the system matrix and the values of the constants can be
- * updated, once the system is initialized its pattern cannot be modified.
- *
- * \param nRows is the number of stencils that will be updated
- * \param rows are the rows of the stencils that will be updated,
- * if a null pointer is passed, the stencils that will be updated are the
- * stencils from 0 to (nRows - 1).
- * \param assembler is the solver assembler
- */
-template<typename stencil_t>
-void DiscretizationStencilSolver<stencil_t>::update(std::size_t nRows, const long *rows,
-                                                    const DiscretizationStencilSolverAssembler<stencil_t> &assembler)
+                                                    const Assembler &assembler)
 {
     // Update the system
-    SystemSolver::update(nRows, rows, assembler);
+    SystemSolver::update(nRows, rows, static_cast<const SystemSolver::Assembler &>(assembler));
 
     // Update the constants
     updateConstants(nRows, rows, assembler);
@@ -1176,7 +1133,7 @@ void DiscretizationStencilSolver<stencil_t>::update(std::size_t nRows, const lon
  * \param assembler is the solver assembler
  */
 template<typename stencil_t>
-void DiscretizationStencilSolver<stencil_t>::assembleConstants(const StencilSolverAssembler &assembler)
+void DiscretizationStencilSolver<stencil_t>::assembleConstants(const Assembler &assembler)
 {
     long nRows = assembler.getRowCount();
     int blockSize = assembler.getBlockSize();
@@ -1199,7 +1156,7 @@ void DiscretizationStencilSolver<stencil_t>::assembleConstants(const StencilSolv
  */
 template<typename stencil_t>
 void DiscretizationStencilSolver<stencil_t>::updateConstants(std::size_t nRows, const long *rows,
-                                                             const StencilSolverAssembler &assembler)
+                                                             const Assembler &assembler)
 {
     int blockSize = assembler.getBlockSize();
     ConstProxyVector<double> rowConstant(blockSize);
