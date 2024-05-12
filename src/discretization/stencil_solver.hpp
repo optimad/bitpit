@@ -122,6 +122,11 @@ public:
     DiscretizationStencilSolverAssembler(MPI_Comm communicator, bool partitioned, const stencil_container_t *stencils);
 #endif
 
+#if BITPIT_ENABLE_MPI==1
+    bool isPartitioned() const override;
+    const MPI_Comm & getCommunicator() const override;
+#endif
+
     AssemblyOptions getOptions() const override;
 
     int getBlockSize() const override;
@@ -174,20 +179,16 @@ protected:
     long m_maxRowNZ;
 
     DiscretizationStencilSolverAssembler(std::unique_ptr<DiscretizationStencilStorageInterface<stencil_t>> &&stencils);
+    DiscretizationStencilSolverAssembler();
 #if BITPIT_ENABLE_MPI==1
     DiscretizationStencilSolverAssembler(MPI_Comm communicator, bool partitioned, std::unique_ptr<DiscretizationStencilStorageInterface<stencil_t>> &&stencils);
+    DiscretizationStencilSolverAssembler(MPI_Comm communicator, bool partitioned);
 #endif
-    DiscretizationStencilSolverAssembler();
 
     void setStencils(std::unique_ptr<DiscretizationStencilStorageInterface<stencil_t>> &&stencils);
 
-#if BITPIT_ENABLE_MPI==1
-    void setMatrixSizes(MPI_Comm communicator, bool partitioned);
-    void setMatrixSizes(long nRows, long nCols, MPI_Comm communicator, bool partitioned);
-#else
     void setMatrixSizes();
     void setMatrixSizes(long nRows, long nCols);
-#endif
 
     void setBlockSize();
     void setBlockSize(int blockSize);
@@ -213,6 +214,12 @@ protected:
 
     double getRawValue(const typename stencil_t::weight_type &weight, int item) const;
 
+private:
+#if BITPIT_ENABLE_MPI==1
+    bool m_partitioned;
+    MPI_Comm m_communicator;
+#endif
+
 };
 
 template<typename stencil_t>
@@ -229,14 +236,12 @@ public:
     void clear(bool release = false);
     template<typename stencil_container_t = std::vector<stencil_t>>
     void assembly(const stencil_container_t &stencils);
-    void assembly(const DiscretizationStencilSolverAssembler<stencil_t> &assembler);
-    void assembly(const StencilSolverAssembler &assembler);
 #if BITPIT_ENABLE_MPI==1
     template<typename stencil_container_t = std::vector<stencil_t>>
     void assembly(MPI_Comm communicator, bool partitioned, const stencil_container_t &stencils);
-    void assembly(MPI_Comm communicator, bool partitioned, const DiscretizationStencilSolverAssembler<stencil_t> &assembler);
-    void assembly(MPI_Comm communicator, bool partitioned, const StencilSolverAssembler &assembler);
 #endif
+    void assembly(const DiscretizationStencilSolverAssembler<stencil_t> &assembler);
+    void assembly(const StencilSolverAssembler &assembler);
     template<typename stencil_container_t = std::vector<stencil_t>>
     void update(const stencil_container_t &stencils);
     template<typename stencil_container_t = std::vector<stencil_t>>
