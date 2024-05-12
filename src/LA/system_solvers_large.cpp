@@ -103,6 +103,28 @@ SystemSparseMatrixAssembler::SystemSparseMatrixAssembler(const SparseMatrix *mat
 {
 }
 
+#if BITPIT_ENABLE_MPI==1
+/*!
+ * Checks if the matrix is partitioned.
+ *
+ * \result Returns true if the patch is partitioned, false otherwise.
+ */
+bool SystemSparseMatrixAssembler::isPartitioned() const
+{
+    return m_matrix->isPartitioned();
+}
+
+/*!
+ * Gets the MPI communicator associated to the matrix.
+ *
+ * \return The MPI communicator associated to the matrix.
+ */
+const MPI_Comm & SystemSparseMatrixAssembler::getCommunicator() const
+{
+    return m_matrix->getCommunicator();
+}
+#endif
+
 /*!
  * Get the assembly options.
  *
@@ -883,38 +905,9 @@ void SystemSolver::assembly(const SparseMatrix &matrix, const SystemMatrixOrderi
 
     // Assembly the system matrix
     SystemSparseMatrixAssembler assembler(&matrix);
-#if BITPIT_ENABLE_MPI == 1
-    assembly(matrix.getCommunicator(), matrix.isPartitioned(), assembler, reordering);
-#else
     assembly(assembler, reordering);
-#endif
 }
 
-#if BITPIT_ENABLE_MPI == 1
-/*!
- * Assembly the system.
- *
- * \param communicator is the MPI communicator
- * \param isPartitioned controls if the system is partitioned
- * \param assembler is the matrix assembler
- */
-void SystemSolver::assembly(MPI_Comm communicator, bool isPartitioned, const SystemMatrixAssembler &assembler)
-{
-    assembly(communicator, isPartitioned, assembler, NaturalSystemMatrixOrdering());
-}
-
-/*!
- * Assembly the system.
- *
- * \param communicator is the MPI communicator
- * \param isPartitioned controls if the system is partitioned
- * \param assembler is the matrix assembler
- * \param reordering is the reordering that will be applied when assemblying the
- * system
- */
-void SystemSolver::assembly(MPI_Comm communicator, bool isPartitioned, const SystemMatrixAssembler &assembler, const SystemMatrixOrdering &reordering)
-{
-#else
 /*!
  * Assembly the system.
  *
@@ -934,7 +927,6 @@ void SystemSolver::assembly(const SystemMatrixAssembler &assembler)
  */
 void SystemSolver::assembly(const SystemMatrixAssembler &assembler, const SystemMatrixOrdering &reordering)
 {
-#endif
     // Clear the system
     clear();
 
@@ -943,10 +935,10 @@ void SystemSolver::assembly(const SystemMatrixAssembler &assembler, const System
 
 #if BITPIT_ENABLE_MPI == 1
     // Set the communicator
-    setCommunicator(communicator);
+    setCommunicator(assembler.getCommunicator());
 
     // Detect if the system is partitioned
-    m_partitioned = isPartitioned;
+    m_partitioned = assembler.isPartitioned();
 #endif
 
     // Initialize matrix
