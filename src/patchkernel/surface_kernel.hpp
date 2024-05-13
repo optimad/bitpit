@@ -72,6 +72,7 @@ public:
     virtual void evalEdgeNormals(long id, int edge, double limit, std::array<double, 3> *unlimitedNormal,
                                  std::array<double, 3> *limitedNormal) const;
     double evalCellSize(long id) const override;
+    void evalBarycentricCoordinates(long id, const std::array<double, 3> &point, double *lambda) const;
 
     bool isCellOrientationConsistent() const;
     bool adjustCellOrientation();

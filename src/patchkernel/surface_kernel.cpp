@@ -35,6 +35,7 @@
 #include "bitpit_communications.hpp"
 #endif
 
+#include "bitpit_CG.hpp"
 #include "surface_kernel.hpp"
 
 namespace bitpit {
@@ -250,6 +251,78 @@ double SurfaceKernel::evalCellSize(long id) const
         return evalCellArea(id);
     }
     return(sqrt(evalCellArea(id))); 
+}
+
+/*!
+        Evaluates the baricentric coordinates of the specified cell.
+
+        \param[in] id is the id of the cell
+        \param[in] point are the coordinates of point
+        \param[out] lambda on output will contain the barycentric coordinates of the projection point
+*/
+void SurfaceKernel::evalBarycentricCoordinates(long id, const std::array<double, 3> &point, double *lambda) const
+{
+
+    // ====================================================================== //
+    // VARIABLES DECLARATION                                                  //
+    // ====================================================================== //
+
+    // Local variables
+    const Cell                   *cell_ = &m_cells[id];
+
+    // Counters
+    // none
+
+    // ====================================================================== //
+    // COMPUTE BARYCENTRIC COORDINATES
+    // ====================================================================== //
+    switch (cell_->getType()) {
+
+    case ElementType::VERTEX:
+    {
+        lambda[0] = 1.0;
+        return;
+    }
+
+    case ElementType::LINE:
+    {
+        ConstProxyVector<long> vertexIds = cell_->getVertexIds();
+
+        std::array<double,3> point0 = getVertexCoords(vertexIds[0]);
+        std::array<double,3> point1 = getVertexCoords(vertexIds[1]);
+
+        std::array<double, 3> projectionPoint = CGElem::projectPointSegment(point, point0, point1, lambda);
+        BITPIT_UNUSED(projectionPoint);
+        return;
+    }
+
+    case ElementType::TRIANGLE:
+    {
+        ConstProxyVector<long> vertexIds = cell_->getVertexIds();
+
+        std::array<double,3> point0 = getVertexCoords(vertexIds[0]);
+        std::array<double,3> point1 = getVertexCoords(vertexIds[1]);
+        std::array<double,3> point2 = getVertexCoords(vertexIds[2]);
+
+        std::array<double,3> projectionPoint = CGElem::projectPointTriangle(point, point0, point1, point2, lambda);
+        BITPIT_UNUSED(projectionPoint);
+        return;
+    }
+
+    default:
+    {
+        ConstProxyVector<long> vertexIds = cell_->getVertexIds();
+
+        std::size_t nVertices = vertexIds.size();
+        BITPIT_CREATE_WORKSPACE(vertexCoords, std::array<double BITPIT_COMMA 3>, nVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
+        getVertexCoords(vertexIds.size(), vertexIds.data(), vertexCoords);
+
+        std::array<double,3> projectionPoint = CGElem::projectPointPolygon(point, nVertices, vertexCoords, lambda);
+        BITPIT_UNUSED(projectionPoint);
+        return;
+    }
+
+    }
 }
 
 /*!

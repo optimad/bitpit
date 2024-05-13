@@ -22,6 +22,7 @@
  *
 \*---------------------------------------------------------------------------*/
 
+#include "bitpit_CG.hpp"
 #include "line_kernel.hpp"
 
 namespace bitpit {
@@ -267,6 +268,58 @@ std::array<double, 3> LineKernel::evalCellNormal(long id, const std::array<doubl
     default:
     {
         return {{0., 0., 0.}};
+    }
+
+    }
+}
+
+/*!
+ *
+ * Evaluates the baricentric coordinates of the specified cell.
+ *
+ * If cell is not of type ElementType::LINE, the function returns 0.0
+ *
+ * \param[in] id is the id of the cell
+ * \param[in] point are the coordinates of point
+ * \param[out] lambda on output will contain the barycentric coordinates of the projection point
+ */
+void LineKernel::evalBarycentricCoordinates(long id, const std::array<double, 3> &point, double *lambda) const
+{
+
+    // ====================================================================== //
+    // VARIABLES DECLARATION                                                  //
+    // ====================================================================== //
+
+    // Local variables
+    const Cell                   *cell_ = &m_cells[id];
+
+    // Counters
+    // none
+
+    // ====================================================================== //
+    // COMPUTE BARYCENTRIC COORDINATES
+    // ====================================================================== //
+    switch (cell_->getType()) {
+
+    case ElementType::LINE:
+    {
+        ConstProxyVector<long> vertexIds = cell_->getVertexIds();
+
+        std::array<double,3> point0 = getVertexCoords(vertexIds[0]);
+        std::array<double,3> point1 = getVertexCoords(vertexIds[1]);
+
+        std::array<double, 3> projectionPoint = CGElem::projectPointSegment(point, point0, point1, lambda);
+        BITPIT_UNUSED(projectionPoint);
+        return;
+    }
+
+    default:
+    {
+        int nVertices = cell_->getVertexCount();
+        for (int i = 0; i < nVertices; ++i) {
+            lambda[i] = 0.0;
+        }
+        return;
     }
 
     }
