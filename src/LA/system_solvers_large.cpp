@@ -2553,15 +2553,26 @@ void SystemSolver::prepareKSP()
 
     // Set up
     if (setupNeeded) {
-        // Perform actions before KSP set up
-        preKSPSetupActions();
-
-        // KSP set up
+        // Initialization
         KSPSetFromOptions(m_KSP);
-        KSPSetUp(m_KSP);
 
-        // Perform actions after KSP set up
-        postKSPSetupActions();
+        // Perform actions before preconditioner set up
+        prePreconditionerSetupActions();
+
+        // Set up preconditioner
+        setupPreconditioner();
+
+        // Perform actions after preconditioner set up
+        postPreconditionerSetupActions();
+
+        // Perform actions before Krylov subspace method set up set up
+        preKrylovSetupActions();
+
+        // Set up the Krylov subspace method
+        setupKrylov();
+
+        // Perform actions after Krylov subspace method set up
+        postKrylovSetupActions();
     }
 
     // KSP is now ready
@@ -2605,72 +2616,127 @@ void SystemSolver::destroyKSP()
 }
 
 /*!
- * Perform actions before KSP setup.
+ * Set up the preconditioner.
  */
-void SystemSolver::preKSPSetupActions()
+void SystemSolver::setupPreconditioner()
 {
-    // Preconditioner configuration
-    PCType preconditionerType;
-#if BITPIT_ENABLE_MPI == 1
-    if (isPartitioned()) {
-        preconditionerType = PCASM;
-    } else {
-        preconditionerType = PCILU;
-    }
-#else
-    preconditionerType = PCILU;
-#endif
-
-    PC preconditioner;
-    KSPGetPC(m_KSP, &preconditioner);
-    PCSetType(preconditioner, preconditionerType);
-    if (strcmp(preconditionerType, PCASM) == 0) {
-        if (m_KSPOptions.overlap != PETSC_DEFAULT) {
-            PCASMSetOverlap(preconditioner, m_KSPOptions.overlap);
-        }
-    } else if (strcmp(preconditionerType, PCILU) == 0) {
-        if (m_KSPOptions.levels != PETSC_DEFAULT) {
-            PCFactorSetLevels(preconditioner, m_KSPOptions.levels);
-        }
-    }
-
-    // Solver configuration
-    KSPSetType(m_KSP, KSPFGMRES);
-    if (m_KSPOptions.restart != PETSC_DEFAULT) {
-        KSPGMRESSetRestart(m_KSP, m_KSPOptions.restart);
-    }
-    if (m_KSPOptions.rtol != PETSC_DEFAULT || m_KSPOptions.atol != PETSC_DEFAULT || m_KSPOptions.maxits != PETSC_DEFAULT) {
-        KSPSetTolerances(m_KSP, m_KSPOptions.rtol, m_KSPOptions.atol, PETSC_DEFAULT, m_KSPOptions.maxits);
-    }
-    KSPSetInitialGuessNonzero(m_KSP, PETSC_TRUE);
+    PC pc;
+    KSPGetPC(m_KSP, &pc);
+    setupPreconditioner(pc, m_KSPOptions);
 }
 
 /*!
- * Perform actions after KSP setup.
+ * Set up the specified preconditioner using the given options.
+ *
+ * \param pc is the preconditioner to set up
+ * \param options are the options that will be used to set up the preconditioner
  */
-void SystemSolver::postKSPSetupActions()
+void SystemSolver::setupPreconditioner(PC pc, const KSPOptions &options) const
 {
-    // Get preconditioner information
-    PC preconditioner;
-    KSPGetPC(m_KSP, &preconditioner);
+    // Set preconditioner type
+    PCType pcType;
+#if BITPIT_ENABLE_MPI == 1
+    if (isPartitioned()) {
+        pcType = PCASM;
+    } else {
+        pcType = PCILU;
+    }
+#else
+    pcType = PCILU;
+#endif
 
-    PCType preconditionerType;
-    PCGetType(preconditioner, &preconditionerType);
+    PCSetType(pc, pcType);
 
-    // Set ASM sub block preconditioners
-    if (strcmp(preconditionerType, PCASM) == 0) {
-        KSP *subksp;
-        PC subpc;
-        PetscInt nlocal, first;
-        PCASMGetSubKSP(preconditioner, &nlocal, &first, &subksp);
-        for (PetscInt i = 0; i < nlocal; ++i) {
-            KSPGetPC(subksp[i], &subpc);
-            PCSetType(subpc, PCILU);
-            if (m_KSPOptions.levels != PETSC_DEFAULT) {
-                PCFactorSetLevels(subpc, m_KSPOptions.levels);
+    // Configure preconditioner
+    if (strcmp(pcType, PCASM) == 0) {
+        if (options.overlap != PETSC_DEFAULT) {
+            PCASMSetOverlap(pc, options.overlap);
+        }
+    } else if (strcmp(pcType, PCILU) == 0) {
+        if (options.levels != PETSC_DEFAULT) {
+            PCFactorSetLevels(pc, options.levels);
+        }
+    }
+
+    PCSetUp(pc);
+
+    if (strcmp(pcType, PCASM) == 0) {
+        KSP *subKSPs;
+        PetscInt nSubKSPs;
+        PCASMGetSubKSP(pc, &nSubKSPs, nullptr, &subKSPs);
+        for (PetscInt i = 0; i < nSubKSPs; ++i) {
+            KSPSetType(m_KSP, KSPPREONLY);
+
+            PC subPC;
+            KSPGetPC(subKSPs[i], &subPC);
+            PCSetType(subPC, PCILU);
+            if (options.levels != PETSC_DEFAULT) {
+                PCFactorSetLevels(subPC, options.levels);
             }
         }
     }
+}
+
+/*!
+ * Perform actions before preconditioner setup.
+ */
+void SystemSolver::prePreconditionerSetupActions()
+{
+    // Nothing to do
+}
+
+/*!
+ * Perform actions after preconditioner setup.
+ */
+void SystemSolver::postPreconditionerSetupActions()
+{
+    // Nothing to do
+}
+
+/*!
+ * Set up the Krylov subspace method used to solve the system.
+ */
+void SystemSolver::setupKrylov()
+{
+    setupKrylov(m_KSP, m_KSPOptions);
+}
+
+/*!
+ * Set up the Krylov subspace method using the given options.
+ *
+ * This function is in charge of only setting the properties of the Krylov subspace
+ * method that will be used to solve the system. There is a dedicated function to
+ * set up the preconditioner.
+ *
+ * \param ksp is the KSP whose Krylov subspace method will be setup
+ * \param options are the options that will be used to set up the KSP
+ */
+void SystemSolver::setupKrylov(KSP ksp, const KSPOptions &options) const
+{
+    KSPSetType(ksp, KSPFGMRES);
+    if (options.restart != PETSC_DEFAULT) {
+        KSPGMRESSetRestart(ksp, options.restart);
+    }
+    if (options.rtol != PETSC_DEFAULT || options.atol != PETSC_DEFAULT || options.maxits != PETSC_DEFAULT) {
+        KSPSetTolerances(ksp, options.rtol, options.atol, PETSC_DEFAULT, options.maxits);
+    }
+    KSPSetInitialGuessNonzero(ksp, options.initial_non_zero);
+
+    KSPSetUp(ksp);
+}
+
+/*!
+ * Perform actions before Krylov subspace method setup.
+ */
+void SystemSolver::preKrylovSetupActions()
+{
+}
+
+/*!
+ * Perform actions after Krylov subspace method setup.
+ */
+void SystemSolver::postKrylovSetupActions()
+{
 }
 
 /*!
