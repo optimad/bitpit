@@ -372,8 +372,15 @@ protected:
     void createKSP();
     void destroyKSP();
 
-    virtual void preKSPSetupActions();
-    virtual void postKSPSetupActions();
+    virtual void setupPreconditioner();
+    virtual void setupPreconditioner(PC pc, const KSPOptions &options) const;
+    virtual void prePreconditionerSetupActions();
+    virtual void postPreconditionerSetupActions();
+
+    virtual void setupKrylov();
+    virtual void setupKrylov(KSP ksp, const KSPOptions &options) const;
+    virtual void preKrylovSetupActions();
+    virtual void postKrylovSetupActions();
 
     virtual void solveKSP();
     virtual void preKSPSolveActions();
