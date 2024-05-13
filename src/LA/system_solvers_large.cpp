@@ -1265,11 +1265,6 @@ void SystemSolver::solve()
     // Perfrom actions before KSP solution
     preKSPSolveActions();
 
-    // Force consistency
-    if (m_forceConsistency) {
-        removeNullSpaceFromRHS();
-    }
-
     // Solve KSP
     solveKSP();
 
@@ -1326,6 +1321,11 @@ void SystemSolver::preKSPSolveActions()
 {
     // Reorder vectors
     vectorsReorder(true);
+
+    // Force consistency
+    if (m_forceConsistency) {
+        removeNullSpaceFromRHS();
+    }
 }
 
 /*!
