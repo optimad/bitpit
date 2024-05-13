@@ -43,6 +43,7 @@ public:
     virtual double evalCellLength(long id) const;
     double evalCellSize(long id) const override;
     virtual std::array<double, 3> evalCellNormal(long id, const std::array<double, 3> &orientation = {{0., 0., 1.}}) const;
+    void evalBarycentricCoordinates(long id, const std::array<double, 3> &point, double *lambda) const;
 
 private:
     void initialize();
