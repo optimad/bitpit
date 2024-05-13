@@ -104,100 +104,55 @@ protected:
     bool m_multigrid;
 
     /*!
-     * Perform actions before KSP setup.
-     */
-    void preKSPSetupActions() override
+    * Set up the specified preconditioner using the given options.
+    *
+    * \param pc is the preconditioner to set up
+    * \param options are the options that will be used to set up the preconditioner
+    */
+    void setupPreconditioner(PC pc, const KSPOptions &options) const override
     {
-        //
-        // Preconditioner configuration
-        //
-        PCType preconditionerType;
-        if (m_multigrid) {
-            preconditionerType = PCGAMG;
-        } else {
-#if BITPIT_ENABLE_MPI == 1
-            if (this->isPartitioned()) {
-                preconditionerType = PCASM;
-            } else {
-                preconditionerType = PCILU;
-            }
-#else
-            preconditionerType = PCILU;
-#endif
+        // Early return for non-multigrid
+        if (!m_multigrid) {
+            SystemSolver::setupPreconditioner(pc, options);
+            return;
         }
 
-        PC preconditioner;
-        KSPGetPC(this->m_KSP, &preconditioner);
-        PCSetType(preconditioner, preconditionerType);
+        // Set multigrid options
+        KSPGetPC(this->m_KSP, &pc);
+        PCSetType(pc, PCGAMG);
 
-        // Set preconditioner options
-        if (strcmp(preconditionerType, PCASM) == 0) {
-            if (this->m_KSPOptions.overlap != PETSC_DEFAULT) {
-                PCASMSetOverlap(preconditioner, this->m_KSPOptions.overlap);
-            }
-        } else if (strcmp(preconditionerType, PCILU) == 0) {
-            if (this->m_KSPOptions.levels != PETSC_DEFAULT) {
-                PCFactorSetLevels(preconditioner, this->m_KSPOptions.levels);
-            }
-        } else if (strcmp(preconditionerType, PCGAMG) == 0) {
-            std::vector<PetscReal> thresholds(GAMG_MAX_LEVELS);
-            for (int i = 0; i < GAMG_MAX_LEVELS; ++i) {
-                thresholds[i] = GAMG_THRESHOLD;
-            }
+        std::vector<PetscReal> thresholds(GAMG_MAX_LEVELS);
+        for (int i = 0; i < GAMG_MAX_LEVELS; ++i) {
+            thresholds[i] = GAMG_THRESHOLD;
+        }
 
-            PCGAMGSetNSmooths(preconditioner, 0);
+        PCGAMGSetNSmooths(pc, 0);
 #if (PETSC_VERSION_MAJOR >= 3 && PETSC_VERSION_MINOR <= 17)
 #if BITPIT_ENABLE_MPI == 1
-            if (this->isPartitioned()) {
-                PCGAMGSetSymGraph(preconditioner, PETSC_TRUE);
-            }
+        if (this->isPartitioned()) {
+            PCGAMGSetSymGraph(pc, PETSC_TRUE);
+        }
 #endif
 #endif
 
-            PCGAMGSetNlevels(preconditioner, GAMG_MAX_LEVELS);
+        PCGAMGSetNlevels(pc, GAMG_MAX_LEVELS);
 #if (PETSC_VERSION_MAJOR >= 3 && PETSC_VERSION_MINOR >= 16)
-            PCGAMGSetThreshold(preconditioner, thresholds.data(), GAMG_MAX_LEVELS);
-            PCGAMGSetThresholdScale(preconditioner, GAMG_THRESHOLD_SCALE);
+        PCGAMGSetThreshold(pc, thresholds.data(), GAMG_MAX_LEVELS);
+        PCGAMGSetThresholdScale(pc, GAMG_THRESHOLD_SCALE);
 #else
-            PCGAMGSetThreshold(preconditioner, GAMG_THRESHOLD);
+        PCGAMGSetThreshold(pc, GAMG_THRESHOLD);
 #endif
-        }
 
-        //
-        // Solver configuration
-        //
-        KSPSetType(this->m_KSP, KSPFGMRES);
-        if (this->m_KSPOptions.restart != PETSC_DEFAULT) {
-            KSPGMRESSetRestart(this->m_KSP, this->m_KSPOptions.restart);
-        }
-        if (this->m_KSPOptions.rtol != PETSC_DEFAULT || this->m_KSPOptions.atol != PETSC_DEFAULT || this->m_KSPOptions.maxits != PETSC_DEFAULT) {
-            KSPSetTolerances(this->m_KSP, this->m_KSPOptions.rtol, this->m_KSPOptions.atol, PETSC_DEFAULT, this->m_KSPOptions.maxits);
-        }
-        KSPSetInitialGuessNonzero(this->m_KSP, PETSC_TRUE);
-    }
+        // Setup
+        PCSetUp(pc);
 
-    /*!
-     * Perform actions after KSP setup.
-     */
-    void postKSPSetupActions() override
-    {
-        // Post-setup actions for the base class
-        SystemSolver::postKSPSetupActions();
+        // Set options for the multigrid coarse level
+        KSP coarseKSP;
+        PCMGGetCoarseSolve(pc, &coarseKSP);
 
-        // Post-setup actions for the preconditioner
-        PC preconditioner;
-        KSPGetPC(this->m_KSP, &preconditioner);
-
-        PCType preconditionerType;
-        PCGetType(preconditioner, &preconditionerType);
-        if (strcmp(preconditionerType, PCGAMG) == 0) {
-            KSP coarseKSP;
-            PCMGGetCoarseSolve(preconditioner, &coarseKSP);
-
-            PC coarsePreconditioner;
-            KSPGetPC(coarseKSP, &coarsePreconditioner);
-            PCSetType(coarsePreconditioner, PCSVD);
-        }
+        PC coarsePreconditioner;
+        KSPGetPC(coarseKSP, &coarsePreconditioner);
+        PCSetType(coarsePreconditioner, PCSVD);
     }
 };
 
