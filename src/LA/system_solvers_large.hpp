@@ -270,8 +270,8 @@ public:
 
     virtual ~SystemSolver();
 
-    void clear();
-    void clearWorkspace();
+    virtual void clear();
+    virtual void clearWorkspace();
 
     void assembly(const SparseMatrix &matrix);
     void assembly(const SparseMatrix &matrix, const SystemMatrixOrdering &reordering);
@@ -317,6 +317,7 @@ public:
 
     KSPOptions & getKSPOptions();
     const KSPOptions & getKSPOptions() const;
+
     const KSPStatus & getKSPStatus() const;
 
     virtual void exportMatrix(const std::string &filePath, FileFormat exportFormat = FILE_BINARY) const;
@@ -372,10 +373,10 @@ protected:
     void clearReordering();
     void setReordering(long nRows, long nCols, const SystemMatrixOrdering &reordering);
 
-    void prepareKSP();
-    void finalizeKSP();
-    void createKSP();
-    void destroyKSP();
+    virtual void prepareKSP();
+    virtual void finalizeKSP();
+    virtual void createKSP();
+    virtual void destroyKSP();
 
     virtual void setupPreconditioner();
     virtual void setupPreconditioner(PC pc, const KSPOptions &options) const;
@@ -391,8 +392,16 @@ protected:
     virtual void preKSPSolveActions();
     virtual void postKSPSolveActions();
 
+    virtual void initializeKSPOptions();
+    virtual void resetKSPOptions(KSPOptions *options) const;
+    virtual void destroyKSPOptions();
+
+    virtual void initializeKSPStatus();
+    virtual void resetKSPStatus();
+    virtual void resetKSPStatus(KSPStatus *status) const;
     virtual void fillKSPStatus();
     virtual void fillKSPStatus(KSP ksp, KSPStatus *status) const;
+    virtual void destroyKSPStatus();
 
     void createMatrix(int rowBlockSize, int colBlockSize, Mat *matrix) const;
     void fillMatrix(Mat matrix, const std::string &filePath) const;
