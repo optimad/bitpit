@@ -870,6 +870,9 @@ void SystemSolver::clear()
 {
     clearWorkspace();
 
+    destroyKSPOptions();
+    destroyKSPStatus();
+
     vectorsDestroy();
     matrixDestroy();
 
@@ -889,10 +892,13 @@ void SystemSolver::clear()
  */
 void SystemSolver::clearWorkspace()
 {
-    // Clear KSP
-    if (m_KSP) {
-        destroyKSP();
+    // Early return if the KSP has not been created
+    if (!m_KSP) {
+        return;
     }
+
+    // Destroy the KSP
+    destroyKSP();
 }
 
 /*!
@@ -965,6 +971,12 @@ void SystemSolver::assembly(const SystemMatrixAssembler &assembler, const System
 
     // The system is now assembled
     m_assembled = true;
+
+    // Initialize KSP options
+    initializeKSPOptions();
+
+    // Initialize KSP statuses
+    initializeKSPStatus();
 }
 
 /*!
@@ -1255,9 +1267,6 @@ void SystemSolver::solve()
         throw std::runtime_error("Unable to solve the system. The system is not yet assembled.");
     }
 
-    // Prepare the KSP
-    prepareKSP();
-
     // Perform actions before KSP solution
     preKSPSolveActions();
 
@@ -1266,9 +1275,6 @@ void SystemSolver::solve()
 
     // Perform actions after KSP solution
     postKSPSolveActions();
-
-    // Finalize the KSP
-    finalizeKSP();
 }
 
 /*!
@@ -1315,6 +1321,9 @@ void SystemSolver::solveKSP()
  */
 void SystemSolver::preKSPSolveActions()
 {
+    // Prepare KSP
+    prepareKSP();
+
     // Reorder vectors
     vectorsReorder(true);
 
@@ -1334,6 +1343,9 @@ void SystemSolver::postKSPSolveActions()
 
     // Reorder vectors
     vectorsReorder(false);
+
+    // Finalize KSP
+    finalizeKSP();
 }
 
 /*!
@@ -2183,6 +2195,12 @@ void SystemSolver::restoreSystem(const std::string &directory, const std::string
 
     // The system is now assembled
     m_assembled = true;
+
+    // Initialize KSP options
+    initializeKSPOptions();
+
+    // Initialize KSP statuses
+    initializeKSPStatus();
 }
 
 /*!
@@ -2783,6 +2801,9 @@ void SystemSolver::prepareKSP()
 
     // KSP is now ready
     m_KSPDirty = false;
+
+    // Reset KSP status
+    resetKSPStatus();
 }
 
 /*!
@@ -2828,7 +2849,7 @@ void SystemSolver::setupPreconditioner()
 {
     PC pc;
     KSPGetPC(m_KSP, &pc);
-    setupPreconditioner(pc, m_KSPOptions);
+    setupPreconditioner(pc, getKSPOptions());
 }
 
 /*!
@@ -2904,7 +2925,7 @@ void SystemSolver::postPreconditionerSetupActions()
  */
 void SystemSolver::setupKrylov()
 {
-    setupKrylov(m_KSP, m_KSPOptions);
+    setupKrylov(m_KSP, getKSPOptions());
 }
 
 /*!
@@ -2946,9 +2967,9 @@ void SystemSolver::postKrylovSetupActions()
 }
 
 /*!
- * Get a reference to the options associated to the Krylov solver.
+ * Get a reference to the options associated with the Krylov solver.
  *
- * \return A reference to the options associated to the Krylov solver.
+ * \return A reference to the options associated with the Krylov solver.
  */
 KSPOptions & SystemSolver::getKSPOptions()
 {
@@ -2956,13 +2977,39 @@ KSPOptions & SystemSolver::getKSPOptions()
 }
 
 /*!
- * Get a constant reference to the options associated to the Krylov solver.
+ * Get a constant reference to the options associated with the Krylov solver.
  *
- * \return A constant reference to the options associated to the Krylov solver.
+ * \return A constant reference to the options associated with the Krylov solver.
  */
 const KSPOptions & SystemSolver::getKSPOptions() const
 {
     return m_KSPOptions;
+}
+
+/*!
+ * Initialize the options associated with the KSP.
+ */
+void SystemSolver::initializeKSPOptions()
+{
+    resetKSPOptions(&getKSPOptions());
+}
+
+/*!
+ * Reset the specified KSP options.
+ *
+ * \param options are the options that will be reset
+ */
+void SystemSolver::resetKSPOptions(KSPOptions *options) const
+{
+    *options = KSPOptions();
+}
+
+/*!
+ * Destroy the options associated with the KSP.
+ */
+void SystemSolver::destroyKSPOptions()
+{
+    resetKSPOptions(&getKSPOptions());
 }
 
 /*!
@@ -2976,7 +3023,15 @@ const KSPStatus & SystemSolver::getKSPStatus() const
 }
 
 /*!
- * Fill information about the status of the KSP.
+ * Initialize the status of the KSP.
+ */
+void SystemSolver::initializeKSPStatus()
+{
+    resetKSPStatus();
+}
+
+/*!
+ * Fill the status of the KSP.
  */
 void SystemSolver::fillKSPStatus()
 {
@@ -2984,7 +3039,7 @@ void SystemSolver::fillKSPStatus()
 }
 
 /*!
- * Fill information about the status of the specified KSP.
+ * Fill the status of the specified KSP.
  *
  * \param ksp is the KSP the status will be fetched from
  * \param status on output will contain the status of the KSP
@@ -2994,6 +3049,34 @@ void SystemSolver::fillKSPStatus(KSP ksp, KSPStatus *status) const
     status->error = 0;
     KSPGetIterationNumber(ksp, &(status->its));
     KSPGetConvergedReason(ksp, &(status->convergence));
+}
+
+/*!
+ * Reset the status of the KSP.
+ */
+void SystemSolver::resetKSPStatus()
+{
+    resetKSPStatus(&m_KSPStatus);
+}
+
+/*!
+ * Reset the status of the specified KSP.
+ *
+ * \param status on output will contain the status of the KSP
+ */
+void SystemSolver::resetKSPStatus(KSPStatus *status) const
+{
+    status->error       = 0;
+    status->its         = -1;
+    status->convergence = KSP_CONVERGED_ITERATING;
+}
+
+/*!
+ * Destroy the status of the KSP.
+ */
+void SystemSolver::destroyKSPStatus()
+{
+    resetKSPStatus();
 }
 
 #if BITPIT_ENABLE_MPI==1
