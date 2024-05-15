@@ -22,19 +22,22 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#include <fstream>
-#include <stdexcept>
-#include <string>
-#include <unordered_set>
-
-#include "petscksp.h"
+#include "system_solvers_large.hpp"
 
 #include "bitpit_common.hpp"
 #include "bitpit_containers.hpp"
 #include "bitpit_IO.hpp"
 #include "bitpit_operators.hpp"
 
-#include "system_solvers_large.hpp"
+#include "petscksp.h"
+#include "petscmat.h"
+#include "petscvec.h"
+
+#include <fstream>
+#include <stdexcept>
+#include <string>
+#include <numeric>
+#include <unordered_set>
 
 #ifndef PETSC_NULLPTR
 #define PETSC_NULLPTR PETSC_NULL
@@ -835,12 +838,12 @@ SystemSolver::SystemSolver(const std::string &prefix, bool transpose, bool debug
 SystemSolver::SystemSolver(const std::string &prefix, bool flatten, bool transpose, bool debug)
     : m_flatten(flatten), m_transpose(transpose),
       m_A(PETSC_NULLPTR), m_rhs(PETSC_NULLPTR), m_solution(PETSC_NULLPTR),
-      m_KSP(PETSC_NULLPTR),
-      m_prefix(prefix), m_assembled(false), m_KSPDirty(true),
+      m_rowReordering(PETSC_NULLPTR), m_colReordering(PETSC_NULLPTR),
+      m_KSP(PETSC_NULLPTR), m_KSPDirty(true),
+      m_prefix(prefix), m_assembled(false),
 #if BITPIT_ENABLE_MPI==1
       m_communicator(MPI_COMM_SELF), m_partitioned(false),
 #endif
-      m_rowReordering(PETSC_NULLPTR), m_colReordering(PETSC_NULLPTR),
       m_forceConsistency(false)
 {
     // Initialize PETSc
@@ -2281,6 +2284,37 @@ void SystemSolver::createMatrix(int rowBlockSize, int colBlockSize, Mat *matrix)
 }
 
 /*!
+ * Create a nest matrix.
+ *
+ * \param rowBlockSize is the row block size of the matrix
+ * \param colBlockSize is the column block size of the matrix
+ * \param nNestRows is the number of rows in the nest, i.e. the number of submatrices along the
+ * rows of the nest
+ * \param nNestCols is the number of columns in the nest, i.e. the number of submatrices along
+ * the columns of the nest
+ * \param subMatrices are the submatrices stored in row-major order, empty submatrices can
+ * be passed using nullptr
+ * \param vector on output will contain the newly created matrix
+ */
+void SystemSolver::createMatrix(int rowBlockSize, int colBlockSize, int nNestRows, int nNestCols,
+                                Mat *subMatrices, Mat *matrix) const
+{
+    // Create the matrix
+#if BITPIT_ENABLE_MPI == 1
+    MatCreateNest(getCommunicator(), nNestRows, PETSC_NULLPTR, nNestCols, PETSC_NULLPTR, subMatrices, matrix);
+#else
+    MatCreateNest(PETSC_COMM_SELF, nNestRows, PETSC_NULLPTR, nNestCols, PETSC_NULLPTR, subMatrices, matrix);
+#endif
+
+    // Set block size
+    if (rowBlockSize == colBlockSize) {
+        MatSetBlockSize(*matrix, rowBlockSize);
+    } else if (rowBlockSize != 1 || colBlockSize != 1) {
+        MatSetBlockSizes(*matrix, rowBlockSize, colBlockSize);
+    }
+}
+
+/*!
  * Fill the given matrix reading its contents from the specified file.
  *
  * The input file should contain a compatible matrix stored in PETSc binary format. If the
@@ -2481,6 +2515,29 @@ void SystemSolver::createVector(int blockSize, Vec *vector) const
     {
         VecSetType(*vector, VECSEQ);
     }
+
+    // Set block size
+    if (blockSize != 1) {
+        VecSetBlockSize(*vector, blockSize);
+    }
+}
+
+/*!
+ * Create a nest vector.
+ *
+ * \param blockSize is the block size of the vector
+ * \param nestSize is the number of subvectors that will be contained in the nest
+ * \param subVectors are the subvectors, empty subvectors can be passed using nullptr
+ * \param vector on output will contain the newly created vector
+ */
+void SystemSolver::createVector(int blockSize, int nestSize, Vec *subVectors, Vec *vector) const
+{
+    // Create the vector
+#if BITPIT_ENABLE_MPI == 1
+    VecCreateNest(getCommunicator(), nestSize, PETSC_NULLPTR, subVectors, vector);
+#else
+    VecCreateNest(PETSC_COMM_SELF, nestSize, PETSC_NULLPTR, subVectors, vector);
+#endif
 
     // Set block size
     if (blockSize != 1) {
