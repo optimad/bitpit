@@ -40,6 +40,7 @@ if(BITPIT_BUILD_EXAMPLES)
     # List of examples
     set(EXAMPLE_LIST "")
     list(APPEND EXAMPLE_LIST "LA_example_00001")
+    list(APPEND EXAMPLE_LIST "LA_example_00002")
     list(APPEND EXAMPLE_LIST "operators_example")
     list(APPEND EXAMPLE_LIST "PABLO_bubbles_2D")
     list(APPEND EXAMPLE_LIST "PABLO_bubbles_3D")
