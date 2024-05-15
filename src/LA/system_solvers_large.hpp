@@ -365,6 +365,7 @@ protected:
     template<typename Assembler>
     void matrixFill(const Assembler &assembler);
     void matrixFill(const Assembler &assembler);
+    virtual void matrixFill(const std::string &filePath);
     template<typename Assembler>
     void matrixUpdate(long nRows, const long *rows, const Assembler &assembler);
     void matrixUpdate(long nRows, const long *rows, const Assembler &assembler);
@@ -374,6 +375,7 @@ protected:
 
     virtual void vectorsCreate();
     virtual void vectorsFill(const std::vector<double> &rhs, const std::vector<double> &solution);
+    virtual void vectorsFill(const std::string &rhsFilePath, const std::string &solutionFilePath);
     virtual void vectorsReorder(bool invert);
     virtual void vectorsDump(std::ostream &stream, const std::string &directory, const std::string &prefix) const;
     virtual void vectorsRestore(std::istream &stream, const std::string &directory, const std::string &prefix);
