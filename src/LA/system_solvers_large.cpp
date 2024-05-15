@@ -1476,6 +1476,26 @@ void SystemSolver::matrixAssembly(const Assembler &assembler)
 }
 
 /*!
+ * Fill the matrix reading its contents form the specified file.
+ *
+ * The input file should contain a compatible vector stored in PETSc binary format. It's up to
+ * the caller of this routine to make sure the loaded vector is compatible with the matrix. If
+ * the matrix file cannot be read an exception is thrown.
+ *
+ * \param filePath is the path of the file
+ */
+void SystemSolver::matrixFill(const std::string &filePath)
+{
+    // Check if the matrix exists
+    if (!m_A) {
+        throw std::runtime_error("Matrix should be created before filling it.");
+    }
+
+    // Fill the matrix
+    fillMatrix(m_A, filePath);
+}
+
+/*!
  * Update the specified rows of the matrix.
  *
  * The contents of the specified rows will be replaced by the data provided by the given
@@ -1737,6 +1757,25 @@ void SystemSolver::vectorsFill(const std::vector<double> &rhs, const std::vector
 }
 
 /*!
+ * Fill RHS and solution vectors reading their contents from the specified file.
+ *
+ * \param rhsFilePath is the file path containing the content of the RHS vector, if the path is
+ * empty the function will leave the RHS vector unaltered
+ * \param solutionFilePath is the file path containing the content of the solution vector, if
+ * the path is empty the function will leave the solution vector unaltered
+ */
+void SystemSolver::vectorsFill(const std::string &rhsFilePath, const std::string &solutionFilePath)
+{
+    if (!rhsFilePath.empty()) {
+        fillVector(m_rhs, rhsFilePath);
+    }
+
+    if (!solutionFilePath.empty()) {
+        fillVector(m_solution, solutionFilePath);
+    }
+}
+
+/*!
  * Reorder RHS and solution vectors to match the order of the system matrix.
  *
  * \param invert is a flag for inverting the ordering
@@ -1935,7 +1974,7 @@ void SystemSolver::importMatrix(const std::string &filePath)
     clearReordering();
 
     // Fill the matrix
-    fillMatrix(m_A, filePath);
+    matrixFill(filePath);
 
     // Re-create vectors
     vectorsDestroy();
@@ -1973,7 +2012,7 @@ void SystemSolver::importRHS(const std::string &filePath)
     }
 
     // Fill the RHS vector
-    fillVector(m_rhs, filePath);
+    vectorsFill(filePath, "");
 
     // Check if the imported RHS is compatible with the matrix
     PetscInt size;
@@ -2026,7 +2065,7 @@ void SystemSolver::importSolution(const std::string &filePath)
     }
 
     // Fill the solution vector
-    fillVector(m_solution, filePath);
+    vectorsFill("", filePath);
 
     // Check if the imported solution is compatible with the matrix
     PetscInt size;
