@@ -22,17 +22,22 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#include <fstream>
-#include <stdexcept>
-#include <string>
-#include <unordered_set>
+#include "matrix_utilities.hpp"
+#include "system_solvers_large.hpp"
 
 #include "bitpit_common.hpp"
 #include "bitpit_containers.hpp"
 #include "bitpit_IO.hpp"
 #include "bitpit_operators.hpp"
 
-#include "system_solvers_large.hpp"
+#include "petscmat.h"
+#include "petscvec.h"
+
+#include <fstream>
+#include <stdexcept>
+#include <string>
+#include <numeric>
+#include <unordered_set>
 
 namespace bitpit {
 
@@ -56,23 +61,29 @@ namespace bitpit {
  */
 
 /*!
- * Get the rank of the specified local row.
+ * Get the permutation rank of the specified local row.
+ *
+ * The permutation rank defines the position of the specified row after applying
+ * the reordering.
  *
  * \param row is the local row
- * \result The rank of the specified local row.
+ * \result The permutation rank of the specified local row.
  */
-long NaturalSystemMatrixOrdering::getRowRank(long row) const
+long NaturalSystemMatrixOrdering::getRowPermutationRank(long row) const
 {
     return row;
 }
 
 /*!
- * Get the rank of the specified local column.
+ * Get the permutation rank of the specified local column.
+ *
+ * The permutation rank defines the position of the specified column after applying
+ * the reordering.
  *
  * \param col is the local column
- * \result The rank of the specified local column.
+ * \result The permutation rank of the specified local column.
  */
-long NaturalSystemMatrixOrdering::getColRank(long col) const
+long NaturalSystemMatrixOrdering::getColPermutationRank(long col) const
 {
     return col;
 }
@@ -437,6 +448,65 @@ void SystemSparseMatrixAssembler::getRowData(long rowIndex, ConstProxyVector<lon
 {
     m_matrix->getRowPattern(rowIndex, pattern);
     m_matrix->getRowValues(rowIndex, values);
+}
+
+/*!
+ * \class SplitSystemMatrixAssembler
+ * \ingroup system_solver_large
+ *
+ * \brief The SplitSystemMatrixAssembler class defines an assembler for building the matrix
+ * of a split system solver.
+ */
+
+/*!
+ * Constructor.
+ *
+ * \param matrix is the matrix
+ */
+SplitSystemMatrixAssembler::SplitSystemMatrixAssembler(const std::vector<int> &splitSizes)
+    : SystemMatrixAssembler(),
+      m_splitSizes(splitSizes)
+{
+}
+
+/*!
+ * Get the block size of the system.
+ *
+ * \result The block size of the system.
+ */
+int SplitSystemMatrixAssembler::getSplitCount() const
+{
+    return m_splitSizes.size();
+}
+
+/*!
+ * Get the block size of the system.
+ *
+ * \result The block size of the system.
+ */
+const std::vector<int> & SplitSystemMatrixAssembler::getSplitSizes() const
+{
+    return m_splitSizes;
+}
+
+/*!
+ * \class SplitSystemSparseMatrixAssembler
+ * \ingroup system_solver_large
+ *
+ * \brief The SplitSystemSparseMatrixAssembler class defines an assembler for building the
+ * matrix of a split system solver.
+ */
+
+/*!
+ * Constructor.
+ *
+ * \param matrix is the matrix
+ */
+SplitSystemSparseMatrixAssembler::SplitSystemSparseMatrixAssembler(const SparseMatrix *matrix,
+                                                                   const std::vector<int> &splitSizes)
+    : SystemSparseMatrixAssembler(matrix),
+      SplitSystemMatrixAssembler(splitSizes)
+{
 }
 
 /*!
@@ -821,12 +891,12 @@ SystemSolver::SystemSolver(const std::string &prefix, bool transpose, bool debug
 SystemSolver::SystemSolver(const std::string &prefix, bool flatten, bool transpose, bool debug)
     : m_flatten(flatten), m_transpose(transpose),
       m_A(PETSC_NULL), m_rhs(PETSC_NULL), m_solution(PETSC_NULL),
-      m_KSP(PETSC_NULL),
-      m_prefix(prefix), m_assembled(false), m_KSPDirty(true),
+      m_rowReordering(PETSC_NULL), m_colReordering(PETSC_NULL),
+      m_KSP(PETSC_NULL), m_KSPDirty(true),
+      m_prefix(prefix), m_assembled(false),
 #if BITPIT_ENABLE_MPI==1
       m_communicator(MPI_COMM_SELF), m_partitioned(false),
 #endif
-      m_rowReordering(PETSC_NULL), m_colReordering(PETSC_NULL),
       m_forceConsistency(false)
 {
     // Initialize PETSc
@@ -1528,13 +1598,11 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const Assembler &a
 
     // Global information
     PetscInt colGlobalBegin;
-    PetscInt colGlobalEnd;
-    MatGetOwnershipRangeColumn(m_A, &colGlobalBegin, &colGlobalEnd);
+    MatGetOwnershipRangeColumn(m_A, &colGlobalBegin, PETSC_NULL);
     colGlobalBegin /= blockSize;
-    colGlobalEnd /= blockSize;
 
     PetscInt rowGlobalOffset;
-    MatGetOwnershipRange(m_A, &rowGlobalOffset, nullptr);
+    MatGetOwnershipRange(m_A, &rowGlobalOffset, PETSC_NULL);
     rowGlobalOffset /= blockSize;
 
     // Get the options for assembling the matrix
@@ -1646,11 +1714,9 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const Assembler &a
                 for (std::size_t k = 0; k < rowPatternSize; ++k) {
                     long globalCol = rowPattern[k];
                     if (colReordering) {
-                        if (globalCol >= colGlobalBegin && globalCol < colGlobalEnd) {
-                            long col = globalCol - colGlobalBegin;
-                            col = colReordering[col];
-                            globalCol = colGlobalBegin + col;
-                        }
+                        long col = globalCol - colGlobalBegin;
+                        col = colReordering[col];
+                        globalCol = colGlobalBegin + col;
                     }
 
                     petscRowPatternStorage[k] = globalCol;
@@ -2244,6 +2310,35 @@ void SystemSolver::createMatrix(int rowBlockSize, int colBlockSize, Mat *matrix)
 }
 
 /*!
+ * Create a nest matrix.
+ *
+ * \param rowBlockSize is the row block size of the matrix
+ * \param colBlockSize is the column block size of the matrix
+ * \param nNestedRows is the number of nested row blocks
+ * \param nNestedCols is the number of nested column blocks
+ * \param subMatrices are the submatrices stored in row-major order, empty submatrices can
+ * be passed using nullptr
+ * \param vector on output will contain the newly created matrix
+ */
+void SystemSolver::createMatrix(int rowBlockSize, int colBlockSize, int nNestedRows, int nNestedCols,
+                                Mat *subMatrices, Mat *matrix) const
+{
+    // Create the matrix
+#if BITPIT_ENABLE_MPI == 1
+    MatCreateNest(getCommunicator(), nNestedRows, nullptr, nNestedCols, nullptr, subMatrices, matrix);
+#else
+    MatCreateNest(PETSC_COMM_SELF, nNestedRows, nullptr nNestedCols, nullptr, subMatrices, matrix);
+#endif
+
+    // Set block size
+    if (rowBlockSize == colBlockSize) {
+        MatSetBlockSize(*matrix, rowBlockSize);
+    } else if (rowBlockSize != 1) {
+        MatSetBlockSizes(*matrix, rowBlockSize, colBlockSize);
+    }
+}
+
+/*!
  * Fill the given matrix reading its contents from the specified file.
  *
  * The input file should contain a compatible matrix stored in PETSc binary format. If the
@@ -2415,6 +2510,29 @@ void SystemSolver::createVector(int blockSize, Vec *vector) const
     {
         VecSetType(*vector, VECSEQ);
     }
+
+    // Set block size
+    if (blockSize != 1) {
+        VecSetBlockSize(*vector, blockSize);
+    }
+}
+
+/*!
+ * Create a nest vector.
+ *
+ * \param blockSize is the block size of the vector
+ * \param nNestedItem is the number of nested item blocks
+ * \param subVectors are the subvectors, empty subvectors can be passed using nullptr
+ * \param vector on output will contain the newly created vector
+ */
+void SystemSolver::createVector(int blockSize, int nNestedItems, Vec *subVectors, Vec *vector) const
+{
+    // Create the vector
+#if BITPIT_ENABLE_MPI == 1
+    VecCreateNest(getCommunicator(), nNestedItems, nullptr, subVectors, vector);
+#else
+    VecCreateNest(PETSC_COMM_SELF, nNestedItems, nullptr subVectors, vector);
+#endif
 
     // Set block size
     if (blockSize != 1) {
@@ -2676,6 +2794,9 @@ void SystemSolver::unsetNullSpace()
  * Reordering is only applied internally, all public functions expects row
  * and column indices to be in natural matrix order (i.e., not reordered).
  *
+ * If the system is partitioned, each process can reorder only it's local
+ * part of the matix.
+ *
  * \param nRows is the number of rows of the system matrix
  * \param nCols is the number of columns of the system matrix
  * \param reordering is the reordering that will be applied
@@ -2699,7 +2820,7 @@ void SystemSolver::setReordering(long nRows, long nCols, const SystemMatrixOrder
     PetscInt *rowReorderingStorage;
     PetscMalloc(nRows * sizeof(PetscInt), &rowReorderingStorage);
     for (long i = 0; i < nRows; ++i) {
-        rowReorderingStorage[reordering.getRowRank(i)] = i;
+        rowReorderingStorage[reordering.getRowPermutationRank(i)] = i;
     }
 
 #if BITPIT_ENABLE_MPI == 1
@@ -2713,7 +2834,7 @@ void SystemSolver::setReordering(long nRows, long nCols, const SystemMatrixOrder
     PetscInt *colReorderingStorage;
     PetscMalloc(nCols * sizeof(PetscInt), &colReorderingStorage);
     for (long j = 0; j < nCols; ++j) {
-        colReorderingStorage[reordering.getColRank(j)] = j;
+        colReorderingStorage[reordering.getColPermutationRank(j)] = j;
     }
 
 #if BITPIT_ENABLE_MPI == 1
@@ -3170,6 +3291,1510 @@ int SystemSolver::getBinaryArchiveBlock() const
 #else
     return -1;
 #endif
+}
+
+
+/*!
+ * Constructor.
+ *
+ * \param debug if set to true, debug information will be printed
+ */
+SplitSystemSolver::SplitSystemSolver(bool debug)
+    : SplitSystemSolver("", false, false, debug)
+{
+}
+
+/*!
+ * Constuctor
+ *
+ * \param transpose if set to true, transposed system will be solved
+ * \param debug if set to true, debug information will be printed
+ */
+SplitSystemSolver::SplitSystemSolver(bool transpose, bool debug)
+    : SplitSystemSolver("", false, transpose, debug)
+{
+}
+
+
+/*!
+ * Constuctor
+ *
+ * \param flatten if set to true, block size will not be taken into account when allocating
+ * the internal storage of the system matrix. Even when the internal storage is flat, block
+ * size information are available and can be used by the solver to speed up the solution of
+ * the system. However, since the internal storage doesn't take blocks into account, some
+ * low level operations (e.g., matrix-matrix multiplications) cannot use block information.
+ * Some algorithms for the solution of the system (e.g., multigrid) requires a flat storage.
+ * \param transpose if set to true, transposed system will be solved
+ * \param debug if set to true, debug information will be printed
+ */
+SplitSystemSolver::SplitSystemSolver(bool flatten, bool transpose, bool debug)
+    : SplitSystemSolver("", flatten, transpose, debug)
+{
+}
+
+/*!
+ * Constructor.
+ *
+ * \param prefix is the prefix string to prepend to all option requests
+ * \param debug if set to true, debug information will be printed
+ */
+SplitSystemSolver::SplitSystemSolver(const std::string &prefix, bool debug)
+    : SplitSystemSolver(prefix, false, debug)
+{
+}
+
+/*!
+ * Constructor.
+ *
+ * \param prefix is the prefix string to prepend to all option requests
+ * \param debug if set to true, debug information will be printed
+ */
+SplitSystemSolver::SplitSystemSolver(const std::string &prefix, bool transpose, bool debug)
+    : SplitSystemSolver(prefix, false, transpose, debug)
+{
+}
+
+/*!
+ * Constuctor
+ *
+ * \param prefix is the prefix string to prepend to all option requests
+ * \param flatten if set to true, block size will not be taken into account when allocating
+ * the internal storage of the system matrix. Even when the internal storage is flat, block
+ * size information are available and can be used by the solver to speed up the solution of
+ * the system. However, since the internal storage doesn't take blocks into account, some
+ * low level operations (e.g., matrix-matrix multiplications) cannot use block information.
+ * Some algorithms for the solution of the system (e.g., multigrid) requires a flat storage.
+ * \param transpose if set to true, transposed system will be solved
+ * \param debug if set to true, debug information will be printed
+ */
+SplitSystemSolver::SplitSystemSolver(const std::string &prefix, bool flatten, bool transpose, bool debug)
+    : SystemSolver(prefix, flatten, transpose, debug),
+      m_rowSplitPermutation(PETSC_NULL), m_colSplitPermutation(PETSC_NULL)
+{
+}
+
+/*!
+ * Get the block size of the system.
+ *
+ * \result The block size of the system.
+ */
+int SplitSystemSolver::getBlockSize() const
+{
+    if (m_A == PETSC_NULL) {
+        return 0;
+    }
+
+    std::vector<int> splitBlockSizes = getSplitSizes();
+    int blockSize = std::accumulate(splitBlockSizes.begin(), splitBlockSizes.end(), 0);
+
+    return blockSize;
+}
+
+/*!
+ * Get the block size of the system.
+ *
+ * \result The block size of the system.
+ */
+int SplitSystemSolver::getSplitCount() const
+{
+    if (m_A == PETSC_NULL) {
+        return -1;
+    }
+
+    PetscInt nNestedRows;
+    MatNestGetSize(m_A, &nNestedRows, nullptr);
+
+    return nNestedRows;
+}
+
+/*!
+ * Get the block size of the system.
+ *
+ * \result The block size of the system.
+ */
+std::vector<int> SplitSystemSolver::getSplitSizes() const
+{
+    if (m_A == PETSC_NULL) {
+        return std::vector<int>();
+    }
+
+    int nSplits = getSplitCount();
+    std::vector<int> splitSizes(nSplits, 0);
+    for (int k = 0; k < nSplits; ++k) {
+        int kk = getBlockSplitLinearIndex(k, k, nSplits);
+
+        PetscInt splitBlockSize;
+        MatGetBlockSize(m_splitAs[kk], &splitBlockSize);
+        splitSizes[k] = splitBlockSize;
+    }
+
+    return splitSizes;
+}
+
+/*!
+ * Get the block offtest of the splits.
+ *
+ * \result The block offsets of the splits.
+ */
+std::vector<int> SplitSystemSolver::getSplitOffsets() const
+{
+    std::vector<int> splitBlockSizes = getSplitSizes();
+    std::vector<int> splitBlockOffsets(splitBlockSizes.size());
+    splitBlockOffsets[0];
+    std::partial_sum(splitBlockSizes.begin(), std::prev(splitBlockSizes.end()), std::next(splitBlockOffsets.begin()));
+
+    return splitBlockOffsets;
+}
+
+/*!
+ * Post-solve actions.
+ */
+void SplitSystemSolver::postKSPSolveActions()
+{
+    // Base actions
+    SystemSolver::postKSPSolveActions();
+
+    // Fill statuses of split KSP
+    fillSplitKSPStatuses();
+}
+
+/*!
+ * Get a reference to the options associated to the Krylov solver of the specified split.
+ *
+ * \param split is the split
+ * \return A reference to the options associated to the Krylov solver of the specified split.
+ */
+KSPOptions & SplitSystemSolver::getSplitKSPOptions(int split)
+{
+    return m_splitKSPOptions[split];
+}
+
+/*!
+ * Get a constant reference to the options associated to the Krylov solver of the specified split.
+ *
+ * \param split is the split
+ * \return A constant reference to the options associated to the Krylov solver of the specified
+ * split.
+ */
+const KSPOptions & SplitSystemSolver::getSplitKSPOptions(int split) const
+{
+    return m_splitKSPOptions[split];
+}
+
+/*!
+ * Initialize the options associated with the KSP.
+ */
+void SplitSystemSolver::initializeKSPOptions()
+{
+    SystemSolver::initializeKSPOptions();
+    initializeSplitKSPOptions();
+}
+
+/*!
+ * Initialize the options associated with the sub KSP.
+ */
+void SplitSystemSolver::initializeSplitKSPOptions()
+{
+    int nSplits = getSplitCount();
+    for (int k = static_cast<int>(m_splitKSPOptions.size()); k < nSplits; ++k) {
+        m_splitKSPOptions.emplace_back();
+        KSPOptions *splitKSPOptions = &(getSplitKSPOptions(k));
+        resetKSPOptions(splitKSPOptions);
+    }
+    m_splitKSPOptions.resize(nSplits);
+}
+
+/*!
+ * Destroy the options associated with the KSP.
+ */
+void SplitSystemSolver::destroyKSPOptions()
+{
+    SystemSolver::destroyKSPOptions();
+    destroySplitKSPOptions();
+}
+
+/*!
+ * Destroy the options associated with the split KSPs.
+ */
+void SplitSystemSolver::destroySplitKSPOptions()
+{
+    m_splitKSPOptions.clear();
+}
+
+/*!
+ * Get a constant reference to the status of the Krylov solver of the specified split.
+ *
+ * \param split is the split
+ * \return A constant reference to the status of the Krylov solver of the specified split.
+ */
+const KSPStatus & SplitSystemSolver::getSplitKSPStatus(int split) const
+{
+    return m_splitKSPStatuses[split];
+}
+/*!
+ * Initialize the status of the split KSPs.
+ */
+void SplitSystemSolver::initializeKSPStatus()
+{
+    SystemSolver::initializeKSPStatus();
+    initializeSplitKSPStatuses();
+}
+
+/*!
+ * Initialize the options associated with the split KSPs.
+ */
+void SplitSystemSolver::initializeSplitKSPStatuses()
+{
+    int nSplits = getSplitCount();
+    for (int k = static_cast<int>(m_splitKSPStatuses.size()); k < nSplits; ++k) {
+        m_splitKSPStatuses.emplace_back();
+        KSPStatus *splitStatus = &(m_splitKSPStatuses.back());
+        resetKSPStatus(splitStatus);
+    }
+    m_splitKSPStatuses.resize(nSplits);
+}
+
+/*!
+ * Fill the status of the KSP.
+ */
+void SplitSystemSolver::fillKSPStatus()
+{
+    SystemSolver::fillKSPStatus();
+    fillSplitKSPStatuses();
+}
+
+/*!
+ * Fill the status of the split KSPs.
+ */
+void SplitSystemSolver::fillSplitKSPStatuses()
+{
+    PC pc;
+    KSPGetPC(m_KSP, &pc);
+
+    PetscInt nFieldSplits;
+    KSP *splitKSPs;
+    PCFieldSplitGetSubKSP(pc, &nFieldSplits, &splitKSPs);
+    for (PetscInt k = 0; k < nFieldSplits; ++k) {
+        KSPStatus *splitKSPStatus = &(m_splitKSPStatuses[k]);
+        fillKSPStatus(splitKSPs[k], splitKSPStatus);
+    }
+}
+
+/*!
+ * Reset the status of the KSP.
+ */
+void SplitSystemSolver::resetKSPStatus()
+{
+    SystemSolver::resetKSPStatus();
+    resetSplitKSPStatuses();
+}
+
+/*!
+ * Reset the status of the split KSPs.
+ */
+void SplitSystemSolver::resetSplitKSPStatuses()
+{
+    for (KSPStatus &splitStatus : m_splitKSPStatuses) {
+        resetKSPStatus(&splitStatus);
+    }
+}
+
+/*!
+ * Destroy the status of the KSP.
+ */
+void SplitSystemSolver::destroyKSPStatus()
+{
+    SystemSolver::destroyKSPStatus();
+    destroySplitKSPStatuses();
+}
+
+/*!
+ * Destroy the status of the split KSPs.
+ */
+void SplitSystemSolver::destroySplitKSPStatuses()
+{
+    m_splitKSPStatuses.clear();
+}
+
+/*!
+ * Assembly the system.
+ *
+ * \param matrix is the matrix
+ */
+void SplitSystemSolver::assembly(const SparseMatrix &matrix, const std::vector<int> &splitSizes)
+{
+    assembly(matrix, splitSizes, NaturalSystemMatrixOrdering());
+}
+
+/*!
+ * Assembly the system.
+ *
+ * \param matrix is the matrix
+ * \param reordering is the reordering that will be applied when assemblying the system
+ */
+void SplitSystemSolver::assembly(const SparseMatrix &matrix, const std::vector<int> &splitSizes,
+                                 const SystemMatrixOrdering &reordering)
+{
+    // Check if the matrix is assembled
+    if (!matrix.isAssembled()) {
+        throw std::runtime_error("Unable to assembly the system. The matrix is not yet assembled.");
+    }
+
+    // Update matrix
+    SplitSystemSparseMatrixAssembler assembler(&matrix, splitSizes);
+    assembly<SplitSystemSolver>(static_cast<const Assembler &>(assembler),reordering);
+}
+
+/*!
+ * Assembly the system.
+ *
+ * \param assembler is the matrix assembler
+ */
+void SplitSystemSolver::assembly(const Assembler &assembler)
+{
+    assembly(assembler, NaturalSystemMatrixOrdering());
+}
+
+/*!
+ * Assembly the system.
+ *
+ * \param assembler is the matrix assembler
+ * \param reordering is the reordering that will be applied when assembling the system
+ */
+void SplitSystemSolver::assembly(const Assembler &assembler, const SystemMatrixOrdering &reordering)
+{
+    assembly<SplitSystemSolver>(assembler, reordering);
+}
+
+/*!
+ * Update all the rows of the system.
+ *
+ * Only the values of the system matrix can be updated, once the system is
+ * assembled its pattern cannot be modified.
+ *
+ * \param elements are the elements that will be used to update the rows
+ */
+void SplitSystemSolver::update(const SparseMatrix &elements)
+{
+    update(getRowCount(), nullptr, elements);
+}
+
+/*!
+ * Update the system.
+ *
+ * Only the values of the system matrix can be updated, once the system is
+ * assembled its pattern cannot be modified.
+ *
+ * \param nRows is the number of rows that will be updated
+ * \param rows are the indices of the rows that will be updated
+ * \param elements are the elements that will be used to update the rows
+ */
+void SplitSystemSolver::update(long nRows, const long *rows, const SparseMatrix &elements)
+{
+    // Check if the element storage is assembled
+    if (!elements.isAssembled()) {
+        throw std::runtime_error("Unable to update the system. The element storage is not yet assembled.");
+    }
+
+    // Update matrix
+    SplitSystemSparseMatrixAssembler assembler(&elements, getSplitSizes());
+    update<SplitSystemSolver>(nRows, rows, static_cast<const Assembler &>(assembler));
+}
+
+/*!
+ * Update all the rows of the system.
+ *
+ * Only the values of the system matrix can be updated, once the system is
+ * assembled its pattern cannot be modified.
+ *
+ * \param assembler is the matrix assembler for the rows that will be updated
+ */
+void SplitSystemSolver::update(const Assembler &assembler)
+{
+    update(getRowCount(), nullptr, assembler);
+}
+
+/*!
+ * Update the system.
+ *
+ * Only the values of the system matrix can be updated, once the system is
+ * assembled its pattern cannot be modified.
+ *
+ * \param nRows is the number of rows that will be updated
+ * \param rows are the indices of the rows that will be updated
+ * \param assembler is the matrix assembler for the rows that will be updated
+ */
+void SplitSystemSolver::update(long nRows, const long *rows, const Assembler &assembler)
+{
+    update<SplitSystemSolver>(nRows, rows, assembler);
+}
+
+/*!
+ * Create the matrix.
+ *
+ * \param assembler is the matrix assembler
+ */
+void SplitSystemSolver::matrixCreate(const Assembler &assembler)
+{
+    const PetscInt *rowReordering = nullptr;
+    if (m_rowReordering) {
+        ISGetIndices(m_rowReordering, &rowReordering);
+    }
+
+    // Matrix information
+    long nRows = assembler.getRowCount();
+
+    // Split information
+    const std::vector<int> &splitBlockSizes = assembler.getSplitSizes();
+    int nSplits = splitBlockSizes.size();
+
+    // Create split matrices
+    m_splitAs.resize(nSplits * nSplits);
+    for (int splitRow = 0; splitRow < nSplits; ++splitRow) {
+        for (int splitCol = 0; splitCol < nSplits; ++splitCol) {
+            // Create matrix
+            int splitIndex = getBlockSplitLinearIndex(splitRow, splitCol, nSplits);
+            Mat *splitMatrix = m_splitAs.data() + splitIndex;
+            createMatrix(splitBlockSizes[splitRow], splitBlockSizes[splitCol], splitMatrix);
+
+            MatType splitMatrixType;
+            MatGetType(*splitMatrix, &splitMatrixType);
+
+            // Set matrix sizes
+            long nSplitRowsElements = assembler.getRowCount() * splitBlockSizes[splitRow];
+            long nSplitColsElements = assembler.getColCount() * splitBlockSizes[splitCol];
+
+            long nGlobalSplitRowsElements;
+            long nGlobalSplitColsElements;
+#if BITPIT_ENABLE_MPI == 1
+            nGlobalSplitRowsElements = assembler.getRowGlobalCount() * splitBlockSizes[splitRow];
+            nGlobalSplitColsElements = assembler.getColGlobalCount() * splitBlockSizes[splitCol];
+#else
+            nGlobalSplitRowsElements = nSplitRowsElements;
+            nGlobalSplitColsElements = nSplitColsElements;
+#endif
+
+            MatSetSizes(*splitMatrix, nSplitRowsElements, nSplitColsElements, nGlobalSplitRowsElements, nGlobalSplitColsElements);
+
+            // Allocate matrix storage
+            //
+            // When the internal storage of the system matrix was created without taking into account
+            // block information, preallocation information should be provided for each row of each
+            // block.
+            int rowAllocationExpansion;
+            int colAllocationExpansion;
+            if (strcmp(splitMatrixType, MATSEQAIJ) == 0) {
+                rowAllocationExpansion = splitBlockSizes[splitRow];
+                colAllocationExpansion = splitBlockSizes[splitCol];
+#if BITPIT_ENABLE_MPI == 1
+            } else if (strcmp(splitMatrixType, MATMPIAIJ) == 0) {
+                rowAllocationExpansion = splitBlockSizes[splitRow];
+                colAllocationExpansion = splitBlockSizes[splitCol];
+#endif
+            } else {
+                rowAllocationExpansion = 1;
+                colAllocationExpansion = 1;
+            }
+
+            long nAllocatedRowElements = rowAllocationExpansion * nRows;
+
+            std::vector<int> d_nnz(nAllocatedRowElements, 0);
+            for (long n = 0; n < nRows; ++n) {
+                long matrixRow = n;
+                if (rowReordering) {
+                    matrixRow = rowReordering[matrixRow];
+                }
+
+                int nAssemblerRowNZ = assembler.getRowNZCount(n);
+
+                long matrixRowOffset = matrixRow * rowAllocationExpansion;
+                for (int n = 0; n < rowAllocationExpansion; ++n) {
+                    d_nnz[matrixRowOffset + n] = colAllocationExpansion * nAssemblerRowNZ;
+                }
+            }
+
+#if BITPIT_ENABLE_MPI == 1
+            std::vector<int> o_nnz(nAllocatedRowElements, 0);
+            if (isPartitioned()) {
+                long nAssemblerCols = assembler.getColCount();
+
+                long assemblerDiagonalBegin = assembler.getColGlobalOffset();
+                long assemblerDiagonalEnd   = assemblerDiagonalBegin + nAssemblerCols;
+
+                ConstProxyVector<long> assemblerRowPattern(static_cast<std::size_t>(0), assembler.getMaxRowNZCount());
+                for (long n = 0; n < nRows; ++n) {
+                    long matrixRow = n;
+                    if (rowReordering) {
+                        matrixRow = rowReordering[matrixRow];
+                    }
+
+                    assembler.getRowPattern(n, &assemblerRowPattern);
+                    int nAssemblerRowNZ = assemblerRowPattern.size();
+
+                    long matrixRowOffset = matrixRow * colAllocationExpansion;
+                    for (int k = 0; k < nAssemblerRowNZ; ++k) {
+                        long id = assemblerRowPattern[k];
+                        if (id < assemblerDiagonalBegin || id >= assemblerDiagonalEnd) {
+                            for (int n = 0; n < colAllocationExpansion; ++n) {
+                                o_nnz[matrixRowOffset + n] += colAllocationExpansion;
+                                d_nnz[matrixRowOffset + n] -= colAllocationExpansion;
+                            }
+                        }
+                    }
+                }
+            }
+#endif
+
+            if (strcmp(splitMatrixType, MATSEQAIJ) == 0) {
+                MatSeqAIJSetPreallocation(*splitMatrix, 0, d_nnz.data());
+            } else if (strcmp(splitMatrixType, MATSEQBAIJ) == 0) {
+                MatSeqBAIJSetPreallocation(*splitMatrix, splitBlockSizes[splitRow], 0, d_nnz.data());
+#if BITPIT_ENABLE_MPI == 1
+            } else if (strcmp(splitMatrixType, MATMPIAIJ) == 0) {
+                MatMPIAIJSetPreallocation(*splitMatrix, 0, d_nnz.data(), 0, o_nnz.data());
+            } else if (strcmp(splitMatrixType, MATMPIBAIJ) == 0) {
+                MatMPIBAIJSetPreallocation(*splitMatrix, splitBlockSizes[splitRow], 0, d_nnz.data(), 0, o_nnz.data());
+#endif
+            } else {
+                throw std::runtime_error("Matrix format not supported.");
+            }
+
+            // Each process will only set values for its own rows
+            MatSetOption(*splitMatrix, MAT_NO_OFF_PROC_ENTRIES, PETSC_TRUE);
+
+#if PETSC_VERSION_GE(3, 12, 0)
+            // The first assembly will set a superset of the off-process entries
+            // required for all subsequent assemblies. This avoids a rendezvous
+            // step in the MatAssembly functions.
+            MatSetOption(*splitMatrix, MAT_SUBSET_OFF_PROC_ENTRIES, PETSC_TRUE);
+#endif
+        }
+    }
+
+    // Create nest matrix
+    createMatrix(1, 1, nSplits, nSplits, m_splitAs.data(), &m_A);
+
+    // Cleanup
+    if (m_rowReordering) {
+        ISRestoreIndices(m_rowReordering, &rowReordering);
+    }
+}
+
+/*!
+ * Fills the matrix reading its contents from the specified assembler.
+ *
+ * \param assembler is the matrix assembler
+ */
+void SplitSystemSolver::matrixFill(const Assembler &assembler)
+{
+    // Check if the matrix exists
+    if (!m_A) {
+        throw std::runtime_error("Matrix should be created before filling it.");
+    }
+
+    // Fill matrix
+    matrixUpdate(assembler.getRowCount(), nullptr, assembler);
+
+    // No new allocations are now allowed
+    //
+    // When updating the matrix it will not be possible to alter the pattern,
+    // it will be possible to change only the values.
+    for (Mat splitMatrix : m_splitAs) {
+        MatSetOption(splitMatrix, MAT_NEW_NONZERO_LOCATIONS, PETSC_FALSE);
+    }
+    MatSetOption(m_A, MAT_NEW_NONZERO_LOCATIONS, PETSC_FALSE);
+}
+
+/*!
+ * Fill the matrix reading its contents form the specified file.
+ *
+ * The input file should contain a compatible vector stored in PETSc binary format. It's up to
+ * the caller of this routine to make sure the loaded vector is compatible with the matrix. If
+ * the matrix file cannot be read an exception is thrown.
+ *
+ * \param filePath is the path of the file
+ */
+void SplitSystemSolver::matrixFill(const std::string &filePath)
+{
+    // Check if the matrix exists
+    if (!m_A) {
+        throw std::runtime_error("Matrix should be created before filling it.");
+    }
+
+    // Fill the matrix
+    int nSplits = getSplitCount();
+    for (PetscInt splitRow = 0; splitRow < nSplits; ++splitRow) {
+        for (PetscInt splitCol = 0; splitCol < nSplits; ++splitCol) {
+            int splitIndex = getBlockSplitLinearIndex(splitRow, splitCol, nSplits);
+            std::string splitFilePath = generateSplitPath(filePath, splitRow, splitCol);
+            fillMatrix(m_splitAs[splitIndex], filePath);
+        }
+    }
+}
+
+/*!
+ * Update the specified rows of the matrix.
+ *
+ * The contents of the specified rows will be replaced by the data provided by the given
+ * assembler. If the matrix has not been assembled yet, both the pattern and the values
+ * of the matrix will be updated. After the matrix has been assembled only the values
+ * will be updated.
+ *
+ * The block size of the assembler should be equal to the block size of the matrix.
+ *
+ * \param nRows is the number of rows that will be updated
+ * \param rows are the local indices of the rows that will be updated, if a
+ * null pointer is passed, the rows that will be updated are the rows
+ * from 0 to (nRows - 1).
+ * \param assembler is the matrix assembler for the rows that will be updated
+ */
+void SplitSystemSolver::matrixUpdate(long nRows, const long *rows, const Assembler &assembler)
+{
+    // Updating the matrix invalidates the KSP
+    m_KSPDirty = true;
+
+    // Get split information
+    std::vector<int> splitBlockSizes = getSplitSizes();
+    std::vector<int> splitBlockOffsets = getSplitOffsets();
+    int nSplits = splitBlockSizes.size();
+
+    // Get matrix information
+    int blockSize = getBlockSize();
+
+    std::vector<int> blockSplitRows(blockSize);
+    for (int i = 0; i < nSplits; ++i) {
+        for (int k = 0; k < splitBlockSizes[i]; ++k) {
+            blockSplitRows[splitBlockOffsets[i] + k] = i;
+        }
+    }
+
+    // Get assembler information
+    int assemblerBlockSize = assembler.getBlockSize();
+    if (assemblerBlockSize != blockSize) {
+        std::string message = "Unable to update the matrix.";
+        message += " The block size of the assembler is not equal to the block size of the system matrix.";
+        throw std::runtime_error(message);
+    }
+
+    const long assemblerMaxRowNZ = assembler.getMaxRowNZCount();
+
+    PetscInt colGlobalBegin;
+    MatGetOwnershipRangeColumn(m_A, &colGlobalBegin, PETSC_NULL);
+    colGlobalBegin /= assemblerBlockSize;
+
+    PetscInt rowGlobalOffset;
+    MatGetOwnershipRange(m_A, &rowGlobalOffset, PETSC_NULL);
+    rowGlobalOffset /= assemblerBlockSize;
+
+    // Initialize reordering
+    const PetscInt *rowReordering = nullptr;
+    if (m_rowReordering) {
+        ISGetIndices(m_rowReordering, &rowReordering);
+    }
+
+    const PetscInt *colReordering = nullptr;
+    if (m_colReordering) {
+        ISGetIndices(m_colReordering, &colReordering);
+    }
+
+    // Generate the split indexes
+    std::vector<std::vector<std::size_t>> scatterIndexes(nSplits);
+    for (int split = 0; split < nSplits; ++split) {
+        generateSplitIndexes(split, assemblerMaxRowNZ, scatterIndexes.data() + split);
+    }
+
+    // Get the options for assembling the matrix
+    SystemMatrixAssembler::AssemblyOptions assemblyOptions = assembler.getOptions();
+
+#if PETSC_VERSION_GE(3, 12, 0)
+    // Check if it is possible to speedup insertion of values
+    //
+    // The option MAT_SORTED_FULL means that each process provides exactly its
+    // local rows; all column indices for a given row are passed in a single call
+    // to MatSetValues(), preallocation is perfect, row oriented, INSERT_VALUES
+    // is used. If this options is set to PETSC_TRUE, the function MatSetValues
+    // will be faster.
+    //
+    // This options needs at least PETSc 3.12.
+    PetscBool matrixSortedFull = (assemblyOptions.full && assemblyOptions.sorted) ? PETSC_TRUE : PETSC_FALSE;
+    MatSetOption(m_A, MAT_SORTED_FULL, matrixSortedFull);
+#endif
+
+    // Insert matrix values
+    //
+    // If the sizes of PETSc data types match the sizes of data types expected by bitpit
+    // and no column reordering is needed, a direct update of the pattern can be performed,
+    // otherwise an intermediate pattern storage is required.
+    bool patternDirectUpdate = !colReordering && (sizeof(long) == sizeof(PetscInt));
+
+    ConstProxyVector<long> rowPattern;
+    std::vector<PetscInt> petscRowPatternStorage;
+    const PetscInt *petscRowPattern;
+    if (!patternDirectUpdate) {
+        rowPattern.set(ConstProxyVector<long>::INTERNAL_STORAGE, 0, assemblerMaxRowNZ);
+        petscRowPatternStorage.resize(assemblerMaxRowNZ);
+        petscRowPattern = petscRowPatternStorage.data();
+    }
+
+    ConstProxyVector<double> rowValues;
+    std::vector<std::vector<PetscScalar>> petscSplitRowValues(m_splitAs.size());
+    for (PetscInt splitRow = 0; splitRow < nSplits; ++splitRow) {
+        for (PetscInt splitCol = 0; splitCol < nSplits; ++splitCol) {
+            int splitIndex = getBlockSplitLinearIndex(splitRow, splitCol, nSplits);
+            if (!m_splitAs[splitIndex]) {
+                continue;
+            }
+
+            int splitMatriBlockSize = splitBlockSizes[splitRow] * splitBlockSizes[splitCol];
+            petscSplitRowValues[splitIndex].resize(splitMatriBlockSize * assemblerMaxRowNZ);
+        }
+    }
+
+    for (long n = 0; n < nRows; ++n) {
+        // Get row information
+        long row;
+        if (rows) {
+            row = rows[n];
+        } else {
+            row = n;
+        }
+
+        if (rowReordering) {
+            row = rowReordering[row];
+        }
+
+        const PetscInt globalRow = rowGlobalOffset + row;
+
+        // Get row data
+        assembler.getRowData(n, &rowPattern, &rowValues);
+        if (rowValues.size() == 0) {
+            continue;
+        }
+
+        // Get pattern in PETSc format
+        const std::size_t rowPatternSize = rowPattern.size();
+        if (patternDirectUpdate) {
+            petscRowPattern = reinterpret_cast<const PetscInt *>(rowPattern.data());
+        } else {
+            for (std::size_t k = 0; k < rowPatternSize; ++k) {
+                petscRowPatternStorage[k] = rowPattern[k];
+                if (colReordering) {
+                    PetscInt col = petscRowPatternStorage[k] - colGlobalBegin;
+                    col = colReordering[col];
+                    petscRowPatternStorage[k] = colGlobalBegin + col;
+                }
+            }
+        }
+
+        // Get values in PETSc format
+        //
+        // The assembler returns the block row values of the matrix in a row-major order.
+        // We need to scatter these values to obtain the values of the block rows of the
+        // split matrices.
+        for (int blockRow = 0; blockRow < blockSize; ++blockRow) {
+            int splitRow = blockSplitRows[blockRow];
+            int splitBlockRow = blockRow - splitBlockOffsets[splitRow];
+
+            std::size_t nRowElements = blockSize * rowPatternSize;
+            std::size_t blockRowValuesOffset = nRowElements * blockRow;
+            const double *blockRowValues = rowValues.data() + blockRowValuesOffset;
+
+            for (int splitCol = 0; splitCol < nSplits; ++splitCol) {
+                int splitIndex = getBlockSplitLinearIndex(splitRow, splitCol, nSplits);
+                const std::vector<std::size_t> &splitScatterIndexes = scatterIndexes[splitCol];
+                std::size_t nSplitRowElements = splitBlockSizes[splitCol] * rowPatternSize;
+                std::size_t splitBlockRowValuesOffset = nSplitRowElements * splitBlockRow;
+                double *splitBlockRowValues = petscSplitRowValues[splitIndex].data() + splitBlockRowValuesOffset;
+                for (std::size_t k = 0; k < nSplitRowElements; ++k) {
+                    splitBlockRowValues[k] = blockRowValues[splitScatterIndexes[k]];
+                }
+            }
+        }
+
+        // Insert values
+        for (std::size_t k = 0; k < m_splitAs.size(); ++k) {
+            MatSetValuesBlocked(m_splitAs[k], 1, &globalRow, rowPatternSize, petscRowPattern,
+                                petscSplitRowValues[k].data(), INSERT_VALUES);
+        }
+    }
+
+    // Let PETSc assembly the matrix after the update
+    for (Mat splitMatrix : m_splitAs) {
+        MatAssemblyBegin(splitMatrix, MAT_FINAL_ASSEMBLY);
+    }
+    MatAssemblyBegin(m_A, MAT_FINAL_ASSEMBLY);
+
+    for (Mat splitMatrix : m_splitAs) {
+        MatAssemblyEnd(splitMatrix, MAT_FINAL_ASSEMBLY);
+    }
+    MatAssemblyEnd(m_A, MAT_FINAL_ASSEMBLY);
+
+    // Cleanup
+    if (rowReordering) {
+        ISRestoreIndices(m_rowReordering, &rowReordering);
+    }
+
+    if (colReordering) {
+        ISRestoreIndices(m_colReordering, &colReordering);
+    }
+}
+
+/*!
+ * Dump the matrix.
+ *
+ * \param stream is the stream in which matrix information is written
+ * \param directory is the directory in which the matrix data file will be written.
+ * \param prefix is the prefix added to the name of the file containing matrix data
+ */
+void SplitSystemSolver::matrixDump(std::ostream &stream, const std::string &directory,
+                                   const std::string &prefix) const
+{
+    // Dump split matrices
+    int nSplits = getSplitCount();
+    utils::binary::write(stream, nSplits);
+
+    for (PetscInt splitRow = 0; splitRow < nSplits; ++splitRow) {
+        for (PetscInt splitCol = 0; splitCol < nSplits; ++splitCol) {
+            int splitIndex = getBlockSplitLinearIndex(splitRow, splitCol, nSplits);
+            std::string splitMatrixName = generateSplitPath(prefix + "A", splitRow, splitCol);
+            dumpMatrix(m_splitAs[splitIndex], stream, directory, splitMatrixName);
+        }
+    }
+
+    // Dump main matrix
+    PetscInt rowBlockSize;
+    PetscInt colBlockSize;
+    MatGetBlockSizes(m_A, &rowBlockSize, &colBlockSize);
+    utils::binary::write(stream, static_cast<int>(rowBlockSize));
+    utils::binary::write(stream, static_cast<int>(colBlockSize));
+}
+
+/*!
+ * Restore the matrix.
+ *
+ * \param stream is the stream from which matrix information is read
+ * \param directory is the directory from which the matrix data file will be read
+ * \param prefix is the prefix that will be was added to the files during
+ */
+void SplitSystemSolver::matrixRestore(std::istream &stream, const std::string &directory,
+                                      const std::string &prefix)
+{
+    // Restore split matrices
+    int nSplits;
+    utils::binary::read(stream, nSplits);
+
+    m_splitAs.resize(nSplits * nSplits);
+    for (PetscInt splitRow = 0; splitRow < nSplits; ++splitRow) {
+        for (PetscInt splitCol = 0; splitCol < nSplits; ++splitCol) {
+            int splitIndex = getBlockSplitLinearIndex(splitRow, splitCol, nSplits);
+            std::string splitMatrixName = generateSplitPath(prefix + "A", splitRow, splitCol);
+            restoreMatrix(stream, directory, splitMatrixName, m_splitAs.data() + splitIndex);
+        }
+    }
+
+    // Restore main matrix
+    int rowBlockSize;
+    utils::binary::read(stream, rowBlockSize);
+    int colBlockSize;
+    utils::binary::read(stream, colBlockSize);
+
+    createMatrix(rowBlockSize, colBlockSize, nSplits, nSplits, m_splitAs.data(), &m_A);
+}
+
+/*!
+ * Destroy the matrix.
+ */
+void SplitSystemSolver::matrixDestroy()
+{
+    for (Mat &splitMatrix : m_splitAs) {
+        destroyMatrix(&splitMatrix);
+    }
+
+    if (m_rowSplitPermutation) {
+        ISDestroy(&m_rowSplitPermutation);
+    }
+
+    if (m_colSplitPermutation) {
+        ISDestroy(&m_colSplitPermutation);
+    }
+
+    destroyMatrix(&m_A);
+}
+
+/*!
+ * Create RHS and solution vectors.
+ *
+ * Vectors will be created, but they will not be initialized.
+ */
+void SplitSystemSolver::vectorsCreate()
+{
+    int nSplits = getSplitCount();
+
+    // Create split vectors
+    m_splitRhss.resize(nSplits);
+    for (PetscInt splitCol = 0; splitCol < nSplits; ++splitCol) {
+        int splitIndex = getBlockSplitLinearIndex(std::min(splitCol, nSplits - 1), splitCol, nSplits);
+        if (!m_transpose) {
+            MatCreateVecs(m_splitAs[splitIndex], &(m_splitRhss[splitCol]), nullptr);
+        } else {
+            MatCreateVecs(m_splitAs[splitIndex], nullptr, &(m_splitRhss[splitCol]));
+        }
+    }
+
+    m_splitSolutions.resize(nSplits);
+    for (PetscInt splitRow = 0; splitRow < nSplits; ++splitRow) {
+        int splitIndex = getBlockSplitLinearIndex(splitRow, std::min(splitRow, nSplits - 1), nSplits);
+        if (!m_transpose) {
+            MatCreateVecs(m_splitAs[splitIndex], nullptr, &(m_splitSolutions[splitRow]));
+        } else {
+            MatCreateVecs(m_splitAs[splitIndex], &(m_splitSolutions[splitRow]), nullptr);
+        }
+    }
+
+    // Create nest vectors
+    if (!m_transpose) {
+        createVector(1, nSplits, m_splitRhss.data(), &m_rhs);
+        createVector(1, nSplits, m_splitSolutions.data(), &m_solution);
+    } else {
+        createVector(1, nSplits, m_splitRhss.data(), &m_rhs);
+        createVector(1, nSplits, m_splitSolutions.data(), &m_solution);
+    }
+
+    // Create the split permutations
+    int blockSize = getBlockSize();
+
+#if BITPIT_ENABLE_MPI == 1
+    PetscInt rhsGlobalBegin;
+    PetscInt rhsGlobalEnd;
+    VecGetOwnershipRange(m_rhs, &rhsGlobalBegin, &rhsGlobalEnd);
+    rhsGlobalBegin /= blockSize;
+    rhsGlobalEnd /= blockSize;
+    PetscInt rhsSize = rhsGlobalEnd - rhsGlobalBegin;
+
+    PetscInt solutionGlobalBegin;
+    PetscInt solutionGlobalEnd;
+    VecGetOwnershipRange(m_solution, &solutionGlobalBegin, &solutionGlobalEnd);
+    solutionGlobalBegin /= blockSize;
+    solutionGlobalEnd /= blockSize;
+    PetscInt solutionSize = solutionGlobalEnd - solutionGlobalBegin;
+
+    generateSplitPermutation(rhsSize, static_cast<long>(rhsGlobalBegin), &m_rowSplitPermutation);
+    generateSplitPermutation(solutionSize, static_cast<long>(solutionGlobalBegin), &m_colSplitPermutation);
+#else
+    PetscInt rhsSize;
+    VecGetSize(m_rhs, &rhsSize);
+    rhsSize /= blockSize;
+
+    PetscInt solutionSize;
+    VecGetSize(m_solution, &solutionSize);
+    solutionSize /= blockSize;
+
+    generateSplitPermutation(rhsSize, &m_rowSplitPermutation);
+    generateSplitPermutation(solutionSize, &m_colSplitPermutation);
+#endif
+}
+
+/*!
+ * Fill RHS and solution vectors reading their contents from the specified containers.
+ *
+ * \param rhs contains the that that will be copied into the RHS vector, if the vector is
+ * empty no data will be copied and function will leave the RHS vector unaltered
+ * \param solution contains the that that will be copied into the solution vector, if the vector is
+ * empty no data will be copied and function will leave the RHS vector unaltered
+ */
+void SplitSystemSolver::vectorsFill(const std::vector<double> &rhs, const std::vector<double> &solution)
+{
+    if (!rhs.empty()) {
+        fillVector(m_rhs, rhs);
+    }
+
+    if (!solution.empty()) {
+        fillVector(m_solution, solution);
+    }
+}
+
+/*!
+ * Fill RHS and solution vectors reading their contents from the specified file.
+ *
+ * \param rhsFilePath is the file path containing the content of the RHS vector, if the path is
+ * empty the function will leave the RHS vector unaltered
+ * \param solutionFilePath is the file path containing the content of the solution vector, if
+ * the path is empty the function will leave the solution vector unaltered
+ */
+void SplitSystemSolver::vectorsFill(const std::string &rhsFilePath, const std::string &solutionFilePath)
+{
+    int nSplits = getSplitCount();
+
+    if (!rhsFilePath.empty()) {
+        for (int splitCol = 0; splitCol < nSplits; ++splitCol) {
+            std::string splitFilePath = generateSplitPath(rhsFilePath, splitCol);
+            fillVector(m_splitRhss[splitCol], splitFilePath);
+        }
+    }
+
+    if (!solutionFilePath.empty()) {
+        for (int splitRow = 0; splitRow < nSplits; ++splitRow) {
+            std::string splitFilePath = generateSplitPath(solutionFilePath, splitRow);
+            fillVector(m_splitSolutions[splitRow], splitFilePath);
+        }
+    }
+}
+
+/*!
+ * Reorder RHS and solution vectors to match the order of the system matrix.
+ *
+ * \param invert is a flag for inverting the ordering
+ */
+void SplitSystemSolver::vectorsReorder(bool invert)
+{
+    reorderVector(m_rhs, m_colReordering, invert);
+    reorderVector(m_rhs, m_colSplitPermutation, !invert);
+
+    reorderVector(m_solution, m_rowReordering, invert);
+    reorderVector(m_solution, m_rowSplitPermutation, !invert);
+}
+
+/*!
+ * Dump RHS and solution vectors.
+ *
+ * \param stream is the stream in which vector information is written
+ * \param directory is the directory in which the vectors data file will be written.
+ * \param prefix is the prefix added to the names of the files containing vector data
+ */
+void SplitSystemSolver::vectorsDump(std::ostream &stream, const std::string &directory, const std::string &prefix) const
+{
+    // Dump split vectors
+    int nSplits = getSplitCount();
+    utils::binary::write(stream, nSplits);
+
+    for (int splitCol = 0; splitCol < nSplits; ++splitCol) {
+        std::string rhsSplitVectorName = generateSplitPath(prefix + "rhs", splitCol);
+        dumpVector(m_splitRhss[splitCol], stream, directory, rhsSplitVectorName);
+    }
+
+    for (int splitRow = 0; splitRow < nSplits; ++splitRow) {
+        std::string solutionSplitVectorName = generateSplitPath(prefix + "solution", splitRow);
+        dumpVector(m_splitSolutions[splitRow], stream, directory, solutionSplitVectorName);
+    }
+
+    // Dump main vectors
+    PetscInt rhsBlockSize;
+    VecGetBlockSize(m_rhs, &rhsBlockSize);
+    utils::binary::write(stream, static_cast<int>(rhsBlockSize));
+
+    PetscInt solutionBlockSize;
+    VecGetBlockSize(m_solution, &solutionBlockSize);
+    utils::binary::write(stream, static_cast<int>(solutionBlockSize));
+}
+
+/*!
+ * Restore RHS and solution vectors.
+ *
+ * \param stream is the stream from which vector information is read
+ * \param directory is the directory from which the vector data file will be read
+ * \param prefix is the prefix added to the name of the file containing vectors data
+ */
+void SplitSystemSolver::vectorsRestore(std::istream &stream, const std::string &directory,
+                                       const std::string &prefix)
+{
+    // Restore split vectors
+    int nSplits;
+    utils::binary::read(stream, nSplits);
+
+    m_splitRhss.resize(nSplits);
+    for (int splitRow = 0; splitRow < nSplits; ++splitRow) {
+        std::string rhsSplitVectorName = generateSplitPath(prefix + "rhs", splitRow);
+        restoreVector(stream, directory, rhsSplitVectorName, m_splitRhss.data() + splitRow);
+    }
+
+    m_splitSolutions.resize(nSplits);
+    for (int splitCol = 0; splitCol < nSplits; ++splitCol) {
+        std::string solutionSplitVectorName = generateSplitPath(prefix + "solution", splitCol);
+        restoreVector(stream, directory, solutionSplitVectorName, m_splitSolutions.data() + splitCol);
+    }
+
+    // Restore main vectors
+    int rhsBlockSize;
+    utils::binary::read(stream, rhsBlockSize);
+    createVector(rhsBlockSize, nSplits, m_splitRhss.data(), &m_rhs);
+
+    int solutionBlockSize;
+    utils::binary::read(stream, solutionBlockSize);
+    createVector(solutionBlockSize, nSplits, m_splitSolutions.data(), &m_solution);
+
+    // Create the split permutations
+    int blockSize = getBlockSize();
+
+#if BITPIT_ENABLE_MPI == 1
+    PetscInt rhsGlobalBegin;
+    PetscInt rhsGlobalEnd;
+    VecGetOwnershipRange(m_rhs, &rhsGlobalBegin, &rhsGlobalEnd);
+    rhsGlobalBegin /= blockSize;
+    rhsGlobalEnd /= blockSize;
+    PetscInt rhsSize = rhsGlobalEnd - rhsGlobalBegin;
+
+    PetscInt solutionGlobalBegin;
+    PetscInt solutionGlobalEnd;
+    VecGetOwnershipRange(m_solution, &solutionGlobalBegin, &solutionGlobalEnd);
+    solutionGlobalBegin /= blockSize;
+    solutionGlobalEnd /= blockSize;
+    PetscInt solutionSize = solutionGlobalEnd - solutionGlobalBegin;
+
+    generateSplitPermutation(rhsSize, static_cast<long>(rhsGlobalBegin), &m_rowSplitPermutation);
+    generateSplitPermutation(solutionSize, static_cast<long>(solutionGlobalBegin), &m_colSplitPermutation);
+#else
+    PetscInt rhsSize;
+    VecGetSize(m_rhs, &rhsSize);
+    rhsSize /= blockSize;
+
+    PetscInt solutionSize;
+    VecGetSize(m_solution, &solutionSize);
+    solutionSize /= blockSize;
+
+    generateSplitPermutation(rhsSize, &m_rowSplitPermutation);
+    generateSplitPermutation(solutionSize, &m_colSplitPermutation);
+#endif
+}
+
+/*!
+ * Destroy RHS and solution vectors.
+ */
+void SplitSystemSolver::vectorsDestroy()
+{
+    // Destroy split vectors
+    for (Vec &splitRHS : m_splitRhss) {
+        destroyVector(&splitRHS);
+    }
+
+    for (Vec &splitSolution : m_splitSolutions) {
+        destroyVector(&splitSolution);
+    }
+
+    // Destroy main vectors
+    destroyVector(&m_rhs);
+    destroyVector(&m_solution);
+}
+
+/*!
+ * Export the matrix to the specified file.
+ *
+ * \param filePath is the path of the file
+ * \param fileFormat is the file format that will be used for exporting the matrix, note that
+ * the ASCII format may not be able to handle large matrices
+ */
+void SplitSystemSolver::exportMatrix(const std::string &filePath, FileFormat fileFormat) const
+{
+    // Export main matrix
+    exportMatrix(m_A, filePath, fileFormat);
+
+    // Export split matrices
+    int nSplits = getSplitCount();
+    for (int splitRow = 0; splitRow < nSplits; ++splitRow) {
+        for (int splitCol = 0; splitCol < nSplits; ++splitCol) {
+            int splitIndex = getBlockSplitLinearIndex(splitRow, splitCol, nSplits);
+            std::string splitFilePath = generateSplitPath(filePath, splitRow, splitCol);
+            exportMatrix(m_splitAs[splitIndex], splitFilePath, fileFormat);
+        }
+    }
+}
+
+/*!
+ * Export the RHS vector to the specified file.
+ *
+ * \param filePath is the path of the file
+ * \param fileFormat is the file format that will be used for exporting the RHS vector,
+ * note that the ASCII format may not be able to handle large vectors
+ */
+void SplitSystemSolver::exportRHS(const std::string &filePath, FileFormat fileFormat) const
+{
+    // Export main vector
+    exportVector(m_rhs, filePath, fileFormat);
+
+    // Export split matrices
+    int nSplits = getSplitCount();
+    for (int splitCol = 0; splitCol < nSplits; ++splitCol) {
+        std::string splitFilePath = generateSplitPath(filePath, splitCol);
+        exportVector(m_splitRhss[splitCol], splitFilePath, fileFormat);
+    }
+}
+
+/*!
+ * Export the solution vector to the specified file.
+ *
+ * \param filePath is the path of the file
+ * \param fileFormat is the file format that will be used for exporting the solution vector,
+ * note that the ASCII format may not be able to handle large vectors
+ */
+void SplitSystemSolver::exportSolution(const std::string &filePath, FileFormat fileFormat) const
+{
+    // Export main vector
+    exportVector(m_solution, filePath, fileFormat);
+
+    // Export split vectors
+    int nSplits = getSplitCount();
+    for (int splitRow = 0; splitRow < nSplits; ++splitRow) {
+        std::string splitFilePath = generateSplitPath(filePath, splitRow);
+        exportVector(m_splitSolutions[splitRow], splitFilePath, fileFormat);
+    }
+}
+
+/*!
+ * Set up the preconditioner.
+ */
+void SplitSystemSolver::setupPreconditioner()
+{
+    PC pc;
+    KSPGetPC(m_KSP, &pc);
+
+    // Setup main preconditioner
+    //
+    // The preconditioner in in charge of the solution of the single splits. The first split
+    // will be resolved first, then the solution of the first split will be will be used for
+    // the solution of the second split and so on and so forth. This strategy can be seen as
+    // a "block" Gauss-Seidel with the blocks being the splits.
+    PCSetType(pc, PCFIELDSPLIT);
+    PCFieldSplitSetType(pc, PC_COMPOSITE_MULTIPLICATIVE);
+
+    int nSplits = getSplitCount();
+    std::vector<IS> splitIndexSets(nSplits);
+    MatNestGetISs(m_A, splitIndexSets.data(), nullptr);
+    for (int k = 0; k < nSplits; ++k) {
+        PCFieldSplitSetIS(pc, nullptr, splitIndexSets[k]);
+    }
+
+    PCSetUp(pc);
+
+    // Set preconditioners of the split
+    setupSplitPreconditioners();
+}
+
+/*!
+ * Set up the Krylov subspace method used to solve the system.
+ */
+void SplitSystemSolver::setupSplitPreconditioners()
+{
+    PC pc;
+    KSPGetPC(m_KSP, &pc);
+
+    PetscInt nSplits;
+    KSP *splitKSPs;
+    PCFieldSplitGetSubKSP(pc, &nSplits, &splitKSPs);
+
+    for (PetscInt k = 0; k < nSplits; ++k) {
+        PC splitPc;
+        KSPGetPC(splitKSPs[k], &splitPc);
+        const KSPOptions &splitOptions = getSplitKSPOptions(k);
+
+        setupPreconditioner(splitPc, splitOptions);
+    }
+}
+
+/*!
+ * Set up the Krylov subspace method used to solve the system.
+ */
+void SplitSystemSolver::setupKrylov()
+{
+    // Setup main Krylov subspace method
+    //
+    // Solution of the system is performed by the Krylov subspace methods of the single splits,
+    // thus the main Krylov subspace method doens't need to to anything.
+    KSPSetType(m_KSP, KSPPREONLY);
+
+    // Setup Krylov subspace methods of the splits
+    setupSplitKrylovs();
+}
+
+/*!
+ * Set up the Krylov subspace method used to solve the system.
+ */
+void SplitSystemSolver::setupSplitKrylovs()
+{
+    PC pc;
+    KSPGetPC(m_KSP, &pc);
+
+    PetscInt nFieldSplits;
+    KSP *splitKSPs;
+    PCFieldSplitGetSubKSP(pc, &nFieldSplits, &splitKSPs);
+
+    for (PetscInt k = 0; k < nFieldSplits; ++k) {
+        const KSPOptions &splitOptions = getSplitKSPOptions(k);
+        setupKrylov(splitKSPs[k], splitOptions);
+    }
+}
+
+/*!
+ * Generate the split permutation.
+ *
+ * Given a vector whose elements are ordered accoring to the full matrix, the permutation
+ * allows to obtain a vector whose elements are ordered according to the split matrices.
+ *
+ * \param split is the split
+ * \param nItems is the number of items in the row/column
+ * \param indexes on output will contains the split indexes
+ */
+#if BITPIT_ENABLE_MPI == 1
+void SplitSystemSolver::generateSplitPermutation(long nItems, long itemGlobalOffset, IS *permutation) const
+#else
+void SplitSystemSolver::generateSplitPermutation(long nItems, IS *permutation) const
+#endif
+{
+   std::vector<std::size_t> workspace;
+
+    // Get split information
+    std::vector<int> splitBlockSizes = getSplitSizes();
+    std::vector<int> splitBlockOffsets = getSplitOffsets();
+    int nSplits = splitBlockSizes.size();
+
+    // Matrix information
+    int blockSize = getBlockSize();
+
+    // Create index set
+    PetscInt *permutationStorage;
+    PetscMalloc(nItems * blockSize * sizeof(PetscInt), &permutationStorage);
+
+    PetscInt *splitPermutationStorage = permutationStorage;
+    for (int k = 0; k < nSplits; ++k) {
+        int splitBlockSize = splitBlockSizes[k];
+        std::size_t nSplitElements = splitBlockSize * nItems;
+        long splitElementsGlobalOffset = blockSize * itemGlobalOffset;
+
+        workspace.resize(nSplitElements);
+        generateSplitIndexes(k, nItems, &workspace);
+        for (std::size_t k = 0; k < nSplitElements; ++k) {
+            splitPermutationStorage[k] = splitElementsGlobalOffset + static_cast<PetscInt>(workspace[k]);
+
+        }
+        splitPermutationStorage += nSplitElements;
+    }
+
+#if BITPIT_ENABLE_MPI == 1
+    ISCreateGeneral(getCommunicator(), nItems, permutationStorage, PETSC_OWN_POINTER, permutation);
+#else
+    ISCreateGeneral(PETSC_COMM_SELF, nItems, permutationStorage, PETSC_OWN_POINTER, permutation);
+#endif
+    ISSetPermutation(*permutation);
+}
+
+/*!
+ * Generate split indexes.
+ *
+ * Split indexes define the indexes of the matrix that are assigned to the specified split.
+ * The k-th element of a split matrix row/column corresponds to the indexes[k]-th element
+ * of the corresponding row/column of the full matrix.
+ *
+ * \param split is the split
+ * \param nItems is the number of items in the row/column
+ * \param indexes on output will contains the split indexes
+ */
+void SplitSystemSolver::generateSplitIndexes(int split, long nItems, std::vector<std::size_t> *indexes) const
+{
+    // Get split information
+    int splitBlockSize   = getSplitSizes()[split];
+    int splitBlockOffset = getSplitOffsets()[split];
+
+    // Get matrix information
+    int blockSize = getBlockSize();
+
+    // Initialize index storage
+    indexes->resize(nItems * splitBlockSize);
+
+    // Evaluate the indexes
+    for (long k = 0; k < nItems; ++k) {
+        for (int n = 0; n < splitBlockSize; ++n) {
+            (*indexes)[splitBlockSize * k + n] = blockSize * k + splitBlockOffset + n;
+        }
+    }
+}
+
+/*!
+ * Generate the split path associated with the specified indexes.
+ *
+ * The split file path is generated adding "_split_ij" before the extension of the specified
+ * path. For example, given the path "data/matrix.dat", the split path associated with the
+ * index 1 is "data/matrix_split_1.dat".
+ *
+ * \param path is the path
+ * \param i is the index associated with the split
+ */
+std::string SplitSystemSolver::generateSplitPath(const std::string &path, int i) const
+{
+    return generateSplitPath(path, std::to_string(i));
+}
+
+/*!
+ * Generate the split path associated with the specified indexes.
+ *
+ * The split file path is generated adding "_split_ij" before the extension of the specified
+ * path. For example, given the path "data/matrix.dat", the split path associated with the
+ * indexes (1,0) is "data/matrix_split_10.dat".
+ *
+ * \param path is the path
+ * \param i is the first index associated with the split
+ * \param j is the second index associated with the split
+ */
+std::string SplitSystemSolver::generateSplitPath(const std::string &path, int i, int j) const
+{
+    return generateSplitPath(path, std::to_string(i) + std::to_string(j));
+}
+
+/*!
+ * Generate the split path associated with the specified indexes.
+ *
+ * The split file path is generated adding "_split_ij" before the extension of the specified
+ * path. For example, given the path "data/matrix.dat", the split path associated with the
+ * index INDEX is "data/matrix_split_INDEX.dat".
+ *
+ * \param path is the path
+ * \param index is the index associated with the split
+ */
+std::string SplitSystemSolver::generateSplitPath(const std::string &path, const std::string &index) const
+{
+    std::string splitLabel = "_split_" + index;
+
+    std::size_t dotPosition = path.find_last_of(".");
+
+    std::string splitPath;
+    std::string extension;
+    std::string basePath;
+    if (dotPosition != std::string::npos) {
+        extension = path.substr(dotPosition + 1);
+        basePath  = path.substr(0, dotPosition);
+        splitPath = basePath + splitLabel + "." + extension;
+    } else {
+        splitPath = path + splitLabel;
+    }
+
+    return splitPath;
+}
+
+/*!
+ * Get the linear index associated with the split block with the given indices.
+ *
+ * The number of row/column splits is inferred from the system matrix.
+ *
+ * \param i is the row index of the split block
+ * \param j is the column index of the split block
+ * \result The linear index associated with the split block with the given indices.
+ */
+int SplitSystemSolver::getBlockSplitLinearIndex(int i, int j) const
+{
+    int nSplits = getSplitCount();
+
+    return getBlockSplitLinearIndex(i, j, nSplits);
+}
+
+/*!
+ * Get the linear index associated with the split block with the given indices.
+ *
+ * \param i is the row index of the split block
+ * \param j is the column index of the split block
+ * \param nSplits are the number of splits
+ * \result The linear index associated with the split block with the given indices.
+ */
+int SplitSystemSolver::getBlockSplitLinearIndex(int i, int j, int nSplits) const
+{
+    return linearalgebra::linearIndexRowMajor(i, j, nSplits, nSplits);
 }
 
 }

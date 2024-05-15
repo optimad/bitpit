@@ -79,7 +79,7 @@ public:
      * \param row is the local row
      * \result The rank of the specified local row.
      */
-    virtual long getRowRank(long row) const = 0;
+    virtual long getRowPermutationRank(long row) const = 0;
 
     /**
      * Get the rank of the specified local column.
@@ -90,7 +90,7 @@ public:
      * \param col is the local column
      * \result The rank of the specified local column.
      */
-    virtual long getColRank(long col) const = 0;
+    virtual long getColPermutationRank(long col) const = 0;
 
 protected:
     SystemMatrixOrdering() = default;
@@ -103,8 +103,8 @@ class NaturalSystemMatrixOrdering : public SystemMatrixOrdering
 public:
     NaturalSystemMatrixOrdering() = default;
 
-    long getRowRank(long row) const override;
-    long getColRank(long col) const override;
+    long getRowPermutationRank(long row) const override;
+    long getColPermutationRank(long col) const override;
 
 };
 
@@ -115,8 +115,8 @@ class ProxySystemMatrixOrdering : public SystemMatrixOrdering
 public:
     ProxySystemMatrixOrdering(const RowRankStorage *rowRankStorage, const ColRankStorage *colRankStorage);
 
-    long getRowRank(long row) const override;
-    long getColRank(long col) const override;
+    long getRowPermutationRank(long row) const override;
+    long getColPermutationRank(long col) const override;
 
 private:
     const RowRankStorage *m_rowRankStorage;
@@ -175,7 +175,7 @@ protected:
 
 };
 
-class SystemSparseMatrixAssembler : public SystemMatrixAssembler {
+class SystemSparseMatrixAssembler : virtual public SystemMatrixAssembler {
 
 public:
     SystemSparseMatrixAssembler(const SparseMatrix *matrix);
@@ -218,6 +218,27 @@ public:
 
 protected:
     const SparseMatrix *m_matrix;
+
+};
+
+class SplitSystemMatrixAssembler : virtual public SystemMatrixAssembler {
+
+public:
+    int getSplitCount() const;
+    const std::vector<int> & getSplitSizes() const;
+
+protected:
+    SplitSystemMatrixAssembler(const std::vector<int> &splitSizes);
+
+private:
+    std::vector<int> m_splitSizes;
+
+};
+
+class SplitSystemSparseMatrixAssembler : public SystemSparseMatrixAssembler, public SplitSystemMatrixAssembler  {
+
+public:
+    SplitSystemSparseMatrixAssembler(const SparseMatrix *matrix, const std::vector<int> &splitSizes);
 
 };
 
@@ -290,7 +311,7 @@ public:
     bool getTranspose() const;
     void setTranspose(bool transpose);
 
-    int getBlockSize() const;
+    virtual int getBlockSize() const;
 
     long getRowCount() const;
     long getColCount() const;
@@ -353,7 +374,11 @@ protected:
     Vec m_rhs;
     Vec m_solution;
 
+    IS m_rowReordering;
+    IS m_colReordering;
+
     KSP m_KSP;
+    bool m_KSPDirty;
     KSPOptions m_KSPOptions;
     KSPStatus m_KSPStatus;
 
@@ -421,6 +446,7 @@ protected:
     virtual void destroyKSPStatus();
 
     void createMatrix(int rowBlockSize, int colBlockSize, Mat *matrix) const;
+    void createMatrix(int rowBlockSize, int colBlockSize, int nNestedRows, int nNestedCols, Mat *subMatrices, Mat *matrix) const;
     void fillMatrix(Mat matrix, const std::string &filePath) const;
     void dumpMatrix(Mat matrix, std::ostream &stream, const std::string &directory, const std::string &name) const;
     void restoreMatrix(std::istream &stream, const std::string &directory, const std::string &name, Mat *matrix) const;
@@ -428,6 +454,7 @@ protected:
     void destroyMatrix(Mat *matrix) const;
 
     void createVector(int blockSize, Vec *vector) const;
+    void createVector(int blockSize, int nNestedItems, Vec *subVectors, Vec *vector) const;
     void fillVector(Vec vector, const std::string &filePath) const;
     void fillVector(Vec vector, const std::vector<double> &data) const;
     void reorderVector(Vec vector, IS permutations, bool invert) const;
@@ -453,16 +480,11 @@ private:
 
     bool m_assembled;
 
-    bool m_KSPDirty;
-
 #if BITPIT_ENABLE_MPI==1
     MPI_Comm m_communicator;
 
     bool m_partitioned;
 #endif
-
-    IS m_rowReordering;
-    IS m_colReordering;
 
     bool m_forceConsistency;
 
@@ -476,6 +498,129 @@ private:
     void removeNullSpaceFromRHS();
 
     int getBinaryArchiveBlock() const;
+
+};
+
+class SplitSystemSolver : public SystemSolver {
+
+public:
+    typedef SplitSystemMatrixAssembler Assembler;
+
+    friend class SystemSolver;
+
+    SplitSystemSolver(bool debug = false);
+    SplitSystemSolver(bool transpose, bool debug);
+    SplitSystemSolver(bool flatten, bool transpose, bool debug);
+    SplitSystemSolver(const std::string &prefix, bool debug = false);
+    SplitSystemSolver(const std::string &prefix, bool transpose, bool debug);
+    SplitSystemSolver(const std::string &prefix, bool flatten, bool transpose, bool debug);
+
+    using SystemSolver::SystemSolver;
+
+    void assembly(const SparseMatrix &matrix, const std::vector<int> &splitSizes);
+    void assembly(const SparseMatrix &matrix, const std::vector<int> &splitSizes, const SystemMatrixOrdering &reordering);
+    void assembly(const Assembler &assembler);
+    void assembly(const Assembler &assembler, const SystemMatrixOrdering &reordering);
+
+    void update(const SparseMatrix &elements);
+    void update(long nRows, const long *rows, const SparseMatrix &elements);
+    void update(const Assembler &assembler);
+    void update(long nRows, const long *rows, const Assembler &assembler);
+
+    int getBlockSize() const override;
+
+    int getSplitCount() const;
+    std::vector<int> getSplitSizes() const;
+    std::vector<int> getSplitOffsets() const;
+
+    KSPOptions & getSplitKSPOptions(int split);
+    const KSPOptions & getSplitKSPOptions(int split) const;
+
+    const KSPStatus & getSplitKSPStatus(int split) const;
+
+    void exportMatrix(const std::string &filePath, FileFormat exportFormat = FILE_BINARY) const override;
+
+    void exportRHS(const std::string &filePath, FileFormat exportFormat = FILE_BINARY) const override;
+
+    void exportSolution(const std::string &filePath, FileFormat exportFormat = FILE_BINARY) const override;
+
+protected:
+    std::vector<Mat> m_splitAs;
+    std::vector<Vec> m_splitRhss;
+    std::vector<Vec> m_splitSolutions;
+
+    std::vector<KSPOptions> m_splitKSPOptions;
+    std::vector<KSPStatus> m_splitKSPStatuses;
+
+    using SystemSolver::assembly;
+    using SystemSolver::update;
+
+    void matrixCreate(const Assembler &assembler);
+    void matrixFill(const Assembler &assembler);
+    void matrixFill(const std::string &filePath) override;
+    void matrixUpdate(long nRows, const long *rows, const Assembler &assembler);
+    void matrixDump(std::ostream &stream, const std::string &directory, const std::string &prefix) const override;
+    void matrixRestore(std::istream &stream, const std::string &directory, const std::string &prefix) override;
+    void matrixDestroy() override;
+
+    void vectorsCreate() override;
+    void vectorsFill(const std::vector<double> &rhs, const std::vector<double> &solution) override;
+    void vectorsFill(const std::string &rhsFilePath, const std::string &solutionFilePath) override;
+    void vectorsReorder(bool invert) override;
+    void vectorsDump(std::ostream &stream, const std::string &directory, const std::string &prefix) const override;
+    void vectorsRestore(std::istream &stream, const std::string &directory, const std::string &prefix) override;
+    void vectorsDestroy() override;
+
+    void setupPreconditioner() override;
+    using SystemSolver::setupPreconditioner;
+    void setupSplitPreconditioners();
+
+    void setupKrylov() override;
+    using SystemSolver::setupKrylov;
+    void setupSplitKrylovs();
+
+    void postKSPSolveActions() override;
+
+    void initializeKSPOptions() override;
+    void initializeSplitKSPOptions();
+    using SystemSolver::resetKSPOptions;
+    void destroyKSPOptions() override;
+    void destroySplitKSPOptions();
+
+    void initializeKSPStatus() override;
+    void initializeSplitKSPStatuses();
+    void fillKSPStatus() override;
+    using SystemSolver::fillKSPStatus;
+    void fillSplitKSPStatuses();
+    void resetKSPStatus() override;
+    using SystemSolver::resetKSPStatus;
+    void resetSplitKSPStatuses();
+    void destroyKSPStatus() override;
+    void destroySplitKSPStatuses();
+
+    using SystemSolver::exportMatrix;
+
+    using SystemSolver::exportRHS;
+
+    using SystemSolver::exportSolution;
+
+#if BITPIT_ENABLE_MPI == 1
+    void generateSplitPermutation(long nItems, long itemGlobalOffset, IS *splitReordering) const;
+#else
+    void generateSplitPermutation(long nItems, IS *splitReordering) const;
+#endif
+    void generateSplitIndexes(int split, long nItems, std::vector<std::size_t> *indexes) const;
+
+    std::string generateSplitPath(const std::string &path, int i) const;
+    std::string generateSplitPath(const std::string &path, int i, int j) const;
+    std::string generateSplitPath(const std::string &path, const std::string &index) const;
+
+private:
+    IS m_rowSplitPermutation;
+    IS m_colSplitPermutation;
+
+    int getBlockSplitLinearIndex(int i, int j) const;
+    int getBlockSplitLinearIndex(int i, int j, int nSplits) const;
 
 };
 

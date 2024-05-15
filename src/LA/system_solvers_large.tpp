@@ -58,7 +58,7 @@ ProxySystemMatrixOrdering<RowRankStorage, ColRankStorage>::ProxySystemMatrixOrde
  * \result The rank of the specified local row.
  */
 template<typename RowRankStorage, typename ColRankStorage>
-long ProxySystemMatrixOrdering<RowRankStorage, ColRankStorage>::getRowRank(long row) const
+long ProxySystemMatrixOrdering<RowRankStorage, ColRankStorage>::getRowPermutationRank(long row) const
 {
     return (*m_rowRankStorage)[row];
 }
@@ -70,7 +70,7 @@ long ProxySystemMatrixOrdering<RowRankStorage, ColRankStorage>::getRowRank(long 
  * \result The rank of the specified local column.
  */
 template<typename RowRankStorage, typename ColRankStorage>
-long ProxySystemMatrixOrdering<RowRankStorage, ColRankStorage>::getColRank(long col) const
+long ProxySystemMatrixOrdering<RowRankStorage, ColRankStorage>::getColPermutationRank(long col) const
 {
     return (*m_colRankStorage)[col];
 }
