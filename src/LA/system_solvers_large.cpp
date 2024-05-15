@@ -1364,20 +1364,20 @@ void SystemSolver::matrixAssembly(const Assembler &assembler)
     // When the internal storage of the system matrix was created without taking into account
     // block information, preallocation information should be provided for each row of each
     // block.
-    int preallocationExpansionSize;
+    int allocationExpansion;
     if (strcmp(matrixType, MATSEQAIJ) == 0) {
-        preallocationExpansionSize = blockSize;
+        allocationExpansion = blockSize;
 #if BITPIT_ENABLE_MPI == 1
     } else if (strcmp(matrixType, MATMPIAIJ) == 0) {
-        preallocationExpansionSize = blockSize;
+        allocationExpansion = blockSize;
 #endif
     } else {
-        preallocationExpansionSize = 1;
+        allocationExpansion = 1;
     }
 
-    long nPreallocationRows = preallocationExpansionSize * nAssemblerRows;
+    long nAllocatedRows = allocationExpansion * nAssemblerRows;
 
-    std::vector<int> d_nnz(nPreallocationRows, 0);
+    std::vector<int> d_nnz(nAllocatedRows, 0);
     for (long n = 0; n < nAssemblerRows; ++n) {
         long matrixRow = n;
         if (rowReordering) {
@@ -1386,14 +1386,14 @@ void SystemSolver::matrixAssembly(const Assembler &assembler)
 
         int nAssemblerRowNZ = assembler.getRowNZCount(n);
 
-        long matrixRowOffset = matrixRow * preallocationExpansionSize;
-        for (int i = 0; i < preallocationExpansionSize; ++i) {
-            d_nnz[matrixRowOffset + i] = preallocationExpansionSize * nAssemblerRowNZ;
+        long matrixRowOffset = matrixRow * allocationExpansion;
+        for (int i = 0; i < allocationExpansion; ++i) {
+            d_nnz[matrixRowOffset + i] = allocationExpansion * nAssemblerRowNZ;
         }
     }
 
 #if BITPIT_ENABLE_MPI == 1
-    std::vector<int> o_nnz(nPreallocationRows, 0);
+    std::vector<int> o_nnz(nAllocatedRows, 0);
     if (m_partitioned) {
         long nAssemblerCols = assembler.getColCount();
 
@@ -1410,13 +1410,13 @@ void SystemSolver::matrixAssembly(const Assembler &assembler)
             assembler.getRowPattern(n, &assemblerRowPattern);
             int nAssemblerRowNZ = assemblerRowPattern.size();
 
-            long matrixRowOffset = matrixRow * preallocationExpansionSize;
+            long matrixRowOffset = matrixRow * allocationExpansion;
             for (int k = 0; k < nAssemblerRowNZ; ++k) {
                 long id = assemblerRowPattern[k];
                 if (id < assemblerDiagonalBegin || id >= assemblerDiagonalEnd) {
-                    for (int i = 0; i < preallocationExpansionSize; ++i) {
-                        o_nnz[matrixRowOffset + i] += preallocationExpansionSize;
-                        d_nnz[matrixRowOffset + i] -= preallocationExpansionSize;
+                    for (int i = 0; i < allocationExpansion; ++i) {
+                        o_nnz[matrixRowOffset + i] += allocationExpansion;
+                        d_nnz[matrixRowOffset + i] -= allocationExpansion;
                     }
                 }
             }
@@ -1554,7 +1554,7 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const Assembler &a
     // If the sizes of PETSc data types match the sizes of data types expected by
     // bitpit a direct update can be performed, otherwise the matrix is updated
     // using intermediate data storages.
-    const long maxRowNZ = std::max(assembler.getMaxRowNZCount(), 0L);
+    const long assemblerMaxRowNZ = std::max(assembler.getMaxRowNZCount(), 0L);
 
     bool patternDirectUpdate = !colReordering && (sizeof(long) == sizeof(PetscInt));
     bool valuesDirectUpdate  = (sizeof(double) == sizeof(PetscScalar));
@@ -1563,8 +1563,8 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const Assembler &a
     std::vector<PetscInt> petscRowPatternStorage;
     const PetscInt *petscRowPattern;
     if (!patternDirectUpdate) {
-        rowPattern.set(ConstProxyVector<long>::INTERNAL_STORAGE, 0, maxRowNZ);
-        petscRowPatternStorage.resize(maxRowNZ);
+        rowPattern.set(ConstProxyVector<long>::INTERNAL_STORAGE, 0, assemblerMaxRowNZ);
+        petscRowPatternStorage.resize(assemblerMaxRowNZ);
         petscRowPattern = petscRowPatternStorage.data();
     }
 
@@ -1572,9 +1572,9 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const Assembler &a
     std::vector<PetscScalar> petscRowValuesStorage;
     const PetscScalar *petscRowValues;
     if (!valuesDirectUpdate) {
-        long maxRowNZElements = blockSize * blockSize * maxRowNZ;
-        rowValues.set(ConstProxyVector<double>::INTERNAL_STORAGE, 0, maxRowNZElements);
-        petscRowValuesStorage.resize(maxRowNZElements);
+        long assemblerMaxRowNZElements = blockSize * blockSize * assemblerMaxRowNZ;
+        rowValues.set(ConstProxyVector<double>::INTERNAL_STORAGE, 0, assemblerMaxRowNZElements);
+        petscRowValuesStorage.resize(assemblerMaxRowNZElements);
         petscRowValues = petscRowValuesStorage.data();
     }
 
