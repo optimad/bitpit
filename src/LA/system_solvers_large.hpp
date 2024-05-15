@@ -177,7 +177,7 @@ protected:
 
 };
 
-class SystemSparseMatrixAssembler : public SystemMatrixAssembler {
+class SystemSparseMatrixAssembler : virtual public SystemMatrixAssembler {
 
 public:
     SystemSparseMatrixAssembler(const SparseMatrix *matrix);
@@ -292,7 +292,7 @@ public:
     bool getTranspose() const;
     void setTranspose(bool transpose);
 
-    int getBlockSize() const;
+    virtual int getBlockSize() const;
 
     long getRowCount() const;
     long getColCount() const;
@@ -355,7 +355,11 @@ protected:
     Vec m_rhs;
     Vec m_solution;
 
+    IS m_rowReordering;
+    IS m_colReordering;
+
     KSP m_KSP;
+    bool m_KSPDirty;
     KSPOptions m_KSPOptions;
     KSPStatus m_KSPStatus;
 
@@ -419,6 +423,7 @@ protected:
     virtual void restoreInfo(std::istream &stream);
 
     void createMatrix(int rowBlockSize, int colBlockSize, Mat *matrix) const;
+    void createMatrix(int rowBlockSize, int colBlockSize, int nNestRows, int nNestCols, Mat *subMatrices, Mat *matrix) const;
     void fillMatrix(Mat matrix, const std::string &filePath) const;
     void dumpMatrix(Mat matrix, std::ostream &stream, const std::string &directory, const std::string &name) const;
     void restoreMatrix(std::istream &stream, const std::string &directory, const std::string &name, Mat *matrix) const;
@@ -426,6 +431,7 @@ protected:
     void destroyMatrix(Mat *matrix) const;
 
     void createVector(int blockSize, Vec *vector) const;
+    void createVector(int blockSize, int nestSize, Vec *subVectors, Vec *vector) const;
     void fillVector(Vec vector, const std::string &filePath) const;
     void fillVector(Vec vector, const std::vector<double> &data) const;
     void reorderVector(Vec vector, IS permutations, bool invert) const;
@@ -451,16 +457,11 @@ private:
 
     bool m_assembled;
 
-    bool m_KSPDirty;
-
 #if BITPIT_ENABLE_MPI==1
     MPI_Comm m_communicator;
 
     bool m_partitioned;
 #endif
-
-    IS m_rowReordering;
-    IS m_colReordering;
 
     bool m_forceConsistency;
 

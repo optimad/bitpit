@@ -37,6 +37,7 @@
  * @defgroup laauxiliary Auxiliary Utilities
  * @defgroup system_solver_small System Solvers (Small Systems)
  * @defgroup system_solver_large System Solvers (Large Systems)
+ * @defgroup system_solver_split System Solvers (Split Systems)
  * @}
  */
 
@@ -45,6 +46,7 @@
 #include "multiplication.hpp"
 #include "system_solvers_large.hpp"
 #include "system_solvers_small.hpp"
+#include "system_solvers_split.hpp"
 
 #include "moduleEnd.hpp"
 #endif
