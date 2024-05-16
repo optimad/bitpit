@@ -2167,10 +2167,7 @@ void SystemSolver::dumpSystem(const std::string &header, const std::string &dire
     std::ostream &infoStream = infoArchive.getStream();
 
     // Dump system information
-#if BITPIT_ENABLE_MPI==1
-    utils::binary::write(infoStream, m_partitioned);
-#endif
-    utils::binary::write(infoStream, m_transpose);
+    dumpInfo(infoStream);
 
     // Dump matrix
     matrixDump(infoStream, directory, prefix);
@@ -2231,15 +2228,8 @@ void SystemSolver::restoreSystem(const std::string &directory, const std::string
 
     std::istream &infoStream = infoArchive.getStream();
 
-#if BITPIT_ENABLE_MPI == 1
-    // Detect if the system is partitioned
-    utils::binary::read(infoStream, m_partitioned);
-#endif
-
-    // Set transpose flag
-    bool transpose;
-    utils::binary::read(infoStream, transpose);
-    setTranspose(transpose);
+    // Dump system information
+    restoreInfo(infoStream);
 
     // Restore the matrix
     matrixRestore(infoStream, directory, prefix);
@@ -2258,6 +2248,38 @@ void SystemSolver::restoreSystem(const std::string &directory, const std::string
 
     // Initialize KSP statuses
     initializeKSPStatus();
+}
+
+/*!
+ * Dump system information.
+ *
+ * \param stream is the stream in which system information is written
+ */
+void SystemSolver::dumpInfo(std::ostream &stream) const
+{
+#if BITPIT_ENABLE_MPI==1
+    utils::binary::write(stream, m_partitioned);
+#endif
+    utils::binary::write(stream, m_transpose);
+}
+
+/*!
+ * Restore system information.
+ *
+ * \param stream is the stream from which system information is read
+ */
+void SystemSolver::restoreInfo(std::istream &stream)
+{
+#if BITPIT_ENABLE_MPI == 1
+    // Detect if the system is partitioned
+    utils::binary::read(stream, m_partitioned);
+#endif
+
+    // Set transpose flag
+    bool transpose;
+    utils::binary::read(stream, transpose);
+    setTranspose(transpose);
+
 }
 
 /*!
