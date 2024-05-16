@@ -4522,10 +4522,10 @@ void SplitSystemSolver::vectorsFill(const std::string &rhsFilePath, const std::s
 void SplitSystemSolver::vectorsReorder(bool invert)
 {
     reorderVector(m_rhs, m_colReordering, invert);
-    reorderVector(m_rhs, m_colSplitPermutation, !invert);
+    // reorderVector(m_rhs, m_colSplitPermutation, !invert);
 
     reorderVector(m_solution, m_rowReordering, invert);
-    reorderVector(m_solution, m_rowSplitPermutation, !invert);
+    // reorderVector(m_solution, m_rowSplitPermutation, !invert);
 }
 
 /*!
