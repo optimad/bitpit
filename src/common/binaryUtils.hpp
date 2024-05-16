@@ -65,6 +65,9 @@ void write(std::ostream &stream, const T &value, size_t size);
 template<typename T>
 void write(std::ostream &stream, const T *value, size_t size);
 
+template<typename T>
+void write(std::ostream &stream, T *value, size_t size);
+
 void write(std::ostream &stream, const std::vector<bool> &container);
 
 void write(std::ostream &stream, const std::string &string);
