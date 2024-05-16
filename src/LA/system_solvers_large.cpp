@@ -36,6 +36,10 @@
 
 #include "system_solvers_large.hpp"
 
+#ifndef PETSC_NULLPTR
+#define PETSC_NULLPTR PETSC_NULL
+#endif
+
 namespace bitpit {
 
 /*!
@@ -822,13 +826,13 @@ SystemSolver::SystemSolver(const std::string &prefix, bool transpose, bool debug
  */
 SystemSolver::SystemSolver(const std::string &prefix, bool flatten, bool transpose, bool debug)
     : m_flatten(flatten), m_transpose(transpose),
-      m_A(PETSC_NULL), m_rhs(PETSC_NULL), m_solution(PETSC_NULL),
-      m_KSP(PETSC_NULL),
+      m_A(PETSC_NULLPTR), m_rhs(PETSC_NULLPTR), m_solution(PETSC_NULLPTR),
+      m_KSP(PETSC_NULLPTR),
       m_prefix(prefix), m_assembled(false), m_KSPDirty(true),
 #if BITPIT_ENABLE_MPI==1
       m_communicator(MPI_COMM_SELF), m_partitioned(false),
 #endif
-      m_rowReordering(PETSC_NULL), m_colReordering(PETSC_NULL),
+      m_rowReordering(PETSC_NULLPTR), m_colReordering(PETSC_NULLPTR),
       m_forceConsistency(false)
 {
     // Initialize PETSc
@@ -839,9 +843,9 @@ SystemSolver::SystemSolver(const std::string &prefix, bool flatten, bool transpo
     // Set KSP debug options
     if (debug) {
 #if (PETSC_VERSION_MAJOR >= 3 && PETSC_VERSION_MINOR >= 7)
-            PetscOptionsSetValue(nullptr, ("-" + m_prefix + "ksp_monitor_true_residual").c_str(), "");
-            PetscOptionsSetValue(nullptr, ("-" + m_prefix + "ksp_converged_reason").c_str(), "");
-            PetscOptionsSetValue(nullptr, ("-" + m_prefix + "ksp_monitor_singular_value").c_str(), "");
+            PetscOptionsSetValue(PETSC_NULLPTR, ("-" + m_prefix + "ksp_monitor_true_residual").c_str(), "");
+            PetscOptionsSetValue(PETSC_NULLPTR, ("-" + m_prefix + "ksp_converged_reason").c_str(), "");
+            PetscOptionsSetValue(PETSC_NULLPTR, ("-" + m_prefix + "ksp_monitor_singular_value").c_str(), "");
 #else
             PetscOptionsSetValue(("-" + m_prefix + "ksp_monitor_true_residual").c_str(), "");
             PetscOptionsSetValue(("-" + m_prefix + "ksp_converged_reason").c_str(), "");
@@ -1017,7 +1021,7 @@ void SystemSolver::update(long nRows, const long *rows, const Assembler &assembl
  */
 int SystemSolver::getBlockSize() const
 {
-    if (m_A == PETSC_NULL) {
+    if (m_A == PETSC_NULLPTR) {
         return 0;
     }
 
@@ -1038,7 +1042,7 @@ int SystemSolver::getBlockSize() const
  */
 long SystemSolver::getRowCount() const
 {
-    if (m_A == PETSC_NULL) {
+    if (m_A == PETSC_NULLPTR) {
         return 0;
     }
 
@@ -1060,7 +1064,7 @@ long SystemSolver::getRowCount() const
  */
 long SystemSolver::getColCount() const
 {
-    if (m_A == PETSC_NULL) {
+    if (m_A == PETSC_NULLPTR) {
         return 0;
     }
 
@@ -1082,7 +1086,7 @@ long SystemSolver::getColCount() const
  */
 long SystemSolver::getRowElementCount() const
 {
-    if (m_A == PETSC_NULL) {
+    if (m_A == PETSC_NULLPTR) {
         return 0;
     }
 
@@ -1103,7 +1107,7 @@ long SystemSolver::getRowElementCount() const
  */
 long SystemSolver::getColElementCount() const
 {
-    if (m_A == PETSC_NULL) {
+    if (m_A == PETSC_NULLPTR) {
         return 0;
     }
 
@@ -1125,7 +1129,7 @@ long SystemSolver::getColElementCount() const
  */
 long SystemSolver::getRowGlobalCount() const
 {
-    if (m_A == PETSC_NULL) {
+    if (m_A == PETSC_NULLPTR) {
         return 0;
     }
 
@@ -1147,7 +1151,7 @@ long SystemSolver::getRowGlobalCount() const
  */
 long SystemSolver::getColGlobalCount() const
 {
-    if (m_A == PETSC_NULL) {
+    if (m_A == PETSC_NULLPTR) {
         return 0;
     }
 
@@ -1168,7 +1172,7 @@ long SystemSolver::getColGlobalCount() const
  */
 long SystemSolver::getRowGlobalElementCount() const
 {
-    if (m_A == PETSC_NULL) {
+    if (m_A == PETSC_NULLPTR) {
         return 0;
     }
 
@@ -1188,7 +1192,7 @@ long SystemSolver::getRowGlobalElementCount() const
  */
 long SystemSolver::getColGlobalElementCount() const
 {
-    if (m_A == PETSC_NULL) {
+    if (m_A == PETSC_NULLPTR) {
         return 0;
     }
 
@@ -1284,7 +1288,7 @@ void SystemSolver::solveKSP()
 
     if (solverError) {
         const char *petscMessage = nullptr;
-        PetscErrorMessage(solverError, &petscMessage, nullptr);
+        PetscErrorMessage(solverError, &petscMessage, PETSC_NULLPTR);
         std::string message = "Unable to solver the system. " + std::string(petscMessage);
         throw std::runtime_error(message);
     }
@@ -1341,7 +1345,7 @@ int SystemSolver::getDumpVersion() const
  */
 void SystemSolver::matrixAssembly(const Assembler &assembler)
 {
-    const PetscInt *rowReordering = nullptr;
+    const PetscInt *rowReordering = PETSC_NULLPTR;
     if (m_rowReordering) {
         ISGetIndices(m_rowReordering, &rowReordering);
     }
@@ -1525,12 +1529,12 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const Assembler &a
     }
 
     // Initialize reordering
-    const PetscInt *rowReordering = nullptr;
+    const PetscInt *rowReordering = PETSC_NULLPTR;
     if (m_rowReordering) {
         ISGetIndices(m_rowReordering, &rowReordering);
     }
 
-    const PetscInt *colReordering = nullptr;
+    const PetscInt *colReordering = PETSC_NULLPTR;
     if (m_colReordering) {
         ISGetIndices(m_colReordering, &colReordering);
     }
@@ -1543,7 +1547,7 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const Assembler &a
     colGlobalEnd /= blockSize;
 
     PetscInt rowGlobalOffset;
-    MatGetOwnershipRange(m_A, &rowGlobalOffset, nullptr);
+    MatGetOwnershipRange(m_A, &rowGlobalOffset, PETSC_NULLPTR);
     rowGlobalOffset /= blockSize;
 
     // Get the options for assembling the matrix
@@ -2341,7 +2345,7 @@ void SystemSolver::restoreMatrix(std::istream &stream, const std::string &direct
     bool matrixExists;
     utils::binary::read(stream, matrixExists);
     if (!matrixExists) {
-        *matrix = PETSC_NULL;
+        *matrix = PETSC_NULLPTR;
         return;
     }
 
@@ -2426,7 +2430,7 @@ void SystemSolver::destroyMatrix(Mat *matrix) const
 {
     if (matrix) {
         MatDestroy(matrix);
-        *matrix = PETSC_NULL;
+        *matrix = PETSC_NULLPTR;
     }
 }
 
@@ -2560,7 +2564,7 @@ void SystemSolver::restoreVector(std::istream &stream, const std::string &direct
     bool vectorExists;;
     utils::binary::read(stream, vectorExists);
     if (!vectorExists) {
-        *vector = PETSC_NULL;
+        *vector = PETSC_NULLPTR;
         return;
     }
 
@@ -2679,7 +2683,7 @@ void SystemSolver::destroyVector(Vec *vector) const
 {
     if (vector) {
         VecDestroy(vector);
-        *vector = PETSC_NULL;
+        *vector = PETSC_NULLPTR;
     }
 }
 
@@ -2908,7 +2912,7 @@ void SystemSolver::destroyKSP()
 {
     m_KSPDirty = true;
     KSPDestroy(&m_KSP);
-    m_KSP = nullptr;
+    m_KSP = PETSC_NULLPTR;
 }
 
 /*!
@@ -2959,7 +2963,7 @@ void SystemSolver::setupPreconditioner(PC pc, const KSPOptions &options) const
     if (strcmp(pcType, PCASM) == 0) {
         KSP *subKSPs;
         PetscInt nSubKSPs;
-        PCASMGetSubKSP(pc, &nSubKSPs, PETSC_NULL, &subKSPs);
+        PCASMGetSubKSP(pc, &nSubKSPs, PETSC_NULLPTR, &subKSPs);
 
         for (PetscInt i = 0; i < nSubKSPs; ++i) {
             KSP subKSP = subKSPs[i];
