@@ -143,6 +143,21 @@ void write(std::ostream &stream, const T *value, size_t size)
 /*!
     \ingroup common_binary
 
+    Write the given data to the specified stream in binary format.
+
+    \param stream is the stream to write to
+    \param value is the data to write
+    \param size is the size, expressed in bytes, of the data to write
+*/
+template<typename T>
+void write(std::ostream &stream, T *value, size_t size)
+{
+    stream.write(reinterpret_cast<char*>(value), size);
+}
+
+/*!
+    \ingroup common_binary
+
     Read the given container to the specified stream in binary format.
 
     \param stream is the stream to write to
