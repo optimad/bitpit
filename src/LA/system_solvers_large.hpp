@@ -413,6 +413,9 @@ protected:
     virtual void fillKSPStatus(KSP ksp, KSPStatus *status) const;
     virtual void destroyKSPStatus();
 
+    virtual void dumpInfo(std::ostream &stream) const;
+    virtual void restoreInfo(std::istream &stream);
+
     void createMatrix(int rowBlockSize, int colBlockSize, Mat *matrix) const;
     void fillMatrix(Mat matrix, const std::string &filePath) const;
     void dumpMatrix(Mat matrix, std::ostream &stream, const std::string &directory, const std::string &name) const;
