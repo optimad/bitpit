@@ -461,12 +461,23 @@ void SystemSparseMatrixAssembler::getRowData(long rowIndex, ConstProxyVector<lon
 /*!
  * Constructor.
  *
- * \param matrix is the matrix
+ * \param splitType the type of split that will be applied to the system
+ * \param splitSizes are the sizes of the splits
  */
-SplitSystemMatrixAssembler::SplitSystemMatrixAssembler(const std::vector<int> &splitSizes)
+SplitSystemMatrixAssembler::SplitSystemMatrixAssembler(SplitType splitType, const std::vector<int> &splitSizes)
     : SystemMatrixAssembler(),
-      m_splitSizes(splitSizes)
+      m_splitType(splitType), m_splitSizes(splitSizes)
 {
+}
+
+/*!
+ * Get type of split that will be applied to the system.
+ *
+ * \result The type of split that will be applied to the system.
+ */
+SplitSystemMatrixAssembler::SplitType SplitSystemMatrixAssembler::getSplitType() const
+{
+    return m_splitType;
 }
 
 /*!
@@ -501,11 +512,13 @@ const std::vector<int> & SplitSystemMatrixAssembler::getSplitSizes() const
  * Constructor.
  *
  * \param matrix is the matrix
+ * \param splitType the type of split that will be applied to the system
+ * \param splitSizes are the sizes of the splits
  */
-SplitSystemSparseMatrixAssembler::SplitSystemSparseMatrixAssembler(const SparseMatrix *matrix,
+SplitSystemSparseMatrixAssembler::SplitSystemSparseMatrixAssembler(const SparseMatrix *matrix, SplitType splitType,
                                                                    const std::vector<int> &splitSizes)
     : SystemSparseMatrixAssembler(matrix),
-      SplitSystemMatrixAssembler(splitSizes)
+      SplitSystemMatrixAssembler(splitType, splitSizes)
 {
 }
 
@@ -3472,6 +3485,16 @@ int SplitSystemSolver::getBlockSize() const
 }
 
 /*!
+ * Get type of split that will be applied to the system.
+ *
+ * \result The type of split that will be applied to the system.
+ */
+SplitSystemSolver::SplitType SplitSystemSolver::getSplitType() const
+{
+    return m_splitType;
+}
+
+/*!
  * Get the block size of the system.
  *
  * \result The block size of the system.
@@ -3521,7 +3544,7 @@ std::vector<int> SplitSystemSolver::getSplitOffsets() const
 {
     std::vector<int> splitBlockSizes = getSplitSizes();
     std::vector<int> splitBlockOffsets(splitBlockSizes.size());
-    splitBlockOffsets[0];
+    splitBlockOffsets[0] = 0;
     std::partial_sum(splitBlockSizes.begin(), std::prev(splitBlockSizes.end()), std::next(splitBlockOffsets.begin()));
 
     return splitBlockOffsets;
@@ -3697,23 +3720,54 @@ void SplitSystemSolver::destroySplitKSPStatuses()
     m_splitKSPStatuses.clear();
 }
 
+
 /*!
- * Assembly the system.
+ * Dump system information.
  *
- * \param matrix is the matrix
+ * \param stream is the stream in which system information is written
  */
-void SplitSystemSolver::assembly(const SparseMatrix &matrix, const std::vector<int> &splitSizes)
+void SplitSystemSolver::dumpInfo(std::ostream &stream) const
 {
-    assembly(matrix, splitSizes, NaturalSystemMatrixOrdering());
+    SystemSolver::dumpInfo(stream);
+
+    utils::binary::write(stream, m_splitType);
+}
+
+/*!
+ * Restore system information.
+ *
+ * \param stream is the stream from which system information is read
+ */
+void SplitSystemSolver::restoreInfo(std::istream &stream)
+{
+    SystemSolver::restoreInfo(stream);
+
+    utils::binary::read(stream, m_splitType);
 }
 
 /*!
  * Assembly the system.
  *
  * \param matrix is the matrix
+ * \param splitType the type of split that will be applied to the system
+ * \param splitSizes are the sizes of the splits
+ */
+void SplitSystemSolver::assembly(const SparseMatrix &matrix, SplitType splitType,
+                                 const std::vector<int> &splitSizes)
+{
+    assembly(matrix, splitType, splitSizes, NaturalSystemMatrixOrdering());
+}
+
+/*!
+ * Assembly the system.
+ *
+ * \param matrix is the matrix
+ * \param splitType the type of split that will be applied to the system
+ * \param splitSizes are the sizes of the splits
  * \param reordering is the reordering that will be applied when assemblying the system
  */
-void SplitSystemSolver::assembly(const SparseMatrix &matrix, const std::vector<int> &splitSizes,
+void SplitSystemSolver::assembly(const SparseMatrix &matrix, SplitType splitType,
+                                 const std::vector<int> &splitSizes,
                                  const SystemMatrixOrdering &reordering)
 {
     // Check if the matrix is assembled
@@ -3722,7 +3776,7 @@ void SplitSystemSolver::assembly(const SparseMatrix &matrix, const std::vector<i
     }
 
     // Update matrix
-    SplitSystemSparseMatrixAssembler assembler(&matrix, splitSizes);
+    SplitSystemSparseMatrixAssembler assembler(&matrix, splitType, splitSizes);
     assembly<SplitSystemSolver>(static_cast<const Assembler &>(assembler),reordering);
 }
 
@@ -3778,7 +3832,7 @@ void SplitSystemSolver::update(long nRows, const long *rows, const SparseMatrix 
     }
 
     // Update matrix
-    SplitSystemSparseMatrixAssembler assembler(&elements, getSplitSizes());
+    SplitSystemSparseMatrixAssembler assembler(&elements, getSplitType(), getSplitSizes());
     update<SplitSystemSolver>(nRows, rows, static_cast<const Assembler &>(assembler));
 }
 
@@ -3826,14 +3880,25 @@ void SplitSystemSolver::matrixCreate(const Assembler &assembler)
     long nRows = assembler.getRowCount();
 
     // Split information
+    m_splitType = assembler.getSplitType();
+
     const std::vector<int> &splitBlockSizes = assembler.getSplitSizes();
     int nSplits = splitBlockSizes.size();
 
     // Create split matrices
-    m_splitAs.resize(nSplits * nSplits);
+    m_splitAs.assign(nSplits * nSplits, PETSC_NULLPTR);
     for (int splitRow = 0; splitRow < nSplits; ++splitRow) {
         for (int splitCol = 0; splitCol < nSplits; ++splitCol) {
             // Create matrix
+            //
+            // In lower-split mode, only the lower triangular portion of the splits need to
+            // be created.
+            if (m_splitType == SplitType::SPLIT_TYPE_LOWER) {
+                if (splitCol > splitRow) {
+                    continue;
+                }
+            }
+
             int splitIndex = getBlockSplitLinearIndex(splitRow, splitCol, nSplits);
             Mat *splitMatrix = m_splitAs.data() + splitIndex;
             createMatrix(splitBlockSizes[splitRow], splitBlockSizes[splitCol], splitMatrix);
@@ -3981,6 +4046,10 @@ void SplitSystemSolver::matrixFill(const Assembler &assembler)
     // When updating the matrix it will not be possible to alter the pattern,
     // it will be possible to change only the values.
     for (Mat splitMatrix : m_splitAs) {
+        if (!splitMatrix) {
+                continue;
+        }
+
         MatSetOption(splitMatrix, MAT_NEW_NONZERO_LOCATIONS, PETSC_FALSE);
     }
     MatSetOption(m_A, MAT_NEW_NONZERO_LOCATIONS, PETSC_FALSE);
@@ -4182,6 +4251,10 @@ void SplitSystemSolver::matrixUpdate(long nRows, const long *rows, const Assembl
 
             for (int splitCol = 0; splitCol < nSplits; ++splitCol) {
                 int splitIndex = getBlockSplitLinearIndex(splitRow, splitCol, nSplits);
+                if (!m_splitAs[splitIndex]) {
+                    continue;
+                }
+
                 const std::vector<std::size_t> &splitScatterIndexes = scatterIndexes[splitCol];
                 std::size_t nSplitRowElements = splitBlockSizes[splitCol] * rowPatternSize;
                 std::size_t splitBlockRowValuesOffset = nSplitRowElements * splitBlockRow;
@@ -4194,6 +4267,10 @@ void SplitSystemSolver::matrixUpdate(long nRows, const long *rows, const Assembl
 
         // Insert values
         for (std::size_t k = 0; k < m_splitAs.size(); ++k) {
+            if (!m_splitAs[k]) {
+                continue;
+            }
+
             MatSetValuesBlocked(m_splitAs[k], 1, &globalRow, rowPatternSize, petscRowPattern,
                                 petscSplitRowValues[k].data(), INSERT_VALUES);
         }
@@ -4201,11 +4278,19 @@ void SplitSystemSolver::matrixUpdate(long nRows, const long *rows, const Assembl
 
     // Let PETSc assembly the matrix after the update
     for (Mat splitMatrix : m_splitAs) {
+        if (!splitMatrix) {
+            continue;
+        }
+
         MatAssemblyBegin(splitMatrix, MAT_FINAL_ASSEMBLY);
     }
     MatAssemblyBegin(m_A, MAT_FINAL_ASSEMBLY);
 
     for (Mat splitMatrix : m_splitAs) {
+        if (!splitMatrix) {
+            continue;
+        }
+
         MatAssemblyEnd(splitMatrix, MAT_FINAL_ASSEMBLY);
     }
     MatAssemblyEnd(m_A, MAT_FINAL_ASSEMBLY);
@@ -4264,7 +4349,7 @@ void SplitSystemSolver::matrixRestore(std::istream &stream, const std::string &d
     int nSplits;
     utils::binary::read(stream, nSplits);
 
-    m_splitAs.resize(nSplits * nSplits);
+    m_splitAs.assign(nSplits * nSplits, PETSC_NULLPTR);
     for (PetscInt splitRow = 0; splitRow < nSplits; ++splitRow) {
         for (PetscInt splitCol = 0; splitCol < nSplits; ++splitCol) {
             int splitIndex = getBlockSplitLinearIndex(splitRow, splitCol, nSplits);
@@ -4312,9 +4397,13 @@ void SplitSystemSolver::vectorsCreate()
     int nSplits = getSplitCount();
 
     // Create split vectors
-    m_splitRhss.resize(nSplits);
+    m_splitRhss.assign(nSplits, PETSC_NULLPTR);
     for (PetscInt splitCol = 0; splitCol < nSplits; ++splitCol) {
         int splitIndex = getBlockSplitLinearIndex(std::min(splitCol, nSplits - 1), splitCol, nSplits);
+        if (!m_splitAs[splitIndex]) {
+            continue;
+        }
+
         if (!m_transpose) {
             MatCreateVecs(m_splitAs[splitIndex], &(m_splitRhss[splitCol]), nullptr);
         } else {
@@ -4322,9 +4411,13 @@ void SplitSystemSolver::vectorsCreate()
         }
     }
 
-    m_splitSolutions.resize(nSplits);
+    m_splitSolutions.assign(nSplits, PETSC_NULLPTR);
     for (PetscInt splitRow = 0; splitRow < nSplits; ++splitRow) {
         int splitIndex = getBlockSplitLinearIndex(splitRow, std::min(splitRow, nSplits - 1), nSplits);
+        if (!m_splitAs[splitIndex]) {
+            continue;
+        }
+
         if (!m_transpose) {
             MatCreateVecs(m_splitAs[splitIndex], nullptr, &(m_splitSolutions[splitRow]));
         } else {
@@ -4482,13 +4575,13 @@ void SplitSystemSolver::vectorsRestore(std::istream &stream, const std::string &
     int nSplits;
     utils::binary::read(stream, nSplits);
 
-    m_splitRhss.resize(nSplits);
+    m_splitRhss.assign(nSplits, PETSC_NULLPTR);
     for (int splitRow = 0; splitRow < nSplits; ++splitRow) {
         std::string rhsSplitVectorName = generateSplitPath(prefix + "rhs", splitRow);
         restoreVector(stream, directory, rhsSplitVectorName, m_splitRhss.data() + splitRow);
     }
 
-    m_splitSolutions.resize(nSplits);
+    m_splitSolutions.assign(nSplits, PETSC_NULLPTR);
     for (int splitCol = 0; splitCol < nSplits; ++splitCol) {
         std::string solutionSplitVectorName = generateSplitPath(prefix + "solution", splitCol);
         restoreVector(stream, directory, solutionSplitVectorName, m_splitSolutions.data() + splitCol);
@@ -4629,12 +4722,16 @@ void SplitSystemSolver::setupPreconditioner()
 
     // Setup main preconditioner
     //
-    // The preconditioner in in charge of the solution of the single splits. The first split
-    // will be resolved first, then the solution of the first split will be will be used for
-    // the solution of the second split and so on and so forth. This strategy can be seen as
-    // a "block" Gauss-Seidel with the blocks being the splits.
+    // In lower-split mode, the preconditioner is in charge of the solution of the single splits.
+    // The first split will be resolved first, then the solution of the first split will be will
+    // be used for the solution of the second split and so on and so forth. This strategy can be
+    // seen as a "block" Gauss-Seidel with the blocks being the splits.
     PCSetType(pc, PCFIELDSPLIT);
-    PCFieldSplitSetType(pc, PC_COMPOSITE_MULTIPLICATIVE);
+    if (m_splitType == SplitType::SPLIT_TYPE_LOWER) {
+        PCFieldSplitSetType(pc, PC_COMPOSITE_MULTIPLICATIVE);
+    } else {
+        PCFieldSplitSetType(pc, PC_COMPOSITE_ADDITIVE);
+    }
 
     int nSplits = getSplitCount();
     std::vector<IS> splitIndexSets(nSplits);
@@ -4677,9 +4774,13 @@ void SplitSystemSolver::setupKrylov()
 {
     // Setup main Krylov subspace method
     //
-    // Solution of the system is performed by the Krylov subspace methods of the single splits,
-    // thus the main Krylov subspace method doens't need to to anything.
-    KSPSetType(m_KSP, KSPPREONLY);
+    // In lower-split mode, solution of the system is performed by the Krylov subspace methods
+    // of the single splits, thus the main Krylov subspace method doesn't need to to anything.
+    if (m_splitType == SplitType::SPLIT_TYPE_LOWER) {
+        KSPSetType(m_KSP, KSPPREONLY);
+    } else {
+        setupKrylov(m_KSP, getKSPOptions());
+    }
 
     // Setup Krylov subspace methods of the splits
     setupSplitKrylovs();
@@ -4699,7 +4800,14 @@ void SplitSystemSolver::setupSplitKrylovs()
 
     for (PetscInt k = 0; k < nFieldSplits; ++k) {
         const KSPOptions &splitOptions = getSplitKSPOptions(k);
-        setupKrylov(splitKSPs[k], splitOptions);
+        if (m_splitType == SplitType::SPLIT_TYPE_LOWER) {
+            setupKrylov(splitKSPs[k], splitOptions);
+        } else {
+            // Since we want to apply multiple preconditioners in a simple iteration
+            // we use KSPRICHARDSON instead of KSPREONLY (see PETSc documentation for
+            // KSPREONLY).
+            KSPSetType(m_KSP, KSPRICHARDSON);
+        }
     }
 }
 

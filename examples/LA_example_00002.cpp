@@ -247,7 +247,7 @@ int run_dump(int rank, int nProcs)
     splitSizes[0] = 4;
     splitSizes[1] = blockSize - splitSizes[0];
 
-    solver.assembly(matrix, splitSizes);
+    solver.assembly(matrix, AMGSplitSystemSolver::SplitType::SPLIT_TYPE_FULL, splitSizes);
 
     double *rhs = solver.getRHSRawPtr();
     for (int i = 0; i < nCols; ++i) {

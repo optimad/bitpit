@@ -224,13 +224,20 @@ protected:
 class SplitSystemMatrixAssembler : virtual public SystemMatrixAssembler {
 
 public:
+    enum SplitType {
+        SPLIT_TYPE_FULL,
+        SPLIT_TYPE_LOWER,
+    };
+
+    SplitType getSplitType() const;
     int getSplitCount() const;
     const std::vector<int> & getSplitSizes() const;
 
 protected:
-    SplitSystemMatrixAssembler(const std::vector<int> &splitSizes);
+    SplitSystemMatrixAssembler(SplitType splitType, const std::vector<int> &splitSizes);
 
 private:
+    SplitType m_splitType;
     std::vector<int> m_splitSizes;
 
 };
@@ -238,7 +245,8 @@ private:
 class SplitSystemSparseMatrixAssembler : public SystemSparseMatrixAssembler, public SplitSystemMatrixAssembler  {
 
 public:
-    SplitSystemSparseMatrixAssembler(const SparseMatrix *matrix, const std::vector<int> &splitSizes);
+    SplitSystemSparseMatrixAssembler(const SparseMatrix *matrix, SplitType splitType,
+                                     const std::vector<int> &splitSizes);
 
 };
 
@@ -509,6 +517,8 @@ class SplitSystemSolver : public SystemSolver {
 public:
     typedef SplitSystemMatrixAssembler Assembler;
 
+    typedef Assembler::SplitType SplitType;
+
     friend class SystemSolver;
 
     SplitSystemSolver(bool debug = false);
@@ -520,8 +530,9 @@ public:
 
     using SystemSolver::SystemSolver;
 
-    void assembly(const SparseMatrix &matrix, const std::vector<int> &splitSizes);
-    void assembly(const SparseMatrix &matrix, const std::vector<int> &splitSizes, const SystemMatrixOrdering &reordering);
+    void assembly(const SparseMatrix &matrix, SplitType splitType, const std::vector<int> &splitSizes);
+    void assembly(const SparseMatrix &matrix, SplitType splitType, const std::vector<int> &splitSizes,
+                  const SystemMatrixOrdering &reordering);
     void assembly(const Assembler &assembler);
     void assembly(const Assembler &assembler, const SystemMatrixOrdering &reordering);
 
@@ -532,6 +543,7 @@ public:
 
     int getBlockSize() const override;
 
+    SplitType getSplitType() const;
     int getSplitCount() const;
     std::vector<int> getSplitSizes() const;
     std::vector<int> getSplitOffsets() const;
@@ -548,6 +560,8 @@ public:
     void exportSolution(const std::string &filePath, FileFormat exportFormat = FILE_BINARY) const override;
 
 protected:
+    SplitType m_splitType;
+
     std::vector<Mat> m_splitAs;
     std::vector<Vec> m_splitRhss;
     std::vector<Vec> m_splitSolutions;
@@ -600,6 +614,9 @@ protected:
     void resetSplitKSPStatuses();
     void destroyKSPStatus() override;
     void destroySplitKSPStatuses();
+
+    void dumpInfo(std::ostream &stream) const override;
+    void restoreInfo(std::istream &stream) override;
 
     using SystemSolver::exportMatrix;
 
