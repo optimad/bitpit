@@ -77,19 +77,9 @@ public:
      * \param debug if true PETSc monitors on residual, reason and singular values are turned on.
      */
     AMGSystemSolver(bool transpose, bool multigrid, bool debug)
-        : SystemSolver(transpose, debug),
+        : SystemSolver(multigrid, transpose, debug),
           m_multigrid(multigrid)
     {
-    }
-
-    /*!
-     * Set the algebraic multigrid preconditioner.
-     *
-     * \param multigrid if true the algebraic multigrid preconditioner is turned on.
-     */
-    void setMultigridFlag(bool multigrid)
-    {
-        m_multigrid = multigrid;
     }
 
 protected:
@@ -240,7 +230,7 @@ int run_dump(int rank, int nProcs)
     // Build solver
     log::cout() << "Building solver..." << std::endl;
 
-    bool multigrid = false;
+    bool multigrid = true;
     bool debug     = false;
     bool transpose = false;
     AMGSystemSolver solver(transpose, multigrid, debug);
@@ -337,7 +327,7 @@ int run_restore(int rank, int nProcs)
 
     // Restore solver with initial guess
     log::cout() << "Restoring linear system ..." << std::endl;
-    bool multigrid = false;
+    bool multigrid = true;
     bool debug     = false;
     bool transpose = false;
     AMGSystemSolver solver(transpose, multigrid, debug);
@@ -353,19 +343,6 @@ int run_restore(int rank, int nProcs)
     solver.exportMatrix("LA_example_0001_restored_matrix.txt", SystemSolver::FILE_ASCII);
     solver.exportRHS("LA_example_0001_restored_rhs.txt", SystemSolver::FILE_ASCII);
     solver.exportSolution("LA_example_0001_restored_solution.txt", SystemSolver::FILE_ASCII);
-
-    // Check if multigrid is possible. Multigrid is not possible on BAIJ matrices
-    if (multigrid) {
-        log::cout() << "Enable multigrid preconditioner..." << std::endl;
-        int blockSize        = solver.getBlockSize();
-        bool enableMultigrid = (blockSize == 1);
-        solver.setMultigridFlag(enableMultigrid);
-        if (enableMultigrid) {
-            log::cout() << "Multigrid preconditioner enabled..." << std::endl;
-        } else {
-            log::cout() << "The matrix is a block matrix, no multigrid preconditioning is possible." << std::endl;
-        }
-    }
 
     // Set KSP options
     KSPOptions &options = solver.getKSPOptions();
