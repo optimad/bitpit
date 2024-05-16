@@ -1786,8 +1786,13 @@ void SystemSolver::vectorsFill(const std::string &rhsFilePath, const std::string
  */
 void SystemSolver::vectorsReorder(bool invert)
 {
-    reorderVector(m_rhs, m_colReordering, invert);
-    reorderVector(m_solution, m_rowReordering, invert);
+    if (!m_transpose) {
+        reorderVector(m_rhs, m_colReordering, invert);
+        reorderVector(m_solution, m_rowReordering, invert);
+    } else {
+        reorderVector(m_rhs, m_rowReordering, invert);
+        reorderVector(m_solution, m_colReordering, invert);
+    }
 }
 
 /*!
