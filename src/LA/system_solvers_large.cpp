@@ -2382,6 +2382,12 @@ void SystemSolver::dumpMatrix(Mat matrix, std::ostream &stream, const std::strin
                               const std::string &name) const
 {
     // Store information needed to create the matrix
+    bool matrixExists = matrix;
+    utils::binary::write(stream, matrixExists);
+    if (!matrixExists) {
+        return;
+    }
+
     PetscInt rowBlockSize;
     PetscInt colBlockSize;
     MatGetBlockSizes(matrix, &rowBlockSize, &colBlockSize);
@@ -2417,6 +2423,13 @@ void SystemSolver::restoreMatrix(std::istream &stream, const std::string &direct
                                  const std::string &name, Mat *matrix) const
 {
     // Create matrix
+    bool matrixExists;
+    utils::binary::read(stream, matrixExists);
+    if (!matrixExists) {
+        *matrix = PETSC_NULL;
+        return;
+    }
+
     int rowBlockSize;
     int colBlockSize;
     utils::binary::read(stream, rowBlockSize);
@@ -2448,6 +2461,19 @@ void SystemSolver::restoreMatrix(std::istream &stream, const std::string &direct
  */
 void SystemSolver::exportMatrix(Mat matrix, const std::string &filePath, FileFormat fileFormat) const
 {
+    // Early return if the matrix doesn't exist
+    bool matrixExists = matrix;
+    if (!matrixExists) {
+        std::ofstream dataFile(filePath);
+        dataFile.close();
+
+        std::ofstream infoFile(filePath + ".info");
+        infoFile.close();
+
+        return;
+    }
+
+    // Create the viewer
     PetscViewerType viewerType;
     PetscViewerFormat viewerFormat;
     if (fileFormat == FILE_BINARY) {
@@ -2467,9 +2493,12 @@ void SystemSolver::exportMatrix(Mat matrix, const std::string &filePath, FileFor
     PetscViewerSetType(matViewer, viewerType);
     PetscViewerFileSetMode(matViewer, FILE_MODE_WRITE);
     PetscViewerPushFormat(matViewer, viewerFormat);
-
     PetscViewerFileSetName(matViewer, filePath.c_str());
+
+    // Export the matrix
     MatView(matrix, matViewer);
+
+    // Destroy the viewer
     PetscViewerDestroy(&matViewer);
 }
 
@@ -2602,6 +2631,12 @@ void SystemSolver::fillVector(Vec vector, const std::vector<double> &data) const
 void SystemSolver::dumpVector(Vec vector, std::ostream &stream, const std::string &directory,
                               const std::string &name) const
 {
+    bool vectorExists = vector;
+    utils::binary::write(stream, vectorExists);
+    if (!vectorExists) {
+        return;
+    }
+
     PetscInt blockSize;
     VecGetBlockSize(vector, &blockSize);
     utils::binary::write(stream, static_cast<int>(blockSize));
@@ -2630,6 +2665,13 @@ void SystemSolver::restoreVector(std::istream &stream, const std::string &direct
                                  const std::string &name, Vec *vector) const
 {
     // Create vector
+    bool vectorExists;;
+    utils::binary::read(stream, vectorExists);
+    if (!vectorExists) {
+        *vector = PETSC_NULL;
+        return;
+    }
+
     int blockSize;
     utils::binary::read(stream, blockSize);
     createVector(blockSize, vector);
@@ -2676,6 +2718,19 @@ void SystemSolver::reorderVector(Vec vector, IS permutations, bool invert) const
  */
 void SystemSolver::exportVector(Vec vector, const std::string &filePath, FileFormat fileFormat) const
 {
+    // Early return if the matrix doesn't exist
+    bool vectorExists = vector;
+    if (!vectorExists) {
+        std::ofstream dataFile(filePath);
+        dataFile.close();
+
+        std::ofstream infoFile(filePath + ".info");
+        infoFile.close();
+
+        return;
+    }
+
+    // Create the viewer
     PetscViewerType viewerType;
     PetscViewerFormat viewerFormat;
     if (fileFormat == FILE_BINARY) {
@@ -2695,9 +2750,12 @@ void SystemSolver::exportVector(Vec vector, const std::string &filePath, FileFor
     PetscViewerSetType(viewer, viewerType);
     PetscViewerFileSetMode(viewer, FILE_MODE_WRITE);
     PetscViewerPushFormat(viewer, viewerFormat);
-
     PetscViewerFileSetName(viewer, filePath.c_str());
+
+    // Export the vector
     VecView(vector, viewer);
+
+    // Destroy the viewer
     PetscViewerDestroy(&viewer);
 }
 
