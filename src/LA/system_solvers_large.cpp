@@ -2298,6 +2298,18 @@ void SystemSolver::dumpMatrix(Mat matrix, std::ostream &stream, const std::strin
     utils::binary::write(stream, static_cast<int>(rowBlockSize));
     utils::binary::write(stream, static_cast<int>(colBlockSize));
 
+    PetscInt nLocalRows;
+    PetscInt nLocalCols;
+    MatGetLocalSize(matrix, &nLocalRows, &nLocalCols);
+    utils::binary::write(stream, static_cast<std::size_t>(nLocalRows));
+    utils::binary::write(stream, static_cast<std::size_t>(nLocalCols));
+
+    PetscInt nGlobalRows;
+    PetscInt nGlobalCols;
+    MatGetSize(matrix, &nGlobalRows, &nGlobalCols);
+    utils::binary::write(stream, static_cast<std::size_t>(nGlobalRows));
+    utils::binary::write(stream, static_cast<std::size_t>(nGlobalCols));
+
     // Store matrix content
     std::string filePath = getDataFilePath(directory, name);
     exportMatrix(matrix, filePath, FILE_BINARY);
@@ -2327,6 +2339,16 @@ void SystemSolver::restoreMatrix(std::istream &stream, const std::string &direct
     utils::binary::read(stream, rowBlockSize);
     utils::binary::read(stream, colBlockSize);
     createMatrix(rowBlockSize, colBlockSize, matrix);
+
+    std::size_t nLocalRows;
+    std::size_t nLocalCols;
+    utils::binary::read(stream, nLocalRows);
+    utils::binary::read(stream, nLocalCols);
+    std::size_t nGlobalRows;
+    std::size_t nGlobalCols;
+    utils::binary::read(stream, nGlobalRows);
+    utils::binary::read(stream, nGlobalCols);
+    MatSetSizes(*matrix, nLocalRows, nLocalCols, nGlobalRows, nGlobalCols);
 
     // Fill matrix
     std::string filePath = getDataFilePath(directory, name);
@@ -2500,6 +2522,14 @@ void SystemSolver::dumpVector(Vec vector, std::ostream &stream, const std::strin
     VecGetBlockSize(vector, &blockSize);
     utils::binary::write(stream, static_cast<int>(blockSize));
 
+    PetscInt localSize;
+    VecGetLocalSize(vector, &localSize);
+    utils::binary::write(stream, static_cast<std::size_t>(localSize));
+
+    PetscInt globalSize;
+    VecGetSize(vector, &globalSize);
+    utils::binary::write(stream, static_cast<std::size_t>(globalSize));
+
     std::string filePath = getDataFilePath(directory, name);
     exportVector(vector, filePath, FILE_BINARY);
 }
@@ -2526,6 +2556,12 @@ void SystemSolver::restoreVector(std::istream &stream, const std::string &direct
     int blockSize;
     utils::binary::read(stream, blockSize);
     createVector(blockSize, vector);
+
+    std::size_t localSize;
+    utils::binary::read(stream, localSize);
+    std::size_t globalSize;
+    utils::binary::read(stream, globalSize);
+    VecSetSizes(*vector, localSize, globalSize);
 
     // Fill vector
     std::string filePath = getDataFilePath(directory, name);
