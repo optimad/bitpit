@@ -54,11 +54,15 @@ ProxySystemMatrixOrdering<RowRankStorage, ColRankStorage>::ProxySystemMatrixOrde
 /*!
  * Get the rank of the specified local row.
  *
- * \param row is the local local row
+ * The permutation rank defines the position, in the final assembled matrix, of the
+ * specified local row (i.e., the position of the specified local row after applying
+ * the reordering).
+ *
+ * \param row is the local row
  * \result The rank of the specified local row.
  */
 template<typename RowRankStorage, typename ColRankStorage>
-long ProxySystemMatrixOrdering<RowRankStorage, ColRankStorage>::getRowRank(long row) const
+long ProxySystemMatrixOrdering<RowRankStorage, ColRankStorage>::getRowPermutationRank(long row) const
 {
     return (*m_rowRankStorage)[row];
 }
@@ -66,11 +70,15 @@ long ProxySystemMatrixOrdering<RowRankStorage, ColRankStorage>::getRowRank(long 
 /*!
  * Get the rank of the specified local column.
  *
+ * The permutation rank defines the position, in the final assembled matrix, of the
+ * specified local column (i.e., the position of the specified local column after
+ * applying the reordering).
+ *
  * \param col is the local column
  * \result The rank of the specified local column.
  */
 template<typename RowRankStorage, typename ColRankStorage>
-long ProxySystemMatrixOrdering<RowRankStorage, ColRankStorage>::getColRank(long col) const
+long ProxySystemMatrixOrdering<RowRankStorage, ColRankStorage>::getColPermutationRank(long col) const
 {
     return (*m_colRankStorage)[col];
 }
