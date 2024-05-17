@@ -70,27 +70,29 @@ class SystemMatrixOrdering
 public:
     virtual ~SystemMatrixOrdering() = default;
 
-    /**
+    /*!
      * Get the rank of the specified local row.
      *
-     * The rank defines the position in the assembled matrix, of the specified
-     * local row.
+     * The permutation rank defines the position, in the final assembled matrix, of the
+     * specified local row (i.e., the position of the specified local row after applying
+     * the reordering).
      *
      * \param row is the local row
      * \result The rank of the specified local row.
      */
-    virtual long getRowRank(long row) const = 0;
+    virtual long getRowPermutationRank(long row) const = 0;
 
-    /**
+    /*!
      * Get the rank of the specified local column.
      *
-     * The rank defines the position in the assembled matrix, of the specified
-     * local column.
+     * The permutation rank defines the position, in the final assembled matrix, of the
+     * specified local column (i.e., the position of the specified local column after
+     * applying the reordering).
      *
      * \param col is the local column
      * \result The rank of the specified local column.
      */
-    virtual long getColRank(long col) const = 0;
+    virtual long getColPermutationRank(long col) const = 0;
 
 protected:
     SystemMatrixOrdering() = default;
@@ -103,8 +105,8 @@ class NaturalSystemMatrixOrdering : public SystemMatrixOrdering
 public:
     NaturalSystemMatrixOrdering() = default;
 
-    long getRowRank(long row) const override;
-    long getColRank(long col) const override;
+    long getRowPermutationRank(long row) const override;
+    long getColPermutationRank(long col) const override;
 
 };
 
@@ -115,8 +117,8 @@ class ProxySystemMatrixOrdering : public SystemMatrixOrdering
 public:
     ProxySystemMatrixOrdering(const RowRankStorage *rowRankStorage, const ColRankStorage *colRankStorage);
 
-    long getRowRank(long row) const override;
-    long getColRank(long col) const override;
+    long getRowPermutationRank(long row) const override;
+    long getColPermutationRank(long col) const override;
 
 private:
     const RowRankStorage *m_rowRankStorage;

@@ -62,23 +62,31 @@ namespace bitpit {
  */
 
 /*!
- * Get the rank of the specified local row.
+ * Get the permutation rank of the specified local row.
+ *
+ * The permutation rank defines the position, in the final assembled matrix, of the
+ * specified local row (i.e., the position of the specified local row after applying
+ * the reordering).
  *
  * \param row is the local row
- * \result The rank of the specified local row.
+ * \result The permutation rank of the specified local row.
  */
-long NaturalSystemMatrixOrdering::getRowRank(long row) const
+long NaturalSystemMatrixOrdering::getRowPermutationRank(long row) const
 {
     return row;
 }
 
 /*!
- * Get the rank of the specified local column.
+ * Get the permutation rank of the specified local column.
+ *
+ * The permutation rank defines the position, in the final assembled matrix, of the
+ * specified local column (i.e., the position of the specified local column after
+ * applying the reordering).
  *
  * \param col is the local column
- * \result The rank of the specified local column.
+ * \result The permutation rank of the specified local column.
  */
-long NaturalSystemMatrixOrdering::getColRank(long col) const
+long NaturalSystemMatrixOrdering::getColPermutationRank(long col) const
 {
     return col;
 }
@@ -2775,6 +2783,9 @@ void SystemSolver::unsetNullSpace()
  * Reordering is only applied internally, all public functions expects row
  * and column indices to be in natural matrix order (i.e., not reordered).
  *
+ * If the system is partitioned, each process can reorder only it's local
+ * part of the matrix.
+ *
  * \param nRows is the number of rows of the system matrix
  * \param nCols is the number of columns of the system matrix
  * \param reordering is the reordering that will be applied
@@ -2798,7 +2809,7 @@ void SystemSolver::setReordering(long nRows, long nCols, const SystemMatrixOrder
     PetscInt *rowReorderingStorage;
     PetscMalloc(nRows * sizeof(PetscInt), &rowReorderingStorage);
     for (long i = 0; i < nRows; ++i) {
-        rowReorderingStorage[reordering.getRowRank(i)] = i;
+        rowReorderingStorage[reordering.getRowPermutationRank(i)] = i;
     }
 
 #if BITPIT_ENABLE_MPI == 1
@@ -2812,7 +2823,7 @@ void SystemSolver::setReordering(long nRows, long nCols, const SystemMatrixOrder
     PetscInt *colReorderingStorage;
     PetscMalloc(nCols * sizeof(PetscInt), &colReorderingStorage);
     for (long j = 0; j < nCols; ++j) {
-        colReorderingStorage[reordering.getColRank(j)] = j;
+        colReorderingStorage[reordering.getColPermutationRank(j)] = j;
     }
 
 #if BITPIT_ENABLE_MPI == 1
