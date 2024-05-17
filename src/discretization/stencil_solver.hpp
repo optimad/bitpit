@@ -234,12 +234,7 @@ class DiscretizationStencilSolver : public SystemSolver {
 public:
     typedef DiscretizationStencilSolverAssembler<stencil_t> Assembler;
 
-    DiscretizationStencilSolver(bool debug = false);
-    DiscretizationStencilSolver(bool transpose, bool debug);
-    DiscretizationStencilSolver(bool flatten, bool transpose, bool debug);
-    DiscretizationStencilSolver(const std::string &prefix, bool debug = false);
-    DiscretizationStencilSolver(const std::string &prefix, bool transpose, bool debug = false);
-    DiscretizationStencilSolver(const std::string &prefix, bool flatten, bool transpose, bool debug = false);
+    using SystemSolver::SystemSolver;
 
     void clear(bool release = false);
 
