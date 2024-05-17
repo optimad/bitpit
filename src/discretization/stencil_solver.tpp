@@ -212,11 +212,14 @@ const stencil_t & DiscretizationStencilProxyStorage<stencil_t, PiercedStorage<st
  * Constructor.
  *
  * \param stencils are the stencils
+ * \param assemblerKernelArgs are the arguments that will be passed to the constructor of the
+ * assembler of the solver kernel
  */
-template<typename stencil_t>
-template<typename stencil_container_t>
-DiscretizationStencilSolverAssembler<stencil_t>::DiscretizationStencilSolverAssembler(const stencil_container_t *stencils)
-    : DiscretizationStencilSolverAssembler(MPI_COMM_SELF, false, stencils)
+template<typename stencil_t, typename solver_kernel_t>
+template<typename stencil_container_t, typename... AssemblerKernelArgs>
+DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::DiscretizationStencilSolverAssembler(const stencil_container_t *stencils,
+                                                                                                       AssemblerKernelArgs&&... assemblerKernelArgs)
+    : DiscretizationStencilSolverAssembler(MPI_COMM_SELF, false, stencils, std::forward<AssemblerKernelArgs>(assemblerKernelArgs)...)
 {
 }
 
@@ -226,11 +229,17 @@ DiscretizationStencilSolverAssembler<stencil_t>::DiscretizationStencilSolverAsse
  * \param communicator is the MPI communicator
  * \param partitioned controls if the matrix is partitioned
  * \param stencils are the stencils
+ * \param assemblerKernelArgs are the arguments that will be passed to the constructor of the
+ * assembler of the solver kernel
  */
-template<typename stencil_t>
-template<typename stencil_container_t>
-DiscretizationStencilSolverAssembler<stencil_t>::DiscretizationStencilSolverAssembler(MPI_Comm communicator, bool partitioned, const stencil_container_t *stencils)
-    : DiscretizationStencilSolverAssembler(communicator, partitioned, std::unique_ptr<DiscretizationStencilStorageInterface<stencil_t>>(new DiscretizationStencilProxyStorage<stencil_t, stencil_container_t>(stencils)))
+template<typename stencil_t, typename solver_kernel_t>
+template<typename stencil_container_t, typename... AssemblerKernelArgs>
+DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::DiscretizationStencilSolverAssembler(MPI_Comm communicator, bool partitioned,
+                                                                                                       const stencil_container_t *stencils,
+                                                                                                       AssemblerKernelArgs&&... assemblerKernelArgs)
+    : DiscretizationStencilSolverAssembler(communicator, partitioned,
+                                           std::unique_ptr<DiscretizationStencilStorageInterface<stencil_t>>(new DiscretizationStencilProxyStorage<stencil_t, stencil_container_t>(stencils)),
+                                           std::forward<AssemblerKernelArgs>(assemblerKernelArgs)...)
 {
 }
 #else
@@ -238,11 +247,15 @@ DiscretizationStencilSolverAssembler<stencil_t>::DiscretizationStencilSolverAsse
  * Constructor.
  *
  * \param stencils are the stencils
+ * \param assemblerKernelArgs are the arguments that will be passed to the constructor of the
+ * assembler of the solver kernel
  */
-template<typename stencil_t>
-template<typename stencil_container_t>
-DiscretizationStencilSolverAssembler<stencil_t>::DiscretizationStencilSolverAssembler(const stencil_container_t *stencils)
-    : DiscretizationStencilSolverAssembler(std::unique_ptr<DiscretizationStencilStorageInterface<stencil_t>>(new DiscretizationStencilProxyStorage<stencil_t, stencil_container_t>(stencils)))
+template<typename stencil_t, typename solver_kernel_t>
+template<typename stencil_container_t, typename... AssemblerKernelArgs>
+DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::DiscretizationStencilSolverAssembler(const stencil_container_t *stencils,
+                                                                                                       AssemblerKernelArgs&&... assemblerKernelArgs)
+    : DiscretizationStencilSolverAssembler(std::unique_ptr<DiscretizationStencilStorageInterface<stencil_t>>(new DiscretizationStencilProxyStorage<stencil_t, stencil_container_t>(stencils)),
+                                           std::forward<AssemblerKernelArgs>(assemblerKernelArgs)...)
 {
 }
 #endif
@@ -252,10 +265,14 @@ DiscretizationStencilSolverAssembler<stencil_t>::DiscretizationStencilSolverAsse
  * Constructor.
  *
  * \param stencils are the stencils
+ * \param assemblerKernelArgs are the arguments that will be passed to the constructor of the
+ * assembler of the solver kernel
  */
-template<typename stencil_t>
-DiscretizationStencilSolverAssembler<stencil_t>::DiscretizationStencilSolverAssembler(std::unique_ptr<DiscretizationStencilStorageInterface<stencil_t>> &&stencils)
-    : DiscretizationStencilSolverAssembler(MPI_COMM_SELF, false, std::move(stencils))
+template<typename stencil_t, typename solver_kernel_t>
+template<typename... AssemblerKernelArgs>
+DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::DiscretizationStencilSolverAssembler(std::unique_ptr<DiscretizationStencilStorageInterface<stencil_t>> &&stencils,
+                                                                                                       AssemblerKernelArgs&&... assemblerKernelArgs)
+    : DiscretizationStencilSolverAssembler(MPI_COMM_SELF, false, std::move(stencils), std::forward<AssemblerKernelArgs>(assemblerKernelArgs)...)
 {
 }
 
@@ -265,19 +282,28 @@ DiscretizationStencilSolverAssembler<stencil_t>::DiscretizationStencilSolverAsse
  * \param communicator is the MPI communicator
  * \param partitioned controls if the matrix is partitioned
  * \param stencils are the stencils
+ * \param assemblerKernelArgs are the arguments that will be passed to the constructor of the
+ * assembler of the solver kernel
  */
-template<typename stencil_t>
-DiscretizationStencilSolverAssembler<stencil_t>::DiscretizationStencilSolverAssembler(MPI_Comm communicator, bool partitioned, std::unique_ptr<DiscretizationStencilStorageInterface<stencil_t>> &&stencils)
-    : DiscretizationStencilSolverAssembler(communicator, partitioned)
+template<typename stencil_t, typename solver_kernel_t>
+template<typename... AssemblerKernelArgs>
+DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::DiscretizationStencilSolverAssembler(MPI_Comm communicator, bool partitioned,
+                                                                                                       std::unique_ptr<DiscretizationStencilStorageInterface<stencil_t>> &&stencils,
+                                                                                                       AssemblerKernelArgs&&... assemblerKernelArgs)
+    : DiscretizationStencilSolverAssembler(communicator, partitioned, std::forward<AssemblerKernelArgs>(assemblerKernelArgs)...)
 #else
 /*!
  * Constructor.
  *
+ * \param assemblerKernelArgs are the arguments that will be passed to the constructor of the
+ * assembler of the solver kernel
  * \param stencils are the stencils
  */
-template<typename stencil_t>
-DiscretizationStencilSolverAssembler<stencil_t>::DiscretizationStencilSolverAssembler(std::unique_ptr<DiscretizationStencilStorageInterface<stencil_t>> &&stencils)
-    : DiscretizationStencilSolverAssembler()
+template<typename stencil_t, typename solver_kernel_t>
+template<typename... AssemblerKernelArgs>
+DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::DiscretizationStencilSolverAssembler(std::unique_ptr<DiscretizationStencilStorageInterface<stencil_t>> &&stencils,
+                                                                                                       AssemblerKernelArgs&&... assemblerKernelArgs)
+    : DiscretizationStencilSolverAssembler(std::forward<AssemblerKernelArgs>(assemblerKernelArgs)...)
 #endif
 {
     setStencils(std::move(stencils));
@@ -289,10 +315,14 @@ DiscretizationStencilSolverAssembler<stencil_t>::DiscretizationStencilSolverAsse
 #if BITPIT_ENABLE_MPI==1
 /*!
  * Constructor.
+ *
+ * \param assemblerKernelArgs are the arguments that will be passed to the constructor of the
+ * assembler of the solver kernel
  */
-template<typename stencil_t>
-DiscretizationStencilSolverAssembler<stencil_t>::DiscretizationStencilSolverAssembler()
-    : DiscretizationStencilSolverAssembler(MPI_COMM_SELF, false)
+template<typename stencil_t, typename solver_kernel_t>
+template<typename... AssemblerKernelArgs>
+DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::DiscretizationStencilSolverAssembler(AssemblerKernelArgs&&... assemblerKernelArgs)
+    : DiscretizationStencilSolverAssembler(MPI_COMM_SELF, false, std::forward<AssemblerKernelArgs>(assemblerKernelArgs)...)
 {
 }
 
@@ -301,20 +331,28 @@ DiscretizationStencilSolverAssembler<stencil_t>::DiscretizationStencilSolverAsse
  *
  * \param communicator is the MPI communicator
  * \param partitioned controls if the matrix is partitioned
+ * \param assemblerKernelArgs are the arguments that will be passed to the constructor of the
+ * assembler of the solver kernel
  */
-template<typename stencil_t>
-DiscretizationStencilSolverAssembler<stencil_t>::DiscretizationStencilSolverAssembler(MPI_Comm communicator, bool partitioned)
-    : StencilSolverAssembler(),
+template<typename stencil_t, typename solver_kernel_t>
+template<typename... AssemblerKernelArgs>
+DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::DiscretizationStencilSolverAssembler(MPI_Comm communicator, bool partitioned,
+                                                                                                       AssemblerKernelArgs&&... assemblerKernelArgs)
+    : solver_kernel_type::Assembler(std::forward<AssemblerKernelArgs>(assemblerKernelArgs)...),
       m_partitioned(partitioned), m_communicator(communicator)
 {
 }
 #else
 /*!
  * Constructor.
+ *
+ * \param assemblerKernelArgs are the arguments that will be passed to the constructor of the
+ * assembler of the solver kernel
  */
-template<typename stencil_t>
-DiscretizationStencilSolverAssembler<stencil_t>::DiscretizationStencilSolverAssembler()
-    : StencilSolverAssembler()
+template<typename stencil_t, typename solver_kernel_t>
+template<typename... AssemblerKernelArgs>
+DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::DiscretizationStencilSolverAssembler(AssemblerKernelArgs&&... assemblerKernelArgs)
+    : solver_kernel_type::Assembler(std::forward<AssemblerKernelArgs>(assemblerKernelArgs)...)
 {
 }
 #endif
@@ -325,8 +363,8 @@ DiscretizationStencilSolverAssembler<stencil_t>::DiscretizationStencilSolverAsse
  *
  * \result Returns true if the patch is partitioned, false otherwise.
  */
-template<typename stencil_t>
-bool DiscretizationStencilSolverAssembler<stencil_t>::isPartitioned() const
+template<typename stencil_t, typename solver_kernel_t>
+bool DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::isPartitioned() const
 {
     return m_partitioned;
 }
@@ -336,8 +374,8 @@ bool DiscretizationStencilSolverAssembler<stencil_t>::isPartitioned() const
  *
  * \return The MPI communicator associated to the matrix.
  */
-template<typename stencil_t>
-const MPI_Comm & DiscretizationStencilSolverAssembler<stencil_t>::getCommunicator() const
+template<typename stencil_t, typename solver_kernel_t>
+const MPI_Comm & DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::getCommunicator() const
 {
     return m_communicator;
 }
@@ -348,10 +386,10 @@ const MPI_Comm & DiscretizationStencilSolverAssembler<stencil_t>::getCommunicato
  *
  * \result The assembly options that will be used.
  */
-template<typename stencil_t>
-SystemMatrixAssembler::AssemblyOptions DiscretizationStencilSolverAssembler<stencil_t>::getOptions() const
+template<typename stencil_t, typename solver_kernel_t>
+typename DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::assembly_options_type DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::getOptions() const
 {
-    AssemblyOptions options;
+    assembly_options_type options;
     options.full   = true;
     options.sorted = false;
 
@@ -361,9 +399,9 @@ SystemMatrixAssembler::AssemblyOptions DiscretizationStencilSolverAssembler<sten
 /*!
  * Set block size.
  */
-template<typename stencil_t>
+template<typename stencil_t, typename solver_kernel_t>
 template<typename W, typename V, typename std::enable_if<std::is_fundamental<W>::value>::type *>
-void DiscretizationStencilSolverAssembler<stencil_t>::setBlockSize()
+void DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::setBlockSize()
 {
     setBlockSize(1);
 }
@@ -371,9 +409,9 @@ void DiscretizationStencilSolverAssembler<stencil_t>::setBlockSize()
 /*!
  * Set block size.
  */
-template<typename stencil_t>
+template<typename stencil_t, typename solver_kernel_t>
 template<typename W, typename V, std::size_t D, typename std::enable_if<std::is_same<std::array<V, D>, W>::value>::type *>
-void DiscretizationStencilSolverAssembler<stencil_t>::setBlockSize()
+void DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::setBlockSize()
 {
     setBlockSize(sizeof(typename StencilVector::weight_type) / sizeof(typename StencilVector::weight_type::value_type));
 }
@@ -390,9 +428,9 @@ void DiscretizationStencilSolverAssembler<stencil_t>::setBlockSize()
  * only when bitpit is compiled in debug mode, otherwise the error is
  * silently ignored.
  */
-template<typename stencil_t>
+template<typename stencil_t, typename solver_kernel_t>
 template<typename W, typename V, typename std::enable_if<std::is_same<std::vector<V>, W>::value>::type *>
-void DiscretizationStencilSolverAssembler<stencil_t>::setBlockSize()
+void DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::setBlockSize()
 {
     // Get block size
     //
@@ -449,8 +487,8 @@ void DiscretizationStencilSolverAssembler<stencil_t>::setBlockSize()
  *
  * \param blockSize is the block size
  */
-template<typename stencil_t>
-void DiscretizationStencilSolverAssembler<stencil_t>::setBlockSize(int blockSize)
+template<typename stencil_t, typename solver_kernel_t>
+void DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::setBlockSize(int blockSize)
 {
     m_blockSize = blockSize;
 }
@@ -460,8 +498,8 @@ void DiscretizationStencilSolverAssembler<stencil_t>::setBlockSize(int blockSize
  *
  * \param stencils are the stencils
  */
-template<typename stencil_t>
-void DiscretizationStencilSolverAssembler<stencil_t>::setStencils(std::unique_ptr<DiscretizationStencilStorageInterface<stencil_t>> &&stencils)
+template<typename stencil_t, typename solver_kernel_t>
+void DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::setStencils(std::unique_ptr<DiscretizationStencilStorageInterface<stencil_t>> &&stencils)
 {
     m_stencils = std::move(stencils);
 }
@@ -469,8 +507,8 @@ void DiscretizationStencilSolverAssembler<stencil_t>::setStencils(std::unique_pt
 /*!
  * Set matrix sizes.
  */
-template<typename stencil_t>
-void DiscretizationStencilSolverAssembler<stencil_t>::setMatrixSizes()
+template<typename stencil_t, typename solver_kernel_t>
+void DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::setMatrixSizes()
 {
     setMatrixSizes(m_stencils->size(), m_stencils->size());
 }
@@ -481,8 +519,8 @@ void DiscretizationStencilSolverAssembler<stencil_t>::setMatrixSizes()
  * \param nRows are the rows of the matrix
  * \param nCols are the columns of the matrix
  */
-template<typename stencil_t>
-void DiscretizationStencilSolverAssembler<stencil_t>::setMatrixSizes(long nRows, long nCols)
+template<typename stencil_t, typename solver_kernel_t>
+void DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::setMatrixSizes(long nRows, long nCols)
 {
     // Set system sizes
     m_nRows = nRows;
@@ -523,8 +561,8 @@ void DiscretizationStencilSolverAssembler<stencil_t>::setMatrixSizes(long nRows,
 /*!
  * Set the maximum number of non-zero element on a single row.
  */
-template<typename stencil_t>
-void DiscretizationStencilSolverAssembler<stencil_t>::setMaximumRowNZ()
+template<typename stencil_t, typename solver_kernel_t>
+void DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::setMaximumRowNZ()
 {
     long maxRowNZ = 0;
     for (long n = 0; n < getRowCount(); ++n) {
@@ -539,8 +577,8 @@ void DiscretizationStencilSolverAssembler<stencil_t>::setMaximumRowNZ()
  *
  * \param maxRowNZ is the maximum number of non-zero element on a single row
  */
-template<typename stencil_t>
-void DiscretizationStencilSolverAssembler<stencil_t>::setMaximumRowNZ(long maxRowNZ)
+template<typename stencil_t, typename solver_kernel_t>
+void DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::setMaximumRowNZ(long maxRowNZ)
 {
     m_maxRowNZ = maxRowNZ;
 }
@@ -550,8 +588,8 @@ void DiscretizationStencilSolverAssembler<stencil_t>::setMaximumRowNZ(long maxRo
  *
  * \result The stencil block size.
  */
-template<typename stencil_t>
-int DiscretizationStencilSolverAssembler<stencil_t>::getBlockSize() const
+template<typename stencil_t, typename solver_kernel_t>
+int DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::getBlockSize() const
 {
     return m_blockSize;
 }
@@ -565,8 +603,8 @@ int DiscretizationStencilSolverAssembler<stencil_t>::getBlockSize() const
  *
  * \result The number of (block) rows handled by the assembler.
  */
-template<typename stencil_t>
-long DiscretizationStencilSolverAssembler<stencil_t>::getRowCount() const
+template<typename stencil_t, typename solver_kernel_t>
+long DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::getRowCount() const
 {
     return m_nRows;
 }
@@ -580,8 +618,8 @@ long DiscretizationStencilSolverAssembler<stencil_t>::getRowCount() const
  *
  * \result The number of (block) columns handled by the assembler.
  */
-template<typename stencil_t>
-long DiscretizationStencilSolverAssembler<stencil_t>::getColCount() const
+template<typename stencil_t, typename solver_kernel_t>
+long DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::getColCount() const
 {
     return m_nCols;
 }
@@ -594,8 +632,8 @@ long DiscretizationStencilSolverAssembler<stencil_t>::getColCount() const
  *
  * \result The number of rows handled by the assembler.
  */
-template<typename stencil_t>
-long DiscretizationStencilSolverAssembler<stencil_t>::getRowElementCount() const
+template<typename stencil_t, typename solver_kernel_t>
+long DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::getRowElementCount() const
 {
     long nRowElements = getBlockSize() * getRowCount();
 
@@ -610,8 +648,8 @@ long DiscretizationStencilSolverAssembler<stencil_t>::getRowElementCount() const
  *
  * \result The number of columns handled by the assembler.
  */
-template<typename stencil_t>
-long DiscretizationStencilSolverAssembler<stencil_t>::getColElementCount() const
+template<typename stencil_t, typename solver_kernel_t>
+long DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::getColElementCount() const
 {
     long nColElements = getBlockSize() * getColCount();
 
@@ -628,8 +666,8 @@ long DiscretizationStencilSolverAssembler<stencil_t>::getColElementCount() const
  *
  * \result The number of global rows handled by the assembler.
  */
-template<typename stencil_t>
-long DiscretizationStencilSolverAssembler<stencil_t>::getRowGlobalCount() const
+template<typename stencil_t, typename solver_kernel_t>
+long DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::getRowGlobalCount() const
 {
     return m_nGlobalRows;
 }
@@ -643,8 +681,8 @@ long DiscretizationStencilSolverAssembler<stencil_t>::getRowGlobalCount() const
  *
  * \result The number of global (block) columns handled by the assembler.
  */
-template<typename stencil_t>
-long DiscretizationStencilSolverAssembler<stencil_t>::getColGlobalCount() const
+template<typename stencil_t, typename solver_kernel_t>
+long DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::getColGlobalCount() const
 {
     return m_nGlobalCols;
 }
@@ -657,8 +695,8 @@ long DiscretizationStencilSolverAssembler<stencil_t>::getColGlobalCount() const
  *
  * \result The number of global elements in the rows handled by the assembler.
  */
-template<typename stencil_t>
-long DiscretizationStencilSolverAssembler<stencil_t>::getRowGlobalElementCount() const
+template<typename stencil_t, typename solver_kernel_t>
+long DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::getRowGlobalElementCount() const
 {
     long nElements = getBlockSize() * getRowGlobalCount();
 
@@ -673,8 +711,8 @@ long DiscretizationStencilSolverAssembler<stencil_t>::getRowGlobalElementCount()
  *
  * \result The global number of columns handled by the assembler.
  */
-template<typename stencil_t>
-long DiscretizationStencilSolverAssembler<stencil_t>::getColGlobalElementCount() const
+template<typename stencil_t, typename solver_kernel_t>
+long DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::getColGlobalElementCount() const
 {
     long nElements = getBlockSize() * getColGlobalCount();
 
@@ -686,8 +724,8 @@ long DiscretizationStencilSolverAssembler<stencil_t>::getColGlobalElementCount()
  *
  * \result The global (block) row offset.
  */
-template<typename stencil_t>
-long DiscretizationStencilSolverAssembler<stencil_t>::getRowGlobalOffset() const
+template<typename stencil_t, typename solver_kernel_t>
+long DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::getRowGlobalOffset() const
 {
     return m_globalRowOffset;
 }
@@ -697,8 +735,8 @@ long DiscretizationStencilSolverAssembler<stencil_t>::getRowGlobalOffset() const
  *
  * \result The global (block) column offset.
  */
-template<typename stencil_t>
-long DiscretizationStencilSolverAssembler<stencil_t>::getColGlobalOffset() const
+template<typename stencil_t, typename solver_kernel_t>
+long DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::getColGlobalOffset() const
 {
     return m_globalColOffset;
 }
@@ -711,8 +749,8 @@ long DiscretizationStencilSolverAssembler<stencil_t>::getColGlobalOffset() const
  *
  * \result The global offset for the elements of the row.
  */
-template<typename stencil_t>
-long DiscretizationStencilSolverAssembler<stencil_t>::getRowGlobalElementOffset() const
+template<typename stencil_t, typename solver_kernel_t>
+long DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::getRowGlobalElementOffset() const
 {
     long offset = getBlockSize() * getRowGlobalOffset();
 
@@ -727,8 +765,8 @@ long DiscretizationStencilSolverAssembler<stencil_t>::getRowGlobalElementOffset(
  *
  * \result The global offset for the elements of the column.
  */
-template<typename stencil_t>
-long DiscretizationStencilSolverAssembler<stencil_t>::getColGlobalElementOffset() const
+template<typename stencil_t, typename solver_kernel_t>
+long DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::getColGlobalElementOffset() const
 {
     long offset = getBlockSize() * getColGlobalOffset();
 
@@ -742,8 +780,8 @@ long DiscretizationStencilSolverAssembler<stencil_t>::getColGlobalElementOffset(
  * \param rowIndex is the index of the row in the assembler
  * \result The number of non-zero elements in the specified row.
  */
-template<typename stencil_t>
-long DiscretizationStencilSolverAssembler<stencil_t>::getRowNZCount(long rowIndex) const
+template<typename stencil_t, typename solver_kernel_t>
+long DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::getRowNZCount(long rowIndex) const
 {
     const stencil_t &stencil = getRowStencil(rowIndex);
     std::size_t stencilSize = stencil.size();
@@ -756,8 +794,8 @@ long DiscretizationStencilSolverAssembler<stencil_t>::getRowNZCount(long rowInde
  *
  * \result The maximum number of non-zero elements per row.
  */
-template<typename stencil_t>
-long DiscretizationStencilSolverAssembler<stencil_t>::getMaxRowNZCount() const
+template<typename stencil_t, typename solver_kernel_t>
+long DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::getMaxRowNZCount() const
 {
     return m_maxRowNZ;
 }
@@ -773,8 +811,8 @@ long DiscretizationStencilSolverAssembler<stencil_t>::getMaxRowNZCount() const
  * \param rowIndex is the index of the row in the assembler
  * \param pattern on output will contain the pattern of the specified row
  */
-template<typename stencil_t>
-void DiscretizationStencilSolverAssembler<stencil_t>::getRowPattern(long rowIndex, ConstProxyVector<long> *pattern) const
+template<typename stencil_t, typename solver_kernel_t>
+void DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::getRowPattern(long rowIndex, ConstProxyVector<long> *pattern) const
 {
     // Get stencil information
     const stencil_t &stencil = getRowStencil(rowIndex);
@@ -789,8 +827,8 @@ void DiscretizationStencilSolverAssembler<stencil_t>::getRowPattern(long rowInde
  * \param stencil is the stencil
  * \param pattern on output will contain the pattern of the specified stencil
  */
-template<typename stencil_t>
-void DiscretizationStencilSolverAssembler<stencil_t>::getPattern(const stencil_t &stencil, ConstProxyVector<long> *pattern) const
+template<typename stencil_t, typename solver_kernel_t>
+void DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::getPattern(const stencil_t &stencil, ConstProxyVector<long> *pattern) const
 {
     std::size_t stencilSize = stencil.size();
 
@@ -811,8 +849,8 @@ void DiscretizationStencilSolverAssembler<stencil_t>::getPattern(const stencil_t
  * If the block size is greater than one, values will be stored in a logically
  * two-dimensional array that uses a col-major order
  */
-template<typename stencil_t>
-void DiscretizationStencilSolverAssembler<stencil_t>::getRowValues(long rowIndex, ConstProxyVector<double> *values) const
+template<typename stencil_t, typename solver_kernel_t>
+void DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::getRowValues(long rowIndex, ConstProxyVector<double> *values) const
 {
     // Get stencil information
     const stencil_t &stencil = getRowStencil(rowIndex);
@@ -829,9 +867,9 @@ void DiscretizationStencilSolverAssembler<stencil_t>::getRowValues(long rowIndex
  * If the block size is greater than one, values will be stored in a logically
  * two-dimensional array that uses a col-major order
  */
-template<typename stencil_t>
+template<typename stencil_t, typename solver_kernel_t>
 template<typename U, typename std::enable_if<std::is_fundamental<U>::value>::type *>
-void DiscretizationStencilSolverAssembler<stencil_t>::getValues(const stencil_t &stencil, ConstProxyVector<double> *values) const
+void DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::getValues(const stencil_t &stencil, ConstProxyVector<double> *values) const
 {
     values->set(stencil.weightData(), m_blockSize * stencil.size());
 }
@@ -844,9 +882,9 @@ void DiscretizationStencilSolverAssembler<stencil_t>::getValues(const stencil_t 
  * If the block size is greater than one, values will be stored in a logically
  * two-dimensional array that uses a col-major order
  */
-template<typename stencil_t>
+template<typename stencil_t, typename solver_kernel_t>
 template<typename U, typename std::enable_if<!std::is_fundamental<U>::value>::type *>
-void DiscretizationStencilSolverAssembler<stencil_t>::getValues(const stencil_t &stencil, ConstProxyVector<double> *values) const
+void DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::getValues(const stencil_t &stencil, ConstProxyVector<double> *values) const
 {
     std::size_t stencilSize = stencil.size();
     const stencil_weight_type *stencilWeightData = stencil.weightData();
@@ -878,8 +916,8 @@ void DiscretizationStencilSolverAssembler<stencil_t>::getValues(const stencil_t 
  * If the block size is greater than one, values will be stored in a logically
  * two-dimensional array that uses a col-major order
  */
-template<typename stencil_t>
-void DiscretizationStencilSolverAssembler<stencil_t>::getRowData(long rowIndex, ConstProxyVector<long> *pattern, ConstProxyVector<double> *values) const
+template<typename stencil_t, typename solver_kernel_t>
+void DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::getRowData(long rowIndex, ConstProxyVector<long> *pattern, ConstProxyVector<double> *values) const
 {
     // Get stencil information
     const stencil_t &stencil = getRowStencil(rowIndex);
@@ -899,8 +937,8 @@ void DiscretizationStencilSolverAssembler<stencil_t>::getRowData(long rowIndex, 
  * If the block size is greater than one, values will be stored in a logically
  * one-dimensional array
  */
-template<typename stencil_t>
-void DiscretizationStencilSolverAssembler<stencil_t>::getRowConstant(long rowIndex, bitpit::ConstProxyVector<double> *constant) const
+template<typename stencil_t, typename solver_kernel_t>
+void DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::getRowConstant(long rowIndex, bitpit::ConstProxyVector<double> *constant) const
 {
     // Get stencil information
     const stencil_t &stencil = getRowStencil(rowIndex);
@@ -917,9 +955,9 @@ void DiscretizationStencilSolverAssembler<stencil_t>::getRowConstant(long rowInd
  * If the block size is greater than one, values will be stored in a logically
  * one-dimensional array
  */
-template<typename stencil_t>
+template<typename stencil_t, typename solver_kernel_t>
 template<typename U, typename std::enable_if<std::is_fundamental<U>::value>::type *>
-void DiscretizationStencilSolverAssembler<stencil_t>::getConstant(const stencil_t &stencil, bitpit::ConstProxyVector<double> *constant) const
+void DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::getConstant(const stencil_t &stencil, bitpit::ConstProxyVector<double> *constant) const
 {
     const stencil_weight_type &stencilConstant = stencil.getConstant();
 
@@ -936,9 +974,9 @@ void DiscretizationStencilSolverAssembler<stencil_t>::getConstant(const stencil_
  * If the block size is greater than one, values will be stored in a logically
  * one-dimensional array
  */
-template<typename stencil_t>
+template<typename stencil_t, typename solver_kernel_t>
 template<typename U, typename std::enable_if<!std::is_fundamental<U>::value>::type *>
-void DiscretizationStencilSolverAssembler<stencil_t>::getConstant(const stencil_t &stencil, bitpit::ConstProxyVector<double> *constant) const
+void DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::getConstant(const stencil_t &stencil, bitpit::ConstProxyVector<double> *constant) const
 {
     const stencil_weight_type &stencilConstant = stencil.getConstant();
 
@@ -960,8 +998,8 @@ void DiscretizationStencilSolverAssembler<stencil_t>::getConstant(const stencil_
  * \param rowIndex is the index of the row in the assembler
  * \result The stencil associated with the specified row.
  */
-template<typename stencil_t>
-const stencil_t & DiscretizationStencilSolverAssembler<stencil_t>::getRowStencil(long rowIndex) const
+template<typename stencil_t, typename solver_kernel_t>
+const stencil_t & DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t>::getRowStencil(long rowIndex) const
 {
     return m_stencils->at(rowIndex);
 }
@@ -981,10 +1019,10 @@ const stencil_t & DiscretizationStencilSolverAssembler<stencil_t>::getRowStencil
 * released, otherwise the stencil solver will be cleared but its memory will
 * not be relased
  */
-template<typename stencil_t>
-void DiscretizationStencilSolver<stencil_t>::clear(bool release)
+template<typename stencil_t, typename solver_kernel_t>
+void DiscretizationStencilSolver<stencil_t, solver_kernel_t>::clear(bool release)
 {
-    SystemSolver::clear();
+    solver_kernel_t::clear();
 
     if (release) {
         std::vector<double>().swap(m_constants);
@@ -997,11 +1035,13 @@ void DiscretizationStencilSolver<stencil_t>::clear(bool release)
 /*!
 * Assembly the stencil solver.
 *
+* After assembying th system solver, its options will be reset.
+*
 * \param stencils are the stencils
 */
-template<typename stencil_t>
+template<typename stencil_t, typename solver_kernel_t>
 template<typename stencil_container_t>
-void DiscretizationStencilSolver<stencil_t>::assembly(const stencil_container_t &stencils)
+void DiscretizationStencilSolver<stencil_t, solver_kernel_t>::assembly(const stencil_container_t &stencils)
 {
     assembly(MPI_COMM_SELF, false, stencils);
 }
@@ -1013,44 +1053,84 @@ void DiscretizationStencilSolver<stencil_t>::assembly(const stencil_container_t 
 * \param communicator is the MPI communicator
 * \param stencils are the stencils
 */
-template<typename stencil_t>
+template<typename stencil_t, typename solver_kernel_t>
 template<typename stencil_container_t>
-void DiscretizationStencilSolver<stencil_t>::assembly(MPI_Comm communicator, bool partitioned, const stencil_container_t &stencils)
+void DiscretizationStencilSolver<stencil_t, solver_kernel_t>::assembly(MPI_Comm communicator, bool partitioned, const stencil_container_t &stencils)
 #else
 /*!
 * Initialize the stencil solver.
 *
 * \param stencils are the stencils
 */
-template<typename stencil_t>
+template<typename stencil_t, typename solver_kernel_t>
 template<typename stencil_container_t>
-void DiscretizationStencilSolver<stencil_t>::assembly(const stencil_container_t &stencils)
+void DiscretizationStencilSolver<stencil_t, solver_kernel_t>::assembly(const stencil_container_t &stencils)
 #endif
 {
     // Create the assembler
 #if BITPIT_ENABLE_MPI==1
-    DiscretizationStencilSolverAssembler<stencil_t> assembler(communicator, partitioned, &stencils);
+    DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t> assembler(communicator, partitioned, &stencils);
 #else
-    DiscretizationStencilSolverAssembler<stencil_t> assembler(&stencils);
+    DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t> assembler(&stencils);
 #endif
 
     // Assembly the system
-    assembly(assembler);
+    solver_kernel_t::template assembly<DiscretizationStencilSolver<stencil_t, solver_kernel_t>>(assembler, NaturalSystemMatrixOrdering());
 }
 
 /*!
-* Assembly the stencil solver.
-*
-* \param assembler is the solver assembler
-*/
-template<typename stencil_t>
-void DiscretizationStencilSolver<stencil_t>::assembly(const Assembler &assembler)
+ * Assembly the system.
+ *
+ * After assembying th system solver, its options will be reset.
+ *
+ * \param assembler is the matrix assembler
+ * \param reordering is the reordering that will be applied when assembling the system
+ */
+template<typename stencil_t, typename solver_kernel_t>
+void DiscretizationStencilSolver<stencil_t, solver_kernel_t>::assembly(const Assembler &assembler)
 {
-    // Assembly system
-    SystemSolver::assembly(static_cast<const SystemSolver::Assembler &>(assembler));
+    solver_kernel_t::template assembly<DiscretizationStencilSolver<stencil_t, solver_kernel_t>>(assembler, NaturalSystemMatrixOrdering());
+}
+
+/*!
+ * Assembly the matrix.
+ *
+ * \param assembler is the matrix assembler
+ */
+template<typename stencil_t, typename solver_kernel_t>
+void DiscretizationStencilSolver<stencil_t, solver_kernel_t>::matrixAssembly(const Assembler &assembler)
+{
+    // Assemble matrix
+    solver_kernel_t::matrixAssembly(assembler);
 
     // Assemble constants
     assembleConstants(assembler);
+}
+
+/*!
+ * Update the specified rows of the matrix.
+ *
+ * The contents of the specified rows will be replaced by the data provided by the given
+ * assembler. If the matrix has not been assembled yet, both the pattern and the values
+ * of the matrix will be updated. After the matrix has been assembled only the values
+ * will be updated.
+ *
+ * The block size of the assembler should be equal to the block size of the matrix.
+ *
+ * \param nRows is the number of rows that will be updated
+ * \param rows are the local indices of the rows that will be updated, if a
+ * null pointer is passed, the rows that will be updated are the rows
+ * from 0 to (nRows - 1).
+ * \param assembler is the matrix assembler for the rows that will be updated
+ */
+template<typename stencil_t, typename solver_kernel_t>
+void DiscretizationStencilSolver<stencil_t, solver_kernel_t>::matrixUpdate(long nRows, const long *rows, const Assembler &assembler)
+{
+    // Update the system
+    solver_kernel_t::matrixUpdate(nRows, rows, assembler);
+
+    // Update the constants
+    updateConstants(nRows, rows, assembler);
 }
 
 /*!
@@ -1061,11 +1141,11 @@ void DiscretizationStencilSolver<stencil_t>::assembly(const Assembler &assembler
  *
  * \param stencils are the stencils that will be used to update the rows
  */
-template<typename stencil_t>
+template<typename stencil_t, typename solver_kernel_t>
 template<typename stencil_container_t>
-void DiscretizationStencilSolver<stencil_t>::update(const stencil_container_t &stencils)
+void DiscretizationStencilSolver<stencil_t, solver_kernel_t>::update(const stencil_container_t &stencils)
 {
-    update(getRowCount(), nullptr, stencils);
+    update(this->getRowCount(), nullptr, stencils);
 }
 
 /*!
@@ -1077,9 +1157,9 @@ void DiscretizationStencilSolver<stencil_t>::update(const stencil_container_t &s
  * \param rows are the global indices of the rows that will be updated
  * \param stencils are the stencils that will be used to update the rows
  */
-template<typename stencil_t>
+template<typename stencil_t, typename solver_kernel_t>
 template<typename stencil_container_t>
-void DiscretizationStencilSolver<stencil_t>::update(const std::vector<long> &rows, const stencil_container_t &stencils)
+void DiscretizationStencilSolver<stencil_t, solver_kernel_t>::update(const std::vector<long> &rows, const stencil_container_t &stencils)
 {
     update(rows.size(), rows.data(), stencils);
 }
@@ -1096,40 +1176,35 @@ void DiscretizationStencilSolver<stencil_t>::update(const std::vector<long> &row
  * stencils from 0 to (nRows - 1).
  * \param stencils are the stencils that will be used to update the rows
  */
-template<typename stencil_t>
+template<typename stencil_t, typename solver_kernel_t>
 template<typename stencil_container_t>
-void DiscretizationStencilSolver<stencil_t>::update(std::size_t nRows, const long *rows, const stencil_container_t &stencils)
+void DiscretizationStencilSolver<stencil_t, solver_kernel_t>::update(std::size_t nRows, const long *rows, const stencil_container_t &stencils)
 {
 #if BITPIT_ENABLE_MPI==1
-    DiscretizationStencilSolverAssembler<stencil_t> assembler(getCommunicator(), isPartitioned(), &stencils);
+    DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t> assembler(this->getCommunicator(), this->isPartitioned(), &stencils);
 #else
-    DiscretizationStencilSolverAssembler<stencil_t> assembler(&stencils);
+    DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t> assembler(&stencils);
 #endif
 
-    update(nRows, rows, assembler);
+    // Update the system
+    solver_kernel_t::template update<DiscretizationStencilSolver<stencil_t, solver_kernel_t>>(nRows, rows, assembler);
 }
 
-/*!
- * Update the stencil solver.
- *
- * Only the values of the system matrix and the values of the constants can be
- * updated, once the system is initialized its pattern cannot be modified.
- *
- * \param nRows is the number of stencils that will be updated
- * \param rows are the rows of the stencils that will be updated,
- * if a null pointer is passed, the stencils that will be updated are the
- * stencils from 0 to (nRows - 1).
- * \param assembler is the solver assembler
- */
-template<typename stencil_t>
-void DiscretizationStencilSolver<stencil_t>::update(std::size_t nRows, const long *rows,
-                                                    const Assembler &assembler)
-{
-    // Update the system
-    SystemSolver::update(nRows, rows, static_cast<const SystemSolver::Assembler &>(assembler));
 
-    // Update the constants
-    updateConstants(nRows, rows, assembler);
+/*!
+ * Update the system.
+ *
+ * Only the values of the system matrix can be updated, once the system is
+ * assembled its pattern cannot be modified.
+ *
+ * \param nRows is the number of rows that will be updated
+ * \param rows are the indices of the rows that will be updated
+ * \param assembler is the matrix assembler for the rows that will be updated
+ */
+template<typename stencil_t, typename solver_kernel_t>
+void DiscretizationStencilSolver<stencil_t, solver_kernel_t>::update(long nRows, const long *rows, const Assembler &assembler)
+{
+    solver_kernel_t::template update<DiscretizationStencilSolver<stencil_t, solver_kernel_t>>(nRows, rows, assembler);
 }
 
 /*!
@@ -1137,8 +1212,8 @@ void DiscretizationStencilSolver<stencil_t>::update(std::size_t nRows, const lon
  *
  * \param assembler is the solver assembler
  */
-template<typename stencil_t>
-void DiscretizationStencilSolver<stencil_t>::assembleConstants(const Assembler &assembler)
+template<typename stencil_t, typename solver_kernel_t>
+void DiscretizationStencilSolver<stencil_t, solver_kernel_t>::assembleConstants(const Assembler &assembler)
 {
     long nRows = assembler.getRowCount();
     int blockSize = assembler.getBlockSize();
@@ -1159,9 +1234,9 @@ void DiscretizationStencilSolver<stencil_t>::assembleConstants(const Assembler &
  * stencils from 0 to (nRows - 1).
  * \param assembler is the solver assembler
  */
-template<typename stencil_t>
-void DiscretizationStencilSolver<stencil_t>::updateConstants(std::size_t nRows, const long *rows,
-                                                             const Assembler &assembler)
+template<typename stencil_t, typename solver_kernel_t>
+void DiscretizationStencilSolver<stencil_t, solver_kernel_t>::updateConstants(std::size_t nRows, const long *rows,
+                                                              const Assembler &assembler)
 {
     int blockSize = assembler.getBlockSize();
     ConstProxyVector<double> rowConstant(blockSize);
@@ -1181,24 +1256,24 @@ void DiscretizationStencilSolver<stencil_t>::updateConstants(std::size_t nRows, 
 /*!
 * Solve the system.
 */
-template<typename stencil_t>
-void DiscretizationStencilSolver<stencil_t>::solve()
+template<typename stencil_t, typename solver_kernel_t>
+void DiscretizationStencilSolver<stencil_t, solver_kernel_t>::solve()
 {
     // Check if the stencil solver is assembled
-    if (!isAssembled()) {
+    if (!this->isAssembled()) {
         throw std::runtime_error("Unable to solve the system. The stencil solver is not yet assembled.");
     }
 
     // Subtract constant terms to the RHS
-    long nUnknowns = getBlockSize() * getRowCount();
-    double *raw_rhs = getRHSRawPtr();
+    long nUnknowns = this->getBlockSize() * this->getRowCount();
+    double *raw_rhs = this->getRHSRawPtr();
     for (long i = 0; i < nUnknowns; ++i) {
         raw_rhs[i] -= m_constants[i];
     }
-    restoreRHSRawPtr(raw_rhs);
+    this->restoreRHSRawPtr(raw_rhs);
 
     // Solve the system
-    SystemSolver::solve();
+    solver_kernel_t::solve();
 }
 
 }
