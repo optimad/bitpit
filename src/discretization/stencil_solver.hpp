@@ -257,8 +257,6 @@ public:
     void solve();
 
 protected:
-    std::size_t nStencils;
-
     std::vector<double> m_constants;
 
     using SystemSolver::assembly;
