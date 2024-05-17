@@ -37,16 +37,6 @@
 
 namespace bitpit {
 
-class StencilSolverAssembler : public SystemMatrixAssembler {
-
-public:
-    virtual void getRowConstant(long rowIndex, bitpit::ConstProxyVector<double> *constant) const = 0;
-
-protected:
-    using SystemMatrixAssembler::SystemMatrixAssembler;
-
-};
-
 template<typename stencil_t>
 class DiscretizationStencilStorageInterface {
 
@@ -109,17 +99,22 @@ public:
 
 };
 
-template<typename stencil_t>
-class DiscretizationStencilSolverAssembler : public StencilSolverAssembler {
+template<typename stencil_t, typename solver_kernel_t = SystemSolver>
+class DiscretizationStencilSolverAssembler : public solver_kernel_t::Assembler {
 
 public:
     using stencil_type = stencil_t;
 
-    template<typename stencil_container_t = std::vector<stencil_t>>
-    DiscretizationStencilSolverAssembler(const stencil_container_t *stencils);
+    using solver_kernel_type    = solver_kernel_t;
+    using assembly_type         = typename solver_kernel_t::Assembler;
+    using assembly_options_type = typename assembly_type::AssemblyOptions;
+
+    template<typename stencil_container_t, typename... AssemblerKernelArgs>
+    DiscretizationStencilSolverAssembler(const stencil_container_t *stencils, AssemblerKernelArgs&&... assemblerKernelArgs);
 #if BITPIT_ENABLE_MPI==1
-    template<typename stencil_container_t = std::vector<stencil_t>>
-    DiscretizationStencilSolverAssembler(MPI_Comm communicator, bool partitioned, const stencil_container_t *stencils);
+    template<typename stencil_container_t, typename... AssemblerKernelArgs>
+    DiscretizationStencilSolverAssembler(MPI_Comm communicator, bool partitioned, const stencil_container_t *stencils,
+                                         AssemblerKernelArgs&&... assemblerKernelArgs);
 #endif
 
 #if BITPIT_ENABLE_MPI==1
@@ -127,7 +122,7 @@ public:
     const MPI_Comm & getCommunicator() const override;
 #endif
 
-    AssemblyOptions getOptions() const override;
+    assembly_options_type getOptions() const override;
 
     int getBlockSize() const override;
 
@@ -158,7 +153,7 @@ public:
     void getRowValues(long rowIndex, ConstProxyVector<double> *values) const override;
     void getRowData(long rowIndex, ConstProxyVector<long> *pattern, ConstProxyVector<double> *values) const override;
 
-    void getRowConstant(long rowIndex, bitpit::ConstProxyVector<double> *constant) const override;
+    virtual void getRowConstant(long rowIndex, bitpit::ConstProxyVector<double> *constant) const;
 
 protected:
     using stencil_weight_type = typename stencil_type::weight_type;
@@ -181,11 +176,19 @@ protected:
 
     long m_maxRowNZ;
 
-    DiscretizationStencilSolverAssembler(std::unique_ptr<DiscretizationStencilStorageInterface<stencil_t>> &&stencils);
-    DiscretizationStencilSolverAssembler();
+    template<typename... AssemblerKernelArgs>
+    DiscretizationStencilSolverAssembler(std::unique_ptr<DiscretizationStencilStorageInterface<stencil_t>> &&stencils,
+                                         AssemblerKernelArgs&&... assemblerKernelArgs);
+    template<typename... AssemblerKernelArgs>
+    DiscretizationStencilSolverAssembler(AssemblerKernelArgs&&... assemblerKernelArgs);
 #if BITPIT_ENABLE_MPI==1
-    DiscretizationStencilSolverAssembler(MPI_Comm communicator, bool partitioned, std::unique_ptr<DiscretizationStencilStorageInterface<stencil_t>> &&stencils);
-    DiscretizationStencilSolverAssembler(MPI_Comm communicator, bool partitioned);
+    template<typename... AssemblerKernelArgs>
+    DiscretizationStencilSolverAssembler(MPI_Comm communicator, bool partitioned,
+                                         std::unique_ptr<DiscretizationStencilStorageInterface<stencil_t>> &&stencils,
+                                         AssemblerKernelArgs&&... assemblerKernelArgs);
+    template<typename... AssemblerKernelArgs>
+    DiscretizationStencilSolverAssembler(MPI_Comm communicator, bool partitioned,
+                                         AssemblerKernelArgs&&... assemblerKernelArgs);
 #endif
 
     void setStencils(std::unique_ptr<DiscretizationStencilStorageInterface<stencil_t>> &&stencils);
@@ -228,13 +231,13 @@ private:
 
 };
 
-template<typename stencil_t>
-class DiscretizationStencilSolver : public SystemSolver {
+template<typename stencil_t, typename solver_kernel_t = SystemSolver>
+class DiscretizationStencilSolver : public solver_kernel_t {
 
 public:
-    typedef DiscretizationStencilSolverAssembler<stencil_t> Assembler;
+    typedef DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_t> Assembler;
 
-    using SystemSolver::SystemSolver;
+    using solver_kernel_t::solver_kernel_t;
 
     void clear(bool release = false);
 
@@ -252,15 +255,18 @@ public:
     void update(const std::vector<long> &rows, const stencil_container_t &stencils);
     template<typename stencil_container_t = std::vector<stencil_t>>
     void update(std::size_t nRows, const long *rows, const stencil_container_t &stencils);
-    void update(std::size_t nRows, const long *rows, const Assembler &assembler);
+    void update(long nRows, const long *rows, const Assembler &assembler);
 
     void solve();
+
+    void matrixAssembly(const Assembler &assembler);
+    void matrixUpdate(long nRows, const long *rows, const Assembler &assembler);
 
 protected:
     std::vector<double> m_constants;
 
-    using SystemSolver::assembly;
-    using SystemSolver::update;
+    using solver_kernel_t::assembly;
+    using solver_kernel_t::update;
 
     void assembleConstants(const Assembler &assembler);
     void updateConstants(std::size_t nRows, const long *rows, const Assembler &assembler);
