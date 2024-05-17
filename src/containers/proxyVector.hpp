@@ -67,7 +67,6 @@ class ProxyVector;
 */
 template<typename value_t, typename container_t>
 class ProxyVectorIterator
-    : public std::iterator<std::random_access_iterator_tag, value_t, std::ptrdiff_t, __PXI_POINTER_TYPE__, __PXI_REFERENCE_TYPE__>
 {
 
 template<typename PXV_value_t, bool PXV_thread_safe>
@@ -79,27 +78,27 @@ public:
     /*!
         Iterator category
     */
-    typedef std::bidirectional_iterator_tag iterator_category;
+    using iterator_category = std::bidirectional_iterator_tag;
 
     /*!
         Value type
     */
-    typedef value_t value_type;
+    using value_type = value_t;
 
     /*!
         Difference type
     */
-    typedef std::ptrdiff_t difference_type;
+    using difference_type = std::ptrdiff_t;
 
     /*!
         Pointer type
     */
-    typedef __PXI_POINTER_TYPE__ pointer;
+    using pointer = __PXI_POINTER_TYPE__;
 
     /*!
         Reference type
     */
-    typedef __PXI_REFERENCE_TYPE__ reference;
+    using reference = __PXI_REFERENCE_TYPE__;
 
     // Constructors
     ProxyVectorIterator();
