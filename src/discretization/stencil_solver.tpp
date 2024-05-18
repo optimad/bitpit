@@ -863,7 +863,7 @@ void DiscretizationStencilSolverAssembler<stencil_t>::getConstant(const stencil_
 
         constantStorage[i] = 0;
         for (int j = 0; j < m_blockSize; ++j) {
-            constantStorage[i] += getRawValue(stencilConstant, offset_i + j);
+            constantStorage[i] += stencil.getWeightManager().at(stencilConstant, offset_i + j);
         }
     }
 }

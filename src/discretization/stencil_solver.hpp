@@ -212,8 +212,6 @@ protected:
     template<typename U = typename stencil_t::weight_type, typename std::enable_if<!std::is_fundamental<U>::value>::type * = nullptr>
     void getConstant(const stencil_t &stencil, bitpit::ConstProxyVector<double> *constant) const;
 
-    double getRawValue(const typename stencil_t::weight_type &weight, int item) const;
-
 private:
 #if BITPIT_ENABLE_MPI==1
     bool m_partitioned;
@@ -273,19 +271,10 @@ template<>
 void DiscretizationStencilSolverAssembler<StencilScalar>::setBlockSize();
 
 template<>
-double DiscretizationStencilSolverAssembler<StencilScalar>::getRawValue(const StencilScalar::weight_type &element, int item) const;
-
-template<>
 void DiscretizationStencilSolverAssembler<StencilVector>::setBlockSize();
 
 template<>
-double DiscretizationStencilSolverAssembler<StencilVector>::getRawValue(const StencilVector::weight_type &element, int item) const;
-
-template<>
 void DiscretizationStencilSolverAssembler<StencilBlock>::setBlockSize();
-
-template<>
-double DiscretizationStencilSolverAssembler<StencilBlock>::getRawValue(const StencilBlock::weight_type &element, int item) const;
 
 }
 
