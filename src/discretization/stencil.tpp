@@ -28,114 +28,20 @@
 namespace bitpit {
 
 /*!
-* Constructor.
-*
-* \param capacity is the maximum number of weights that can be stored
-* in the pool
+* The weight manager.
 */
 template<typename weight_t>
-DiscreteStencilWeightPool<weight_t>::DiscreteStencilWeightPool(std::size_t capacity)
-    : m_capacity(capacity)
-{
-}
+const typename DiscreteStencil<weight_t>::weight_manager_type DiscreteStencil<weight_t>::m_weightManager = typename DiscreteStencil<weight_t>::weight_manager_type();
 
 /*!
-* Get the size of the pool.
+* Get a constant reference to the weight manager.
 *
-* The size represents the number of weights currently stored in the pool.
-*
-* \param size The size of the pool.
+* \result A constant reference to the weight manager.
 */
 template<typename weight_t>
-std::size_t DiscreteStencilWeightPool<weight_t>::size() const
+const typename DiscreteStencil<weight_t>::weight_manager_type & DiscreteStencil<weight_t>::getWeightManager()
 {
-    return m_storage.size();
-}
-
-/*!
-* Get the capacity of the pool.
-*
-* The capacity represents the maximum number of weights that can be stored
-* in the pool.
-*
-* \param size The capacity of the pool.
-*/
-template<typename weight_t>
-std::size_t DiscreteStencilWeightPool<weight_t>::capacity() const
-{
-    return m_capacity;
-}
-
-/*!
-* Clear the pool.
-*
-* Removes all weights from the pool (which are destroyed), leaving it
-* with a size of 0.
-*
-* \param release if it's true the memory hold by the pool will be
-* released, otherwise the pool will be cleared but its memory will
-* not be relased
-*/
-template<typename weight_t>
-void DiscreteStencilWeightPool<weight_t>::clear(bool release)
-{
-    m_storage.clear();
-    if (release) {
-        m_storage.shrink_to_fit();
-    }
-}
-
-/*!
-* Retrieve a weight from the pool.
-*
-* If the pool is empty, an exception is thrown.
-*
-* \result The weight retrieved from the pool.
-*/
-template<typename weight_t>
-weight_t DiscreteStencilWeightPool<weight_t>::retrieve()
-{
-    if (size() == 0) {
-        throw std::runtime_error("Unable to retrieve a weight from the pool: the pool is empty.");
-    }
-
-    weight_t weight = std::move(m_storage.back());
-    m_storage.pop_back();
-
-    return weight;
-}
-
-/*!
-* Store the given weight in the pool.
-*
-* \param weight is the weight that will be stored in the pool
-*/
-template<typename weight_t>
-void DiscreteStencilWeightPool<weight_t>::store(weight_t &&weight)
-{
-    if (m_capacity == size()) {
-        return;
-    }
-
-    m_storage.emplace_back(std::move(weight));
-}
-
-/*!
-* Store the given weights in the pool.
-*
-* \param weights are the weight that will be stored in the pool
-*/
-template<typename weight_t>
-void DiscreteStencilWeightPool<weight_t>::store(std::vector<weight_t> *weights)
-{
-    std::size_t nStorableWeights = std::min(m_capacity - size(), weights->size());
-    if (nStorableWeights == 0) {
-        return;
-    }
-
-    m_storage.insert(m_storage.end(),
-                     std::make_move_iterator(weights->begin()),
-                     std::make_move_iterator(weights->begin() + nStorableWeights));
+    return m_weightManager;
 }
 
 /*!
@@ -258,13 +164,13 @@ DiscreteStencil<weight_t>::DiscreteStencil(std::size_t size, const long *pattern
 template<typename weight_t>
 void DiscreteStencil<weight_t>::initialize(std::size_t size, const weight_t &zero)
 {
-    rawCopyValue(zero, &m_zero);
+    m_weightManager.copy(zero, &m_zero);
 
     std::size_t previousSize = this->size();
     std::size_t commonSize   = std::min(previousSize, size);
     for (std::size_t n = 0; n < commonSize; ++n) {
         m_pattern[n] = -1;
-        rawCopyValue(m_zero, m_weights.data() + n);
+        m_weightManager.copy(m_zero, m_weights.data() + n);
     }
     if (previousSize != size) {
         resize(size);
@@ -283,13 +189,13 @@ void DiscreteStencil<weight_t>::initialize(std::size_t size, const weight_t &zer
 template<typename weight_t>
 void DiscreteStencil<weight_t>::initialize(std::size_t size, const long *pattern, const weight_t &zero)
 {
-    rawCopyValue(zero, &m_zero);
+    m_weightManager.copy(zero, &m_zero);
 
     std::size_t previousSize = this->size();
     std::size_t commonSize   = std::min(previousSize, size);
     for (std::size_t n = 0; n < commonSize; ++n) {
         m_pattern[n] = pattern[n];
-        rawCopyValue(m_zero, m_weights.data() + n);
+        m_weightManager.copy(m_zero, m_weights.data() + n);
     }
     if (previousSize != size) {
         resize(size);
@@ -312,13 +218,13 @@ void DiscreteStencil<weight_t>::initialize(std::size_t size, const long *pattern
 template<typename weight_t>
 void DiscreteStencil<weight_t>::initialize(std::size_t size, const long *pattern, const weight_t *weights, const weight_t &zero)
 {
-    rawCopyValue(zero, &m_zero);
+    m_weightManager.copy(zero, &m_zero);
 
     std::size_t previousSize = this->size();
     std::size_t commonSize   = std::min(previousSize, size);
     for (std::size_t n = 0; n < commonSize; ++n) {
         m_pattern[n] = pattern[n];
-        rawCopyValue(weights[n], m_weights.data() + n);
+        m_weightManager.copy(weights[n], m_weights.data() + n);
     }
     if (size > previousSize) {
         reserve(size);
@@ -512,16 +418,16 @@ void DiscreteStencil<weight_t>::setWeight(std::size_t pos, weight_t &&weight)
 }
 
 /*!
-* Sum the given value to the weight at the specified position of the stencil.
+* Sum the given weight to the one at the specified position of the stencil.
 *
 * \param pos is the position of the weight
-* \param value is the value that will be summed
-* \param factor is the factor by which the value will be multiplied
+* \param weight is the value that will be summed
+* \param factor is the factor by which the weight will be multiplied
 */
 template<typename weight_t>
-void DiscreteStencil<weight_t>::sumWeight(std::size_t pos, const weight_t &value, double factor)
+void DiscreteStencil<weight_t>::sumWeight(std::size_t pos, const weight_t &weight, double factor)
 {
-    rawSumValue(value, factor, m_weights.data() + pos);
+    m_weightManager.sum(weight, factor, m_weights.data() + pos);
 }
 
 /*!
@@ -532,7 +438,7 @@ void DiscreteStencil<weight_t>::sumWeight(std::size_t pos, const weight_t &value
 template<typename weight_t>
 void DiscreteStencil<weight_t>::zeroWeight(std::size_t pos)
 {
-    rawCopyValue(m_zero, m_weights.data() + pos);
+    m_weightManager.copy(m_zero, m_weights.data() + pos);
 }
 
 /*!
@@ -564,23 +470,23 @@ void DiscreteStencil<weight_t>::setItem(std::size_t pos, long id, weight_t &&wei
 }
 
 /*!
-* Sum the given value to the item of the stencil with the specified index.
+* Sum the given weight to the item of the stencil with the specified index.
 *
-* If an item with the same id already exists, the given value will be summed
+* If an item with the same id already exists, the given weight will be summed
 * to the weight of the existing item. Otherwise, a new item will be appended.
 *
 * \param id is the index of the item
-* \param value is the value that will be summed
-* \param factor is the factor by which the value will be multiplied
+* \param weight is the weight that will be summed
+* \param factor is the factor by which the weight will be multiplied
 */
 template<typename weight_t>
-void DiscreteStencil<weight_t>::sumItem(long id, const weight_t &value, double factor)
+void DiscreteStencil<weight_t>::sumItem(long id, const weight_t &weight, double factor)
 {
-    weight_t *weight = findWeight(id);
-    if (weight) {
-        rawSumValue(value, factor, weight);
+    weight_t *target = findWeight(id);
+    if (target) {
+        m_weightManager.sum(weight, factor, target);
     } else {
-        appendItem(id, value);
+        appendItem(id, weight);
         if (factor != 1.) {
             m_weights.back() *= factor;
         }
@@ -644,35 +550,35 @@ weight_t & DiscreteStencil<weight_t>::getConstant()
 /*!
 * Set the value of the constant associated to the stencil.
 *
-* \param value is the value that will be set
+* \param constant is the constant that will be set
 */
 template<typename weight_t>
-void DiscreteStencil<weight_t>::setConstant(const weight_t &value)
+void DiscreteStencil<weight_t>::setConstant(const weight_t &constant)
 {
-    rawCopyValue(value, &m_constant);
+    m_weightManager.copy(constant, &m_constant);
 }
 
 /*!
 * Set the value of the constant associated to the stencil.
 *
-* \param value is the value that will be set
+* \param constant is the constant that will be set
 */
 template<typename weight_t>
-void DiscreteStencil<weight_t>::setConstant(weight_t &&value)
+void DiscreteStencil<weight_t>::setConstant(weight_t &&constant)
 {
-    rawMoveValue(std::move(value), &m_constant);
+    m_weightManager.move(std::move(constant), &m_constant);
 }
 
 /*!
-* Sum the specified value to the constant associated to the stencil.
+* Sum the specified constant to the constant associated to the stencil.
 *
-* \param value is the value that will be summed
-* \param factor is the factor by which the value will be multiplied
+* \param constant is the constant that will be summed
+* \param factor is the factor by which the constant will be multiplied
 */
 template<typename weight_t>
-void DiscreteStencil<weight_t>::sumConstant(const weight_t &value, double factor)
+void DiscreteStencil<weight_t>::sumConstant(const weight_t &constant, double factor)
 {
-    rawSumValue(value, factor, &m_constant);
+    m_weightManager.sum(constant, factor, &m_constant);
 }
 
 /*!
@@ -681,7 +587,7 @@ void DiscreteStencil<weight_t>::sumConstant(const weight_t &value, double factor
 template<typename weight_t>
 void DiscreteStencil<weight_t>::zeroConstant()
 {
-    rawCopyValue(m_zero, &m_constant);
+    m_weightManager.copy(m_zero, &m_constant);
 }
 
 /*!
@@ -734,7 +640,7 @@ void DiscreteStencil<weight_t>::optimize(double tolerance)
 {
     std::size_t nItems = size();
     for (std::size_t n = 0; n < nItems; ++n) {
-        if (isWeightNegligible(m_weights[n], tolerance)) {
+        if (m_weightManager.isNegligible(m_weights[n], m_zero, tolerance)) {
             m_pattern.erase(m_pattern.begin() + n);
             m_weights.erase(m_weights.begin() + n);
             --n;
@@ -784,7 +690,7 @@ void DiscreteStencil<weight_t>::addComplementToZero(long id)
 
     weight_t complement = m_zero;
     for (const weight_t &weight : m_weights) {
-        rawSumValue(weight, -1., &complement);
+        m_weightManager.sum(weight, -1., &complement);
     }
 
     appendItem(id, complement);
@@ -797,65 +703,10 @@ template<typename weight_t>
 void DiscreteStencil<weight_t>::zero()
 {
     for (weight_t &weight : m_weights) {
-        rawCopyValue(m_zero, &weight);
+        m_weightManager.copy(m_zero, &weight);
     }
 
     setConstant(m_zero);
-}
-
-/*!
-* Check if the specified weight is negligible.
-*
-* \param tolerance is the tolerance that will be used for the check
-* \param weight is the weight that will be optimized
-* \result Returns true if the whole weight is neglibile
-*/
-template<typename weight_t>
-template<typename W>
-bool DiscreteStencil<weight_t>::isWeightNegligible(const W &weight, double tolerance) const
-{
-    return (std::abs(weight - m_zero) <= tolerance);
-}
-
-/*!
-* Check if the specified weight is negligible.
-*
-* \param tolerance is the tolerance that will be used for the check
-* \param weight is the weight that will be optimized
-* \result Returns true if the whole weight is neglibile
-*/
-template<typename weight_t>
-template<typename W, typename V, long unsigned int D, typename std::enable_if<std::is_same<std::array<V, D>, W>::value>::type *>
-bool DiscreteStencil<weight_t>::isWeightNegligible(const std::array<V, D> &weight, double tolerance) const
-{
-    for (long unsigned int k = 0; k < D; ++k) {
-        if (std::abs(weight[k] - m_zero[k]) > tolerance) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-/*!
-* Check if the specified weight is negligible.
-*
-* \param tolerance is the tolerance that will be used for the check
-* \param weight is the weight that will be optimized
-* \result Returns true if the whole weight is neglibile
-*/
-template<typename weight_t>
-template<typename W, typename V, typename std::enable_if<std::is_same<std::vector<V>, W>::value>::type *>
-bool DiscreteStencil<weight_t>::isWeightNegligible(const std::vector<V> &weight, double tolerance) const
-{
-    const int nItems = weight.size();
-    for (int k = 0; k < nItems; ++k) {
-        if (std::abs(weight[k] - m_zero[k]) > tolerance) {
-            return false;
-        }
-    }
-
-    return true;
 }
 
 /*!
@@ -942,135 +793,6 @@ void DiscreteStencil<weight_t>::clearWeights(bool release)
 }
 
 /*!
-* Sum the specified value to the target.
-*
-* \param value is the value that will be summed
-* \param factor is the factor the value will be multiplied with
-* \param target on output will contain the original weight plus the value multiplied by the factor
-*/
-template<typename weight_t>
-template<typename W>
-void DiscreteStencil<weight_t>::rawSumValue(const W &value, double factor, W *target)
-{
-    *target += factor * value;
-}
-
-/*!
- * Sum the specified value to the target.
- *
- * \param value is the value that will be summed
- * \param factor is the factor the value will be multiplied with
- * \param target on output will contain the original weight plus the value multiplied by the factor
- */
-template<typename weight_t>
-template<typename W, typename V, long unsigned int D, typename std::enable_if<std::is_same<std::array<V, D>, W>::value>::type *>
-void DiscreteStencil<weight_t>::rawSumValue(const std::array<V, D> &value, double factor, std::array<V, D> *target)
-{
-    for (long unsigned int i = 0; i < D; ++i) {
-        (*target)[i] += factor * value[i];
-    }
-}
-
-/*!
- * Sum the specified value to the target.
- *
- * The target will be resized to match the size of the value to be summed. If the value size is
- * greater that the target size, missing target elements will be initialized to zero before
- * summing the specified value.
- *
- * \param value is the value that will be summed
- * \param factor is the factor the value will be multiplied with
- * \param target on output will contain the original weight plus the value multiplied by the factor
- */
-template<typename weight_t>
-template<typename W, typename V, typename std::enable_if<std::is_same<std::vector<V>, W>::value>::type *>
-void DiscreteStencil<weight_t>::rawSumValue(const std::vector<V> &value, double factor, std::vector<V> *target)
-{
-    std::size_t valueSize  = value.size();
-    std::size_t targetSize = target->size();
-    std::size_t commonSize = std::min(valueSize, targetSize);
-
-    for (std::size_t i = 0; i < commonSize; ++i) {
-        (*target)[i] += factor * value[i];
-    }
-
-    if (valueSize > targetSize) {
-        target->insert(target->end(), value.cbegin() + commonSize, value.cend());
-
-        if (factor != 1.) {
-            auto targetBegin = target->begin();
-            auto targetEnd   = target->end();
-            for (auto itr = targetBegin + commonSize; itr != targetEnd; ++itr) {
-                *itr *= factor;
-            }
-        }
-    }
-}
-
-/**
- * Copy the source value into the target.
- *
- * \param source is the value that will be copied
- * \param[out] target on output will contain the source value
- */
-template<typename weight_t>
-template<typename W>
-void DiscreteStencil<weight_t>::rawCopyValue(const W &source, W *target)
-{
-    *target = source;
-}
-
-/**
- * Set the source value into the target.
- *
- * \param source is the value that will be set
- * \param[out] target on output will contain the source value
- */
-template<typename weight_t>
-template<typename W, typename V, long unsigned int D, typename std::enable_if<std::is_same<std::array<V, D>, W>::value>::type *>
-void DiscreteStencil<weight_t>::rawCopyValue(const std::array<V, D> &source, std::array<V, D> *target)
-{
-    std::copy_n(source.data(), D, target->data());
-}
-
-/**
- * Copy the source value into the target.
- *
- * The target will be resized to match the size of the source.
- *
- * \param source is the value that will be set
- * \param[out] target on output will contain the source value
- */
-template<typename weight_t>
-template<typename W, typename V, typename std::enable_if<std::is_same<std::vector<V>, W>::value>::type *>
-void DiscreteStencil<weight_t>::rawCopyValue(const std::vector<V> &source, std::vector<V> *target)
-{
-    std::size_t sourceSize = source.size();
-    std::size_t targetSize = target->size();
-    std::size_t commonSize = std::min(sourceSize, targetSize);
-
-    std::copy_n(source.data(), commonSize, target->data());
-
-    if (sourceSize < targetSize) {
-        target->resize(sourceSize);
-    } else if (sourceSize > targetSize) {
-        target->insert(target->end(), source.begin() + commonSize, source.end());
-    }
-}
-/**
- * Move the source value into the target.
- *
- * \param[in,out] source is the value that will be moved
- * \param[out] target on output will contain the source value
- */
-template<typename weight_t>
-template<typename W>
-void DiscreteStencil<weight_t>::rawMoveValue(W &&source, W *target)
-{
-    *target = std::move(source);
-}
-
-/*!
 * Display the stencil.
 *
 * \param out is the stream that will be used for the output
@@ -1084,9 +806,9 @@ void DiscreteStencil<weight_t>::display(std::ostream &out, double factor) const
     weight_t sum = m_zero;
     for (std::size_t n = 0; n < nItems; ++n) {
         long id = m_pattern[n];
-        weight_t value = factor * m_weights[n];
-        out << "   id: " << id << " weight: " << value << std::endl;
-        rawSumValue(value, 1., &sum);
+        weight_t weight = factor * m_weights[n];
+        out << "   id: " << id << " weight: " << weight << std::endl;
+        m_weightManager.sum(weight, 1., &sum);
     }
 
     out << " constant : " << (factor * m_constant) << std::endl;
