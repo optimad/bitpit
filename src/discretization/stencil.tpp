@@ -1201,7 +1201,7 @@ void dotProduct(const typename bitpit::DiscreteStencil<std::array<V, 3>> &stenci
     const long *patternData = stencil.patternData();
     const bitpit::StencilVector::weight_type *weightData = stencil.weightData();
     long *patternData_dotProduct = stencil_dotProduct->patternData();
-    bitpit::StencilScalar::weight_type *weightData_dotProduct = stencil_dotProduct->weightData();
+    typename bitpit::DiscreteStencil<V>::weight_type *weightData_dotProduct = stencil_dotProduct->weightData();
     for (std::size_t n = 0; n < nItems; ++n) {
         patternData_dotProduct[n] = patternData[n];
         weightData_dotProduct[n]  = ::dotProduct(weightData[n], vector);
