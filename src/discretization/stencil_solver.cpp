@@ -49,40 +49,12 @@ void DiscretizationStencilSolverAssembler<StencilScalar>::setBlockSize()
 }
 
 /*!
- * Get the raw value of the specified element.
- *
- * \param element is the stencil element
- * \param item is the requested block item
- * \result The values of the specified weight.
- */
-template<>
-double DiscretizationStencilSolverAssembler<StencilScalar>::getRawValue(const StencilScalar::weight_type &element, int item) const
-{
-    BITPIT_UNUSED(item);
-
-    return element;
-}
-
-/*!
  * Set block size.
  */
 template<>
 void DiscretizationStencilSolverAssembler<StencilVector>::setBlockSize()
 {
     setBlockSize(sizeof(typename StencilVector::weight_type) / sizeof(typename StencilVector::weight_type::value_type));
-}
-
-/*!
- * Get the raw value of the specified element.
- *
- * \param element is the stencil element
- * \param item is the requested block item
- * \result The values of the specified weight.
- */
-template<>
-double DiscretizationStencilSolverAssembler<StencilVector>::getRawValue(const StencilVector::weight_type &element, int item) const
-{
-    return element[item];
 }
 
 /*!
@@ -148,19 +120,6 @@ void DiscretizationStencilSolverAssembler<StencilBlock>::setBlockSize()
         }
     }
 #endif
-}
-
-/*!
- * Get the raw value of the specified element.
- *
- * \param element is the stencil element
- * \param item is the requested block item
- * \result The values of the specified weight.
- */
-template<>
-double DiscretizationStencilSolverAssembler<StencilBlock>::getRawValue(const StencilBlock::weight_type &element, int item) const
-{
-    return element[item];
 }
 
 }

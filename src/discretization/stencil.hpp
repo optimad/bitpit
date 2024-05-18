@@ -25,38 +25,18 @@
 #ifndef __BTPIT_STENCIL_HPP__
 #define __BTPIT_STENCIL_HPP__
 
-#include <array>
-#include <ostream>
-#include <unordered_map>
-#include <vector>
+#include "stencil_weight.hpp"
 
 #include "bitpit_common.hpp"
 #include "bitpit_containers.hpp"
 #include "bitpit_operators.hpp"
 
+#include <array>
+#include <ostream>
+#include <unordered_map>
+#include <vector>
+
 namespace bitpit {
-
-// Stencil weight pool
-template<typename weight_t>
-class DiscreteStencilWeightPool
-{
-
-public:
-    DiscreteStencilWeightPool(std::size_t capacity = 128);
-
-    std::size_t size() const;
-    std::size_t capacity() const;
-    void clear(bool release);
-
-    weight_t retrieve();
-    void store(weight_t &&weight);
-    void store(std::vector<weight_t> *weights);
-
-private:
-    std::size_t m_capacity;
-    std::vector<weight_t> m_storage;
-
-};
 
 // Stream operators for the stencil class
 template<typename weight_t>
@@ -86,7 +66,10 @@ friend IBinaryStream & (operator>>) (IBinaryStream &buffer, DiscreteStencil<W> &
 public:
     long NULL_ID = - std::numeric_limits<long>::max();
 
-    typedef weight_t weight_type;
+    using weight_type         = weight_t;
+    using weight_manager_type = DiscreteStencilWeightManager<weight_t, typename DiscreteStencilWeightValueInfo<weight_t>::type>;
+
+    static const weight_manager_type & getWeightManager();
 
     /**
     * Defines an item of the stencil
@@ -127,20 +110,20 @@ public:
     const weight_t * weightData() const;
     void setWeight(std::size_t pos, const weight_t &weight);
     void setWeight(std::size_t pos, weight_t &&weight);
-    void sumWeight(std::size_t pos, const weight_t &value, double factor = 1.);
+    void sumWeight(std::size_t pos, const weight_t &weight, double factor = 1.);
     void zeroWeight(std::size_t pos);
 
     void setItem(std::size_t pos, long id, const weight_t &weight);
     void setItem(std::size_t pos, long id, weight_t &&weight);
-    void sumItem(long id, const weight_t &value, double factor = 1.);
+    void sumItem(long id, const weight_t &weight, double factor = 1.);
     void appendItem(long id, const weight_t &weight);
     void appendItem(long id, weight_t &&weight);
 
     weight_t & getConstant();
     const weight_t & getConstant() const;
-    void setConstant(const weight_t &value);
-    void setConstant(weight_t &&value);
-    void sumConstant(const weight_t &value, double factor = 1.);
+    void setConstant(const weight_t &constant);
+    void setConstant(weight_t &&constant);
+    void sumConstant(const weight_t &constant, double factor = 1.);
     void zeroConstant();
 
     void sum(const DiscreteStencil<weight_t> &other, double factor);
@@ -167,6 +150,8 @@ public:
     DiscreteStencil<weight_t> & operator-=(const DiscreteStencil<weight_t> &other);
 
 protected:
+    static const weight_manager_type m_weightManager;
+
     weight_t m_zero;
     std::vector<long> m_pattern;
     std::vector<weight_t> m_weights;
@@ -178,32 +163,8 @@ protected:
     virtual void clearWeights(bool release);
 
 private:
-    template<typename W>
-    static void rawSumValue(const W &value, double factor, W *target);
-    template<typename W = weight_t, typename V = typename W::value_type, long unsigned int D = W::size_type, typename std::enable_if<std::is_same<std::array<V, D>, W>::value>::type * = nullptr>
-    static void rawSumValue(const std::array<V, D> &value, double factor, std::array<V, D> *target);
-    template<typename W = weight_t, typename V = typename W::value_type, typename std::enable_if<std::is_same<std::vector<V>, W>::value>::type * = nullptr>
-    static void rawSumValue(const std::vector<V> &value, double factor, std::vector<V> *target);
-
-    template<typename W>
-    static void rawCopyValue(const W &source, W *target);
-    template<typename W = weight_t, typename V = typename W::value_type, long unsigned int D = W::size_type, typename std::enable_if<std::is_same<std::array<V, D>, W>::value>::type * = nullptr>
-    static void rawCopyValue(const std::array<V, D> &source, std::array<V, D> *target);
-    template<typename W = weight_t, typename V = typename W::value_type, typename std::enable_if<std::is_same<std::vector<V>, W>::value>::type * = nullptr>
-    static void rawCopyValue(const std::vector<V> &source, std::vector<V> *target);
-
-    template<typename W>
-    static void rawMoveValue(W &&source, W *target);
-
     weight_t * findWeight(long id);
     const weight_t * findWeight(long id) const;
-
-    template<typename W>
-    bool isWeightNegligible(const W &weight, double tolerance = 1.e-12) const;
-    template<typename W = weight_t, typename V = typename W::value_type, long unsigned int D = W::size_type, typename std::enable_if<std::is_same<std::array<V, D>, W>::value>::type * = nullptr>
-    bool isWeightNegligible(const std::array<V, D> &weight, double tolerance = 1.e-12) const;
-    template<typename W = weight_t, typename V = typename W::value_type, typename std::enable_if<std::is_same<std::vector<V>, W>::value>::type * = nullptr>
-    bool isWeightNegligible(const std::vector<V> &weight, double tolerance = 1.e-12) const;
 
 };
 
