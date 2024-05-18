@@ -763,7 +763,7 @@ template<typename U, typename std::enable_if<!std::is_fundamental<U>::value>::ty
 void DiscretizationStencilSolverAssembler<stencil_t>::getValues(const stencil_t &stencil, ConstProxyVector<double> *values) const
 {
     std::size_t stencilSize = stencil.size();
-    const typename stencil_t::weight_type *stencilWeightData = stencil.weightData();
+    const stencil_weight_type *stencilWeightData = stencil.weightData();
 
     int nBlockElements = m_blockSize * m_blockSize;
     std::size_t nRowValues = m_blockSize * stencilSize;
@@ -835,7 +835,7 @@ template<typename stencil_t>
 template<typename U, typename std::enable_if<std::is_fundamental<U>::value>::type *>
 void DiscretizationStencilSolverAssembler<stencil_t>::getConstant(const stencil_t &stencil, bitpit::ConstProxyVector<double> *constant) const
 {
-    const typename stencil_t::weight_type &stencilConstant = stencil.getConstant();
+    const stencil_weight_type &stencilConstant = stencil.getConstant();
 
     constant->set(ConstProxyVector<double>::INTERNAL_STORAGE, m_blockSize);
     ConstProxyVector<double>::storage_pointer constantStorage = constant->storedData();
@@ -854,7 +854,7 @@ template<typename stencil_t>
 template<typename U, typename std::enable_if<!std::is_fundamental<U>::value>::type *>
 void DiscretizationStencilSolverAssembler<stencil_t>::getConstant(const stencil_t &stencil, bitpit::ConstProxyVector<double> *constant) const
 {
-    const typename stencil_t::weight_type &stencilConstant = stencil.getConstant();
+    const stencil_weight_type &stencilConstant = stencil.getConstant();
 
     constant->set(ConstProxyVector<double>::INTERNAL_STORAGE, m_blockSize);
     ConstProxyVector<double>::storage_pointer constantStorage = constant->storedData();

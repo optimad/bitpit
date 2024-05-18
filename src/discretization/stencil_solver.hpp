@@ -113,7 +113,7 @@ template<typename stencil_t>
 class DiscretizationStencilSolverAssembler : public StencilSolverAssembler {
 
 public:
-    typedef stencil_t stencil_type;
+    using stencil_type = stencil_t;
 
     template<typename stencil_container_t = std::vector<stencil_t>>
     DiscretizationStencilSolverAssembler(const stencil_container_t *stencils);
@@ -161,6 +161,8 @@ public:
     void getRowConstant(long rowIndex, bitpit::ConstProxyVector<double> *constant) const override;
 
 protected:
+    using stencil_weight_type = typename stencil_type::weight_type;
+
     long m_nRows;
     long m_nCols;
 
@@ -200,16 +202,16 @@ protected:
 
     void getPattern(const stencil_t &stencil, ConstProxyVector<long> *pattern) const;
 
-    template<typename U = typename stencil_t::weight_type, typename std::enable_if<std::is_fundamental<U>::value>::type * = nullptr>
+    template<typename W = stencil_weight_type, typename std::enable_if<std::is_fundamental<W>::value>::type * = nullptr>
     void getValues(const stencil_t &stencil, ConstProxyVector<double> *values) const;
 
-    template<typename U = typename stencil_t::weight_type, typename std::enable_if<!std::is_fundamental<U>::value>::type * = nullptr>
+    template<typename W = stencil_weight_type, typename std::enable_if<!std::is_fundamental<W>::value>::type * = nullptr>
     void getValues(const stencil_t &stencil, ConstProxyVector<double> *values) const;
 
-    template<typename U = typename stencil_t::weight_type, typename std::enable_if<std::is_fundamental<U>::value>::type * = nullptr>
+    template<typename W = stencil_weight_type, typename std::enable_if<std::is_fundamental<W>::value>::type * = nullptr>
     void getConstant(const stencil_t &stencil, bitpit::ConstProxyVector<double> *constant) const;
 
-    template<typename U = typename stencil_t::weight_type, typename std::enable_if<!std::is_fundamental<U>::value>::type * = nullptr>
+    template<typename W = stencil_weight_type, typename std::enable_if<!std::is_fundamental<W>::value>::type * = nullptr>
     void getConstant(const stencil_t &stencil, bitpit::ConstProxyVector<double> *constant) const;
 
 private:
