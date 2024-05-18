@@ -193,6 +193,11 @@ protected:
     void setMatrixSizes();
     void setMatrixSizes(long nRows, long nCols);
 
+    template<typename W = stencil_weight_type, typename V = stencil_value_type, typename std::enable_if<std::is_fundamental<W>::value>::type * = nullptr>
+    void setBlockSize();
+    template<typename W = stencil_weight_type, typename V = stencil_value_type, std::size_t D = std::tuple_size<W>::value, typename std::enable_if<std::is_same<std::array<V, D>, W>::value>::type * = nullptr>
+    void setBlockSize();
+    template<typename W = stencil_weight_type, typename V = stencil_value_type, typename std::enable_if<std::is_same<std::vector<V>, W>::value>::type * = nullptr>
     void setBlockSize();
     void setBlockSize(int blockSize);
 
@@ -268,16 +273,6 @@ protected:
     void updateConstants(std::size_t nRows, const long *rows, const Assembler &assembler);
 
 };
-
-// Specializations
-template<>
-void DiscretizationStencilSolverAssembler<StencilScalar>::setBlockSize();
-
-template<>
-void DiscretizationStencilSolverAssembler<StencilVector>::setBlockSize();
-
-template<>
-void DiscretizationStencilSolverAssembler<StencilBlock>::setBlockSize();
 
 }
 
