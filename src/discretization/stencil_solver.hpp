@@ -162,6 +162,7 @@ public:
 
 protected:
     using stencil_weight_type = typename stencil_type::weight_type;
+    using stencil_value_type  = typename stencil_type::value_type;
 
     long m_nRows;
     long m_nCols;

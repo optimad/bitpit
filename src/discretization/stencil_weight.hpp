@@ -89,21 +89,21 @@ public:
     bool isNegligible(const W &weight, const weight_t &zero, double tolerance = 1e-12) const;
     template<typename W = weight_t, typename V = value_t, std::size_t D = std::tuple_size<W>::value, typename std::enable_if<std::is_same<std::array<V, D>, W>::value>::type * = nullptr>
     bool isNegligible(const std::array<V, D> &weight, const weight_t &zero, double tolerance = 1e-12) const;
-    template<typename W = weight_t, typename V, typename std::enable_if<std::is_same<std::vector<V>, W>::value>::type * = nullptr>
+    template<typename W = weight_t, typename V = value_t, typename std::enable_if<std::is_same<std::vector<V>, W>::value>::type * = nullptr>
     bool isNegligible(const std::vector<V> &weight, const weight_t &zero, double tolerance = 1e-12) const;
 
     template<typename W>
     void sum(const W &weight, double factor, W *target) const;
     template<typename W = weight_t, typename V = value_t, std::size_t D = std::tuple_size<W>::value, typename std::enable_if<std::is_same<std::array<V, D>, W>::value>::type * = nullptr>
     void sum(const std::array<V, D> &weight, double factor, std::array<V, D> *target) const;
-    template<typename W = weight_t, typename V, typename std::enable_if<std::is_same<std::vector<V>, W>::value>::type * = nullptr>
+    template<typename W = weight_t, typename V = value_t, typename std::enable_if<std::is_same<std::vector<V>, W>::value>::type * = nullptr>
     void sum(const std::vector<V> &weight, double factor, std::vector<V> *target) const;
 
     template<typename W>
     void copy(const W &weight, W *target) const;
-    template<typename W = weight_t, typename V, std::size_t D = std::tuple_size<W>::value, typename std::enable_if<std::is_same<std::array<V, D>, W>::value>::type * = nullptr>
+    template<typename W = weight_t, typename V = value_t, std::size_t D = std::tuple_size<W>::value, typename std::enable_if<std::is_same<std::array<V, D>, W>::value>::type * = nullptr>
     void copy(const std::array<V, D> &weight, std::array<V, D> *target) const;
-    template<typename W = weight_t, typename V, typename std::enable_if<std::is_same<std::vector<V>, W>::value>::type * = nullptr>
+    template<typename W = weight_t, typename V = value_t, typename std::enable_if<std::is_same<std::vector<V>, W>::value>::type * = nullptr>
     void copy(const std::vector<V> &weight, std::vector<V> *target) const;
 
     template<typename W>
