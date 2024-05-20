@@ -39,14 +39,14 @@
 namespace bitpit {
 
 // Stream operators for the stencil class
-template<typename weight_t>
+template<typename weight_t, typename value_t>
 class DiscreteStencil;
 
-template<typename weight_t>
-OBinaryStream & operator<<(OBinaryStream &buffer, const DiscreteStencil<weight_t> &stencil);
+template<typename weight_t, typename value_t>
+OBinaryStream & operator<<(OBinaryStream &buffer, const DiscreteStencil<weight_t, value_t> &stencil);
 
-template<typename weight_t>
-IBinaryStream & operator>>(IBinaryStream &buffer, DiscreteStencil<weight_t> &stencil);
+template<typename weight_t, typename value_t>
+IBinaryStream & operator>>(IBinaryStream &buffer, DiscreteStencil<weight_t, value_t> &stencil);
 
 /**
 * \ingroup discretization
@@ -55,19 +55,21 @@ IBinaryStream & operator>>(IBinaryStream &buffer, DiscreteStencil<weight_t> &ste
 *
 * \tparam weight_t is the type of the weights stored in the stencil
 */
-template <typename weight_t>
+template<typename weight_t, typename value_t = typename DiscreteStencilWeightValueInfo<weight_t>::type>
 class DiscreteStencil {
 
-template<typename W>
-friend OBinaryStream & (operator<<) (OBinaryStream &buffer, const DiscreteStencil<W> &stencil);
-template<typename W>
-friend IBinaryStream & (operator>>) (IBinaryStream &buffer, DiscreteStencil<W> &stencil);
+template<typename W, typename V>
+friend OBinaryStream & (operator<<) (OBinaryStream &buffer, const DiscreteStencil<W, V> &stencil);
+template<typename W, typename V>
+friend IBinaryStream & (operator>>) (IBinaryStream &buffer, DiscreteStencil<W, V> &stencil);
 
 public:
     long NULL_ID = - std::numeric_limits<long>::max();
 
     using weight_type         = weight_t;
-    using weight_manager_type = DiscreteStencilWeightManager<weight_t, typename DiscreteStencilWeightValueInfo<weight_t>::type>;
+    using weight_manager_type = DiscreteStencilWeightManager<weight_t, value_t>;
+
+    using value_type = value_t;
 
     static const weight_manager_type & getWeightManager();
 
@@ -89,7 +91,7 @@ public:
     void initialize(std::size_t nItems, const weight_t &zero = weight_t());
     void initialize(std::size_t size, const long *pattern, const weight_t &zero = weight_t());
     void initialize(std::size_t size, const long *pattern, const weight_t *weights, const weight_t &zero = weight_t());
-    void initialize(const DiscreteStencil<weight_t> &other);
+    void initialize(const DiscreteStencil<weight_t, value_t> &other);
 
     void clear(bool release = false);
 
@@ -126,7 +128,7 @@ public:
     void sumConstant(const weight_t &constant, double factor = 1.);
     void zeroConstant();
 
-    void sum(const DiscreteStencil<weight_t> &other, double factor);
+    void sum(const DiscreteStencil<weight_t, value_t> &other, double factor);
 
     void optimize(double tolerance = 1.e-12);
     void renumber(const std::unordered_map<long, long> &map);
@@ -144,10 +146,10 @@ public:
 
     weight_t & operator[](long id);
 
-    DiscreteStencil<weight_t> & operator*=(double factor);
-    DiscreteStencil<weight_t> & operator/=(double factor);
-    DiscreteStencil<weight_t> & operator+=(const DiscreteStencil<weight_t> &other);
-    DiscreteStencil<weight_t> & operator-=(const DiscreteStencil<weight_t> &other);
+    DiscreteStencil<weight_t, value_t> & operator*=(double factor);
+    DiscreteStencil<weight_t, value_t> & operator/=(double factor);
+    DiscreteStencil<weight_t, value_t> & operator+=(const DiscreteStencil<weight_t, value_t> &other);
+    DiscreteStencil<weight_t, value_t> & operator-=(const DiscreteStencil<weight_t, value_t> &other);
 
 protected:
     static const weight_manager_type m_weightManager;
@@ -176,8 +178,8 @@ private:
 *
 * \tparam weight_t is the type of the weights stored in the stencil
 */
-template<typename weight_t>
-class MPDiscreteStencil : public DiscreteStencil<weight_t>
+template<typename weight_t, typename value_t = typename DiscreteStencilWeightValueInfo<weight_t>::type>
+class MPDiscreteStencil : public DiscreteStencil<weight_t, value_t>
 {
 
 public:
@@ -211,20 +213,20 @@ typedef MPDiscreteStencil<std::vector<double>> MPStencilBlock;
 }
 
 // Operators for the stencil class
-template <typename weight_t>
-bitpit::DiscreteStencil<weight_t> operator*(const bitpit::DiscreteStencil<weight_t> &stencil, double factor);
+template <typename weight_t, typename value_t>
+bitpit::DiscreteStencil<weight_t, value_t> operator*(const bitpit::DiscreteStencil<weight_t, value_t> &stencil, double factor);
 
-template <typename weight_t>
-bitpit::DiscreteStencil<weight_t> operator*(double factor, const bitpit::DiscreteStencil<weight_t> &stencil);
+template <typename weight_t, typename value_t>
+bitpit::DiscreteStencil<weight_t, value_t> operator*(double factor, const bitpit::DiscreteStencil<weight_t, value_t> &stencil);
 
-template <typename weight_t>
-bitpit::DiscreteStencil<weight_t> operator/(const bitpit::DiscreteStencil<weight_t> &stencil, double factor);
+template <typename weight_t, typename value_t>
+bitpit::DiscreteStencil<weight_t, value_t> operator/(const bitpit::DiscreteStencil<weight_t, value_t> &stencil, double factor);
 
-template <typename weight_t>
-bitpit::DiscreteStencil<weight_t> operator+(const bitpit::DiscreteStencil<weight_t> &stencil_A, const bitpit::DiscreteStencil<weight_t> &stencil_B);
+template <typename weight_t, typename value_t>
+bitpit::DiscreteStencil<weight_t, value_t> operator+(const bitpit::DiscreteStencil<weight_t, value_t> &stencil_A, const bitpit::DiscreteStencil<weight_t, value_t> &stencil_B);
 
-template <typename weight_t>
-bitpit::DiscreteStencil<weight_t> operator-(const bitpit::DiscreteStencil<weight_t> &stencil_A, const bitpit::DiscreteStencil<weight_t> &stencil_B);
+template <typename weight_t, typename value_t>
+bitpit::DiscreteStencil<weight_t, value_t> operator-(const bitpit::DiscreteStencil<weight_t, value_t> &stencil_A, const bitpit::DiscreteStencil<weight_t, value_t> &stencil_B);
 
 // Operators for the specializations
 template <typename V>
