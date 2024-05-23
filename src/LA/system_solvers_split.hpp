@@ -120,13 +120,17 @@ protected:
     void matrixAssembly(const Assembler &assembler);
     void matrixUpdate(long nRows, const long *rows, const Assembler &assembler);
     void matrixFill(const std::string &filePath) override;
-    void matrixDump(std::ostream &stream, const std::string &directory, const std::string &prefix) const override;
-    void matrixRestore(std::istream &stream, const std::string &directory, const std::string &prefix) override;
+    void matrixDump(std::ostream &systemStream, const std::string &directory, const std::string &prefix) const override;
+#if BITPIT_ENABLE_MPI==1
+    void matrixRestore(std::istream &systemStream, const std::string &directory, const std::string &prefix, bool redistribute) override;
+#else
+    void matrixRestore(std::istream &systemStream, const std::string &directory, const std::string &prefix) override;
+#endif
     void matrixDestroy() override;
 
     void vectorsCreate() override;
     void vectorsReorder(bool invert) override;
-    void vectorsRestore(std::istream &stream, const std::string &directory, const std::string &prefix) override;
+    void vectorsRestore(std::istream &systemStream, const std::string &directory, const std::string &prefix) override;
     void vectorsCreateSplitPermutations();
     void vectorsDestroy() override;
 
@@ -157,8 +161,8 @@ protected:
     void destroyKSPStatus() override;
     virtual void destroySplitKSPStatuses();
 
-    void dumpInfo(std::ostream &stream) const override;
-    void restoreInfo(std::istream &stream) override;
+    void dumpInfo(std::ostream &systemStream) const override;
+    void restoreInfo(std::istream &systemStream) override;
 
     using SystemSolver::exportMatrix;
 
