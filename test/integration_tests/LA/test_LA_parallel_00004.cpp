@@ -228,7 +228,7 @@ int subtest_002(int rank, int nProcs)
     bool transpose = false;
     SplitSystemSolver solver(transpose, multigrid, debug);
 
-    solver.restoreSystem(MPI_COMM_WORLD, ".", "LA_example_0002_linear_system_");
+    solver.restoreSystem(MPI_COMM_WORLD, false, ".", "LA_example_0002_linear_system_");
     log::cout() << "Linear system restored." << std::endl;
 
     // Export system

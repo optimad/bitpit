@@ -664,25 +664,27 @@ void SplitSystemSolver::destroySplitKSPStatuses()
 /*!
  * Dump system information.
  *
- * \param stream is the stream in which system information is written
+ * \param systemStream is the stream in which system information is written
  */
-void SplitSystemSolver::dumpInfo(std::ostream &stream) const
+void SplitSystemSolver::dumpInfo(std::ostream &systemStream) const
 {
-    SystemSolver::dumpInfo(stream);
+    SystemSolver::dumpInfo(systemStream);
 
-    utils::binary::write(stream, m_splitStrategy);
+    if (systemStream.good()) {
+        utils::binary::write(systemStream, m_splitStrategy);
+    }
 }
 
 /*!
  * Restore system information.
  *
- * \param stream is the stream from which system information is read
+ * \param systemStream is the stream from which system information is read
  */
-void SplitSystemSolver::restoreInfo(std::istream &stream)
+void SplitSystemSolver::restoreInfo(std::istream &systemStream)
 {
-    SystemSolver::restoreInfo(stream);
+    SystemSolver::restoreInfo(systemStream);
 
-    utils::binary::read(stream, m_splitStrategy);
+    utils::binary::read(systemStream, m_splitStrategy);
 }
 
 /*!
@@ -1251,61 +1253,79 @@ void SplitSystemSolver::matrixUpdate(long nRows, const long *rows, const Assembl
 /*!
  * Dump the matrix.
  *
- * \param stream is the stream in which matrix information is written
+ * \param systemStream is the stream in which system information is written
  * \param directory is the directory in which the matrix data file will be written.
  * \param prefix is the prefix added to the name of the file containing matrix data
  */
-void SplitSystemSolver::matrixDump(std::ostream &stream, const std::string &directory,
+void SplitSystemSolver::matrixDump(std::ostream &systemStream, const std::string &directory,
                                    const std::string &prefix) const
 {
     // Dump split matrices
     int nSplits = getSplitCount();
-    utils::binary::write(stream, nSplits);
+    if (systemStream.good()) {
+        utils::binary::write(systemStream, nSplits);
+    }
 
     for (PetscInt splitRow = 0; splitRow < nSplits; ++splitRow) {
         for (PetscInt splitCol = 0; splitCol < nSplits; ++splitCol) {
             int splitIndex = getBlockSplitLinearIndex(splitRow, splitCol, nSplits);
             std::string splitMatrixName = generateSplitPath(prefix + "A", splitRow, splitCol);
-            dumpMatrix(m_splitAs[splitIndex], stream, directory, splitMatrixName);
+            dumpMatrix(m_splitAs[splitIndex], directory, splitMatrixName);
         }
     }
 
-    // Dump main matrix
-    PetscInt rowBlockSize;
-    PetscInt colBlockSize;
-    MatGetBlockSizes(m_A, &rowBlockSize, &colBlockSize);
-    utils::binary::write(stream, static_cast<int>(rowBlockSize));
-    utils::binary::write(stream, static_cast<int>(colBlockSize));
+    // Dump information for creating the main matrix
+    if (systemStream.good()) {
+        PetscInt rowBlockSize;
+        PetscInt colBlockSize;
+        MatGetBlockSizes(m_A, &rowBlockSize, &colBlockSize);
+        utils::binary::write(systemStream, static_cast<int>(rowBlockSize));
+        utils::binary::write(systemStream, static_cast<int>(colBlockSize));
+    }
 }
 
 /*!
  * Restore the matrix.
  *
- * \param stream is the stream from which matrix information is read
+ * \param systemStream is the stream from which system information is read
  * \param directory is the directory from which the matrix data file will be read
  * \param prefix is the prefix that will be was added to the files during
  */
-void SplitSystemSolver::matrixRestore(std::istream &stream, const std::string &directory,
+#if BITPIT_ENABLE_MPI==1
+/*!
+ * \param redistribute if set to true, the matrix will be redistributed among the available
+ * processes, allowing to restore the matrix with a different number of processes than those
+ * used to dump it
+ */
+void SplitSystemSolver::matrixRestore(std::istream &systemStream, const std::string &directory,
+                                      const std::string &prefix, bool redistribute)
+#else
+void SplitSystemSolver::matrixRestore(std::istream &systemStream, const std::string &directory,
                                       const std::string &prefix)
+#endif
 {
     // Restore split matrices
     int nSplits;
-    utils::binary::read(stream, nSplits);
+    utils::binary::read(systemStream, nSplits);
 
     m_splitAs.assign(nSplits * nSplits, PETSC_NULLPTR);
     for (PetscInt splitRow = 0; splitRow < nSplits; ++splitRow) {
         for (PetscInt splitCol = 0; splitCol < nSplits; ++splitCol) {
             int splitIndex = getBlockSplitLinearIndex(splitRow, splitCol, nSplits);
             std::string splitMatrixName = generateSplitPath(prefix + "A", splitRow, splitCol);
-            restoreMatrix(stream, directory, splitMatrixName, m_splitAs.data() + splitIndex);
+#if BITPIT_ENABLE_MPI==1
+            restoreMatrix(directory, splitMatrixName, redistribute, m_splitAs.data() + splitIndex);
+#else
+            restoreMatrix(directory, splitMatrixName, m_splitAs.data() + splitIndex);
+#endif
         }
     }
 
     // Restore main matrix
     int rowBlockSize;
-    utils::binary::read(stream, rowBlockSize);
+    utils::binary::read(systemStream, rowBlockSize);
     int colBlockSize;
-    utils::binary::read(stream, colBlockSize);
+    utils::binary::read(systemStream, colBlockSize);
 
     createMatrix(rowBlockSize, colBlockSize, nSplits, nSplits, m_splitAs.data(), &m_A);
 }
@@ -1355,15 +1375,15 @@ void SplitSystemSolver::vectorsReorder(bool invert)
 /*!
  * Restore RHS and solution vectors.
  *
- * \param stream is the stream from which vector information is read
+ * \param systemStream is the stream from which system information is read
  * \param directory is the directory from which the vector data file will be read
  * \param prefix is the prefix added to the name of the file containing vectors data
  */
-void SplitSystemSolver::vectorsRestore(std::istream &stream, const std::string &directory,
+void SplitSystemSolver::vectorsRestore(std::istream &systemStream, const std::string &directory,
                                        const std::string &prefix)
 {
     // Create vectors
-    SystemSolver::vectorsRestore(stream, directory, prefix);
+    SystemSolver::vectorsRestore(systemStream, directory, prefix);
 
     // Create the split permutations
     vectorsCreateSplitPermutations();
