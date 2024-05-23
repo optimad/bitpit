@@ -197,7 +197,7 @@ int subtest_002()
     SplitSystemSolver solver(transpose, multigrid, debug);
 
 #if BITPIT_ENABLE_MPI==1
-    solver.restoreSystem(MPI_COMM_WORLD, ".", "LA_example_0002_linear_system_");
+    solver.restoreSystem(MPI_COMM_WORLD, false, ".", "LA_example_0002_linear_system_");
 #else
     solver.restoreSystem(".", "LA_example_0002_linear_system_");
 #endif

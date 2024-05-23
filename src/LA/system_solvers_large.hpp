@@ -31,6 +31,8 @@
 
 #include <petscksp.h>
 
+#include "bitpit_IO.hpp"
+
 #include "system_matrix.hpp"
 
 namespace bitpit {
@@ -315,7 +317,8 @@ public:
 
     void dumpSystem(const std::string &header, const std::string &directory, const std::string &prefix = "") const;
 #if BITPIT_ENABLE_MPI==1
-    void restoreSystem(MPI_Comm communicator, const std::string &directory, const std::string &prefix = "");
+    void restoreSystem(MPI_Comm communicator, bool redistribute, const std::string &directory,
+                       const std::string &prefix = "");
 #else
     void restoreSystem(const std::string &directory, const std::string &prefix = "");
 #endif
@@ -351,6 +354,11 @@ public:
     void enableForceConsistency(bool enable);
 
 protected:
+    enum VectorSide {
+        VECTOR_SIDE_RIGHT, // Vector that the matrix can be multiplied against
+        VECTOR_SIDE_LEFT, // Vector that the matrix vector product can be stored in
+    };
+
     bool m_flatten;
     bool m_transpose;
 
@@ -371,16 +379,20 @@ protected:
     void matrixAssembly(const Assembler &assembler);
     void matrixUpdate(long nRows, const long *rows, const Assembler &assembler);
     virtual void matrixFill(const std::string &filePath);
-    virtual void matrixDump(std::ostream &stream, const std::string &directory, const std::string &prefix) const;
-    virtual void matrixRestore(std::istream &stream, const std::string &directory, const std::string &prefix);
+    virtual void matrixDump(std::ostream &systemStream, const std::string &directory, const std::string &prefix) const;
+#if BITPIT_ENABLE_MPI==1
+    virtual void matrixRestore(std::istream &systemStream, const std::string &directory, const std::string &prefix, bool redistribute);
+#else
+    virtual void matrixRestore(std::istream &systemStream, const std::string &directory, const std::string &prefix);
+#endif
     virtual void matrixDestroy();
 
     virtual void vectorsCreate();
     virtual void vectorsFill(const std::vector<double> &rhs, const std::vector<double> &solution);
     virtual void vectorsFill(const std::string &rhsFilePath, const std::string &solutionFilePath);
     virtual void vectorsReorder(bool invert);
-    virtual void vectorsDump(std::ostream &stream, const std::string &directory, const std::string &prefix) const;
-    virtual void vectorsRestore(std::istream &stream, const std::string &directory, const std::string &prefix);
+    virtual void vectorsDump(std::ostream &systemStream, const std::string &directory, const std::string &prefix) const;
+    virtual void vectorsRestore(std::istream &systemStream, const std::string &directory, const std::string &prefix);
     virtual void vectorsDestroy();
 
     void clearReordering();
@@ -428,8 +440,12 @@ protected:
     void createMatrix(int rowBlockSize, int colBlockSize, Mat *matrix) const;
     void createMatrix(int rowBlockSize, int colBlockSize, int nNestRows, int nNestCols, Mat *subMatrices, Mat *matrix) const;
     void fillMatrix(Mat matrix, const std::string &filePath) const;
-    void dumpMatrix(Mat matrix, std::ostream &stream, const std::string &directory, const std::string &name) const;
-    void restoreMatrix(std::istream &stream, const std::string &directory, const std::string &name, Mat *matrix) const;
+    void dumpMatrix(Mat matrix, const std::string &directory, const std::string &name) const;
+#if BITPIT_ENABLE_MPI==1
+    void restoreMatrix(const std::string &directory, const std::string &name, bool redistribute, Mat *matrix) const;
+#else
+    void restoreMatrix(const std::string &directory, const std::string &name, Mat *matrix) const;
+#endif
     void exportMatrix(Mat matrix, const std::string &filePath, FileFormat fileFormat) const;
     void destroyMatrix(Mat *matrix) const;
 
@@ -438,14 +454,22 @@ protected:
     void fillVector(Vec vector, const std::string &filePath) const;
     void fillVector(Vec vector, const std::vector<double> &data) const;
     void reorderVector(Vec vector, IS permutations, bool invert) const;
-    void dumpVector(Vec vector, std::ostream &stream, const std::string &directory, const std::string &name) const;
-    void restoreVector(std::istream &stream, const std::string &directory, const std::string &name, Vec *vector) const;
+    void dumpVector(Vec vector, const std::string &directory, const std::string &name) const;
+    void dumpVector(Vec vector, VectorSide side, const std::string &directory, const std::string &name) const;
+    void restoreVector(const std::string &directory, const std::string &name, Mat matrix, VectorSide side, Vec *vector) const;
+#if BITPIT_ENABLE_MPI==1
+    void restoreVector(const std::string &directory, const std::string &name, bool redistribute, Vec *vector) const;
+#else
+    void restoreVector(const std::string &directory, const std::string &name, Vec *vector) const;
+#endif
+    void restoreVector(const std::string &directory, const std::string &name, std::size_t localSize, std::size_t globalSize, Vec *vector) const;
     void exportVector(Vec vector, const std::string &filePath, FileFormat fileFormat) const;
     void exportVector(Vec vector, std::vector<double> *data) const;
     void destroyVector(Vec *vector) const;
 
-    std::string getInfoFilePath(const std::string &directory, const std::string &prefix) const;
+    std::string getInfoFilePath(const std::string &directory, const std::string &name) const;
     std::string getDataFilePath(const std::string &directory, const std::string &name) const;
+    std::string getFilePath(const std::string &directory, const std::string &name) const;
 
 #if BITPIT_ENABLE_MPI==1
     const MPI_Comm & getCommunicator() const;
@@ -477,8 +501,14 @@ private:
 
     void removeNullSpaceFromRHS();
 
-    int getBinaryArchiveBlock() const;
+    void openBinaryArchive(const std::string &directory, const std::string &prefix,
+                           int block, IBinaryArchive *archive) const;
+    void openBinaryArchive(const std::string &header, const std::string &directory,
+                           const std::string &prefix, int block, OBinaryArchive *archive) const;
 
+    void closeBinaryArchive(BinaryArchive *archive) const;
+
+    int getBinaryArchiveBlock() const;
 };
 
 }

@@ -31,6 +31,7 @@
 
 #include "petscksp.h"
 #include "petscmat.h"
+#include "petscsystypes.h"
 #include "petscvec.h"
 
 #include <fstream>
@@ -1707,27 +1708,45 @@ void SystemSolver::matrixUpdate(long nRows, const long *rows, const Assembler &a
 /*!
  * Dump the matrix.
  *
- * \param stream is the stream in which matrix information is written
+ * \param systemStream is the stream in which system information is written
  * \param directory is the directory in which the matrix data file will be written
  * \param prefix is the prefix added to the name of the file containing matrix data
  */
-void SystemSolver::matrixDump(std::ostream &stream, const std::string &directory,
+void SystemSolver::matrixDump(std::ostream &systemStream, const std::string &directory,
                               const std::string &prefix) const
 {
-    dumpMatrix(m_A, stream, directory, prefix + "A");
+    BITPIT_UNUSED(systemStream);
+
+    dumpMatrix(m_A, directory, prefix + "A");
 }
 
 /*!
  * Restore the matrix.
  *
- * \param stream is the stream from which matrix information is read
+ * \param systemStream is the stream from which system information is read
  * \param directory is the directory from which the matrix data file will be read
  * \param prefix is the prefix that will be was added to the files during
  */
-void SystemSolver::matrixRestore(std::istream &stream, const std::string &directory,
+#if BITPIT_ENABLE_MPI==1
+/*!
+ * \param redistribute if set to true, the matrix will be redistributed among the available
+ * processes, allowing to restore the matrix with a different number of processes than those
+ * used to dump it
+ */
+void SystemSolver::matrixRestore(std::istream &systemStream, const std::string &directory,
+                                 const std::string &prefix, bool redistribute)
+#else
+void SystemSolver::matrixRestore(std::istream &systemStream, const std::string &directory,
                                  const std::string &prefix)
+#endif
 {
-    restoreMatrix(stream, directory, prefix + "A", &m_A);
+    BITPIT_UNUSED(systemStream);
+
+#if BITPIT_ENABLE_MPI==1
+    restoreMatrix(directory, prefix + "A", redistribute, &m_A);
+#else
+    restoreMatrix(directory, prefix + "A", &m_A);
+#endif
 }
 
 /*!
@@ -1809,29 +1828,33 @@ void SystemSolver::vectorsReorder(bool invert)
 /*!
  * Dump RHS and solution vectors.
  *
- * \param stream is the stream in which vector information is written
+ * \param systemStream is the stream from which system information is read
  * \param directory is the directory in which the vectors data file will be written
  * \param prefix is the prefix added to the names of the files containing vector data
  */
-void SystemSolver::vectorsDump(std::ostream &stream, const std::string &directory,
+void SystemSolver::vectorsDump(std::ostream &systemStream, const std::string &directory,
                                const std::string &prefix) const
 {
-    dumpVector(m_rhs, stream, directory, prefix + "rhs");
-    dumpVector(m_solution, stream, directory, prefix + "solution");
+    BITPIT_UNUSED(systemStream);
+
+    dumpVector(m_rhs, directory, prefix + "rhs");
+    dumpVector(m_solution, directory, prefix + "solution");
 }
 
 /*!
  * Restore RHS and solution vectors.
  *
- * \param stream is the stream from which vector information is read
+ * \param systemStream is the stream that contains system information
  * \param directory is the directory from which the vector data file will be read
  * \param prefix is the prefix added to the name of the file containing vectors data
  */
-void SystemSolver::vectorsRestore(std::istream &stream, const std::string &directory,
-                                 const std::string &prefix)
+void SystemSolver::vectorsRestore(std::istream &systemStream, const std::string &directory,
+                                  const std::string &prefix)
 {
-    restoreVector(stream, directory, prefix + "rhs", &m_rhs);
-    restoreVector(stream, directory, prefix + "solution",  &m_solution);
+    BITPIT_UNUSED(systemStream);
+
+    restoreVector(directory, prefix + "rhs", m_A, VECTOR_SIDE_RIGHT, &m_rhs);
+    restoreVector(directory, prefix + "solution", m_A, VECTOR_SIDE_LEFT, &m_solution);
 }
 
 /*!
@@ -2121,26 +2144,26 @@ void SystemSolver::importSolution(const std::string &filePath)
 void SystemSolver::dumpSystem(const std::string &header, const std::string &directory,
                               const std::string &prefix) const
 {
+    int partitioningBlock = getBinaryArchiveBlock();
+
     // Open stream that will contain system information
-    int archiveBlock = getBinaryArchiveBlock();
-
-    int infoVersion = getDumpVersion();
-    std::string infoPath = getInfoFilePath(directory, prefix);
-    OBinaryArchive infoArchive(infoPath, "dat", infoVersion, header, archiveBlock);
-
-    std::ostream &infoStream = infoArchive.getStream();
+    OBinaryArchive systemArchive;
+    if (partitioningBlock <= 0) {
+        openBinaryArchive(header, directory, prefix + "info", -1, &systemArchive);
+    }
+    std::ostream &systemStream = systemArchive.getStream();
 
     // Dump system information
-    dumpInfo(infoStream);
+    dumpInfo(systemStream);
 
     // Dump matrix
-    matrixDump(infoStream, directory, prefix);
+    matrixDump(systemStream, directory, prefix);
 
     // Dump vectors
-    vectorsDump(infoStream, directory, prefix);
+    vectorsDump(systemStream, directory, prefix);
 
     // Open stream with system information
-    infoArchive.close();
+    closeBinaryArchive(&systemArchive);
 }
 
 /*!
@@ -2154,17 +2177,21 @@ void SystemSolver::dumpSystem(const std::string &header, const std::string &dire
  * files are found they will be re-created from scratch (but they will not be initialized).
  */
 #if BITPIT_ENABLE_MPI==1
- /*!
+/*!
  * \param communicator is the MPI communicator
+ * \param redistribute if set to true, the system will be redistributed among the available
+ * processes, allowing to restore the system with a different number of processes than those
+ * used to dump it
+ */
+#endif
+/*!
  * \param directory is the directory where the files will be read from
  * \param prefix is the prefix that will be was added to the files during
  */
-void SystemSolver::restoreSystem(MPI_Comm communicator, const std::string &directory, const std::string &prefix)
+#if BITPIT_ENABLE_MPI==1
+void SystemSolver::restoreSystem(MPI_Comm communicator, bool redistribute,
+                                 const std::string &directory, const std::string &prefix)
 #else
- /*!
- * \param directory is the directory where the files will be read from
- * \param prefix is the prefix that will be was added to the files during
- */
 void SystemSolver::restoreSystem(const std::string &directory, const std::string &prefix)
 #endif
 {
@@ -2177,32 +2204,25 @@ void SystemSolver::restoreSystem(const std::string &directory, const std::string
 #endif
 
     // Open stream with system information
-    int archiveBlock = getBinaryArchiveBlock();
-
-    int infoVersion = getDumpVersion();
-    std::string infoPath = getInfoFilePath(directory, prefix);
-    IBinaryArchive infoArchive(infoPath, "dat", archiveBlock);
-    bool versionsMatch = infoArchive.checkVersion(infoVersion);
-    if (!versionsMatch) {
-        std::string message = "Restart version in dump file " + infoPath + " does not match";
-        message += " the expected restart version " + std::to_string(infoVersion) + ".";
-
-        throw std::runtime_error(message);
-    }
-
-    std::istream &infoStream = infoArchive.getStream();
+    IBinaryArchive systemArchive;
+    openBinaryArchive(directory, prefix + "info", -1, &systemArchive);
+    std::istream &systemStream = systemArchive.getStream();
 
     // Dump system information
-    restoreInfo(infoStream);
+    restoreInfo(systemStream);
 
     // Restore the matrix
-    matrixRestore(infoStream, directory, prefix);
+#if BITPIT_ENABLE_MPI==1
+    matrixRestore(systemStream, directory, prefix, redistribute);
+#else
+    matrixRestore(systemStream, directory, prefix);
+#endif
 
     // Restore RHS and solution vectors
-    vectorsRestore(infoStream, directory, prefix);
+    vectorsRestore(systemStream, directory, prefix);
 
     // Close stream with system information
-    infoArchive.close();
+    closeBinaryArchive(&systemArchive);
 
     // The system is now assembled
     m_assembled = true;
@@ -2217,31 +2237,33 @@ void SystemSolver::restoreSystem(const std::string &directory, const std::string
 /*!
  * Dump system information.
  *
- * \param stream is the stream in which system information is written
+ * \param systemStream is the stream in which system information is written
  */
-void SystemSolver::dumpInfo(std::ostream &stream) const
+void SystemSolver::dumpInfo(std::ostream &systemStream) const
 {
+    if (systemStream.good()) {
 #if BITPIT_ENABLE_MPI==1
-    utils::binary::write(stream, m_partitioned);
+        utils::binary::write(systemStream, m_partitioned);
 #endif
-    utils::binary::write(stream, m_transpose);
+        utils::binary::write(systemStream, m_transpose);
+    }
 }
 
 /*!
  * Restore system information.
  *
- * \param stream is the stream from which system information is read
+ * \param systemStream is the stream from which system information is read
  */
-void SystemSolver::restoreInfo(std::istream &stream)
+void SystemSolver::restoreInfo(std::istream &systemStream)
 {
 #if BITPIT_ENABLE_MPI == 1
     // Detect if the system is partitioned
-    utils::binary::read(stream, m_partitioned);
+    utils::binary::read(systemStream, m_partitioned);
 #endif
 
     // Set transpose flag
     bool transpose;
-    utils::binary::read(stream, transpose);
+    utils::binary::read(systemStream, transpose);
     setTranspose(transpose);
 
 }
@@ -2361,40 +2383,76 @@ void SystemSolver::fillMatrix(Mat matrix, const std::string &filePath) const
 /*!
  * Dump the specified matrix.
  *
+ * In addition to the file that contains the contant of the matrix, some other files will be
+ * created:
+ *  - a file with the information needed for re-creating the matrix (called "<NAME>.info");
+ */
+#if BITPIT_ENABLE_MPI==1
+/*!
+ *  - a file with the information about the partitioning (called "<NAME>.partitioning"), this
+ *    file is created only if the system is partitioned and bitpit MPI support is enabled.
+ */
+#endif
+/*!
+ *
  * \param matrix is the matrix that will be dumped
- * \param stream is the stream in which matrix information is written
  * \param directory is the directory in which the matrix data file will be written
  * \param name is the name of the matrix that will be dumped
  */
-void SystemSolver::dumpMatrix(Mat matrix, std::ostream &stream, const std::string &directory,
-                              const std::string &name) const
+void SystemSolver::dumpMatrix(Mat matrix, const std::string &directory, const std::string &name) const
 {
+    int partitioningBlock = getBinaryArchiveBlock();
+
     // Store information needed to create the matrix
-    bool matrixExists = matrix;
-    utils::binary::write(stream, matrixExists);
-    if (!matrixExists) {
+    OBinaryArchive infoArchive;
+    if (partitioningBlock <= 0) {
+        openBinaryArchive("", directory, name + ".info", -1, &infoArchive);
+        std::ostream &infoStream = infoArchive.getStream();
+
+        bool matrixExists = matrix;
+        utils::binary::write(infoStream, matrixExists);
+        if (!matrixExists) {
+            closeBinaryArchive(&infoArchive);
+            return;
+        }
+
+        PetscInt rowBlockSize;
+        PetscInt colBlockSize;
+        MatGetBlockSizes(matrix, &rowBlockSize, &colBlockSize);
+        utils::binary::write(infoStream, static_cast<int>(rowBlockSize));
+        utils::binary::write(infoStream, static_cast<int>(colBlockSize));
+
+        closeBinaryArchive(&infoArchive);
+    }
+
+    if (!matrix) {
         return;
     }
 
-    PetscInt rowBlockSize;
-    PetscInt colBlockSize;
-    MatGetBlockSizes(matrix, &rowBlockSize, &colBlockSize);
-    utils::binary::write(stream, static_cast<int>(rowBlockSize));
-    utils::binary::write(stream, static_cast<int>(colBlockSize));
+#if BITPIT_ENABLE_MPI==1
+    // Store partitioning information
+    if (isPartitioned()) {
+        OBinaryArchive partitioningArchive;
+        openBinaryArchive("", directory, name + ".partitioning", partitioningBlock, &partitioningArchive);
+        std::ostream &partitioningStream = partitioningArchive.getStream();
 
-    PetscInt nLocalRows;
-    PetscInt nLocalCols;
-    MatGetLocalSize(matrix, &nLocalRows, &nLocalCols);
-    utils::binary::write(stream, static_cast<std::size_t>(nLocalRows));
-    utils::binary::write(stream, static_cast<std::size_t>(nLocalCols));
+        PetscInt nLocalRows;
+        PetscInt nLocalCols;
+        MatGetLocalSize(matrix, &nLocalRows, &nLocalCols);
+        utils::binary::write(partitioningStream, static_cast<std::size_t>(nLocalRows));
+        utils::binary::write(partitioningStream, static_cast<std::size_t>(nLocalCols));
 
-    PetscInt nGlobalRows;
-    PetscInt nGlobalCols;
-    MatGetSize(matrix, &nGlobalRows, &nGlobalCols);
-    utils::binary::write(stream, static_cast<std::size_t>(nGlobalRows));
-    utils::binary::write(stream, static_cast<std::size_t>(nGlobalCols));
+        PetscInt nGlobalRows;
+        PetscInt nGlobalCols;
+        MatGetSize(matrix, &nGlobalRows, &nGlobalCols);
+        utils::binary::write(partitioningStream, static_cast<std::size_t>(nGlobalRows));
+        utils::binary::write(partitioningStream, static_cast<std::size_t>(nGlobalCols));
 
-    // Store matrix content
+        closeBinaryArchive(&partitioningArchive);
+    }
+#endif
+
+    // Store matrix data
     std::string filePath = getDataFilePath(directory, name);
     exportMatrix(matrix, filePath, FILE_BINARY);
 }
@@ -2402,37 +2460,72 @@ void SystemSolver::dumpMatrix(Mat matrix, std::ostream &stream, const std::strin
 /*!
  * Restore the specified matrix.
  *
- * \param stream is the stream from which matrix information is read
  * \param directory is the directory from which the matrix data file will be read
  * \param name is the name of the matrix that will be dumped
- * \param matrix is the matrix that will be restored
  */
-void SystemSolver::restoreMatrix(std::istream &stream, const std::string &directory,
-                                 const std::string &name, Mat *matrix) const
+#if BITPIT_ENABLE_MPI==1
+/*!
+ * \param redistribute if set to true, the matrix will be redistributed among the available
+ * processes, allowing to restore the matrix with a different number of processes than those
+ * used to dump it
+ */
+#endif
+/*!
+ * \param[out] matrix on output will contain the restored matrix
+ */
+#if BITPIT_ENABLE_MPI==1
+void SystemSolver::restoreMatrix(const std::string &directory, const std::string &name,
+                                 bool redistribute, Mat *matrix) const
 {
+#else
+void SystemSolver::restoreMatrix(const std::string &directory, const std::string &name,
+                                 Mat *matrix) const
+{
+#endif
+
     // Create matrix
+    IBinaryArchive infoArchive;
+    openBinaryArchive(directory, name + ".info", -1, &infoArchive);
+    std::istream &infoStream = infoArchive.getStream();
+
     bool matrixExists;
-    utils::binary::read(stream, matrixExists);
+    utils::binary::read(infoStream, matrixExists);
     if (!matrixExists) {
         *matrix = PETSC_NULLPTR;
+        closeBinaryArchive(&infoArchive);
         return;
     }
 
     int rowBlockSize;
     int colBlockSize;
-    utils::binary::read(stream, rowBlockSize);
-    utils::binary::read(stream, colBlockSize);
+    utils::binary::read(infoStream, rowBlockSize);
+    utils::binary::read(infoStream, colBlockSize);
     createMatrix(rowBlockSize, colBlockSize, matrix);
 
-    std::size_t nLocalRows;
-    std::size_t nLocalCols;
-    utils::binary::read(stream, nLocalRows);
-    utils::binary::read(stream, nLocalCols);
-    std::size_t nGlobalRows;
-    std::size_t nGlobalCols;
-    utils::binary::read(stream, nGlobalRows);
-    utils::binary::read(stream, nGlobalCols);
-    MatSetSizes(*matrix, nLocalRows, nLocalCols, nGlobalRows, nGlobalCols);
+    closeBinaryArchive(&infoArchive);
+
+#if BITPIT_ENABLE_MPI==1
+    // Set partitioning information
+    if (isPartitioned() && !redistribute) {
+        int partitioningBlock = getBinaryArchiveBlock();
+
+        IBinaryArchive partitioningArchive;
+        openBinaryArchive(directory, name + ".partitioning", partitioningBlock, &partitioningArchive);
+        std::istream &partitioningStream = partitioningArchive.getStream();
+
+        std::size_t nLocalRows;
+        std::size_t nLocalCols;
+        utils::binary::read(partitioningStream, nLocalRows);
+        utils::binary::read(partitioningStream, nLocalCols);
+        std::size_t nGlobalRows;
+        std::size_t nGlobalCols;
+        utils::binary::read(partitioningStream, nGlobalRows);
+        utils::binary::read(partitioningStream, nGlobalCols);
+        MatSetSizes(*matrix, nLocalRows, nLocalCols, nGlobalRows, nGlobalCols);
+
+        closeBinaryArchive(&partitioningArchive);
+    }
+#endif
 
     // Fill matrix
     std::string filePath = getDataFilePath(directory, name);
@@ -2611,32 +2704,72 @@ void SystemSolver::fillVector(Vec vector, const std::vector<double> &data) const
 /*!
  * Dump the specified vector.
  *
+ * In addition to the file that contains the contant of the vector, some other files will be
+ * created:
+ *  - a file with the information needed for re-creating the vector (called "<NAME>.info");
+ */
+#if BITPIT_ENABLE_MPI==1
+/*!
+ *  - a file with the information about the partitioning (called "<NAME>.partitioning"), this
+ *    file is created only if the system is partitioned and bitpit MPI support is enabled.
+ */
+#endif
+/*!
+ *
  * \param vector is the vector that will be dumped
- * \param stream is the stream in which vector information is written
  * \param directory is the directory in which the vector data file will be written
  * \param name is the name of the vector that will be dumped
  */
-void SystemSolver::dumpVector(Vec vector, std::ostream &stream, const std::string &directory,
-                              const std::string &name) const
+void SystemSolver::dumpVector(Vec vector, const std::string &directory, const std::string &name) const
 {
-    bool vectorExists = vector;
-    utils::binary::write(stream, vectorExists);
-    if (!vectorExists) {
+    int partitioningBlock = getBinaryArchiveBlock();
+
+    // Store information needed to create the matrix
+    if (partitioningBlock <= 0) {
+        OBinaryArchive infoArchive;
+        openBinaryArchive("", directory, name + ".info", -1, &infoArchive);
+        std::ostream &infoStream = infoArchive.getStream();
+
+        bool vectorExists = vector;
+        utils::binary::write(infoStream, vectorExists);
+        if (!vectorExists) {
+            closeBinaryArchive(&infoArchive);
+            return;
+        }
+
+        PetscInt blockSize;
+        VecGetBlockSize(vector, &blockSize);
+        utils::binary::write(infoStream, static_cast<int>(blockSize));
+
+        closeBinaryArchive(&infoArchive);
+    }
+
+    if (!vector) {
         return;
     }
 
-    PetscInt blockSize;
-    VecGetBlockSize(vector, &blockSize);
-    utils::binary::write(stream, static_cast<int>(blockSize));
+#if BITPIT_ENABLE_MPI==1
+    // Store partitioning information
+    if (isPartitioned()) {
+        int partitioningBlock = getBinaryArchiveBlock();
 
-    PetscInt localSize;
-    VecGetLocalSize(vector, &localSize);
-    utils::binary::write(stream, static_cast<std::size_t>(localSize));
+        OBinaryArchive partitioningArchive;
+        openBinaryArchive("", directory, name + ".partitioning", partitioningBlock, &partitioningArchive);
+        std::ostream &partitioningStream = partitioningArchive.getStream();
 
-    PetscInt globalSize;
-    VecGetSize(vector, &globalSize);
-    utils::binary::write(stream, static_cast<std::size_t>(globalSize));
+        PetscInt localSize;
+        VecGetLocalSize(vector, &localSize);
+        utils::binary::write(partitioningStream, static_cast<std::size_t>(localSize));
 
+        PetscInt globalSize;
+        VecGetSize(vector, &globalSize);
+        utils::binary::write(partitioningStream, static_cast<std::size_t>(globalSize));
+
+        closeBinaryArchive(&partitioningArchive);
+    }
+#endif
+
+    // Store vector data
     std::string filePath = getDataFilePath(directory, name);
     exportVector(vector, filePath, FILE_BINARY);
 }
@@ -2644,33 +2777,148 @@ void SystemSolver::dumpVector(Vec vector, std::ostream &stream, const std::strin
 /*!
  * Restore the specified vector.
  *
- * \param stream is the stream from which vector information is read
  * \param directory is the directory from which the vector data file will be read
- * \param name is the name of the vector that will be restored
- * \param vector is the vector that will be restored
+ * \param name is the name of the vector that will be dumped
+ * \param matrix is the matrix the vectors should be compatible with
+ * \param side specifies whether the vector can be multiplied by the matrix, or whether the
+ * matrix-vector product can be stored in it
+ * \param[out] vector on output will contain the restored vector
  */
-void SystemSolver::restoreVector(std::istream &stream, const std::string &directory,
-                                 const std::string &name, Vec *vector) const
+void SystemSolver::restoreVector(const std::string &directory, const std::string &name,
+                                 Mat matrix, VectorSide side, Vec *vector) const
+{
+    // Get size information
+    PetscInt nLocalRows;
+    PetscInt nLocalCols;
+    MatGetLocalSize(matrix, &nLocalRows, &nLocalCols);
+
+    PetscInt nGlobalRows;
+    PetscInt nGlobalCols;
+    MatGetSize(matrix, &nGlobalRows, &nGlobalCols);
+
+    std::size_t localSize  = std::numeric_limits<std::size_t>::max();
+    std::size_t globalSize = std::numeric_limits<std::size_t>::max();
+    if (!m_transpose) {
+        if (side == VECTOR_SIDE_RIGHT) {
+            localSize  = nLocalCols;
+            globalSize = nGlobalCols;
+        } else if (side == VECTOR_SIDE_LEFT) {
+            localSize  = nLocalRows;
+            globalSize = nGlobalRows;
+        }
+    } else {
+        if (side == VECTOR_SIDE_RIGHT) {
+            localSize  = nLocalRows;
+            globalSize = nGlobalRows;
+        } else if (side == VECTOR_SIDE_LEFT) {
+            localSize  = nLocalCols;
+            globalSize = nGlobalCols;
+        }
+    }
+
+    // Restore the vector
+    restoreVector(directory, name, localSize, globalSize, vector);
+}
+
+/*!
+ * Restore the specified vector.
+ *
+ * \param directory is the directory from which the vector data file will be read
+ * \param name is the name of the vector that will be dumped
+ */
+#if BITPIT_ENABLE_MPI==1
+/*!
+ * \param redistribute if set to true, the vector will be redistributed among the available
+ * processes, allowing to restore the vector with a different number of processes than those
+ * used to dump it
+ */
+#endif
+/*!
+ * \param[out] vector on output will contain the restored vector
+ */
+#if BITPIT_ENABLE_MPI==1
+void SystemSolver::restoreVector(const std::string &directory, const std::string &name,
+                                 bool redistribute, Vec *vector) const
+#else
+void SystemSolver::restoreVector(const std::string &directory, const std::string &name,
+                                 Vec *vector) const
+#endif
+{
+
+    // Get size information
+    std::size_t localSize  = std::numeric_limits<std::size_t>::max();
+    std::size_t globalSize = std::numeric_limits<std::size_t>::max();
+#if BITPIT_ENABLE_MPI==1
+    if (isPartitioned()) {
+        if (!redistribute) {
+            int partitioningBlock = getBinaryArchiveBlock();
+
+            IBinaryArchive partitioningArchive;
+            openBinaryArchive(directory, name + ".partitioning", partitioningBlock, &partitioningArchive);
+            std::istream &partitioningStream = partitioningArchive.getStream();
+
+            utils::binary::read(partitioningStream, localSize);
+            utils::binary::read(partitioningStream, globalSize);
+
+            closeBinaryArchive(&partitioningArchive);
+        }
+    }
+#endif
+
+    restoreVector(directory, name, localSize, globalSize, vector);
+}
+
+/*!
+ * Restore the specified vector.
+ *
+ * \param directory is the directory from which the vector data file will be read
+ * \param name is the name of the vector that will be dumped
+ * \param localSize is the local size of the restored vector
+ * \param globalSize is the global size of the restored vector
+ * \param[out] vector on output will contain the restored vector
+ */
+void SystemSolver::restoreVector(const std::string &directory, const std::string &name,
+                                 std::size_t localSize, std::size_t globalSize, Vec *vector) const
 {
     // Create vector
+    IBinaryArchive infoArchive;
+    openBinaryArchive(directory, name + ".info", -1, &infoArchive);
+    std::istream &infoStream = infoArchive.getStream();
+
     bool vectorExists;;
-    utils::binary::read(stream, vectorExists);
+    utils::binary::read(infoStream, vectorExists);
     if (!vectorExists) {
         *vector = PETSC_NULLPTR;
+        closeBinaryArchive(&infoArchive);
         return;
     }
 
     int blockSize;
-    utils::binary::read(stream, blockSize);
+    utils::binary::read(infoStream, blockSize);
     createVector(blockSize, vector);
 
-    std::size_t localSize;
-    utils::binary::read(stream, localSize);
-    std::size_t globalSize;
-    utils::binary::read(stream, globalSize);
-    VecSetSizes(*vector, localSize, globalSize);
+    closeBinaryArchive(&infoArchive);
 
-    // Fill vector
+    // Set size information
+    PetscInt petscLocalSize;
+    if (localSize != std::numeric_limits<std::size_t>::max()) {
+        petscLocalSize = static_cast<PetscInt>(localSize);
+    } else {
+        petscLocalSize = PETSC_DECIDE;
+    }
+
+    PetscInt petscGlobalSize;
+    if (globalSize != std::numeric_limits<std::size_t>::max()) {
+        petscGlobalSize = static_cast<PetscInt>(globalSize);
+    } else {
+        petscGlobalSize = PETSC_DETERMINE;
+    }
+
+    if (petscLocalSize != PETSC_DECIDE || petscGlobalSize != PETSC_DETERMINE) {
+        VecSetSizes(*vector, petscLocalSize, petscGlobalSize);
+    }
+
+    // Fill vector data
     std::string filePath = getDataFilePath(directory, name);
     fillVector(*vector, filePath);
 }
@@ -2780,29 +3028,39 @@ void SystemSolver::destroyVector(Vec *vector) const
 }
 
 /*!
- * Get the path of the file that will be used to dump/restore system information.
+ * Get the path of the specified info file.
  *
  * \param directory is the directory that contains the file
- * \param prefix is the prefix that will be was added to the file
- * \result The path of the file that will be used to dump/restore system information.
+ * \param name is the name, without extension, of the file
+ * \result The path of the info file.
  */
-std::string SystemSolver::getInfoFilePath(const std::string &directory, const std::string &prefix) const
+std::string SystemSolver::getInfoFilePath(const std::string &directory, const std::string &name) const
 {
-    std::string path = directory + "/" + prefix + "info";
-
-    return path;
+    return getFilePath(directory, name + ".info");
 }
 
 /*!
- * Get the path of the file that will be used to dump/restore the specified data.
+ * Get the path of the specified data file.
  *
  * \param directory is the directory that contains the file
- * \param prefix is the prefix that will be was added to the file
- * \result The path of the file that will be used to dump/restore the specified data.
+ * \param name is the name, without extension, of the file
+ * \result The path of the data file.
  */
 std::string SystemSolver::getDataFilePath(const std::string &directory, const std::string &name) const
 {
-    std::string path = directory + "/" + name + ".dat";
+    return getFilePath(directory, name + ".dat");
+}
+
+/*!
+ * Get the path of the specified file.
+ *
+ * \param directory is the directory that contains the file
+ * \param name is the name of the file
+ * \result The path of the file.
+ */
+std::string SystemSolver::getFilePath(const std::string &directory, const std::string &name) const
+{
+    std::string path = directory + "/" + name;
 
     return path;
 }
@@ -3345,6 +3603,65 @@ void SystemSolver::enableForceConsistency(bool enable)
 }
 
 /*!
+ * Open an input binary archive.
+ *
+ * It's up to the caller of this function to close the binary archive when it is not needed
+ * anymore.
+ *
+ * \param directory is the directory that contains the boundary archive
+ * \param name is the name, without extension, of the binary archive
+ * \param block is the parallel block the archive belongs to, a negative value means that the
+ * archive is serial
+ * \param[in, out] archive on output will contained the opened binary archive
+ */
+void SystemSolver::openBinaryArchive(const std::string &directory, const std::string &prefix,
+                                     int block, IBinaryArchive *archive) const
+{
+    int expectedVersion = getDumpVersion();
+
+    std::string path = getFilePath(directory, prefix);
+    archive->open(path, "dat", block);
+    bool versionsMatch = archive->checkVersion(expectedVersion);
+    if (!versionsMatch) {
+        std::string message = "Version stored in binary archive " + path + " does not match";
+        message += " the expected version " + std::to_string(expectedVersion) + ".";
+
+        throw std::runtime_error(message);
+    }
+}
+
+/*!
+ * Open an output binary archive.
+ *
+ * It's up to the caller of this function to close the binary archive when it is not needed
+ * anymore.
+ *
+ * \param header is the header of the archive
+ * \param directory is the directory that will contain the boundary archive
+ * \param name is the name, without extension, of the binary archive
+ * \param block is the parallel block the archive belongs to, a negative value means that the
+ * archive is serial
+ * \param[in, out] archive on output will contained the opened binary archive
+ */
+void SystemSolver::openBinaryArchive(const std::string &header, const std::string &directory,
+                                     const std::string &prefix, int block, OBinaryArchive *archive) const
+{
+    int version = getDumpVersion();
+    std::string path = getFilePath(directory, prefix);
+    archive->open(path, "dat", version, header, block);
+}
+
+/*!
+ * Close the specified binary archive.
+ *
+ * \param[in, out] archive is the archive that will be closed
+ */
+void SystemSolver::closeBinaryArchive(BinaryArchive *archive) const
+{
+    archive->close();
+}
+
+/*!
  * Get the block of the binary archive assigned to this process.
  *
  * \result The block of the binary archive assigned to this process.
@@ -3352,16 +3669,20 @@ void SystemSolver::enableForceConsistency(bool enable)
 int SystemSolver::getBinaryArchiveBlock() const
 {
 #if BITPIT_ENABLE_MPI == 1
-    int nProcesses;
-    MPI_Comm_size(getCommunicator(), &nProcesses);
-    if (nProcesses <= 1) {
+    if (isPartitioned()) {
+        int nProcesses;
+        MPI_Comm_size(getCommunicator(), &nProcesses);
+        if (nProcesses <= 1) {
+            return -1;
+        }
+
+        int archiveBlock;
+        MPI_Comm_rank(getCommunicator(), &archiveBlock);
+
+        return archiveBlock;
+    } else {
         return -1;
     }
-
-    int archiveBlock;
-    MPI_Comm_rank(getCommunicator(), &archiveBlock);
-
-    return archiveBlock;
 #else
     return -1;
 #endif

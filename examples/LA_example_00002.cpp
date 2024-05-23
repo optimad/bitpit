@@ -44,23 +44,19 @@ const int    SOLVER_MAXITS = 100;
  * This example builds a small linear system, it dumps it to the disk,
  * it solves the linear system and it exports the solution to disk.
  * Dump files will be saved in the current directory and they names are:
+ *   LA_example_0002_linear_system_A.dat
+ *   LA_example_0002_linear_system_A.dat.info
+ *   LA_example_0002_linear_system_A.info.dat
+ *   LA_example_0002_linear_system_A.partitioning.bXXXX.dat
  *   LA_example_0002_linear_system_info.dat
- *   LA_example_0002_linear_system_A_split_00.dat.info
- *   LA_example_0002_linear_system_A_split_00.dat
- *   LA_example_0002_linear_system_A_split_01.dat.info
- *   LA_example_0002_linear_system_A_split_01.dat
- *   LA_example_0002_linear_system_A_split_10.dat.info
- *   LA_example_0002_linear_system_A_split_10.dat
- *   LA_example_0002_linear_system_A_split_11.dat.info
- *   LA_example_0002_linear_system_A_split_11.dat
- *   LA_example_0002_linear_system_rhs_split_0.dat.info
- *   LA_example_0002_linear_system_rhs_split_0.dat
- *   LA_example_0002_linear_system_rhs_split_1.dat.info
- *   LA_example_0002_linear_system_rhs_split_1.dat
- *   LA_example_0002_linear_system_solution_split_0.dat.info
- *   LA_example_0002_linear_system_solution_split_0.dat
- *   LA_example_0002_linear_system_solution_split_1.dat.info
- *   LA_example_0002_linear_system_solution_split_1.dat
+ *   LA_example_0002_linear_system_rhs.dat
+ *   LA_example_0002_linear_system_rhs.dat.info
+ *   LA_example_0002_linear_system_rhs.info.dat
+ *   LA_example_0002_linear_system_rhs.partitioning.bXXXX.dat
+ *   LA_example_0002_linear_system_solution.dat
+ *   LA_example_0002_linear_system_solution.dat.info
+ *   LA_example_0002_linear_system_solution.info.dat
+ *   LA_example_0002_linear_system_solution.partitioning.bXXXX.dat
  *
  * This example contains an extension of the bare SplitSystemSolver class
  * adding the ability to solve using algebraic multigrid (PETSc GAMG)
@@ -377,7 +373,7 @@ int run_restore(int rank, int nProcs)
     AMGSplitSystemSolver solver(transpose, multigrid, debug);
 
 #if BITPIT_ENABLE_MPI==1
-    solver.restoreSystem(MPI_COMM_WORLD, ".", "LA_example_0002_linear_system_");
+    solver.restoreSystem(MPI_COMM_WORLD, false, ".", "LA_example_0002_linear_system_");
 #else
     solver.restoreSystem(".", "LA_example_0002_linear_system_");
 #endif
