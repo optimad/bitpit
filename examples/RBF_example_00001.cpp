@@ -187,7 +187,7 @@ void run(std::string filename,
     try {
         STL0->importSTL(data_path + filename + ".stl", true);
     }
-    catch (const std::bad_alloc) {
+    catch (const std::bad_alloc &) {
         STL0->importSTL(data_path + filename + ".stl", false);
     }
     STL0->deleteCoincidentVertices();
