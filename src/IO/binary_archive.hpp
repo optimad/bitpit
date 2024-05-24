@@ -68,6 +68,7 @@ class IBinaryArchive : public BinaryArchive
 {
 
 public:
+    IBinaryArchive() = default;
     IBinaryArchive(const std::string &name, int block = -1);
     IBinaryArchive(const std::string &name, const std::string &extension, int block = -1);
 
@@ -87,6 +88,7 @@ class OBinaryArchive : public BinaryArchive
 {
 
 public:
+    OBinaryArchive() = default;
     OBinaryArchive(const std::string &name, int version,
                    int block = -1);
     OBinaryArchive(const std::string &name, int version, const std::string &header,
