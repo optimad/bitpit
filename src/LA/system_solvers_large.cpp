@@ -1731,9 +1731,9 @@ void SystemSolver::matrixDestroy()
 void SystemSolver::vectorsCreate()
 {
     if (!m_transpose) {
-        MatCreateVecs(m_A, &m_rhs, &m_solution);
-    } else {
         MatCreateVecs(m_A, &m_solution, &m_rhs);
+    } else {
+        MatCreateVecs(m_A, &m_rhs, &m_solution);
     }
 }
 
@@ -2025,9 +2025,9 @@ void SystemSolver::importRHS(const std::string &filePath)
 
     PetscInt expectedSize;
     if (!m_transpose) {
-        expectedSize = getRowCount();
-    } else {
         expectedSize = getColCount();
+    } else {
+        expectedSize = getRowCount();
     }
     expectedSize *= getBlockSize();
 
@@ -2078,9 +2078,9 @@ void SystemSolver::importSolution(const std::string &filePath)
 
     PetscInt expectedSize;
     if (!m_transpose) {
-        expectedSize = getColCount();
-    } else {
         expectedSize = getRowCount();
+    } else {
+        expectedSize = getColCount();
     }
     expectedSize *= getBlockSize();
 
