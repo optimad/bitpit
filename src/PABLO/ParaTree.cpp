@@ -2544,7 +2544,7 @@ namespace bitpit {
             throw std::runtime_error ("It is not possible to disable the ghost halo!");
         }
 
-        typedef std::result_of<decltype(&Octant::getGhostLayer)(Octant)>::type layer_t;
+        typedef std::invoke_result_t<decltype(&Octant::getGhostLayer), Octant> layer_t;
         typedef std::make_unsigned<layer_t>::type ulayer_t;
         ulayer_t maxNofGhostLayers = std::numeric_limits<layer_t>::max() + (ulayer_t) 1;
         if (nofGhostLayers > maxNofGhostLayers) {
