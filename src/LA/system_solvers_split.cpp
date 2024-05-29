@@ -1573,6 +1573,33 @@ void SplitSystemSolver::setupSplitKrylovs()
 }
 
 /*!
+ * Perform actions before Krylov subspace method setup.
+ */
+void SplitSystemSolver::preKrylovSetupActions()
+{
+    // Execute base actions
+    SystemSolver::preKrylovSetupActions();
+
+    // Enable convergence monitor
+    if (m_convergenceMonitorEnabled) {
+        int nSplits = getSplitCount();
+        for (int split = 0; split < nSplits; ++split) {
+            std::string prefix = "fieldsplit_" + std::to_string(split) + "_";
+
+#if (PETSC_VERSION_MAJOR >= 3 && PETSC_VERSION_MINOR >= 7)
+            PetscOptionsSetValue(PETSC_NULLPTR, ("-" + prefix + "ksp_monitor_true_residual").c_str(), "");
+            PetscOptionsSetValue(PETSC_NULLPTR, ("-" + prefix + "ksp_converged_reason").c_str(), "");
+            PetscOptionsSetValue(PETSC_NULLPTR, ("-" + prefix + "ksp_monitor_singular_value").c_str(), "");
+#else
+            PetscOptionsSetValue(("-" + prefix + "ksp_monitor_true_residual").c_str(), "");
+            PetscOptionsSetValue(("-" + prefix + "ksp_converged_reason").c_str(), "");
+            PetscOptionsSetValue(("-" + prefix + "ksp_monitor_singular_value").c_str(), "");
+#endif
+        }
+    }
+}
+
+/*!
  * Generate the split permutation.
  *
  * Given a vector whose elements are ordered according to the full matrix, the split permutations
