@@ -840,6 +840,7 @@ SystemSolver::SystemSolver(const std::string &prefix, bool flatten, bool transpo
     : m_flatten(flatten), m_transpose(transpose),
       m_A(PETSC_NULLPTR), m_rhs(PETSC_NULLPTR), m_solution(PETSC_NULLPTR),
       m_rowReordering(PETSC_NULLPTR), m_colReordering(PETSC_NULLPTR),
+      m_convergenceMonitorEnabled(debug),
       m_KSP(PETSC_NULLPTR), m_KSPDirty(true),
       m_prefix(prefix), m_assembled(false),
 #if BITPIT_ENABLE_MPI==1
@@ -850,19 +851,6 @@ SystemSolver::SystemSolver(const std::string &prefix, bool flatten, bool transpo
     // Initialize PETSc
     if (m_nInstances == 0) {
         m_petscManager.initialize(debug);
-    }
-
-    // Set KSP debug options
-    if (debug) {
-#if (PETSC_VERSION_MAJOR >= 3 && PETSC_VERSION_MINOR >= 7)
-            PetscOptionsSetValue(PETSC_NULLPTR, ("-" + m_prefix + "ksp_monitor_true_residual").c_str(), "");
-            PetscOptionsSetValue(PETSC_NULLPTR, ("-" + m_prefix + "ksp_converged_reason").c_str(), "");
-            PetscOptionsSetValue(PETSC_NULLPTR, ("-" + m_prefix + "ksp_monitor_singular_value").c_str(), "");
-#else
-            PetscOptionsSetValue(("-" + m_prefix + "ksp_monitor_true_residual").c_str(), "");
-            PetscOptionsSetValue(("-" + m_prefix + "ksp_converged_reason").c_str(), "");
-            PetscOptionsSetValue(("-" + m_prefix + "ksp_monitor_singular_value").c_str(), "");
-#endif
     }
 
     // Increase the number of instances
@@ -3383,6 +3371,18 @@ void SystemSolver::setupKrylov(KSP ksp, const KSPOptions &options) const
  */
 void SystemSolver::preKrylovSetupActions()
 {
+    // Enable convergence monitor
+    if (m_convergenceMonitorEnabled) {
+#if (PETSC_VERSION_MAJOR >= 3 && PETSC_VERSION_MINOR >= 7)
+        PetscOptionsSetValue(PETSC_NULLPTR, ("-" + m_prefix + "ksp_monitor_true_residual").c_str(), "");
+        PetscOptionsSetValue(PETSC_NULLPTR, ("-" + m_prefix + "ksp_monitor_singular_value").c_str(), "");
+        PetscOptionsSetValue(PETSC_NULLPTR, ("-" + m_prefix + "ksp_converged_reason").c_str(), "");
+#else
+        PetscOptionsSetValue(("-" + m_prefix + "ksp_monitor_true_residual").c_str(), "");
+        PetscOptionsSetValue(("-" + m_prefix + "ksp_monitor_singular_value").c_str(), "");
+        PetscOptionsSetValue(("-" + m_prefix + "ksp_converged_reason").c_str(), "");
+#endif
+    }
 }
 
 /*!
