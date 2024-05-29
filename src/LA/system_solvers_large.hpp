@@ -366,6 +366,8 @@ protected:
     IS m_rowReordering;
     IS m_colReordering;
 
+    bool m_convergenceMonitorEnabled;
+
     KSP m_KSP;
     bool m_KSPDirty;
     KSPOptions m_KSPOptions;
