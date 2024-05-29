@@ -241,6 +241,22 @@ int LevelSet::addObject( SurfUnstructured *segmentation, double angle, int id ) 
  * Objects can be added to the levelset only after setting the mesh.
  * @param[in] segmentation surface segmentation
  * @param[in] angle feature angle
+ * @param[in] surfaceSmoothing is the given surface snoothing order
+ * @param[in] id identifier of object; in case no id is provided the insertion
+ * order will be used as identifier
+ */
+int LevelSet::addObject( SurfUnstructured *segmentation, double angle, LevelSetSurfaceSmoothing surfaceSmoothing, int id ) {
+
+    auto object = std::unique_ptr<LevelSetObject>(new LevelSetSegmentationObject(id, segmentation, angle, surfaceSmoothing));
+
+    return registerObject(std::move(object));
+}
+
+/*!
+ * Adds a segmentation object
+ * Objects can be added to the levelset only after setting the mesh.
+ * @param[in] segmentation surface segmentation
+ * @param[in] angle feature angle
  * @param[in] id identifier of object; in case no id is provided the insertion
  * order will be used as identifier
  */
@@ -272,6 +288,27 @@ int LevelSet::addObject( SurfaceKernel *segmentation, double angle, int id ) {
     }
 
     auto object = std::unique_ptr<LevelSetObject>(new LevelSetSegmentationObject(id, surfUnstructured, angle));
+
+    return registerObject(std::move(object));
+}
+
+/*!
+ * Adds a segmentation object
+ * Objects can be added to the levelset only after setting the mesh.
+ * @param[in] segmentation surface segmentation
+ * @param[in] angle feature angle
+ * @param[in] surfaceSmoothing is the given surface snoothing order
+ * @param[in] id identifier of object; in case no id is provided the insertion
+ * order will be used as identifier
+ */
+int LevelSet::addObject( SurfaceKernel *segmentation, double angle, LevelSetSurfaceSmoothing surfaceSmoothing, int id ) {
+
+    SurfUnstructured *surfUnstructured = dynamic_cast<SurfUnstructured *>(segmentation);
+    if (!surfUnstructured) {
+        throw std::runtime_error ("Segmentation type not supported");
+    }
+
+    auto object = std::unique_ptr<LevelSetObject>(new LevelSetSegmentationObject(id, surfUnstructured, angle, surfaceSmoothing));
 
     return registerObject(std::move(object));
 }
