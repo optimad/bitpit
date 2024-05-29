@@ -239,7 +239,7 @@ public:
 
     using solver_kernel_t::solver_kernel_t;
 
-    void clear(bool release = false);
+    void clear() override;
 
     template<typename stencil_container_t = std::vector<stencil_t>>
     void assembly(const stencil_container_t &stencils);
