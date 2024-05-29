@@ -1014,21 +1014,13 @@ const stencil_t & DiscretizationStencilSolverAssembler<stencil_t, solver_kernel_
 
 /*!
 * Clear the stencil solver
-*
-* \param release if it's true the memory hold by the stencil solver will be
-* released, otherwise the stencil solver will be cleared but its memory will
-* not be relased
  */
 template<typename stencil_t, typename solver_kernel_t>
-void DiscretizationStencilSolver<stencil_t, solver_kernel_t>::clear(bool release)
+void DiscretizationStencilSolver<stencil_t, solver_kernel_t>::clear()
 {
     solver_kernel_t::clear();
 
-    if (release) {
-        std::vector<double>().swap(m_constants);
-    } else {
-        m_constants.clear();
-    }
+    std::vector<double>().swap(m_constants);
 }
 
 #if BITPIT_ENABLE_MPI==1
