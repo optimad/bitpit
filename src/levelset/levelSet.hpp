@@ -99,8 +99,10 @@ public:
 
     int                     addObject( std::unique_ptr<SurfaceKernel> &&, double, int id = levelSetDefaults::OBJECT ) ;
     int                     addObject( SurfaceKernel *, double, int id = levelSetDefaults::OBJECT ) ;
+    int                     addObject( SurfaceKernel *, double, LevelSetSurfaceSmoothing, int id = levelSetDefaults::OBJECT ) ;
     int                     addObject( std::unique_ptr<SurfUnstructured> &&, double, int id = levelSetDefaults::OBJECT ) ;
     int                     addObject( SurfUnstructured *, double, int id = levelSetDefaults::OBJECT ) ;
+    int                     addObject( SurfUnstructured *, double, LevelSetSurfaceSmoothing, int id = levelSetDefaults::OBJECT ) ;
     int                     addObject( const std::unordered_set<long> &, int id=levelSetDefaults::OBJECT ) ;
     int                     addObject( const std::vector<long> &, long, bool, int id=levelSetDefaults::OBJECT ) ;
     int                     addObject( std::unique_ptr<LevelSetObject> && ) ;

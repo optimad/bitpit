@@ -57,18 +57,21 @@ public:
     BITPIT_PUBLIC_API static const double DEFAULT_FEATURE_ANGLE;
 
     LevelSetSegmentationSurfaceInfo();
+    LevelSetSegmentationSurfaceInfo(LevelSetSurfaceSmoothing surfaceSmoothing);
     LevelSetSegmentationSurfaceInfo(const LevelSetSegmentationSurfaceInfo &other);
     LevelSetSegmentationSurfaceInfo(LevelSetSegmentationSurfaceInfo &&other) = default;
-    LevelSetSegmentationSurfaceInfo(const SurfUnstructured *surface, double featureAngle);
-    LevelSetSegmentationSurfaceInfo(std::unique_ptr<const SurfUnstructured> &&surface, double featureAngle);
+    LevelSetSegmentationSurfaceInfo(const SurfUnstructured *surface, double featureAngle, LevelSetSurfaceSmoothing surfaceSmoothing = LevelSetSurfaceSmoothing::LOW_ORDER);
+    LevelSetSegmentationSurfaceInfo(std::unique_ptr<const SurfUnstructured> &&surface, double featureAngle, LevelSetSurfaceSmoothing surfaceSmoothing = LevelSetSurfaceSmoothing::LOW_ORDER);
 
     const SurfUnstructured & getSurface() const;
     void setSurface(std::unique_ptr<const SurfUnstructured> &&surface, double featureAngle = DEFAULT_FEATURE_ANGLE);
     void setSurface(const SurfUnstructured *surface, double featureAngle = DEFAULT_FEATURE_ANGLE);
+    void setSurface(const SurfUnstructured *surface, double featureAngle, LevelSetSurfaceSmoothing surfaceSmoothing);
 
     const SurfaceSkdTree & getSearchTree() const;
 
     double getFeatureAngle() const;
+    LevelSetSurfaceSmoothing getSurfaceSmoothing() const;
 
     double evalDistance(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr, bool signedDistance) const;
     std::array<double, 3> evalDistanceVector(const std::array<double, 3> &point, const SegmentConstIterator &segmentItr) const;
@@ -81,6 +84,7 @@ private:
     const SurfUnstructured *m_surface;
     std::unique_ptr<const SurfUnstructured> m_ownedSurface;
     double m_featureAngle;
+    LevelSetSurfaceSmoothing m_surfaceSmoothing;
 
     std::unique_ptr<SurfaceSkdTree> m_searchTree;
 
@@ -169,6 +173,7 @@ public:
     LevelSetSegmentationObject(int);
     LevelSetSegmentationObject(int, std::unique_ptr<const SurfUnstructured> &&surface, double featureAngle = 2. * BITPIT_PI);
     LevelSetSegmentationObject(int, const SurfUnstructured *surface, double featureAngle = 2. * BITPIT_PI);
+    LevelSetSegmentationObject(int, const SurfUnstructured *surface, double featureAngle, LevelSetSurfaceSmoothing surfaceSmoothing);
     LevelSetSegmentationObject(const LevelSetSegmentationObject &other);
     LevelSetSegmentationObject(LevelSetSegmentationObject &&other) = default;
 
@@ -181,10 +186,12 @@ public:
     void setSurface(std::unique_ptr<const SurfUnstructured> &&surface, double featureAngle, bool force = false);
     void setSurface(const SurfUnstructured *surface, bool force = false);
     void setSurface(const SurfUnstructured *surface, double featureAngle, bool force = false);
+    void setSurface(const SurfUnstructured *surface, double featureAngle, LevelSetSurfaceSmoothing surfaceSmoothing, bool force = false);
 
     const SurfaceSkdTree & getSearchTree() const;
 
     double getFeatureAngle() const;
+    LevelSetSurfaceSmoothing getSurfaceSmoothing() const;
 
     BITPIT_DEPRECATED(double getMinSurfaceFeatureSize() const);
     BITPIT_DEPRECATED(double getMaxSurfaceFeatureSize() const);
