@@ -142,6 +142,8 @@ protected:
     using SystemSolver::setupKrylov;
     virtual void setupSplitKrylovs();
 
+    void preKrylovSetupActions() override;
+
     void postKSPSolveActions() override;
 
     void initializeKSPOptions() override;
