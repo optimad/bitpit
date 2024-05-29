@@ -183,6 +183,7 @@ enum class LevelSetField{
  */
 enum class LevelSetSurfaceSmoothing{
     LOW_ORDER,                      /**< low order surface smoothing */
+    HIGH_ORDER                      /**< high order surface smoothing */
 };
 
 /*!
