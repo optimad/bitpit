@@ -333,6 +333,891 @@ void LevelSetSegmentationSurfaceInfo::evalProjectionOnVertex(const std::array<do
 }
 
 /*!
+ * Evaluate the projection of the given point on a curve created based on
+ * the points representing the specified segment. The curve passes from these
+ * points and is vertical to the normal vectors associated with them. It's
+ * continuous with a continuous normal vector distribution.
+ *
+ * Consider an arbitrary segment in 2D space defined by nodes "point0" and "poin1",
+ * its normal vector "normal_s" and an arbitrary point in space named "point".
+ * Let "point_s" be the projection of "point" to the segment
+ * and "t[0]" and "t[1] its barycentric coordinates such that:
+ * point_s = tau[0] * point0 + tau[1] * point1
+ *
+ * The constructed curve is described by equation:
+ * projectionPoint = point_s + f01 * normal_s
+ *
+ * Variable "f01" is function of "t[0]" and  guaranties that the curve passes from
+ * "point0" and "point1". Thus, f01(0)=0 and f01(1)=0. Also, it guarantees that
+ * the curve's tangent computed as
+ * d(projectionPoint)/d(t[0]) = point0 - point1 + d(f10)/d(t[0]) * normal_s
+ * is vertical to the normals "normal0" and "normal1".
+ *
+ * Let's introduce variables "lambda10" and "lambda01" defined as the derivative
+ * of "f01" for t[0]=0 and t[0]=1, respectively. They are computed as follows:
+ *
+ * For t[0] = 0: d(projectionPoint)/d(t[0]) * normal1 = 0 <=>
+ * lambda10 = ((point1 - point0) * normal1) / (normal_s * normal1)
+ * For t[0] = 1: d(projectionPoint)/d(t[0]) * normal0 = 0 <=>
+ * lambda01 = ((point0 - point1) * normal0) / (normal_s * normal0)
+ *
+ * Function "f01" is defined as a polynomial which respects all four conditions.
+ * Thus,
+ * f01 = t[0] * t[1] * (lambda01 * t[0] + lambda10 * t[1])
+ *
+ * The normal vector to the curve is defined as the derivative of its
+ * tangential vector wrt "t[0]". After some math, its expression is
+ * projectionNormal = d(f10)/d(t[0]) * (point1 - point0) + l * l * normal_s,
+ * where "l" is the segment length.
+ *
+ * Since the normals corresponding to the geometry points are equal for two
+ * subsequent segments, the developed curve is equipped with a continuous normal
+ * vector everywhere.
+ *
+ *
+ * @param[in] point are the coordinates of the given point
+ * @param[in] segmentItr is an iterator pointing to the segment on which the surface
+ * will be created.
+ * @param[out] projectionPoint The coordinates of the projection point on the surface.
+ * @param[out] projectionNormal The coordinates of the normal to the surface vector on the surface
+ * projection point.
+ */
+void LevelSetSegmentationSurfaceInfo::evalHighOrderProjectionOnLine(const std::array<double,3> &point,
+                                                                    const SegmentConstIterator &segmentItr,
+                                                                    std::array<double, 3> *projectionPoint,
+                                                                    std::array<double, 3> *projectionNormal) const
+{
+    // Get segment
+    const Cell &segment = *segmentItr;
+    assert(segment.getType() == ElementType::LINE);
+
+    // Get segment vertices
+    ConstProxyVector<long> segmentVertexIds = segment.getVertexIds();
+
+    const std::array<double,3> &point0 = m_surface->getVertexCoords(segmentVertexIds[0]);
+    const std::array<double,3> &point1 = m_surface->getVertexCoords(segmentVertexIds[1]);
+
+    // Get projection point on segment
+    std::array<double,2> t;
+    std::array<double, 3> point_s = CGElem::projectPointSegment(point, point0, point1, &(t[0]));
+
+    // Early return if point_s consides with segment's node
+    double distanceTolerance = m_surface->getTol();
+    for (int i = 0; i < 2; ++i) {
+        if (utils::DoubleFloatingEqual()(t[i], 1., distanceTolerance, distanceTolerance)) {
+            (*projectionPoint)  = m_surface->getVertexCoords(segmentVertexIds[i]);
+            (*projectionNormal) = computeSegmentVertexNormal(segmentItr, i, true);
+            return;
+        }
+    }
+
+    // Get normal on segment
+    std::array<double, 3> facetNormal = computeSegmentNormal(segmentItr);
+    std::array<double, 3> normal_s = point - point_s;
+
+    double distance = norm2(normal_s);
+    if (utils::DoubleFloatingEqual()(distance, 0., distanceTolerance, distanceTolerance)) {
+        normal_s = facetNormal;
+    } else {
+        normal_s /= distance;
+        if (dotProduct(normal_s, facetNormal) < 0.0) {
+            normal_s *= -1.0;
+        }
+    }
+
+    // Get normals on segment's vertices
+    std::array<double, 3> normal0 = computeSegmentVertexNormal(segmentItr, 0, true);
+    std::array<double, 3> normal1 = computeSegmentVertexNormal(segmentItr, 1, true);
+
+    // Compute lambda coefficients
+    std::array<double, 3> edge = point1 - point0;
+    double lambda01 = -dotProduct(edge, normal0) / dotProduct(normal_s, normal0); 
+    double lambda10 =  dotProduct(edge, normal1) / dotProduct(normal_s, normal1); 
+
+    // Eval polynomial parameterizing the curve
+    double product1 = t[0] * t[1];
+    double product2 = lambda01 * t[0] + lambda10 * t[1];
+    double f        = product1 * product2;
+    double df       = product1 * (lambda01 - lambda10) + product2 * (t[1] - t[0]);
+
+    // Eval projection point on curve
+    (*projectionPoint) = point_s + f * normal_s;
+
+    // Eval normal vector on curve
+    double length = norm2(edge);
+    (*projectionNormal)  = df * edge + length * length * normal_s;
+    (*projectionNormal) /= norm2((*projectionNormal));
+
+    if (dotProduct(normal_s, (*projectionNormal)) < 0.0) {
+       (*projectionNormal) *= -1.0;
+    }
+}
+
+/*!
+ * Evaluate the projection of the given point on a smooth surface created 
+ * over a discretized geometry and, referred as global surface. The surface
+ * passes from the geometry's points and it's vertical to the normal vectors
+ * associated with them. Also, it's continuous and offers normal vector
+ * continuity over the different segments of the discretized geometry.
+ *
+ * In this case the studied segment is a triangle.
+ *
+ * The developed algorithm does not exist in literature and is described bellow.
+ * Consider an arbitrary triangle in 3D space defined by nodes "point0", "poin1"
+ * and "point2", its normal vector "normal_s" and an arbitrary point in space
+ * named "point". Let "point_s" be the projection of "point" to the triangle
+ * and "tau[i]" with i=0,1,2 be its barycentric coordinates such that:
+ * point_s = tau[0] * point0 + tau[1] * point1 + tau[2] * point2
+ *
+ * Let "edgePoint_s[e]" be the projection of "point_s" to the triangle edge "e".
+ * It can be described as a function of the two nodes "node0" and "node1"
+ * defining the edge as:
+ * edgePoint_s[e] = p10 * node0 + p01 * node1,
+ * where "p01" and "p10" are the edge barycentric coordinates.
+ *
+ * Let "edgeNormal_s[e]" be the normal to the triangulated geometry corresponding
+ * to "edgePoint_s[e]". This normal remains the same for both triangles sharing
+ * the same edge.
+ *
+ * For each edge "e" a curve is constructed described by equation:
+ * edgePoint_p[e] = edgePoint_s[e] + f01 * edgeNormal_s,
+ * where "edgePoint_P[e]" is the curve point corresponding to "edgePoint_s[e]".
+ *
+ * Variable "f01" is function of "p10" and  guaranties that the curve passes from
+ * "node0" and "node1". Thus, f01(0)=0 and f01(1)=0. Also, it guararantees that
+ * the curve's tangent computed as
+ * d(edgePoint_p[e])/d(p10) = node0 - node1 + d(f10)/d(p10) * edgeNormal_s
+ * is vertical to the normals "normal0" and "normal1" which correspond to
+ * nodes "node0" and "node1". 
+ *
+ * Let's introduce variables "larmda10" and "lambda01" defined as the derivative
+ * of "f01" for p10=0 and p10=1, respectively. They are computed as follows:
+ *
+ * For p10 = 0: d(edgePoint_p[e])/d(p10) * normal1 = 0 <=>
+ * lambda10 = ((node1 - node0) * normal1) / (edgeNormal_s[e] * normal1)
+ * For p10 = 1: d(edgePoint_p[e])/d(p10) * normal0 = 0 <=>
+ * lambda01 = ((node0 - node1) * normal0) / (edgeNormal_s[e] * normal0)
+ *
+ * Function "f01" is defined as a polynomial which respects all four conditions.
+ * Thus,
+ * f01 = p10 * p01 * (lambda01 * p10 + lambda10 * p01)
+ *
+ * The normal vector to the curve is defined as the derivative of its
+ * tangential vector wrt "p10". After some math, its expression is
+ * edgeNormal_p[e] = d(f10)/d(p10) * (point1 - point0) + l * l * edgeNormal_s,
+ * where "l" is the edge length.
+ *
+ * The three points "edgePoint_s[e]", e=0,1,2 define a new triangle in
+ * space named inscribed triangle.
+ * Similarly, the three points "edgePoint_p[e]", e=0,1,2 define a new
+ * triangle in space named projection triangle.
+ *
+ * Point "point_s" can be written by using the barycentric coordinates of
+ * the inscribed triangle, namely "t[i]", i=0,1,2:
+ * point_s = t[0] * edgePoint_s[0] + t[1] * edgePoint_s[1] + t[2] * edgePoint_s[2]
+ * This point is transformed to the projection triangle by the formula:
+ * point_m = t[0] * edgePoint_p[0] + t[1] * edgePoint_p[1] + t[2] * edgePoint_p[2]
+ * This point is used to compute the projection point on the global surface as
+ * projectionPoint = point_m + f * normal_s;
+ *
+ * Variable "f" is a function of "t[0]" and "t[1]" and it's the expansion of "f01"
+ * in 2D. It's responsible for guaranteeing that the projection surface created
+ * over the projection triangle will pass from its nodes "edgePoint_p" and will be
+ * vertical to the corresponding normals "edgeNormal_p". It's a 2D polynomial
+ * defined as
+ * f(t[0], t[1]) = sum i=0,2 {
+ *                     t[i] * t[j] * (lambda_ij * t[i] + lambda_ji * t[j])
+ *               },
+ * where "j" is the subsequent vertex of "i", i.e. j=(i+1)%3.
+ *
+ * The above function satisfies the following conditions:
+ * f(0,0) = 0, f(1,0) = 0, f(0,1) = 0
+ * meaning that the projection surface passes from the projection triangle's vertices.
+ *
+ * Also, the two tangents of the projection surface at each projection triangle
+ * vertex should be vertical to the corresponding normal. Thus, there
+ * are 6 conditions to be satisfied and 6 lambda_ij to be found. If "k" is the third
+ * triangle vertex and t[k] = 0, the "lamda_ij" and "lamda_ji" can be found as follows:
+ * for t[j] = 0: d(projectionPoint)/d(t[i]) * edgeNormal_p[i] = 0 <=>
+ * lambda_ij = (edgePoint_p[i] - edgePoint_p[j] * edgeNormal[i]) / (normal_s * edgeNormal[i])
+ * for t[i] = 0: d(projectionPoint)/d(t[j]) * edgeNormal_p[j] = 0 <=>
+ * lambda_ji = (edgePoint_p[j] - edgePoint_p[i] * edgeNormal[j]) / (normal_s * edgeNormal[j])
+ *
+ * The global surface normal to the projectionPoint is computed by considering
+ * that "ptojectionPoint" is a function of "tau[0]" and "tau[1]". The unit normal
+ * is perpendicular to the two global surface tangent vectors and thus
+ * projectionNormal ~ d(projectionPoint)/d(tau[0]) x d(projectionPoint)/d(tau[1])
+ * Its direction is corrected to be aligned with "normal_s", hence
+ * projectionNormal * normal_s >= 0
+ *
+ * The above algorithm creates a global surface with the following properties.
+ * Firstly, it is clarified that the projection surface is not part of the
+ * global surface. This is because for each "point_s" a different inscribed and
+ * projection triangle will be created and a different projection surface will
+ * be computed. As point_s moves towards an edge "e", the corresponding projection
+ * surface will always pass from the "edgePoint_p[e]" and will be always vertical
+ * to the "edgeNormal_p[e]". So, when point_s arrives at "e" it will be equal
+ * to "edgePoint_p[e]" and it's normal will coincide with the "edgeNormal_p[e]".
+ * Thus, the curves constructed for each edge are part of the global smoothed
+ * surface over the geometry and the curve normal vectors are respected by the
+ * global surface. Since these curves are the same for each triangle neighboring
+ * the edge, global surface is continuous and offers a continuous normal over
+ * adjacent triangles. Also, since the curves respect the vertices and normals
+ * of the discretized geometry, the final surface will respect them as well.
+ *
+ * Used terminology:
+ * - var_s: is any point or vector named "var" positioned on the interior or
+ *   boundary of the given triangle represented by segmentItr which is part of
+ *   the triangulated geometrical surface
+ * - var_p: is any point or vector named "var" positioned on the interior or
+ *   boundary of the projection triangle defined above
+ * - d0_var : is the derivative of an arbitrary variable "var" wrt the first
+ *   barycentric coordinate of the triangle (i.e. "tau[0]")
+ * - d1_var : is the derivative of an arbitrary variable "var" wrt the first
+ *   barycentric coordinate of the triangle (i.e. "tau[1]")
+ *
+ * @param[in] point are the coordinates of the given point
+ * @param[in] segmentItr is an iterator pointing to the segment on which the surface
+ * will be created.
+ * @param[out] projectionPoint The coordinates of the projection point on the surface.
+ * @param[out] projectionNormal The coordinates of the normal to the surface vector on the surface
+ * projection point.
+ */
+void LevelSetSegmentationSurfaceInfo::evalHighOrderProjectionOnTriangle(const std::array<double,3> &point,
+                                                                        const SegmentConstIterator &segmentItr,
+                                                                        std::array<double, 3> *projectionPoint,
+                                                                        std::array<double, 3> *projectionNormal) const
+{
+    // Get segment
+    const Cell &segment = *segmentItr;
+    assert(segment.getType() == ElementType::TRIANGLE);
+
+    // Get segment vertices
+    ConstProxyVector<long> segmentVertexIds = segment.getVertexIds();
+
+    const std::array<double,3> &point0 = m_surface->getVertexCoords(segmentVertexIds[0]);
+    const std::array<double,3> &point1 = m_surface->getVertexCoords(segmentVertexIds[1]);
+    const std::array<double,3> &point2 = m_surface->getVertexCoords(segmentVertexIds[2]);
+
+    // Get projection point on segment
+    std::array<double,3> tau;
+    std::array<double, 3> point_s = CGElem::projectPointTriangle(point, point0, point1, point2, &(tau[0]));
+    std::array<double, 3> d0_point_s = point0 - point2;
+    std::array<double, 3> d1_point_s = point1 - point2;
+
+    // Early return if point_s consides with segment's node
+    double distanceTolerance = m_surface->getTol();
+    for (int i = 0; i < 3; ++i) {
+        if (utils::DoubleFloatingEqual()(tau[i], 1., distanceTolerance, distanceTolerance)) {
+            (*projectionPoint)  = m_surface->getVertexCoords(segmentVertexIds[i]);
+            (*projectionNormal) = computeSegmentVertexNormal(segmentItr, i, true);
+            return;
+        }
+    }
+
+    // Get normal on segment
+    std::array<double, 3> facetNormal = computeSegmentNormal(segmentItr);
+    std::array<double, 3> normal_s = point - point_s;
+
+    double distance = norm2(normal_s);
+    if (utils::DoubleFloatingEqual()(distance, 0., distanceTolerance, distanceTolerance)) {
+        normal_s = facetNormal;
+    } else {
+        normal_s /= distance;
+        if (dotProduct(normal_s, facetNormal) < 0.0) {
+            normal_s *= -1.0;
+        }
+    }
+
+    // Compute projection point and normal at each edge "e"
+    std::array<std::array<double, 3>,3 > edgePoint_s;
+    std::array< std::array<double, 3>, 3 > d0_edgePoint_s;
+    std::array< std::array<double, 3>, 3 > d1_edgePoint_s;
+    std::array< std::array<double, 3>, 3 > edgePoint_p;
+    std::array< std::array<double, 3>, 3 > d0_edgePoint_p;
+    std::array< std::array<double, 3>, 3 > d1_edgePoint_p;
+    std::array< std::array<double, 3>, 3 > edgeNormal_p;
+    std::array< std::array<double, 3>, 3 > d0_edgeNormal_p;
+    std::array< std::array<double, 3>, 3 > d1_edgeNormal_p;
+    for (int e = 0; e < 3; ++e) {
+        // Get segment
+        const Cell &segment = *segmentItr;
+
+        // Get edge's local and global node ids
+        ConstProxyVector<int> edgeLocalVertexIds = segment.getFaceLocalVertexIds(e);
+        int localId0 = edgeLocalVertexIds[0]; 
+        int localId1 = edgeLocalVertexIds[1]; 
+        int id0      = segment.getVertexId(localId0);
+        int id1      = segment.getVertexId(localId1);
+
+        // Get vertex information
+        const std::array<double,3> &node0 = m_surface->getVertexCoords(id0);
+        const std::array<double,3> &node1 = m_surface->getVertexCoords(id1);
+
+        std::array<double, 3> normal0 = computeSegmentVertexNormal(segmentItr, localId0, true);
+        std::array<double, 3> normal1 = computeSegmentVertexNormal(segmentItr, localId1, true);
+
+        // Get edge normal
+        std::array<double, 3> edgeNormal_s = computeSegmentEdgeNormal(segmentItr, e, true);
+
+        // Compute projection coefficients
+        std::array<double, 3> edge = node1 - node0;
+        double p01 = dotProduct(point_s - node0, edge) / dotProduct(edge, edge);
+        double d0_p01;
+        double d1_p01;
+        if (p01 > 1.0) {
+            p01 = 1.0;
+            d0_p01 = 0.0;
+            d1_p01 = 0.0;
+        } else if (p01 < 0.0) {
+            p01 = 0.0;
+            d0_p01 = 0.0;
+            d1_p01 = 0.0;
+        } else {
+            d0_p01 = dotProduct(d0_point_s - node0, edge) / dotProduct(edge, edge);
+            d1_p01 = dotProduct(d1_point_s - node0, edge) / dotProduct(edge, edge);
+        }
+        double p10 = 1.0 - p01;
+        double d0_p10 = - d0_p01;
+        double d1_p10 = - d1_p01;
+
+        // Compute lambda coefficients
+        double lambda01 = -dotProduct(edge, normal0) / dotProduct(edgeNormal_s, normal0); 
+        double lambda10 =  dotProduct(edge, normal1) / dotProduct(edgeNormal_s, normal1); 
+
+        // Edge projection point
+        double product1   = p10 * p01;
+        double d_product1 = p01 - p10; // derivative wrt p10
+
+        double product2   = lambda01 * p10 + lambda10 * p01;
+        double d_product2 = lambda01 - lambda10;
+
+        double f01     = product1 * product2;
+        double d_f01   = d_product1 * product2 + product1 * d_product2;
+        double d_d_f01 = 2.0 * (d_product1 * d_product2 - product2);
+
+        edgePoint_s[e] = p10 * node0 + p01 * node1;
+        std::array<double, 3> d_edgePoint_s = node0 - node1;
+
+        d0_edgePoint_s[e] = d_edgePoint_s  * d0_p10;
+        d1_edgePoint_s[e] = d_edgePoint_s  * d1_p10;
+
+        edgePoint_p[e] = edgePoint_s[e] + f01 * edgeNormal_s;
+        std::array<double, 3> d_edgePoint_p = d_edgePoint_s + d_f01 * edgeNormal_s;
+
+        d0_edgePoint_p[e] = d_edgePoint_p * d0_p10;
+        d1_edgePoint_p[e] = d_edgePoint_p * d1_p10;
+
+        // Edge surface normal
+        double length   = norm2(edge);
+        edgeNormal_p[e] = d_f01 * edge + length * length * edgeNormal_s;
+        std::array<double, 3> d_edgeNormal_p = d_d_f01 * edge;
+
+        double norm = norm2(edgeNormal_p[e]);
+        double d_norm = dotProduct(edgeNormal_p[e], d_edgeNormal_p) / norm;
+        edgeNormal_p[e] /= norm;
+        d_edgeNormal_p = (d_edgeNormal_p - edgeNormal_p[e] * d_norm) / norm;
+
+        d0_edgeNormal_p[e] = d_edgeNormal_p * d0_p10;
+        d1_edgeNormal_p[e] = d_edgeNormal_p * d1_p10;
+    }
+
+    // Project surface point to the intermediator polygon
+    double sum_t = 0.0;
+    double d0_sum_t = 0.0;
+    double d1_sum_t = 0.0;
+    std::array<double, 3> t;
+    std::array<double, 3> d0_t;
+    std::array<double, 3> d1_t;
+    for (int i = 0; i < 3; i ++) { // loop in vertices
+        int j = (i + 1) % 3;
+        int k = (i + 2) % 3;
+        std::array<double, 3> v1 = edgePoint_s[j] - point_s;
+        std::array<double, 3> d0_v1 = d0_edgePoint_s[j]- d0_point_s;
+        std::array<double, 3> d1_v1 = d1_edgePoint_s[j]- d1_point_s;
+
+        std::array<double, 3> v2 = edgePoint_s[k] - point_s;
+        std::array<double, 3> d0_v2 = d0_edgePoint_s[k]- d0_point_s;
+        std::array<double, 3> d1_v2 = d1_edgePoint_s[k]- d1_point_s;
+
+        std::array<double, 3> normal = crossProduct(v1, v2);
+        std::array<double, 3> d0_normal = crossProduct(d0_v1, v2) + crossProduct(v1, d0_v2);
+        std::array<double, 3> d1_normal = crossProduct(d1_v1, v2) + crossProduct(v1, d1_v2);
+
+        t[i] = norm2(normal);
+        d0_t[i] = dotProduct(normal, d0_normal) / t[i];
+        d1_t[i] = dotProduct(normal, d1_normal) / t[i];
+        sum_t += t[i];
+        d0_sum_t += d0_t[i];
+        d1_sum_t += d1_t[i];
+    }
+
+    std::array<double, 3> point_m    = {0.0, 0.0, 0.0};
+    std::array<double, 3> d0_point_m = {0.0, 0.0, 0.0};
+    std::array<double, 3> d1_point_m = {0.0, 0.0, 0.0};
+    for (int i = 0; i < 3; i ++) {
+        t[i] /= sum_t;
+        d0_t[i] = (d0_t[i] - t[i] * d0_sum_t) / sum_t;
+        d1_t[i] = (d1_t[i] - t[i] * d1_sum_t) / sum_t;
+        point_m += t[i] * edgePoint_p[i];
+        d0_point_m += d0_t[i] * edgePoint_p[i] + t[i] * d0_edgePoint_p[i];
+        d1_point_m += d1_t[i] * edgePoint_p[i] + t[i] * d1_edgePoint_p[i];
+    }
+
+    // Early return if point_s coinsides with a triangle
+    // edge (or a node of the intermediate triangle)
+    for (int i = 0; i < 3; ++i) {
+        if (utils::DoubleFloatingEqual()(t[i], 1., distanceTolerance, distanceTolerance)) {
+            (*projectionPoint)  = edgePoint_p[i];
+            (*projectionNormal) = edgeNormal_p[i];
+            return;
+        }
+    }
+
+    // Compute 2D f function
+    double f    = 0.0;
+    double d0_f = 0.0;
+    double d1_f = 0.0;
+    for (int e = 0; e < 3; ++e) {
+        int i = e;           // previous vertex
+        int j = (e + 1) % 3; // next vertex
+
+        // Get vertex information
+        std::array<double,3> &node_i    = edgePoint_p[i];
+        std::array<double,3> &d0_node_i = d0_edgePoint_p[i];
+        std::array<double,3> &d1_node_i = d1_edgePoint_p[i];
+
+        std::array<double,3> &node_j     = edgePoint_p[j];
+        std::array<double, 3> &d0_node_j = d0_edgeNormal_p[j];
+        std::array<double, 3> &d1_node_j = d1_edgeNormal_p[j];
+
+        std::array<double, 3> &normal_i    = edgeNormal_p[i];
+        std::array<double, 3> &d0_normal_i = d0_edgeNormal_p[i];
+        std::array<double, 3> &d1_normal_i = d1_edgeNormal_p[i];
+
+        std::array<double, 3> &normal_j    = edgeNormal_p[j];
+        std::array<double, 3> &d0_normal_j = d0_edgeNormal_p[j];
+        std::array<double, 3> &d1_normal_j = d1_edgeNormal_p[j];
+
+        // Compute lambda parameters
+        std::array<double, 3> edge    = node_j - node_i;
+        std::array<double, 3> d0_edge = d0_node_j - d0_node_i;
+        std::array<double, 3> d1_edge = d1_node_j - d1_node_i;
+
+        double lambda_ij    = -dotProduct(edge, normal_i) / dotProduct(normal_s, normal_i);
+        double d0_lambda_ij = -(dotProduct(edge - lambda_ij * normal_s, d0_normal_i) + dotProduct(d0_edge, normal_i)) / dotProduct(normal_s, normal_i);
+        double d1_lambda_ij = -(dotProduct(edge - lambda_ij * normal_s, d1_normal_i) + dotProduct(d1_edge, normal_i)) / dotProduct(normal_s, normal_i);
+
+        double lambda_ji    = dotProduct(edge, normal_j) / dotProduct(normal_s, normal_j);
+        double d0_lambda_ji = (dotProduct(edge - lambda_ji * normal_s, d0_normal_j) + dotProduct(d0_edge, normal_j)) / dotProduct(normal_s, normal_j);
+        double d1_lambda_ji = (dotProduct(edge - lambda_ji * normal_s, d1_normal_j) + dotProduct(d1_edge, normal_j)) / dotProduct(normal_s, normal_j);
+
+        // Compute contribution to the f function
+        f += t[i] * t[j] * (lambda_ij * t[i] + lambda_ji * t[j]);
+        d0_f += (d0_t[i] * t[j] + t[i] * d0_t[j]) * (lambda_ij * t[i] + lambda_ji * t[j])
+              + t[i] * t[j] * (d0_lambda_ij * t[i] + lambda_ij * d0_t[i] + d0_lambda_ji * t[j] + lambda_ji * d0_t[j]);
+        d1_f += (d1_t[i] * t[j] + t[i] * d1_t[j]) * (lambda_ij * t[i] + lambda_ji * t[j])
+              + t[i] * t[j] * (d1_lambda_ij * t[i] + lambda_ij * d1_t[i] + d1_lambda_ji * t[j] + lambda_ji * d1_t[j]);
+    }
+
+    // Compute projection point on curved surface
+    (*projectionPoint) = point_m + f * normal_s;
+
+    // Compute projection normal on curved surface
+    std::array<double, 3> d0_point_p = d0_point_m + d0_f * normal_s;
+    std::array<double, 3> d1_point_p = d1_point_m + d1_f * normal_s;
+
+    (*projectionNormal) = crossProduct(d0_point_p, d1_point_p);
+    (*projectionNormal) /= norm2((*projectionNormal));
+
+    if (dotProduct(normal_s, (*projectionNormal)) < 0.0) {
+       (*projectionNormal) *= -1.0;
+    }
+}
+
+/*!
+ * Evaluate the projection of the given point on a smooth surface created 
+ * over a discretized geometry. The surface passes from the geometry's points
+ * and it's vertical to the normal vectors associated with them. Also, it's
+ * continuous and offers normal vector continuity over the different segments
+ * of the discretized geometry.
+ *
+ * In this case the segment is a non degenerated polygon. No checks are performed to
+ * find out if the specified polygon is degenerate.
+ *
+ * The developed algorithm does not exist in literature and it's a straightforward
+ * expansion of the algorithm developed for triangular segments. The algorithm is
+ * described in the documentation of function "evalHighOrderProjectionOnTriangle".
+ *
+ * @param[in] point are the coordinates of the given point
+ * @param[in] segmentItr is an iterator pointing to the segment on which the surface
+ * will be created.
+ * @param[out] projectionPoint The coordinates of the projection point on the surface.
+ * @param[out] projectionNormal The coordinates of the normal to the surface vector on the surface
+ * projection point. It is computed approximately.
+ */
+void LevelSetSegmentationSurfaceInfo::evalHighOrderProjectionOnPolygon(const std::array<double,3> &point,
+                                                                       const SegmentConstIterator &segmentItr,
+                                                                       std::array<double, 3> *projectionPoint,
+                                                                       std::array<double, 3> *projectionNormal) const
+{
+    // Get segment
+    const Cell &segment = *segmentItr;
+
+    // Get projection point on segment
+    ConstProxyVector<long> segmentVertexIds = m_surface->getFacetOrderedVertexIds(segment);
+
+    std::size_t nSegmentVertices = segmentVertexIds.size();
+    BITPIT_CREATE_WORKSPACE(segmentVertexCoords, std::array<double BITPIT_COMMA 3>, nSegmentVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
+    m_surface->getVertexCoords(segmentVertexIds.size(), segmentVertexIds.data(), segmentVertexCoords);
+
+    BITPIT_CREATE_WORKSPACE(tau, double, nSegmentVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
+    std::array<double, 3> point_s = CGElem::projectPointPolygon(point, nSegmentVertices, segmentVertexCoords, tau);
+
+    std::array<double, 3> lowOrderProjectionNormal = tau[0] * computeSegmentVertexNormal(segmentItr, 0, true);
+    for (std::size_t i = 1; i < nSegmentVertices; ++i) {
+        lowOrderProjectionNormal += tau[i] * computeSegmentVertexNormal(segmentItr, i, true);
+    }
+
+    // Early return if point_s consides with segment's node
+    double distanceTolerance = m_surface->getTol();
+    for (std::size_t i = 0; i < nSegmentVertices; ++i) {
+        if (utils::DoubleFloatingEqual()(tau[i], 1., distanceTolerance, distanceTolerance)) {
+            (*projectionPoint)  = segmentVertexCoords[i];
+            (*projectionNormal) = computeSegmentVertexNormal(segmentItr, i, true);
+            return;
+        }
+    }
+
+    std::array<double, 3> d0_point_s;
+    std::array<double, 3> d1_point_s;
+
+    // Define parameterization of point_s
+    // Definition: point_s - x_central = t0 * (x_prev - x_central) + t1 * (x_next - x_central)
+    // where x_prev, x_central, x_next are subsequent polygon vertices
+    // Vertex x_central is the one corresponding to polygon angle closer to 90 degrees
+    double cosMin = std::numeric_limits<double>::max();
+    for (std::size_t i = 0; i < nSegmentVertices; ++i) {
+        int i_p = i;                          // previous
+        int i_c = (i + 1) % nSegmentVertices; // central
+        int i_n = (i + 2) % nSegmentVertices; // next
+
+        const std::array<double,3> &point_p = m_surface->getVertexCoords(segmentVertexIds[i_p]);
+        const std::array<double,3> &point_c = m_surface->getVertexCoords(segmentVertexIds[i_c]);
+        const std::array<double,3> &point_n = m_surface->getVertexCoords(segmentVertexIds[i_n]);
+
+        std::array<double,3> x_p = point_p - point_c;
+        std::array<double,3> x_n = point_n - point_c;
+
+        double cos = std::abs(dotProduct(x_p, x_n)) / (norm2(x_p) * norm2(x_n));
+        if (cos < cosMin) {
+            cosMin = cos;
+            d0_point_s = x_p;
+            d1_point_s = x_n;
+        }
+    }
+
+    // Get normal on segment
+    std::array<double, 3> facetNormal = computeSegmentNormal(segmentItr);
+    std::array<double, 3> normal_s = point - point_s;
+    double distance = norm2(normal_s);
+    if (utils::DoubleFloatingEqual()(distance, 0., distanceTolerance, distanceTolerance)) {
+        normal_s = facetNormal;
+    } else {
+        normal_s /= distance;
+        if (dotProduct(normal_s, facetNormal) < 0.0) {
+            normal_s *= -1.0;
+        }
+    }
+
+    // Compute projection point and normal at each edge "e"
+    int nSegmentEdges = nSegmentVertices;
+    BITPIT_CREATE_WORKSPACE(edgePoint_s, std::array<double BITPIT_COMMA 3>, nSegmentEdges, ReferenceElementInfo::MAX_ELEM_EDGES);
+    BITPIT_CREATE_WORKSPACE(d0_edgePoint_s, std::array<double BITPIT_COMMA 3>, nSegmentEdges, ReferenceElementInfo::MAX_ELEM_EDGES);
+    BITPIT_CREATE_WORKSPACE(d1_edgePoint_s, std::array<double BITPIT_COMMA 3>, nSegmentEdges, ReferenceElementInfo::MAX_ELEM_EDGES);
+    BITPIT_CREATE_WORKSPACE(edgePoint_p, std::array<double BITPIT_COMMA 3>, nSegmentEdges, ReferenceElementInfo::MAX_ELEM_EDGES);
+    BITPIT_CREATE_WORKSPACE(d0_edgePoint_p, std::array<double BITPIT_COMMA 3>, nSegmentEdges, ReferenceElementInfo::MAX_ELEM_EDGES);
+    BITPIT_CREATE_WORKSPACE(d1_edgePoint_p, std::array<double BITPIT_COMMA 3>, nSegmentEdges, ReferenceElementInfo::MAX_ELEM_EDGES);
+    BITPIT_CREATE_WORKSPACE(edgeNormal_p, std::array<double BITPIT_COMMA 3>, nSegmentEdges, ReferenceElementInfo::MAX_ELEM_EDGES);
+    BITPIT_CREATE_WORKSPACE(d0_edgeNormal_p, std::array<double BITPIT_COMMA 3>, nSegmentEdges, ReferenceElementInfo::MAX_ELEM_EDGES);
+    BITPIT_CREATE_WORKSPACE(d1_edgeNormal_p, std::array<double BITPIT_COMMA 3>, nSegmentEdges, ReferenceElementInfo::MAX_ELEM_EDGES);
+    for (int e = 0; e < nSegmentEdges; ++e) {
+        // Get edge's local and global node ids
+        ConstProxyVector<int> edgeLocalVertexIds = segment.getFaceLocalVertexIds(e);
+        int localId0 = edgeLocalVertexIds[0]; 
+        int localId1 = edgeLocalVertexIds[1]; 
+        int id0      = segment.getVertexId(localId0);
+        int id1      = segment.getVertexId(localId1);
+
+        // Get vertex information
+        const std::array<double,3> &node0 = m_surface->getVertexCoords(id0);
+        const std::array<double,3> &node1 = m_surface->getVertexCoords(id1);
+
+        std::array<double, 3> normal0 = computeSegmentVertexNormal(segmentItr, localId0, true);
+        std::array<double, 3> normal1 = computeSegmentVertexNormal(segmentItr, localId1, true);
+
+        // Get edge normal
+        std::array<double, 3> edgeNormal_s = computeSegmentEdgeNormal(segmentItr, e, true);
+
+        // Compute projection coefficients
+        std::array<double, 3> edge = node1 - node0;
+        double p01 = dotProduct(point_s - node0, edge) / dotProduct(edge, edge);
+        double d0_p01;
+        double d1_p01;
+        if (p01 > 1.0) {
+            p01 = 1.0;
+            d0_p01 = 0.0;
+            d1_p01 = 0.0;
+        } else if (p01 < 0.0) {
+            p01 = 0.0;
+            d0_p01 = 0.0;
+            d1_p01 = 0.0;
+        } else {
+            d0_p01 = dotProduct(d0_point_s - node0, edge) / dotProduct(edge, edge);
+            d1_p01 = dotProduct(d1_point_s - node0, edge) / dotProduct(edge, edge);
+        }
+        double p10 = 1.0 - p01;
+        double d0_p10 = - d0_p01;
+        double d1_p10 = - d1_p01;
+
+        // Compute lambda coefficients
+        double lambda01 = -dotProduct(edge, normal0) / dotProduct(edgeNormal_s, normal0); 
+        double lambda10 =  dotProduct(edge, normal1) / dotProduct(edgeNormal_s, normal1); 
+
+        // Edge projection point
+        double product1 = p10 * p01;
+        double d_product1 = p01 - p10; // derivative wrt p10
+
+        double product2 = lambda01 * p10 + lambda10 * p01;
+        double d_product2 = lambda01 - lambda10;
+
+        double f01     = product1 * product2;
+        double d_f01   = d_product1 * product2 + product1 * d_product2;
+        double d_d_f01 = 2.0 * (d_product1 * d_product2 - product2);
+
+        edgePoint_s[e] = p10 * node0 + p01 * node1;
+        std::array<double, 3> d_edgePoint_s = node0 - node1;
+
+        d0_edgePoint_s[e] = d_edgePoint_s  * d0_p10;
+        d1_edgePoint_s[e] = d_edgePoint_s  * d1_p10;
+
+        edgePoint_p[e] = edgePoint_s[e] + f01 * edgeNormal_s;
+        std::array<double, 3> d_edgePoint_p = d_edgePoint_s + d_f01 * edgeNormal_s;
+
+        d0_edgePoint_p[e] = d_edgePoint_p * d0_p10;
+        d1_edgePoint_p[e] = d_edgePoint_p * d1_p10;
+
+        // Edge surface normal
+        double length   = norm2(edge);
+        edgeNormal_p[e] = d_f01 * edge + length * length * edgeNormal_s;
+        std::array<double, 3> d_edgeNormal_p = d_d_f01 * edge;
+
+        double norm = norm2(edgeNormal_p[e]);
+        double d_norm = dotProduct(edgeNormal_p[e], d_edgeNormal_p) / norm;
+        edgeNormal_p[e] /= norm;
+        d_edgeNormal_p = (d_edgeNormal_p - edgeNormal_p[e] * d_norm) / norm;
+
+        d0_edgeNormal_p[e] = d_edgeNormal_p * d0_p10;
+        d1_edgeNormal_p[e] = d_edgeNormal_p * d1_p10;
+    }
+
+    // Early return if point_s coinsides with a polygon's
+    // edge (or a node of the intermediate polygon)
+    for (int e = 0; e < nSegmentEdges; ++e) {
+        double distance = norm2(edgePoint_s[e] - point_s);
+        if (utils::DoubleFloatingEqual()(distance, 0.0, distanceTolerance, distanceTolerance)) {
+            (*projectionPoint)  = edgePoint_p[e];
+            (*projectionNormal) = edgeNormal_p[e];
+            return;
+        }
+    }
+
+    // Project surface point to the intermediator polygon
+    // The projection is done by following formula:
+    // point_m - point_s = sum i=0,vertices-1 { t[i] * (edgePoint_p[i] - edgePoint_s[i]) }
+    // After various numerical experiments it is concluded that a quite smooth interpolation is
+    // resulted from the following choice of the interpolation weights "t":
+    // t[i] = w[i] / sum j=0,vertices-1 { w[j] }, where
+    // w[i] = product j=0,vertices-1, j!=i { d[j]^4 }, where
+    // d[i] is the distance between point_s and edgePoint_s[i]
+    BITPIT_CREATE_WORKSPACE(d, double, nSegmentVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
+    BITPIT_CREATE_WORKSPACE(d0_d, double, nSegmentVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
+    BITPIT_CREATE_WORKSPACE(d1_d, double, nSegmentVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
+    for (std::size_t i = 0; i < nSegmentVertices; ++i) {
+        d[i] = (edgePoint_s[i][0] - point_s[0]) * (edgePoint_s[i][0] - point_s[0])
+        + (edgePoint_s[i][1] - point_s[1]) * (edgePoint_s[i][1] - point_s[1])
+        + (edgePoint_s[i][2] - point_s[2]) * (edgePoint_s[i][2] - point_s[2]);
+
+        d[i] = d[i] * d[i];
+
+        d0_d[i] = 4.0 * d[i] * dotProduct((edgePoint_s[i] - point_s), (d0_edgePoint_s[i] - d0_point_s));
+        d1_d[i] = 4.0 * d[i] * dotProduct((edgePoint_s[i] - point_s), (d1_edgePoint_s[i] - d1_point_s));
+    }
+
+    BITPIT_CREATE_WORKSPACE(t, double, nSegmentVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
+    BITPIT_CREATE_WORKSPACE(d0_t, double, nSegmentVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
+    BITPIT_CREATE_WORKSPACE(d1_t, double, nSegmentVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
+    double sum = 0.0;
+    double d0_sum = 0.0;
+    double d1_sum = 0.0;
+    for (std::size_t i = 0; i < nSegmentVertices; ++i) {
+        t[i]    = 1.0;
+        d0_t[i] = 0.0;
+        d1_t[i] = 0.0;
+        for (std::size_t j = 0; j < nSegmentVertices; ++j) {
+            if (i != j) {
+                t[i] *= d[j];
+
+                double product = 1.0;
+                for (std::size_t k = 0; k < nSegmentVertices; ++k) {
+                    if (j != k) {
+                        product *= d[k];
+                    }
+                }
+                d0_t[i] += d0_d[j] * product;
+                d1_t[i] += d1_d[j] * product;
+            }
+        }
+        sum    += t[i];
+        d0_sum += d0_t[i];
+        d1_sum += d1_t[i];
+    }
+    for (std::size_t i = 0; i < nSegmentVertices; ++i) {
+        t[i] /= sum;
+        d0_t[i] = (d0_t[i] - t[i] * d0_sum) / sum;
+        d1_t[i] = (d1_t[i] - t[i] * d1_sum) / sum;
+    }
+
+    std::array<double, 3> point_m = {0.0, 0.0, 0.0};
+    std::array<double, 3> d0_point_m = {0.0, 0.0, 0.0};
+    std::array<double, 3> d1_point_m = {0.0, 0.0, 0.0};
+    for (std::size_t i = 0; i < nSegmentVertices; ++i) {
+        point_m += (edgePoint_p[i] - edgePoint_s[i]) * t[i];
+        d0_point_m += d0_t[i] * (edgePoint_p[i]- edgePoint_s[i]) + t[i] * (d0_edgePoint_p[i] - d0_edgePoint_s[i]);
+        d1_point_m += d1_t[i] * (edgePoint_p[i]- edgePoint_s[i]) + t[i] * (d1_edgePoint_p[i] - d1_edgePoint_s[i]);
+    }
+    point_m += point_s;
+    d0_point_m += d0_point_s;
+    d1_point_m += d1_point_s;
+
+    // Compute 2D f function
+    double f    = 0.0;
+    double d0_f = 0.0;
+    double d1_f = 0.0;
+    for (int e = 0; e < nSegmentEdges; ++e) {
+        int i = e;                       // previous vertex
+        int j = (e + 1) % nSegmentEdges; // next vertex
+
+        // Get vertex information
+        std::array<double,3> &node_i    = edgePoint_p[i];
+        std::array<double,3> &d0_node_i = d0_edgePoint_p[i];
+        std::array<double,3> &d1_node_i = d1_edgePoint_p[i];
+
+        std::array<double, 3> &node_j     = edgePoint_p[j];
+        std::array<double, 3> &d0_node_j = d0_edgeNormal_p[j];
+        std::array<double, 3> &d1_node_j = d1_edgeNormal_p[j];
+
+        std::array<double, 3> &normal_i    = edgeNormal_p[i];
+        std::array<double, 3> &d0_normal_i = d0_edgeNormal_p[i];
+        std::array<double, 3> &d1_normal_i = d1_edgeNormal_p[i];
+
+        std::array<double, 3> &normal_j    = edgeNormal_p[j];
+        std::array<double, 3> &d0_normal_j = d0_edgeNormal_p[j];
+        std::array<double, 3> &d1_normal_j = d1_edgeNormal_p[j];
+
+        // Compute lambda parameters
+        std::array<double, 3> edge    = node_j - node_i;
+        std::array<double, 3> d0_edge = d0_node_j - d0_node_i;
+        std::array<double, 3> d1_edge = d1_node_j - d1_node_i;
+
+        double lambda_ij    = -dotProduct(edge, normal_i) / dotProduct(normal_s, normal_i);
+        double d0_lambda_ij = -(dotProduct(edge - lambda_ij * normal_s, d0_normal_i) + dotProduct(d0_edge, normal_i)) / dotProduct(normal_s, normal_i);
+        double d1_lambda_ij = -(dotProduct(edge - lambda_ij * normal_s, d1_normal_i) + dotProduct(d1_edge, normal_i)) / dotProduct(normal_s, normal_i);
+
+        double lambda_ji    =  dotProduct(edge, normal_j) / dotProduct(normal_s, normal_j);
+        double d0_lambda_ji = (dotProduct(edge - lambda_ji * normal_s, d0_normal_j) + dotProduct(d0_edge, normal_j)) / dotProduct(normal_s, normal_j);
+        double d1_lambda_ji = (dotProduct(edge - lambda_ji * normal_s, d1_normal_j) + dotProduct(d1_edge, normal_j)) / dotProduct(normal_s, normal_j);
+
+        // Compute contribution to the f function
+        f += t[i] * t[j] * (lambda_ij * t[i] + lambda_ji * t[j]);
+        d0_f += (d0_t[i] * t[j] + t[i] * d0_t[j]) * (lambda_ij * t[i] + lambda_ji * t[j])
+              + t[i] * t[j] * (d0_lambda_ij * t[i] + lambda_ij * d0_t[i] + d0_lambda_ji * t[j] + lambda_ji * d0_t[j]);
+        d1_f += (d1_t[i] * t[j] + t[i] * d1_t[j]) * (lambda_ij * t[i] + lambda_ji * t[j])
+              + t[i] * t[j] * (d1_lambda_ij * t[i] + lambda_ij * d1_t[i] + d1_lambda_ji * t[j] + lambda_ji * d1_t[j]);
+    }
+
+    // Compute projection point on curved surface
+    (*projectionPoint) = point_m + f * normal_s;
+
+    // Compute projection normal on curved surface
+    std::array<double, 3> d0_point_p = d0_point_m + d0_f * normal_s;
+    std::array<double, 3> d1_point_p = d1_point_m + d1_f * normal_s;
+
+    (*projectionNormal) = crossProduct(d0_point_p, d1_point_p);
+    (*projectionNormal) /= norm2((*projectionNormal));
+
+    if (dotProduct(normal_s, (*projectionNormal)) < 0.0) {
+       (*projectionNormal) *= -1.0;
+    }
+}
+
+/*!
+ * Evaluate the projection of the given point on the surface created based on
+ * the points representing the specified segment. The surface passes from these
+ * points and is vertical to the normal vectors associated with them.
+ *
+ * The computed projection point (\vec{x_p}) is not the closest to the given
+ * point, but it's defined from the following equation:
+ * \vec{x_p} = \vec{x_s} + f * \vec{n_s},
+ * where \vec{x_s} and \vec{n_s} is the projection point and boundary normal on the
+ * discretized polygonal/plyhedral geometry and f is a function depending on \vec{x_s}
+ * which returns a real number.
+ *
+ * @param[in] point are the coordinates of the given point
+ * @param[in] segmentItr is an iterator pointing to the segment on which the surface
+ * will be created.
+ * @param[out] projectionPoint The coordinates of the projection point on the surface.
+ * @param[out] projectionNormal The coordinates of the normal to the surface vector on the surface
+ * projection point.
+ */
+void LevelSetSegmentationSurfaceInfo::evalHighOrderProjection(const std::array<double,3> &point,
+                                                              const SegmentConstIterator &segmentItr,
+                                                              std::array<double, 3> *projectionPoint,
+                                                              std::array<double, 3> *projectionNormal) const
+{
+
+    const Cell &segment = *segmentItr;
+    ElementType segmentType = segment.getType();
+    switch (segmentType) {
+
+    case ElementType::VERTEX:
+    {
+        evalProjectionOnVertex(point, segmentItr, projectionPoint, projectionNormal);
+        return;
+    }
+
+    case ElementType::LINE:
+    {
+        evalHighOrderProjectionOnLine(point, segmentItr, projectionPoint, projectionNormal);
+        return;
+    }
+
+    case ElementType::TRIANGLE:
+    {
+        evalHighOrderProjectionOnTriangle(point, segmentItr, projectionPoint, projectionNormal);
+        return;
+    }
+
+    default:
+    {
+        evalHighOrderProjectionOnPolygon(point, segmentItr, projectionPoint, projectionNormal);
+        return;
+    }
+
+    }
+}
+
+/*!
  * Evaluate the projection of the given point on the specified linear segment.
  *
  * @param[in] point are the coordinates of point
@@ -478,6 +1363,43 @@ void LevelSetSegmentationSurfaceInfo::evalLowOrderProjection(const std::array<do
  *
  * @param[in] point are the coordinates of point
  * @param[in] segmentItr is an iterator pointing to the closest segment
+ * @param[out] projectionPoint The coordinates of the projection point on the surface.
+ * @param[out] projectionNormal The coordinates of the normal to the surface vector on the surface
+ */
+void LevelSetSegmentationSurfaceInfo::evalProjection(const std::array<double, 3> &point,
+                                                     const SegmentConstIterator &segmentItr,
+                                                     std::array<double, 3> *projectionPoint,
+                                                     std::array<double, 3> *projectionNormal) const
+{
+    if (m_surfaceSmoothing == LevelSetSurfaceSmoothing::HIGH_ORDER) {
+        evalHighOrderProjection(point, segmentItr, projectionPoint, projectionNormal);
+    } else {
+        evalLowOrderProjection(point, segmentItr, projectionPoint, projectionNormal);
+    }
+}
+
+/*!
+ * Evaluate the projection of the given point on the specified segment.
+ *
+ * @param[in] point are the coordinates of point
+ * @param[in] segmentItr is an iterator pointing to the closest segment
+ * @param[out] projectionPoint The coordinates of the projection point on the surface.
+ */
+void LevelSetSegmentationSurfaceInfo::evalProjection(const std::array<double, 3> &point,
+                                                     const SegmentConstIterator &segmentItr,
+                                                     std::array<double, 3> *projectionPoint) const
+{
+    std::array<double, 3> projectionNormal;
+    evalProjection(point, segmentItr, projectionPoint, &projectionNormal);
+
+    BITPIT_UNUSED(projectionNormal);
+}
+
+/*!
+ * Evaluate the projection of the given point on the specified segment.
+ *
+ * @param[in] point are the coordinates of point
+ * @param[in] segmentItr is an iterator pointing to the closest segment
  * @param[out] lambda on output will contain the barycentric coordinates of the projection point
  * @return The coordinates of the projection point.
  */
@@ -486,9 +1408,7 @@ std::array<double, 3> LevelSetSegmentationSurfaceInfo::evalProjection(const std:
                                                                       double *lambda) const
 {
     std::array<double, 3> projectionPoint;
-    std::array<double, 3> projectionNormal;
-    evalLowOrderProjection(point, segmentItr, &projectionPoint, &projectionNormal);
-    BITPIT_UNUSED(projectionNormal);
+    evalProjection(point, segmentItr, &projectionPoint);
 
     const Cell &segment = *segmentItr;
     m_surface->evalBarycentricCoordinates(segment.getId(), point, lambda);
