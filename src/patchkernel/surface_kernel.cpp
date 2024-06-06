@@ -1006,7 +1006,7 @@ void SurfaceKernel::evalEdgeNormals(long id, int edge, double limit,
     }
 
     // Add contribution of neighbouring cells
-    for (std::size_t i = 0; i < nEdgeNeighs; ++i) {
+    for (int i = 0; i < nEdgeNeighs; ++i) {
         // Get neighbour information
         long                  neighId     = edgeNeighs[i];
         std::array<double, 3> neighNormal = evalFacetNormal(neighId);
