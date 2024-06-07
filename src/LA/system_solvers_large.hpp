@@ -47,10 +47,14 @@ struct KSPOptions {
     PetscScalar rtol; //! Relative convergence tolerance, relative decrease in the preconditioned residual norm
     PetscScalar atol; //! Absolute convergence tolerance, absolute size of the preconditioned residual norm
 
+    PetscInt sublevels; //! Deprecated, ASM ILU levels should be set using the "levels" member
+    PetscScalar subrtol; //! Deprecated, it has never had any effect on the solution of the system
+
     KSPOptions()
         : overlap(PETSC_DEFAULT), levels(PETSC_DEFAULT),
           initial_non_zero(PETSC_TRUE), restart(PETSC_DEFAULT),
-          maxits(PETSC_DEFAULT), rtol(PETSC_DEFAULT), atol(PETSC_DEFAULT)
+          maxits(PETSC_DEFAULT), rtol(PETSC_DEFAULT), atol(PETSC_DEFAULT),
+          sublevels(PETSC_DEFAULT), subrtol(PETSC_DEFAULT)
     {
     }
 };

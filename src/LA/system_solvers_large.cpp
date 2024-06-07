@@ -3291,8 +3291,20 @@ void SystemSolver::setupPreconditioner(PC pc, const KSPOptions &options) const
             PC subPC;
             KSPGetPC(subKSP, &subPC);
             PCSetType(subPC, PCILU);
-            if (options.levels != PETSC_DEFAULT) {
+            if (options.sublevels != PETSC_DEFAULT) {
+                log::warning() << " Setting ASM ILU levels using the member \"sublevels\" is deprecated."
+                               << " ASM ILU levels should be set using the member \"levels\"." << std::endl;
+
+                PCFactorSetLevels(subPC, options.sublevels);
+            } else if (options.levels != PETSC_DEFAULT) {
                 PCFactorSetLevels(subPC, options.levels);
+            }
+
+            if (options.subrtol != PETSC_DEFAULT) {
+                log::warning() << " The member \"subrtol\" is deprecated. Since ASM is only use a a preconditioner"
+                               << " setting the tolerance of the Krylov subspace doens't have any effect on the"
+                               << " solution of the system."
+                               << std::endl;
             }
         }
     }
