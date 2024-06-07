@@ -3191,9 +3191,6 @@ void SystemSolver::prepareKSP()
 
     // Set up
     if (setupNeeded) {
-        // Initialization
-        KSPSetFromOptions(m_KSP);
-
         // Perform actions before preconditioner set up
         prePreconditionerSetupActions();
 
@@ -3205,6 +3202,9 @@ void SystemSolver::prepareKSP()
 
         // Perform actions before Krylov subspace method set up set up
         preKrylovSetupActions();
+
+        // Initialize Krylov subspace from options
+        KSPSetFromOptions(m_KSP);
 
         // Set up the Krylov subspace method
         setupKrylov();
