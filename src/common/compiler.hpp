@@ -96,4 +96,24 @@ do {                  \
  */
 #define BITPIT_COMMA ,
 
+
+/*!
+ * \ingroup common_misc
+ *
+ * Custom implementation of std::void_t for C++11 backwards compatibility.
+ */
+#if __cplusplus < 201703L
+template <class...>
+struct make_void { using type = void; };
+
+template <typename... T>
+using void_t = typename make_void<T...>::type;
+
+template <typename... T>
+using bitpit_void_t = void_t<T...>;
+#else
+template <typename... T>
+using bitpit_void_t = std::void_t<T...>;
+#endif
+
 #endif
