@@ -67,7 +67,7 @@ public:
 };
 
 template <typename weight_t>
-class DiscreteStencilWeightValueInfo<weight_t, std::void_t<typename weight_t::value_type>>
+class DiscreteStencilWeightValueInfo<weight_t, bitpit_void_t<typename weight_t::value_type>>
 {
 public:
     using type = typename weight_t::value_type;
