@@ -3172,6 +3172,11 @@ void SystemSolver::prepareKSP()
         // Perform actions before preconditioner set up
         prePreconditionerSetupActions();
 
+        // Initialize preconditioner from options
+        PC pc;
+        KSPGetPC(m_KSP, &pc);
+        PCSetFromOptions(pc);
+
         // Set up preconditioner
         setupPreconditioner();
 
