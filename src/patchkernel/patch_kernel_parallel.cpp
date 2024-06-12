@@ -1303,6 +1303,11 @@ void PatchKernel::updateFirstGhostCellId()
 	Partitions the patch among the processes. Each cell will be assigned
 	to a specific process according to the specified input.
 
+	Optionally, this funciton can track the changes performed to the patch. See
+	PatchKernel::partitioningAlter(bool trackPartitioning, bool squeezeStorage)
+	for the documentation about the tracking information returned by this
+	function.
+
 	\param communicator is the communicator that will be used
 	\param cellRanks are the ranks of the cells after the partitioning
 	\param trackPartitioning if set to true, the changes to the patch will be
@@ -1327,6 +1332,11 @@ std::vector<adaption::Info> PatchKernel::partition(MPI_Comm communicator, const 
 	Partitions the patch among the processes. Each cell will be assigned
 	to a specific process according to the specified input.
 
+	Optionally, this funciton can track the changes performed to the patch. See
+	PatchKernel::partitioningAlter(bool trackPartitioning, bool squeezeStorage)
+	for the documentation about the tracking information returned by this
+	function.
+
 	\param cellRanks are the ranks of the cells after the partitioning
 	\param trackPartitioning if set to true, the changes to the patch will be
 	tracked
@@ -1349,6 +1359,11 @@ std::vector<adaption::Info> PatchKernel::partition(const std::unordered_map<long
 /*!
 	Partitions the patch among the processes. The partitioning is done using
 	a criteria that tries to balance the load among the processes.
+
+	Optionally, this funciton can track the changes performed to the patch. See
+	PatchKernel::partitioningAlter(bool trackPartitioning, bool squeezeStorage)
+	for the documentation about the tracking information returned by this
+	function.
 
 	\param communicator is the communicator that will be used
 	\param trackPartitioning if set to true, the changes to the patch will be
@@ -1375,6 +1390,11 @@ std::vector<adaption::Info> PatchKernel::partition(MPI_Comm communicator, bool t
 	Partitions the patch among the processes. The partitioning is done using
 	a criteria that tries to balance the load among the processes.
 
+	Optionally, this funciton can track the changes performed to the patch. See
+	PatchKernel::partitioningAlter(bool trackPartitioning, bool squeezeStorage)
+	for the documentation about the tracking information returned by this
+	function.
+
 	\param trackPartitioning if set to true, the changes to the patch will be
 	tracked
 	\param squeezeStorage if set to true the vector that store patch information
@@ -1398,6 +1418,11 @@ std::vector<adaption::Info> PatchKernel::partition(bool trackPartitioning, bool 
 /*!
 	Partitions the patch among the processes. Each cell will be assigned
 	to a specific process according to the specified input.
+
+	Optionally, this funciton can track the changes performed to the patch. See
+	PatchKernel::partitioningAlter(bool trackPartitioning, bool squeezeStorage)
+	for the documentation about the tracking information returned by this
+	function.
 
 	\param communicator is the communicator that will be used
 	\param cellWeights are the weights of the cells, the weight represents the
@@ -1425,6 +1450,11 @@ std::vector<adaption::Info> PatchKernel::partition(MPI_Comm communicator, const 
 	Partitions the patch among the processes. Each cell will be assigned
 	to a specific process according to the specified input.
 
+	Optionally, this funciton can track the changes performed to the patch. See
+	PatchKernel::partitioningAlter(bool trackPartitioning, bool squeezeStorage)
+	for the documentation about the tracking information returned by this
+	function.
+
 	\param cellWeights are the weights of the cells, the weight represents the
 	relative computational cost associated with a specified cell. If no weight
 	is specified for a cell, a weight equal to one is used
@@ -1450,6 +1480,9 @@ std::vector<adaption::Info> PatchKernel::partition(const std::unordered_map<long
 	Partitions the patch among the processes. The partitioning is done using
 	a criteria that tries to balance the load among the processes.
 
+	See PatchKernel::partitioningPrepare(bool trackPartitioning) for the
+	documentation about the tracking information returned by this function.
+
 	\param communicator is the communicator that will be used
 	\param cellRanks are the ranks of the cells after the partitioning
 	\param trackPartitioning if set to true, the changes to the patch will be
@@ -1471,6 +1504,9 @@ std::vector<adaption::Info> PatchKernel::partitioningPrepare(MPI_Comm communicat
 /*!
 	Partitions the patch among the processes. Each cell will be assigned
 	to a specific process according to the specified input.
+
+	See PatchKernel::partitioningPrepare(bool trackPartitioning) for the
+	documentation about the tracking information returned by this function.
 
 	\param cellRanks are the ranks of the cells after the partitioning
 	\param trackPartitioning if set to true, the changes to the patch will be
@@ -1508,6 +1544,9 @@ std::vector<adaption::Info> PatchKernel::partitioningPrepare(const std::unordere
 	Partitions the patch among the processes. The partitioning is done using
 	a criteria that tries to balance the load among the processes.
 
+	See PatchKernel::partitioningPrepare(bool trackPartitioning) for the
+	documentation about the tracking information returned by this function.
+
 	\param communicator is the communicator that will be used
 	\param trackPartitioning if set to true, the changes to the patch will be
 	tracked
@@ -1531,6 +1570,17 @@ std::vector<adaption::Info> PatchKernel::partitioningPrepare(MPI_Comm communicat
 	Partitions the patch among the processes. The partitioning is done using
 	a criteria that tries to balance the load among the processes.
 
+	Tracking will only list changes that involve data exchange among internal
+	data structured (e.g., partitioning preparation will not track ghost cells
+	nor cell deletion).
+
+	Information available on the sender side for tracking purposes are the
+	following:
+	 - internal cells that will be send;
+	 - internal vertices that will be send.
+
+	No information about tracking are provided on the receiver side.
+
 	\param trackPartitioning if set to true, the changes to the patch will be
 	tracked
 	\result Returns a vector of adaption::Info that can be used to track
@@ -1546,6 +1596,9 @@ std::vector<adaption::Info> PatchKernel::partitioningPrepare(bool trackPartition
 /*!
 	Partitions the patch among the processes. The partitioning is done using
 	a criteria that tries to balance the load among the processes.
+
+	See PatchKernel::partitioningPrepare(bool trackPartitioning) for the
+	documentation about the tracking information returned by this function.
 
 	\param communicator is the communicator that will be used
 	\param cellWeights are the weights of the cells, the weight represents the
@@ -1570,6 +1623,9 @@ std::vector<adaption::Info> PatchKernel::partitioningPrepare(MPI_Comm communicat
 /*!
 	Partitions the patch among the processes. The partitioning is done using
 	a criteria that tries to balance the load among the processes.
+
+	See PatchKernel::partitioningPrepare(bool trackPartitioning) for the
+	documentation about the tracking information returned by this function.
 
 	\param cellWeights are the weights of the cells, the weight represents the
 	relative computational cost associated with a specified cell. If no weight
@@ -1606,7 +1662,42 @@ std::vector<adaption::Info> PatchKernel::partitioningPrepare(const std::unordere
 
 	The actual modification of the patch takes place during this phase. After
 	this phase the adaption is completed and the patch is in its final state.
-	Optionally the patch can track the changes performed to the patch.
+
+	Optionally, this funciton can track the changes performed to the patch.
+
+	Tracking information will not contain changes that involve data exchange
+	among ghost data structured (e.g., ghost cells exchanges are not tracked,
+	only deletion and creation of ghost cells will be tracked).
+
+	Multiple adaption information can be associated to a single element, for
+	example a cell can be sent to another processor and then "recreated" to
+	become a ghost cell.
+
+	Information available on the sender side for tracking purposes are the
+	following:
+	 - internal cells that have been sent;
+	 - internal vertices that have been sent;
+	 - new ghost cells that have been created (some of the internal cells that
+	   have been sent may have become ghosts cells);
+	 - new ghost vertices that have been created (some of the internal vertices
+	   that have been sent may have become ghosts vertices);
+	 - ghost cells that have been deleted;
+	 - ghost vertices that have been deleted;
+	 - new interfaces that have been created;
+	 - interfaces that have been deleted.
+
+	Information available on the receiver side for tracking purposes are the
+	following:
+	 - internal cells that have been received;
+	 - internal vertices that have been received;
+	 - new ghost cells that have been created;
+	 - new ghost vertices that have been created;
+	 - ghost cells that have been deleted (some ghost cells may have been
+	   replaced by internal cells that have just been received);
+	 - ghost vertices that have been deleted (some ghost vertices may have been
+	   replaced by internal vertices that have just been received);
+	 - new interfaces that have been created;
+	 - interfaces that have been deleted.
 
 	\param trackPartitioning if set to true the function will return the changes
 	done to the patch during the partitioning
@@ -1632,10 +1723,10 @@ std::vector<adaption::Info> PatchKernel::partitioningAlter(bool trackPartitionin
 	}
 
 	// Partition the patch
-	partitioningData = _partitioningAlter(trackPartitioning);
+	mergeAdaptionInfo(_partitioningAlter(trackPartitioning), partitioningData);
 
 	// Finalize patch alterations
-	finalizeAlterations(squeezeStorage);
+	mergeAdaptionInfo(finalizeAlterations(trackPartitioning, squeezeStorage), partitioningData);
 
 	// Update the status
 	setPartitioningStatus(PARTITIONING_ALTERED);
@@ -1833,6 +1924,10 @@ double PatchKernel::evalPartitioningUnbalance(const std::unordered_map<long, dou
 
 /*!
 	Prepares the patch for performing the partitioning.
+
+	See PatchKernel::partitioningPrepare(bool trackPartitioning) for the
+	documentation about the tracking information that should be returned
+	when re-implmeneting by this function.
 */
 #if BITPIT_ENABLE_METIS==1
 /*!
@@ -1971,6 +2066,9 @@ std::vector<adaption::Info> PatchKernel::_partitioningPrepare(const std::unorder
 	Partitions the patch among the processes. Each cell will be assigned
 	to a specific process according to the specified input.
 
+	See PatchKernel::partitioningPrepare(bool trackPartitioningge) for the
+	documentation about the tracking information returned by this function.
+
 	\param cellRanks are the ranks of the cells after the partitioning
 	\param trackPartitioning if set to true, the changes to the patch will be
 	tracked
@@ -2055,20 +2153,21 @@ std::vector<adaption::Info> PatchKernel::_partitioningPrepare(const std::unorder
 		MPI_Allreduce(MPI_IN_PLACE, &m_partitioningSerialization, 1, MPI_C_BOOL, MPI_LAND, m_communicator);
 	}
 
-	// Build the information on the cells that will be sent
-	//
-	// Only internal cells are tracked.
+	// Track changes that involve data exchange
 	std::vector<adaption::Info> partitioningData;
 	if (trackPartitioning) {
+		std::vector<long> cellsToSend;
 		for (const std::pair<int, int> &entry : m_partitioningGlobalExchanges) {
+			// Get send/receive ranks
 			int sendRank = entry.first;
 			if (sendRank != patchRank) {
 				continue;
 			}
 
+			// Get list of cells to be sent
 			int recvRank = entry.second;
 
-			std::vector<long> previous;
+			cellsToSend.clear();
 			for (const auto &entry : m_partitioningOutgoings) {
 				int cellRank = entry.second;
 				if (cellRank != recvRank) {
@@ -2076,17 +2175,27 @@ std::vector<adaption::Info> PatchKernel::_partitioningPrepare(const std::unorder
 				}
 
 				long cellId = entry.first;
-				previous.push_back(cellId);
+				cellsToSend.push_back(cellId);
 			}
 
-			if (!previous.empty()) {
-				partitioningData.emplace_back();
-				adaption::Info &partitioningInfo = partitioningData.back();
-				partitioningInfo.entity   = adaption::ENTITY_CELL;
-				partitioningInfo.type     = adaption::TYPE_PARTITION_SEND;
-				partitioningInfo.rank     = recvRank;
-				partitioningInfo.previous = std::move(previous);
+			if (cellsToSend.empty()) {
+				continue;
 			}
+
+			// Fill tracking data structures
+			partitioningData.emplace_back();
+			adaption::Info &partitioningVertexInfo = partitioningData.back();
+			partitioningVertexInfo.entity   = adaption::ENTITY_VERTEX;
+			partitioningVertexInfo.type     = adaption::TYPE_PARTITION_SEND;
+			partitioningVertexInfo.rank     = recvRank;
+			partitioningVertexInfo.previous = getOrderedCellsVertices(cellsToSend, true, false);
+
+			partitioningData.emplace_back();
+			adaption::Info &partitioningCellInfo = partitioningData.back();
+			partitioningCellInfo.entity   = adaption::ENTITY_CELL;
+			partitioningCellInfo.type     = adaption::TYPE_PARTITION_SEND;
+			partitioningCellInfo.rank     = recvRank;
+			partitioningCellInfo.previous = std::move(cellsToSend);
 		}
 	}
 
@@ -2096,6 +2205,9 @@ std::vector<adaption::Info> PatchKernel::_partitioningPrepare(const std::unorder
 /*!
     Alter the patch performing the partitioning.
 
+    See PatchKernel::partitioningAlter(bool trackPartitioning, bool squeezeStorage)
+    for the documentation about the tracking information returned by this function.
+
     \param trackPartitioning if set to true the function will return the changes
     done to the patch during the partitioning
     \result If the partitioning is tracked, returns a vector of adaption::Info
@@ -2104,6 +2216,8 @@ std::vector<adaption::Info> PatchKernel::_partitioningPrepare(const std::unorder
 */
 std::vector<adaption::Info> PatchKernel::_partitioningAlter(bool trackPartitioning)
 {
+    std::vector<adaption::Info> partitioningData;
+
     // Adjacencies need to be up-to-date
     updateAdjacencies();
 
@@ -2120,7 +2234,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter(bool trackPartitioni
             ghostCellOwnershipChanges = _partitioningAlter_evalGhostCellOwnershipChanges();
         }
     } else {
-        _partitioningAlter_deleteGhosts();
+        mergeAdaptionInfo(_partitioningAlter_deleteGhosts(trackPartitioning), partitioningData);
     }
 
     // Communicate patch data structures
@@ -2132,7 +2246,6 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter(bool trackPartitioni
     std::unordered_set<int> batchSendRanks;
     std::unordered_set<int> batchRecvRanks;
 
-    std::vector<adaption::Info> partitioningData;
     std::vector<adaption::Info> rankPartitioningData;
     while (!m_partitioningGlobalExchanges.empty()) {
         // Add exchanges to the batch
@@ -2191,7 +2304,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter(bool trackPartitioni
 }
 
 /*!
-    Get the ghost that will change ownership after partitioning.
+    Get the ghost cells that will change ownership after partitioning.
 
     Some of the cells that are send during a partitioning may be ghosts on
     other processes. We need to find out the final ghost owners after the
@@ -2306,9 +2419,44 @@ void PatchKernel::_partitioningAlter_applyGhostCellOwnershipChanges(int sendRank
 
 /*!
     Delete ghosts.
+
+    See PatchKernel::partitioningAlter(bool trackPartitioning, bool squeezeStorage)
+    for the documentation about the tracking information returned by this function.
+
+    \param trackPartitioning if set to true the function will return the changes
+    done to the patch during the partitioning
+    \result If the partitioning is tracked, returns a vector of adaption::Info
+    with all the changes done to the patch during the partitioning, otherwise
+    an empty vector will be returned.
 */
-void PatchKernel::_partitioningAlter_deleteGhosts()
+std::vector<adaption::Info> PatchKernel::_partitioningAlter_deleteGhosts(bool trackPartitioning)
 {
+    std::vector<adaption::Info> partitioningData;
+    if (getGhostCellCount() == 0) {
+        return partitioningData;
+    }
+
+    // Track changes
+    if (trackPartitioning) {
+        partitioningData.emplace_back();
+        adaption::Info &partitioningVertexInfo = partitioningData.back();
+        partitioningVertexInfo.entity= adaption::ENTITY_VERTEX;
+        partitioningVertexInfo.type  = adaption::TYPE_DELETION;
+        partitioningVertexInfo.current.reserve(getGhostVertexCount());
+        for (VertexConstIterator itr = ghostVertexConstBegin(); itr != ghostVertexConstEnd(); ++itr) {
+            partitioningVertexInfo.current.push_back(itr.getId());
+        }
+
+        partitioningData.emplace_back();
+        adaption::Info &partitioningCellInfo = partitioningData.back();
+        partitioningCellInfo.entity = adaption::ENTITY_CELL;
+        partitioningCellInfo.type   = adaption::TYPE_DELETION;
+        partitioningCellInfo.current.reserve(getGhostCellCount());
+        for (CellConstIterator itr = ghostCellConstBegin(); itr != ghostCellConstEnd(); ++itr) {
+            partitioningCellInfo.current.push_back(itr.getId());
+        }
+    }
+
     // Delete ghost cells
     std::vector<long> cellsDeleteList;
     cellsDeleteList.reserve(m_ghostCellInfo.size());
@@ -2325,7 +2473,7 @@ void PatchKernel::_partitioningAlter_deleteGhosts()
     // Prune stale interfaces
     //
     // Interfaces will be re-created after the partitioning.
-    pruneStaleInterfaces();
+    mergeAdaptionInfo(pruneStaleInterfaces(trackPartitioning), partitioningData);
 
     // Delete vertices no longer used
     deleteOrphanVertices();
@@ -2334,10 +2482,15 @@ void PatchKernel::_partitioningAlter_deleteGhosts()
     while (getGhostVertexCount() > 0) {
         ghostVertex2InternalVertex(m_firstGhostVertexId);
     }
+
+    return partitioningData;
 }
 
 /*!
     Sends the given list of cells to the process with the specified rank.
+
+    See PatchKernel::partitioningAlter(bool trackPartitioning, bool squeezeStorage)
+    for the documentation about the tracking information returned by this function.
 
     \param recvRanks are the receiver ranks
     \param trackPartitioning if set to true the function will return the changes
@@ -2734,6 +2887,31 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
             ghostHaloCellsOverall.insert(cellId);
         }
 
+        // Track changes that involve data exchange
+        if (trackPartitioning && !cellSendList.empty()) {
+            // Track cells that have been sent to other processes
+            //
+            // The ids of the cells send will be stored accordingly to the send
+            // order, this is the same order that will be used on the process
+            // that has received the cell. Since the order is the same, the
+            // two processes are able to exchange cell data without additional
+            // communications (they already know the list of cells for which
+            // data is needed and the order in which these data will be sent).
+            partitioningData.emplace_back();
+            adaption::Info &partitioningVertexInfo = partitioningData.back();
+            partitioningVertexInfo.entity  = adaption::ENTITY_VERTEX;
+            partitioningVertexInfo.type    = adaption::TYPE_PARTITION_SEND;
+            partitioningVertexInfo.rank    = recvRank;
+            partitioningVertexInfo.current = getOrderedCellsVertices(cellSendList, true, false);
+
+            partitioningData.emplace_back();
+            adaption::Info &partitioningCellInfo = partitioningData.back();
+            partitioningCellInfo.entity   = adaption::ENTITY_CELL;
+            partitioningCellInfo.type     = adaption::TYPE_PARTITION_SEND;
+            partitioningCellInfo.rank     = recvRank;
+            partitioningCellInfo.previous = std::vector<long>(cellSendList.begin(), cellSendList.begin() + nOutgoingCells);
+        }
+
         //
         // Communicate cell buffer size
         //
@@ -2918,31 +3096,6 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
 
         MPI_Isend(cellsBuffer.data(), cellsBuffer.getSize(), MPI_CHAR, recvRank, m_partitioningCellsTag, m_communicator, &cellsRequest);
 
-        //
-        // Update adaption info
-        //
-        if (trackPartitioning) {
-            // Update partition
-            //
-            // The ids of the cells send will be stored accordingly to the send
-            // order, this is the same order that will be used on the process
-            // that has received the cell. Since the order is the same, the
-            // two processes are able to exchange cell data without additional
-            // communications (they already know the list of cells for which
-            // data is needed and the order in which these data will be sent).
-            partitioningData.emplace_back();
-            adaption::Info &partitioningInfo = partitioningData.back();
-            partitioningInfo.entity = adaption::ENTITY_CELL;
-            partitioningInfo.type   = adaption::TYPE_PARTITION_SEND;
-            partitioningInfo.rank   = recvRank;
-
-            partitioningInfo.previous.resize(nOutgoingCells);
-            for (std::size_t i = 0; i < nOutgoingCells; ++i) {
-                long cellId = cellSendList[i];
-                partitioningInfo.previous[i] = cellId;
-            }
-        }
-
         // Delete outgoing cells not in the frame
         //
         // Frame cells cannot be deleted just now, because they may be ghost cells
@@ -2965,7 +3118,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
         // we need to remove stale adjacencies and interfaces.
         pruneStaleAdjacencies();
 
-        pruneStaleInterfaces();
+        mergeAdaptionInfo(pruneStaleInterfaces(trackPartitioning), partitioningData);
 
         // If we are sending many cells try to reduced the used memory
         bool keepMemoryLimited = (nOutgoingCells > ACTIVATE_MEMORY_LIMIT_THRESHOLD * getInternalCellCount());
@@ -2988,13 +3141,12 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
 
     // If the process is sending all its cells we can just clear the patch.
     if (!sendingAllCells) {
-        std::vector<long> deleteList;
-
         // Convert inner cells into ghosts
         //
         // All cells on the inner frontier should become ghost cells. These
         // cells belongs to the first halo layer and defines the seeds for
         // growing the subsequent halo layers.
+        std::vector<long> trackedCreatedGhostCells;
         for (long cellId : innerFrontierCellsOverall) {
             const Cell &cell = getCell(cellId);
             std::size_t cellHaloLayer = 0;
@@ -3004,26 +3156,50 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
 
             int cellOwner = m_partitioningOutgoings.at(cellId);
             internalCell2GhostCell(cellId, cellOwner, cellHaloLayer);
+            if (trackPartitioning) {
+                trackedCreatedGhostCells.push_back(cellId);
+            }
         }
 
         auto ghostFrameSelector = [this](long cellId) {
             return (m_partitioningOutgoings.count(cellId) != 0);
         };
 
-        auto ghostFrameBuilder = [this](long cellId, int layer) {
+        auto ghostFrameBuilder = [this, trackPartitioning, &trackedCreatedGhostCells](long cellId, int layer) {
             int cellOwner = m_partitioningOutgoings.at(cellId);
             internalCell2GhostCell(cellId, cellOwner, layer + 1);
+            if (trackPartitioning) {
+                trackedCreatedGhostCells.push_back(cellId);
+            }
 
             return false;
         };
 
         processCellsNeighbours(innerFrontierCellsOverall, m_haloSize - 1, ghostFrameSelector, ghostFrameBuilder);
+        if (!trackedCreatedGhostCells.empty()) {
+            partitioningData.emplace_back();
+            adaption::Info &cellCreationInfo = partitioningData.back();
+            cellCreationInfo.entity  = adaption::ENTITY_CELL;
+            cellCreationInfo.type    = adaption::TYPE_CREATION;
+            cellCreationInfo.rank    = getRank();
+            cellCreationInfo.current = getOrderedCellsVertices(trackedCreatedGhostCells, false, true);
+
+            std::vector<long> deletedGhostVertices = getOrderedCellsVertices(trackedCreatedGhostCells, false, true);
+            if (!deletedGhostVertices.empty()) {
+                partitioningData.emplace_back();
+                adaption::Info &vertexCreationInfo = partitioningData.back();
+                vertexCreationInfo.entity  = adaption::ENTITY_VERTEX;
+                vertexCreationInfo.type    = adaption::TYPE_CREATION;
+                vertexCreationInfo.rank    = getRank();
+                vertexCreationInfo.current = std::move(deletedGhostVertices);
+            }
+        }
 
         // Delete frame cells that are not ghosts
         //
         // Now that the new ghosts have been created, we can delete all the
         // frontier cells that are not ghosts.
-        deleteList.clear();
+        std::vector<long> deleteList;
         for (long cellId : frameCellsOverall) {
             const Cell &cell = getCell(cellId);
             if (!cell.isInterior()) {
@@ -3055,8 +3231,10 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
         std::vector<long> neighIds;
         std::vector<long> updateList;
 
+        std::vector<long> haloDeleteList;
+        std::vector<long> trackedDeletedGhostCells;
         for (int haloLayer = 0; haloLayer < static_cast<int>(m_haloSize); ++haloLayer) {
-            deleteList.clear();
+            haloDeleteList.clear();
             for (long cellId : ghostHaloCellsOverall) {
                 // Consider only cells in the current halo layer
                 const GhostCellInfo &ghostInfo = m_ghostCellInfo.at(cellId);
@@ -3070,19 +3248,35 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
                 if (confirmCellHaloLayer(cell, haloLayer, m_partitioningOutgoings)) {
                     updateList.push_back(cellId);
                 } else {
-                    deleteList.push_back(cellId);
+                    haloDeleteList.push_back(cellId);
                 }
             }
 
             // Delete stale ghost in this layer
-            for (long cellId : deleteList) {
+            for (long cellId : haloDeleteList) {
                 ghostCellOwnershipChanges->erase(cellId);
                 ghostHaloCellsOverall.erase(cellId);
             }
-            deleteCells(deleteList);
+            deleteCells(haloDeleteList);
+
+            // Track deleted cells
+            if (trackPartitioning) {
+                trackedDeletedGhostCells.insert(trackedDeletedGhostCells.end(), haloDeleteList.begin(), haloDeleteList.end());
+            }
 
             // Prune stale adjacencies
             pruneStaleAdjacencies();
+        }
+
+        // Track ghost cell deletion
+        if (trackPartitioning && !trackedDeletedGhostCells.empty()) {
+            partitioningData.emplace_back();
+            adaption::Info &cellDeletionInfo = partitioningData.back();
+            cellDeletionInfo.entity  = adaption::ENTITY_CELL;
+            cellDeletionInfo.type    = adaption::TYPE_DELETION;
+            cellDeletionInfo.rank    = getRank();
+            cellDeletionInfo.current = std::move(trackedDeletedGhostCells);
+            trackedDeletedGhostCells.clear();
         }
 
         // Compute layer associated with ghosts in the halo of the outgoing cells
@@ -3095,11 +3289,55 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
         }
 
         // Prune stale interfaces
-        pruneStaleInterfaces();
+        mergeAdaptionInfo(pruneStaleInterfaces(trackPartitioning), partitioningData);
+
+        // Identify orphan vertices
+        std::vector<long> orphanVertices = findOrphanVertices();
+
+        // Track ghost vertices deletion
+        //
+        // Only ghost vertices need to be tracked, all orphan internal vertex
+        // have already been tracked among the vertices that have been send.
+        if (trackPartitioning && !orphanVertices.empty()) {
+            partitioningData.emplace_back();
+            adaption::Info &vertexDeletionInfo = partitioningData.back();
+            vertexDeletionInfo.entity = adaption::ENTITY_VERTEX;
+            vertexDeletionInfo.type   = adaption::TYPE_DELETION;
+            vertexDeletionInfo.rank   = getRank();
+            for (long vertexId : orphanVertices) {
+                const Vertex &vertex = getVertex(vertexId);
+                if (vertex.isInterior()) {
+                    continue;
+                }
+
+                vertexDeletionInfo.current.push_back(vertexId);
+            }
+        }
 
         // Delete orphan vertices
-        deleteOrphanVertices();
+        deleteVertices(orphanVertices);
     } else {
+        // All ghost cells will be deleted
+        if (trackPartitioning) {
+            partitioningData.emplace_back();
+            adaption::Info &partitioningVertexInfo = partitioningData.back();
+            partitioningVertexInfo.entity= adaption::ENTITY_VERTEX;
+            partitioningVertexInfo.type  = adaption::TYPE_DELETION;
+            partitioningVertexInfo.current.reserve(getGhostVertexCount());
+            for (VertexConstIterator itr = ghostVertexConstBegin(); itr != ghostVertexConstEnd(); ++itr) {
+                partitioningVertexInfo.current.push_back(itr.getId());
+            }
+
+            partitioningData.emplace_back();
+            adaption::Info &partitioningCellInfo = partitioningData.back();
+            partitioningCellInfo.entity = adaption::ENTITY_CELL;
+            partitioningCellInfo.type   = adaption::TYPE_DELETION;
+            partitioningCellInfo.current.reserve(getGhostCellCount());
+            for (CellConstIterator itr = ghostCellConstBegin(); itr != ghostCellConstEnd(); ++itr) {
+                partitioningCellInfo.current.push_back(itr.getId());
+            }
+        }
+
         // The process has sent all its cells, the patch is now empty
         reset();
         ghostCellOwnershipChanges->clear();
@@ -3127,6 +3365,9 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_sendCells(const std:
 
 /*!
     Receives a list of cells from the specified process.
+
+    See PatchKernel::partitioningAlter(bool trackPartitioning, bool squeezeStorage)
+    for the documentation about the tracking information returned by this function.
 
     \param sendRanks are the rank of the processes sending the cells
     \param trackPartitioning if set to true the function will return the changes
@@ -3179,19 +3420,8 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
     std::vector<std::unique_ptr<IBinaryStream>> cellsBuffers(nSendRanks);
     std::vector<std::unique_ptr<IBinaryStream>> verticesBuffers(nSendRanks);
 
-    // Fill partitioning info
+    // Initialize partitioning info
     std::vector<adaption::Info> partitioningData;
-    if (trackPartitioning) {
-        partitioningData.resize(nSendRanks);
-        for (int sendRank : sendRanks) {
-            int sendRankIndex = sendRankIndexes.at(sendRank);
-
-            adaption::Info &partitioningInfo = partitioningData[sendRankIndex];
-            partitioningInfo.entity = adaption::ENTITY_CELL;
-            partitioningInfo.type   = adaption::TYPE_PARTITION_RECV;
-            partitioningInfo.rank   = sendRank;
-        }
-    }
 
     // Mark border interfaces of ghost cells as dangling
     //
@@ -3485,9 +3715,10 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
 
         reserveCells(getCellCount() + nReceivedCells);
 
+        std::vector<long> trackedReceivedInteriorCells;
+        std::vector<long> trackedCreatedGhostCells;
         if (trackPartitioning) {
-            // Only internal cells are tracked.
-            partitioningData[sendRankIndex].current.reserve(nReceivedInternalCells);
+            trackedReceivedInteriorCells.reserve(nReceivedInternalCells);
         }
 
         validReceivedAdjacencies.clear();
@@ -3549,12 +3780,14 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
                 }
             }
 
+            bool cellAlreadyExists = (cellId >= 0);
+
             // If the cell is not a duplicate add it in the cell data structure,
             // otherwise merge the connectivity of the duplicate cell to the
             // existing cell. This ensure that the received cell will be
             // properly connected to the received cells
-            bool isTracked = false;
-            if (cellId < 0) {
+            CellIterator cellIterator;
+            if (!cellAlreadyExists) {
                 // Reset the interfaces of the cell
                 if (getInterfacesBuildStrategy() != INTERFACES_NONE) {
                     cell.resetInterfaces();
@@ -3574,7 +3807,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
                     throw std::runtime_error("A cell with the same id of the received cell already exists.");
                 }
 
-                CellIterator cellIterator = addCell(std::move(cell), cellOwner, cellHaloLayer);
+                cellIterator = addCell(std::move(cell), cellOwner, cellHaloLayer);
                 cellId = cellIterator.getId();
                 addedCells.push_back(cellId);
 
@@ -3584,16 +3817,12 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
                         ghostCellOwnershipChanges->insert({cellId, ghostCellOwnershipChange});
                     }
                 }
-
-                // Interior cells are tacked
-                isTracked = (trackPartitioning && isInterior);
             } else {
                 // Check if the existing cells needs to become an internal cell
-                const Cell &localCell = m_cells[cellId];
-                if (isInterior && !localCell.isInterior()) {
+                cellIterator = getCellIterator(cellId);
+                if (isInterior && !cellIterator->isInterior()) {
                     ghostCell2InternalCell(cellId);
                     ghostCellOwnershipChanges->erase(cellId);
-                    isTracked = trackPartitioning;
                 }
 
                 // Update the halo layer associated with ghost cells
@@ -3643,8 +3872,12 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
             // additional communications (they already know the list of cells
             // for which data is needed and the order in which these data will
             // be sent).
-            if (isTracked) {
-                partitioningData[sendRankIndex].current.emplace_back(cellId);
+            if (trackPartitioning) {
+                if (cellIterator->isInterior()) {
+                    trackedReceivedInteriorCells.emplace_back(cellId);
+                } else if (!cellAlreadyExists) {
+                    trackedCreatedGhostCells.emplace_back(cellId);
+                }
             }
         }
 
@@ -3747,6 +3980,44 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
             }
         }
 
+        // Track changes
+        if (trackPartitioning) {
+            if (!trackedReceivedInteriorCells.empty()) {
+                partitioningData.emplace_back();
+                adaption::Info &vertexRecvInfo = partitioningData.back();
+                vertexRecvInfo.entity  = adaption::ENTITY_VERTEX;
+                vertexRecvInfo.type    = adaption::TYPE_PARTITION_RECV;
+                vertexRecvInfo.rank    = sendRank;
+                vertexRecvInfo.current = getOrderedCellsVertices(trackedReceivedInteriorCells, true, false);
+
+                partitioningData.emplace_back();
+                adaption::Info &cellRecvInfo = partitioningData.back();
+                cellRecvInfo.entity = adaption::ENTITY_CELL;
+                cellRecvInfo.type   = adaption::TYPE_PARTITION_RECV;
+                cellRecvInfo.rank   = sendRank;
+                cellRecvInfo.current = std::move(trackedReceivedInteriorCells);
+                trackedReceivedInteriorCells.clear();
+            }
+
+            if (!trackedCreatedGhostCells.empty()) {
+                partitioningData.emplace_back();
+                adaption::Info &vertexCreationInfo = partitioningData.back();
+                vertexCreationInfo.entity  = adaption::ENTITY_VERTEX;
+                vertexCreationInfo.type    = adaption::TYPE_CREATION;
+                vertexCreationInfo.rank    = patchRank;
+                vertexCreationInfo.current = getOrderedCellsVertices(trackedCreatedGhostCells, false, true);
+
+
+                partitioningData.emplace_back();
+                adaption::Info &cellCreationInfo = partitioningData.back();
+                cellCreationInfo.entity  = adaption::ENTITY_CELL;
+                cellCreationInfo.type    = adaption::TYPE_CREATION;
+                cellCreationInfo.rank    = patchRank;
+                cellCreationInfo.current = std::move(trackedCreatedGhostCells);
+                trackedCreatedGhostCells.clear();
+            }
+        }
+
         // Receive is now complete
         awaitingSendRanks.erase(sendRank);
     }
@@ -3758,7 +4029,7 @@ std::vector<adaption::Info> PatchKernel::_partitioningAlter_receiveCells(const s
 
     // Update interfaces
     if (getInterfacesBuildStrategy() == INTERFACES_AUTOMATIC) {
-        updateInterfaces();
+        mergeAdaptionInfo(updateInterfaces(false, trackPartitioning), partitioningData);
     }
 
     // Return adaption data

@@ -56,7 +56,8 @@ namespace adaption
 	enum Entity {
 		ENTITY_UNKNOWN = -1,
 		ENTITY_CELL,
-		ENTITY_INTERFACE
+		ENTITY_INTERFACE,
+		ENTITY_VERTEX
 	};
 
 	struct Info
@@ -82,10 +83,32 @@ namespace adaption
 	{
 
 	public:
+		typedef std::vector<Info>::iterator iterator;
+		typedef std::vector<Info>::const_iterator const_iterator;
+
+		static void appendIds(std::vector<long> src, bool unique, std::vector<long> *dst);
+		static std::size_t removeIds(std::unordered_set<long> src, std::vector<long> *dst);
+
 		InfoCollection();
 
-		std::size_t create();
-		std::size_t create(Type type, Entity entity, int rank = -1);
+		std::size_t size() const;
+
+		iterator begin() noexcept;
+		iterator end() noexcept;
+
+		const_iterator begin() const noexcept;
+		const_iterator end() const noexcept;
+
+		const_iterator cbegin() const noexcept;
+		const_iterator cend() const noexcept;
+
+		std::size_t insert();
+		std::size_t insert(Type type, Entity entity, int rank = -1);
+		std::size_t insert(const Info &other);
+		std::size_t insert(Info &&other);
+
+		bool erase(std::size_t id);
+		std::size_t erase(Type type);
 
 		Info & at(std::size_t id);
 		const Info & at(std::size_t id) const;
