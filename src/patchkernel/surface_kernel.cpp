@@ -311,7 +311,7 @@ void SurfaceKernel::evalBarycentricCoordinates(long id, const std::array<double,
 
     default:
     {
-        ConstProxyVector<long> vertexIds = cell_->getVertexIds();
+        ConstProxyVector<long> vertexIds = getFacetOrderedVertexIds(*cell_);
 
         std::size_t nVertices = vertexIds.size();
         BITPIT_CREATE_WORKSPACE(vertexCoords, std::array<double BITPIT_COMMA 3>, nVertices, ReferenceElementInfo::MAX_ELEM_VERTICES);
