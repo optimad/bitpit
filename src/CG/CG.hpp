@@ -201,6 +201,29 @@ bool intersectSegmentBox( array3D const &, array3D const &, array3D const &, arr
 bool intersectSegmentBox( array3D const &, array3D const &, array3D const &, array3D const &, bool, bool, 
         std::vector<array3D> &, std::vector<int> &, int dim=3, const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE);
 
+bool intersectPlanePixel(array3D const &Pp, array3D const &nP, array3D const *V, std::array<array3D, 2> &intersection,
+                         std::array<int, 2> &edges_of_intersection, const double distanceTolerance = DEFAULT_COPLANARITY_TOLERANCE);
+bool intersectPlanePixel(array3D const &Pp, array3D const &nP, array3D const *V,
+                        std::array<array3D, 2> &intersection, const double distanceTolerance = DEFAULT_COPLANARITY_TOLERANCE);
+bool intersectPlanePixel(array3D const &Pp, array3D const &nP, array3D const *V, 
+                         std::array<array3D, 2> &intersection, std::vector<array3D> &poly, const double distanceTolerance = DEFAULT_COPLANARITY_TOLERANCE);
+bool intersectPlaneTriangle(array3D const &P0, array3D const &P1, array3D const &P2, array3D const &Pp, array3D const &nP, std::array<array3D, 2> &intersection,
+                            std::array<int, 2> &edges_of_intersection, const double distanceTolerance = DEFAULT_COPLANARITY_TOLERANCE);
+bool intersectPlaneTriangle(array3D const &P0, array3D const &P1, array3D const &P2, array3D const &Pp, array3D const &nP, std::array<array3D, 2> &intersection,
+                            const double distanceTolerance = DEFAULT_COPLANARITY_TOLERANCE);
+bool intersectPlaneTriangle(array3D const &P0, array3D const &P1, array3D const &P2, array3D const &Pp, array3D const &nP,
+                            std::array<array3D, 2> &intersection, std::vector<array3D> &poly, const double distanceTolerance = DEFAULT_COPLANARITY_TOLERANCE);
+bool intersectPlanePolygon(array3D const &P, array3D const &nP, std::size_t nV, array3D const *V, std::vector<std::array<array3D, 2>> &Qs,
+                           std::vector<std::array<int, 2>> &edges_of_Qs, const double distanceTolerance = DEFAULT_COPLANARITY_TOLERANCE);
+bool intersectPlanePolygon(array3D const &P, array3D const &nP, std::size_t nV, array3D const *V,
+                           std::vector<std::array<array3D, 2>> &Qs, const double distanceTolerance = DEFAULT_COPLANARITY_TOLERANCE);
+bool intersectPlanePolygon(array3D const &P, array3D const &nP, std::size_t nV, array3D const *V,
+                           std::vector<std::array<array3D, 2>> &Qs, std::vector< std::vector<array3D> > &polys, const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE);
+array3D computePolygonNormal(std::size_t nV, const array3D *V);
+void reconstructPlaneIntersectedPolygons(std::size_t nV, array3D const *V, std::vector<std::array<array3D, 2>> const &Qs,
+                                         std::vector<std::array<int, 2>> const &edges_of_Qs,
+                                         std::vector< std::vector<array3D> > &polys, const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE);
+
 bool intersectPlanePlane( array3D const &, array3D const &, array3D const &, array3D const &, 
         array3D &, array3D &, const double coplanarityTolerance = DEFAULT_COPLANARITY_TOLERANCE) ;
 bool intersectPlaneBox( array3D const &, array3D const &, array3D const &, array3D const &, int dim=3, 
@@ -212,7 +235,6 @@ bool intersectBoxBox( array3D const &, array3D const &, array3D const &, array3D
         const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE) ;
 bool intersectBoxBox( array3D const &, array3D const &, array3D const &, array3D const &, 
         array3D &, array3D &, int  dim = 3, const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE) ;
-
 
 bool intersectBoxTriangle( array3D const &, array3D const &, array3D const &, array3D const &, array3D const &, 
         int dim=3, const double distanceTolerance = DEFAULT_DISTANCE_TOLERANCE) ;
