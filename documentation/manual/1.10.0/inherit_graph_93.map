@@ -1,7 +1,0 @@
-<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$classbitpit_1_1SystemMatrixOrdering.html" title="The SystemMatrixOrdering class provides an interface for defining classes that allows to reorder the ..." alt="" coords="5,49,192,74"/>
-<area shape="rect" id="Node000001" href="$classbitpit_1_1NaturalSystemMatrixOrdering.html" title="The NaturalSystemMatrixOrdering class defines allows to use a matrix natural ordering." alt="" coords="245,5,425,45"/>
-<area shape="poly" id="edge207_Node000000_Node000001" title=" " alt="" coords="195,44,244,36,245,42,196,49"/>
-<area shape="rect" id="Node000002" href="$classbitpit_1_1ProxySystemMatrixOrdering.html" title="The ProxySystemMatrixOrdering class defines allows to use a matrix ordering defined in some external ..." alt="" coords="240,70,429,125"/>
-<area shape="poly" id="edge208_Node000000_Node000002" title=" " alt="" coords="196,73,240,80,239,86,195,79"/>
-</map>

@@ -1,0 +1,10 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" href="$classbitpit_1_1SystemMatrixAssembler.html" title="The SystemMatrixAssembler class provides an interface for defining system matrix assemblers." alt="" coords="5,45,205,70"/>
+<area shape="rect" id="Node000001" href="$classbitpit_1_1SplitSystemMatrixAssembler.html" title="The SplitSystemMatrixAssembler class is the base class for defining assemblers for split system solve..." alt="" coords="261,5,425,45"/>
+<area shape="poly" id="edge204_Node000000_Node000001" title=" " alt="" coords="213,40,260,34,261,39,213,45"/>
+<area shape="rect" id="Node000003" href="$classbitpit_1_1SystemSparseMatrixAssembler.html" title="The SystemSparseMatrixAssembler class defines an assembler for building the system matrix form a spar..." alt="" coords="253,69,432,109"/>
+<area shape="poly" id="edge206_Node000000_Node000003" title=" " alt="" coords="213,69,254,75,253,80,213,74"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1SplitSystemSparseMatrixAssembler.html" title="The SplitSystemSparseMatrixAssembler class allows to assembly a split system solver from a sparse mat..." alt="" coords="480,37,649,77"/>
+<area shape="poly" id="edge205_Node000001_Node000002" title=" " alt="" coords="439,36,480,42,479,48,438,42"/>
+<area shape="poly" id="edge207_Node000003_Node000002" title=" " alt="" coords="445,72,479,67,480,72,446,77"/>
+</map>

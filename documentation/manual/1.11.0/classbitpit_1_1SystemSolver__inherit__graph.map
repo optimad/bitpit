@@ -1,0 +1,11 @@
+<map id="bitpit::SystemSolver" name="bitpit::SystemSolver">
+<area shape="rect" id="Node000001" title="The SystemSolver class provides methods for building and solving large linear systems." alt="" coords="5,69,144,95"/>
+<area shape="rect" id="Node000002" href="$classAMGSystemSolver.html" title="The class AMGSystemSolver is derived form SystemSolver and it allows to solve the linear system using..." alt="" coords="214,5,347,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="124,62,191,39,230,28,231,33,193,45,125,67"/>
+<area shape="rect" id="Node000003" href="$classbitpit_1_1DiscretizationStencilSolver.html" title=" " alt="" coords="192,55,369,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="158,79,192,79,192,85,158,85"/>
+<area shape="rect" id="Node000004" href="$classbitpit_1_1SplitSystemSolver.html" title="The SplitSystemSolver class allows to solve a split linear system." alt="" coords="199,133,363,159"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="127,97,193,118,235,131,234,136,191,123,125,102"/>
+<area shape="rect" id="Node000005" href="$classAMGSplitSystemSolver.html" title="The class AMGSplitSystemSolver is derived form SplitSystemSolver and it allows to solve the linear sy..." alt="" coords="417,133,576,159"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="377,143,417,143,417,149,377,149"/>
+</map>

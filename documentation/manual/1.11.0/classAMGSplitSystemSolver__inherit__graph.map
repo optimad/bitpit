@@ -1,0 +1,7 @@
+<map id="AMGSplitSystemSolver" name="AMGSplitSystemSolver">
+<area shape="rect" id="Node000001" title="The class AMGSplitSystemSolver is derived form SplitSystemSolver and it allows to solve the linear sy..." alt="" coords="8,152,167,177"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1SplitSystemSolver.html" title="The SplitSystemSolver class allows to solve a split linear system." alt="" coords="5,79,169,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="90,118,90,152,85,152,85,118"/>
+<area shape="rect" id="Node000003" href="$classbitpit_1_1SystemSolver.html" title="The SystemSolver class provides methods for building and solving large linear systems." alt="" coords="18,5,157,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="90,44,90,79,85,79,85,44"/>
+</map>

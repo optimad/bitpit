@@ -1,9 +1,0 @@
-<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$classbitpit_1_1SystemMatrixAssembler.html" title="The SystemMatrixAssembler class provides an interface for defining system matrix assemblers." alt="" coords="5,42,205,67"/>
-<area shape="rect" id="Node000001" href="$classbitpit_1_1StencilSolverAssembler.html" title=" " alt="" coords="253,13,448,38"/>
-<area shape="poly" id="edge204_Node000000_Node000001" title=" " alt="" coords="218,38,253,34,253,40,219,44"/>
-<area shape="rect" id="Node000003" href="$classbitpit_1_1SystemSparseMatrixAssembler.html" title="The SystemSparseMatrixAssembler class defines an assembler for building the system matrix form a spar..." alt="" coords="261,63,440,103"/>
-<area shape="poly" id="edge206_Node000000_Node000003" title=" " alt="" coords="219,65,262,70,261,75,219,70"/>
-<area shape="rect" id="Node000002" href="$classbitpit_1_1DiscretizationStencilSolverAssembler.html" title="The DiscretizationStencilSolverAssembler class defines an assembler for building the stencil solver." alt="" coords="496,5,689,45"/>
-<area shape="poly" id="edge205_Node000001_Node000002" title=" " alt="" coords="462,23,496,23,496,28,462,28"/>
-</map>

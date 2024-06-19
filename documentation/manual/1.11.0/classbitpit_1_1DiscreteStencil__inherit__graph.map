@@ -1,0 +1,7 @@
+<map id="bitpit::DiscreteStencil&lt; weight_t, value_t &gt;" name="bitpit::DiscreteStencil&lt; weight_t, value_t &gt;">
+<area shape="rect" id="Node000001" title="Metafunction for generating a discretization stencil." alt="" coords="5,45,152,85"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1MPDiscreteStencil.html" title="Metafunction for generating a discretization stencil with a memory pool (MP)." alt="" coords="385,5,551,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="165,43,176,41,284,30,384,25,384,30,285,35,176,47,166,48"/>
+<area shape="rect" id="Node000003" href="$classbitpit_1_1DiscreteStencil.html" title=" " alt="" coords="365,69,571,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="166,84,176,85,273,95,365,100,365,105,273,101,176,91,165,89"/>
+</map>

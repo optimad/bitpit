@@ -1,0 +1,16 @@
+<map id="bitpit::SplitSystemSparseMatrixAssembler" name="bitpit::SplitSystemSparseMatrixAssembler">
+<area shape="rect" id="Node000001" title="The SplitSystemSparseMatrixAssembler class allows to assembly a split system solver from a sparse mat..." alt="" coords="135,373,305,413"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1SystemSparseMatrixAssembler.html" title="The SystemSparseMatrixAssembler class defines an assembler for building the system matrix form a spar..." alt="" coords="209,284,388,324"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="274,336,239,375,235,371,270,333"/>
+<area shape="rect" id="Node000003" href="$classbitpit_1_1SystemMatrixAssembler.html" title="The SystemMatrixAssembler class provides an interface for defining system matrix assemblers." alt="" coords="5,196,205,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="143,225,261,282,259,286,140,230"/>
+<area shape="rect" id="Node000007" href="$classbitpit_1_1SplitSystemMatrixAssembler.html" title="The SplitSystemMatrixAssembler class is the base class for defining assemblers for split system solve..." alt="" coords="21,284,185,324"/>
+<area shape="poly" id="edge7_Node000007_Node000003" title=" " alt="" coords="107,235,106,284,101,284,102,235"/>
+<area shape="rect" id="Node000004" href="$classbitpit_1_1SparseMatrix.html" title="Sparse matrix." alt="" coords="231,196,366,221"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="301,235,301,284,296,284,296,235"/>
+<area shape="rect" id="Node000005" href="$classbitpit_1_1FlatVector2D.html" title=" " alt="" coords="232,93,365,133"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="301,147,301,196,296,196,296,147"/>
+<area shape="rect" id="Node000006" href="$classbitpit_1_1FlatVector2D.html" title="Metafunction for generation of a flattened vector of vectors." alt="" coords="216,5,381,31"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="301,44,301,93,296,93,296,44"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="140,330,196,371,193,375,137,334"/>
+</map>
