@@ -58,6 +58,7 @@ namespace bitpit {
 	- writing of VTK files.
 	When in light memory mode, updating the patch will automatically switch
 	to normal memory mode.
+	A newly constructed patch will operate in light memory mode.
 */
 
 /*!
