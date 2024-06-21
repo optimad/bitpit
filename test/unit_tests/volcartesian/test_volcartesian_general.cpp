@@ -87,13 +87,26 @@ BOOST_FIXTURE_TEST_CASE(method_getSpacing_2, NormalTestPatch)
     }
 }
 
-BOOST_FIXTURE_TEST_CASE(method_switchMemoryMode, NormalTestPatch)
+BOOST_FIXTURE_TEST_CASE(method_switchMemoryMode_1, NormalTestPatch)
 {
     BITPIT_UNIT_TEST_DISPLAY_NAME(log::cout());
 
     const VolCartesian::MemoryMode EXPECTED_RESULT = VolCartesian::MEMORY_LIGHT;
 
     patch->switchMemoryMode(VolCartesian::MEMORY_LIGHT);
+    VolCartesian::MemoryMode result = patch->getMemoryMode();
+    if (result != EXPECTED_RESULT) {
+        throw std::runtime_error("Function 'switchMemoryMode(MemoryMode mode)' failed unit test.");
+    }
+}
+
+BOOST_FIXTURE_TEST_CASE(method_switchMemoryMode_2, LightTestPatch)
+{
+    BITPIT_UNIT_TEST_DISPLAY_NAME(log::cout());
+
+    const VolCartesian::MemoryMode EXPECTED_RESULT = VolCartesian::MEMORY_NORMAL;
+
+    patch->switchMemoryMode(VolCartesian::MEMORY_NORMAL);
     VolCartesian::MemoryMode result = patch->getMemoryMode();
     if (result != EXPECTED_RESULT) {
         throw std::runtime_error("Function 'switchMemoryMode(MemoryMode mode)' failed unit test.");

@@ -957,6 +957,13 @@ void VolCartesian::switchMemoryMode(MemoryMode mode)
 
 	// Set the requested memory mode
 	setMemoryMode(mode);
+
+	// Update the patch
+	//
+	// This will update all data structures (e.g., the interface) associated with the patch.
+	if (mode == MemoryMode::MEMORY_NORMAL) {
+		update();
+	}
 }
 
 /*!
