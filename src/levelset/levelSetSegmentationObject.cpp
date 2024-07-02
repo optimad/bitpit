@@ -1803,7 +1803,7 @@ int LevelSetSegmentationBaseObject::evalCellPart(long id) const
  * @param[in] mode describes the types of check that should be performed
  * @return indicator regarding intersection
  */
-LevelSetIntersectionStatus LevelSetSegmentationBaseObject::_intersectSurface(long id, double distance, LevelSetIntersectionMode mode) const
+LevelSetIntersectionStatus LevelSetSegmentationBaseObject::_isCellIntersected(long id, double distance, LevelSetIntersectionMode mode) const
 {
     // Get surface information
     const SurfUnstructured &surface = evalCellSurface(id);
@@ -1814,7 +1814,85 @@ LevelSetIntersectionStatus LevelSetSegmentationBaseObject::_intersectSurface(lon
     }
 
     // Evaluate intersection using base class
-    return LevelSetObject::_intersectSurface(id, distance, mode);
+    return LevelSetObject::_isCellIntersected(id, distance, mode);
+}
+
+/*!
+ * Check if the specified interface intersects the zero-levelset iso-surface.
+ *
+ * The iso-surface is considered planar. Calculate the intersection
+ * as a segment defined by two points and the part of the interface belonging to the subspace
+ * opposite to the one pointed by the given normal. If the interface is not intersected,
+ * an empty polygon is returned. 
+ *
+ * The intersection is computed by considering the zero-levelset as a curved surface.
+ *
+ * @param[in] id is the interface index
+ * @param[in] signedLevelSet controls if signed levelset function will be used
+ * @param[in] tolerance is the tolerance used for distance comparisons
+ * @param[out] intersection If intersects, return the cutting segment. In case of a liner interface
+ * the intersection degenerates to a point which coincides with the begining and the ending
+ * of the segment
+ * @param[out] polygon is the polygon constructed by the interface intersection placed on the
+ * opposite subspace of the one pointed by the plane's normal
+ * @return the level set status
+ */
+LevelSetIntersectionStatus LevelSetSegmentationBaseObject::_isInterfaceIntersected(long id, bool signedLevelSet, double tolerance,
+                                                                                   std::array<std::array<double, 3>, 2> *intersection,
+                                                                                   std::vector<std::array<double, 3>> *polygon) const
+{
+    // Evaluate projection of interface centroid on surface
+    const Interface &interface = m_kernel->getMesh()->getInterface(id);
+    std::array<double,3> interfaceCentroid = m_kernel->getMesh()->evalElementCentroid(interface);
+
+    std::array<double,3> projectionPoint;
+    std::array<double,3> projectionNormal;
+    evalProjection(interfaceCentroid, signedLevelSet, &projectionPoint, &projectionNormal);
+
+    // Early return if projection point is not the closest point of the
+    // plane (defined by the projection point and projection normal) to
+    // the interface centroid
+    long support = evalSupport(interfaceCentroid);
+    const SurfUnstructured &surface = evalSurface(interfaceCentroid);
+    LevelSetSegmentationSurfaceInfo::SegmentConstIterator segmentItr = surface.getCellConstIterator(support);
+
+    const Cell &segment = *segmentItr;
+    ElementType segmentType = segment.getType();
+    if ((segmentType == ElementType::VERTEX)
+    || (m_kernel->getMesh()->getDimension() == 3 && segmentType == ElementType::LINE)) {
+        return LevelSetIntersectionStatus::FALSE;
+    }
+
+    // Detect the intersection by imposing a Newton algorithm
+    std::array<double, 3> intersectionCentroid = interfaceCentroid;
+    std::array<double, 3> intersectionCentroidNew;
+
+    double residual    = tolerance + 1.0;
+    int iter           = 0;
+    int iterMax        = 5;
+    bool isIntersected = true;
+    while (residual > tolerance && iter < iterMax && isIntersected) {
+        ++ iter;
+
+        // Eval intersection between arbitrary 2D surface and planar interface
+        isIntersected = m_kernel->getMesh()->intersectInterfacePlane(id, projectionPoint, projectionNormal, intersection, polygon);
+
+        intersectionCentroidNew = 0.5 * ((*intersection)[0] + (*intersection)[1]);
+
+        evalProjection(intersectionCentroidNew, signedLevelSet, &projectionPoint, &projectionNormal);
+ 
+        residual             = norm2(intersectionCentroid - intersectionCentroidNew);
+        intersectionCentroid = intersectionCentroidNew;
+    }
+
+    // Eval centroid and area of the intersected interface
+    if (isIntersected) {
+        isIntersected = m_kernel->getMesh()->intersectInterfacePlane(id, projectionPoint, projectionNormal, intersection, polygon);
+        if (isIntersected) {
+            return LevelSetIntersectionStatus::TRUE;
+        }
+    }
+    return LevelSetIntersectionStatus::FALSE;
 }
 
 /*!
@@ -2784,7 +2862,7 @@ LevelSetCellLocation LevelSetSegmentationObject::fillCellGeometricNarrowBandLoca
     // geometrically inside the narrow band and as such it's up to the caller of this function to
     // identify their cell location.
     LevelSetCellLocation cellLocation = LevelSetCellLocation::UNKNOWN;
-    if (_intersectSurface(id, cellUnsigendValue, CELL_LOCATION_INTERSECTION_MODE) == LevelSetIntersectionStatus::TRUE) {
+    if (_isCellIntersected(id, cellUnsigendValue, CELL_LOCATION_INTERSECTION_MODE) == LevelSetIntersectionStatus::TRUE) {
         cellLocation = LevelSetCellLocation::NARROW_BAND_INTERSECTED;
     } else if (cellUnsigendValue <= m_narrowBandSize) {
         cellLocation = LevelSetCellLocation::NARROW_BAND_DISTANCE;
@@ -3154,6 +3232,38 @@ void LevelSetSegmentationObject::_evalProjection(const std::array<double,3> &poi
     if (!signedLevelSet) {
         (*projectionNormal) *= static_cast<double>(evalSign(point));
     }
+}
+
+/*!
+ * Check if the specified interface intersects the zero-levelset iso-surface.
+ *
+ * The iso-surface is considered planar. Calculate the intersection
+ * as a segment defined by two points and the part of the interface belonging to the subspace
+ * opposite to the one pointed by the given normal. If the interface is not intersected,
+ * an empty polygon is returned. 
+ *
+ * Depending on the smoothing order, the intersection is computed by considering the
+ * zero-levelset as a plane or a curved surface.
+ *
+ * @param[in] id is the interface index
+ * @param[in] signedLevelSet controls if signed levelset function will be used
+ * @param[in] tolerance is the tolerance used for distance comparisons
+ * @param[out] intersection If intersects, return the cutting segment. In case of a liner interface
+ * the intersection degenerates to a point which coincides with the begining and the ending
+ * of the segment
+ * @param[out] polygon is the polygon constructed by the interface intersection placed on the
+ * opposite subspace of the one pointed by the plane's normal
+ * @return the level set status
+ */
+LevelSetIntersectionStatus LevelSetSegmentationObject::_isInterfaceIntersected(long id, bool signedLevelSet, double tolerance,
+                                                                               std::array<std::array<double, 3>, 2> *intersection,
+                                                                               std::vector<std::array<double, 3>> *polygon) const
+{
+    // Early return if low order smoothing is chosen
+    if (m_surfaceInfo->getSurfaceSmoothing() == LevelSetSurfaceSmoothing::LOW_ORDER) {
+        return LevelSetObject::_isInterfaceIntersected(id, signedLevelSet, tolerance, intersection, polygon);
+    }
+    return _isInterfaceIntersected(id, signedLevelSet, tolerance, intersection, polygon);
 }
 
 /*!

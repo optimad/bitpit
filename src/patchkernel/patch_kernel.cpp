@@ -5636,6 +5636,147 @@ void PatchKernel::getInterfaceVertexCoordinates(long id, std::array<double, 3> *
 }
 
 /*!
+   Check if an interface  is intersected by a given plane. Calculate the intersection
+   as a segment defined by two points and the part of the interface belonging to the subspace
+   opposite to the one pointed by the given normal. If the interface is not intersected,
+   an empty polygon is returned. 
+
+   Interfaces laid on the plane are not considered as intersected ones.
+
+   Interfaces having an edge on the plane are not considered as intersected ones.
+
+   \param[in] P0 First triangle vertex
+   \param[in] P1 Second triangle vertex
+   \param[in] P2 Third triangle vertex
+   \param[in] P Point belonging to the plane
+   \param[in] nP Normal to the plane
+   \param[out] intersection If intersects, return the cutting segment. In case of a liner interface
+   the intersection degenerates to a point which coincides with the begining and the ending
+   of the segment
+   \param[out] polygon is the polygon constructed by the interface intersection placed on the
+   opposite subspace of the one pointed by the plane's normal
+   \param[in] distanceTolerance define a distance tolerance so that if a polygon and the 
+   plane are at distance below such threshold they are considered intersecting.
+   \return True if intersection occurs, false if not
+ */
+bool PatchKernel::intersectInterfacePlane(long id, std::array<double, 3> P, std::array<double, 3> nP,
+                                          std::array<std::array<double, 3>, 2> *intersection,
+                                          std::vector<std::array<double, 3>> *polygon) const
+{
+        double distanceTolerance = getTol();
+
+	const Interface &interface = getInterface(id);
+	ElementType elementType = interface.getType();
+	switch (elementType)
+	{
+
+	case ElementType::LINE:
+	{
+		const std::array<double, 3> &P0 = getVertexCoords(interface.getVertexId(0));
+		const std::array<double, 3> &P1 = getVertexCoords(interface.getVertexId(1));
+
+		std::array<double, 3> x;
+		bool intrExist = CGElem::intersectSegmentPlane(P0, P1, P, nP, x, distanceTolerance);
+
+		if (norm2(x - P0) < distanceTolerance) return false;
+		if (norm2(x - P1) < distanceTolerance) return false;
+
+		if (!intrExist) return false;
+
+		(*intersection)[0] = x;
+		(*intersection)[1] = x;
+                if (dotProduct(P - P0, nP) > 0.) {
+			polygon->push_back(P0);
+			polygon->push_back(x);
+                        return true;
+                }
+		polygon->push_back(x);
+		polygon->push_back(P1);
+                return true;
+	}
+
+	case ElementType::TRIANGLE:
+	{
+		const std::array<double, 3> &P0 = getVertexCoords(interface.getVertexId(0));
+		const std::array<double, 3> &P1 = getVertexCoords(interface.getVertexId(1));
+		const std::array<double, 3> &P2 = getVertexCoords(interface.getVertexId(2));
+            
+		return CGElem::intersectPlaneTriangle(P0, P1, P2, P, nP,
+                       *intersection, *polygon, distanceTolerance);
+	}
+
+	case ElementType::PIXEL:
+	{
+		// evaluate pixel normal
+		std::unique_ptr<std::array<double, 3>[]> coordinates;
+		getElementVertexCoordinates(interface, &coordinates);
+		std::array<double, 3> normal = interface.evalNormal(coordinates.get());
+
+		// evaluate the minimum and maximum coordinates of the pixel
+		std::array<double,3> minPoint;
+		std::array<double,3> maxPoint;
+		evalElementBoundingBox(interface, &minPoint, &maxPoint);
+
+		// evaluate direction of pixel
+		int dir = -1;
+                double maxCoor = 0.;
+		for (int i = 0; i < 3; ++i) {
+			if (std::abs(normal[i]) > 0.) {
+				maxCoor = normal[i];
+				dir     = i;
+			}
+		}
+
+		// evaluate the constant coordinate over the pixel
+		double constCoor = minPoint[dir];
+
+		// evaluate the directions tangential to the pixel plane
+		int d0 = (dir + 1) % 3;
+		int d1 = (dir + 2) % 3;
+
+		// evaluate the direction's sign
+		++dir;
+		if (maxCoor < 0.) {
+			dir = -dir;
+                }
+
+		// evaluate the minimum and maximum coordinates in
+		// the pixel's coordinate system
+		std::array<double, 2> A0 = {minPoint[d0], minPoint[d1]};
+		std::array<double, 2> A1 = {maxPoint[d0], maxPoint[d1]};
+
+		return CGElem::intersectPlanePixel(P, nP, A0, A1, dir, constCoor,
+                       *intersection, *polygon, distanceTolerance);
+	}
+
+	default:
+	{
+	        ConstProxyVector<long> vertexIds = interface.getVertexIds();
+                int nVertices = vertexIds.size();
+
+		std::unique_ptr<std::array<double, 3>[]> coordinates;
+	        getVertexCoords(nVertices, vertexIds.data(), &coordinates);
+
+                std::vector<std::array<std::array<double, 3>, 2>> intersections;
+                std::vector< std::vector<std::array<double, 3>>> polygons;
+		bool intrExist = CGElem::intersectPlanePolygon(P, nP, nVertices, coordinates.get(),
+                                 intersections, polygons, distanceTolerance);
+
+		if (intersections.size() > 1) {
+			throw std::runtime_error("Intersection of concave interface is not supported.");
+                }
+
+		(*intersection) = intersections[0];
+		(*polygon)      = polygons[0];
+
+		return intrExist;
+	}
+
+	}
+        return false;
+}
+
+/*!
 	Evaluates the centroid of the specified element.
 
 	Element centroid is computed as the arithmetic average of element

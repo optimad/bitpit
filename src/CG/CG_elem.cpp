@@ -2114,6 +2114,829 @@ bool intersectSegmentPolygon( array3D const &P0, array3D const &P1, std::size_t 
 }
 
 /*!
+ * Check if a pixel is crossing a given plane and fully calculate the intersection (a segment) with 
+ * edges, eventually. A pixel is defined as a planar rectangular, vertical to a cartesian axis.
+ * The polygon greated from the intersection belongs to the subspace opposite of the
+ * one pointed by the plane's normal
+ *
+ * Given the normal cartesian direction dir, the pixel coordinates
+ * are represened on its 2D plane as (x, y) where x = (dim + 1) % 3 and y = (dim + 2) % 3 
+ *
+ * Local indeces for edges are defined as follows:
+ * edge 0: y = y min
+ * edge 1: x = x max
+ * edge 2: y = y max
+ * edge 3: x = x min
+ *
+ * Co-planarity of input pixel and plane will produce no intersection.
+ * No intersection is considered if the plane passes from a pixel's vertex,
+ * and no other intersection exist.
+ *
+ * \param[in] Pp point belonging to the plane
+ * \param[in] nP unit normal to plane
+ * \param[in] A0 min point of pixel on the 2D space defined by the pixel direction dir
+ * \param[in] A1 max point of pixel on the 2D space defined by the pixel direction dir
+ * \param[in] dir is an integer from 1 to 3 and indicates the cartesian direction normal
+ * to the pixel. Its sign affects the polynomial's orientation. The above used dim variable
+ * is computed as dim = |dir| - 1
+ * \param[in] coor indicates the cartesian coordinate of all the pixel points
+ * \param[out] intersection If intersects, return the cutting segment
+ * \param[out] edges_of_intersection If intersects, return the pixel edge local indices, 
+ * of the intersected edges. If no intersection occurs return a -1 label. 
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
+ * \return if intersects
+ */
+bool intersectPlanePixel(array3D const &Pp, array3D const &nP, std::array<double, 2> const &A0,
+                         std::array<double, 2> const &A1, int dir, double coor, std::array<array3D, 2> &intersection,
+                         std::array<int, 2> &edges_of_intersection, const double distanceTolerance)
+{
+    assert( validPlane(Pp,nP) );
+
+    // initialization
+    edges_of_intersection[0] = -1;
+    edges_of_intersection[1] = -1;
+
+    // trivial case when plane is parallel to pixel
+
+    // compute proper cartesian directions
+    int d0 = std::abs(dir) - 1;
+    int d1 = (d0 + 1) % 3;
+    int d2 = (d0 + 2) % 3;
+
+    bool zero1 = (std::abs(nP[d1]) < distanceTolerance);
+    bool zero2 = (std::abs(nP[d2]) < distanceTolerance);
+    if (zero1 && zero2) return false;
+
+    // define the line (point belonging on it and and vector parallel to it)
+    // resulted from intersection between the pixel plane and the give plane
+    std::array<double, 2> P;
+    if (zero1) {
+        P[0] = Pp[d1];
+        P[1] = (Pp[d0] - coor) * nP[d0] / nP[d2] + Pp[d2];
+    } else {
+        P[0] = (Pp[d0] - coor) * nP[d0] / nP[d1] + Pp[d1];
+        P[1] = Pp[d2];
+    }
+
+    std::array<double, 2> n;
+    n[0] = -nP[d2];
+    n[1] = nP[d1];
+
+    bool zero0 = zero2;
+ 
+    // compute intersections over edges
+    int i = 0;
+
+    // edge 0
+    if (!zero1) {
+        double x0 = P[0] + (A0[1] - P[1]) * n[0] / n[1];
+        if (x0 - A0[0] > distanceTolerance && x0 - A1[0] < distanceTolerance) {
+            edges_of_intersection[i] = 0;
+            intersection[i][d0] = coor;
+            intersection[i][d1] = x0;
+            intersection[i][d2] = A0[1];
+            ++i;
+        }
+    }
+    // edge 1
+    if (!zero0) {
+        double y1 = P[1] + (A1[0] - P[0]) * n[1] / n[0];
+        if (y1 - A0[1] > distanceTolerance && y1 - A1[1] < distanceTolerance) {
+            edges_of_intersection[i] = 1;
+            intersection[i][d0] = coor;
+            intersection[i][d1] = A1[0];
+            intersection[i][d2] = y1;
+            ++i;
+        }
+    }
+    // edge 2
+    if (i <= 1 && !zero1) {
+        double x2 = P[0] + (A1[1] - P[1]) * n[0] / n[1];
+        if (A1[0] - x2 > distanceTolerance && A0[0] - x2 < distanceTolerance) {
+            edges_of_intersection[i] = 2;
+            intersection[i][d0] = coor;
+            intersection[i][d1] = x2;
+            intersection[i][d2] = A1[1];
+            ++i;
+        }
+    }
+    // edge 3
+    if (i <= 1 && !zero0) {
+        double y3 = P[1] + (A0[0] - P[0]) * n[1] / n[0];
+        if (A1[1] - y3 > distanceTolerance && A0[1] - y3 < distanceTolerance) {
+            edges_of_intersection[i] = 3;
+            intersection[i][d0] = coor;
+            intersection[i][d1] = A0[0];
+            intersection[i][d2] = y3;
+            ++i;
+        }
+    }
+
+    if (i == 0) {
+        return false;
+    }
+    if (i == 1) {
+        edges_of_intersection[0] = -1;
+        edges_of_intersection[1] = -1;
+        return false;
+    }
+
+    if (dir < 0) {
+        std::swap(edges_of_intersection[0], edges_of_intersection[1]);
+        std::swap(intersection[0], intersection[1]);
+    }
+    return true;
+}
+
+/*!
+ * Check if a pixel is crossing a given plane and fully calculate the intersection (a segment) with 
+ * edges, eventually. A pixel is defined as a planar rectangular, vertical to a cartesian axis.
+ * The polygon greated from the intersection belongs to the subspace opposite of the
+ * one pointed by the plane's normal
+ *
+ * Given the normal cartesian direction dir, the pixel coordinates
+ * are represened on its 2D plane as (x, y) where x = (dim + 1) % 3 and y = (dim + 2) % 3 
+ *
+ * Co-planarity of input pixel and plane will produce no intersection.
+ *
+ * \param[in] Pp point belonging to the plane
+ * \param[in] nP normal to plane
+ * \param[in] A0 min point of pixel on the 2D space defined by the pixel direction dir
+ * \param[in] A1 max point of pixel on the 2D space defined by the pixel direction dir
+ * \param[in] dir indicates the cartesian direction normal to the pixel. Its sign affects
+ * the polynomial's orientation
+ * \param[in] coor indicates the cartesian coordinate of all the pixel points
+ * \param[out] intersection If intersects, return the cutting segment
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
+ * \return if intersects
+ */
+bool intersectPlanePixel(array3D const &Pp, array3D const &nP, std::array<double, 2> const &A0,
+                         std::array<double, 2> const &A1, int dir, double coor,
+                         std::array<array3D, 2> &intersection, const double distanceTolerance)
+{
+    std::array<int, 2> edges_of_intersection;
+    return intersectPlanePixel(Pp, nP, A0, A1, dir, coor, intersection,
+                               edges_of_intersection, distanceTolerance);
+}
+
+/*!
+ * Check if a pixel is crossing a given plane and fully calculate the intersection (a segment) with 
+ * edges, eventually. A pixel is defined as a planar rectangular, vertical to a cartesian axis.
+ * The polygon greated from the intersection belongs to the subspace opposite of the
+ * one pointed by the plane's normal. Given the normal cartesian direction dir, the pixel coordinates
+ * are represened on its 2D plane as (x, y) where x = (dim + 1) % 3 and y = (dim + 2) % 3 
+ * Co-planarity of input pixel and plane will produce no intersection.
+ *
+ * \param[in] Pp point belonging to the plane
+ * \param[in] nP normal to plane
+ * \param[in] A0 min point of pixel on the 2D space defined by the pixel direction dir
+ * \param[in] A1 max point of pixel on the 2D space defined by the pixel direction dir
+ * \param[in] dir is an integer from 1 to 3 and indicates the cartesian direction normal
+ * to the pixel. Its sign affects the polynomial's orientation. The above used dim variable
+ * is computed as dim = |dir| - 1
+ * \param[in] coor indicates the cartesian coordinate of all the pixel points
+ * \param[out] intersection If intersects, return the cutting segment
+ * \param[out] poly is the polygon constructed by the pixel intersection placed on the
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
+ * \return if intersects
+ */
+bool intersectPlanePixel(array3D const &Pp, array3D const &nP, std::array<double, 2> const &A0,
+                         std::array<double, 2> const &A1, int dir, double coor,
+                         std::array<array3D, 2> &intersection,
+                         std::vector<array3D> &poly, const double distanceTolerance)
+{
+    poly.clear();
+
+    int d0 = std::abs(dir) - 1;
+    int d1 = (d0 + 1) % 3;
+    int d2 = (d0 + 2) % 3;
+
+    // Compute pixel vertices
+    std::array<array3D, 4> v;
+    v[0][d0] = coor; v[0][d1] = A0[0]; v[0][d2] = A0[1];
+    v[1][d0] = coor; v[1][d1] = A1[0]; v[1][d2] = A0[1];
+    v[2][d0] = coor; v[2][d1] = A1[0]; v[2][d2] = A1[1];
+    v[3][d0] = coor; v[3][d1] = A0[0]; v[3][d2] = A1[1];
+
+    // Compute vertices signed distance from the plane
+    std::array<double, 4> a;
+    double aMax = std::numeric_limits<int>::min();
+    double aMin = std::numeric_limits<int>::max();
+    for (int i = 0; i < 4; ++ i) {
+        a[i] = dotProduct(Pp - v[i], nP);
+        if (a[i] > aMax) {
+            aMax = a[i];
+        }
+        if (a[i] < aMin) {
+            aMin = a[i];
+        }
+    }
+
+    // Early return if pixel is not intersected
+    if (aMax < distanceTolerance) {
+        return false;
+    }
+    if (aMin > -distanceTolerance) {
+        for (int i = 0; i < 4; ++i) {
+            poly.push_back(v[i]);
+        }
+        return false;
+    }
+
+    // Compute intersections
+    std::array<int, 2> edges_of_intersection;
+    bool intersect = intersectPlanePixel(Pp, nP, A0, A1, dir, coor,
+                     intersection, edges_of_intersection, distanceTolerance);
+
+    // Build polygon created by the pixel cut following the
+    // order given by the dir sign
+    if (dir > 0) {
+        int intr = 0;
+        for (int i = 0; i < 4; ++i) {
+            if (intr < 2 && edges_of_intersection[intr] == i) {
+                poly.push_back(intersection[intr]);
+                ++intr;
+            }
+            int iNext = (i + 1) % 4;
+            if (a[iNext] > distanceTolerance) {
+                poly.push_back(v[iNext]);
+            }
+        }
+    } else {
+        int intr = 0;
+        for (int i = 3; i >= 0; --i) {
+            if (intr < 2 && edges_of_intersection[intr] == i) {
+                poly.push_back(intersection[intr]);
+                ++intr;
+            }
+            if (a[i] > distanceTolerance) {
+                poly.push_back(v[i]);
+            }
+        }
+    }
+
+    return intersect;
+}
+
+/*!
+ * Check if a pixel is crossing a given plane and fully calculate the intersection (a segment) with 
+ * edges, eventually. A pixel is defined as a planar rectangular, vertical to a cartesian axis.
+ * Co-planarity of input pixel and plane will produce no intersection.
+ * \param[in] P0 First triangle vertex
+ * \param[in] P1 Second triangle vertex
+ * \param[in] P2 Third triangle vertex
+ * \param[in] Pp Point belonging to the plane
+ * \param[in] nP Normal to the plane
+ * \param[out] intersection If intersects, return the cutting segment.
+ * \param[out] edges_of_intersection If intersects, return the triangle edge local indices, 
+ * touched by the intersection segment, one for each extremal point. If no intersection occurs 
+ * return a -1 label. 
+   \param[in] distanceTolerance define a distance tolerance so that if a polygon and the 
+   plane are at distance below such threshold they are considered intersecting.
+ * \return True if intersection occurs, false if not
+ */
+bool intersectPlaneTriangle(array3D const &P0, array3D const &P1, array3D const &P2,
+                            array3D const &Pp, array3D const &nP,
+                            std::array<array3D, 2> &intersection,
+                            std::array<int, 2> &edges_of_intersection,
+                            const double distanceTolerance)
+{
+    assert( validTriangle(P0,P1,P2) );
+
+    std::vector<const array3D *> ptrs{&P0, &P1, &P2};
+    array3D temp;
+    std::vector<array3D *> localI{&intersection[0], &intersection[1], &temp};
+    int temp_2;
+    std::array<int *, 3> localE{&edges_of_intersection[0], &edges_of_intersection[1], &temp_2};
+
+    int count(0);
+    for (std::size_t i = 0; i < 3; ++i) {
+        const array3D *v1 = ptrs[i];
+        const array3D *v2 = ptrs[(i + 1) % 3];
+        if (intersectSegmentPlane(*v1, *v2, Pp, nP, *(localI[count]), distanceTolerance)) {
+            *(localE[count]) = i;
+            ++count;
+        }
+    }
+
+    if (count > 2) {
+        // plane is cutting exactly onto a vertex + its opposite edge. So you see 3 apparent intersections, but 2 are the same point.
+        // take the most significant intersections.
+        if (norm2(*(localI[2]) - *(localI[0])) > norm2(*(localI[1]) - *(localI[0]))) {
+            std::swap(intersection[1], temp);
+            std::swap(edges_of_intersection[1], temp_2);
+        }
+    }
+
+    // return true if you found at least 2 edges intersecting.
+    return count >= 2;
+}
+
+/*!
+ * Check if a triangle is crossing a given plane and fully calculate the intersections a segment.
+ * Co-planarity of input triangle and plane will produce no intersection.
+ * \param[in] P0 First triangle vertex
+ * \param[in] P1 Second triangle vertex
+ * \param[in] P2 Third triangle vertex
+ * \param[in] Pp Point belonging to the plane
+ * \param[in] nP Normal to the plane
+ * \param[out] intersection If intersects, return the cutting segment.
+ * \param[in] distanceTolerance define a distance tolerance so that if a polygon and the 
+ * plane are at distance below such threshold they are considered intersecting.
+ * \return True if intersection occurs, false if not
+ */
+bool intersectPlaneTriangle(array3D const &P0, array3D const &P1, array3D const &P2,
+                            array3D const &Pp, array3D const &nP,
+                            std::array<array3D, 2> &intersection,
+                            const double distanceTolerance)
+{
+
+    std::array<int, 2> edges_of_intersection;
+    return intersectPlaneTriangle(P0, P1, P2, Pp, nP, intersection,
+                                  edges_of_intersection, distanceTolerance);
+}
+
+/*!
+ * Check if a triangle is crossing a given plane and fully calculate the intersection (a segment) with 
+ * edges, eventually. Co-planarity of input triangle and plane will produce no intersection.
+ * Polygons on both sides of the plane are returned.
+ * \param[in] P0 First triangle vertex
+ * \param[in] P1 Second triangle vertex
+ * \param[in] P2 Third triangle vertex
+ * \param[in] Pp Point belonging to the plane
+ * \param[in] nP Normal to the plane
+ * \param[out] intersection If intersects, return the cutting segment.
+ * \param[out] poly is the polygon constructed by the triangle intersection placed on the
+ * opposite subspace of the one pointed by the plane's normal
+ * \param[in] distanceTolerance define a distance tolerance so that if a polygon and the 
+ * plane are at distance below such threshold they are considered intersecting.
+ * \return True if intersection occurs, false if not
+ */
+bool intersectPlaneTriangle(array3D const &P0, array3D const &P1, array3D const &P2,
+                            array3D const &Pp, array3D const &nP,
+                            std::array<array3D, 2> &intersection,
+                            std::vector<array3D> &poly,
+                            const double distanceTolerance)
+{
+    std::vector<const array3D*> ptrs{&P0, &P1, &P2};
+
+    // Compute vertices signed distance from the plane
+    std::array<double, 3> a;
+    double aMax = std::numeric_limits<int>::min();
+    double aMin = std::numeric_limits<int>::max();
+    for (int i = 0; i < 3; ++ i) {
+        a[i] = dotProduct(Pp - *(ptrs[i]), nP);
+        if (a[i] > aMax) {
+            aMax = a[i];
+        }
+        if (a[i] < aMin) {
+            aMin = a[i];
+        }
+    }
+
+    // Early return if triangle is not intersected
+    if (aMax < distanceTolerance) {
+        return false;
+    }
+    if (aMin > -distanceTolerance) {
+        for (int i = 0; i < 3; ++i) {
+            poly.push_back(*(ptrs[i]));
+        }
+        return false;
+    }
+
+    // Compute intersections
+    std::array<int, 2> edges_of_intersection;
+    bool intersected =  intersectPlaneTriangle(P0, P1, P2, Pp, nP, intersection,
+                                               edges_of_intersection, distanceTolerance);
+
+    // Build polygon
+    int intr  = 0;
+    bool push = (a[0] > distanceTolerance);
+    for (std::size_t i = 0; i < ptrs.size(); ++i) {
+        if (intr < 2 && edges_of_intersection[intr] == int(i)) {
+            poly.push_back(intersection[intr]);
+            ++intr;
+            push = !push;
+        }
+        if (push) {
+            int iNext = (int(i) + 1) % 3;
+            poly.push_back(*(ptrs[iNext]));
+        }
+    }
+    return intersected;
+}
+
+/*!
+ * Computes intersection between a plane and a polygon. The polygon can be planar or not,
+ * convex or concave.
+ * \param[in] P point belonging to the plane
+ * \param[in] nP normal to the plane
+ * \param[in] nV number of polygon vertices
+ * \param[in] V polygon vertices coordinates
+ * \param[out] Qs a collection of edges defined by the intersection points
+ * \param[out] edges_of_Qs If intersects, return the list of polygon edges couple "touched" by the intersecting segment, one for each
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
+ * \return if intersect
+ */
+bool intersectPlanePolygon(array3D const &P, array3D const &nP, std::size_t nV, array3D const *V, std::vector<std::array<array3D, 2>> &Qs, std::vector<std::array<int, 2>> &edges_of_Qs, const double distanceTolerance)
+{
+    int subTrianglesCount;
+    std::vector<int> subTrianglesConn;
+    array3D C;
+    if (!triangulatePolygon(nV, V, C, subTrianglesCount, subTrianglesConn)) {
+        return false;
+    }
+
+    if (!intersectPlaneTriPolygon(P, nP, true, nV, V, C, subTrianglesCount, subTrianglesConn, Qs, edges_of_Qs, distanceTolerance)) {
+        return false;
+    }
+    return true;
+}
+
+/*!
+ * Computes intersection between a plane and a polygon. The polygon can be planar or not,
+ * convex or concave.
+ * \param[in] P point belonging to the plane
+ * \param[in] nP normal to the plane
+ * \param[in] nV number of polygon vertices
+ * \param[in] V polygon vertices coordinates
+ * \param[out] Qs a collection of edges defined by the intersection points
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
+ * \return if intersect
+ */
+bool intersectPlanePolygon(array3D const &P, array3D const &nP, std::size_t nV, array3D const *V, 
+                           std::vector<std::array<array3D, 2>> &Qs, const double distanceTolerance)
+{
+    std::vector<std::array<int, 2>> edges_of_Qs;
+    return intersectPlanePolygon(P, nP, nV, V, Qs, edges_of_Qs, distanceTolerance);
+}
+
+/*!
+ * Computes intersection between a plane and a polygon. The polygon can be planar or not,
+ * convex or concave. The part of the polygon belonging to the subspace defined by the given plane
+ * is constructed. Its part belonging to the subspace pointed by the given normal is neglected.
+ * \param[in] P point belonging to the plane
+ * \param[in] nP normal to the plane
+ * \param[in] nV number of polygon vertices
+ * \param[in] V polygon vertices coordinates
+ * \param[out] Qs a collection of edges defined by the intersection points
+ * \param[out] polys polygons created by the intersection
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
+ * \return if intersect
+ */
+bool intersectPlanePolygon(array3D const &P, array3D const &nP, std::size_t nV, array3D const *V,
+                           std::vector<std::array<array3D, 2>> &Qs,
+                           std::vector< std::vector<array3D> > &polys,
+                           const double distanceTolerance)
+{
+    int subTrianglesCount;
+    std::vector<int> subTrianglesConn;
+    array3D C;
+    if (!triangulatePolygon(nV, V, C, subTrianglesCount, subTrianglesConn)) {
+        return false;
+    }
+
+    std::vector<std::array<int, 2>> edges_of_Qs;
+    if (!intersectPlaneTriPolygon(P, nP, true, nV, V, C, subTrianglesCount, subTrianglesConn, Qs, edges_of_Qs, distanceTolerance)) {
+        return false;
+    }
+
+    std::vector< std::vector<array3D> > totalPolys;
+    reconstructPlaneIntersectedPolygons(nV, V, Qs, edges_of_Qs, totalPolys, distanceTolerance);
+
+    // discard polygons placed on the subspace pointed by the normal
+    for (std::size_t i = 0; i < totalPolys.size(); ++i) {
+        double dMax = 0.0;
+        for (std::size_t j = 0; j < totalPolys[i].size(); ++j) {
+            double d = dotProduct(P - totalPolys[i][j], nP);
+            if (std::abs(d) > std::abs(dMax)) {
+                dMax = d;
+            }
+        }
+        if (dMax > -distanceTolerance) {
+            polys.push_back(totalPolys[i]);
+        }
+    }
+    return (!polys.empty());
+}
+
+/*!
+ * Compute a normal for the polygon, by looping on constitutive vertices and summing normals of 
+ * triangles formed by the i-th vertex and its immediate neighbours i-1 and i+1.
+ * Lines (nV = 2) or Single Vertex (nV = 1) will return zero normal;
+ * \param[in] nV Number  of Vertices of the polygon
+ * \param[in] V Pointer to Vertices list array. Must have size nV.
+ */
+array3D computePolygonNormal(std::size_t nV, const array3D *V)
+{
+    //Note for Devs : method 2) algorithm of vtk::vtkPolygon.
+    array3D normal{0., 0., 0.};
+
+    if (nV < 3 || V == nullptr) {
+        //lines or vertices are not a polygon or if the polygon is not defined.
+        return normal;
+    }
+
+    if (nV == 3) {
+        //it's a regular triangle, can do it fast, without summation.
+        normal = crossProduct(V[2] - V[1], V[0] - V[1]);
+    } else {
+        //use vtkPolygon algorithm
+        int iV0(0), iV1(1), iV2(1);
+        for (std::size_t i = 0; i < nV; ++i) {
+            //update the vertices
+            iV0 = iV1;
+            iV1 = iV2;
+            iV2 = (i + 2) % nV;
+            normal += crossProduct(V[iV2] - V[iV1], V[iV0] - V[iV1]);
+        }
+    }
+
+    double normv = norm2(normal);
+    normv        = normv > std::numeric_limits<double>::min() ? normv : 1.0;
+
+    return normal / normv;
+}
+
+/*!
+ * Triangulation method: split the polygon in nV triangles adding the polygon centroid
+ * as auxiliary constitutive point.
+ * In case of non-convex polygon the method will create a non-compliant
+ * subdivision in subtriangles.
+ * When filling the sub-triangle connectivity, it will push the -1 label 
+ * as vertex index to recongnize that the auxiliary point Centroid is used.
+ * \param[in] nV Number  of Vertices of the polygon
+ * \param[in] V Pointer to Vertices list array. Must have size nV.
+ * \param[in] C Polygon centroid computed as the mean of the polygon vertices
+ * \param[in] subTrianglesCount number of generated triangles
+ * \param[in] subTrianglesConn connectivity of each triangle
+ * \return True in case of successfull triangulation, false otherwise
+ */
+bool triangulatePolygon(std::size_t nV, array3D const *V, array3D &C,
+                        int &subTrianglesCount, std::vector<int> &subTrianglesConn)
+{
+    //evaluate the centroid
+    C = {0.0, 0.0, 0.0};
+    for (std::size_t i = 0; i < nV; ++i) {
+        C += V[i];
+    }
+    C /= double(nV > 0 ? nV : 1);
+
+    //verify the set of vertices is defining a non-zero area polygon
+    array3D N = computePolygonNormal(nV, V);
+    if (norm2(N) <= std::numeric_limits<double>::min()) {
+        throw std::runtime_error ("List of vertices provided do not describe a polygon with area > 0.0. Cannot perform polygon triangulation.");
+        return false;
+    }
+
+    //run the triangulator core and update the sub-triangle structure.
+    subTrianglesCount = 0;
+    if (V) {
+        if (nV < 2 || V == nullptr) {
+            //line and vertex not allowed as polygon or if polygon is not provided properly
+            throw std::runtime_error ("Triangulation of polygon failed.");
+        } else if (nV == 3) {
+            //trivial trangulation, nothing to do.
+            subTrianglesCount = 1;
+            subTrianglesConn  = {{0, 1, 2}};
+        } else {
+            subTrianglesCount = nV;
+            subTrianglesConn.resize(3 * nV);
+
+            for (std::size_t i = 0; i < nV; ++i) {
+                subTrianglesConn[3 * i]     = i;
+                subTrianglesConn[3 * i + 1] = (i + 1) % nV;
+                subTrianglesConn[3 * i + 2] = -1;
+            }
+        }
+    }
+
+    return true;
+}
+
+/*!
+ * Computes polygon intersections with a plane. The polygon is given in a triangulated form.
+ * To triangulate a polygon call method "triangulatePolygon". Intersections are considered only
+ * between the polygonal edges and the plane and not between an edge serving the polygon
+ * triangulation. If intersection occurrs, it can be a single segment (convex, planar polygon)
+ * or a collection of segments. Co-planarity of polygon and plane will be treated as a
+ * no-intersection case. If no intersections occurr, an empty intersection list will be returned.
+ * \param[in] P Point belonging to the plane
+ * \param[in] nP Normal to the plane
+ * \param[in] intersect when false no intersection is occured
+ * \param[in] nV Number  of vertices of the polygon
+ * \param[in] V Pointer to vertices list array. Must have size nV.
+ * \param[in] C Centroid of the polygon used as an auxxiliary point during the triangulation
+ * \param[in] subTrianglesCount number of triangles constituting the polygon
+ * \param[in] subTrianglesConn connectivity of each triangle being part of the triangulated polygon
+ * \param[out] Qs If intersects, return a non-empty list of intersecting Segments.
+ * \param[out] edges_of_Qs If intersects, return the list of polygon edges couple "touched" by the intersecting segment, one for each
+ * intersecting segment.
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
+ * \return True if intersect, false if not. Return false too if class is not updated.
+ */
+bool intersectPlaneTriPolygon(array3D const &P, array3D const &nP, bool intersect,
+                              std::size_t nV, array3D const *V, array3D const &C,
+                              int &subTrianglesCount, const std::vector<int> &subTrianglesConn,
+                              std::vector<std::array<array3D, 2>> &Qs,
+                              std::vector<std::array<int, 2>> &edges_of_Qs,
+                              const double distanceTolerance)
+{
+    if (!intersect || V == nullptr) {
+        return false;
+    }
+    assert(validPlane(P, nP));
+
+    //note for Devs: passing from triangle subdivision proven to be more robust than looping on polygon edges crossing plane
+    //when detecting multiple separate intersections in concave polygons.
+
+    Qs.clear();
+    edges_of_Qs.clear();
+
+    std::map<int, array3D> ordered_intersections;
+
+    for (int i = 0; i < subTrianglesCount; ++i) {
+        std::array<array3D, 2> wSegment;
+        std::array<int, 2> edges_of_wSegment;
+
+        std::array<int, 3> map_edges = {-1, -1, -1};
+        const int *conn = subTrianglesConn.data() + 3 * i;
+        for (int k = 0; k < 3; ++k) {
+            int next = (k + 1) % 3;
+            if ((conn[next] == (conn[k] + 1) % int(nV)) && (conn[k] != -1)) {
+                map_edges[k] = conn[k];
+            }
+        }
+
+        std::array<const array3D *, 3> VV;
+        for (int k = 0; k < 3; ++k) {
+            //in of case -1 (centroid label) )pick the centroid as vertex
+            VV[k] = (conn[k] == -1) ? &C : &V[conn[k]];
+        }
+
+        if (!intersectPlaneTriangle(*(VV[0]), *(VV[1]), *(VV[2]), P, nP, wSegment, edges_of_wSegment, distanceTolerance)) {
+            continue;
+        }
+
+        // Keep only the intersections of the plane with the polygon excluding the
+        // intersections between the plane and the edges resulted form the polygon triangulation.
+        for (int k = 0; k < 2; ++k) {
+            int pos = map_edges[edges_of_wSegment[k]];
+            if (pos >= 0) {
+                ordered_intersections[pos] = wSegment[k];
+            }
+        }
+    }
+
+    //the ordered_intersections map should retain only even entries.
+    std::size_t size = ordered_intersections.size();
+
+    // If 2 entries are retained, is the normal segment cutting a regular polygon.
+    // if 4 or 6 or m= 2*n are found, there are m/2 segment cutting the polygon
+    // (which can be convex or plane is cutting onto one or multiple polygon vertices)
+    if (size < 2 || size % 2 != 0) {
+        return false;
+    }
+
+    Qs.reserve(size / 2);
+    edges_of_Qs.reserve(size / 2);
+
+    int iL(0), iR(1);
+    std::map<int, array3D>::iterator tup1 = std::next(ordered_intersections.begin(), iL);
+    std::map<int, array3D>::iterator tup2 = std::next(ordered_intersections.begin(), iR);
+
+    if (size == 2) {
+        //push directly without problems.
+        Qs.push_back(std::array<array3D, 2>{tup1->second, tup2->second});
+        edges_of_Qs.push_back(std::array<int, 2>{tup1->first, tup2->first});
+    } else {
+        //try to find as representative couple 2 intersection points not coincident.
+        bool found = norm2(tup1->second - tup2->second) > distanceTolerance;
+        while (!found && tup2 != ordered_intersections.end()) {
+            ++iL, ++iR;
+            tup1  = std::next(ordered_intersections.begin(), iL);
+            tup2  = std::next(ordered_intersections.begin(), iR);
+            found = norm2(tup1->second - tup2->second) > distanceTolerance;
+        }
+
+        std::size_t offset = 0;
+        if (found) {
+            // check the normal of polygon portion cut by segment has the same normal direction than my original polygon.
+            // if not alter the offset so that i can visit intersection n-1,0,1,2,... 2 by 2, instead of 0,1,2,...,n-1
+            array3D polyNormal = computePolygonNormal(nV, V);
+
+            std::vector<array3D> pp;
+            pp.reserve(tup2->first - tup1->first + 2);
+            pp.push_back(tup1->second);
+            for (int k = (tup1->first + 1); k <= tup2->first; ++k) {
+                pp.push_back(V[k]);
+            }
+            pp.push_back(tup2->second);
+
+            array3D subNormal = computePolygonNormal(pp.size(), pp.data());
+            offset            = (dotProduct(polyNormal, subNormal) < 0) ? size - 1 : 0;
+        }
+        for (std::size_t j = 0; j < (size / 2); ++j) {
+            tup1 = std::next(ordered_intersections.begin(), (2 * j + offset) % size);
+            tup2 = std::next(ordered_intersections.begin(), (2 * j + 1 + offset) % size);
+            Qs.push_back(std::array<array3D, 2>{tup1->second, tup2->second});
+            edges_of_Qs.push_back(std::array<int, 2>{tup1->first, tup2->first});
+        }
+    }
+    return !Qs.empty();
+}
+
+/*!
+ * Once a polygon intersects a plane and the intersection segments info are available, 
+ * return the N polygons created by the intersections on both sides of the plane.
+ * \param[in] nV Number  of vertices of the polygon
+ * \param[in] V Pointer to vertices list array. Must have size nV.
+ * \param[in] Qs List of cutting segments identified by the plane.
+ * \param[in] edges_of_Qs List of polygon edges couple "touched" by each cutting segment. Negative indices or edge local indices greater
+ * than number for actual polygon edges, will make the method skip the info.
+ * \param[out] polys List of resulting polygons. Each new polygon will be reported as a list of constitutive points. In case of invalid input, return a empty list. 
+ * \param[in] distanceTolerance if distance among features exceed this value they are considered as not intersecting
+ */
+void reconstructPlaneIntersectedPolygons(std::size_t nV, array3D const *V,
+                                         std::vector<std::array<array3D, 2>> const &Qs,
+                                         std::vector<std::array<int, 2>> const &edges_of_Qs,
+                                         std::vector< std::vector<array3D> > &polys,
+                                         const double distanceTolerance)
+{
+    polys.clear();
+
+    std::vector<array3D> motherPolygon;
+    std::size_t motherPos(0);
+    int motherInit(-1);
+    motherPolygon.reserve(nV);
+
+    std::size_t size = Qs.size();
+    for (std::size_t i = 0; i < size; ++i) {
+        const std::array<array3D, 2> &Q = Qs[i];
+        const std::array<int, 2> &edges = edges_of_Qs[i];
+
+        //skip invalid input data in edges
+        if (edges[0] < 0 || edges[1] < 0) {
+            continue;
+        }
+
+        const int &L1     = edges[0];
+        const int &L2     = edges[1];
+        const array3D &S1 = Q[0];
+        const array3D &S2 = Q[1];
+
+        //if segment has negligible lenght
+        if (norm2(S1 - S2) < distanceTolerance) {
+            continue;
+        }
+
+        if (motherInit < 0) {
+            motherInit = L1;
+            motherPos  = motherInit;
+        }
+
+        std::size_t index = motherPos;
+        while (int(index) != L1) {
+            motherPolygon.push_back(V[index]);
+            index = (index + 1) % nV;
+        }
+        motherPolygon.push_back(V[L1]);
+        //ok extract the next cut sub_polygon.
+        {
+            std::vector<array3D> newp;
+            newp.push_back(S1);
+            index = (L1 + 1) % nV;
+            while (int(index) != L2) {
+                newp.push_back(V[index]);
+                index = (index + 1) % nV;
+            }
+            newp.push_back(V[L2]);
+            newp.push_back(S2);
+            polys.push_back(newp);
+        }
+
+        // and update the mother polygon with intersections.
+        motherPolygon.push_back(S1);
+        motherPolygon.push_back(S2);
+        motherPos = (L2 + 1) % nV;
+    }
+
+    //if mother polygon is empty means no valid intersection occurred.
+    if (motherPolygon.empty()) {
+        return;
+    }
+
+    //otherwise you may need to complete motherPolygon, and push it as valid polys.
+    std::size_t index = motherPos;
+    while (int(index) != motherInit) {
+        motherPolygon.push_back(V[index]);
+        index = (index + 1) % nV;
+    }
+    polys.push_back(motherPolygon);
+}
+
+/*!
  * Computes intersection between two axis aligned bounding boxes
  * \param[in] A1 min point of first box
  * \param[in] A2 max point of first box

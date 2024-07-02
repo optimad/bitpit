@@ -619,6 +619,7 @@ public:
 	BITPIT_DEPRECATED(ConstProxyVector<std::array<double BITPIT_COMMA 3>> getInterfaceVertexCoordinates(long id) const);
 	void getInterfaceVertexCoordinates(long id, std::unique_ptr<std::array<double, 3>[]> *coordinates) const;
 	void getInterfaceVertexCoordinates(long id, std::array<double, 3> *coordinates) const;
+        bool intersectInterfacePlane(long id, std::array<double, 3> P, std::array<double, 3> nP, std::array<std::array<double, 3>, 2> *intersection, std::vector<std::array<double, 3>> *polygon) const;
 
 	InterfaceIterator getInterfaceIterator(long id);
 	InterfaceIterator interfaceBegin();
