@@ -27,7 +27,8 @@
     \ingroup MathFunctions
     Sign function.
     Given a a variable of integral type, val, returns:
-    1 if val > 0
+    1 if val > T(0)
+    0 if val == T(0)
     -1, othersize.
 
     Template parameters can be any integral type such that operator< is defined.
