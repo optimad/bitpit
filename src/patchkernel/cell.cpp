@@ -632,9 +632,9 @@ long * Cell::getInterfaces(int face)
 	\param interface is the interface to look for
 	\result The position in the interface face list of the specfied interface.
 */
-int Cell::findInterface(int face, int interface)
+int Cell::findInterface(int face, long interface) const
 {
-	long *faceInterfaces = getInterfaces(face);
+	const long *faceInterfaces = getInterfaces(face);
 	int nFaceInterfaces = getInterfaceCount(face);
 	for (int i = 0; i < nFaceInterfaces; i++) {
 		if (faceInterfaces[i] == interface) {
@@ -655,7 +655,7 @@ int Cell::findInterface(int face, int interface)
 	\param interface is the interface to look for
 	\result The position in the interface cell list of the specfied interface.
 */
-int Cell::findInterface(int interface)
+int Cell::findInterface(long interface) const
 {
 	int nCellInterfaces = getInterfaceCount();
 	const long *interfaces = getInterfaces();
