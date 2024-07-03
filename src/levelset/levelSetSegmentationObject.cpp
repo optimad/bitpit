@@ -2028,6 +2028,12 @@ long LevelSetSegmentationBaseObject::evalSupport(const std::array<double,3> &poi
  * the points representing the specified segment. The surface passes from these
  * points and is verical to the normal vectors associated with them.
  *
+ * If the usage of an  unsigned level set is requested, the orientation of the
+ * surface should be discarded in order to have a normal that is agnostic with
+ * respect to the two sides of the surface. If the sign is not cached, it
+ * should be evaluated from scratch and this will cause the projection
+ * evaluation to be performed twice.
+ *
  * @param[in] point are the coordinates of the given point
  * @param[in] signedLevelSet controls if signed levelset function will be used
  * @param[out] projectionPoint The coordinates of the projection point on the surface.
@@ -2961,6 +2967,12 @@ std::array<double,3> LevelSetSegmentationObject::_evalGradient(const std::array<
  * the points representing the specified segment. The surface passes from these
  * points and is verical to the normal vectors associated with them.
  *
+ * If the usage of an  unsigned level set is requested, the orientation of the
+ * surface should be discarded in order to have a normal that is agnostic with
+ * respect to the two sides of the surface. If the sign is not cached, it
+ * should be evaluated from scratch and this will cause the projection
+ * evaluation to be performed twice.
+ *
  * @param[in] point are the coordinates of the given point
  * @param[in] signedLevelSet controls if signed levelset function will be used
  * @param[out] projectionPoint The coordinates of the projection point on the surface.
@@ -2975,7 +2987,7 @@ void LevelSetSegmentationObject::_evalProjection(const std::array<double,3> &poi
     // Get closest segment
     long support = evalSupport(point);
 
-    return _evalProjection(point, support, signedLevelSet, projectionPoint, projectionNormal);
+    _evalProjection(point, support, signedLevelSet, projectionPoint, projectionNormal);
 }
 
 /*!
@@ -3118,12 +3130,20 @@ long LevelSetSegmentationObject::_evalSupport(const std::array<double,3> &point,
  * the points representing the specified segment. The surface passes from these
  * points and is verical to the normal vectors associated with them.
  *
+ * If the usage of an  unsigned level set is requested, the orientation of the
+ * surface should be discarded in order to have a normal that is agnostic with
+ * respect to the two sides of the surface. If the sign is not cached, it
+ * should be evaluated from scratch and this will cause the projection
+ * evaluation to be performed twice.
+ *
  * \param[in] point are the coordinates of the given point
- * \param support is the the closest segment to the specified point
+ * \param[in] support is the the closest segment to the specified point
  * \param[in] signedLevelSet controls if signed levelset function will be used
- * \param[out] projectionPoint The coordinates of the projection point on the surface.
- * \param[out] projectionNormal The coordinates of the norrmal to the surface vector on the surface
- * projection point.
+ * \param[out] projectionPoint if a valid pointer is provided, contains the coordinates
+ * of the projection point on the surface.
+ * \param[out] projectionNormal if a valid pointer is provided, contains the normal to
+ * the surface on the projection point. If the projection point lies on the zero-level-set surface,
+ * a zero vector is returned
  */
 void LevelSetSegmentationObject::_evalProjection(const std::array<double,3> &point,
                                                  long support,
@@ -3131,6 +3151,11 @@ void LevelSetSegmentationObject::_evalProjection(const std::array<double,3> &poi
                                                  std::array<double, 3> *projectionPoint,
                                                  std::array<double, 3> *projectionNormal) const
 {
+    // Early return if projection normal and projection point pointers are null
+    if (!(projectionNormal) && !(projectionPoint)) {
+       return;
+    }
+
     // Early return if the support is not valid
     //
     // With an invalid support, only the unsigend levelset can be evaluated.
@@ -3149,10 +3174,16 @@ void LevelSetSegmentationObject::_evalProjection(const std::array<double,3> &poi
     // Eval projection point and normal
     m_surfaceInfo->evalProjection(point, segmentItr, projectionPoint, projectionNormal);
 
+    // Early return if a projection normal null pointer is given
+    if (!(projectionNormal)) {
+       return;
+    }
+
     // If an unsigned evaluation is requested, the orientation of the surface should be discarded
-    // and in order to have a normal that is agnostic with respect the two sides of the surface.
+    // in order to have a normal that is agnostic with respect the two sides of the surface.
     if (!signedLevelSet) {
-        (*projectionNormal) *= static_cast<double>(evalSign(point));
+        short sign = evalSign(point);
+        (*projectionNormal) *= static_cast<double>(sign);
     }
 }
 
@@ -3332,6 +3363,12 @@ long LevelSetBooleanObject<LevelSetSegmentationBaseObject>::_evalSupport(const s
  * the points representing the specified segment. The surface passes from these
  * points and is verical to the normal vectors associated with them.
  *
+ * If the usage of an  unsigned level set is requested, the orientation of the
+ * surface should be discarded in order to have a normal that is agnostic with
+ * respect to the two sides of the surface. If the sign is not cached, it
+ * should be evaluated from scratch and this will cause the projection
+ * evaluation to be performed twice.
+ *
  * @param[in] point are the coordinates of the given point
  * @param[in] signedLevelSet controls if signed levelset function will be used
  * @param[out] projectionPoint The coordinates of the projection point on the surface.
@@ -3494,6 +3531,12 @@ int LevelSetComplementObject<LevelSetSegmentationBaseObject>::_evalPart(const st
  * Evaluate the projection of the given point on the surface created based on
  * the points representing the specified segment. The surface passes from these
  * points and is verical to the normal vectors associated with them.
+ *
+ * If the usage of an  unsigned level set is requested, the orientation of the
+ * surface should be discarded in order to have a normal that is agnostic with
+ * respect to the two sides of the surface. If the sign is not cached, it
+ * should be evaluated from scratch and this will cause the projection
+ * evaluation to be performed twice.
  *
  * @param[in] point are the coordinates of the given point
  * @param[in] signedLevelSet controls if signed levelset function will be used
