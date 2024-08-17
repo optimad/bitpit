@@ -913,9 +913,11 @@ foreach (VARIABLE_NAME IN LISTS BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS)
     list (APPEND BITPIT_EXTERNAL_INCLUDE_DIRS "${${VARIABLE_NAME}}")
 endforeach ()
 
-# Windows shared libraries have to be linked against their dependencies.
-if (WIN32 AND BUILD_SHARED_LIBS)
-    target_link_libraries(${BITPIT_LIBRARY} ${BITPIT_EXTERNAL_LIBRARIES})
+# Windows And MacOS shared libraries have to be linked against their dependencies.
+if (WIN32 OR APPLE)
+    if (BUILD_SHARED_LIBS)
+        target_link_libraries(${BITPIT_LIBRARY} ${BITPIT_EXTERNAL_LIBRARIES})
+    endif()
 endif()
 
 #------------------------------------------------------------------------------------#
