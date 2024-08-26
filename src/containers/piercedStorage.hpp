@@ -478,9 +478,10 @@ protected:
     template<typename... Args>
     void rawEmreplace(std::size_t pos, Args&&... args);
 
-private:
     std::size_t m_nFields;
     container_t m_fields;
+
+private:
 
     void restoreField(std::istream &stream, std::vector<bool>::reference value);
 

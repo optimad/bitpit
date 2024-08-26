@@ -36,8 +36,11 @@ namespace bitpit {
 template<typename value_t, typename id_t>
 PiercedVector<value_t, id_t>::PiercedVector()
     : PiercedVectorKernel<id_t>(),
-      PiercedVectorStorage<value_t, id_t>(1, this, PiercedVectorKernel<id_t>::SYNC_MODE_DISABLED)
+      PiercedVectorStorage<value_t, id_t>() //1, this, PiercedVectorKernel<id_t>::SYNC_MODE_DISABLED)
 {
+    PiercedStorageSyncSlave<id_t>::setDynamicKernel(this, PiercedVectorKernel<id_t>::SYNC_MODE_DISABLED);
+    PiercedStorage<value_t, id_t>::_postSetStaticKernel();
+    PiercedStorage<value_t, id_t>::_postSetDynamicKernel();
 }
 
 /**
@@ -52,8 +55,11 @@ PiercedVector<value_t, id_t>::PiercedVector()
 template<typename value_t, typename id_t>
 PiercedVector<value_t, id_t>::PiercedVector(std::size_t n)
     : PiercedVectorKernel<id_t>(n),
-      PiercedVectorStorage<value_t, id_t>(1, this, PiercedVectorKernel<id_t>::SYNC_MODE_DISABLED)
+      PiercedVectorStorage<value_t, id_t>() //1, this, PiercedVectorKernel<id_t>::SYNC_MODE_DISABLED)
 {
+    PiercedStorageSyncSlave<id_t>::setDynamicKernel(this, PiercedVectorKernel<id_t>::SYNC_MODE_DISABLED);
+    PiercedStorage<value_t, id_t>::_postSetStaticKernel();
+    PiercedStorage<value_t, id_t>::_postSetDynamicKernel();
 }
 
 /**
@@ -65,8 +71,16 @@ PiercedVector<value_t, id_t>::PiercedVector(std::size_t n)
 template<typename value_t, typename id_t>
 PiercedVector<value_t, id_t>::PiercedVector(const PiercedVector<value_t, id_t> &other)
     : PiercedVectorKernel<id_t>(other),
-      PiercedVectorStorage<value_t, id_t>(other, this, other.getSyncMode())
+      PiercedVectorStorage<value_t, id_t>() //other, this, other.getSyncMode())
 {
+    PiercedStorage<value_t, id_t>::m_nFields = other.m_nFields;
+    PiercedStorage<value_t, id_t>::m_fields = other.m_fields;
+    PiercedStorageSyncSlave<id_t>::setDynamicKernel(this, other.getSyncMode());
+    if (PiercedStorage<value_t, id_t>::getKernel()) {
+        PiercedStorage<value_t, id_t>::_postSetStaticKernel();
+        PiercedStorage<value_t, id_t>::_postSetDynamicKernel();
+    }
+
     // Since we have copied the kernel, the list of registered slaves contains
     // also the internal storage of other vector. We need to unregister that
     // storage from the kernel.
@@ -82,8 +96,20 @@ PiercedVector<value_t, id_t>::PiercedVector(const PiercedVector<value_t, id_t> &
 template<typename value_t, typename id_t>
 PiercedVector<value_t, id_t>::PiercedVector(PiercedVector<value_t, id_t> &&other)
     : PiercedVectorKernel<id_t>(std::move(other)),
-      PiercedVectorStorage<value_t, id_t>(std::move(other), this, other.getSyncMode())
+      PiercedVectorStorage<value_t, id_t>() //std::move(other), this, other.getSyncMode())
 {
+    PiercedStorage<value_t, id_t>::m_nFields = std::move(other.m_nFields);
+    PiercedStorage<value_t, id_t>::m_fields = std::move(other.m_fields);
+    PiercedStorageSyncSlave<id_t>::setDynamicKernel(this, other.getSyncMode());
+    other.unsetKernel(true);
+    if (PiercedStorage<value_t, id_t>::getKernel()) {
+        PiercedStorage<value_t, id_t>::_postSetStaticKernel();
+        PiercedStorage<value_t, id_t>::_postSetDynamicKernel();
+    }
+
+    // Explicitly reset the number of fields of the other storage
+    other.m_nFields = 0;
+
     // Since we have moved the kernel, the list of registered slaves contains
     // also the internal storage of other vector. We need to unregister that
     // storage from the kernel.
@@ -92,7 +118,7 @@ PiercedVector<value_t, id_t>::PiercedVector(PiercedVector<value_t, id_t> &&other
 
 /**
 * Copy assignment operator.
-*
+*s
 * \param other is another container of the same type (i.e., instantiated with
 * the same template parameters) whose content is copied in this container.
 */
