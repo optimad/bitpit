@@ -52,7 +52,7 @@ public:
     SparseMatrix(SparseMatrix &&other) = default;
 #endif
 
-    ~SparseMatrix();
+    virtual ~SparseMatrix();
 
     void initialize(long nRows, long nCols, long nNZ);
     void initialize(int blockSize, long nRows, long nCols, long nNZ);
