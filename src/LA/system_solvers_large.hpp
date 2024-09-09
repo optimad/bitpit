@@ -33,6 +33,10 @@
 
 #include "system_matrix.hpp"
 
+#ifndef PETSC_NULLPTR
+#define PETSC_NULLPTR PETSC_NULL
+#endif
+
 namespace bitpit {
 
 struct KSPOptions {

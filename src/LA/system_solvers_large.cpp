@@ -771,13 +771,13 @@ SystemSolver::SystemSolver(const std::string &prefix, bool transpose, bool debug
  */
 SystemSolver::SystemSolver(const std::string &prefix, bool flatten, bool transpose, bool debug)
     : m_flatten(flatten), m_transpose(transpose),
-      m_A(PETSC_NULL), m_rhs(PETSC_NULL), m_solution(PETSC_NULL),
-      m_KSP(PETSC_NULL),
+      m_A(PETSC_NULLPTR), m_rhs(PETSC_NULLPTR), m_solution(PETSC_NULLPTR),
+      m_KSP(PETSC_NULLPTR),
       m_prefix(prefix), m_assembled(false), m_KSPDirty(true),
 #if BITPIT_ENABLE_MPI==1
       m_communicator(MPI_COMM_SELF), m_partitioned(false),
 #endif
-      m_rowReordering(PETSC_NULL), m_colReordering(PETSC_NULL),
+      m_rowReordering(PETSC_NULLPTR), m_colReordering(PETSC_NULLPTR),
       m_forceConsistency(false)
 {
     // Initialize PETSc
@@ -1051,7 +1051,7 @@ void SystemSolver::update(long nRows, const long *rows, const SystemMatrixAssemb
  */
 int SystemSolver::getBlockSize() const
 {
-    if (m_A == PETSC_NULL) {
+    if (m_A == PETSC_NULLPTR) {
         return 0;
     }
 
@@ -1072,7 +1072,7 @@ int SystemSolver::getBlockSize() const
  */
 long SystemSolver::getRowCount() const
 {
-    if (m_A == PETSC_NULL) {
+    if (m_A == PETSC_NULLPTR) {
         return 0;
     }
 
@@ -1094,7 +1094,7 @@ long SystemSolver::getRowCount() const
  */
 long SystemSolver::getColCount() const
 {
-    if (m_A == PETSC_NULL) {
+    if (m_A == PETSC_NULLPTR) {
         return 0;
     }
 
@@ -1116,7 +1116,7 @@ long SystemSolver::getColCount() const
  */
 long SystemSolver::getRowElementCount() const
 {
-    if (m_A == PETSC_NULL) {
+    if (m_A == PETSC_NULLPTR) {
         return 0;
     }
 
@@ -1137,7 +1137,7 @@ long SystemSolver::getRowElementCount() const
  */
 long SystemSolver::getColElementCount() const
 {
-    if (m_A == PETSC_NULL) {
+    if (m_A == PETSC_NULLPTR) {
         return 0;
     }
 
@@ -1159,7 +1159,7 @@ long SystemSolver::getColElementCount() const
  */
 long SystemSolver::getRowGlobalCount() const
 {
-    if (m_A == PETSC_NULL) {
+    if (m_A == PETSC_NULLPTR) {
         return 0;
     }
 
@@ -1181,7 +1181,7 @@ long SystemSolver::getRowGlobalCount() const
  */
 long SystemSolver::getColGlobalCount() const
 {
-    if (m_A == PETSC_NULL) {
+    if (m_A == PETSC_NULLPTR) {
         return 0;
     }
 
@@ -1202,7 +1202,7 @@ long SystemSolver::getColGlobalCount() const
  */
 long SystemSolver::getRowGlobalElementCount() const
 {
-    if (m_A == PETSC_NULL) {
+    if (m_A == PETSC_NULLPTR) {
         return 0;
     }
 
@@ -1222,7 +1222,7 @@ long SystemSolver::getRowGlobalElementCount() const
  */
 long SystemSolver::getColGlobalElementCount() const
 {
-    if (m_A == PETSC_NULL) {
+    if (m_A == PETSC_NULLPTR) {
         return 0;
     }
 
@@ -1597,7 +1597,7 @@ void SystemSolver::matrixDestroy()
 {
     if (m_A) {
         MatDestroy(&m_A);
-        m_A = PETSC_NULL;
+        m_A = PETSC_NULLPTR;
     }
 }
 
@@ -1836,12 +1836,12 @@ void SystemSolver::vectorsDestroy()
 {
     if (m_rhs) {
         VecDestroy(&m_rhs);
-        m_rhs = PETSC_NULL;
+        m_rhs = PETSC_NULLPTR;
     }
 
     if (m_solution) {
         VecDestroy(&m_solution);
-        m_solution = PETSC_NULL;
+        m_solution = PETSC_NULLPTR;
     }
 }
 
