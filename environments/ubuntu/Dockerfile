@@ -31,7 +31,7 @@ RUN cd /opt && \
 FROM bitpit-ubuntu-base AS bitpit-ubuntu-boost
 LABEL stage=bitpit-ubuntu-boost
 RUN cd /opt && \
-    wget --no-verbose https://boostorg.jfrog.io/artifactory/main/release/1.71.0/source/boost_1_71_0.tar.gz && \
+    wget --no-verbose https://archives.boost.io/release/1.71.0/source/boost_1_71_0.tar.gz && \
     tar xzf boost_1_71_0.tar.gz && \
     cd boost_1_71_0 && \
     ./bootstrap.sh --prefix=/opt/boost-install && ./b2 -j 10 install && \

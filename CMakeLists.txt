@@ -69,6 +69,70 @@ set(BITPIT_INSTALL_CMAKEDIR "${CMAKE_INSTALL_DATAROOTDIR}/${CMAKE_PROJECT_NAME}/
 #------------------------------------------------------------------------------------#
 # Functions
 #------------------------------------------------------------------------------------#
+function(configureBitpitTargetDependencies TARGET_NAME DEPENDENCIES_SCOPE)
+
+    if (MPI_FOUND)
+        target_link_libraries(${TARGET_NAME} ${DEPENDENCIES_SCOPE} MPI::MPI_CXX)
+        target_include_directories(${TARGET_NAME} ${DEPENDENCIES_SCOPE} $<TARGET_PROPERTY:MPI::MPI_CXX,INTERFACE_INCLUDE_DIRECTORIES>)
+        target_compile_definitions(${TARGET_NAME} ${DEPENDENCIES_SCOPE} $<TARGET_PROPERTY:MPI::MPI_CXX,INTERFACE_COMPILE_DEFINITIONS>)
+        if ("Fortran" IN_LIST BITPIT_LANGUAGES)
+            target_link_libraries(${TARGET_NAME} ${DEPENDENCIES_SCOPE} MPI::MPI_Fortran)
+            target_include_directories(${TARGET_NAME} ${DEPENDENCIES_SCOPE} $<TARGET_PROPERTY:MPI::MPI_Fortran,INTERFACE_INCLUDE_DIRECTORIES>)
+            target_compile_definitions(${TARGET_NAME} ${DEPENDENCIES_SCOPE} $<TARGET_PROPERTY:MPI::MPI_Fortran,INTERFACE_COMPILE_DEFINITIONS>)
+        endif()
+
+        target_compile_definitions(${TARGET_NAME} ${DEPENDENCIES_SCOPE} "BITPIT_ENABLE_MPI=1")
+    else()
+        target_compile_definitions(${TARGET_NAME} ${DEPENDENCIES_SCOPE} "BITPIT_ENABLE_MPI=0")
+    endif()
+
+    if (BLAS_FOUND)
+        target_link_libraries(${TARGET_NAME} ${DEPENDENCIES_SCOPE} ${BLAS_LIBRARIES})
+        target_include_directories(${TARGET_NAME} ${DEPENDENCIES_SCOPE} ${BLAS_INCLUDE_DIRS})
+    endif()
+
+    if (CBLAS_FOUND)
+        set(CBLAS_PRIVATE_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/external/CBLAS/include")
+
+        target_link_libraries(${TARGET_NAME} ${DEPENDENCIES_SCOPE} ${CBLAS_LIBRARIES})
+        target_include_directories(${TARGET_NAME} PRIVATE ${CBLAS_PRIVATE_INCLUDE_DIR})
+        target_include_directories(${TARGET_NAME} ${DEPENDENCIES_SCOPE} ${CBLAS_INCLUDE_DIRS})
+    endif()
+
+    if (LAPACK_FOUND)
+        target_link_libraries(${TARGET_NAME} ${DEPENDENCIES_SCOPE} ${LAPACK_LIBRARIES})
+        target_include_directories(${TARGET_NAME} ${DEPENDENCIES_SCOPE}${LAPACK_INCLUDE_DIRS})
+    endif()
+
+    if (LAPACKE_FOUND)
+        set(LAPACKE_PRIVATE_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/external/LAPACKE/include")
+
+        target_link_libraries(${TARGET_NAME} ${DEPENDENCIES_SCOPE} ${LAPACKE_LIBRARIES})
+        target_include_directories(${TARGET_NAME} PRIVATE ${LAPACKE_PRIVATE_INCLUDE_DIR})
+        target_include_directories(${TARGET_NAME} ${DEPENDENCIES_SCOPE} ${LAPACKE_INCLUDE_DIRS})
+    endif()
+
+    if (PETSC_FOUND)
+        target_link_libraries(${TARGET_NAME} ${DEPENDENCIES_SCOPE} ${PETSC_LIBRARIES})
+        target_include_directories(${TARGET_NAME} ${DEPENDENCIES_SCOPE} ${PETSC_INCLUDES})
+    endif()
+    unset(_PETSc_index)
+
+    if (Boost_FOUND)
+        target_link_libraries(${TARGET_NAME} ${DEPENDENCIES_SCOPE} Boost::headers)
+        target_link_libraries(${TARGET_NAME} ${DEPENDENCIES_SCOPE} ${Boost_LIBRARIES})
+    endif()
+
+    if (METIS_FOUND)
+        target_link_libraries(${TARGET_NAME} ${DEPENDENCIES_SCOPE} ${METIS_LIBRARIES})
+        target_include_directories(${TARGET_NAME} ${DEPENDENCIES_SCOPE} ${METIS_INCLUDE_DIRS})
+
+        target_compile_definitions(${BITPIT_LIBRARY} ${DEPENDENCIES_SCOPE} "BITPIT_ENABLE_METIS=1")
+    else()
+        target_compile_definitions(${BITPIT_LIBRARY} ${DEPENDENCIES_SCOPE} "BITPIT_ENABLE_METIS=0")
+    endif()
+endfunction()
+
 function(getModuleEnableName MODULE_NAME FLAG_NAME)
     string(TOUPPER ${MODULE_NAME} UPPER_MODULE_NAME)
     set(${FLAG_NAME} "BITPIT_MODULE_${UPPER_MODULE_NAME}" PARENT_SCOPE)
@@ -122,19 +186,6 @@ function(hideModule MODULE_NAME)
 endfunction()
 
 function(addModuleIncludeDirectories TARGET_NAME MODULE_NAME)
-    set (EXTRA_ARGUMENTS ${ARGN})
-    list(LENGTH EXTRA_ARGUMENTS EXTRA_ARGUMENT_COUNT)
-    if (${EXTRA_ARGUMENT_COUNT} GREATER 0)
-        list(GET EXTRA_ARGUMENTS 0 INCLUDE_EXTERNAL)
-    else ()
-        set(INCLUDE_EXTERNAL "TRUE")
-    endif ()
-
-    # External includes
-    if (INCLUDE_EXTERNAL)
-        target_include_directories(${TARGET_NAME} PUBLIC "${BITPIT_EXTERNAL_INCLUDE_DIRS}")
-    endif ()
-
     # Add dependiecies
     string(TOUPPER ${MODULE_NAME} UPPER_MODULE_NAME)
     foreach (DEPENDENCY_NAME IN LISTS ${UPPER_MODULE_NAME}_DEPS)
@@ -363,83 +414,6 @@ function(addCoverageAnalysis GENERATE_GCOVR_REPORTS GENERATE_LCOV_REPORTS EXCLUD
 endfunction()
 
 #------------------------------------------------------------------------------------#
-# Initialize library target
-#------------------------------------------------------------------------------------#
-set(BITPIT_LIBRARY ${PROJECT_NAME} CACHE INTERNAL "bitpit library name" FORCE)
-
-add_library(${BITPIT_LIBRARY})
-
-target_compile_features(${BITPIT_LIBRARY} PUBLIC cxx_std_17)
-set_target_properties(${BITPIT_LIBRARY} PROPERTIES CXX_STANDARD 17)
-set_target_properties(${BITPIT_LIBRARY} PROPERTIES CXX_STANDARD_REQUIRED ON)
-
-if (BITPIT_ENABLE_MPI)
-    set_target_properties(${BITPIT_LIBRARY} PROPERTIES DEBUG_POSTFIX "_MPI_D")
-    set_target_properties(${BITPIT_LIBRARY} PROPERTIES RELWITHDEBINFO_POSTFIX "_MPI_D")
-    set_target_properties(${BITPIT_LIBRARY} PROPERTIES RELEASE_POSTFIX "_MPI")
-else()
-    set_target_properties(${BITPIT_LIBRARY} PROPERTIES DEBUG_POSTFIX "_D")
-    set_target_properties(${BITPIT_LIBRARY} PROPERTIES RELWITHDEBINFO_POSTFIX "_D")
-endif()
-
-
-#------------------------------------------------------------------------------------#
-# Link Time Optimization (LTO)
-#------------------------------------------------------------------------------------#
-
-# Detect if LTO can be enabled
-if(DEFINED BITPIT_LTO_STRATEGY)
-    if (NOT "${BITPIT_LTO_STRATEGY}" STREQUAL "Disabled")
-        include(CheckIPOSupported)
-
-        if ("${BITPIT_LTO_STRATEGY}" STREQUAL "Enabled")
-            if (NOT BUILD_SHARED_LIBS)
-                message(FATAL_ERROR "LTO can be enabled only when building a shared library." )
-            endif()
-            if (WIN32)
-                message(FATAL_ERROR "LTO in not currently supported on Windows.")
-            endif()
-            check_ipo_supported()
-            set(ENABLE_LTO TRUE)
-        elseif ("${BITPIT_LTO_STRATEGY}" STREQUAL "Auto")
-            if (NOT WIN32)
-                if (BUILD_SHARED_LIBS)
-                    check_ipo_supported(RESULT LTO_SUPPORTED)
-                    if (${LTO_SUPPORTED} AND "${CMAKE_BUILD_TYPE}" STREQUAL "Release")
-                        set(ENABLE_LTO TRUE)
-                    else()
-                        set(ENABLE_LTO FALSE)
-                    endif()
-                else()
-                    set(ENABLE_LTO FALSE)
-                endif()
-            else()
-                set(ENABLE_LTO FALSE)
-            endif()
-        else()
-            set(ENABLE_LTO FALSE)
-        endif()
-    else()
-        set(ENABLE_LTO FALSE)
-    endif()
-else()
-    set(ENABLE_LTO FALSE)
-endif()
-
-# Set LTO property for the specified target
-function(set_lto_property TARGET_NAME)
-    if (${ENABLE_LTO})
-        set_target_properties(${TARGET_NAME} PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
-    endif()
-endfunction()
-
-# Set LTO property for the main library
-#
-# Here LTO property is set only for the main library, each module may need
-# to set its own LTO property.
-set_lto_property(${BITPIT_LIBRARY})
-
-#------------------------------------------------------------------------------------#
 # Sanitize
 #------------------------------------------------------------------------------------#
 
@@ -464,82 +438,6 @@ if(NOT CMAKE_BUILD_TYPE)
     # Set the possible values of build type for the GUI
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS ${SUPPORTED_BUILD_TYPE})
 endif()
-
-#------------------------------------------------------------------------------------#
-# Version
-#------------------------------------------------------------------------------------#
-
-# Version regex expressions
-set(VERSION_MATCHER_REGEX "^${CMAKE_PROJECT_NAME}-((([0-9]*)(\\.([0-9]*))?(\\.([0-9]*)))(-(.*))?)$")
-set(VERSION_TAG_MATCHER_REGEX "^${CMAKE_PROJECT_NAME}-[^-]*(-(.*))?$")
-
-# Initialize version string
-set(BITPIT_VERSION_STRING "${CMAKE_PROJECT_NAME}-${BITPIT_VERSION}")
-
-string(REGEX MATCH "${VERSION_MATCHER_REGEX}" VERSION_STRING_VALID "${BITPIT_VERSION_STRING}")
-if ("${VERSION_STRING_VALID}" STREQUAL "")
-    message(FATAL_ERROR "Version string \"${BITPIT_VERSION_STRING}\" is not a valid version.")
-endif()
-
-# Initialize verbose version string
-set(BITPIT_VERBOSE_VERSION_STRING "${BITPIT_VERSION_STRING}")
-
-get_git_head_revision(BITPIT_GIT_REFERENCE BITPIT_GIT_HASH)
-if(NOT "${BITPIT_GIT_REFERENCE}" STREQUAL "GITDIR-NOTFOUND")
-    # Add git information
-    #
-    # Information about git are added only if git tag doens't match the version
-    # string.
-    git_get_exact_tag(BITPIT_GIT_TAG)
-    if(NOT "${BITPIT_GIT_TAG}" STREQUAL "${BITPIT_VERBOSE_VERSION_STRING}")
-        git_get_branch(BITPIT_GIT_BRANCH)
-        if(NOT "${BITPIT_GIT_BRANCH}" MATCHES "NOTFOUND$")
-            set(BITPIT_VERBOSE_VERSION_STRING "${BITPIT_VERBOSE_VERSION_STRING}-${BITPIT_GIT_BRANCH}")
-        else()
-            set(BITPIT_VERBOSE_VERSION_STRING "${BITPIT_VERBOSE_VERSION_STRING}-detached")
-        endif()
-
-        git_get_short_hash(BITPIT_GIT_SHORT_HASH)
-        set(BITPIT_VERBOSE_VERSION_STRING "${BITPIT_VERBOSE_VERSION_STRING}-${BITPIT_GIT_SHORT_HASH}")
-    endif()
-
-    # Report if there are uncommited changes
-    #
-    # It's not possible to automatically re-run cmake (and thus update the
-    # version) if there are uncommited changes. The label will be reliably
-    # added only if, after changing the code, cmake is run manually.
-    set(BITPIT_VERBOSE_VERSION_DIRTY_TAG "dirty" CACHE STRING "Tag that will be added to the verbose version string when there are uncommited changes")
-    mark_as_advanced(BITPIT_VERBOSE_VERSION_DIRTY_TAG)
-
-    git_local_changes(BITPIT_GIT_STATUS)
-    if (BITPIT_GIT_STATUS STREQUAL "DIRTY")
-        set(BITPIT_VERBOSE_VERSION_STRING "${BITPIT_VERBOSE_VERSION_STRING}-${BITPIT_VERBOSE_VERSION_DIRTY_LABEL}")
-    endif()
-endif()
-
-string(REGEX MATCH "${VERSION_MATCHER_REGEX}" VERSION_STRING_VALID "${BITPIT_VERBOSE_VERSION_STRING}")
-if ("${VERSION_STRING_VALID}" STREQUAL "")
-    message(FATAL_ERROR "Version string \"${BITPIT_VERBOSE_VERSION_STRING}\" is not a valid verbose version.")
-endif()
-
-# Extract version information
-string(REGEX REPLACE "${VERSION_MATCHER_REGEX}" "\\1" BITPIT_VERBOSE_VERSION "${BITPIT_VERBOSE_VERSION_STRING}")
-
-string(REGEX REPLACE "${VERSION_MATCHER_REGEX}" "\\1" BITPIT_VERSION "${BITPIT_VERSION_STRING}")
-string(REGEX REPLACE "${VERSION_MATCHER_REGEX}" "\\3" BITPIT_MAJOR_VERSION "${BITPIT_VERSION_STRING}")
-string(REGEX REPLACE "${VERSION_MATCHER_REGEX}" "\\5" BITPIT_MINOR_VERSION "${BITPIT_VERSION_STRING}")
-string(REGEX REPLACE "${VERSION_MATCHER_REGEX}" "\\7" BITPIT_PATCH_VERSION "${BITPIT_VERSION_STRING}")
-
-string(REGEX MATCH "${VERSION_TAG_MATCHER_REGEX}" dummy "${BITPIT_VERSION_STRING}")
-if (NOT CMAKE_MATCH_2 STREQUAL "")
-    string(REGEX REPLACE "${VERSION_TAG_MATCHER_REGEX}" "\\2" BITPIT_TAG_VERSION "${BITPIT_VERSION_STRING}")
-else ()
-    set(BITPIT_TAG_VERSION "")
-endif ()
-
-# Set library version
-set_target_properties(${BITPIT_LIBRARY} PROPERTIES   VERSION "${BITPIT_MAJOR_VERSION}.${BITPIT_MINOR_VERSION}.${BITPIT_PATCH_VERSION}"
-                                                   SOVERSION "${BITPIT_MAJOR_VERSION}")
 
 #------------------------------------------------------------------------------------#
 # List of all avilable modules
@@ -755,35 +653,16 @@ else()
     endforeach()
 endif()
 
-# Add external dependencies
+# Find external dependencies
 #
 # Low-level dependencies are processed first.
 set(BITPIT_EXTERNAL_DEPENDENCIES "")
-set(BITPIT_EXTERNAL_VARIABLES_LIBRARIES "")
-set(BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS "")
 
 list(FIND EXTERNAL_DEPS "MPI" _MPI_index)
 if (${_MPI_index} GREATER -1)
     find_package(MPI)
 
-    target_compile_definitions(${BITPIT_LIBRARY} PUBLIC "BITPIT_ENABLE_MPI=1")
-
-    if(MPI_CXX_COMPILE_FLAGS)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MPI_CXX_COMPILE_FLAGS}")
-    endif()
-
-    if(MPI_CXX_LINK_FLAGS)
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${MPI_CXX_LINK_FLAGS}")
-    endif()
-
     list (INSERT BITPIT_EXTERNAL_DEPENDENCIES 0 "MPI")
-    list (INSERT BITPIT_EXTERNAL_VARIABLES_LIBRARIES 0 "MPI_CXX_LIBRARIES")
-    if ("Fortran" IN_LIST BITPIT_LANGUAGES)
-        list (INSERT BITPIT_EXTERNAL_VARIABLES_LIBRARIES 0 "MPI_Fortran_LIBRARIES")
-    endif()
-    list (INSERT BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS 0 "MPI_CXX_INCLUDE_PATH" )
-else()
-    target_compile_definitions(${BITPIT_LIBRARY} PUBLIC "BITPIT_ENABLE_MPI=0")
 endif()
 unset(_MPI_index)
 
@@ -796,8 +675,6 @@ if (${_BLAS_index} GREATER -1)
     find_package(BLAS REQUIRED)
 
     list (INSERT BITPIT_EXTERNAL_DEPENDENCIES 0 "BLAS")
-    list (INSERT BITPIT_EXTERNAL_VARIABLES_LIBRARIES 0 "BLAS_LIBRARIES")
-    list (INSERT BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS 0 "BLAS_INCLUDE_DIRS")
 endif()
 unset(_BLAS_index)
 
@@ -807,11 +684,7 @@ if (${_CBLAS_index} GREATER -1)
 
     find_package(CBLAS REQUIRED)
 
-    set(CBLAS_PRIVATE_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/external/CBLAS/include")
-
     list (INSERT BITPIT_EXTERNAL_DEPENDENCIES 0 "CBLAS")
-    list (INSERT BITPIT_EXTERNAL_VARIABLES_LIBRARIES 0 "CBLAS_LIBRARIES")
-    list (INSERT BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS 0 "CBLAS_PRIVATE_INCLUDE_DIR" "CBLAS_INCLUDE_DIRS")
 endif()
 unset(_CBLAS_index)
 
@@ -820,8 +693,6 @@ if (${_LAPACK_index} GREATER -1)
     find_package(LAPACK REQUIRED)
 
     list (INSERT BITPIT_EXTERNAL_DEPENDENCIES 0 "LAPACK")
-    list (INSERT BITPIT_EXTERNAL_VARIABLES_LIBRARIES 0 "LAPACK_LIBRARIES")
-    list (INSERT BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS 0 "LAPACK_INCLUDE_DIRS")
 endif()
 unset(_LAPACK_index)
 
@@ -834,11 +705,7 @@ if (${_LAPACKE_index} GREATER -1)
 
     find_package(LAPACKE REQUIRED)
 
-    set(LAPACKE_PRIVATE_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/external/LAPACKE/include")
-
     list (INSERT BITPIT_EXTERNAL_DEPENDENCIES 0 "LAPACKE")
-    list (INSERT BITPIT_EXTERNAL_VARIABLES_LIBRARIES 0 "LAPACKE_LIBRARIES")
-    list (INSERT BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS 0 "LAPACKE_PRIVATE_INCLUDE_DIR" "LAPACKE_INCLUDE_DIRS")
 endif()
 unset(_LAPACKE_index)
 
@@ -863,8 +730,6 @@ if (${_PETSc_index} GREATER -1)
     find_package(PETSc REQUIRED)
 
     list (INSERT BITPIT_EXTERNAL_DEPENDENCIES 0 "PETSc")
-    list (INSERT BITPIT_EXTERNAL_VARIABLES_LIBRARIES 0 "PETSC_LIBRARIES")
-    list (INSERT BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS 0 "PETSC_INCLUDES" )
 endif()
 unset(_PETSc_index)
 
@@ -880,8 +745,6 @@ if (${_Boost_index} GREATER -1)
     endif ()
 
     list (INSERT BITPIT_EXTERNAL_DEPENDENCIES 0 "Boost")
-    list (INSERT BITPIT_EXTERNAL_VARIABLES_LIBRARIES 0 "Boost_LIBRARIES")
-    list (INSERT BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS 0 "Boost_INCLUDE_DIR")
 endif()
 unset(_BoostTest_index)
 
@@ -892,33 +755,168 @@ if (${_METIS_index} GREATER -1)
     find_package(METIS)
 
     if (METIS_FOUND)
-        target_compile_definitions(${BITPIT_LIBRARY} PUBLIC "BITPIT_ENABLE_METIS=1")
-
         list (APPEND BITPIT_EXTERNAL_DEPENDENCIES "METIS")
-        list (APPEND BITPIT_EXTERNAL_VARIABLES_LIBRARIES "METIS_LIBRARIES")
-        list (APPEND BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS "METIS_INCLUDE_DIRS")
     else()
-        target_compile_definitions(${BITPIT_LIBRARY} PUBLIC "BITPIT_ENABLE_METIS=0")
-
         message(STATUS "METIS library not found, default patch partitioning support will be disabled.")
     endif()
 endif()
 unset(_METIS_index)
 
-set(BITPIT_EXTERNAL_LIBRARIES "")
-foreach (VARIABLE_NAME IN LISTS BITPIT_EXTERNAL_VARIABLES_LIBRARIES)
-    list (APPEND BITPIT_EXTERNAL_LIBRARIES "${${VARIABLE_NAME}}")
-endforeach ()
+#------------------------------------------------------------------------------------#
+# Initialize library target
+#------------------------------------------------------------------------------------#
+set(BITPIT_LIBRARY ${PROJECT_NAME} CACHE INTERNAL "bitpit library name" FORCE)
 
-set(BITPIT_EXTERNAL_INCLUDE_DIRS "")
-foreach (VARIABLE_NAME IN LISTS BITPIT_EXTERNAL_VARIABLES_INCLUDE_DIRS)
-    list (APPEND BITPIT_EXTERNAL_INCLUDE_DIRS "${${VARIABLE_NAME}}")
-endforeach ()
+add_library(${BITPIT_LIBRARY})
+configureBitpitTargetDependencies(${BITPIT_LIBRARY} PUBLIC)
 
-# Windows shared libraries have to be linked against their dependencies.
-if (WIN32 AND BUILD_SHARED_LIBS)
-    target_link_libraries(${BITPIT_LIBRARY} ${BITPIT_EXTERNAL_LIBRARIES})
+set_target_properties(${BITPIT_LIBRARY}
+    PROPERTIES
+    CXX_STANDARD 17
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO
+)
+
+if (BITPIT_ENABLE_MPI)
+    set_target_properties(${BITPIT_LIBRARY} PROPERTIES DEBUG_POSTFIX "_MPI_D")
+    set_target_properties(${BITPIT_LIBRARY} PROPERTIES RELWITHDEBINFO_POSTFIX "_MPI_D")
+    set_target_properties(${BITPIT_LIBRARY} PROPERTIES RELEASE_POSTFIX "_MPI")
+else()
+    set_target_properties(${BITPIT_LIBRARY} PROPERTIES DEBUG_POSTFIX "_D")
+    set_target_properties(${BITPIT_LIBRARY} PROPERTIES RELWITHDEBINFO_POSTFIX "_D")
 endif()
+
+#------------------------------------------------------------------------------------#
+# Version
+#------------------------------------------------------------------------------------#
+
+# Version regex expressions
+set(VERSION_MATCHER_REGEX "^${CMAKE_PROJECT_NAME}-((([0-9]*)(\\.([0-9]*))?(\\.([0-9]*)))(-(.*))?)$")
+set(VERSION_TAG_MATCHER_REGEX "^${CMAKE_PROJECT_NAME}-[^-]*(-(.*))?$")
+
+# Initialize version string
+set(BITPIT_VERSION_STRING "${CMAKE_PROJECT_NAME}-${BITPIT_VERSION}")
+
+string(REGEX MATCH "${VERSION_MATCHER_REGEX}" VERSION_STRING_VALID "${BITPIT_VERSION_STRING}")
+if ("${VERSION_STRING_VALID}" STREQUAL "")
+    message(FATAL_ERROR "Version string \"${BITPIT_VERSION_STRING}\" is not a valid version.")
+endif()
+
+# Initialize verbose version string
+set(BITPIT_VERBOSE_VERSION_STRING "${BITPIT_VERSION_STRING}")
+
+get_git_head_revision(BITPIT_GIT_REFERENCE BITPIT_GIT_HASH)
+if(NOT "${BITPIT_GIT_REFERENCE}" STREQUAL "GITDIR-NOTFOUND")
+    # Add git information
+    #
+    # Information about git are added only if git tag doens't match the version
+    # string.
+    git_get_exact_tag(BITPIT_GIT_TAG)
+    if(NOT "${BITPIT_GIT_TAG}" STREQUAL "${BITPIT_VERBOSE_VERSION_STRING}")
+        git_get_branch(BITPIT_GIT_BRANCH)
+        if(NOT "${BITPIT_GIT_BRANCH}" MATCHES "NOTFOUND$")
+            set(BITPIT_VERBOSE_VERSION_STRING "${BITPIT_VERBOSE_VERSION_STRING}-${BITPIT_GIT_BRANCH}")
+        else()
+            set(BITPIT_VERBOSE_VERSION_STRING "${BITPIT_VERBOSE_VERSION_STRING}-detached")
+        endif()
+
+        git_get_short_hash(BITPIT_GIT_SHORT_HASH)
+        set(BITPIT_VERBOSE_VERSION_STRING "${BITPIT_VERBOSE_VERSION_STRING}-${BITPIT_GIT_SHORT_HASH}")
+    endif()
+
+    # Report if there are uncommited changes
+    #
+    # It's not possible to automatically re-run cmake (and thus update the
+    # version) if there are uncommited changes. The label will be reliably
+    # added only if, after changing the code, cmake is run manually.
+    set(BITPIT_VERBOSE_VERSION_DIRTY_TAG "dirty" CACHE STRING "Tag that will be added to the verbose version string when there are uncommited changes")
+    mark_as_advanced(BITPIT_VERBOSE_VERSION_DIRTY_TAG)
+
+    git_local_changes(BITPIT_GIT_STATUS)
+    if (BITPIT_GIT_STATUS STREQUAL "DIRTY")
+        set(BITPIT_VERBOSE_VERSION_STRING "${BITPIT_VERBOSE_VERSION_STRING}-${BITPIT_VERBOSE_VERSION_DIRTY_LABEL}")
+    endif()
+endif()
+
+string(REGEX MATCH "${VERSION_MATCHER_REGEX}" VERSION_STRING_VALID "${BITPIT_VERBOSE_VERSION_STRING}")
+if ("${VERSION_STRING_VALID}" STREQUAL "")
+    message(FATAL_ERROR "Version string \"${BITPIT_VERBOSE_VERSION_STRING}\" is not a valid verbose version.")
+endif()
+
+# Extract version information
+string(REGEX REPLACE "${VERSION_MATCHER_REGEX}" "\\1" BITPIT_VERBOSE_VERSION "${BITPIT_VERBOSE_VERSION_STRING}")
+
+string(REGEX REPLACE "${VERSION_MATCHER_REGEX}" "\\1" BITPIT_VERSION "${BITPIT_VERSION_STRING}")
+string(REGEX REPLACE "${VERSION_MATCHER_REGEX}" "\\3" BITPIT_MAJOR_VERSION "${BITPIT_VERSION_STRING}")
+string(REGEX REPLACE "${VERSION_MATCHER_REGEX}" "\\5" BITPIT_MINOR_VERSION "${BITPIT_VERSION_STRING}")
+string(REGEX REPLACE "${VERSION_MATCHER_REGEX}" "\\7" BITPIT_PATCH_VERSION "${BITPIT_VERSION_STRING}")
+
+string(REGEX MATCH "${VERSION_TAG_MATCHER_REGEX}" dummy "${BITPIT_VERSION_STRING}")
+if (NOT CMAKE_MATCH_2 STREQUAL "")
+    string(REGEX REPLACE "${VERSION_TAG_MATCHER_REGEX}" "\\2" BITPIT_TAG_VERSION "${BITPIT_VERSION_STRING}")
+else ()
+    set(BITPIT_TAG_VERSION "")
+endif ()
+
+# Set library version
+set_target_properties(${BITPIT_LIBRARY} PROPERTIES   VERSION "${BITPIT_MAJOR_VERSION}.${BITPIT_MINOR_VERSION}.${BITPIT_PATCH_VERSION}"
+                                                   SOVERSION "${BITPIT_MAJOR_VERSION}")
+
+#------------------------------------------------------------------------------------#
+# Link Time Optimization (LTO)
+#------------------------------------------------------------------------------------#
+
+# Detect if LTO can be enabled
+if(DEFINED BITPIT_LTO_STRATEGY)
+    if (NOT "${BITPIT_LTO_STRATEGY}" STREQUAL "Disabled")
+        include(CheckIPOSupported)
+
+        if ("${BITPIT_LTO_STRATEGY}" STREQUAL "Enabled")
+            if (NOT BUILD_SHARED_LIBS)
+                message(FATAL_ERROR "LTO can be enabled only when building a shared library." )
+            endif()
+            if (WIN32)
+                message(FATAL_ERROR "LTO in not currently supported on Windows.")
+            endif()
+            check_ipo_supported()
+            set(ENABLE_LTO TRUE)
+        elseif ("${BITPIT_LTO_STRATEGY}" STREQUAL "Auto")
+            if (NOT WIN32)
+                if (BUILD_SHARED_LIBS)
+                    check_ipo_supported(RESULT LTO_SUPPORTED)
+                    if (${LTO_SUPPORTED} AND "${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+                        set(ENABLE_LTO TRUE)
+                    else()
+                        set(ENABLE_LTO FALSE)
+                    endif()
+                else()
+                    set(ENABLE_LTO FALSE)
+                endif()
+            else()
+                set(ENABLE_LTO FALSE)
+            endif()
+        else()
+            set(ENABLE_LTO FALSE)
+        endif()
+    else()
+        set(ENABLE_LTO FALSE)
+    endif()
+else()
+    set(ENABLE_LTO FALSE)
+endif()
+
+# Set LTO property for the specified target
+function(set_lto_property BITPIT_LIBRARY)
+    if (${ENABLE_LTO})
+        set_target_properties(${BITPIT_LIBRARY} PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
+    endif()
+endfunction()
+
+# Set LTO property for the main library
+#
+# Here LTO property is set only for the main library, each module may need
+# to set its own LTO property.
+set_lto_property(${BITPIT_LIBRARY})
 
 #------------------------------------------------------------------------------------#
 # Compiler settings
@@ -1169,6 +1167,29 @@ endif()
 get_property(BITPIT_LANGUAGES GLOBAL PROPERTY ENABLED_LANGUAGES)
 
 #------------------------------------------------------------------------------------#
+# Installation
+#------------------------------------------------------------------------------------#
+
+install(TARGETS ${BITPIT_LIBRARY}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${CMAKE_PROJECT_NAME}
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${CMAKE_PROJECT_NAME}
+)
+
+if (MSVC)
+    # Install the exported debug information (if any, see OPTIONAL) related to bitpit library
+    install(FILES $<TARGET_PDB_FILE:${BITPIT_LIBRARY}> DESTINATION ${CMAKE_INSTALL_LIBDIR} OPTIONAL)
+endif()
+
+target_include_directories(
+    ${BITPIT_LIBRARY}
+    INTERFACE
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
+
+#------------------------------------------------------------------------------------#
 # Subdirectories
 #------------------------------------------------------------------------------------#
 
@@ -1193,21 +1214,4 @@ endif()
 if (BUILD_TESTING)
     enable_testing()
     add_subdirectory(test)
-endif()
-
-#------------------------------------------------------------------------------------#
-# Installation
-#------------------------------------------------------------------------------------#
-
-install(TARGETS ${BITPIT_LIBRARY}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${CMAKE_PROJECT_NAME}
-        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${CMAKE_PROJECT_NAME}
-       )
-
-if (MSVC)
-    # Install the exported debug information (if any, see OPTIONAL) related to bitpit library
-    install(FILES $<TARGET_PDB_FILE:${BITPIT_LIBRARY}> DESTINATION ${CMAKE_INSTALL_LIBDIR} OPTIONAL)
 endif()

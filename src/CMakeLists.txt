@@ -77,6 +77,7 @@ function(configureModule MODULE_NAME)
         set_target_properties(${UPPER_MODULE_NAME}_TARGET_OBJECT PROPERTIES CXX_STANDARD_REQUIRED ON)
         set_target_properties(${UPPER_MODULE_NAME}_TARGET_OBJECT PROPERTIES POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS})
         set_lto_property(${UPPER_MODULE_NAME}_TARGET_OBJECT)
+        configureBitpitTargetDependencies(${UPPER_MODULE_NAME}_TARGET_OBJECT PRIVATE)
         addModuleIncludeDirectories(${UPPER_MODULE_NAME}_TARGET_OBJECT ${MODULE_NAME})
 
         get_target_property(BITPIT_COMPILE_DEFINITIONS ${BITPIT_LIBRARY} COMPILE_DEFINITIONS)
