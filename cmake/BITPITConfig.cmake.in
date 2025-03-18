@@ -1,111 +1,8 @@
-# BITPITConfig.cmake - bitpit CMake configuration file for external projects.
-# -----------
-#
-# This file is configured by bitpit and used by the UseBITPIT.cmake module
-# to load bitpit's settings for an external project.
-
-# Compute the installation prefix from this BITPITConfig.cmake file location.
-@BITPIT_INSTALL_PREFIX_CODE@
-
-# If a different UseBITPIT.cmake was previoulsy loaded a reconfiguration
-# is needed
-if(NOT ("${BITPIT_INSTALL_PREFIX}/@BITPIT_INSTALL_CMAKEDIR@" STREQUAL BITPIT_INSTALL_CMAKEDIR_PREVIOUS))
-    set(BITPIT_RECONFIGURE 1)
-    set(BITPIT_INSTALL_CMAKEDIR_PREVIOUS "${BITPIT_INSTALL_PREFIX}/@BITPIT_INSTALL_CMAKEDIR@" CACHE INTERNAL "Defines the previous bitpit CMake configuration file loaded")
-endif()
-
-# The C and C++ flags added by bitpit to the cmake-configured flags.
-SET(BITPIT_REQUIRED_C_FLAGS "")
-SET(BITPIT_REQUIRED_CXX_FLAGS "")
-SET(BITPIT_REQUIRED_EXE_LINKER_FLAGS "")
-SET(BITPIT_REQUIRED_SHARED_LINKER_FLAGS "")
-SET(BITPIT_REQUIRED_MODULE_LINKER_FLAGS "")
-
-# The bitpit version number
-SET(BITPIT_MAJOR_VERSION "@BITPIT_MAJOR_VERSION@")
-SET(BITPIT_MINOR_VERSION "@BITPIT_MINOR_VERSION@")
-SET(BITPIT_PATCH_VERSION "@BITPIT_PATCH_VERSION@")
-SET(BITPIT_VERSION "@BITPIT_VERSION@")
-
-# The location of the UseBITPIT.cmake file.
-SET(BITPIT_CMAKE_DIR "${BITPIT_INSTALL_PREFIX}/@BITPIT_INSTALL_CMAKEDIR@")
-SET(BITPIT_USE_FILE "${BITPIT_CMAKE_DIR}/UseBITPIT.cmake")
-
-# Flag for shared build
-SET(BITPIT_SHARED "@BUILD_SHARED_LIBS@")
-
-# Include macros for finding packages
-list(APPEND CMAKE_MODULE_PATH ${BITPIT_CMAKE_DIR})
-include(LibFindMacros)
-include(FindPackageHandleStandardArgs)
+@PACKAGE_INIT@
 
 #-----------------------------------------------------------------------------
-# Find bitpit libraries and headers
+# Modules
 #-----------------------------------------------------------------------------
-
-# Headers
-if(BITPIT_RECONFIGURE)
-    unset(BITPIT_INCLUDE_DIR CACHE)
-endif()
-
-find_path(BITPIT_INCLUDE_DIR "@PROJECT_NAME@.hpp"
-          HINTS "${BITPIT_INSTALL_PREFIX}/@CMAKE_INSTALL_INCLUDEDIR@/@PROJECT_NAME@/")
-
-mark_as_advanced(BITPIT_INCLUDE_DIR)
-
-# Library
-if(BITPIT_RECONFIGURE)
-    unset(BITPIT_LIBRARY_RELEASE CACHE)
-    unset(BITPIT_LIBRARY_DEBUG CACHE)
-endif()
-
-find_library(BITPIT_LIBRARY_RELEASE
-             NAMES @PROJECT_NAME@@BITPIT_RELEASE_POSTFIX@ @PROJECT_NAME@
-             HINTS "${BITPIT_INSTALL_PREFIX}/@CMAKE_INSTALL_LIBDIR@")
-
-find_library(BITPIT_LIBRARY_DEBUG
-             NAMES @PROJECT_NAME@@BITPIT_DEBUG_POSTFIX@ @PROJECT_NAME@
-             HINTS "${BITPIT_INSTALL_PREFIX}/@CMAKE_INSTALL_LIBDIR@")
-
-mark_as_advanced(BITPIT_LIBRARY_RELEASE)
-mark_as_advanced(BITPIT_LIBRARY_DEBUG)
-
-# Choose good values for BITPIT_LIBRARY, BITPIT_LIBRARIES,
-# BITPIT_LIBRARY_DEBUG, and BITPIT_LIBRARY_RELEASE depending on what
-# has been found and set.  If only BITPIT_LIBRARY_RELEASE is defined,
-# BITPIT_LIBRARY will be set to the release value, and
-# BITPIT_LIBRARY_DEBUG will be set to BITPIT_LIBRARY_DEBUG-NOTFOUND.
-# If only BITPIT_LIBRARY_DEBUG is defined, then BITPIT_LIBRARY will
-# take the debug value, and BITPIT_LIBRARY_RELEASE will be set to
-# BITPIT_LIBRARY_RELEASE-NOTFOUND.
-#
-# If the generator supports configuration types, then BITPIT_LIBRARY
-# and BITPIT_LIBRARIES will be set with debug and optimized flags
-# specifying the library to be used for the given configuration.  If no
-# build type has been set or the generator in use does not support
-# configuration types, then BITPIT_LIBRARY and BITPIT_LIBRARIES will
-# take only the release value, or the debug value if the release one is
-# not set.
-if (BITPIT_LIBRARY_DEBUG AND BITPIT_LIBRARY_RELEASE AND
-       NOT BITPIT_LIBRARY_DEBUG STREQUAL BITPIT_LIBRARY_RELEASE AND
-           (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE))
-    set( BITPIT_LIBRARY "" )
-    foreach( _libname IN LISTS BITPIT_LIBRARY_RELEASE )
-        list( APPEND BITPIT_LIBRARY optimized "${_libname}" )
-    endforeach()
-    foreach( _libname IN LISTS BITPIT_LIBRARY_DEBUG )
-        list( APPEND BITPIT_LIBRARY debug "${_libname}" )
-    endforeach()
-elseif (BITPIT_LIBRARY_RELEASE)
-    set (BITPIT_LIBRARY ${BITPIT_LIBRARY_RELEASE})
-elseif (BITPIT_LIBRARY_DEBUG)
-    set (BITPIT_LIBRARY ${BITPIT_LIBRARY_DEBUG})
-else ()
-    set( BITPIT_LIBRARY "BITPIT_LIBRARY-NOTFOUND")
-endif ()
-
-# bitpit Definitions
-set(BITPIT_DEFINITIONS "@BITPIT_INTERFACE_COMPILE_DEFINITIONS@")
 
 # List of currently enabled bitpit modules
 set(BITPIT_ENABLED_MODULE_LIST "@BITPIT_ENABLED_MODULE_LIST@")
@@ -143,17 +40,23 @@ if(BITPIT_FIND_OPTIONAL_COMPONENTS)
     endforeach()
 endif()
 
-# Unset the unneeded variables
-if(BITPIT_RECONFIGURE)
-    unset(BITPIT_RECONFIGURE)
-endif()
+#-----------------------------------------------------------------------------
+# Location of UseBITPIT.cmake file.
+#-----------------------------------------------------------------------------
 
-# Let libfind_process initialize the appropriate variables
-libfind_process(BITPIT)
+SET(BITPIT_USE_FILE "@CMAKE_INSTALL_PREFIX@/@BITPIT_INSTALL_CMAKEDIR@/UseBITPIT.cmake")
+
+#-----------------------------------------------------------------------------
+# Programming languages
+#-----------------------------------------------------------------------------
+
+set(BITPIT_LANGUAGES "@BITPIT_LANGUAGES@")
 
 #-----------------------------------------------------------------------------
 # Find bitpit external dependencies
 #-----------------------------------------------------------------------------
+
+list(APPEND CMAKE_MODULE_PATH "@CMAKE_INSTALL_PREFIX@/@BITPIT_INSTALL_CMAKEDIR@")
 
 # Set external dependencies information
 set(_EXTERNAL_DEPENDENCIES "@BITPIT_EXTERNAL_DEPENDENCIES@")
@@ -199,29 +102,21 @@ foreach (VARIABLE_NAME IN LISTS _EXTERNAL_VARIABLES_INCLUDE_DIRS)
 endforeach ()
 
 #-----------------------------------------------------------------------------
-# Set programming languages
+# Include targets
 #-----------------------------------------------------------------------------
-set(BITPIT_LANGUAGES "@BITPIT_LANGUAGES@")
+include ( "${CMAKE_CURRENT_LIST_DIR}/@BITPIT_CMAKE_TARGETS_FILE@" )
 
 #-----------------------------------------------------------------------------
-# Create imported target
+# Backwards compatibility
 #-----------------------------------------------------------------------------
-if(BITPIT_SHARED)
-    set(LIBRARY_TYPE SHARED)
-else()
-    set(LIBRARY_TYPE STATIC)
-endif()
 
-if(NOT TARGET bitpit::bitpit)
-    add_library(bitpit::bitpit ${LIBRARY_TYPE} IMPORTED GLOBAL)
+# Definitions
+get_target_property(BITPIT_DEFINITIONS @BITPIT_LIBRARY@::@BITPIT_LIBRARY@ INTERFACE_COMPILE_DEFINITIONS)
 
-    set_target_properties(bitpit::bitpit
-        PROPERTIES
-        IMPORTED_LOCATION "${BITPIT_LIBRARY}"
-        INTERFACE_INCLUDE_DIRECTORIES "${BITPIT_INCLUDE_DIRS}"
-        INTERFACE_COMPILE_DEFINITIONS "${BITPIT_DEFINITIONS}")
+# Include directories
+get_target_property(BITPIT_INCLUDE_DIRS @BITPIT_LIBRARY@::@BITPIT_LIBRARY@ INTERFACE_INCLUDE_DIRECTORIES)
 
-    # The property INTERFACE_LINK_LIBRARIES is set using target_link_libraries so that the debug
-    # and optimized keywords work.
-    target_link_libraries(bitpit::bitpit INTERFACE ${BITPIT_LIBRARIES})
-endif()
+# Include libraries
+get_target_property(BITPIT_LIBRARY @BITPIT_LIBRARY@::@BITPIT_LIBRARY@ LOCATION)
+get_target_property(BITPIT_LINK_LIBRARIES @BITPIT_LIBRARY@::@BITPIT_LIBRARY@ INTERFACE_LINK_LIBRARIES)
+set(BITPIT_LIBRARIES "${BITPIT_LINK_LIBRARIES};${BITPIT_LIBRARY}")

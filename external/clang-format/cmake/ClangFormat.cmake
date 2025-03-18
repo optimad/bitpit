@@ -102,6 +102,7 @@ function(ClangFormatTargetSources TARGET FILE_PATHS)
         # Add file
         add_custom_command(
             TARGET ${TARGET}
+            PRE_BUILD
             COMMAND ${CLANG_FORMAT_EXECUTABLE} -style=file -i ${FULL_FILE_PATH}
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
             COMMENT "Formatting ${FULL_FILE_PATH}..."
