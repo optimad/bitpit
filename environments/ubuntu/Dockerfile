@@ -5,7 +5,6 @@ RUN sed -i "s/htt[p|ps]:\/\/archive.ubuntu.com\/ubuntu\//mirror:\/\/mirrors.ubun
     apt-get update && \
     apt-get install -y \
         build-essential \
-        cmake \
         clang \
         libblas-dev  \
         liblapack-dev  \
@@ -13,8 +12,20 @@ RUN sed -i "s/htt[p|ps]:\/\/archive.ubuntu.com\/ubuntu\//mirror:\/\/mirrors.ubun
         mpich \
         libmetis-dev \
         git \
+        rsync \
         wget \
         python3
+
+# CMake is installed and removed using the distribution package manager
+# just to install the needed dependencies.
+RUN apt install -y cmake && \
+    apt remove -y cmake
+
+# Download and install the precompiled CMake binaries
+RUN wget "https://github.com/Kitware/CMake/releases/download/v3.31.6/cmake-3.31.6-linux-x86_64.tar.gz" && \
+tar -xvf cmake-*.tar.gz && \
+rsync -av --ignore-existing cmake-*/ /usr/ && \
+rm -rf cmake-*
 
 FROM bitpit-ubuntu-base AS bitpit-ubuntu-mpi
 LABEL stage=bitpit-ubuntu-mpi
