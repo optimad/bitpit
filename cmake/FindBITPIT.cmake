@@ -34,6 +34,9 @@
 # Assume not found.
 set(BITPIT_FOUND 0)
 
+# Warn that the usage of this file is deprecated.
+message(WARNING "FindBITPIT.cmake is deprecated and should not be used in new projects.")
+
 # Use the Config mode of the find_package() command to find BITPITConfig.
 # If this succeeds (possibly because BITPIT_DIR is already set), the
 # command will have already loaded BITPITConfig.cmake and set BITPIT_FOUND.
