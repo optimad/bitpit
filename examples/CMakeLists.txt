@@ -81,8 +81,8 @@ if(BITPIT_BUILD_EXAMPLES)
         set_target_properties(${EXAMPLE_NAME} PROPERTIES CXX_STANDARD 17)
         set_target_properties(${EXAMPLE_NAME} PROPERTIES CXX_STANDARD_REQUIRED ON)
 
-        target_link_libraries(${EXAMPLE_NAME} ${BITPIT_LIBRARY})
-        target_link_libraries(${EXAMPLE_NAME} ${BITPIT_EXTERNAL_LIBRARIES})
+        configureBitpitTargetDependencies(${EXAMPLE_NAME} PRIVATE)
+        target_link_libraries(${EXAMPLE_NAME} PRIVATE ${BITPIT_LIBRARY})
 
         if (MSVC)
             target_compile_definitions(${EXAMPLE_NAME} PRIVATE "_CRT_SECURE_NO_WARNINGS")

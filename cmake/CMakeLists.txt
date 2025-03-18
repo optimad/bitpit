@@ -22,33 +22,23 @@
 #
 #---------------------------------------------------------------------------*/
 
+include(CMakePackageConfigHelpers)
+
+string(TOUPPER ${BITPIT_LIBRARY} UPPER_BITPIT_LIBRARY_NAME)
+
 #------------------------------------------------------------------------------------#
-# Generate BITPITConfig.cmake
+# CMake configuration file
 #------------------------------------------------------------------------------------#
-set(BITPIT_INSTALL_PREFIX_CODE
-"set(_bitpit_installed_prefix \"${CMAKE_INSTALL_PREFIX}/${BITPIT_INSTALL_CMAKEDIR}\")
-set(_bitpit_requested_prefix \"\${CMAKE_CURRENT_LIST_DIR}\")
-get_filename_component(_bitpit_installed_prefix_full \"\${_bitpit_installed_prefix}\" REALPATH)
-get_filename_component(_bitpit_requested_prefix_full \"\${_bitpit_requested_prefix}\" REALPATH)
-if (_bitpit_installed_prefix_full STREQUAL _bitpit_requested_prefix_full)
-    set(BITPIT_INSTALL_PREFIX \"${CMAKE_INSTALL_PREFIX}\")
-else ()
-    set(BITPIT_INSTALL_PREFIX \"\${CMAKE_CURRENT_LIST_DIR}\")")
 
-# Construct the proper number of get_filename_component(... PATH)
-# calls to compute the installation prefix.
-string(REGEX REPLACE "/" ";" _count "${BITPIT_INSTALL_CMAKEDIR}")
-foreach(p ${_count})
-    set(BITPIT_INSTALL_PREFIX_CODE "${BITPIT_INSTALL_PREFIX_CODE}
-    get_filename_component(BITPIT_INSTALL_PREFIX \"\${BITPIT_INSTALL_PREFIX}\" PATH)")
-endforeach()
+set (BITPIT_CMAKE_TARGETS_FILE "${UPPER_BITPIT_LIBRARY_NAME}Targets.cmake")
 
-set(BITPIT_INSTALL_PREFIX_CODE "${BITPIT_INSTALL_PREFIX_CODE}
-endif ()")
+install(TARGETS ${BITPIT_LIBRARY} EXPORT ${BITPIT_LIBRARY}Targets)
 
-get_target_property(BITPIT_DEBUG_POSTFIX ${BITPIT_LIBRARY} DEBUG_POSTFIX)
-get_target_property(BITPIT_RELEASE_POSTFIX ${BITPIT_LIBRARY} RELEASE_POSTFIX)
-get_target_property(BITPIT_INTERFACE_COMPILE_DEFINITIONS ${BITPIT_LIBRARY} INTERFACE_COMPILE_DEFINITIONS)
+install(EXPORT ${BITPIT_LIBRARY}Targets
+    FILE ${BITPIT_CMAKE_TARGETS_FILE}
+    NAMESPACE ${BITPIT_LIBRARY}::
+    DESTINATION ${BITPIT_INSTALL_CMAKEDIR}
+)
 
 set(BITPIT_ENABLED_MODULE_LIST "")
 foreach(MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
@@ -58,32 +48,50 @@ foreach(MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
     endif()
 endforeach()
 
-configure_file("BITPITConfig.cmake.in"  "${CMAKE_CURRENT_BINARY_DIR}/BITPITConfig.cmake" @ONLY)
+set (BITPIT_CMAKE_PACKAGE_FILE "${UPPER_BITPIT_LIBRARY_NAME}Config.cmake")
+configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/${BITPIT_CMAKE_PACKAGE_FILE}.in
+    "${CMAKE_CURRENT_BINARY_DIR}/${BITPIT_CMAKE_PACKAGE_FILE}"
+    INSTALL_DESTINATION "${BITPIT_INSTALL_CMAKEDIR}"
+    NO_SET_AND_CHECK_MACRO
+    NO_CHECK_REQUIRED_COMPONENTS_MACRO
+)
 
 unset(BITPIT_ENABLED_MODULE_LIST)
-unset(BITPIT_INTERFACE_COMPILE_DEFINITIONS)
-unset(BITPIT_RELEASE_POSTFIX)
-unset(BITPIT_DEBUG_POSTFIX)
-unset(BITPIT_INSTALL_PREFIX_CODE)
+
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/${BITPIT_CMAKE_PACKAGE_FILE}
+    DESTINATION "${BITPIT_INSTALL_CMAKEDIR}"
+)
 
 #------------------------------------------------------------------------------------#
-# Generate BITPITConfigVersion.cmake.in
+# CMake version file
 #------------------------------------------------------------------------------------#
 
-get_target_property(BITPIT_INTERFACE_COMPILE_DEFINITIONS ${BITPIT_LIBRARY} INTERFACE_COMPILE_DEFINITIONS)
+set (BITPIT_CMAKE_CONFIG_VERSION_FILE "${UPPER_BITPIT_LIBRARY_NAME}ConfigVersion.cmake")
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/${BITPIT_CMAKE_CONFIG_VERSION_FILE}
+    VERSION ${BITPIT_VERSION}
+    COMPATIBILITY AnyNewerVersion
+)
 
-configure_file("BITPITConfigVersion.cmake.in"  "${CMAKE_CURRENT_BINARY_DIR}/BITPITConfigVersion.cmake" @ONLY)
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/${BITPIT_CMAKE_CONFIG_VERSION_FILE}
+    DESTINATION "${BITPIT_INSTALL_CMAKEDIR}"
+)
 
-unset(BITPIT_INTERFACE_COMPILE_DEFINITIONS)
+#------------------------------------------------------------------------------------#
+# CMake find package file
+#------------------------------------------------------------------------------------#
+
+install(FILES "FindBITPIT.cmake" DESTINATION "${BITPIT_INSTALL_CMAKEDIR}")
+
+#------------------------------------------------------------------------------------#
+# CMake use package file
+#------------------------------------------------------------------------------------#
+
+install(FILES "UseBITPIT.cmake" DESTINATION "${BITPIT_INSTALL_CMAKEDIR}")
 
 #------------------------------------------------------------------------------------#
 # CMake targets
 #------------------------------------------------------------------------------------#
 add_custom_target(clean-cmake COMMAND ${CMAKE_MAKE_PROGRAM} clean WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/BITPITConfig.cmake" DESTINATION "${BITPIT_INSTALL_CMAKEDIR}")
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/BITPITConfigVersion.cmake" DESTINATION "${BITPIT_INSTALL_CMAKEDIR}")
-
-install(FILES "FindBITPIT.cmake" DESTINATION "${BITPIT_INSTALL_CMAKEDIR}")
-install(FILES "UseBITPIT.cmake" DESTINATION "${BITPIT_INSTALL_CMAKEDIR}")
-install(FILES "LibFindMacros.cmake" DESTINATION "${BITPIT_INSTALL_CMAKEDIR}")

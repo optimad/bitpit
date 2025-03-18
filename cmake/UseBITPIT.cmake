@@ -5,11 +5,17 @@
 # compiler settings for a project to use BITPIT.  It should not be
 # included directly, but rather through the BITPIT_USE_FILE setting
 # obtained from BITPITConfig.cmake.
+#
+# This file is no longer needed and it's here only tom maintain compatibility
+# with older versions of BITPIT. It should not be used in new projects.
 
 if(BITPIT_USE_FILE_INCLUDED)
   return()
 endif()
 set(BITPIT_USE_FILE_INCLUDED 1)
+
+# Warn that the usage of this file is deprecated.
+message(WARNING "UseBITPIT.cmake is deprecated and should not be used in new projects.")
 
 # Update CMAKE_MODULE_PATH so includes work.
 list(APPEND CMAKE_MODULE_PATH ${BITPIT_CMAKE_DIR})
