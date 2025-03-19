@@ -858,6 +858,9 @@ SystemSolver::SystemSolver(const std::string &prefix, bool flatten, bool transpo
 
     // Reset KSP options
     initializeKSPOptions();
+
+    // Reset KSP status
+    initializeKSPStatus();
 }
 
 /*!
@@ -3471,10 +3474,6 @@ void SystemSolver::destroyKSPOptions()
  */
 const KSPStatus & SystemSolver::getKSPStatus() const
 {
-    if (!isAssembled()) {
-        throw std::runtime_error("The status of the Krylov solver can only be accessed after assembling the system.");
-    }
-
     return m_KSPStatus;
 }
 
