@@ -855,6 +855,9 @@ SystemSolver::SystemSolver(const std::string &prefix, bool flatten, bool transpo
 
     // Increase the number of instances
     ++m_nInstances;
+
+    // Reset KSP options
+    initializeKSPOptions();
 }
 
 /*!
@@ -3418,10 +3421,6 @@ void SystemSolver::postKrylovSetupActions()
  */
 KSPOptions & SystemSolver::getKSPOptions()
 {
-    if (!isAssembled()) {
-        throw std::runtime_error("The options associated with the Krylov solver can only be accessed after assembling the system.");
-    }
-
     return m_KSPOptions;
 }
 
@@ -3434,10 +3433,6 @@ KSPOptions & SystemSolver::getKSPOptions()
  */
 const KSPOptions & SystemSolver::getKSPOptions() const
 {
-    if (!isAssembled()) {
-        throw std::runtime_error("The options associated with the Krylov solver can only be accessed after assembling the system.");
-    }
-
     return m_KSPOptions;
 }
 
