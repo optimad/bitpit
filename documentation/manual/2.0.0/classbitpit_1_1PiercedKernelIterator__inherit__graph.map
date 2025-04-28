@@ -1,0 +1,13 @@
+<map id="bitpit::PiercedKernelIterator&lt; id_t &gt;" name="bitpit::PiercedKernelIterator&lt; id_t &gt;">
+<area shape="rect" id="Node000001" title="Iterator for the class PiercedKernel." alt="" coords="5,83,184,123"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="80,67,85,59,95,56,103,58,108,65,110,82,104,82,103,67,100,63,95,61,88,63,85,70"/>
+<area shape="poly" id="edge2_Node000001_Node000001" title=" " alt="" coords="67,70,66,56,70,44,80,35,95,32,112,37,122,49,123,66,117,83,112,82,118,65,117,51,109,41,95,37,82,40,75,47,72,57,73,70"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1PiercedKernelIterator.html" title=" " alt="" coords="285,83,464,123"/>
+<area shape="poly" id="edge3_Node000001_Node000002" title=" " alt="" coords="198,100,285,100,285,105,198,105"/>
+<area shape="rect" id="Node000003" href="$classbitpit_1_1PiercedStorageIterator.html" title="Iterator for the class PiercedStorage." alt="" coords="513,83,720,123"/>
+<area shape="poly" id="edge4_Node000002_Node000003" title=" " alt="" coords="478,100,513,100,513,105,478,105"/>
+<area shape="rect" id="Node000004" href="$classbitpit_1_1PiercedStorageIterator.html" title=" " alt="" coords="903,51,1089,91"/>
+<area shape="poly" id="edge5_Node000003_Node000004" title=" " alt="" coords="734,90,902,76,903,81,734,95"/>
+<area shape="rect" id="Node000005" href="$classbitpit_1_1PiercedStorageIterator.html" title=" " alt="" coords="903,115,1089,155"/>
+<area shape="poly" id="edge6_Node000003_Node000005" title=" " alt="" coords="734,110,903,124,902,129,734,115"/>
+</map>

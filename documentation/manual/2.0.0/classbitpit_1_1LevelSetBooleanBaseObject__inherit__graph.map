@@ -1,0 +1,30 @@
+<map id="bitpit::LevelSetBooleanBaseObject&lt; SourceLevelSetObject &gt;" name="bitpit::LevelSetBooleanBaseObject&lt; SourceLevelSetObject &gt;">
+<area shape="rect" id="Node000001" title="Base class which deals with boolean operation between two LevelSetObjects." alt="" coords="1045,83,1259,123"/>
+<area shape="rect" id="Node000008" href="$classbitpit_1_1LevelSetBooleanObject.html" title="Class which deals with boolean operation between two LevelSetObjects." alt="" coords="1504,83,1696,123"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="1273,100,1504,100,1504,105,1273,105"/>
+<area shape="rect" id="Node000011" href="$classbitpit_1_1LevelSetBooleanBaseObject.html" title=" " alt="" coords="1508,5,1692,45"/>
+<area shape="poly" id="edge11_Node000001_Node000011" title=" " alt="" coords="1272,79,1507,38,1508,44,1273,85"/>
+<area shape="rect" id="Node000012" href="$classbitpit_1_1LevelSetBooleanBaseObject.html" title=" " alt="" coords="1484,161,1716,215"/>
+<area shape="poly" id="edge14_Node000001_Node000012" title=" " alt="" coords="1237,124,1283,135,1484,170,1483,175,1282,140,1236,129"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1LevelSetProxyObject.html" title=" " alt="" coords="817,75,996,130"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1010,100,1045,100,1045,105,1010,105"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="455,26,606,51"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="620,42,705,51,794,65,824,73,823,78,793,71,704,56,619,47"/>
+<area shape="rect" id="Node000004" href="$classbitpit_1_1LevelSetProxyBaseObject.html" title=" " alt="" coords="221,143,392,183"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="406,156,620,140,817,114,817,119,620,145,406,161"/>
+<area shape="rect" id="Node000005" href="$classbitpit_1_1LevelSetProxyObject.html" title="Interface class for all objects, which depend on other LevelSetObjects." alt="" coords="441,75,620,130"/>
+<area shape="poly" id="edge7_Node000005_Node000004" title=" " alt="" coords="395,136,440,124,442,129,396,142"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="634,100,817,100,817,105,634,105"/>
+<area shape="rect" id="Node000006" href="$classbitpit_1_1LevelSetObject.html" title="Interface class for all objects with respect to whom the levelset function may be computed." alt="" coords="234,89,379,114"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="393,99,441,99,441,105,393,105"/>
+<area shape="rect" id="Node000007" href="$classbitpit_1_1VTKBaseStreamer.html" title="The base class to be used to derive VTK streamers form." alt="" coords="5,89,172,114"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="186,99,234,99,234,104,186,104"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="1967,5,2159,45"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="1709,82,1967,39,1968,44,1710,87"/>
+<area shape="rect" id="Node000010" href="$classbitpit_1_1LevelSetBooleanObject_3_01LevelSetSegmentationBaseObject_01_4.html" title=" " alt="" coords="1941,168,2185,208"/>
+<area shape="poly" id="edge10_Node000008_Node000010" title=" " alt="" coords="1710,120,1954,165,1953,171,1709,125"/>
+<area shape="poly" id="edge12_Node000011_Node000009" title=" " alt="" coords="1706,30,1967,30,1967,35,1706,36"/>
+<area shape="poly" id="edge13_Node000011_Node000009" title=" " alt="" coords="1706,15,1967,15,1967,21,1706,20"/>
+<area shape="poly" id="edge15_Node000012_Node000010" title=" " alt="" coords="1730,194,1941,193,1941,199,1730,199"/>
+<area shape="poly" id="edge16_Node000012_Node000010" title=" " alt="" coords="1730,177,1941,177,1941,183,1730,182"/>
+</map>

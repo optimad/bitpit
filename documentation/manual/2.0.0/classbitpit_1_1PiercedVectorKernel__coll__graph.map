@@ -1,0 +1,14 @@
+<map id="bitpit::PiercedVectorKernel&lt; id_t &gt;" name="bitpit::PiercedVectorKernel&lt; id_t &gt;">
+<area shape="rect" id="Node000001" title="Kernel of the pierced vector." alt="" coords="18,347,193,387"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1BasePiercedVectorKernel.html" title="Base class for pierced vector kernels." alt="" coords="5,257,173,297"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="98,310,104,346,99,347,93,311"/>
+<area shape="rect" id="Node000003" href="$classbitpit_1_1PiercedKernel.html" title=" " alt="" coords="198,257,335,297"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="221,306,142,349,139,344,218,302"/>
+<area shape="rect" id="Node000004" href="$classbitpit_1_1BasePiercedKernel.html" title="Base class for the pierced kernel." alt="" coords="162,80,329,105"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="250,119,257,194,266,257,261,258,252,195,245,120"/>
+<area shape="rect" id="Node000006" href="$classbitpit_1_1PiercedKernel.html" title="Metafunction for generating a pierced kernel." alt="" coords="267,155,405,195"/>
+<area shape="poly" id="edge6_Node000006_Node000004" title=" " alt="" coords="270,112,316,153,313,157,267,116"/>
+<area shape="rect" id="Node000005" href="$classbitpit_1_1PiercedSyncMaster.html" title="Base class for defining an object that acts like a master in pierced synchronization." alt="" coords="160,5,331,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="248,45,248,80,243,80,243,45"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="317,208,282,259,277,256,313,205"/>
+</map>

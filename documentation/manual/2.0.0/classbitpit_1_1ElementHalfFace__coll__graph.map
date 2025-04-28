@@ -1,0 +1,11 @@
+<map id="bitpit::ElementHalfFace&lt; DerivedElement &gt;" name="bitpit::ElementHalfFace&lt; DerivedElement &gt;">
+<area shape="rect" id="Node000001" title="The ElementHalfFace class defines element half&#45;faces." alt="" coords="7,447,166,487"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1ElementHalfItem.html" title="The ElementHalfItem class is the base calss for defining element half&#45;edge and half&#45;faces." alt="" coords="9,357,164,397"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="89,411,89,447,84,447,84,411"/>
+<area shape="rect" id="Node000003" href="$classbitpit_1_1ProxyVector.html" title=" " alt="" coords="9,240,164,295"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="89,309,89,357,84,357,84,309"/>
+<area shape="rect" id="Node000004" href="$classbitpit_1_1ProxyVector.html" title=" " alt="" coords="9,123,164,177"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="89,191,89,240,84,240,84,191"/>
+<area shape="rect" id="Node000005" href="$classbitpit_1_1ProxyVector.html" title="Metafunction for generating a list of elements that can be either stored in an external vectror or,..." alt="" coords="5,5,168,45"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="89,59,89,122,84,122,84,59"/>
+</map>

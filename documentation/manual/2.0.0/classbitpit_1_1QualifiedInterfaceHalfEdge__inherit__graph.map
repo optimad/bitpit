@@ -1,0 +1,17 @@
+<map id="bitpit::QualifiedInterfaceHalfEdge&lt; QualifiedInterface &gt;" name="bitpit::QualifiedInterfaceHalfEdge&lt; QualifiedInterface &gt;">
+<area shape="rect" id="Node000001" title="The QualifiedInterfaceHalfEdge class defines interface half&#45;edges." alt="" coords="887,37,1089,77"/>
+<area shape="rect" id="Node000007" href="$classbitpit_1_1QualifiedInterfaceHalfEdge.html" title=" " alt="" coords="1269,5,1429,45"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="1103,45,1268,30,1268,35,1103,50"/>
+<area shape="rect" id="Node000008" href="$classbitpit_1_1QualifiedInterfaceHalfEdge.html" title=" " alt="" coords="1255,69,1443,109"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="1103,65,1255,78,1254,84,1103,70"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1ElementHalfFace.html" title=" " alt="" coords="679,37,837,77"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="851,55,887,55,887,60,851,60"/>
+<area shape="rect" id="Node000003" href="$classbitpit_1_1ElementHalfItem.html" title=" " alt="" coords="342,5,497,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="511,31,679,47,678,53,510,37"/>
+<area shape="rect" id="Node000004" href="$classbitpit_1_1ElementHalfItem.html" title="The ElementHalfItem class is the base calss for defining element half&#45;edge and half&#45;faces." alt="" coords="5,5,160,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="174,23,342,23,342,28,174,28"/>
+<area shape="rect" id="Node000005" href="$classbitpit_1_1ElementHalfFace.html" title="The ElementHalfFace class defines element half&#45;faces." alt="" coords="340,69,499,109"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="512,79,654,65,678,63,678,68,655,71,513,84"/>
+<area shape="rect" id="Node000006" href="$classbitpit_1_1ElementHalfItem.html" title="The ElementHalfItem class is the base calss for defining element half&#45;edge and half&#45;faces." alt="" coords="5,69,160,109"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="174,87,340,87,340,92,174,92"/>
+</map>

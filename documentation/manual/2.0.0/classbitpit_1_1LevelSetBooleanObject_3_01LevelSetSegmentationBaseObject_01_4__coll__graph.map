@@ -1,0 +1,129 @@
+<map id="bitpit::LevelSetBooleanObject&lt; LevelSetSegmentationBaseObject &gt;" name="bitpit::LevelSetBooleanObject&lt; LevelSetSegmentationBaseObject &gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="226,2113,470,2153"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1LevelSetBooleanBaseObject.html" title=" " alt="" coords="232,1981,464,2036"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="342,2050,344,2113,339,2113,337,2050"/>
+<area shape="poly" id="edge80_Node000001_Node000002" title=" " alt="" coords="359,2050,357,2113,352,2113,354,2050"/>
+<area shape="rect" id="Node000003" href="$classbitpit_1_1LevelSetProxyObject.html" title=" " alt="" coords="427,1760,663,1815"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="555,1828,557,1859,555,1894,546,1929,529,1959,500,1983,465,1998,463,1993,497,1979,525,1956,542,1927,550,1893,552,1859,550,1829"/>
+<area shape="rect" id="Node000004" href="$classbitpit_1_1LevelSetSegmentationBaseObject.html" title="Implements visitor pattern fo segmentated geometries." alt="" coords="679,1621,865,1661"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="776,1675,772,1708,765,1724,755,1738,740,1748,719,1757,664,1771,663,1766,717,1752,738,1744,751,1734,761,1721,767,1706,771,1674"/>
+<area shape="rect" id="Node000005" href="$classbitpit_1_1LevelSetObject.html" title="Interface class for all objects with respect to whom the levelset function may be computed." alt="" coords="623,1531,769,1557"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="716,1566,759,1619,755,1622,712,1569"/>
+<area shape="rect" id="Node000039" href="$classbitpit_1_1LevelSetProxyObject.html" title="Interface class for all objects, which depend on other LevelSetObjects." alt="" coords="476,1613,655,1668"/>
+<area shape="poly" id="edge73_Node000039_Node000005" title=" " alt="" coords="670,1567,603,1615,600,1611,667,1563"/>
+<area shape="rect" id="Node000006" href="$classbitpit_1_1VTKBaseStreamer.html" title="The base class to be used to derive VTK streamers form." alt="" coords="542,1178,709,1203"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="641,1215,655,1247,661,1284,661,1450,664,1473,672,1495,690,1530,686,1533,667,1497,659,1474,656,1450,656,1285,650,1249,637,1217"/>
+<area shape="rect" id="Node000009" href="$classbitpit_1_1PatchKernel.html" title="The PatchKernel class provides an interface for defining patches." alt="" coords="739,1273,866,1299"/>
+<area shape="poly" id="edge9_Node000009_Node000006" title=" " alt="" coords="661,1207,782,1271,780,1276,658,1212"/>
+<area shape="rect" id="Node000007" href="$classbitpit_1_1LevelSetKernel.html" title="Mesh specific implementation to calculate the levelset function." alt="" coords="714,1436,857,1461"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="767,1473,709,1533,705,1529,763,1469"/>
+<area shape="rect" id="Node000008" href="$classbitpit_1_1VolumeKernel.html" title="The VolumeKernel class provides an interface for defining volume patches." alt="" coords="728,1348,864,1373"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="795,1388,789,1436,784,1435,790,1387"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="803,1313,800,1348,794,1347,798,1312"/>
+<area shape="rect" id="Node000010" href="$classbitpit_1_1PiercedVector.html" title=" " alt="" coords="1228,1171,1367,1211"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="1214,1210,864,1276,863,1271,1213,1205"/>
+<area shape="rect" id="Node000011" href="$classbitpit_1_1BasePiercedVector.html" title="Base class for pierced vectors." alt="" coords="917,986,1085,1011"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="1046,1014,1145,1060,1201,1092,1254,1130,1273,1149,1288,1169,1283,1172,1269,1153,1250,1134,1198,1097,1143,1064,1044,1019"/>
+<area shape="rect" id="Node000030" href="$classbitpit_1_1PiercedVector.html" title="Metafunction for generating a pierced vector." alt="" coords="880,1068,1019,1108"/>
+<area shape="poly" id="edge45_Node000030_Node000011" title=" " alt="" coords="990,1025,963,1069,958,1067,985,1022"/>
+<area shape="rect" id="Node000032" href="$classbitpit_1_1PiercedVector.html" title=" " alt="" coords="896,1171,1035,1211"/>
+<area shape="poly" id="edge52_Node000032_Node000011" title=" " alt="" coords="1019,1022,1033,1048,1045,1080,1049,1115,1046,1132,1040,1148,1028,1162,1014,1173,1011,1169,1025,1158,1035,1145,1041,1130,1044,1115,1040,1082,1028,1050,1014,1024"/>
+<area shape="rect" id="Node000035" href="$classbitpit_1_1PiercedVector.html" title=" " alt="" coords="733,1171,872,1211"/>
+<area shape="poly" id="edge62_Node000035_Node000011" title=" " alt="" coords="960,1019,915,1041,870,1070,838,1098,816,1133,806,1171,801,1170,811,1131,834,1094,866,1066,912,1036,957,1014"/>
+<area shape="rect" id="Node000012" href="$classbitpit_1_1PiercedVectorKernel.html" title=" " alt="" coords="1317,979,1491,1019"/>
+<area shape="poly" id="edge12_Node000010_Node000012" title=" " alt="" coords="1393,1032,1367,1087,1333,1148,1316,1172,1311,1169,1328,1145,1362,1085,1388,1030"/>
+<area shape="poly" id="edge46_Node000030_Node000012" title=" " alt="" coords="1303,1022,1206,1032,1113,1045,1011,1070,1010,1065,1111,1040,1205,1027,1302,1016"/>
+<area shape="poly" id="edge53_Node000032_Node000012" title=" " alt="" coords="1361,1028,1251,1087,1114,1149,1036,1175,1034,1170,1112,1144,1248,1082,1359,1023"/>
+<area shape="poly" id="edge63_Node000035_Node000012" title=" " alt="" coords="1328,1025,1201,1070,1157,1092,1124,1112,1090,1131,1043,1149,1000,1160,964,1164,929,1167,884,1173,873,1176,872,1170,884,1168,929,1162,964,1159,999,1155,1042,1144,1087,1126,1121,1107,1154,1087,1199,1066,1327,1020"/>
+<area shape="rect" id="Node000013" href="$classbitpit_1_1BasePiercedVectorKernel.html" title="Base class for pierced vector kernels." alt="" coords="1297,772,1465,812"/>
+<area shape="poly" id="edge13_Node000012_Node000013" title=" " alt="" coords="1408,822,1429,860,1442,907,1441,929,1435,956,1422,980,1417,977,1429,954,1435,928,1436,908,1424,862,1404,824"/>
+<area shape="rect" id="Node000018" href="$classbitpit_1_1PiercedVectorKernel.html" title="Kernel of the pierced vector." alt="" coords="1239,861,1414,901"/>
+<area shape="poly" id="edge20_Node000018_Node000013" title=" " alt="" coords="1365,825,1341,863,1336,860,1360,822"/>
+<area shape="rect" id="Node000014" href="$classbitpit_1_1PiercedKernel.html" title=" " alt="" coords="1189,257,1326,297"/>
+<area shape="poly" id="edge14_Node000012_Node000014" title=" " alt="" coords="1340,277,1396,285,1449,302,1472,315,1489,332,1501,353,1505,378,1505,883,1499,913,1482,940,1460,963,1437,981,1434,976,1457,959,1478,937,1494,911,1500,882,1500,379,1496,355,1485,335,1468,319,1447,307,1395,290,1339,282"/>
+<area shape="poly" id="edge21_Node000018_Node000014" title=" " alt="" coords="1261,311,1263,379,1263,793,1266,813,1275,830,1302,859,1298,863,1271,833,1261,814,1257,794,1257,379,1256,311"/>
+<area shape="rect" id="Node000022" href="$classbitpit_1_1PiercedStorageSyncSlave.html" title=" " alt="" coords="788,565,964,605"/>
+<area shape="poly" id="edge28_Node000022_Node000014" title=" " alt="" coords="1244,311,1212,364,1166,428,1105,493,1071,521,1033,544,1000,558,965,569,963,564,998,553,1031,539,1068,516,1102,489,1161,425,1208,361,1239,308"/>
+<area shape="rect" id="Node000026" href="$classbitpit_1_1PiercedStorageSyncSlave.html" title="Base class for defining storages that acts like a slave in pierced synchronization." alt="" coords="868,360,1044,400"/>
+<area shape="poly" id="edge35_Node000026_Node000014" title=" " alt="" coords="1176,303,1108,324,1003,362,1002,357,1106,319,1175,298"/>
+<area shape="rect" id="Node000015" href="$classbitpit_1_1BasePiercedKernel.html" title="Base class for the pierced kernel." alt="" coords="1153,80,1319,105"/>
+<area shape="poly" id="edge15_Node000014_Node000015" title=" " alt="" coords="1241,119,1248,194,1257,257,1252,258,1243,195,1235,120"/>
+<area shape="rect" id="Node000017" href="$classbitpit_1_1PiercedKernel.html" title="Metafunction for generating a pierced kernel." alt="" coords="1258,155,1395,195"/>
+<area shape="poly" id="edge18_Node000017_Node000015" title=" " alt="" coords="1261,112,1307,153,1304,157,1258,116"/>
+<area shape="rect" id="Node000016" href="$classbitpit_1_1PiercedSyncMaster.html" title="Base class for defining an object that acts like a master in pierced synchronization." alt="" coords="1151,5,1321,31"/>
+<area shape="poly" id="edge16_Node000015_Node000016" title=" " alt="" coords="1239,45,1239,80,1233,80,1233,45"/>
+<area shape="poly" id="edge17_Node000014_Node000017" title=" " alt="" coords="1308,208,1273,259,1268,256,1304,205"/>
+<area shape="poly" id="edge19_Node000012_Node000018" title=" " alt="" coords="1349,912,1393,977,1389,980,1345,914"/>
+<area shape="rect" id="Node000019" href="$classbitpit_1_1PiercedVectorStorage.html" title=" " alt="" coords="1110,979,1293,1019"/>
+<area shape="poly" id="edge22_Node000010_Node000019" title=" " alt="" coords="1238,1026,1281,1071,1300,1100,1315,1131,1316,1152,1310,1171,1305,1170,1311,1151,1309,1133,1296,1103,1277,1075,1234,1029"/>
+<area shape="rect" id="Node000020" href="$classbitpit_1_1BasePiercedVectorStorage.html" title="Base class for pierced vector kernels." alt="" coords="692,772,860,812"/>
+<area shape="poly" id="edge23_Node000019_Node000020" title=" " alt="" coords="873,813,941,833,1009,859,1063,888,1114,923,1181,976,1178,981,1110,927,1061,892,1007,864,939,838,872,818"/>
+<area shape="rect" id="Node000028" href="$classbitpit_1_1PiercedVectorStorage.html" title="Kernel of the pierced vector." alt="" coords="814,861,997,901"/>
+<area shape="poly" id="edge40_Node000028_Node000020" title=" " alt="" coords="817,817,879,859,876,863,814,822"/>
+<area shape="rect" id="Node000031" href="$classbitpit_1_1PiercedVectorStorage.html" title=" " alt="" coords="710,979,893,1019"/>
+<area shape="poly" id="edge48_Node000031_Node000020" title=" " alt="" coords="783,825,802,978,796,979,777,826"/>
+<area shape="rect" id="Node000033" href="$classbitpit_1_1PiercedVectorStorage.html" title=" " alt="" coords="503,979,686,1019"/>
+<area shape="poly" id="edge55_Node000033_Node000020" title=" " alt="" coords="742,823,690,869,637,927,619,954,605,980,601,977,614,951,633,924,686,866,739,819"/>
+<area shape="rect" id="Node000036" href="$classbitpit_1_1PiercedVectorStorage.html" title=" " alt="" coords="297,979,479,1019"/>
+<area shape="poly" id="edge65_Node000036_Node000020" title=" " alt="" coords="695,819,578,862,515,892,456,927,427,953,404,980,400,977,423,950,453,923,513,887,576,857,693,814"/>
+<area shape="rect" id="Node000021" href="$classbitpit_1_1PiercedStorage.html" title=" " alt="" coords="1063,772,1214,812"/>
+<area shape="poly" id="edge24_Node000019_Node000021" title=" " alt="" coords="1165,822,1172,835,1185,874,1194,913,1203,978,1198,979,1189,914,1180,875,1167,837,1160,825"/>
+<area shape="poly" id="edge25_Node000021_Node000022" title=" " alt="" coords="954,608,998,626,1043,650,1086,680,1122,717,1135,744,1140,771,1135,772,1130,746,1118,720,1082,684,1040,654,995,630,952,612"/>
+<area shape="rect" id="Node000027" href="$classbitpit_1_1PiercedStorage.html" title="Metafunction for generating a pierced storage." alt="" coords="747,655,893,695"/>
+<area shape="poly" id="edge38_Node000027_Node000022" title=" " alt="" coords="859,618,834,656,830,653,854,615"/>
+<area shape="rect" id="Node000029" href="$classbitpit_1_1PiercedStorage.html" title=" " alt="" coords="884,772,1031,812"/>
+<area shape="poly" id="edge42_Node000029_Node000022" title=" " alt="" coords="892,617,908,654,953,771,948,773,903,656,887,619"/>
+<area shape="rect" id="Node000034" href="$classbitpit_1_1PiercedStorage.html" title=" " alt="" coords="521,772,668,812"/>
+<area shape="poly" id="edge57_Node000034_Node000022" title=" " alt="" coords="813,613,727,657,683,686,643,721,622,747,607,773,602,770,618,744,639,717,680,682,724,652,811,608"/>
+<area shape="rect" id="Node000037" href="$classbitpit_1_1PiercedStorage.html" title=" " alt="" coords="332,772,497,812"/>
+<area shape="poly" id="edge67_Node000037_Node000022" title=" " alt="" coords="775,605,704,621,625,645,546,678,472,721,446,746,427,773,423,770,442,743,469,717,543,673,623,640,702,616,774,600"/>
+<area shape="rect" id="Node000023" href="$classbitpit_1_1PiercedSyncSlave.html" title="Base class for defining an object that acts like a slave in pierced synchronization." alt="" coords="1000,265,1163,290"/>
+<area shape="poly" id="edge26_Node000022_Node000023" title=" " alt="" coords="1101,300,1111,321,1117,355,1116,383,1106,410,1089,440,1053,498,1034,520,1004,544,955,568,953,563,1001,539,1030,516,1049,494,1084,437,1102,408,1111,382,1112,355,1105,322,1096,303"/>
+<area shape="rect" id="Node000025" href="$classbitpit_1_1PiercedStorageSyncSlave.html" title=" " alt="" coords="879,463,1001,503"/>
+<area shape="poly" id="edge30_Node000025_Node000023" title=" " alt="" coords="1089,303,1091,334,1090,370,1083,407,1065,440,1036,463,1002,476,1000,471,1033,459,1061,437,1078,405,1085,369,1086,334,1083,304"/>
+<area shape="poly" id="edge33_Node000026_Node000023" title=" " alt="" coords="1018,297,997,308,978,323,967,341,961,360,956,359,962,339,974,320,994,304,1016,292"/>
+<area shape="rect" id="Node000024" href="$classbitpit_1_1BasePiercedStorage.html" title="Base class for the pierced storages." alt="" coords="743,265,919,290"/>
+<area shape="poly" id="edge27_Node000022_Node000024" title=" " alt="" coords="825,304,815,343,806,392,801,447,805,502,810,522,819,540,845,563,841,567,815,543,805,524,800,503,796,447,800,391,810,342,820,303"/>
+<area shape="poly" id="edge31_Node000025_Node000024" title=" " alt="" coords="834,303,841,349,848,375,858,399,885,433,915,461,912,465,881,437,854,401,843,377,836,351,829,304"/>
+<area shape="poly" id="edge34_Node000026_Node000024" title=" " alt="" coords="857,297,934,358,931,362,854,301"/>
+<area shape="poly" id="edge29_Node000022_Node000025" title=" " alt="" coords="923,516,890,567,886,564,918,513"/>
+<area shape="poly" id="edge36_Node000022_Node000026" title=" " alt="" coords="883,408,845,431,829,446,816,464,811,477,810,490,819,517,836,542,856,563,852,567,832,546,814,519,805,491,806,476,811,461,825,443,842,427,880,403"/>
+<area shape="poly" id="edge32_Node000025_Node000026" title=" " alt="" coords="947,414,944,424,942,463,936,462,939,424,941,412"/>
+<area shape="poly" id="edge37_Node000021_Node000027" title=" " alt="" coords="884,697,929,716,958,731,988,746,1064,770,1062,775,986,750,956,736,927,721,882,702"/>
+<area shape="poly" id="edge43_Node000029_Node000027" title=" " alt="" coords="815,708,816,728,823,746,845,756,886,769,884,774,843,761,819,750,811,730,810,708"/>
+<area shape="poly" id="edge58_Node000034_Node000027" title=" " alt="" coords="736,702,691,721,650,747,617,774,613,770,647,743,688,716,734,697"/>
+<area shape="poly" id="edge68_Node000037_Node000027" title=" " alt="" coords="733,683,636,695,584,706,534,721,483,746,441,774,438,770,480,741,532,716,583,701,635,690,732,677"/>
+<area shape="poly" id="edge39_Node000019_Node000028" title=" " alt="" coords="936,909,966,932,1000,952,1110,977,1109,983,998,957,963,936,933,913"/>
+<area shape="poly" id="edge50_Node000031_Node000028" title=" " alt="" coords="842,910,823,927,810,952,805,979,800,978,805,951,819,924,838,906"/>
+<area shape="poly" id="edge59_Node000033_Node000028" title=" " alt="" coords="801,895,742,907,685,928,646,953,614,980,611,976,643,948,683,923,741,902,800,890"/>
+<area shape="poly" id="edge69_Node000036_Node000028" title=" " alt="" coords="801,887,669,899,597,910,528,928,468,953,418,981,415,976,465,948,526,923,596,905,668,893,800,882"/>
+<area shape="poly" id="edge41_Node000028_Node000029" title=" " alt="" coords="941,825,919,863,914,860,937,823"/>
+<area shape="poly" id="edge49_Node000031_Node000029" title=" " alt="" coords="1005,817,1046,846,1082,880,1094,899,1101,918,1099,938,1089,956,1074,967,1053,973,1001,978,906,981,894,983,893,978,905,976,1001,973,1052,968,1072,962,1085,953,1094,936,1095,919,1090,901,1078,884,1043,850,1002,822"/>
+<area shape="poly" id="edge44_Node000010_Node000030" title=" " alt="" coords="1028,1109,1233,1168,1231,1173,1027,1114"/>
+<area shape="poly" id="edge60_Node000032_Node000030" title=" " alt="" coords="951,1122,953,1146,960,1170,955,1171,948,1147,946,1122"/>
+<area shape="poly" id="edge70_Node000035_Node000030" title=" " alt="" coords="868,1110,848,1121,830,1134,817,1152,809,1171,804,1170,812,1149,826,1130,845,1116,866,1105"/>
+<area shape="poly" id="edge47_Node000030_Node000031" title=" " alt="" coords="846,1023,919,1066,916,1070,844,1028"/>
+<area shape="poly" id="edge51_Node000009_Node000032" title=" " alt="" coords="934,1222,891,1252,838,1276,835,1271,888,1247,931,1218"/>
+<area shape="poly" id="edge54_Node000032_Node000033" title=" " alt="" coords="630,1025,711,1085,762,1117,814,1144,896,1169,895,1175,812,1149,759,1121,708,1089,627,1030"/>
+<area shape="poly" id="edge56_Node000033_Node000034" title=" " alt="" coords="589,826,579,886,578,920,581,954,589,978,583,979,576,955,573,920,574,885,584,825"/>
+<area shape="poly" id="edge61_Node000009_Node000035" title=" " alt="" coords="805,1225,805,1273,800,1273,800,1225"/>
+<area shape="poly" id="edge64_Node000035_Node000036" title=" " alt="" coords="442,1022,763,1168,760,1173,440,1027"/>
+<area shape="poly" id="edge66_Node000036_Node000037" title=" " alt="" coords="380,823,372,837,362,868,360,894,372,954,380,977,375,979,367,955,355,894,356,867,367,835,376,821"/>
+<area shape="rect" id="Node000038" href="$classbitpit_1_1LevelSetProxyBaseObject.html" title=" " alt="" coords="353,1524,524,1564"/>
+<area shape="poly" id="edge71_Node000003_Node000038" title=" " alt="" coords="444,1577,452,1621,466,1667,494,1717,525,1758,520,1761,490,1720,462,1669,447,1622,439,1578"/>
+<area shape="poly" id="edge74_Node000039_Node000038" title=" " alt="" coords="477,1570,532,1611,529,1615,474,1575"/>
+<area shape="rect" id="Node000041" href="$classbitpit_1_1LevelSetProxyObject.html" title=" " alt="" coords="136,1760,315,1815"/>
+<area shape="poly" id="edge78_Node000041_Node000038" title=" " alt="" coords="412,1576,303,1694,248,1761,244,1758,299,1690,408,1572"/>
+<area shape="poly" id="edge72_Node000003_Node000039" title=" " alt="" coords="552,1682,549,1692,546,1727,546,1760,541,1760,540,1727,544,1692,547,1681"/>
+<area shape="poly" id="edge79_Node000041_Node000039" title=" " alt="" coords="464,1669,390,1694,323,1728,266,1762,263,1758,321,1723,388,1690,462,1664"/>
+<area shape="rect" id="Node000040" href="$classbitpit_1_1LevelSetBooleanBaseObject.html" title="Base class which deals with boolean operation between two LevelSetObjects." alt="" coords="243,1864,456,1904"/>
+<area shape="poly" id="edge75_Node000002_Node000040" title=" " alt="" coords="352,1918,351,1981,346,1981,346,1918"/>
+<area shape="poly" id="edge76_Node000040_Node000041" title=" " alt="" coords="272,1821,326,1862,323,1866,269,1825"/>
+<area shape="rect" id="Node000044" href="$classbitpit_1_1LevelSetBooleanBaseObject.html" title="Base class which deals with boolean operation between two LevelSetObjects." alt="" coords="5,1864,219,1904"/>
+<area shape="poly" id="edge83_Node000044_Node000041" title=" " alt="" coords="185,1826,136,1866,133,1862,182,1821"/>
+<area shape="rect" id="Node000042" title=" " alt="" coords="37,1628,187,1653"/>
+<area shape="poly" id="edge77_Node000041_Node000042" title=" " alt="" coords="132,1663,207,1758,202,1761,127,1666"/>
+<area shape="rect" id="Node000043" href="$classbitpit_1_1LevelSetBooleanObject.html" title="Class which deals with boolean operation between two LevelSetObjects." alt="" coords="16,1989,208,2029"/>
+<area shape="poly" id="edge81_Node000001_Node000043" title=" " alt="" coords="128,2039,144,2065,167,2087,195,2103,227,2114,225,2119,193,2108,164,2091,140,2069,123,2042"/>
+<area shape="poly" id="edge82_Node000043_Node000044" title=" " alt="" coords="115,1918,115,1988,109,1988,109,1918"/>
+</map>

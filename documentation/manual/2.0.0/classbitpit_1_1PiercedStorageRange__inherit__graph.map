@@ -1,0 +1,11 @@
+<map id="bitpit::PiercedStorageRange&lt; value_t, id_t, value_no_cv_t &gt;" name="bitpit::PiercedStorageRange&lt; value_t, id_t, value_no_cv_t &gt;">
+<area shape="rect" id="Node000001" title="The PiercedStorageRange allow to iterate using range&#45;based loops over a PiercedStorage." alt="" coords="505,37,712,77"/>
+<area shape="rect" id="Node000004" href="$classbitpit_1_1PiercedStorageRange.html" title=" " alt="" coords="895,5,1077,45"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="726,45,894,30,895,36,726,50"/>
+<area shape="rect" id="Node000005" href="$classbitpit_1_1PiercedStorageRange.html" title=" " alt="" coords="895,69,1077,109"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="726,65,895,79,894,84,726,70"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1PiercedKernelRange.html" title=" " alt="" coords="281,37,456,77"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="470,55,505,55,505,60,470,60"/>
+<area shape="rect" id="Node000003" href="$classbitpit_1_1PiercedKernelRange.html" title="The PiercedKernelRange allow to iterate using range&#45;based loops over a PiercedStorage." alt="" coords="5,37,180,77"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="194,55,281,55,281,60,194,60"/>
+</map>

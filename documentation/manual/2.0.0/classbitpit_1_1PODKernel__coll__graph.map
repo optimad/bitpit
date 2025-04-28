@@ -1,0 +1,35 @@
+<map id="bitpit::PODKernel" name="bitpit::PODKernel">
+<area shape="rect" id="Node000001" title="The PODKernel class provides an interface to manage the mesh dependent members and functions of a POD..." alt="" coords="2356,102,2479,127"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1VTKBaseStreamer.html" title="The base class to be used to derive VTK streamers form." alt="" coords="2048,74,2215,99"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="2229,93,2356,106,2356,111,2228,99"/>
+<area shape="rect" id="Node000003" href="$classbitpit_1_1PiercedStorage.html" title=" " alt="" coords="2058,124,2205,164"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="2218,135,2332,124,2356,121,2356,126,2332,129,2219,140"/>
+<area shape="rect" id="Node000004" href="$classbitpit_1_1PiercedStorageSyncSlave.html" title=" " alt="" coords="1561,125,1737,165"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="1751,138,1881,134,2024,135,2058,136,2057,141,2024,140,1881,139,1751,143"/>
+<area shape="rect" id="Node000013" href="$classbitpit_1_1PiercedStorage.html" title="Metafunction for generating a pierced storage." alt="" coords="1787,153,1933,193"/>
+<area shape="poly" id="edge20_Node000013_Node000004" title=" " alt="" coords="1751,156,1787,161,1786,166,1751,161"/>
+<area shape="rect" id="Node000005" href="$classbitpit_1_1PiercedSyncSlave.html" title="Base class for defining an object that acts like a slave in pierced synchronization." alt="" coords="687,18,849,43"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="833,13,880,5,937,5,1076,5,1185,6,1292,17,1429,43,1485,56,1538,77,1582,100,1619,123,1617,127,1579,104,1536,82,1483,62,1427,48,1292,22,1185,12,1076,10,937,11,880,11,834,18"/>
+<area shape="rect" id="Node000011" href="$classbitpit_1_1PiercedStorageSyncSlave.html" title=" " alt="" coords="1307,57,1428,97"/>
+<area shape="poly" id="edge12_Node000011_Node000005" title=" " alt="" coords="863,24,1058,25,1171,33,1283,48,1311,55,1310,60,1282,53,1170,38,1057,31,863,29"/>
+<area shape="rect" id="Node000012" href="$classbitpit_1_1PiercedStorageSyncSlave.html" title="Base class for defining storages that acts like a slave in pierced synchronization." alt="" coords="961,123,1137,163"/>
+<area shape="poly" id="edge15_Node000012_Node000005" title=" " alt="" coords="815,46,999,120,997,125,813,51"/>
+<area shape="rect" id="Node000006" href="$classbitpit_1_1BasePiercedStorage.html" title="Base class for the pierced storages." alt="" coords="680,130,856,155"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="844,155,962,172,1128,179,1293,175,1442,165,1561,153,1561,159,1443,170,1293,180,1127,184,961,177,843,160"/>
+<area shape="poly" id="edge13_Node000011_Node000006" title=" " alt="" coords="857,125,880,121,961,108,1061,95,1161,85,1306,77,1307,82,1162,91,1061,100,962,113,880,127,858,130"/>
+<area shape="poly" id="edge16_Node000012_Node000006" title=" " alt="" coords="870,140,961,140,961,145,870,145"/>
+<area shape="rect" id="Node000007" href="$classbitpit_1_1PiercedKernel.html" title=" " alt="" coords="699,244,837,284"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="850,255,1153,224,1345,200,1537,169,1569,163,1570,168,1538,175,1345,205,1154,229,851,260"/>
+<area shape="poly" id="edge17_Node000012_Node000007" title=" " alt="" coords="827,236,1001,160,1003,165,829,241"/>
+<area shape="rect" id="Node000008" href="$classbitpit_1_1BasePiercedKernel.html" title="Base class for the pierced kernel." alt="" coords="225,245,392,270"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="406,254,656,256,699,257,699,263,656,261,406,259"/>
+<area shape="rect" id="Node000010" href="$classbitpit_1_1PiercedKernel.html" title="Metafunction for generating a pierced kernel." alt="" coords="441,277,579,317"/>
+<area shape="poly" id="edge10_Node000010_Node000008" title=" " alt="" coords="387,270,442,281,441,286,386,275"/>
+<area shape="rect" id="Node000009" href="$classbitpit_1_1PiercedSyncMaster.html" title="Base class for defining an object that acts like a master in pierced synchronization." alt="" coords="5,245,176,270"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="190,255,225,255,225,260,190,260"/>
+<area shape="poly" id="edge9_Node000007_Node000010" title=" " alt="" coords="592,284,699,270,700,275,593,289"/>
+<area shape="poly" id="edge11_Node000004_Node000011" title=" " alt="" coords="1442,92,1566,123,1565,128,1441,98"/>
+<area shape="poly" id="edge18_Node000004_Node000012" title=" " alt="" coords="1151,140,1561,142,1561,148,1151,146"/>
+<area shape="poly" id="edge14_Node000011_Node000012" title=" " alt="" coords="1151,125,1282,100,1306,94,1307,99,1283,105,1152,131"/>
+<area shape="poly" id="edge19_Node000003_Node000013" title=" " alt="" coords="1947,161,2058,149,2058,154,1947,167"/>
+</map>

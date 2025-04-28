@@ -1,0 +1,20 @@
+<map id="bitpit::SystemSolver" name="bitpit::SystemSolver">
+<area shape="rect" id="Node000001" title="The SystemSolver class provides methods for building and solving large linear systems." alt="" coords="5,170,144,195"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1DiscretizationStencilSolver.html" title=" " alt="" coords="524,5,701,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="90,157,132,108,160,84,192,64,233,48,277,35,365,19,450,14,524,15,524,20,450,19,365,25,278,40,235,53,195,69,163,88,136,112,94,160"/>
+<area shape="rect" id="Node000003" href="$classbitpit_1_1DiscretizationStencilSolver.html" title=" " alt="" coords="524,179,701,219"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="158,183,193,184,524,194,524,199,193,189,158,188"/>
+<area shape="rect" id="Node000004" href="$classbitpit_1_1DiscretizationStencilSolver.html" title=" " alt="" coords="524,103,701,143"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="101,159,142,131,192,106,276,76,344,61,414,60,501,73,540,85,575,100,573,105,538,90,499,79,413,65,345,66,277,81,194,110,145,135,104,164"/>
+<area shape="rect" id="Node000005" href="$classAMGSystemSolver.html" title="The class AMGSystemSolver is derived form SystemSolver and it allows to solve the linear system using..." alt="" coords="215,265,349,290"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="103,201,134,223,169,243,223,262,221,267,167,248,131,228,100,206"/>
+<area shape="rect" id="Node000006" href="$classbitpit_1_1DiscretizationStencilSolver.html" title=" " alt="" coords="193,121,371,175"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="157,166,193,160,194,165,158,171"/>
+<area shape="rect" id="Node000007" href="$classbitpit_1_1SplitSystemSolver.html" title="The SplitSystemSolver class allows to solve a split linear system." alt="" coords="200,314,364,339"/>
+<area shape="poly" id="edge9_Node000001_Node000007" title=" " alt="" coords="95,205,137,254,164,279,195,300,219,312,217,316,192,305,161,283,133,257,91,208"/>
+<area shape="poly" id="edge6_Node000006_Node000002" title=" " alt="" coords="368,113,557,43,559,48,370,118"/>
+<area shape="poly" id="edge7_Node000006_Node000003" title=" " alt="" coords="385,161,524,182,523,188,384,166"/>
+<area shape="poly" id="edge8_Node000006_Node000004" title=" " alt="" coords="384,141,500,133,524,131,524,136,500,139,385,146"/>
+<area shape="rect" id="Node000008" href="$classAMGSplitSystemSolver.html" title="The class AMGSplitSystemSolver is derived form SplitSystemSolver and it allows to solve the linear sy..." alt="" coords="533,314,692,339"/>
+<area shape="poly" id="edge10_Node000007_Node000008" title=" " alt="" coords="378,324,533,324,533,329,378,329"/>
+</map>

@@ -1,0 +1,11 @@
+<map id="bitpit::DiscretizationStencilSolver&lt; stencil_t, solver_kernel_t &gt;" name="bitpit::DiscretizationStencilSolver&lt; stencil_t, solver_kernel_t &gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="193,62,371,117"/>
+<area shape="rect" id="Node000003" href="$classbitpit_1_1DiscretizationStencilSolver.html" title=" " alt="" coords="524,5,701,45"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="384,67,523,40,524,45,385,72"/>
+<area shape="rect" id="Node000004" href="$classbitpit_1_1DiscretizationStencilSolver.html" title=" " alt="" coords="524,69,701,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="384,87,524,87,524,92,384,92"/>
+<area shape="rect" id="Node000005" href="$classbitpit_1_1DiscretizationStencilSolver.html" title=" " alt="" coords="524,133,701,173"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="385,106,524,134,523,139,384,112"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1SystemSolver.html" title="The SystemSolver class provides methods for building and solving large linear systems." alt="" coords="5,77,144,102"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="158,87,193,87,193,92,158,92"/>
+</map>

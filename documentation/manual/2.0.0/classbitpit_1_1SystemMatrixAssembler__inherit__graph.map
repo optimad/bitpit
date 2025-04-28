@@ -1,0 +1,23 @@
+<map id="bitpit::SystemMatrixAssembler" name="bitpit::SystemMatrixAssembler">
+<area shape="rect" id="Node000001" title="The SystemMatrixAssembler class provides an interface for defining system matrix assemblers." alt="" coords="5,234,205,259"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1DiscretizationStencilSolverAssembler.html" title=" " alt="" coords="589,5,811,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="122,221,176,160,212,128,253,100,294,81,337,65,425,42,512,29,589,23,590,28,512,34,426,47,339,70,296,86,256,105,216,132,179,164,126,225"/>
+<area shape="rect" id="Node000003" href="$classbitpit_1_1DiscretizationStencilSolverAssembler.html" title=" " alt="" coords="589,83,811,123"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="135,224,191,188,269,145,360,105,408,89,457,77,496,73,536,72,612,80,611,85,536,77,496,78,458,83,410,94,362,110,272,150,194,193,137,229"/>
+<area shape="rect" id="Node000004" href="$classbitpit_1_1DiscretizationStencilSolverAssembler.html" title=" " alt="" coords="591,263,809,303"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="219,251,591,273,591,279,219,256"/>
+<area shape="rect" id="Node000005" href="$classbitpit_1_1DiscretizationStencilSolverAssembler.html" title="The DiscretizationStencilSolverAssembler class defines an assembler for building the stencil solver." alt="" coords="255,174,433,229"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="186,229,255,216,256,221,187,234"/>
+<area shape="rect" id="Node000007" href="$classbitpit_1_1SplitSystemMatrixAssembler.html" title="The SplitSystemMatrixAssembler class is the base class for defining assemblers for split system solve..." alt="" coords="262,392,426,432"/>
+<area shape="poly" id="edge9_Node000001_Node000007" title=" " alt="" coords="129,268,183,322,218,352,256,378,280,390,277,394,253,382,215,356,180,326,125,271"/>
+<area shape="rect" id="Node000009" href="$classbitpit_1_1SystemSparseMatrixAssembler.html" title="The SystemSparseMatrixAssembler class defines an assembler for building the system matrix form a spar..." alt="" coords="255,328,433,368"/>
+<area shape="poly" id="edge11_Node000001_Node000009" title=" " alt="" coords="142,264,230,307,279,325,278,330,228,312,140,268"/>
+<area shape="poly" id="edge6_Node000005_Node000002" title=" " alt="" coords="392,164,456,123,552,78,640,43,642,48,554,82,459,128,394,168"/>
+<area shape="poly" id="edge7_Node000005_Node000003" title=" " alt="" coords="445,171,565,137,626,120,628,125,566,143,447,176"/>
+<area shape="poly" id="edge8_Node000005_Node000004" title=" " alt="" coords="446,222,612,260,611,265,445,227"/>
+<area shape="rect" id="Node000006" href="$classbitpit_1_1DiscretizationStencilSolverAssembler.html" title=" " alt="" coords="611,174,789,229"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="446,199,611,199,611,204,446,204"/>
+<area shape="rect" id="Node000008" href="$classbitpit_1_1SplitSystemSparseMatrixAssembler.html" title="The SplitSystemSparseMatrixAssembler class allows to assembly a split system solver from a sparse mat..." alt="" coords="615,348,785,388"/>
+<area shape="poly" id="edge10_Node000007_Node000008" title=" " alt="" coords="440,398,615,376,615,381,440,403"/>
+<area shape="poly" id="edge12_Node000009_Node000008" title=" " alt="" coords="447,351,615,361,615,366,447,356"/>
+</map>

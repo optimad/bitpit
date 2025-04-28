@@ -1,0 +1,14 @@
+<map id="bitpit::DiscretizationStencilStorageInterface&lt; stencil_t &gt;" name="bitpit::DiscretizationStencilStorageInterface&lt; stencil_t &gt;">
+<area shape="rect" id="Node000001" title="The DiscretizationStencilStorageInterface class defines the interface for stencil storage." alt="" coords="5,31,197,71"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1DiscretizationStencilProxyBaseStorage.html" title=" " alt="" coords="639,5,853,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="211,44,247,42,452,34,639,31,639,36,452,39,247,47,211,49"/>
+<area shape="rect" id="Node000004" href="$classbitpit_1_1DiscretizationStencilProxyBaseStorage.html" title="The DiscretizationStencilProxyBaseStorage class defines a proxy for stencil storage." alt="" coords="247,56,428,111"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="211,64,247,68,246,74,211,69"/>
+<area shape="rect" id="Node000003" href="$classbitpit_1_1DiscretizationStencilProxyStorage_3_01stencil__t_00_01PiercedStorage_3_01stencil__t_01_4_01_4.html" title=" " alt="" coords="1064,5,1264,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="867,38,1064,38,1064,43,867,44"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="867,22,1064,22,1064,28,867,27"/>
+<area shape="poly" id="edge7_Node000004_Node000002" title=" " alt="" coords="442,79,526,74,614,63,646,57,647,63,615,69,527,79,442,84"/>
+<area shape="rect" id="Node000005" href="$classbitpit_1_1DiscretizationStencilProxyStorage.html" title=" " alt="" coords="657,84,835,139"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="442,89,452,90,657,103,657,109,452,95,442,95"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="848,97,941,83,1039,65,1070,57,1071,63,1041,70,942,88,849,102"/>
+</map>

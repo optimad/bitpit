@@ -1,0 +1,60 @@
+<map id="bitpit::LevelSetObject" name="bitpit::LevelSetObject">
+<area shape="rect" id="Node000001" title="Interface class for all objects with respect to whom the levelset function may be computed." alt="" coords="221,179,367,205"/>
+<area shape="rect" id="Node000003" href="$classbitpit_1_1LevelSetProxyObject.html" title=" " alt="" coords="861,144,1040,184"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="380,180,497,169,627,160,730,158,833,160,861,160,861,166,833,165,730,164,627,165,497,174,381,185"/>
+<area shape="rect" id="Node000004" href="$classbitpit_1_1LevelSetProxyObject.html" title=" " alt="" coords="1071,211,1301,251"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="338,172,415,149,592,113,665,99,733,89,801,85,872,90,952,104,1045,129,1081,145,1115,166,1166,208,1163,212,1111,170,1079,150,1043,135,951,109,872,95,801,91,733,94,666,104,593,118,417,155,339,177"/>
+<area shape="rect" id="Node000009" href="$classbitpit_1_1LevelSetProxyObject.html" title="Interface class for all objects, which depend on other LevelSetObjects." alt="" coords="420,211,599,266"/>
+<area shape="poly" id="edge10_Node000001_Node000009" title=" " alt="" coords="367,205,420,217,419,222,366,210"/>
+<area shape="rect" id="Node000020" href="$classbitpit_1_1LevelSetSegmentationBaseObject.html" title="Implements visitor pattern fo segmentated geometries." alt="" coords="416,404,603,444"/>
+<area shape="poly" id="edge33_Node000001_Node000020" title=" " alt="" coords="318,213,492,402,488,406,315,217"/>
+<area shape="rect" id="Node000002" href="$classbitpit_1_1VTKBaseStreamer.html" title="The base class to be used to derive VTK streamers form." alt="" coords="5,179,172,205"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="186,189,221,189,221,195,186,195"/>
+<area shape="rect" id="Node000005" href="$classbitpit_1_1LevelSetBooleanBaseObject.html" title=" " alt="" coords="1820,7,2004,47"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="1207,198,1257,141,1290,112,1327,88,1389,61,1454,41,1521,27,1588,18,1714,11,1820,15,1820,20,1715,17,1588,23,1522,32,1455,46,1391,66,1329,93,1293,116,1261,145,1211,202"/>
+<area shape="rect" id="Node000007" href="$classbitpit_1_1LevelSetComplementBaseObject.html" title=" " alt="" coords="1811,240,2013,280"/>
+<area shape="poly" id="edge7_Node000004_Node000007" title=" " alt="" coords="1315,233,1811,253,1810,259,1315,239"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="2279,5,2471,45"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="2018,31,2279,30,2279,36,2018,37"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="2018,16,2279,16,2279,21,2018,21"/>
+<area shape="rect" id="Node000008" href="$classbitpit_1_1LevelSetComplementObject_3_01LevelSetObject_01_4.html" title=" " alt="" coords="2285,240,2466,280"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="2027,265,2285,265,2285,270,2027,271"/>
+<area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="2027,249,2285,250,2285,255,2027,255"/>
+<area shape="poly" id="edge11_Node000009_Node000003" title=" " alt="" coords="612,208,626,205,861,172,861,177,627,211,613,214"/>
+<area shape="poly" id="edge29_Node000009_Node000004" title=" " alt="" coords="612,240,627,240,833,240,1070,233,1070,238,833,245,627,245,612,245"/>
+<area shape="rect" id="Node000010" href="$classbitpit_1_1LevelSetProxyObject.html" title=" " alt="" coords="861,277,1040,331"/>
+<area shape="poly" id="edge12_Node000009_Node000010" title=" " alt="" coords="566,270,596,284,627,295,687,306,749,311,861,310,861,315,748,316,686,311,626,300,594,289,564,275"/>
+<area shape="rect" id="Node000019" href="$classbitpit_1_1LevelSetProxyObject.html" title=" " alt="" coords="1068,370,1304,425"/>
+<area shape="poly" id="edge30_Node000009_Node000019" title=" " alt="" coords="537,276,575,323,600,345,628,361,682,369,795,377,1068,390,1067,395,795,382,681,374,626,367,597,349,572,327,533,279"/>
+<area shape="rect" id="Node000011" href="$classbitpit_1_1LevelSetBooleanBaseObject.html" title="Base class which deals with boolean operation between two LevelSetObjects." alt="" coords="1343,103,1556,143"/>
+<area shape="poly" id="edge13_Node000010_Node000011" title=" " alt="" coords="1053,290,1212,270,1274,260,1302,252,1313,236,1315,219,1316,199,1326,178,1351,156,1381,141,1383,145,1354,161,1330,182,1321,200,1320,219,1318,238,1306,257,1275,265,1213,275,1054,295"/>
+<area shape="rect" id="Node000015" href="$classbitpit_1_1LevelSetComplementBaseObject.html" title="Base class that allows to evaluate the complement of a LevelSetObjects." alt="" coords="1328,301,1571,341"/>
+<area shape="poly" id="edge21_Node000010_Node000015" title=" " alt="" coords="1054,305,1328,314,1328,320,1053,310"/>
+<area shape="poly" id="edge17_Node000011_Node000005" title=" " alt="" coords="1569,98,1771,57,1829,44,1830,49,1773,63,1570,103"/>
+<area shape="rect" id="Node000012" href="$classbitpit_1_1LevelSetBooleanObject.html" title="Class which deals with boolean operation between two LevelSetObjects." alt="" coords="1816,85,2008,125"/>
+<area shape="poly" id="edge14_Node000011_Node000012" title=" " alt="" coords="1570,116,1816,106,1816,112,1570,121"/>
+<area shape="rect" id="Node000014" href="$classbitpit_1_1LevelSetBooleanBaseObject.html" title=" " alt="" coords="1796,161,2028,215"/>
+<area shape="poly" id="edge18_Node000011_Node000014" title=" " alt="" coords="1557,143,1595,149,1796,175,1796,180,1594,155,1556,148"/>
+<area shape="poly" id="edge15_Node000012_Node000006" title=" " alt="" coords="2021,84,2279,39,2280,44,2022,89"/>
+<area shape="rect" id="Node000013" href="$classbitpit_1_1LevelSetBooleanObject_3_01LevelSetSegmentationBaseObject_01_4.html" title=" " alt="" coords="2253,168,2497,208"/>
+<area shape="poly" id="edge16_Node000012_Node000013" title=" " alt="" coords="2022,122,2230,159,2266,165,2265,171,2229,164,2021,127"/>
+<area shape="poly" id="edge19_Node000014_Node000013" title=" " alt="" coords="2042,194,2253,193,2253,199,2042,199"/>
+<area shape="poly" id="edge20_Node000014_Node000013" title=" " alt="" coords="2042,177,2253,177,2253,183,2042,182"/>
+<area shape="poly" id="edge25_Node000015_Node000007" title=" " alt="" coords="1584,304,1772,280,1810,274,1811,280,1772,285,1585,309"/>
+<area shape="rect" id="Node000016" href="$classbitpit_1_1LevelSetComplementObject.html" title="Class that allows to evaluate the complement of a LevelSetObjects." alt="" coords="1805,308,2019,348"/>
+<area shape="poly" id="edge22_Node000015_Node000016" title=" " alt="" coords="1584,321,1805,324,1805,329,1584,326"/>
+<area shape="rect" id="Node000018" href="$classbitpit_1_1LevelSetComplementBaseObject.html" title=" " alt="" coords="1796,395,2028,450"/>
+<area shape="poly" id="edge26_Node000015_Node000018" title=" " alt="" coords="1535,342,1595,357,1796,399,1795,404,1594,363,1534,348"/>
+<area shape="poly" id="edge23_Node000016_Node000008" title=" " alt="" coords="2032,308,2284,271,2285,276,2033,313"/>
+<area shape="rect" id="Node000017" href="$classbitpit_1_1LevelSetComplementObject_3_01LevelSetSegmentationBaseObject_01_4.html" title=" " alt="" coords="2259,395,2491,450"/>
+<area shape="poly" id="edge24_Node000016_Node000017" title=" " alt="" coords="2025,348,2259,396,2258,402,2024,353"/>
+<area shape="poly" id="edge27_Node000018_Node000017" title=" " alt="" coords="2042,428,2259,428,2259,433,2042,434"/>
+<area shape="poly" id="edge28_Node000018_Node000017" title=" " alt="" coords="2042,412,2259,412,2259,417,2042,417"/>
+<area shape="poly" id="edge31_Node000019_Node000014" title=" " alt="" coords="1223,358,1270,320,1327,287,1386,264,1448,244,1574,216,1693,198,1796,189,1796,194,1694,203,1574,221,1449,249,1388,269,1329,292,1273,324,1226,362"/>
+<area shape="poly" id="edge32_Node000019_Node000018" title=" " alt="" coords="1318,399,1796,416,1796,421,1318,405"/>
+<area shape="poly" id="edge34_Node000020_Node000019" title=" " alt="" coords="616,417,1067,399,1068,405,617,422"/>
+<area shape="rect" id="Node000021" href="$classbitpit_1_1LevelSetSegmentationObject.html" title="Implements visitor pattern fo segmentated geometries." alt="" coords="857,461,1044,501"/>
+<area shape="poly" id="edge35_Node000020_Node000021" title=" " alt="" coords="617,439,627,440,857,469,857,474,626,445,616,444"/>
+<area shape="rect" id="Node000022" href="$classbitpit_1_1LevelSetMaskObject.html" title="Implements the levelset around a set of cells or interfaces of the kernel." alt="" coords="1361,469,1538,494"/>
+<area shape="poly" id="edge36_Node000021_Node000022" title=" " alt="" coords="1058,479,1361,479,1361,484,1058,484"/>
+</map>
