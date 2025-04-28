@@ -11,7 +11,7 @@ MANUAL_BUILD_DIR="${MANUAL_ROOT_DIR}/build"
 # Generate build directory
 rm -rf "${MANUAL_BUILD_DIR}"
 mkdir "${MANUAL_BUILD_DIR}"
-mkdir "${MANUAL_BUILD_DIR}/doxygen_templates"
+mkdir "${MANUAL_BUILD_DIR}/_doxygen_templates"
 cd "${MANUAL_BUILD_DIR}"
 
 # Link files needed by jekyll
@@ -20,8 +20,8 @@ cp -r "${MANUAL_ROOT_DIR}/_layouts" "${MANUAL_BUILD_DIR}"
 cp -r "${MANUAL_ROOT_DIR}/stylesheets" "${MANUAL_BUILD_DIR}"
 cp "${JEKYLL_ROOT_DIR}/_includes/"* "${MANUAL_BUILD_DIR}/_includes/"
 cp "${JEKYLL_ROOT_DIR}/_layouts/"* "${MANUAL_BUILD_DIR}/_layouts/"
-cp "${MANUAL_ROOT_DIR}/doxygen_footer.html" "${MANUAL_BUILD_DIR}/doxygen_templates"
-cp "${MANUAL_ROOT_DIR}/doxygen_header.html" "${MANUAL_BUILD_DIR}/doxygen_templates"
+cp "${MANUAL_ROOT_DIR}/doxygen_footer.html" "${MANUAL_BUILD_DIR}"
+cp "${MANUAL_ROOT_DIR}/doxygen_header.html" "${MANUAL_BUILD_DIR}"
 
 # Configration files needed by jekyll
 JEKYLL_CONFIG_GLOBAL="${JEKYLL_ROOT_DIR}/_config.yml"
@@ -52,8 +52,6 @@ bundle exec jekyll build \
 
 # Generate doxygen files
 cd ${MANUAL_BUILD_DIR}
-mkdir bitpit
-cd bitpit
 
 cmake ${BITPIT_SOURCE_DIR} \
     -DCMAKE_INSTALL_PREFIX:PATH="" \
@@ -61,7 +59,7 @@ cmake ${BITPIT_SOURCE_DIR} \
     -DBITPIT_ENABLE_MPI="ON" \
     -DBLAS_VENDOR="Generic" \
     -DPETSC_ARCH="" \
-    -DPETSC_DIR="/usr/lib64/mpi/gcc/openmpi4/lib64/petsc/3.18.5/linux-gnu-c-opt" \
+    -DPETSC_DIR="/usr/lib64/mpi/gcc/openmpi4" \
     -DMPI_INCLUDE_PATH="/usr/lib64/mpi/gcc/openmpi4/include/" \
     -DMPIEXEC_EXECUTABLE="/usr/lib64/mpi/gcc/openmpi4/bin/mpiexec" \
     -DMPI_CXX_COMPILER="/usr/lib64/mpi/gcc/openmpi4/bin/mpicxx" \
