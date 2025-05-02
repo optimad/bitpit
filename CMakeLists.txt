@@ -45,6 +45,9 @@ include(GNUInstallDirs)
 
 include(CTest)
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+include(DependencyResolution)
+
 #------------------------------------------------------------------------------------#
 # Variables visible to the user
 #
@@ -653,6 +656,17 @@ else()
     endforeach()
 endif()
 
+# Initialize dependency resolution
+set(SELF_CONTAINMENT_THIRD_PARTY_PATTERNS ".*mpi.*;.*blas.*;.*cblas.*;.*lapack.*;.*lapacke.*;.*petsc.*;.*boost.*;.*metis.*")
+set(SELF_CONTAINMENT_THIRD_PARTY_DIR "${CMAKE_INSTALL_LIBDIR}/bitpit/third_party")
+set(RUNTIME_DLLS_EXCLUDE_PATTERNS ".*bitpit.*")
+set(RUNTIME_DLLS_DIR "${CMAKE_INSTALL_LIBDIR}/bitpit/third_party")
+initialize_dependency_resolution(BITPIT
+                                 "${SELF_CONTAINMENT_THIRD_PARTY_PATTERNS}"
+                                 "${SELF_CONTAINMENT_THIRD_PARTY_DIR}"
+                                 "${RUNTIME_DLLS_EXCLUDE_PATTERNS}"
+                                 "${RUNTIME_DLLS_DIR}")
+
 # Find external dependencies
 #
 # Low-level dependencies are processed first.
@@ -769,6 +783,7 @@ set(BITPIT_LIBRARY ${PROJECT_NAME} CACHE INTERNAL "bitpit library name" FORCE)
 
 add_library(${BITPIT_LIBRARY})
 configureBitpitTargetDependencies(${BITPIT_LIBRARY} PUBLIC)
+configure_dependency_resolution(${BITPIT_LIBRARY} "${CMAKE_INSTALL_LIBDIR}")
 
 set_target_properties(${BITPIT_LIBRARY}
     PROPERTIES
