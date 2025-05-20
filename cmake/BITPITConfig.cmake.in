@@ -44,7 +44,7 @@ endif()
 # Location of UseBITPIT.cmake file.
 #-----------------------------------------------------------------------------
 
-SET(BITPIT_USE_FILE "@CMAKE_INSTALL_PREFIX@/@BITPIT_INSTALL_CMAKEDIR@/UseBITPIT.cmake")
+SET(BITPIT_USE_FILE "${CMAKE_CURRENT_LIST_DIR}/UseBITPIT.cmake")
 
 #-----------------------------------------------------------------------------
 # Programming languages
@@ -56,7 +56,7 @@ set(BITPIT_LANGUAGES "@BITPIT_LANGUAGES@")
 # Find bitpit external dependencies
 #-----------------------------------------------------------------------------
 
-list(APPEND CMAKE_MODULE_PATH "@CMAKE_INSTALL_PREFIX@/@BITPIT_INSTALL_CMAKEDIR@")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
 
 # Set external dependencies information
 set(_EXTERNAL_DEPENDENCIES "@BITPIT_EXTERNAL_DEPENDENCIES@")
