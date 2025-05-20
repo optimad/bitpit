@@ -674,7 +674,7 @@ set(BITPIT_EXTERNAL_DEPENDENCIES "")
 
 list(FIND EXTERNAL_DEPS "MPI" _MPI_index)
 if (${_MPI_index} GREATER -1)
-    find_package(MPI)
+    find_package(MPI REQUIRED)
 
     list (INSERT BITPIT_EXTERNAL_DEPENDENCIES 0 "MPI")
 endif()
