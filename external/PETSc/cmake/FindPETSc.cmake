@@ -444,3 +444,59 @@ find_package_handle_standard_args (PETSc
   REQUIRED_VARS PETSC_INCLUDES PETSC_LIBRARIES PETSC_EXECUTABLE_RUNS
   VERSION_VAR PETSC_VERSION
   FAIL_MESSAGE "PETSc could not be found.  Be sure to set PETSC_DIR and PETSC_ARCH.")
+
+#-----------------------------------------------------------------------------
+# Create imported target
+#-----------------------------------------------------------------------------
+if (NOT TARGET PETSc::PETSc)
+    set(PETSC_LIBRARY_TARGETS "")
+    foreach(LIBRARY_PATH ${PETSC_LIBRARIES})
+        get_filename_component(LIBRARY_FILENAME "${LIBRARY_PATH}" NAME)
+        get_filename_component(LIBRARY_EXTENSION "${LIBRARY_PATH}" LAST_EXT)
+
+        string(REGEX REPLACE "\\.[^.]*$" "" LIBRARY_TARGET "${LIBRARY_FILENAME}")
+        string(REGEX REPLACE "^lib" "" LIBRARY_TARGET "${LIBRARY_TARGET}")
+        set(LIBRARY_TARGET "PETSc::${LIBRARY_TARGET}_library")
+
+        if (LIBRARY_EXTENSION STREQUAL ".a")
+            set(TARGET_TYPE "STATIC")
+            set(TARGET_IMPORTED_LOCATION "${LIBRARY_PATH}")
+        elseif (LIBRARY_EXTENSION STREQUAL ".lib")
+            get_filename_component(LIBRARY_BASENAME "${LIBRARY_FILENAME}" NAME_WE)
+            get_filename_component(LIBRARY_DIRECTORY "${LIBRARY_PATH}" DIRECTORY)
+            set(LIBRARY_DLL_SEARCH_PATHS
+                "${LIBRARY_DIRECTORY}"
+                "${LIBRARY_DIRECTORY}/../bin"
+            )
+
+            set(TARGET_TYPE "STATIC")
+            set(TARGET_IMPORTED_LOCATION "${LIBRARY_PATH}")
+            foreach(LIBRARY_DLL_SEARCH_PATH IN LISTS LIBRARY_DLL_SEARCH_PATHS)
+                set(CANDIDATE_LIBRARY_DLL_PATH "${LIBRARY_DLL_SEARCH_PATH}/${LIBRARY_BASENAME}.dll")
+                if(EXISTS "${CANDIDATE_LIBRARY_DLL_PATH}")
+                    set(TARGET_TYPE "SHARED")
+                    set(TARGET_IMPORTED_LOCATION "${CANDIDATE_LIBRARY_DLL_PATH}")
+                    break()
+                endif()
+            endforeach()
+        elseif (LIBRARY_EXTENSION STREQUAL ".so")
+            set(TARGET_TYPE "SHARED")
+            set(TARGET_IMPORTED_LOCATION "${LIBRARY_PATH}")
+        elseif (LIBRARY_EXTENSION STREQUAL ".dll")
+            set(TARGET_TYPE "SHARED")
+            set(TARGET_IMPORTED_LOCATION "${LIBRARY_PATH}")
+        endif()
+
+        add_library(${LIBRARY_TARGET} ${TARGET_TYPE} IMPORTED)
+        set_target_properties(${LIBRARY_TARGET} PROPERTIES IMPORTED_LOCATION ${TARGET_IMPORTED_LOCATION})
+        if (WIN32 AND TARGET_TYPE STREQUAL "SHARED")
+            set_target_properties(${LIBRARY_TARGET} PROPERTIES IMPORTED_IMPLIB "${LIBRARY_PATH}")
+        endif()
+        set_target_properties(${LIBRARY_TARGET} PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${PETSC_INCLUDES}")
+        target_compile_definitions(${LIBRARY_TARGET} INTERFACE ${PETSC_DEFINITIONS})
+        list(APPEND PETSC_LIBRARY_TARGETS ${LIBRARY_TARGET})
+    endforeach()
+
+    add_library(PETSc::PETSc INTERFACE IMPORTED)
+    set_target_properties(PETSc::PETSc PROPERTIES INTERFACE_LINK_LIBRARIES "${PETSC_LIBRARY_TARGETS}")
+endif()

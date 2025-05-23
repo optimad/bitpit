@@ -116,8 +116,7 @@ function(configureBitpitTargetDependencies TARGET_NAME DEPENDENCIES_SCOPE)
     endif()
 
     if (PETSC_FOUND)
-        target_link_libraries(${TARGET_NAME} ${DEPENDENCIES_SCOPE} ${PETSC_LIBRARIES})
-        target_include_directories(${TARGET_NAME} ${DEPENDENCIES_SCOPE} ${PETSC_INCLUDES})
+        target_link_libraries(${TARGET_NAME} ${DEPENDENCIES_SCOPE} PETSc::PETSc)
     endif()
     unset(_PETSc_index)
 
