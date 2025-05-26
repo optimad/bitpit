@@ -126,8 +126,7 @@ function(configureBitpitTargetDependencies TARGET_NAME DEPENDENCIES_SCOPE)
     endif()
 
     if (METIS_FOUND)
-        target_link_libraries(${TARGET_NAME} ${DEPENDENCIES_SCOPE} ${METIS_LIBRARIES})
-        target_include_directories(${TARGET_NAME} ${DEPENDENCIES_SCOPE} ${METIS_INCLUDE_DIRS})
+        target_link_libraries(${TARGET_NAME} ${DEPENDENCIES_SCOPE} METIS::METIS)
 
         target_compile_definitions(${BITPIT_LIBRARY} ${DEPENDENCIES_SCOPE} "BITPIT_ENABLE_METIS=1")
     else()
