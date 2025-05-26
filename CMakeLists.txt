@@ -108,11 +108,10 @@ function(configureBitpitTargetDependencies TARGET_NAME DEPENDENCIES_SCOPE)
     endif()
 
     if (LAPACKE_FOUND)
-        set(LAPACKE_PRIVATE_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/external/LAPACKE/include")
+        target_link_libraries(${TARGET_NAME} ${DEPENDENCIES_SCOPE} LAPACKE::LAPACKE)
 
-        target_link_libraries(${TARGET_NAME} ${DEPENDENCIES_SCOPE} ${LAPACKE_LIBRARIES})
+        set(LAPACKE_PRIVATE_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/external/LAPACKE/include")
         target_include_directories(${TARGET_NAME} PRIVATE ${LAPACKE_PRIVATE_INCLUDE_DIR})
-        target_include_directories(${TARGET_NAME} ${DEPENDENCIES_SCOPE} ${LAPACKE_INCLUDE_DIRS})
     endif()
 
     if (PETSC_FOUND)
