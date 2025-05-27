@@ -940,9 +940,11 @@ SET(CMAKE_CXX_FLAGS_GNUPROFILING "-pg" CACHE STRING
     "Flags used by the C++ compiler during GNU profiling builds." FORCE)
 MARK_AS_ADVANCED(CMAKE_CXX_FLAGS_GNUPROFILING)
 
-SET(CMAKE_C_FLAGS_GNUPROFILING "-pg" CACHE STRING
-    "Flags used by the C compiler during GNU profiling builds." FORCE)
-MARK_AS_ADVANCED(CMAKE_C_FLAGS_GNUPROFILING)
+if ("C" IN_LIST BITPIT_LANGUAGES)
+    SET(CMAKE_C_FLAGS_GNUPROFILING "-pg" CACHE STRING
+        "Flags used by the C compiler during GNU profiling builds." FORCE)
+    MARK_AS_ADVANCED(CMAKE_C_FLAGS_GNUPROFILING)
+endif()
 
 SET(CMAKE_EXE_LINKER_FLAGS_GNUPROFILING "-pg" CACHE STRING
     "Flags used for linking binaries during GNU profiling builds." FORCE)
@@ -957,9 +959,11 @@ SET(CMAKE_CXX_FLAGS_SCALASCAPROFILING "-O2" CACHE STRING
     "Flags used by the C++ compiler during Scalasca profiling builds." FORCE)
 MARK_AS_ADVANCED(CMAKE_CXX_FLAGS_SCALASCAPROFILING)
 
-SET(CMAKE_C_FLAGS_SCALASCAPROFILING "-O2" CACHE STRING
-    "Flags used by the C compiler during Scalasca builds." FORCE)
-MARK_AS_ADVANCED(CMAKE_C_FLAGS_SCALASCAPROFILING)
+if ("C" IN_LIST BITPIT_LANGUAGES)
+    SET(CMAKE_C_FLAGS_SCALASCAPROFILING "-O2" CACHE STRING
+        "Flags used by the C compiler during Scalasca builds." FORCE)
+    MARK_AS_ADVANCED(CMAKE_C_FLAGS_SCALASCAPROFILING)
+endif()
 
 SET(CMAKE_EXE_LINKER_FLAGS_SCALASCAPROFILING "" CACHE STRING
     "Flags used for linking binaries during Scalasca builds." FORCE)
@@ -1000,24 +1004,31 @@ endif()
 
 # Standard build types
 if (MSVC)
-    set(CMAKE_C_FLAGS_RELWITHDEBINFO "/O2 /Zi /Zo /Oy- /Ob0 /MDd")
-    set(CMAKE_C_FLAGS_DEBUG "/Od /Zi /Oy- /Ob0 /MDd")
-    set(CMAKE_C_FLAGS_RELEASE "/O2 /MD")
-    set(CMAKE_C_FLAGS_MINSIZEREL "/O1 /MD")
+    if ("C" IN_LIST BITPIT_LANGUAGES)
+        set(CMAKE_C_FLAGS_RELWITHDEBINFO "/O2 /Zi /Zo /Oy- /Ob0 /MDd")
+        set(CMAKE_C_FLAGS_DEBUG "/Od /Zi /Oy- /Ob0 /MDd")
+        set(CMAKE_C_FLAGS_RELEASE "/O2 /MD")
+        set(CMAKE_C_FLAGS_MINSIZEREL "/O1 /MD")
+    endif()
 
     set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "/O2 /Zi /Zo /Oy- /Ob0 /MDd")
     set(CMAKE_CXX_FLAGS_DEBUG "/Od /Zi /Oy- /Ob0 /MDd")
     set(CMAKE_CXX_FLAGS_RELEASE "/O2 /MD")
     set(CMAKE_CXX_FLAGS_MINSIZEREL "/O1 /MD")
 
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3 /wd4267 /wd4250 /Zc:preprocessor")
+    if ("C" IN_LIST BITPIT_LANGUAGES)
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3 /wd4267 /wd4250 /Zc:preprocessor")
+    endif()
+
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /wd4267 /wd4250 /Zc:preprocessor")
 else()
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0")
-    set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
-    set(CMAKE_C_FLAGS_RELWITHSANITIZE "-O2 -g -fno-omit-frame-pointer -fno-common ${C_SANITIZE_MODULE_FLAGS}")
-    set(CMAKE_C_FLAGS_DEBUG "-O0 -g")
-    set(CMAKE_C_FLAGS_RELEASE "-O2")
+    if ("C" IN_LIST BITPIT_LANGUAGES)
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0")
+        set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
+        set(CMAKE_C_FLAGS_RELWITHSANITIZE "-O2 -g -fno-omit-frame-pointer -fno-common ${C_SANITIZE_MODULE_FLAGS}")
+        set(CMAKE_C_FLAGS_DEBUG "-O0 -g")
+        set(CMAKE_C_FLAGS_RELEASE "-O2")
+    endif()
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmessage-length=0")
     set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
@@ -1040,23 +1051,27 @@ else()
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wsuggest-override")
     endif()
 
-    CHECK_C_COMPILER_FLAG("-Wall" C_SUPPORTS_WALL)
-    if(C_SUPPORTS_WALL)
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
-    endif()
+    if ("C" IN_LIST BITPIT_LANGUAGES)
+        CHECK_C_COMPILER_FLAG("-Wall" C_SUPPORTS_WALL)
+        if(C_SUPPORTS_WALL)
+            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
+        endif()
 
-    CHECK_C_COMPILER_FLAG("-Wextra" C_SUPPORTS_WEXTRA)
-    if(C_SUPPORTS_WEXTRA)
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wextra")
+        CHECK_C_COMPILER_FLAG("-Wextra" C_SUPPORTS_WEXTRA)
+        if(C_SUPPORTS_WEXTRA)
+            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wextra")
+        endif()
     endif()
 
     set(CMAKE_EXE_LINKER_FLAGS_RELWITHSANITIZE "-fno-omit-frame-pointer -fno-common ${CXX_SANITIZE_MODULE_FLAGS}")
 endif()
 
 # Coverage build type
-SET(CMAKE_C_FLAGS_COVERAGE "-g -O0 -fprofile-arcs -ftest-coverage" CACHE STRING
-    "Flags used by the C compiler during coverage builds." FORCE)
-MARK_AS_ADVANCED(CMAKE_C_FLAGS_COVERAGE)
+if ("C" IN_LIST BITPIT_LANGUAGES)
+    SET(CMAKE_C_FLAGS_COVERAGE "-g -O0 -fprofile-arcs -ftest-coverage" CACHE STRING
+        "Flags used by the C compiler during coverage builds." FORCE)
+    MARK_AS_ADVANCED(CMAKE_C_FLAGS_COVERAGE)
+endif()
 
 SET(CMAKE_CXX_FLAGS_COVERAGE "-g -O0 -fprofile-arcs -ftest-coverage" CACHE STRING
     "Flags used by the C++ compiler during coverage builds." FORCE)
@@ -1134,7 +1149,9 @@ scalasca ${C_FLAGS_INSTRUMENT} \"$@\"
     file(REMOVE  scalasca_c_compiler)
 
     set(CMAKE_CXX_COMPILER "${PROJECT_BINARY_DIR}/scalasca_cxx_compiler")
-    set(CMAKE_C_COMPILER   "${PROJECT_BINARY_DIR}/scalasca_c_compiler")
+    if ("C" IN_LIST BITPIT_LANGUAGES)
+        set(CMAKE_C_COMPILER "${PROJECT_BINARY_DIR}/scalasca_c_compiler")
+    endif()
 endif ()
 
 # Check the features supported by the compiler
