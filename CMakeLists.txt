@@ -90,8 +90,7 @@ function(configureBitpitTargetDependencies TARGET_NAME DEPENDENCIES_SCOPE)
     endif()
 
     if (BLAS_FOUND)
-        target_link_libraries(${TARGET_NAME} ${DEPENDENCIES_SCOPE} ${BLAS_LIBRARIES})
-        target_include_directories(${TARGET_NAME} ${DEPENDENCIES_SCOPE} ${BLAS_INCLUDE_DIRS})
+        target_link_libraries(${TARGET_NAME} ${DEPENDENCIES_SCOPE} BLAS::BLAS)
     endif()
 
     if (CBLAS_FOUND)
