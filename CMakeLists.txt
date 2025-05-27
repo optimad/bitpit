@@ -94,11 +94,10 @@ function(configureBitpitTargetDependencies TARGET_NAME DEPENDENCIES_SCOPE)
     endif()
 
     if (CBLAS_FOUND)
-        set(CBLAS_PRIVATE_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/external/CBLAS/include")
+        target_link_libraries(${TARGET_NAME} ${DEPENDENCIES_SCOPE} CBLAS::CBLAS)
 
-        target_link_libraries(${TARGET_NAME} ${DEPENDENCIES_SCOPE} ${CBLAS_LIBRARIES})
+        set(CBLAS_PRIVATE_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/external/CBLAS/include")
         target_include_directories(${TARGET_NAME} PRIVATE ${CBLAS_PRIVATE_INCLUDE_DIR})
-        target_include_directories(${TARGET_NAME} ${DEPENDENCIES_SCOPE} ${CBLAS_INCLUDE_DIRS})
     endif()
 
     if (LAPACK_FOUND)
