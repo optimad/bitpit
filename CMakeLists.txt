@@ -102,7 +102,7 @@ function(configureBitpitTargetDependencies TARGET_NAME DEPENDENCIES_SCOPE)
     endif()
 
     if (LAPACK_FOUND)
-        target_link_libraries(${TARGET_NAME} ${DEPENDENCIES_SCOPE} ${LAPACK_LIBRARIES})
+        target_link_libraries(${TARGET_NAME} ${DEPENDENCIES_SCOPE} LAPACK::LAPACK)
         target_include_directories(${TARGET_NAME} ${DEPENDENCIES_SCOPE}${LAPACK_INCLUDE_DIRS})
     endif()
 
