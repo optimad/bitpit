@@ -1026,31 +1026,26 @@ else()
     set(CMAKE_CXX_FLAGS_RELEASE "-O2")
 
     CHECK_CXX_COMPILER_FLAG("-Wall" CXX_SUPPORTS_WALL)
-
     if(CXX_SUPPORTS_WALL)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
     endif()
 
     CHECK_CXX_COMPILER_FLAG("-Wextra" CXX_SUPPORTS_WEXTRA)
-
     if(CXX_SUPPORTS_WEXTRA)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
     endif()
 
     CHECK_CXX_COMPILER_FLAG("-Wsuggest-override" CXX_SUPPORTS_WSUGGEST_OVERRIDE)
-
     if(CXX_SUPPORTS_WSUGGEST_OVERRIDE)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wsuggest-override")
     endif()
 
     CHECK_C_COMPILER_FLAG("-Wall" C_SUPPORTS_WALL)
-
     if(C_SUPPORTS_WALL)
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
     endif()
 
     CHECK_C_COMPILER_FLAG("-Wextra" C_SUPPORTS_WEXTRA)
-
     if(C_SUPPORTS_WEXTRA)
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wextra")
     endif()
