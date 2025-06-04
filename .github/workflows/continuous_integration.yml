@@ -26,8 +26,6 @@ jobs:
         run: |
           DOCKER_BUILDKIT=1 docker buildx build \
           --builder=container \
-          --cache-from type=local,src=/home/bob/products/bitpit/ubuntu-cache \
-          --cache-to type=local,dest=/home/bob/products/bitpit/ubuntu-cache \
           --rm \
           --target bitpit-environment \
           -f bitpit/environments/ubuntu/Dockerfile .
@@ -65,7 +63,6 @@ jobs:
         run: |
           DOCKER_BUILDKIT=1 docker buildx build \
           --builder=container \
-          --cache-from type=local,src=/home/bob/products/bitpit/ubuntu-cache \
           --rm \
           --build-arg COMPILER=${{ matrix.compiler }} \
           --build-arg MPI=${{ matrix.mpi }} \
@@ -77,7 +74,6 @@ jobs:
         run: |
           DOCKER_BUILDKIT=1 docker buildx build \
           --builder=container \
-          --cache-from type=local,src=/home/bob/products/bitpit/ubuntu-cache \
           --rm \
           --build-arg COMPILER=${{ matrix.compiler }} \
           --build-arg MPI=${{ matrix.mpi }} \
