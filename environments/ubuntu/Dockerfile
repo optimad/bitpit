@@ -1,4 +1,4 @@
-FROM ubuntu:20.04 AS bitpit-ubuntu-base
+FROM ubuntu:focal-20250404 AS bitpit-ubuntu-base
 LABEL stage=bitpit-ubuntu-base
 ENV DEBIAN_FRONTEND noninteractive
 RUN sed -i "s/htt[p|ps]:\/\/archive.ubuntu.com\/ubuntu\//mirror:\/\/mirrors.ubuntu.com\/mirrors.txt/g" /etc/apt/sources.list && \
