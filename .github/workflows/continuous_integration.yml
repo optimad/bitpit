@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   setup-linux:
-    runs-on: ubuntu
+    runs-on: [self-hosted, Linux, esteco]
     name: Setup - Linux
     steps:
       - name: Checkout build environment information
@@ -33,7 +33,7 @@ jobs:
         run: |
           rm -rf bitpit
   tests-linux:
-    runs-on: ubuntu
+    runs-on: [self-hosted, Linux, esteco]
     needs: setup-linux
     name: Linux (${{ matrix.compiler }}) - MPI ${{ matrix.mpi }} - Debug ${{ matrix.debug }}
     strategy:
@@ -81,7 +81,7 @@ jobs:
           --target bitpit-test \
           -f environments/ubuntu/Dockerfile .
   tests-windows:
-    runs-on: Windows
+    runs-on: [self-hosted, Windows]
     name: Windows (MSVC) - MPI ${{ matrix.mpi }} - Debug ${{ matrix.debug }}
     strategy:
       fail-fast: false
