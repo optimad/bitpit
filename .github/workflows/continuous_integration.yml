@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   setup-linux:
-    runs-on: [self-hosted, Linux, esteco]
+    runs-on: [self-hosted, Linux, external]
     name: Setup - Linux
     steps:
       - name: Checkout build environment information
@@ -33,7 +33,7 @@ jobs:
         run: |
           rm -rf bitpit
   tests-linux:
-    runs-on: [self-hosted, Linux, esteco]
+    runs-on: [self-hosted, Linux, external]
     needs: setup-linux
     name: Linux (${{ matrix.compiler }}) - MPI ${{ matrix.mpi }} - Debug ${{ matrix.debug }}
     strategy:
@@ -81,7 +81,7 @@ jobs:
           --target bitpit-test \
           -f environments/ubuntu/Dockerfile .
   tests-windows:
-    runs-on: [self-hosted, Windows]
+    runs-on: [self-hosted, win11, external]
     name: Windows (MSVC) - MPI ${{ matrix.mpi }} - Debug ${{ matrix.debug }}
     strategy:
       fail-fast: false
@@ -104,6 +104,9 @@ jobs:
 
           echo Prepare environment
 
+          echo preloading build tools variables
+          call C:\BuildTools\VC\Auxiliary\Build\vcvars64.bat
+
           REM Calling setvars.bat works properly only if called with call statement.
           call "C:\Program Files (x86)\Intel\oneAPI\setvars.bat"
           IF %SETVARS_COMPLETED% == 1 (echo   MKL status.......... Loaded) else (echo   MKL status.......... Error)
@@ -113,8 +116,8 @@ jobs:
           IF "${{ matrix.debug }}" == "ON" (set "BUILD_TYPE=Debug") ELSE (set "BUILD_TYPE=Release")
           echo   Build type.......... %BUILD_TYPE%
 
-          set "PETSC_DIR=C:\petsc\3_19_5"
-          IF "${{ matrix.mpi }}" == "OFF" (set "PETSC_DIR=%PETSC_DIR%SERIAL")
+          set "PETSC_DIR=C:\petsc-mpi"
+          IF "${{ matrix.mpi }}" == "OFF" (set "PETSC_DIR=C:\petsc")
           echo   PETSc directory..... %PETSC_DIR%
 
           set "INSTALL_DIR=%cd%/install"
@@ -131,7 +134,7 @@ jobs:
           echo Configure bitpit
           set "CMAKE_VARIABLES="
           set "CMAKE_VARIABLES=%CMAKE_VARIABLES% -DBoost_USE_STATIC_LIBS=OFF"
-          set "CMAKE_VARIABLES=%CMAKE_VARIABLES% -DBOOST_ROOT:PATH=C:\optimad-dependencies\boost\lib\cmake\Boost-1.82.0"
+          set "CMAKE_VARIABLES=%CMAKE_VARIABLES% -DBOOST_ROOT:PATH=C:\optimad-dependencies\boost-v1.80.0\lib\cmake\Boost-1.80.0"
           set "CMAKE_VARIABLES=%CMAKE_VARIABLES% -DBITPIT_BUILD_EXAMPLES=ON"
           set "CMAKE_VARIABLES=%CMAKE_VARIABLES% -DBITPIT_ENABLE_INTEGRATION_TESTS=ON"
           set "CMAKE_VARIABLES=%CMAKE_VARIABLES% -DBITPIT_ENABLE_MPI=${{ matrix.mpi }}"
@@ -142,13 +145,13 @@ jobs:
           set "CMAKE_VARIABLES=%CMAKE_VARIABLES% -DCMAKE_CONFIGURATION_TYPES=%BUILD_TYPE%"
           set "CMAKE_VARIABLES=%CMAKE_VARIABLES% -DCMAKE_INSTALL_PREFIX=%INSTALL_DIR%"
           set "CMAKE_VARIABLES=%CMAKE_VARIABLES% -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=ON"
-          IF "${{ matrix.mpi }}" == "ON" (set "CMAKE_VARIABLES=%CMAKE_VARIABLES% -DMETIS_DIR=C:\optimad-dependencies\metis-5.1.0-win\dynamic\")
+          IF "${{ matrix.mpi }}" == "ON" (set "CMAKE_VARIABLES=%CMAKE_VARIABLES% -DMETIS_DIR=C:\optimad-dependencies\Metis-v5.1.0\")
           set "CMAKE_VARIABLES=%CMAKE_VARIABLES% -DPETSC_DIR=%PETSC_DIR%"
 
-          "C:\Program Files\CMake\bin\cmake.exe" -G "Visual Studio 17 2022" %CMAKE_VARIABLES% ..
+          cmake.exe -G "Visual Studio 17 2022" %CMAKE_VARIABLES% ..
 
           echo Build bitpit
-          "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe" INSTALL.vcxproj /p:Configuration=%BUILD_TYPE% /p:Platform=x64 /m:8
+          MSBuild.exe INSTALL.vcxproj /p:Configuration=%BUILD_TYPE% /p:Platform=x64 /m:8
       - name: Run bitpit tests
         shell: cmd
         if: matrix.debug == 'OFF'
@@ -164,15 +167,14 @@ jobs:
           IF "${{ matrix.debug }}" == "ON" (set "BUILD_TYPE=Debug") ELSE (set "BUILD_TYPE=Release")
           echo   Build type.......... %BUILD_TYPE%
 
-          set "PATH=%PATH%;C:\Program Files (x86)\Intel\oneAPI\compiler\latest\windows\redist\intel64_win\compiler\"
-          set "PATH=%PATH%;C:\Program Files (x86)\Intel\oneAPI\mkl\latest\redist\intel64\"
+          call "C:\Program Files (x86)\Intel\oneAPI\setvars.bat"
 
-          set "PATH=%PATH%;C:\optimad-dependencies\boost\lib"
+          set "PATH=%PATH%;C:\optimad-dependencies\boost-v1.80.0\lib"
 
-          IF "${{ matrix.mpi }}" == "ON" (set "PATH=%PATH%;C:\optimad-dependencies\metis-5.1.0-win\dynamic\lib\")
+          IF "${{ matrix.mpi }}" == "ON" (set "PATH=%PATH%;C:\optimad-dependencies\Metis-v5.1.0\lib\")
 
-          set "PETSC_DIR=C:\petsc\3_19_5"
-          IF "${{ matrix.mpi }}" == "OFF" (set "PETSC_DIR=%PETSC_DIR%SERIAL")
+          set "PETSC_DIR=C:\petsc-mpi"
+          IF "${{ matrix.mpi }}" == "OFF" (set "PETSC_DIR=C:\petsc")
           set "PATH=%PATH%;%PETSC_DIR%\lib"
 
           set "PATH=%PATH%;%INSTALL_DIR%/bin"
