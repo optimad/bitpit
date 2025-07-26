@@ -40,6 +40,7 @@
 // ================================================================================== //
 #include <array>
 #include <cmath>
+#include <cstdint>
 #include <iostream>
 #if BITPIT_ENABLE_MPI==1
 #include <mpi.h>
