@@ -25,6 +25,7 @@
 #ifndef __BITPIT_GENERIC_IO_HPP__
 #define __BITPIT_GENERIC_IO_HPP__
 
+#include <cstdint>
 #include <iostream>
 #include <iomanip>
 #include <fstream>
