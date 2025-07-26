@@ -24,7 +24,6 @@
 
 #include <array>
 #include <cassert>
-#include <cctype>
 #include <cmath>
 #include <chrono>
 #include <cstdio>
@@ -32,12 +31,10 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <memory>
 #include <sstream>
 #include <functional>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <type_traits>
 
 #include "compiler.hpp"
 #include "fileHandler.hpp"
