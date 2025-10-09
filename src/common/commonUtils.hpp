@@ -155,7 +155,7 @@ protected:
     Donald. E. Knuth, 1998, Addison-Wesley Longman, Inc., ISBN 0-201-89684-2,
     Addison-Wesley Professional; 3rd edition.
 
-    Also see: "https://www.boost.org/doc/libs/1_74_0/libs/test/doc/html/boost_test/testing_tools/extended_comparison/floating_point/floating_points_comparison_theory.html"
+    Also see: "https://www.boost.org/doc/libs/1_87_0/libs/test/doc/html/boost_test/testing_tools/extended_comparison/floating_point/floating_points_comparison_theory.html"
 */
 struct DoubleFloatingEqual : public DoubleFloatingComparison
 {
