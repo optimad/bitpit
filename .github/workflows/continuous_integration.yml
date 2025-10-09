@@ -134,7 +134,7 @@ jobs:
           echo Configure bitpit
           set "CMAKE_VARIABLES="
           set "CMAKE_VARIABLES=%CMAKE_VARIABLES% -DBoost_USE_STATIC_LIBS=OFF"
-          set "CMAKE_VARIABLES=%CMAKE_VARIABLES% -DBOOST_ROOT:PATH=C:\optimad-dependencies\boost-v1.80.0\lib\cmake\Boost-1.80.0"
+          set "CMAKE_VARIABLES=%CMAKE_VARIABLES% -DBOOST_ROOT:PATH=C:\optimad-dependencies\boost-v1.87.0\lib\cmake\Boost-1.87.0"
           set "CMAKE_VARIABLES=%CMAKE_VARIABLES% -DBITPIT_BUILD_EXAMPLES=ON"
           set "CMAKE_VARIABLES=%CMAKE_VARIABLES% -DBITPIT_ENABLE_INTEGRATION_TESTS=ON"
           set "CMAKE_VARIABLES=%CMAKE_VARIABLES% -DBITPIT_ENABLE_MPI=${{ matrix.mpi }}"
@@ -169,7 +169,7 @@ jobs:
 
           call "C:\Program Files (x86)\Intel\oneAPI\setvars.bat"
 
-          set "PATH=%PATH%;C:\optimad-dependencies\boost-v1.80.0\lib"
+          set "PATH=%PATH%;C:\optimad-dependencies\boost-v1.87.0\lib"
 
           IF "${{ matrix.mpi }}" == "ON" (set "PATH=%PATH%;C:\optimad-dependencies\Metis-v5.1.0\lib\")
 
