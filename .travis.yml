@@ -52,7 +52,6 @@ jobs:
           project:
             name: optimad/bitpit
             description: "bitpit :: Open source library for scientific High Performance Computing"
-          notification_email: coverity@optimad.it
           build_command_prepend: >
             mkdir build;
             cd build;
